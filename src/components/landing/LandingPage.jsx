@@ -28,24 +28,24 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
 
   return (
     <div className="min-h-screen bg-cream">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-cream/95 backdrop-blur-sm border-b border-beige-dark">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="font-serif text-xl text-ink tracking-wider">
-            <span className="text-gold-gradient font-semibold">Digitoy</span>
-            <span className="text-brown-muted font-light">.az</span>
+      {/* Header — ultra-minimal, barely-there */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-cream/92 backdrop-blur-md border-b border-beige-dark/35">
+        <div className="max-w-6xl mx-auto px-8 h-16 flex items-center justify-between">
+          <div className="font-serif text-lg text-ink tracking-widest">
+            <span className="text-gold font-light">Digitoy</span>
+            <span className="text-brown-muted/50 font-light">.az</span>
           </div>
 
-          <nav className="hidden sm:flex items-center gap-6">
+          <nav className="hidden sm:flex items-center gap-8">
             <button
               onClick={onViewInvitation}
-              className="text-xs tracking-[0.15em] uppercase text-brown-muted hover:text-gold transition-colors duration-200"
+              className="text-[10px] tracking-[0.22em] uppercase text-brown-muted hover:text-gold transition-colors duration-300 font-medium"
             >
               {tr.nav_demo}
             </button>
             <button
               onClick={scrollToBuilder}
-              className="text-xs tracking-[0.15em] uppercase px-4 py-2 border border-gold/40 text-gold hover:bg-gold hover:text-white transition-all duration-200"
+              className="text-[10px] tracking-[0.22em] uppercase px-5 py-2.5 border border-gold/35 text-gold hover:bg-gold hover:text-white transition-all duration-300 font-medium"
             >
               {tr.nav_create}
             </button>
@@ -61,20 +61,20 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
       {/* Features */}
       <Features lang={lang} />
 
-      {/* Builder / Preview section */}
-      <section id="builder-section" className="py-24 px-6 bg-beige">
+      {/* Builder / Preview */}
+      <section id="builder-section" className="py-32 px-6 bg-beige">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <p className="text-xs tracking-[0.25em] uppercase text-gold mb-4">
+          <div className="text-center mb-20">
+            <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-5 font-medium">
               {showPreview ? 'Preview' : 'Builder'}
             </p>
-            <h2 className="font-serif text-3xl sm:text-4xl text-ink font-light">
+            <h2 className="font-serif text-3xl sm:text-4xl text-ink font-light tracking-tight">
               {tr.builder_title}
             </h2>
             {!showPreview && (
-              <p className="text-brown-muted text-sm mt-3">{tr.builder_subtitle}</p>
+              <p className="text-brown-muted text-sm mt-4 tracking-wide font-light">{tr.builder_subtitle}</p>
             )}
-            <div className="gold-divider mt-6 max-w-xs mx-auto" />
+            <div className="gold-divider mt-8 max-w-[160px] mx-auto" />
           </div>
 
           {showPreview ? (
@@ -98,14 +98,14 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
       <Pricing lang={lang} onSelect={scrollToBuilder} />
 
       {/* Footer */}
-      <footer className="py-10 px-6 bg-ink text-center">
-        <div className="font-serif text-lg mb-2">
-          <span className="text-gold">Digitoy</span>
-          <span className="text-white/50">.az</span>
+      <footer className="py-16 px-6 bg-espresso text-center">
+        <div className="font-serif text-base mb-3 tracking-wider">
+          <span className="text-gold font-light">Digitoy</span>
+          <span className="text-white/30 font-light">.az</span>
         </div>
-        <p className="text-white/30 text-xs tracking-widest">{tr.footer_made}</p>
-        <div className="gold-divider mt-6 max-w-xs mx-auto opacity-30" />
-        <p className="text-white/20 text-[10px] mt-4 tracking-wide">
+        <p className="text-white/25 text-[10px] tracking-[0.28em] uppercase font-medium">{tr.footer_made}</p>
+        <div className="gold-divider mt-8 max-w-[120px] mx-auto opacity-25" />
+        <p className="text-white/15 text-[10px] mt-6 tracking-widest">
           © {new Date().getFullYear()} Digitoy.az
         </p>
       </footer>

@@ -16,31 +16,31 @@ export default function Features({ lang }) {
   }))
 
   return (
-    <section className="py-24 px-6 bg-beige">
+    <section className="py-32 px-6 bg-beige">
       <div
         ref={ref}
         className={`max-w-4xl mx-auto reveal-hidden ${visible ? 'reveal-visible' : ''}`}
       >
         {/* Section header */}
-        <div className="text-center mb-16">
-          <p className="text-xs tracking-[0.25em] uppercase text-gold mb-4">Features</p>
-          <h2 className="font-serif text-3xl sm:text-4xl text-ink font-light">{tr.features_title}</h2>
-          <div className="gold-divider mt-6 max-w-xs mx-auto" />
+        <div className="text-center mb-20">
+          <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-5 font-medium">Features</p>
+          <h2 className="font-serif text-3xl sm:text-4xl text-ink font-light tracking-tight">{tr.features_title}</h2>
+          <div className="gold-divider mt-8 max-w-[160px] mx-auto" />
         </div>
 
-        {/* Feature grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-px bg-beige-dark">
+        {/* Feature grid — fine border lines between cells */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-px bg-beige-dark/50">
           {features.map(({ icon: Icon, title, desc }, i) => (
             <div
               key={title}
-              className="bg-cream p-8 group hover:bg-beige transition-colors duration-300"
-              style={{ transitionDelay: `${i * 60}ms` }}
+              className="bg-cream px-10 py-12 group hover:bg-beige/60 transition-colors duration-400"
+              style={{ transitionDelay: `${i * 50}ms` }}
             >
-              <div className="w-10 h-10 border border-gold/30 flex items-center justify-center mb-5 group-hover:border-gold transition-colors duration-300">
-                <Icon size={18} className="text-gold" />
+              <div className="w-9 h-9 border border-gold/25 flex items-center justify-center mb-7 group-hover:border-gold/50 transition-colors duration-300">
+                <Icon size={16} className="text-gold" strokeWidth={1.5} />
               </div>
-              <h3 className="font-serif text-base text-ink mb-2">{title}</h3>
-              <p className="text-xs text-brown-muted leading-relaxed">{desc}</p>
+              <h3 className="font-serif text-[15px] text-ink mb-3 font-light">{title}</h3>
+              <p className="text-xs text-brown-muted leading-[1.9] tracking-wide">{desc}</p>
             </div>
           ))}
         </div>

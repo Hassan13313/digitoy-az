@@ -6,7 +6,7 @@
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body {
-    @apply bg-cream font-sans text-ink;
+    @apply bg-cream font-sans text-espresso;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     margin: 0;
@@ -18,7 +18,7 @@
 
 @layer utilities {
   .text-gold-gradient {
-    background: linear-gradient(135deg, #B8963E 0%, #E8D5A3 50%, #C9A84C 100%);
+    background: linear-gradient(135deg, #C5A059 0%, #E8D5A3 55%, #C5A059 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -26,8 +26,8 @@
 
   .reveal-hidden {
     opacity: 0;
-    transform: translateY(28px);
-    transition: opacity 0.75s ease-out, transform 0.75s ease-out;
+    transform: translateY(24px);
+    transition: opacity 0.9s ease-out, transform 0.9s ease-out;
   }
 
   .reveal-visible {
@@ -37,38 +37,42 @@
 
   .gold-divider {
     height: 1px;
-    background: linear-gradient(to right, transparent, #C9A84C88, transparent);
+    background: linear-gradient(to right, transparent, rgba(197,160,89,0.35), transparent);
   }
 
   .btn-gold {
-    @apply bg-gold text-white font-sans font-medium tracking-wide px-8 py-3 rounded-none transition-all duration-300;
-    background: linear-gradient(135deg, #C9A84C, #B8963E);
+    @apply bg-gold text-white font-sans font-medium tracking-[0.18em] px-9 py-3.5 rounded-none transition-all duration-300 uppercase text-xs;
   }
   .btn-gold:hover {
-    background: linear-gradient(135deg, #B8963E, #A07830);
-    transform: translateY(-1px);
-    box-shadow: 0 8px 24px rgba(201,168,76,0.3);
+    @apply bg-gold-dark;
+    transform: scale(1.015);
+    box-shadow: 0 4px 20px rgba(197, 160, 89, 0.14);
   }
 
   .btn-outline-gold {
-    @apply border border-gold text-gold font-sans font-medium tracking-wide px-8 py-3 rounded-none transition-all duration-300 bg-transparent;
+    @apply border border-gold text-gold font-sans font-medium tracking-[0.18em] px-9 py-3.5 rounded-none transition-all duration-300 bg-transparent uppercase text-xs;
   }
   .btn-outline-gold:hover {
     @apply bg-gold text-white;
-    transform: translateY(-1px);
+    transform: scale(1.015);
+  }
+
+  .luxury-input {
+    @apply w-full border-0 border-b border-beige-dark bg-transparent text-ink text-sm px-0 py-3 focus:outline-none focus:border-gold transition-colors duration-300 placeholder:text-brown-muted/40 rounded-none;
   }
 
   .card-premium {
-    @apply bg-white border border-beige-dark shadow-sm;
+    @apply bg-cream border border-beige-dark/70;
   }
 }
 
 /* Custom scrollbar */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: #EFEBE9; }
-::-webkit-scrollbar-thumb { background: #C9A84C; border-radius: 3px; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #F4F1EA; }
+::-webkit-scrollbar-thumb { background: rgba(197,160,89,0.4); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(197,160,89,0.65); }
 
 /* Step indicator active line */
 .step-line-active {
-  background: linear-gradient(to right, #C9A84C, #E8D5A3);
+  background: linear-gradient(to right, #C5A059, #E8D5A3);
 }

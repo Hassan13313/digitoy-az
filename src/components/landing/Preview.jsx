@@ -59,9 +59,9 @@ export default function Preview({ lang, data, onEdit, onView }) {
       value: (
         <span className="flex items-center gap-2">
           {palette?.colors.map((c) => (
-            <span key={c} className="w-4 h-4 rounded-full border border-white/60 shadow-sm inline-block" style={{ backgroundColor: c }} />
+            <span key={c} className="w-3.5 h-3.5 rounded-full border border-white/50 shadow-sm inline-block" style={{ backgroundColor: c }} />
           ))}
-          <span className="ml-1">{palette?.label[lang]}</span>
+          <span className="ml-1 font-light">{palette?.label[lang]}</span>
         </span>
       ),
     },
@@ -72,33 +72,33 @@ export default function Preview({ lang, data, onEdit, onView }) {
   return (
     <div className="max-w-2xl mx-auto animate-fade-up">
       {/* Header */}
-      <div className="text-center mb-8">
-        <p className="text-xs tracking-[0.25em] uppercase text-gold mb-2">Preview</p>
-        <h2 className="font-serif text-2xl text-ink">{tr.preview_title}</h2>
-        <div className="gold-divider mt-4 max-w-xs mx-auto" />
+      <div className="text-center mb-12">
+        <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-3 font-medium">Preview</p>
+        <h2 className="font-serif text-2xl text-ink font-light tracking-tight">{tr.preview_title}</h2>
+        <div className="gold-divider mt-6 max-w-[160px] mx-auto" />
       </div>
 
       {/* Couple card */}
-      <div className="bg-beige border border-beige-dark p-8 mb-1 text-center">
-        <p className="text-xs tracking-[0.25em] uppercase text-brown-muted mb-3">{eventLabels[data.eventType]}</p>
-        <h3 className="font-serif text-3xl text-ink font-light">
+      <div className="bg-beige border border-beige-dark/60 px-10 py-10 mb-px text-center">
+        <p className="text-[10px] tracking-[0.28em] uppercase text-brown-muted mb-4 font-medium">{eventLabels[data.eventType]}</p>
+        <h3 className="font-serif text-3xl text-ink font-light tracking-tight">
           {data.brideName || '—'}
-          <span className="text-gold mx-3 font-serif italic">&</span>
+          <span className="text-gold mx-4 font-serif italic font-light">&</span>
           {data.groomName || '—'}
         </h3>
       </div>
 
       {/* Details */}
-      <div className="bg-cream border border-beige-dark border-t-0 p-6 mb-6">
-        <div className="space-y-4">
+      <div className="bg-cream border border-beige-dark/60 border-t-0 px-10 py-8 mb-8">
+        <div className="space-y-6">
           {rows.map(({ icon: Icon, label, value }) => (
-            <div key={label} className="flex items-start gap-4">
-              <div className="w-8 h-8 border border-beige-dark flex items-center justify-center flex-shrink-0 mt-0.5">
-                <Icon size={13} className="text-gold" />
+            <div key={label} className="flex items-start gap-5">
+              <div className="w-7 h-7 border border-beige-dark/80 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Icon size={12} className="text-gold" strokeWidth={1.5} />
               </div>
               <div>
-                <p className="text-[10px] tracking-[0.15em] uppercase text-brown-muted mb-0.5">{label}</p>
-                <div className="text-sm text-ink flex items-center">{value}</div>
+                <p className="text-[9px] tracking-[0.22em] uppercase text-brown-muted mb-1 font-medium">{label}</p>
+                <div className="text-sm text-ink font-light flex items-center">{value}</div>
               </div>
             </div>
           ))}
@@ -111,25 +111,25 @@ export default function Preview({ lang, data, onEdit, onView }) {
           href={waLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1 flex items-center justify-center gap-2.5 btn-gold text-xs tracking-widest uppercase"
+          className="flex-1 flex items-center justify-center gap-2.5 btn-gold"
         >
-          <MessageCircle size={15} />
+          <MessageCircle size={14} strokeWidth={1.5} />
           {tr.preview_whatsapp}
         </a>
         <button
           onClick={onView}
-          className="flex-1 flex items-center justify-center gap-2.5 btn-outline-gold text-xs tracking-widest uppercase"
+          className="flex-1 flex items-center justify-center gap-2.5 btn-outline-gold"
         >
-          <Eye size={15} />
+          <Eye size={14} strokeWidth={1.5} />
           {tr.preview_view}
         </button>
       </div>
 
       <button
         onClick={onEdit}
-        className="w-full mt-3 flex items-center justify-center gap-2 text-xs text-brown-muted hover:text-gold transition-colors duration-200 py-2"
+        className="w-full mt-4 flex items-center justify-center gap-2 text-[10px] tracking-[0.18em] uppercase text-brown-muted hover:text-gold transition-colors duration-200 py-3"
       >
-        <Edit2 size={12} />
+        <Edit2 size={11} strokeWidth={1.5} />
         {tr.preview_edit}
       </button>
     </div>

@@ -8,17 +8,17 @@ const TOTAL_STEPS = 5
 
 function Label({ children, required }) {
   return (
-    <label className="block text-xs tracking-[0.15em] uppercase text-brown-muted mb-2 font-medium">
+    <label className="block text-[10px] tracking-[0.22em] uppercase text-brown-muted mb-3 font-medium">
       {children} {required && <span className="text-gold">*</span>}
     </label>
   )
 }
 
-function Input({ ...props }) {
+function Input({ className = '', ...props }) {
   return (
     <input
       {...props}
-      className="w-full border border-beige-dark bg-cream text-ink text-sm px-4 py-3 focus:outline-none focus:border-gold transition-colors duration-200 placeholder:text-brown-muted/50"
+      className={`luxury-input ${className}`}
     />
   )
 }
@@ -28,7 +28,7 @@ function Textarea({ ...props }) {
     <textarea
       {...props}
       rows={5}
-      className="w-full border border-beige-dark bg-cream text-ink text-sm px-4 py-3 focus:outline-none focus:border-gold transition-colors duration-200 placeholder:text-brown-muted/50 resize-none"
+      className="w-full border-0 border-b border-beige-dark bg-transparent text-ink text-sm px-0 py-3 focus:outline-none focus:border-gold transition-colors duration-300 placeholder:text-brown-muted/40 resize-none rounded-none"
     />
   )
 }
@@ -77,31 +77,31 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
   return (
     <div className="max-w-2xl mx-auto">
       {/* Step indicator */}
-      <div className="flex items-center mb-10">
+      <div className="flex items-center mb-14">
         {steps.map((title, i) => {
           const n = i + 1
           const done = n < step
           const active = n === step
           return (
             <div key={n} className="flex items-center flex-1 last:flex-none">
-              <div className="flex flex-col items-center gap-1.5">
+              <div className="flex flex-col items-center gap-2">
                 <div
-                  className={`w-8 h-8 flex items-center justify-center text-xs font-medium transition-all duration-300 ${
+                  className={`w-7 h-7 flex items-center justify-center text-[10px] font-medium transition-all duration-300 ${
                     done
                       ? 'bg-gold text-white'
                       : active
-                      ? 'border-2 border-gold text-gold bg-cream'
-                      : 'border border-beige-dark text-brown-muted/50 bg-cream'
+                      ? 'border border-gold text-gold bg-transparent'
+                      : 'border border-beige-dark text-brown-muted/40 bg-transparent'
                   }`}
                 >
-                  {done ? <Check size={13} /> : n}
+                  {done ? <Check size={11} strokeWidth={2} /> : n}
                 </div>
-                <span className={`hidden sm:block text-[10px] tracking-wide text-center max-w-[60px] leading-tight ${active ? 'text-gold' : 'text-brown-muted/60'}`}>
+                <span className={`hidden sm:block text-[9px] tracking-[0.12em] uppercase text-center max-w-[56px] leading-tight ${active ? 'text-gold' : 'text-brown-muted/50'}`}>
                   {title}
                 </span>
               </div>
               {i < steps.length - 1 && (
-                <div className={`flex-1 h-px mx-1 transition-all duration-500 ${done ? 'step-line-active' : 'bg-beige-dark'}`} />
+                <div className={`flex-1 h-px mx-2 transition-all duration-500 ${done ? 'step-line-active' : 'bg-beige-dark/60'}`} />
               )}
             </div>
           )
@@ -109,15 +109,15 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
       </div>
 
       {/* Step content */}
-      <div className="bg-cream border border-beige-dark p-8">
-        <h3 className="font-serif text-xl text-ink mb-6">{steps[step - 1]}</h3>
+      <div className="bg-cream border border-beige-dark/60 px-10 py-12">
+        <h3 className="font-serif text-xl text-ink mb-10 font-light tracking-tight">{steps[step - 1]}</h3>
 
         {/* STEP 1 */}
         {step === 1 && (
-          <div className="space-y-5">
+          <div className="space-y-8">
             <div>
               <Label>{tr.event_type || 'Mərasim növü'}</Label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1">
                 {EVENT_TYPES.map(({ id }) => {
                   const Icon = EVENT_ICONS[id]
                   const label = tr[`event_${id}`]
@@ -126,27 +126,27 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
                       key={id}
                       type="button"
                       onClick={() => set('eventType', id)}
-                      className={`flex flex-col items-center gap-2 py-4 border transition-all duration-200 ${
+                      className={`flex flex-col items-center gap-2.5 py-5 border transition-all duration-200 ${
                         data.eventType === id
-                          ? 'border-gold bg-gold/5 text-gold'
-                          : 'border-beige-dark text-brown-muted hover:border-gold/50'
+                          ? 'border-gold bg-gold/[0.04] text-gold'
+                          : 'border-beige-dark/70 text-brown-muted/70 hover:border-gold/40 hover:text-brown-muted'
                       }`}
                     >
-                      <Icon size={18} />
-                      <span className="text-xs tracking-wide">{label}</span>
+                      <Icon size={16} strokeWidth={1.5} />
+                      <span className="text-[10px] tracking-[0.12em] uppercase">{label}</span>
                     </button>
                   )
                 })}
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               <div>
                 <Label required>{tr.bride_label}</Label>
                 <Input
                   value={data.brideName}
                   onChange={(e) => set('brideName', e.target.value)}
                   placeholder="Leyla"
-                  className={errors.brideName ? 'border-red-300' : ''}
+                  className={errors.brideName ? 'border-b-red-300' : ''}
                 />
               </div>
               <div>
@@ -158,7 +158,7 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               <div>
                 <Label required>{tr.date_label}</Label>
                 <Input
@@ -181,7 +181,7 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
 
         {/* STEP 2 */}
         {step === 2 && (
-          <div className="space-y-5">
+          <div className="space-y-8">
             <div>
               <Label required>{tr.venue_label}</Label>
               <Input
@@ -211,32 +211,32 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
 
         {/* STEP 3 */}
         {step === 3 && (
-          <div className="space-y-6">
+          <div className="space-y-8">
             <div>
               <Label>{tr.palette_label}</Label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3 mt-1">
                 {DRESS_CODE_PALETTES.map((pal) => (
                   <button
                     key={pal.id}
                     type="button"
                     onClick={() => set('dressCodePalette', pal.id)}
-                    className={`text-left p-4 border transition-all duration-200 ${
+                    className={`text-left p-5 border transition-all duration-200 ${
                       data.dressCodePalette === pal.id
-                        ? 'border-gold bg-gold/5'
-                        : 'border-beige-dark hover:border-gold/40'
+                        ? 'border-gold bg-gold/[0.04]'
+                        : 'border-beige-dark/60 hover:border-gold/35'
                     }`}
                   >
-                    <div className="flex gap-2 mb-3">
+                    <div className="flex gap-2 mb-4">
                       {pal.colors.map((c) => (
                         <div
                           key={c}
-                          className="w-6 h-6 rounded-full border border-white/60 shadow-sm"
+                          className="w-5 h-5 rounded-full border border-white/50 shadow-sm"
                           style={{ backgroundColor: c }}
                         />
                       ))}
                     </div>
-                    <p className="text-xs font-medium text-ink">{pal.label[lang]}</p>
-                    <p className="text-[11px] text-brown-muted mt-0.5">{pal.description[lang]}</p>
+                    <p className="text-xs font-medium text-ink tracking-wide">{pal.label[lang]}</p>
+                    <p className="text-[11px] text-brown-muted mt-1 leading-relaxed font-light">{pal.description[lang]}</p>
                   </button>
                 ))}
               </div>
@@ -254,7 +254,7 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
 
         {/* STEP 4 */}
         {step === 4 && (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div>
               <Label>{tr.seating_label}</Label>
               <Textarea
@@ -263,14 +263,14 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
                 placeholder={tr.seating_placeholder}
                 rows={7}
               />
-              <p className="text-[11px] text-brown-muted mt-2">{tr.seating_help}</p>
+              <p className="text-[11px] text-brown-muted/70 mt-3 leading-relaxed tracking-wide font-light">{tr.seating_help}</p>
             </div>
           </div>
         )}
 
         {/* STEP 5 */}
         {step === 5 && (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div>
               <Label>{tr.gallery_label}</Label>
               <Input
@@ -278,35 +278,35 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
                 onChange={(e) => set('galleryLink', e.target.value)}
                 placeholder={tr.gallery_placeholder}
               />
-              <p className="text-[11px] text-brown-muted mt-2">{tr.gallery_help}</p>
+              <p className="text-[11px] text-brown-muted/70 mt-3 leading-relaxed tracking-wide font-light">{tr.gallery_help}</p>
             </div>
           </div>
         )}
       </div>
 
-      {/* Navigation buttons */}
-      <div className="flex justify-between mt-6">
+      {/* Navigation */}
+      <div className="flex justify-between mt-8">
         <button
           onClick={prev}
           disabled={step === 1}
-          className="flex items-center gap-2 px-6 py-3 border border-beige-dark text-brown-muted text-xs tracking-widest uppercase hover:border-gold hover:text-gold transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-7 py-3.5 border border-beige-dark/70 text-brown-muted text-[10px] tracking-[0.22em] uppercase hover:border-gold/50 hover:text-gold transition-all duration-200 disabled:opacity-25 disabled:cursor-not-allowed"
         >
-          <ChevronLeft size={14} />
+          <ChevronLeft size={13} strokeWidth={1.5} />
           {tr.btn_prev}
         </button>
 
         {step < TOTAL_STEPS ? (
           <button
             onClick={next}
-            className="flex items-center gap-2 btn-gold text-xs tracking-widest uppercase"
+            className="flex items-center gap-2 btn-gold"
           >
             {tr.btn_next}
-            <ChevronRight size={14} />
+            <ChevronRight size={13} strokeWidth={1.5} />
           </button>
         ) : (
           <button
             onClick={handleSubmit}
-            className="btn-gold text-xs tracking-widest uppercase"
+            className="btn-gold"
           >
             {tr.btn_create}
           </button>

@@ -19,12 +19,12 @@ function SectionWrapper({ children, className = '' }) {
 
 function GoldDividerOrnament() {
   return (
-    <div className="flex items-center justify-center gap-3 my-8">
-      <div className="flex-1 max-w-[80px] h-px" style={{ background: 'linear-gradient(to right, transparent, #C9A84C66)' }} />
-      <div className="w-1 h-1 bg-gold rotate-45" />
-      <div className="w-2 h-2 border border-gold rotate-45" />
-      <div className="w-1 h-1 bg-gold rotate-45" />
-      <div className="flex-1 max-w-[80px] h-px" style={{ background: 'linear-gradient(to left, transparent, #C9A84C66)' }} />
+    <div className="flex items-center justify-center gap-3 my-10">
+      <div className="flex-1 max-w-[60px] h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.45))' }} />
+      <div className="w-1 h-1 bg-gold/60 rotate-45" />
+      <div className="w-1.5 h-1.5 border border-gold/50 rotate-45" />
+      <div className="w-1 h-1 bg-gold/60 rotate-45" />
+      <div className="flex-1 max-w-[60px] h-px" style={{ background: 'linear-gradient(to left, transparent, rgba(197,160,89,0.45))' }} />
     </div>
   )
 }
@@ -56,60 +56,60 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
       <MusicToggle lang={lang} />
 
       {/* Sticky minimal header */}
-      <header className="fixed top-0 left-0 right-0 z-40 bg-cream/90 backdrop-blur-sm border-b border-beige-dark/60">
-        <div className="max-w-2xl mx-auto px-5 h-14 flex items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 z-40 bg-cream/88 backdrop-blur-md border-b border-beige-dark/30">
+        <div className="max-w-2xl mx-auto px-6 h-14 flex items-center justify-between">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-xs text-brown-muted hover:text-gold transition-colors duration-200"
+            className="flex items-center gap-2 text-[10px] tracking-[0.18em] uppercase text-brown-muted hover:text-gold transition-colors duration-300 font-medium"
           >
-            <ArrowLeft size={14} />
+            <ArrowLeft size={13} strokeWidth={1.5} />
             {tr.btn_back}
           </button>
-          <div className="font-serif text-sm">
-            <span className="text-gold-gradient font-medium">Digitoy</span>
-            <span className="text-brown-muted/60">.az</span>
+          <div className="font-serif text-sm tracking-wider">
+            <span className="text-gold font-light">Digitoy</span>
+            <span className="text-brown-muted/40 font-light">.az</span>
           </div>
           <LanguageSwitcher lang={lang} setLang={setLang} />
         </div>
       </header>
 
-      {/* ── HERO SECTION ── */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-20 pb-16 text-center">
-        {/* Subtle top accent */}
-        <div className="absolute top-0 left-0 right-0 h-1" style={{ background: 'linear-gradient(to right, transparent, #C9A84C, transparent)' }} />
+      {/* ── HERO ── */}
+      <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-20 pb-20 text-center">
+        {/* Hairline gold top accent */}
+        <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.5), transparent)' }} />
 
         <div className="animate-fade-in">
-          <p className="text-[10px] tracking-[0.35em] uppercase text-gold mb-6 font-medium">
+          <p className="text-[9px] tracking-[0.45em] uppercase text-gold mb-8 font-medium">
             {eventLabels[weddingData.eventType] || tr.event_toy}
           </p>
 
-          <p className="font-serif text-sm tracking-[0.2em] uppercase text-brown-muted mb-4">
+          <p className="font-serif text-[11px] tracking-[0.3em] uppercase text-brown-muted mb-6 font-light">
             {tr.inv_join}
           </p>
 
           {/* Names */}
-          <h1 className="font-serif leading-none mb-2">
-            <span className="block text-4xl sm:text-5xl md:text-6xl text-ink font-light">{weddingData.brideName}</span>
-            <span className="block text-3xl sm:text-4xl text-gold font-light italic my-1">{tr.inv_and}</span>
-            <span className="block text-4xl sm:text-5xl md:text-6xl text-ink font-light">{weddingData.groomName}</span>
+          <h1 className="font-serif leading-none mb-3">
+            <span className="block text-5xl sm:text-6xl md:text-7xl text-ink font-light tracking-tight">{weddingData.brideName}</span>
+            <span className="block text-3xl sm:text-4xl text-gold font-light italic my-3">{tr.inv_and}</span>
+            <span className="block text-5xl sm:text-6xl md:text-7xl text-ink font-light tracking-tight">{weddingData.groomName}</span>
           </h1>
 
           <GoldDividerOrnament />
 
-          <p className="text-sm text-brown-muted font-light tracking-wide mb-1">
+          <p className="text-sm text-brown-muted font-light tracking-wider mb-1.5">
             {formatDisplayDate(weddingData.date, lang)}
           </p>
           {weddingData.time && (
-            <p className="text-sm text-brown-muted font-light">{weddingData.time}</p>
+            <p className="text-sm text-brown-muted font-light tracking-wide">{weddingData.time}</p>
           )}
           {weddingData.venueName && (
-            <p className="mt-3 text-xs tracking-[0.15em] uppercase text-gold/80">{weddingData.venueName}</p>
+            <p className="mt-5 text-[10px] tracking-[0.28em] uppercase text-gold/70 font-medium">{weddingData.venueName}</p>
           )}
         </div>
 
         {/* Scroll cue */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-float">
-          <ChevronDown size={18} className="text-gold/40" />
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-float">
+          <ChevronDown size={16} className="text-gold/30" strokeWidth={1.5} />
         </div>
       </section>
 
@@ -117,29 +117,29 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
       <CountdownTimer date={weddingData.date} time={weddingData.time} lang={lang} />
 
       {/* ── LOCATION ── */}
-      <section className="py-20 px-6 bg-cream">
+      <section className="py-28 px-6 bg-cream">
         <SectionWrapper className="max-w-lg mx-auto text-center">
-          <p className="text-xs tracking-[0.25em] uppercase text-gold mb-2">Location</p>
-          <h2 className="font-serif text-2xl text-ink font-light mb-3">{tr.inv_location}</h2>
-          <p className="text-brown-muted text-sm mb-8">{weddingData.venueName}</p>
+          <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">Location</p>
+          <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-4">{tr.inv_location}</h2>
+          <p className="text-brown-muted text-sm font-light tracking-wide leading-relaxed mb-10">{weddingData.venueName}</p>
           <GoldDividerOrnament />
-          <div className="flex gap-3 mt-2">
+          <div className="flex gap-3 mt-4">
             <a
               href={weddingData.googleMapsUrl || '#'}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 btn-gold text-xs tracking-widest uppercase"
+              className="flex-1 flex items-center justify-center gap-2 btn-gold"
             >
-              <MapPin size={14} />
+              <MapPin size={13} strokeWidth={1.5} />
               {tr.inv_maps_btn}
             </a>
             <a
               href={weddingData.wazeUrl || '#'}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 btn-outline-gold text-xs tracking-widest uppercase"
+              className="flex-1 flex items-center justify-center gap-2 btn-outline-gold"
             >
-              <Navigation size={14} />
+              <Navigation size={13} strokeWidth={1.5} />
               {tr.inv_waze_btn}
             </a>
           </div>
@@ -147,29 +147,34 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
       </section>
 
       {/* ── DRESS CODE ── */}
-      <section className="py-20 px-6 bg-beige">
+      <section className="py-28 px-6 bg-beige">
         <SectionWrapper className="max-w-lg mx-auto text-center">
-          <p className="text-xs tracking-[0.25em] uppercase text-gold mb-2">Style</p>
-          <h2 className="font-serif text-2xl text-ink font-light mb-8">{tr.inv_dresscode}</h2>
+          <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">Style</p>
+          <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-12">{tr.inv_dresscode}</h2>
 
           {/* Color swatches */}
-          <div className="flex justify-center gap-4 mb-6">
+          <div className="flex justify-center gap-5 mb-8">
             {palette.colors.map((color, i) => (
-              <div key={color} className="flex flex-col items-center gap-2">
+              <div key={color} className="flex flex-col items-center gap-2.5">
                 <div
-                  className="w-12 h-12 shadow-md border-2 border-white/80"
-                  style={{ backgroundColor: color, borderRadius: '2px', transform: `rotate(${i % 2 === 0 ? '-3deg' : '3deg'})` }}
+                  className="w-10 h-10 border border-white/60 shadow-sm"
+                  style={{
+                    backgroundColor: color,
+                    borderRadius: '1px',
+                    transform: `rotate(${i % 2 === 0 ? '-4deg' : '4deg'})`,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                  }}
                 />
                 <div
-                  className="w-2 h-2 rounded-full opacity-60"
+                  className="w-1.5 h-1.5 rounded-full opacity-50"
                   style={{ backgroundColor: color }}
                 />
               </div>
             ))}
           </div>
 
-          <p className="font-serif text-lg text-ink mb-2">{palette.label[lang]}</p>
-          <p className="text-sm text-brown-muted leading-relaxed max-w-xs mx-auto">
+          <p className="font-serif text-lg text-ink mb-3 font-light">{palette.label[lang]}</p>
+          <p className="text-sm text-brown-muted leading-[1.9] max-w-xs mx-auto font-light tracking-wide">
             {weddingData.dressCodeDescription || palette.description[lang]}
           </p>
         </SectionWrapper>
@@ -181,27 +186,26 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
       )}
 
       {/* ── GALLERY ── */}
-      <section className="py-20 px-6 bg-cream">
+      <section className="py-28 px-6 bg-cream">
         <SectionWrapper className="max-w-lg mx-auto text-center">
-          <p className="text-xs tracking-[0.25em] uppercase text-gold mb-2">Gallery</p>
-          <h2 className="font-serif text-2xl text-ink font-light mb-4">{tr.inv_gallery}</h2>
+          <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">Gallery</p>
+          <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-5">{tr.inv_gallery}</h2>
           <GoldDividerOrnament />
 
-          {/* Simulated QR code */}
-          <div className="inline-flex flex-col items-center mb-6">
-            <div className="w-32 h-32 border-2 border-gold/30 bg-beige flex items-center justify-center relative mb-3">
-              <div className="absolute inset-2 border border-gold/20" />
-              <QrCode size={64} className="text-gold/40" />
-              {/* Corner accents */}
-              <div className="absolute top-1 left-1 w-4 h-4 border-l-2 border-t-2 border-gold" />
-              <div className="absolute top-1 right-1 w-4 h-4 border-r-2 border-t-2 border-gold" />
-              <div className="absolute bottom-1 left-1 w-4 h-4 border-l-2 border-b-2 border-gold" />
-              <div className="absolute bottom-1 right-1 w-4 h-4 border-r-2 border-b-2 border-gold" />
+          {/* QR placeholder */}
+          <div className="inline-flex flex-col items-center mb-8">
+            <div className="w-28 h-28 border border-gold/20 bg-beige/60 flex items-center justify-center relative mb-4">
+              <div className="absolute inset-2 border border-gold/10" />
+              <QrCode size={56} className="text-gold/30" strokeWidth={1} />
+              <div className="absolute top-1.5 left-1.5 w-3.5 h-3.5 border-l border-t border-gold/50" />
+              <div className="absolute top-1.5 right-1.5 w-3.5 h-3.5 border-r border-t border-gold/50" />
+              <div className="absolute bottom-1.5 left-1.5 w-3.5 h-3.5 border-l border-b border-gold/50" />
+              <div className="absolute bottom-1.5 right-1.5 w-3.5 h-3.5 border-r border-b border-gold/50" />
             </div>
-            <p className="text-[10px] tracking-[0.2em] uppercase text-brown-muted">Scan to upload</p>
+            <p className="text-[9px] tracking-[0.28em] uppercase text-brown-muted/60 font-medium">Scan to upload</p>
           </div>
 
-          <p className="text-sm text-brown-muted leading-relaxed max-w-xs mx-auto mb-8">
+          <p className="text-sm text-brown-muted leading-[1.9] max-w-xs mx-auto mb-10 font-light tracking-wide">
             {tr.inv_gallery_desc}
           </p>
 
@@ -209,26 +213,26 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
             href={weddingData.galleryLink || '#'}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 btn-gold text-xs tracking-widest uppercase"
+            className="inline-flex items-center gap-2 btn-gold"
           >
-            <ExternalLink size={14} />
+            <ExternalLink size={13} strokeWidth={1.5} />
             {tr.inv_gallery_btn}
           </a>
         </SectionWrapper>
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="py-12 px-6 bg-ink text-center">
-        <div className="font-serif text-base mb-2">
-          <span className="text-gold">{weddingData.brideName}</span>
-          <span className="text-white/30 mx-2 italic">&</span>
-          <span className="text-gold">{weddingData.groomName}</span>
+      <footer className="py-16 px-6 bg-espresso text-center">
+        <div className="font-serif text-base mb-3 tracking-wider">
+          <span className="text-gold font-light">{weddingData.brideName}</span>
+          <span className="text-white/25 mx-3 italic font-light">&</span>
+          <span className="text-gold font-light">{weddingData.groomName}</span>
         </div>
-        <p className="text-white/30 text-[10px] tracking-[0.2em] uppercase mb-6">
+        <p className="text-white/25 text-[10px] tracking-[0.28em] uppercase font-medium mb-8">
           {weddingData.date}
         </p>
-        <div className="h-px mb-6" style={{ background: 'linear-gradient(to right, transparent, rgba(201,168,76,0.3), transparent)' }} />
-        <p className="text-white/20 text-[10px] tracking-widest">{tr.footer_made}</p>
+        <div className="gold-divider mb-8 max-w-[120px] mx-auto opacity-25" />
+        <p className="text-white/15 text-[10px] tracking-widest">{tr.footer_made}</p>
       </footer>
     </div>
   )

@@ -4,15 +4,16 @@ export default {
   theme: {
     extend: {
       colors: {
-        cream: '#FDFCF8',
-        beige: '#EFEBE9',
-        'beige-dark': '#E8E0D8',
-        gold: '#C9A84C',
-        'gold-dark': '#B8963E',
+        cream: '#FDFBF7',
+        beige: '#F4F1EA',
+        'beige-dark': '#DDD5C8',
+        gold: '#C5A059',
+        'gold-dark': '#B8903A',
         'gold-light': '#E8D5A3',
         'brown-muted': '#8C7B6B',
         'brown-dark': '#5C4A3A',
-        ink: '#2C2C2C',
+        ink: '#1A1A1A',
+        espresso: '#2C2523',
       },
       fontFamily: {
         serif: ['"Playfair Display"', 'Georgia', 'serif'],
