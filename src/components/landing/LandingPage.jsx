@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import LanguageSwitcher from '../LanguageSwitcher'
-import Hero from './Hero'
-import Features from './Features'
+import Hero, { FeaturesSection, FAQSection, HeroFooter } from './Hero'
 import BuilderForm from './BuilderForm'
 import Preview from './Preview'
 import Pricing from './Pricing'
@@ -28,14 +27,13 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
 
   return (
     <div className="min-h-screen bg-cream">
-      {/* Header — ultra-minimal, barely-there */}
+      {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-cream/92 backdrop-blur-md border-b border-beige-dark/35">
         <div className="max-w-6xl mx-auto px-8 h-16 flex items-center justify-between">
           <div className="font-serif text-lg text-ink tracking-widest">
             <span className="text-gold font-light">Digitoy</span>
             <span className="text-brown-muted/50 font-light">.az</span>
           </div>
-
           <nav className="hidden sm:flex items-center gap-8">
             <button
               onClick={onViewInvitation}
@@ -50,19 +48,18 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
               {tr.nav_create}
             </button>
           </nav>
-
           <LanguageSwitcher lang={lang} setLang={setLang} />
         </div>
       </header>
 
-      {/* Hero */}
+      {/* 1. Hero + 9 interaktiv düymə */}
       <Hero lang={lang} onStart={scrollToBuilder} onDemo={onViewInvitation} />
 
-      {/* Features */}
-      <Features lang={lang} />
+      {/* 2. Features — Premium Rəqəmsal İmkanlar */}
+      <FeaturesSection />
 
-      {/* Builder / Preview */}
-      <section id="builder-section" className="py-32 px-6 bg-beige">
+      {/* 3. Builder */}
+      <section id="builder-section" className="py-12 md:py-24 px-6 bg-beige/80 backdrop-blur-sm relative z-10">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-20">
             <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-5 font-medium">
@@ -76,7 +73,6 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
             )}
             <div className="gold-divider mt-8 max-w-[160px] mx-auto" />
           </div>
-
           {showPreview ? (
             <Preview
               lang={lang}
@@ -94,21 +90,14 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
         </div>
       </section>
 
-      {/* Pricing */}
+      {/* 4. Pricing */}
       <Pricing lang={lang} onSelect={scrollToBuilder} />
 
-      {/* Footer */}
-      <footer className="py-16 px-6 bg-espresso text-center">
-        <div className="font-serif text-base mb-3 tracking-wider">
-          <span className="text-gold font-light">Digitoy</span>
-          <span className="text-white/30 font-light">.az</span>
-        </div>
-        <p className="text-white/25 text-[10px] tracking-[0.28em] uppercase font-medium">{tr.footer_made}</p>
-        <div className="gold-divider mt-8 max-w-[120px] mx-auto opacity-25" />
-        <p className="text-white/15 text-[10px] mt-6 tracking-widest">
-          © {new Date().getFullYear()} Digitoy.az
-        </p>
-      </footer>
+      {/* 5. FAQ */}
+      <FAQSection />
+
+      {/* 6. Premium Footer */}
+      <HeroFooter />
     </div>
   )
 }

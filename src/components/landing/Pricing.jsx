@@ -8,14 +8,14 @@ export default function Pricing({ lang, onSelect }) {
   const [ref, visible] = useScrollReveal()
 
   return (
-    <section className="py-32 px-6 bg-cream">
+    <section className="py-12 md:py-24 px-6 bg-cream/80 backdrop-blur-sm relative z-10">
       <div
         ref={ref}
         className={`max-w-5xl mx-auto reveal-hidden ${visible ? 'reveal-visible' : ''}`}
       >
         <div className="text-center mb-20">
           <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-5 font-medium">Pricing</p>
-          <h2 className="font-serif text-3xl sm:text-4xl text-ink font-light tracking-tight">{tr.pricing_title}</h2>
+          <h2 className="font-serif text-2xl md:text-4xl text-ink font-light tracking-tight">{tr.pricing_title}</h2>
           <p className="text-brown-muted text-sm mt-4 tracking-wide font-light">{tr.pricing_subtitle}</p>
           <div className="gold-divider mt-8 max-w-[160px] mx-auto" />
         </div>
@@ -67,7 +67,7 @@ export default function Pricing({ lang, onSelect }) {
 
                 <button
                   onClick={() => onSelect?.(pkg.id)}
-                  className={`w-full py-3.5 text-[10px] tracking-[0.22em] uppercase font-medium transition-all duration-300 ${
+                  className={`w-full py-3.5 text-[10px] tracking-[0.22em] uppercase font-medium transition-all duration-300 active:scale-95 ${
                     isPopular
                       ? 'bg-gold text-white hover:bg-gold-dark'
                       : 'border border-gold/60 text-gold hover:bg-gold hover:text-white hover:border-gold'

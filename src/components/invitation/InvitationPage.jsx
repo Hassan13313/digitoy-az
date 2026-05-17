@@ -15,6 +15,7 @@ import ThreeDSeatingChart from './ThreeDSeatingChart'
 import ThreeDDressCode from './ThreeDDressCode'
 import { DRESS_CODE_PALETTES } from '../../data/constants'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
+import { formatAzDate, formatAzFullDate, formatTime24 } from '../../utils/dateFormat'
 import t from '../../data/translations'
 
 function SectionWrapper({ children, className = '' }) {
@@ -38,26 +39,18 @@ function GoldDividerOrnament() {
   )
 }
 
-function formatDisplayDate(dateStr, lang) {
-  if (!dateStr) return ''
-  try {
-    const locales = { az: 'az-AZ', en: 'en-US', ru: 'ru-RU' }
-    return new Date(dateStr + 'T00:00:00').toLocaleDateString(locales[lang] || 'az-AZ', {
-      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-    })
-  } catch {
-    return dateStr
-  }
-}
 
 export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
   const tr = t[lang]
   const [envelopeOpened, setEnvelopeOpened] = useState(false)
   const palette = DRESS_CODE_PALETTES.find((p) => p.id === weddingData.dressCodePalette) || DRESS_CODE_PALETTES[0]
 
+  const isCouple = ['toy', 'nishan'].includes(weddingData.eventType)
+
   const eventLabels = {
     toy: tr.event_toy, nishan: tr.event_nishan,
     birthday: tr.event_birthday, corporate: tr.event_corporate,
+    other: weddingData.eventName || tr.event_other,
   }
 
   // Primary palette color for 3D fabric
@@ -68,8 +61,8 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
       {/* Envelope opening screen */}
       <EnvelopeOpening
         brideName={weddingData.brideName}
-        groomName={weddingData.groomName}
-        eventLabel={eventLabels[weddingData.eventType] || tr.event_toy}
+        groomName={isCouple ? weddingData.groomName : null}
+        eventLabel={eventLabels[weddingData.eventType] || tr.event_other}
         onComplete={() => setEnvelopeOpened(true)}
       />
 
@@ -117,18 +110,36 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
 
                 {/* Names */}
                 <h1 className="font-serif leading-none mb-3">
-                  <span className="block text-5xl sm:text-6xl md:text-7xl text-ink font-light tracking-tight">{weddingData.brideName}</span>
-                  <span className="block text-3xl sm:text-4xl text-gold font-light italic my-3">{tr.inv_and}</span>
-                  <span className="block text-5xl sm:text-6xl md:text-7xl text-ink font-light tracking-tight">{weddingData.groomName}</span>
+                  {isCouple ? (
+                    <>
+                      <span className="block text-5xl sm:text-6xl md:text-7xl text-ink font-light tracking-tight">{weddingData.brideName}</span>
+                      <span className="block text-3xl sm:text-4xl text-gold font-light italic my-3">{tr.inv_and}</span>
+                      <span className="block text-5xl sm:text-6xl md:text-7xl text-ink font-light tracking-tight">{weddingData.groomName}</span>
+                    </>
+                  ) : (
+                    <span className="block text-5xl sm:text-6xl md:text-7xl text-ink font-light tracking-tight">{weddingData.brideName}</span>
+                  )}
                 </h1>
 
                 <GoldDividerOrnament />
 
-                <p className="text-sm text-brown-muted font-light tracking-wider mb-1.5">
-                  {formatDisplayDate(weddingData.date, lang)}
-                </p>
+                {(() => {
+                  const { formattedDate, dayName } = formatAzDate(weddingData.date, lang)
+                  return (
+                    <>
+                      <p className="text-sm text-brown-muted font-light tracking-wider mb-0.5">
+                        {formattedDate}
+                      </p>
+                      {dayName && (
+                        <p className="text-[11px] tracking-[0.22em] uppercase text-gold/70 font-medium mb-1.5">
+                          {dayName}
+                        </p>
+                      )}
+                    </>
+                  )
+                })()}
                 {weddingData.time && (
-                  <p className="text-sm text-brown-muted font-light tracking-wide">{weddingData.time}</p>
+                  <p className="text-sm text-brown-muted font-light tracking-wide">{formatTime24(weddingData.time)}</p>
                 )}
                 {weddingData.venueName && (
                   <p className="mt-5 text-[10px] tracking-[0.28em] uppercase text-gold/70 font-medium">{weddingData.venueName}</p>
@@ -272,12 +283,18 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
             {/* ── FOOTER ── */}
             <footer className="py-16 px-6 bg-espresso text-center">
               <div className="font-serif text-base mb-3 tracking-wider">
-                <span className="text-gold font-light">{weddingData.brideName}</span>
-                <span className="text-white/25 mx-3 italic font-light">&</span>
-                <span className="text-gold font-light">{weddingData.groomName}</span>
+                {isCouple ? (
+                  <>
+                    <span className="text-gold font-light">{weddingData.brideName}</span>
+                    <span className="text-white/25 mx-3 italic font-light">&</span>
+                    <span className="text-gold font-light">{weddingData.groomName}</span>
+                  </>
+                ) : (
+                  <span className="text-gold font-light">{weddingData.brideName}</span>
+                )}
               </div>
-              <p className="text-white/25 text-[10px] tracking-[0.28em] uppercase font-medium mb-8">
-                {weddingData.date}
+              <p className="text-white/25 text-[10px] tracking-[0.2em] uppercase font-medium mb-8">
+                {formatAzFullDate(weddingData.date, lang)}
               </p>
               <div className="gold-divider mb-8 max-w-[120px] mx-auto opacity-25" />
               <p className="text-white/15 text-[10px] tracking-widest">{tr.footer_made}</p>

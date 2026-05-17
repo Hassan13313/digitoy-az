@@ -48,6 +48,7 @@
     transform: scale(1.015);
     box-shadow: 0 4px 20px rgba(197, 160, 89, 0.14);
   }
+  .btn-gold:active { transform: scale(0.95); }
 
   .btn-outline-gold {
     @apply border border-gold text-gold font-sans font-medium tracking-[0.18em] px-9 py-3.5 rounded-none transition-all duration-300 bg-transparent uppercase text-xs;
@@ -56,6 +57,7 @@
     @apply bg-gold text-white;
     transform: scale(1.015);
   }
+  .btn-outline-gold:active { transform: scale(0.95); }
 
   .luxury-input {
     @apply w-full border-0 border-b border-beige-dark bg-transparent text-ink text-sm px-0 py-3 focus:outline-none focus:border-gold transition-colors duration-300 placeholder:text-brown-muted/40 rounded-none;

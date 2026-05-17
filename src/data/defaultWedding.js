@@ -1,5 +1,6 @@
 export const defaultWedding = {
   eventType: 'toy',
+  eventName: '',
   brideName: 'Leyla',
   groomName: 'Murad',
   date: '2025-09-20',

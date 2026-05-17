@@ -1,35 +1,30 @@
 import { Eye, MessageCircle, Edit2, Calendar, MapPin, Shirt, Users, Image } from 'lucide-react'
 import { DRESS_CODE_PALETTES, WHATSAPP_NUMBER } from '../../data/constants'
+import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
 import t from '../../data/translations'
-
-function formatDate(dateStr, lang) {
-  if (!dateStr) return '—'
-  try {
-    const locales = { az: 'az-AZ', en: 'en-US', ru: 'ru-RU' }
-    return new Date(dateStr + 'T00:00:00').toLocaleDateString(locales[lang] || 'az-AZ', {
-      day: 'numeric', month: 'long', year: 'numeric',
-    })
-  } catch {
-    return dateStr
-  }
-}
 
 function generateWhatsAppText(data, lang) {
   const tr = t[lang]
   const eventLabels = {
     toy: t.az.event_toy, nishan: t.az.event_nishan,
     birthday: t.az.event_birthday, corporate: t.az.event_corporate,
+    other: data.eventName || t.az.event_other,
   }
   const paletteLabel = DRESS_CODE_PALETTES.find((p) => p.id === data.dressCodePalette)?.label[lang] || '—'
-  const dateStr = formatDate(data.date, lang)
+  const { formattedDate, dayName } = formatAzDate(data.date, lang)
+  const dateStr = dayName ? `${formattedDate}, ${dayName}` : formattedDate
+  const timeStr = formatTime24(data.time)
+
+  const isCouple = ['toy', 'nishan'].includes(data.eventType)
 
   const lines = [
     tr.whatsapp_header,
     '',
     `🎉 ${tr.event_label}: ${eventLabels[data.eventType] || data.eventType}`,
-    `👰 ${tr.bride_label}: ${data.brideName || '—'}`,
-    `🤵 ${tr.groom_label}: ${data.groomName || '—'}`,
-    `📅 ${tr.datetime_label}: ${dateStr}, ${data.time || '—'}`,
+    isCouple
+      ? `👰 ${tr.bride_label}: ${data.brideName || '—'}\n🤵 ${tr.groom_label}: ${data.groomName || '—'}`
+      : `👤 ${tr.person_name_label}: ${data.brideName || '—'}`,
+    `📅 ${tr.datetime_label}: ${dateStr}, ${timeStr}`,
     `📍 ${tr.venue_summary}: ${data.venueName || '—'}`,
     `👗 ${tr.dresscode_summary}: ${paletteLabel}`,
     `🪑 ${tr.seating_label}: ${data.seatingPlan ? tr.seating_yes : tr.seating_no}`,
@@ -46,13 +41,29 @@ export default function Preview({ lang, data, onEdit, onView }) {
   const palette = DRESS_CODE_PALETTES.find((p) => p.id === data.dressCodePalette)
   const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${generateWhatsAppText(data, lang)}`
 
+  const isCouple = ['toy', 'nishan'].includes(data.eventType)
+
   const eventLabels = {
     toy: tr.event_toy, nishan: tr.event_nishan,
     birthday: tr.event_birthday, corporate: tr.event_corporate,
+    other: data.eventName || tr.event_other,
   }
 
+  const { formattedDate, dayName } = formatAzDate(data.date, lang)
+  const timeStr = formatTime24(data.time)
+  const dateDisplay = dayName ? `${formattedDate} — ${dayName}` : formattedDate
+
   const rows = [
-    { icon: Calendar, label: tr.datetime_label, value: `${formatDate(data.date, lang)} — ${data.time || '—'}` },
+    {
+      icon: Calendar,
+      label: tr.datetime_label,
+      value: (
+        <span className="flex flex-col gap-0.5">
+          <span>{dateDisplay}</span>
+          <span className="text-brown-muted/60 text-xs">{timeStr}</span>
+        </span>
+      ),
+    },
     { icon: MapPin, label: tr.venue_summary, value: data.venueName || '—' },
     {
       icon: Shirt, label: tr.dresscode_summary,
@@ -78,13 +89,21 @@ export default function Preview({ lang, data, onEdit, onView }) {
         <div className="gold-divider mt-6 max-w-[160px] mx-auto" />
       </div>
 
-      {/* Couple card */}
+      {/* Name card */}
       <div className="bg-beige border border-beige-dark/60 px-10 py-10 mb-px text-center">
-        <p className="text-[10px] tracking-[0.28em] uppercase text-brown-muted mb-4 font-medium">{eventLabels[data.eventType]}</p>
+        <p className="text-[10px] tracking-[0.28em] uppercase text-brown-muted mb-4 font-medium">
+          {eventLabels[data.eventType] || tr.event_other}
+        </p>
         <h3 className="font-serif text-3xl text-ink font-light tracking-tight">
-          {data.brideName || '—'}
-          <span className="text-gold mx-4 font-serif italic font-light">&</span>
-          {data.groomName || '—'}
+          {isCouple ? (
+            <>
+              {data.brideName || '—'}
+              <span className="text-gold mx-4 font-serif italic font-light">&</span>
+              {data.groomName || '—'}
+            </>
+          ) : (
+            data.brideName || '—'
+          )}
         </h3>
       </div>
 

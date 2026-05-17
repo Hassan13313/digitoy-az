@@ -46,6 +46,7 @@ export const EVENT_TYPES = [
   { id: 'nishan', icon: 'Diamond' },
   { id: 'birthday', icon: 'Cake' },
   { id: 'corporate', icon: 'Briefcase' },
+  { id: 'other', icon: 'Sparkles' },
 ]
 
 export const PRICING = [

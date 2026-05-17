@@ -159,27 +159,31 @@ export default function EnvelopeOpening({ brideName, groomName, eventLabel, onCo
                 >
                   {brideName}
                 </h2>
-                <span
-                  style={{
-                    fontFamily: '"Playfair Display", Georgia, serif',
-                    fontSize: '14px',
-                    color: '#C5A059',
-                    fontStyle: 'italic',
-                  }}
-                >
-                  &
-                </span>
-                <h2
-                  className="mb-4 font-light"
-                  style={{
-                    fontFamily: '"Playfair Display", Georgia, serif',
-                    fontSize: '22px',
-                    color: '#1A1A1A',
-                    lineHeight: 1.2,
-                  }}
-                >
-                  {groomName}
-                </h2>
+                {groomName && (
+                  <>
+                    <span
+                      style={{
+                        fontFamily: '"Playfair Display", Georgia, serif',
+                        fontSize: '14px',
+                        color: '#C5A059',
+                        fontStyle: 'italic',
+                      }}
+                    >
+                      &
+                    </span>
+                    <h2
+                      className="mb-4 font-light"
+                      style={{
+                        fontFamily: '"Playfair Display", Georgia, serif',
+                        fontSize: '22px',
+                        color: '#1A1A1A',
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {groomName}
+                    </h2>
+                  </>
+                )}
                 <div
                   className="h-px w-12 mb-4"
                   style={{ background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.5), transparent)' }}

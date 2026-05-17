@@ -16,7 +16,7 @@ export default function Features({ lang }) {
   }))
 
   return (
-    <section className="py-32 px-6 bg-beige">
+    <section className="py-32 px-6 bg-beige/80 backdrop-blur-sm relative z-10">
       <div
         ref={ref}
         className={`max-w-4xl mx-auto reveal-hidden ${visible ? 'reveal-visible' : ''}`}
