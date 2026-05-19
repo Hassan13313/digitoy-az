@@ -134,4 +134,4 @@ export const PRICING = [
   },
 ]
 
-export const WHATSAPP_NUMBER = '994555696549'
+export const WHATSAPP_NUMBER = '994557133696'

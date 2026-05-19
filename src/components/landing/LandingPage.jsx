@@ -6,7 +6,7 @@ import Preview from './Preview'
 import Pricing from './Pricing'
 import t from '../../data/translations'
 
-export default function LandingPage({ lang, setLang, weddingData, setWeddingData, onViewInvitation }) {
+export default function LandingPage({ lang, setLang, weddingData, setWeddingData, onViewInvitation, isAdmin = false }) {
   const tr = t[lang]
   const [showPreview, setShowPreview] = useState(false)
   const [formData, setFormData] = useState(weddingData)
@@ -79,6 +79,7 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
               data={formData}
               onEdit={() => setShowPreview(false)}
               onView={onViewInvitation}
+              isAdmin={isAdmin}
             />
           ) : (
             <BuilderForm
