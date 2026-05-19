@@ -29,13 +29,20 @@ const calendarTranslations = {
 }
 
 /* ── Nominatim ilə məkan axtarışı komponenti ── */
-function VenueSearchInput({ value, onChange, onSelect, lang, tr }) {
+const VENUE_HINTS = {
+  az: '*Məkan adlarını Azərbaycan hərfləri ilə və ya Google-da axtardığınız rəsmi şəkildə yazmağınız tövsiyə olunur.',
+  en: '*It is recommended to type venue names with Azerbaijani characters or exactly as they appear on Google Search.',
+  ru: '*Рекомендуется вводить названия мест на азербайджанской латинице или так, как они указаны в поиске Google.',
+}
+
+function VenueSearchInput({ value, onSelect, lang, tr }) {
   const [query, setQuery]     = useState(value || '')
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
   const [open, setOpen]       = useState(false)
   const [success, setSuccess] = useState(false)
-  const wrapRef = useRef(null)
+  const wrapRef   = useRef(null)
+  const debounceRef = useRef(null)
 
   /* Xaricdən value dəyişəndə query-ni sinxronla */
   useEffect(() => { setQuery(value || '') }, [value])
@@ -49,19 +56,17 @@ function VenueSearchInput({ value, onChange, onSelect, lang, tr }) {
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
-  const search = async () => {
-    if (!query.trim()) return
+  const doSearch = async (q) => {
+    if (!q.trim() || q.trim().length < 2) { setResults([]); setOpen(false); return }
     setLoading(true)
-    setOpen(false)
-    setSuccess(false)
     try {
       const res  = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=6`,
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=6`,
         { headers: { 'Accept-Language': lang === 'ru' ? 'ru' : lang === 'en' ? 'en' : 'az,en' } }
       )
       const data = await res.json()
       setResults(data)
-      setOpen(data.length > 0)
+      setOpen(true)
     } catch {
       setResults([])
     } finally {
@@ -69,14 +74,23 @@ function VenueSearchInput({ value, onChange, onSelect, lang, tr }) {
     }
   }
 
+  const handleChange = (e) => {
+    const q = e.target.value
+    setQuery(q)
+    setSuccess(false)
+    clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => doSearch(q), 300)
+  }
+
   const handleSelect = (item) => {
     const lat = parseFloat(item.lat)
     const lon = parseFloat(item.lon)
     const name = item.display_name.split(',')[0].trim()
-    const mapsUrl  = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`
-    const wazeUrl  = `https://waze.com/ul?ll=${lat},${lon}&navigate=yes`
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`
+    const wazeUrl = `https://waze.com/ul?ll=${lat},${lon}&navigate=yes`
     setQuery(name)
     setOpen(false)
+    setResults([])
     setSuccess(true)
     onSelect({ venueName: name, googleMapsUrl: mapsUrl, wazeUrl })
     setTimeout(() => setSuccess(false), 4000)
@@ -84,31 +98,30 @@ function VenueSearchInput({ value, onChange, onSelect, lang, tr }) {
 
   return (
     <div ref={wrapRef} className="relative">
-      <div className="flex gap-2">
-        <div className="relative flex-1">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gold/50 pointer-events-none" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => { setQuery(e.target.value); setSuccess(false) }}
-            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), search())}
-            placeholder={tr.venue_search_placeholder}
-            className="w-full pl-9 pr-4 py-3 bg-[#1a1a1a]/60 border border-gold/20 text-white/90 text-sm placeholder-white/25 rounded-none focus:outline-none focus:border-gold/50 transition-colors"
-          />
-        </div>
-        <button
-          type="button"
-          onClick={search}
-          disabled={loading}
-          className="px-4 py-3 bg-gold/90 hover:bg-gold text-espresso text-[11px] tracking-[0.14em] uppercase font-semibold transition-colors disabled:opacity-50"
-        >
-          {loading ? '...' : tr.venue_search_btn}
-        </button>
+      {/* Input */}
+      <div className="relative">
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gold/50 pointer-events-none" />
+        {loading && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 border border-gold/40 border-t-gold/80 rounded-full animate-spin" />
+        )}
+        <input
+          type="text"
+          value={query}
+          onChange={handleChange}
+          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), doSearch(query))}
+          placeholder={tr.venue_search_placeholder}
+          className="w-full pl-9 pr-10 py-3 bg-[#1a1a1a]/60 border border-gold/20 text-white/90 text-sm placeholder-white/25 rounded-none focus:outline-none focus:border-gold/50 transition-colors"
+        />
       </div>
+
+      {/* Hint qeydi */}
+      <p className="mt-1 text-xs text-white/30 font-light leading-relaxed">
+        {VENUE_HINTS[lang] || VENUE_HINTS.az}
+      </p>
 
       {/* Dropdown nəticələr */}
       {open && results.length > 0 && (
-        <div className="absolute left-0 right-0 top-full mt-1 z-[110] backdrop-blur-md bg-[#1a1a1a]/90 border border-gold/20 shadow-2xl max-h-64 overflow-y-auto">
+        <div className="absolute left-0 right-0 top-[calc(100%-1.25rem)] mt-1 z-[110] backdrop-blur-md bg-[#1a1a1a]/90 border border-gold/20 shadow-2xl max-h-64 overflow-y-auto">
           {results.map((item) => (
             <button
               key={item.place_id}
@@ -123,9 +136,9 @@ function VenueSearchInput({ value, onChange, onSelect, lang, tr }) {
         </div>
       )}
 
-      {/* Nəticə yoxdur bildirişi */}
-      {open && results.length === 0 && !loading && (
-        <div className="absolute left-0 right-0 top-full mt-1 z-[110] backdrop-blur-md bg-[#1a1a1a]/90 border border-gold/20 px-4 py-3">
+      {/* Nəticə yoxdur */}
+      {open && results.length === 0 && !loading && query.trim().length >= 2 && (
+        <div className="absolute left-0 right-0 top-[calc(100%-1.25rem)] mt-1 z-[110] backdrop-blur-md bg-[#1a1a1a]/90 border border-gold/20 px-4 py-3">
           <p className="text-white/40 text-sm">{tr.venue_search_no_results}</p>
         </div>
       )}

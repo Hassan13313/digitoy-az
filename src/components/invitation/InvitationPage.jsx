@@ -182,19 +182,19 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
                     href={weddingData.googleMapsUrl || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 btn-gold"
+                    className="flex-1 flex items-center justify-center gap-2 py-3 px-5 bg-[#d4af37] text-black text-[11px] tracking-[0.18em] uppercase font-semibold transition-opacity hover:opacity-90"
                   >
-                    <MapPin size={13} strokeWidth={1.5} />
-                    {tr.inv_maps_btn_full}
+                    <MapPin size={13} strokeWidth={2} />
+                    Google Maps
                   </a>
                   <a
                     href={weddingData.wazeUrl || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 btn-outline-gold"
+                    className="flex-1 flex items-center justify-center gap-2 py-3 px-5 border border-[#d4af37] text-[#d4af37] text-[11px] tracking-[0.18em] uppercase font-semibold transition-opacity hover:opacity-80"
                   >
-                    <Navigation size={13} strokeWidth={1.5} />
-                    {tr.inv_waze_btn_full}
+                    <Navigation size={13} strokeWidth={2} />
+                    Waze
                   </a>
                 </div>
               </SectionWrapper>
