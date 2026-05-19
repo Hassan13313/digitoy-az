@@ -47,7 +47,7 @@ function buildWhatsAppMessage(data, lang) {
   const programCount = (data.programSteps || []).filter(r => r.time || r.activity).length
 
   const token = encodeData(data)
-  const adminLink = `https://digitoy.az/builder?admin=digitoyadmin2026&data=${token}`
+  const adminLink = `${window.location.origin}/builder?admin=digitoyadmin2026&data=${token}`
 
   let nameLines = ''
   if (isCouple) {
@@ -119,7 +119,7 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
 
   /* Admin üçün idarəetmə linki */
   const token     = encodeData(data)
-  const adminLink = `https://digitoy.az/builder?admin=digitoyadmin2026&data=${token}`
+  const adminLink = `${window.location.origin}/builder?admin=digitoyadmin2026&data=${token}`
 
   /* Xülasə sətirləri */
   const rows = [
