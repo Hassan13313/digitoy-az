@@ -30,31 +30,46 @@ export function formatAzDate(dateString, lang = 'az') {
   return { formattedDate, dayName }
 }
 
+const DATE_DICT = {
+  az: {
+    months: ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'İyun', 'İyul', 'Avqust', 'Sentyabr', 'Oktabr', 'Noyabr', 'Dekabr'],
+    days: ['Bazar', 'Bazar ertəsi', 'Çərşənbə axşamı', 'Çərşənbə', 'Cümə axşamı', 'Cümə', 'Şənbə'],
+  },
+  ru: {
+    months: ['Января', 'Февраля', 'Марта', 'Апреля', 'Мая', 'Июня', 'Июля', 'Августа', 'Сентября', 'Октября', 'Ноября', 'Декабря'],
+    days: ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'],
+  },
+  en: {
+    months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+    days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+  },
+}
+
 /**
- * Returns full text date for az: "01 Yanvar 2026, Bazar ertəsi"
- * For en/ru falls back to locale string.
+ * Returns full localised text date.
+ * az → "01 Yanvar 2026, Bazar ertəsi"
+ * ru → "01 Января 2026, Понедельник"
+ * en → "Monday, January 01, 2026"
  */
-export function formatAzFullDate(dateString, lang = 'az') {
+export function formatFullDateByLang(dateString, lang = 'az') {
   if (!dateString) return ''
   const date = new Date(dateString + 'T00:00:00')
   if (isNaN(date.getTime())) return dateString
 
-  if (lang === 'az') {
-    const dd = String(date.getDate()).padStart(2, '0')
-    const monthName = AZ_MONTHS[date.getMonth()]
-    const yyyy = date.getFullYear()
-    const dayName = AZ_DAYS[date.getDay()]
-    return `${dd} ${monthName} ${yyyy}, ${dayName}`
-  }
+  const dict = DATE_DICT[lang] || DATE_DICT.az
+  const dd = String(date.getDate()).padStart(2, '0')
+  const monthName = dict.months[date.getMonth()]
+  const yyyy = date.getFullYear()
+  const dayName = dict.days[date.getDay()]
 
-  const locales = { en: 'en-US', ru: 'ru-RU' }
-  try {
-    return date.toLocaleDateString(locales[lang] || 'en-US', {
-      day: 'numeric', month: 'long', year: 'numeric', weekday: 'long',
-    })
-  } catch {
-    return dateString
-  }
+  if (lang === 'en') return `${dayName}, ${monthName} ${dd}, ${yyyy}`
+  if (lang === 'ru') return `${dd} ${monthName} ${yyyy}, ${dayName}`
+  return `${dd} ${monthName} ${yyyy}, ${dayName}`
+}
+
+/** @deprecated Use formatFullDateByLang instead */
+export function formatAzFullDate(dateString, lang = 'az') {
+  return formatFullDateByLang(dateString, lang)
 }
 
 /**

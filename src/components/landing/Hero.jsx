@@ -4,44 +4,45 @@ import t from '../../data/translations'
 
 const featureKeys = ['countdown', 'maps', 'dresscode', 'seating', 'gallery', 'music', 'rsvp', 'timeline', 'guestbook']
 const featureIcons = { countdown: Timer, maps: MapPin, dresscode: Shirt, seating: Users, gallery: Camera, music: Music, rsvp: UserCheck, timeline: Clock, guestbook: BookOpen }
-const featureLabels = { rsvp: 'İştirak Təsdiqi', timeline: 'Tədbir Proqramı', guestbook: 'Təbrik Kitabı' }
 
-
-const DRESS_STYLES = [
-  {
-    id: 'blacktie',
-    label: 'Black Tie',
-    sub: 'Rəsmi / Zərif',
-    male: { icon: User, text: 'Smokin və ya Frak' },
-    female: { icon: Sparkles, text: 'Uzun ziyafət libası' },
-  },
-  {
-    id: 'cocktail',
-    label: 'Cocktail',
-    sub: 'Yarı-rəsmi / Modern',
-    male: { icon: User, text: 'Kostyum + qalstuk' },
-    female: { icon: Sparkles, text: 'Kokteyl donu' },
-  },
-  {
-    id: 'smartcasual',
-    label: 'Smart Casual',
-    sub: 'Şık / Rahat',
-    male: { icon: User, text: 'Köynək + pencək' },
-    female: { icon: Sparkles, text: 'Zərif geyim dəsti' },
-  },
-  {
-    id: 'creative',
-    label: 'Creative',
-    sub: 'Tematik / Yaradıcı',
-    male: { icon: User, text: 'Tema rəngləri' },
-    female: { icon: Sparkles, text: 'Tema rəngləri' },
-  },
-]
+function getDressStyles(tr) {
+  return [
+    {
+      id: 'blacktie',
+      label: 'Black Tie',
+      sub: tr.dresscode_blacktie_sub,
+      male: { icon: User, text: tr.dress_blacktie_male },
+      female: { icon: Sparkles, text: tr.dress_blacktie_female },
+    },
+    {
+      id: 'cocktail',
+      label: 'Cocktail',
+      sub: tr.dresscode_cocktail_sub,
+      male: { icon: User, text: tr.dress_cocktail_male },
+      female: { icon: Sparkles, text: tr.dress_cocktail_female },
+    },
+    {
+      id: 'smartcasual',
+      label: 'Smart Casual',
+      sub: tr.dresscode_smartcasual_sub,
+      male: { icon: User, text: tr.dress_smartcasual_male },
+      female: { icon: Sparkles, text: tr.dress_smartcasual_female },
+    },
+    {
+      id: 'creative',
+      label: 'Creative',
+      sub: tr.dresscode_creative_sub,
+      male: { icon: User, text: tr.dress_creative_male },
+      female: { icon: Sparkles, text: tr.dress_creative_female },
+    },
+  ]
+}
 
 function DressCodePanel({ tr }) {
   const [selectedStyle, setSelectedStyle] = useState(null)
   const [note, setNote] = useState('')
 
+  const DRESS_STYLES = getDressStyles(tr)
   const active = DRESS_STYLES.find(s => s.id === selectedStyle)
 
   return (
@@ -49,7 +50,6 @@ function DressCodePanel({ tr }) {
       <p className="text-[10px] tracking-[0.28em] uppercase text-gold font-medium text-center">{tr.f_dresscode}</p>
       <p className="text-brown-muted text-sm font-light text-center">{tr.f_dresscode_desc}</p>
 
-      {/* 4 stil kartı */}
       <div className="grid grid-cols-2 gap-2 mt-2">
         {DRESS_STYLES.map(({ id, label, sub }) => {
           const isActive = selectedStyle === id
@@ -70,12 +70,11 @@ function DressCodePanel({ tr }) {
         })}
       </div>
 
-      {/* Seçilmiş stilin geyim ikonları */}
       {active && (
         <div className="flex justify-center gap-4 pt-1 transition-all duration-300">
           {[
-            { role: 'Kişi qonaqlar', ...active.male },
-            { role: 'Xanım qonaqlar', ...active.female },
+            { role: tr.dress_male_role, ...active.male },
+            { role: tr.dress_female_role, ...active.female },
           ].map(({ role, icon: Icon, text }) => (
             <div key={role} className="flex flex-col items-center gap-2 px-4 py-3 bg-white/30 border border-white/50 rounded-xl backdrop-blur-sm flex-1">
               <Icon size={18} className="text-amber-700/80" strokeWidth={1.4} />
@@ -88,13 +87,12 @@ function DressCodePanel({ tr }) {
         </div>
       )}
 
-      {/* Qeyd sahəsi */}
       <div className="relative z-20 pointer-events-auto mt-6">
-        <p className="text-[10px] tracking-[0.18em] uppercase text-brown-muted/60 mb-2">Əlavə qeyd</p>
+        <p className="text-[10px] tracking-[0.18em] uppercase text-brown-muted/60 mb-2">{tr.dress_note_label}</p>
         <textarea
           value={note}
           onChange={e => setNote(e.target.value)}
-          placeholder="Məs: Zəhmət olmasa bəyaz rəngdən qaçının..."
+          placeholder={tr.dress_note_ph}
           rows={2}
           className="w-full text-xs px-4 py-2.5 bg-white/40 border border-white/50 rounded-xl outline-none text-ink placeholder-brown-muted/40 focus:border-gold/50 transition-colors backdrop-blur-sm resize-none font-light"
         />
@@ -104,9 +102,9 @@ function DressCodePanel({ tr }) {
 }
 
 const slides = [
-  { bg: 'from-amber-50 to-stone-100', label: 'Şəkil 1' },
-  { bg: 'from-rose-50 to-amber-50',   label: 'Şəkil 2' },
-  { bg: 'from-stone-100 to-amber-100', label: 'Şəkil 3' },
+  { bg: 'from-amber-50 to-stone-100' },
+  { bg: 'from-rose-50 to-amber-50' },
+  { bg: 'from-stone-100 to-amber-100' },
 ]
 
 function GallerySlider({ tr }) {
@@ -119,16 +117,14 @@ function GallerySlider({ tr }) {
       <p className="text-[10px] tracking-[0.28em] uppercase text-gold font-medium">{tr.f_gallery}</p>
       <p className="text-brown-muted text-sm font-light">{tr.f_gallery_desc}</p>
 
-      {/* Slider */}
       <div className="relative max-w-xs mx-auto mt-3">
         <div className={`w-full h-44 rounded-xl bg-gradient-to-br ${slides[current].bg} border border-white/60 flex items-center justify-center transition-all duration-500`}>
           <div className="flex flex-col items-center gap-2 opacity-40">
             <Camera size={28} className="text-gold" strokeWidth={1.2} />
-            <span className="text-[11px] text-brown-muted font-light">{slides[current].label}</span>
+            <span className="text-[11px] text-brown-muted font-light">{tr.gallery_slide} {current + 1}</span>
           </div>
         </div>
 
-        {/* Ok düymələri */}
         <button
           onClick={prev}
           className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/60 border border-white/70 backdrop-blur-sm flex items-center justify-center hover:bg-white/80 transition-all duration-200 shadow-sm"
@@ -143,7 +139,6 @@ function GallerySlider({ tr }) {
         </button>
       </div>
 
-      {/* Nöqtələr */}
       <div className="flex justify-center gap-2">
         {slides.map((_, i) => (
           <button
@@ -154,12 +149,12 @@ function GallerySlider({ tr }) {
         ))}
       </div>
 
-      <p className="text-[11px] text-brown-muted/70 font-light">QR kod vasitəsilə foto yükləyin</p>
+      <p className="text-[11px] text-brown-muted/70 font-light">{tr.gallery_qr_hint}</p>
     </div>
   )
 }
 
-function RSVPPanel() {
+function RSVPPanel({ tr }) {
   const [name, setName] = useState('')
   const [status, setStatus] = useState(null)
   const [submitted, setSubmitted] = useState(false)
@@ -173,14 +168,14 @@ function RSVPPanel() {
   return (
     <div className="space-y-4">
       <div className="text-center">
-        <p className="text-[10px] tracking-[0.28em] uppercase text-gold font-medium">İştirak Təsdiqi</p>
-        <p className="text-brown-muted text-sm font-light mt-1">Zəhmət olmasa iştirakınızı bildirin</p>
+        <p className="text-[10px] tracking-[0.28em] uppercase text-gold font-medium">{tr.rsvp_panel_title}</p>
+        <p className="text-brown-muted text-sm font-light mt-1">{tr.rsvp_panel_sub}</p>
       </div>
 
       {!submitted ? (
         <>
           <div className="relative z-20 pointer-events-auto">
-            <p className="text-[10px] tracking-[0.18em] uppercase text-brown-muted/60 mb-2">Adınız</p>
+            <p className="text-[10px] tracking-[0.18em] uppercase text-brown-muted/60 mb-2">{tr.rsvp_name}</p>
             <input
               type="text"
               value={name}
@@ -195,13 +190,13 @@ function RSVPPanel() {
               className="flex-1 flex items-center justify-center gap-2 py-3 bg-gold/10 border border-gold/40 rounded-xl text-xs text-gold font-medium hover:bg-gold/20 transition-all duration-300"
             >
               <UserCheck size={13} strokeWidth={1.5} />
-              İştirak edirəm
+              {tr.rsvp_yes_btn}
             </button>
             <button
               onClick={() => submit('no')}
               className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/30 border border-white/50 rounded-xl text-xs text-brown-muted font-medium hover:bg-white/50 transition-all duration-300"
             >
-              İştirak edə bilmirəm
+              {tr.rsvp_no_btn}
             </button>
           </div>
         </>
@@ -209,13 +204,13 @@ function RSVPPanel() {
         <div className="text-center py-4 px-5 bg-gold/[0.06] border border-gold/30 rounded-xl">
           <UserCheck size={24} className="text-gold mx-auto mb-2" strokeWidth={1.4} />
           <p className="font-serif text-base text-ink font-light">
-            Təşəkkür edirik, <span className="text-gold">{name}</span>!
+            {tr.rsvp_thanks_msg}, <span className="text-gold">{name}</span>!
           </p>
           <p className="text-[11px] text-brown-muted font-light mt-1">
-            {status === 'yes' ? 'Sizi görməyi səbirsizliklə gözləyirik.' : 'Cavabınız qeydə alındı.'}
+            {status === 'yes' ? tr.rsvp_yes_sub : tr.rsvp_no_sub}
           </p>
           <button onClick={() => { setSubmitted(false); setName(''); setStatus(null) }} className="mt-3 text-[10px] text-gold/60 hover:text-gold transition-colors underline underline-offset-2">
-            Dəyişdir
+            {tr.rsvp_change}
           </button>
         </div>
       )}
@@ -223,23 +218,22 @@ function RSVPPanel() {
   )
 }
 
-const TIMELINE = [
-  { time: '18:00', label: 'Qonaqların qarşılanması' },
-  { time: '19:00', label: 'Nikah mərasimi' },
-  { time: '19:30', label: 'Şənliyin başlanması' },
-  { time: '21:00', label: 'Ziyafət süfrəsi' },
-  { time: '23:00', label: 'Gecə proqramı' },
-]
+function TimelinePanel({ tr }) {
+  const TIMELINE = [
+    { time: '18:00', label: tr.timeline_i1 },
+    { time: '19:00', label: tr.timeline_i2 },
+    { time: '19:30', label: tr.timeline_i3 },
+    { time: '21:00', label: tr.timeline_i4 },
+    { time: '23:00', label: tr.timeline_i5 },
+  ]
 
-function TimelinePanel() {
   return (
     <div className="space-y-4">
       <div className="text-center">
-        <p className="text-[10px] tracking-[0.28em] uppercase text-gold font-medium">Tədbir Proqramı</p>
-        <p className="text-brown-muted text-sm font-light mt-1">Toy günü saatlıq proqram</p>
+        <p className="text-[10px] tracking-[0.28em] uppercase text-gold font-medium">{tr.timeline_title}</p>
+        <p className="text-brown-muted text-sm font-light mt-1">{tr.timeline_sub}</p>
       </div>
       <div className="relative pl-6 space-y-4">
-        {/* Şaquli xətt */}
         <div className="absolute left-[11px] top-2 bottom-2 w-px bg-gold/25" />
         {TIMELINE.map(({ time, label }, i) => (
           <div key={i} className="flex items-start gap-4 relative">
@@ -257,19 +251,15 @@ function TimelinePanel() {
   )
 }
 
-const SAMPLE_MESSAGES = [
-  { name: 'Aytən X.', text: 'Xoşbəxt olun, canım! 🤍' },
-]
-
-function GuestbookPanel() {
+function GuestbookPanel({ tr }) {
   const [message, setMessage] = useState('')
   const [guestName, setGuestName] = useState('')
-  const [messages, setMessages] = useState(SAMPLE_MESSAGES)
+  const [messages, setMessages] = useState([{ name: 'Aytən X.', text: 'Xoşbəxt olun, canım! 🤍' }])
   const [sent, setSent] = useState(false)
 
   const send = () => {
     if (!message.trim()) return
-    setMessages(prev => [{ name: guestName.trim() || 'Qonaq', text: message.trim() }, ...prev])
+    setMessages(prev => [{ name: guestName.trim() || tr.guestbook_default_name, text: message.trim() }, ...prev])
     setMessage('')
     setGuestName('')
     setSent(true)
@@ -279,8 +269,8 @@ function GuestbookPanel() {
   return (
     <div className="space-y-4">
       <div className="text-center">
-        <p className="text-[10px] tracking-[0.28em] uppercase text-gold font-medium">Təbrik Kitabı</p>
-        <p className="text-brown-muted text-sm font-light mt-1">Bəy və gəlinə ürək sözünüzü yazın</p>
+        <p className="text-[10px] tracking-[0.28em] uppercase text-gold font-medium">{tr.guestbook_title}</p>
+        <p className="text-brown-muted text-sm font-light mt-1">{tr.guestbook_sub}</p>
       </div>
 
       <div className="relative z-20 pointer-events-auto space-y-2">
@@ -288,13 +278,13 @@ function GuestbookPanel() {
           type="text"
           value={guestName}
           onChange={e => setGuestName(e.target.value)}
-          placeholder="Adınız (ixtiyari)"
+          placeholder={tr.guestbook_name_ph}
           className="w-full text-xs px-4 py-2.5 bg-white/40 border border-white/50 rounded-xl outline-none text-ink placeholder-brown-muted/40 focus:border-gold/50 transition-colors backdrop-blur-sm"
         />
         <textarea
           value={message}
           onChange={e => setMessage(e.target.value)}
-          placeholder="Təbrik mesajınızı yazın..."
+          placeholder={tr.guestbook_msg_ph}
           rows={3}
           className="w-full text-xs px-4 py-2.5 bg-white/40 border border-white/50 rounded-xl outline-none text-ink placeholder-brown-muted/40 focus:border-gold/50 transition-colors backdrop-blur-sm resize-none font-light"
         />
@@ -303,11 +293,10 @@ function GuestbookPanel() {
           className="w-full flex items-center justify-center gap-2 py-2.5 bg-gold/15 border border-gold/40 rounded-xl text-xs text-gold font-medium hover:bg-gold/25 transition-all duration-300"
         >
           <BookOpen size={12} strokeWidth={1.5} />
-          {sent ? 'Göndərildi ✓' : 'Təbrikimi Göndər'}
+          {sent ? tr.guestbook_sent_btn : tr.guestbook_send_btn}
         </button>
       </div>
 
-      {/* Yazılmış mesajlar */}
       {messages.length > 0 && (
         <div className="space-y-2 max-h-32 overflow-y-auto pr-1">
           {messages.map((m, i) => (
@@ -346,20 +335,16 @@ function MusicPlayer({ tr }) {
       <audio ref={audioRef} src="/wedding-music.mp3" loop preload="none" />
 
       <div className="flex flex-col items-center gap-4 mt-4">
-
-        {/* Play/Pause düyməsi */}
         <button
           onClick={toggle}
           className="w-16 h-16 rounded-full bg-white/40 border border-gold/40 flex items-center justify-center shadow-lg backdrop-blur-md hover:bg-white/60 hover:border-gold/70 transition-all duration-300"
         >
           {playing ? (
-            /* Pause — iki şaquli xətt */
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
               <rect x="6" y="5" width="4" height="14" rx="1" fill="#C5A059"/>
               <rect x="14" y="5" width="4" height="14" rx="1" fill="#C5A059"/>
             </svg>
           ) : (
-            /* Xətt çəkilmiş spiker ikonu (mute/stopped) */
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M11 5L6 9H3v6h3l5 4V5z" fill="#C5A059" opacity="0.85"/>
               <line x1="17" y1="7" x2="23" y2="13" stroke="#C5A059" strokeWidth="1.8" strokeLinecap="round"/>
@@ -368,7 +353,6 @@ function MusicPlayer({ tr }) {
           )}
         </button>
 
-        {/* Dalğa çubuqları — çalınanda hərəkətli, dayananda düz */}
         <div className="flex gap-1 items-end h-8">
           {bars.map((h, i) => (
             <div
@@ -385,7 +369,7 @@ function MusicPlayer({ tr }) {
         </div>
 
         <p className="text-[11px] text-brown-muted/70 font-light italic">
-          {playing ? 'Çalınır...' : 'Musiqini başlatmaq üçün düyməyə basın'}
+          {playing ? tr.music_playing_text : tr.music_start_text}
         </p>
         <p className="text-[10px] text-gold/60 tracking-wide">Canon in D — Johann Pachelbel</p>
       </div>
@@ -419,10 +403,10 @@ function FeatureContent({ featureKey, tr }) {
 
   if (featureKey === 'countdown') {
     const units = [
-      { v: String(timeLeft.days).padStart(2, '0'),    l: 'Gün'     },
-      { v: String(timeLeft.hours).padStart(2, '0'),   l: 'Saat'    },
-      { v: String(timeLeft.minutes).padStart(2, '0'), l: 'Dəqiqə'  },
-      { v: String(timeLeft.seconds).padStart(2, '0'), l: 'Saniyə'  },
+      { v: String(timeLeft.days).padStart(2, '0'),    l: tr.inv_days    },
+      { v: String(timeLeft.hours).padStart(2, '0'),   l: tr.inv_hours   },
+      { v: String(timeLeft.minutes).padStart(2, '0'), l: tr.inv_minutes },
+      { v: String(timeLeft.seconds).padStart(2, '0'), l: tr.inv_seconds },
     ]
     return (
       <div className="text-center space-y-4">
@@ -444,16 +428,12 @@ function FeatureContent({ featureKey, tr }) {
     <div className="text-center space-y-4">
       <p className="text-[10px] tracking-[0.28em] uppercase text-gold font-medium">{tr.f_maps}</p>
       <p className="text-brown-muted text-sm font-light">{tr.f_maps_desc}</p>
-
-      {/* Məkan məlumatı */}
       <div className="mt-3 space-y-1">
         <p className="font-serif text-lg text-ink font-light tracking-wide">Hilton Baku</p>
         <p className="text-[11px] text-brown-muted/80 font-light tracking-wide">
           1 Azadlıq Square, Bakı AZ1000, Azərbaycan
         </p>
       </div>
-
-      {/* Naviqasiya düymələri */}
       <div className="flex justify-center gap-3 mt-5">
         <a
           href="https://maps.google.com/?q=Hilton+Baku,+1+Azadliq+Square,+Baku"
@@ -493,7 +473,7 @@ function FeatureContent({ featureKey, tr }) {
       <p className="text-[10px] tracking-[0.28em] uppercase text-gold font-medium">{tr.f_seating}</p>
       <p className="text-brown-muted text-sm font-light">{tr.f_seating_desc}</p>
       <p className="text-[11px] text-brown-muted/70 font-light max-w-xs mx-auto">
-        Masanızı və masa yoldaşlarınızı öyrənmək üçün adınızı daxil edin
+        {tr.seating_panel_hint}
       </p>
       <div className="flex gap-2 mt-2 max-w-xs mx-auto">
         <input
@@ -504,21 +484,21 @@ function FeatureContent({ featureKey, tr }) {
           className="flex-1 text-xs px-4 py-2.5 bg-white/40 border border-white/50 rounded-xl outline-none text-ink placeholder-brown-muted/40 focus:border-gold/50 transition-colors backdrop-blur-sm"
         />
         <button className="px-4 py-2.5 bg-gold/20 border border-gold/30 rounded-xl text-[10px] text-gold font-medium hover:bg-gold/30 transition-colors">
-          Axtar
+          {tr.seating_search_btn}
         </button>
       </div>
       {seatingName && (
         <div className="mt-3 max-w-sm mx-auto px-5 py-4 border border-gold/40 rounded-xl bg-gold/[0.06] backdrop-blur-sm space-y-3 text-left">
           <div>
-            <p className="text-[11px] text-brown-muted font-light">Hörmətli qonaq,</p>
+            <p className="text-[11px] text-brown-muted font-light">{tr.seating_dear}</p>
             <p className="font-serif text-base text-ink font-light mt-0.5">
-              Sizin masanız: <span className="text-gold font-medium">Masa № 5</span>
+              {tr.seating_your_table_label} <span className="text-gold font-medium">{tr.inv_table} № 5</span>
             </p>
           </div>
           <div className="h-px bg-gold/20" />
           <div>
             <p className="text-[10px] tracking-[0.18em] uppercase text-brown-muted/70 mb-2">
-              Sizinlə eyni masada əyləşəcək qonaqlar:
+              {tr.seating_tablemates_label2}
             </p>
             <div className="flex flex-wrap gap-2">
               {['Elşən Məmmədov', 'Günel Məmmədova', 'Leyla Əliyeva'].map(name => (
@@ -540,11 +520,11 @@ function FeatureContent({ featureKey, tr }) {
 
   if (featureKey === 'music') return <MusicPlayer tr={tr} />
 
-  if (featureKey === 'rsvp') return <RSVPPanel />
+  if (featureKey === 'rsvp') return <RSVPPanel tr={tr} />
 
-  if (featureKey === 'timeline') return <TimelinePanel />
+  if (featureKey === 'timeline') return <TimelinePanel tr={tr} />
 
-  if (featureKey === 'guestbook') return <GuestbookPanel />
+  if (featureKey === 'guestbook') return <GuestbookPanel tr={tr} />
 
   return null
 }
@@ -553,11 +533,10 @@ export default function Hero({ lang, onStart, onDemo }) {
   const tr = t[lang]
   const [activeFeature, setActiveFeature] = useState(null)
 
-  const features = featureKeys.map(k => ({ key: k, label: tr[`f_${k}`] || featureLabels[k] }))
+  const features = featureKeys.map(k => ({ key: k, label: tr[`f_${k}`] }))
 
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-36 pb-28 overflow-hidden">
-      {/* Video background — fixed, full page */}
       <video
         autoPlay
         loop
@@ -568,7 +547,6 @@ export default function Hero({ lang, onStart, onDemo }) {
         <source src="/rings-bg.mp4" type="video/mp4" />
       </video>
 
-      {/* Ambient radial glow */}
       <div className="absolute inset-0 pointer-events-none">
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[600px] rounded-full opacity-[0.14]"
@@ -576,14 +554,12 @@ export default function Hero({ lang, onStart, onDemo }) {
         />
       </div>
 
-      {/* Premium badge */}
       <div className="relative flex items-center gap-2.5 mb-12 px-6 py-2.5 border border-gold/30 bg-gold/[0.04]">
         <Sparkles size={11} className="text-gold" strokeWidth={1.5} />
         <span className="text-[10px] tracking-[0.28em] uppercase text-gold font-medium">Premium Digital Invitation</span>
         <Sparkles size={11} className="text-gold" strokeWidth={1.5} />
       </div>
 
-      {/* Main heading */}
       <h1 className="relative font-serif text-center leading-[1.08] mb-8 max-w-3xl">
         <span className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-ink font-light tracking-tight">
           {tr.hero_line1}
@@ -593,7 +569,6 @@ export default function Hero({ lang, onStart, onDemo }) {
         </span>
       </h1>
 
-      {/* Gold ornamental rule */}
       <div className="relative flex items-center gap-3 mb-10 w-full max-w-[200px]">
         <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.55))' }} />
         <div className="w-1 h-1 bg-gold rotate-45 opacity-70" />
@@ -602,12 +577,10 @@ export default function Hero({ lang, onStart, onDemo }) {
         <div className="flex-1 h-px" style={{ background: 'linear-gradient(to left, transparent, rgba(197,160,89,0.55))' }} />
       </div>
 
-      {/* Subtitle */}
       <p className="relative text-brown-muted text-center text-base sm:text-lg leading-[1.8] max-w-sm mb-14 font-light tracking-wide">
         {tr.hero_subtitle}
       </p>
 
-      {/* CTA buttons */}
       <div className="relative flex flex-col sm:flex-row gap-3 mb-20">
         <button onClick={onStart} className="btn-gold active:scale-95">
           {tr.hero_cta}
@@ -617,7 +590,6 @@ export default function Hero({ lang, onStart, onDemo }) {
         </button>
       </div>
 
-      {/* Feature badges */}
       <div className="relative flex flex-wrap justify-center gap-2 max-w-xl">
         {features.map(({ key, label }) => {
           const Icon = featureIcons[key]
@@ -639,7 +611,6 @@ export default function Hero({ lang, onStart, onDemo }) {
         })}
       </div>
 
-      {/* Glass content card */}
       <div
         className={`relative max-w-2xl w-full mx-auto mt-8 transition-all duration-500 overflow-visible ${
           activeFeature ? 'opacity-100' : 'opacity-0 pointer-events-none'
@@ -652,7 +623,6 @@ export default function Hero({ lang, onStart, onDemo }) {
         )}
       </div>
 
-      {/* Scroll indicator */}
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-float">
         <ChevronDown size={18} className="text-gold/35" strokeWidth={1.5} />
       </div>
@@ -660,23 +630,15 @@ export default function Hero({ lang, onStart, onDemo }) {
   )
 }
 
-const FAQS = [
-  {
-    q: 'Rəqəmsal dəvətnamə necə sifariş edilir?',
-    a: '"Özün Yarat" düyməsinə klikləyərək məlumatlarınızı daxil edib, dəvətnamənizi anında hazır edə bilərsiniz.',
-  },
-  {
-    q: 'Dəvətnamənin istifadə müddəti nə qədərdir?',
-    a: 'Sifariş etdiyiniz dəvətnamə tədbir gününüz bitənə qədər tam aktiv və onlayn qalır.',
-  },
-  {
-    q: 'Qonaqlar dəvətnaməni necə açır?',
-    a: 'Sizə WhatsApp vasitəsilə göndərilən unikal link vasitəsilə qonaqlar birbaşa brauzerdən açır — heç bir tətbiq lazım deyil.',
-  },
-]
-
-export function FAQSection() {
+export function FAQSection({ lang = 'az' }) {
+  const tr = t[lang]
   const [open, setOpen] = useState(null)
+
+  const faqs = [
+    { q: tr.faq_q1, a: tr.faq_a1 },
+    { q: tr.faq_q2, a: tr.faq_a2 },
+    { q: tr.faq_q3, a: tr.faq_a3 },
+  ]
 
   return (
     <section id="faq" className="py-20 relative z-10 bg-cream/80 backdrop-blur-sm">
@@ -684,7 +646,7 @@ export function FAQSection() {
         <div className="text-center mb-12">
           <p className="text-[10px] tracking-[0.38em] uppercase text-gold font-medium mb-4">FAQ</p>
           <h3 className="font-serif text-2xl sm:text-3xl text-ink font-light tracking-tight">
-            Tez-tez Verilən Suallar
+            {tr.faq_title}
           </h3>
           <div className="flex items-center justify-center gap-3 mt-5 max-w-[180px] mx-auto">
             <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.55))' }} />
@@ -694,7 +656,7 @@ export function FAQSection() {
         </div>
 
         <div className="space-y-3">
-          {FAQS.map(({ q, a }, i) => {
+          {faqs.map(({ q, a }, i) => {
             const isOpen = open === i
             return (
               <div key={i} className="bg-white/30 backdrop-blur-sm border border-white/30 rounded-xl overflow-hidden transition-all duration-300">
@@ -724,26 +686,24 @@ export function FAQSection() {
   )
 }
 
-export function HeroFooter() {
+export function HeroFooter({ lang = 'az' }) {
+  const tr = t[lang]
+
   return (
     <footer className="relative z-10 bg-espresso/95 backdrop-blur-md pt-14 pb-8 px-6">
       <div className="max-w-5xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 pb-10 border-b border-white/10">
-
-          {/* Logo + slogan */}
           <div>
             <div className="font-serif text-xl tracking-widest mb-2">
               <span className="text-gold font-light">Digitoy</span>
               <span className="text-white/30 font-light">.az</span>
             </div>
             <p className="text-white/40 text-[11px] font-light tracking-wide max-w-[220px] leading-relaxed">
-              Özəl günləriniz üçün modern rəqəmsal həllər.
+              {tr.footer_tagline}
             </p>
           </div>
 
-          {/* Sosial media ikonları */}
           <div className="flex items-center gap-4">
-            {/* Instagram */}
             <a href="#" aria-label="Instagram" className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center hover:border-gold/50 hover:bg-gold/10 transition-all duration-300">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(197,160,89,0.7)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="2" width="20" height="20" rx="5"/>
@@ -751,13 +711,11 @@ export function HeroFooter() {
                 <circle cx="17.5" cy="6.5" r="1" fill="rgba(197,160,89,0.7)" stroke="none"/>
               </svg>
             </a>
-            {/* WhatsApp */}
             <a href="https://wa.me/994555696549" aria-label="WhatsApp" className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center hover:border-gold/50 hover:bg-gold/10 transition-all duration-300">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
                 <path d="M20.52 3.48A11.93 11.93 0 0 0 12 0C5.37 0 0 5.37 0 12c0 2.11.55 4.16 1.6 5.97L0 24l6.18-1.62A11.94 11.94 0 0 0 12 24c6.63 0 12-5.37 12-12 0-3.2-1.25-6.21-3.48-8.52zM12 22c-1.85 0-3.67-.5-5.25-1.44l-.38-.22-3.67.96.98-3.58-.25-.38A9.94 9.94 0 0 1 2 12C2 6.48 6.48 2 12 2c2.67 0 5.18 1.04 7.07 2.93A9.94 9.94 0 0 1 22 12c0 5.52-4.48 10-10 10zm5.44-7.4c-.3-.15-1.76-.87-2.03-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.95 1.16-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.48-1.77-1.66-2.07-.17-.3-.02-.46.13-.6.13-.13.3-.35.44-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.6-.91-2.2-.24-.57-.48-.5-.67-.5h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.01-1.04 2.47 0 1.45 1.06 2.86 1.21 3.06.15.2 2.09 3.19 5.07 4.47.71.3 1.26.49 1.69.62.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.69.25-1.28.17-1.41-.07-.13-.27-.2-.57-.35z" fill="rgba(197,160,89,0.7)"/>
               </svg>
             </a>
-            {/* TikTok */}
             <a href="#" aria-label="TikTok" className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center hover:border-gold/50 hover:bg-gold/10 transition-all duration-300">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="rgba(197,160,89,0.7)">
                 <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/>
@@ -767,23 +725,37 @@ export function HeroFooter() {
         </div>
 
         <p className="text-center text-white/20 text-[10px] tracking-[0.25em] mt-7 uppercase font-light">
-          © {new Date().getFullYear()} Digitoy.az. Bütün hüquqlar qorunur.
+          © {new Date().getFullYear()} Digitoy.az. {tr.footer_rights}
         </p>
       </div>
     </footer>
   )
 }
 
-export function FeaturesSection() {
+export function FeaturesSection({ lang = 'az' }) {
+  const tr = t[lang]
+
+  const cards = [
+    { Icon: Timer,     titleKey: 'f_countdown', descKey: 'fg_countdown_desc' },
+    { Icon: MapPin,    titleKey: 'f_maps',       descKey: 'fg_maps_desc'      },
+    { Icon: Shirt,     titleKey: 'f_dresscode',  descKey: 'fg_dresscode_desc' },
+    { Icon: Users,     titleKey: 'f_seating',    descKey: 'fg_seating_desc'   },
+    { Icon: Camera,    titleKey: 'f_gallery',    descKey: 'fg_gallery_desc'   },
+    { Icon: Music,     titleKey: 'f_music',      descKey: 'fg_music_desc'     },
+    { Icon: UserCheck, titleKey: 'f_rsvp',       descKey: 'fg_rsvp_desc'      },
+    { Icon: Clock,     titleKey: 'f_timeline',   descKey: 'fg_timeline_desc'  },
+    { Icon: BookOpen,  titleKey: 'f_guestbook',  descKey: 'fg_guestbook_desc' },
+  ]
+
   return (
     <section id="features" className="py-12 md:py-24 px-6 relative z-10 bg-beige/80 backdrop-blur-sm">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-12">
           <p className="text-[10px] tracking-[0.38em] uppercase text-gold font-medium mb-4">
-            Rahat və İnteraktiv
+            {tr.features_badge}
           </p>
           <h3 className="font-serif text-2xl md:text-4xl text-ink font-light tracking-tight">
-            Premium Rəqəmsal İmkanlar
+            {tr.features_section_heading}
           </h3>
           <div className="flex items-center justify-center gap-3 mt-5 max-w-[180px] mx-auto">
             <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.55))' }} />
@@ -794,25 +766,15 @@ export function FeaturesSection() {
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {[
-            { Icon: Timer,     title: 'Geri Sayım',       desc: 'Tədbir gününə qədər qalan vaxtı qonaqlarınız üçün saniyə-saniyə canlı olaraq göstərir.' },
-            { Icon: MapPin,    title: 'Naviqasiya',       desc: 'Qonaqlarınızın toy məkanını rahatlıqla tapması üçün Google Maps və Waze marşrut keçidləri.' },
-            { Icon: Shirt,     title: 'Dress Code',       desc: 'Tədbirinizin konseptinə uyğun geyim tərzini vizual ikonlar və geyim stilləri ilə qonaqlara ötürür.' },
-            { Icon: Users,     title: 'Oturma Planı',     desc: 'Qonağın öz adını yazaraq neçənci masada və kimlərlə əyləşəcəyini dərhal öyrənməsi üçün rahat axtarış sistemi.' },
-            { Icon: Camera,    title: 'Foto Qalereya',    desc: 'Sizin ən özəl günlərinizdən və pre-wedding çəkilişlərinizdən ibarət zərif foto-slayder.' },
-            { Icon: Music,     title: 'Ambient Musiqi',   desc: 'Dəvətnamə açılan andan etibarən arxa fonda səslənən premium royal və ya skripka canlı ifası.' },
-            { Icon: UserCheck, title: 'İştirak Təsdiqi', desc: 'Qonaqlarınızın gəlib-gəlməyəcəyini onlayn təsdiqləməsi və sizə qonaq sayını dəqiqləşdirməkdə kömək etməsi.' },
-            { Icon: Clock,     title: 'Tədbir Proqramı', desc: 'Qarşılanmadan tutmuş nikah və şənliyin sonuna qədər tədbir gününün saatbasaat gedişat proqramı.' },
-            { Icon: BookOpen,  title: 'Təbrik Kitabı',   desc: 'Qonaqlarınızın birbaşa rəqəmsal dəvətnamə üzərindən sizə öz saf ürək sözlərini və təbriklərini yazması.' },
-          ].map(({ Icon, title, desc }) => (
-            <div key={title} className="group bg-white/30 backdrop-blur-sm border border-amber-500/10 rounded-xl p-5 flex flex-col gap-4 hover:-translate-y-1 hover:shadow-2xl hover:bg-white/50 hover:border-amber-500/30 transition-all duration-500">
+          {cards.map(({ Icon, titleKey, descKey }) => (
+            <div key={titleKey} className="group bg-white/30 backdrop-blur-sm border border-amber-500/10 rounded-xl p-5 flex flex-col gap-4 hover:-translate-y-1 hover:shadow-2xl hover:bg-white/50 hover:border-amber-500/30 transition-all duration-500">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-amber-500/10 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-amber-500/20 transition-colors duration-300">
                   <Icon size={16} className="text-gold" strokeWidth={1.5} />
                 </div>
-                <p className="text-[11px] tracking-[0.18em] uppercase text-ink font-semibold">{title}</p>
+                <p className="text-[11px] tracking-[0.18em] uppercase text-ink font-semibold">{tr[titleKey]}</p>
               </div>
-              <p className="text-[11px] text-brown-muted font-light leading-[1.9]">{desc}</p>
+              <p className="text-[11px] text-brown-muted font-light leading-[1.9]">{tr[descKey]}</p>
             </div>
           ))}
         </div>

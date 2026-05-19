@@ -56,7 +56,7 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
       <Hero lang={lang} onStart={scrollToBuilder} onDemo={onViewInvitation} />
 
       {/* 2. Features — Premium Rəqəmsal İmkanlar */}
-      <FeaturesSection />
+      <FeaturesSection lang={lang} />
 
       {/* 3. Builder */}
       <section id="builder-section" className="py-12 md:py-24 px-6 bg-beige/80 backdrop-blur-sm relative z-10">
@@ -94,10 +94,10 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
       <Pricing lang={lang} onSelect={scrollToBuilder} />
 
       {/* 5. FAQ */}
-      <FAQSection />
+      <FAQSection lang={lang} />
 
       {/* 6. Premium Footer */}
-      <HeroFooter />
+      <HeroFooter lang={lang} />
     </div>
   )
 }

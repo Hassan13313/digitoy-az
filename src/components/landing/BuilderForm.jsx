@@ -4,19 +4,44 @@ import {
   ChevronRight, ChevronLeft, Check, Crown, Shirt, Calendar, User,
 } from 'lucide-react'
 import { DRESS_CODE_PALETTES, EVENT_TYPES } from '../../data/constants'
-import { formatAzFullDate } from '../../utils/dateFormat'
+import { formatFullDateByLang } from '../../utils/dateFormat'
 import t from '../../data/translations'
 
 const EVENT_ICONS = { toy: Heart, nishan: Diamond, birthday: Cake, corporate: Briefcase, other: Sparkles }
 const TOTAL_STEPS = 5
 const COUPLE_TYPES = ['toy', 'nishan']
+const CORP_TYPES   = ['corporate', 'other']
 
-/* ── Azərbaycan ay + gün massivləri ── */
-const azMonths = [
-  'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'İyun',
-  'İyul', 'Avqust', 'Sentyabr', 'Oktabr', 'Noyabr', 'Dekabr',
-]
-const azWeekDays = ['B.', 'B.E.', 'Ç.A.', 'Ç.', 'C.A.', 'C.', 'Ş.']
+/* ── Çoxdilli təqvim massivləri ── */
+const calendarTranslations = {
+  az: {
+    weekDays: ['B.', 'B.E.', 'Ç.A.', 'Ç.', 'C.A.', 'C.', 'Ş.'],
+    months: ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'İyun', 'İyul', 'Avqust', 'Sentyabr', 'Oktabr', 'Noyabr', 'Dekabr'],
+  },
+  ru: {
+    weekDays: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+    months: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'],
+  },
+  en: {
+    weekDays: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+    months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+  },
+}
+
+/* ── Google Maps URL-dən Waze linki generasiyası ── */
+function generateWazeUrl(mapsUrl) {
+  if (!mapsUrl) return ''
+  try {
+    const u = new URL(mapsUrl)
+    const q = u.searchParams.get('q')
+    if (q) return `https://waze.com/ul?q=${encodeURIComponent(q)}&navigate=yes`
+    const coordMatch = mapsUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)
+    if (coordMatch) return `https://waze.com/ul?ll=${coordMatch[1]},${coordMatch[2]}&navigate=yes`
+    const searchMatch = mapsUrl.match(/\/maps\/(?:search|place)\/([^/@?]+)/)
+    if (searchMatch) return `https://waze.com/ul?q=${encodeURIComponent(decodeURIComponent(searchMatch[1]))}&navigate=yes`
+  } catch {}
+  return ''
+}
 
 /* ── Köməkçi: YYYY-MM-DD → { year, month(0-based), day } ── */
 function parseIso(iso) {
@@ -33,12 +58,13 @@ function toIso(year, month, day) {
 /* ══════════════════════════════════════════════════
    Özəl Azərbaycan Təqvim Komponenti
 ══════════════════════════════════════════════════ */
-function AzCalendar({ value, onChange, hasError }) {
+function AzCalendar({ value, onChange, hasError, lang = 'az' }) {
   const [open, setOpen] = useState(false)
   const wrapRef = useRef(null)
 
   const today    = new Date()
   const selected = parseIso(value)
+  const calLang  = calendarTranslations[lang] || calendarTranslations.az
 
   /* displayDate: GG.AA.YYYY — həm başlanğıc dəyər, həm sinxron */
   const isoToDisplay = (iso) => {
@@ -139,7 +165,7 @@ function AzCalendar({ value, onChange, hasError }) {
       {/* canlı tarix mətni */}
       {value && (
         <p className="mt-2 text-[10px] tracking-[0.14em] text-gold/80 font-light">
-          {formatAzFullDate(value, 'az')}
+          {formatFullDateByLang(value, lang)}
         </p>
       )}
 
@@ -156,7 +182,7 @@ function AzCalendar({ value, onChange, hasError }) {
               <ChevronLeft size={14} strokeWidth={1.5} />
             </button>
             <span className="text-[11px] tracking-[0.22em] uppercase text-amber-200/80 font-medium">
-              {azMonths[viewMonth]} {viewYear}
+              {calLang.months[viewMonth]} {viewYear}
             </span>
             <button type="button" onClick={nextMonth}
               className="w-7 h-7 flex items-center justify-center text-amber-400/70 hover:text-amber-400 transition-colors rounded-full hover:bg-white/5">
@@ -166,7 +192,7 @@ function AzCalendar({ value, onChange, hasError }) {
 
           {/* həftə günləri */}
           <div className="grid grid-cols-7 gap-1 mb-2">
-            {azWeekDays.map((d) => (
+            {calLang.weekDays.map((d) => (
               <div key={d} className="text-center text-[9px] text-amber-500/50 font-medium tracking-wide py-1">{d}</div>
             ))}
           </div>
@@ -193,7 +219,7 @@ function AzCalendar({ value, onChange, hasError }) {
           </div>
 
           <p className="mt-3 text-center text-[9px] text-amber-500/30 tracking-widest uppercase">
-            {azMonths[viewMonth]} {viewYear}
+            {calLang.months[viewMonth]} {viewYear}
           </p>
         </div>
       )}
@@ -283,6 +309,7 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
   }
 
   const isCouple = COUPLE_TYPES.includes(data.eventType)
+  const isCorp   = CORP_TYPES.includes(data.eventType)
 
   const steps = [
     tr.step1_title, tr.step2_title, tr.step3_title,
@@ -292,8 +319,8 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
   const validate = () => {
     const e = {}
     if (step === 1) {
-      if (data.eventType === 'other' && !data.eventName?.trim()) e.eventName = true
-      if (!data.brideName.trim()) e.brideName = true
+      if (isCorp && !data.eventName?.trim()) e.eventName = true
+      if (!isCorp && !data.brideName.trim()) e.brideName = true
       if (isCouple && !data.groomName.trim()) e.groomName = true
       if (!data.date) e.date = true
       if (!data.time) e.time = true
@@ -305,12 +332,32 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
     return Object.keys(e).length === 0
   }
 
-  const next = () => { if (validate()) setStep((s) => Math.min(s + 1, TOTAL_STEPS)) }
-  const prev = () => setStep((s) => Math.max(s - 1, 1))
-  const handleSubmit = () => { if (validate()) onSubmit(data) }
+  const scrollToTop = () => {
+    setTimeout(() => {
+      const el = document.getElementById('builder-top')
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 50)
+  }
+
+  const next = (e) => {
+    if (e) { e.preventDefault(); e.stopPropagation() }
+    if (validate()) {
+      setStep((s) => Math.min(s + 1, TOTAL_STEPS))
+      scrollToTop()
+    }
+  }
+  const prev = (e) => {
+    if (e) { e.preventDefault(); e.stopPropagation() }
+    setStep((s) => Math.max(s - 1, 1))
+    scrollToTop()
+  }
+  const handleSubmit = (e) => {
+    if (e) { e.preventDefault(); e.stopPropagation() }
+    if (validate()) onSubmit(data)
+  }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div id="builder-top" className="max-w-2xl mx-auto">
       {/* Step indicator */}
       <div className="flex items-center mb-14">
         {steps.map((title, i) => {
@@ -344,7 +391,7 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
       </div>
 
       {/* Step content */}
-      <div className="bg-cream border border-beige-dark/60 px-10 py-12 overflow-visible">
+      <div className="bg-cream border border-beige-dark/60 px-10 py-12 overflow-visible min-h-[520px]">
         <h3 className="font-serif text-xl text-ink mb-10 font-light tracking-tight">{steps[step - 1]}</h3>
 
         {/* STEP 1 */}
@@ -376,21 +423,29 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
               </div>
             </div>
 
-            {/* "Digər" seçilsə Tədbirin Adı inputu */}
-            {data.eventType === 'other' && (
-              <div>
-                <Label required>{tr.event_name_label}</Label>
-                <Input
-                  value={data.eventName || ''}
-                  onChange={(e) => set('eventName', e.target.value)}
-                  placeholder={tr.event_name_label}
-                  className={errors.eventName ? 'border-b-red-300' : ''}
-                />
-              </div>
-            )}
-
-            {/* Ad sahələri — cütlük vs tək */}
-            {isCouple ? (
+            {/* Korporativ / Digər — Tədbirin Adı + Təşkilatçı */}
+            {isCorp ? (
+              <>
+                <div>
+                  <Label required>{tr.event_name_label}</Label>
+                  <Input
+                    value={data.eventName || ''}
+                    onChange={(e) => set('eventName', e.target.value)}
+                    placeholder={tr.event_name_label}
+                    className={errors.eventName ? 'border-b-red-300' : ''}
+                  />
+                </div>
+                <div>
+                  <Label>{tr.organizer_label}</Label>
+                  <Input
+                    value={data.organizer || ''}
+                    onChange={(e) => set('organizer', e.target.value)}
+                    placeholder={tr.organizer_placeholder}
+                  />
+                </div>
+              </>
+            ) : isCouple ? (
+              /* Toy / Nişan — cütlük adları */
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <div>
                   <Label required>{tr.bride_label}</Label>
@@ -412,6 +467,7 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
                 </div>
               </div>
             ) : (
+              /* Ad günü — tək ad */
               <div>
                 <Label required>{tr.person_name_label}</Label>
                 <Input
@@ -431,6 +487,7 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
                   value={data.date}
                   onChange={(iso) => set('date', iso)}
                   hasError={!!errors.date}
+                  lang={lang}
                 />
               </div>
               <div>
@@ -456,20 +513,24 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
               />
             </div>
             <div>
-              <Label>{tr.maps_label}</Label>
+              <Label>{tr.maps_link_label}</Label>
               <Input
                 value={data.googleMapsUrl}
-                onChange={(e) => set('googleMapsUrl', e.target.value)}
-                placeholder="https://maps.google.com/..."
+                onChange={(e) => {
+                  const url = e.target.value
+                  setData(d => ({
+                    ...d,
+                    googleMapsUrl: url,
+                    wazeUrl: generateWazeUrl(url),
+                  }))
+                }}
+                placeholder={tr.maps_link_placeholder}
               />
-            </div>
-            <div>
-              <Label>{tr.waze_label}</Label>
-              <Input
-                value={data.wazeUrl}
-                onChange={(e) => set('wazeUrl', e.target.value)}
-                placeholder="https://waze.com/ul?..."
-              />
+              {data.wazeUrl && (
+                <p className="mt-2 text-[10px] tracking-[0.14em] text-gold/70 font-light">
+                  ✓ Waze: {data.wazeUrl}
+                </p>
+              )}
             </div>
           </div>
         )}
@@ -478,14 +539,15 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
         {step === 3 && (
           <div className="space-y-8">
             <div>
-              <Label>{tr.palette_label || 'Geyim stili'}</Label>
+              <Label>{tr.dresscode_type_label}</Label>
               <div className="grid grid-cols-2 gap-3 mt-1">
                 {[
-                  { id: 'blacktie',    label: 'Black Tie',    sub: 'Zərif / Rəsmi'        },
-                  { id: 'cocktail',    label: 'Cocktail',     sub: 'Yarı-rəsmi / Modern'  },
-                  { id: 'smartcasual', label: 'Smart Casual', sub: 'Şık / Rahat'           },
-                  { id: 'creative',    label: 'Creative',     sub: 'Tematik / Yaradıcı'   },
-                ].map(({ id, label, sub }) => {
+                  { id: 'blacktie',    label: 'Black Tie',    subKey: 'dresscode_blacktie_sub'    },
+                  { id: 'cocktail',    label: 'Cocktail',     subKey: 'dresscode_cocktail_sub'    },
+                  { id: 'smartcasual', label: 'Smart Casual', subKey: 'dresscode_smartcasual_sub' },
+                  { id: 'creative',    label: 'Creative',     subKey: 'dresscode_creative_sub'    },
+                ].map(({ id, label, subKey }) => {
+                  const sub = tr[subKey] || subKey
                   const isActive = data.dressCodePalette === id
                   return (
                     <button
@@ -504,11 +566,11 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
                         <div className="flex gap-4">
                           <div className="flex flex-col items-center gap-1.5">
                             <User size={18} className="text-amber-700/80" strokeWidth={1.4} />
-                            <span className="text-[9px] text-brown-muted">Bəy</span>
+                            <span className="text-[9px] text-brown-muted">{tr.dresscode_groom_icon}</span>
                           </div>
                           <div className="flex flex-col items-center gap-1.5">
                             <Sparkles size={18} className="text-amber-700/80" strokeWidth={1.4} />
-                            <span className="text-[9px] text-brown-muted">Xanım</span>
+                            <span className="text-[9px] text-brown-muted">{tr.dresscode_bride_icon}</span>
                           </div>
                         </div>
                       )}
@@ -563,6 +625,7 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
       {/* Navigation */}
       <div className="flex justify-between mt-8">
         <button
+          type="button"
           onClick={prev}
           disabled={step === 1}
           className="flex items-center gap-2 px-7 py-3.5 border border-beige-dark/70 text-brown-muted text-[10px] tracking-[0.22em] uppercase hover:border-gold/50 hover:text-gold transition-all duration-200 active:scale-95 disabled:opacity-25 disabled:cursor-not-allowed"
@@ -572,12 +635,12 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
         </button>
 
         {step < TOTAL_STEPS ? (
-          <button onClick={next} className="flex items-center gap-2 btn-gold">
+          <button type="button" onClick={next} className="flex items-center gap-2 btn-gold">
             {tr.btn_next}
             <ChevronRight size={13} strokeWidth={1.5} />
           </button>
         ) : (
-          <button onClick={handleSubmit} className="btn-gold">
+          <button type="button" onClick={handleSubmit} className="btn-gold">
             {tr.btn_create}
           </button>
         )}

@@ -15,7 +15,7 @@ import ThreeDSeatingChart from './ThreeDSeatingChart'
 import ThreeDDressCode from './ThreeDDressCode'
 import { DRESS_CODE_PALETTES } from '../../data/constants'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
-import { formatAzDate, formatAzFullDate, formatTime24 } from '../../utils/dateFormat'
+import { formatAzDate, formatFullDateByLang, formatTime24 } from '../../utils/dateFormat'
 import t from '../../data/translations'
 
 function SectionWrapper({ children, className = '' }) {
@@ -46,6 +46,7 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
   const palette = DRESS_CODE_PALETTES.find((p) => p.id === weddingData.dressCodePalette) || DRESS_CODE_PALETTES[0]
 
   const isCouple = ['toy', 'nishan'].includes(weddingData.eventType)
+  const isCorp   = ['corporate', 'other'].includes(weddingData.eventType)
 
   const eventLabels = {
     toy: tr.event_toy, nishan: tr.event_nishan,
@@ -60,7 +61,7 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
     <div className="relative min-h-screen bg-cream overflow-x-hidden">
       {/* Envelope opening screen */}
       <EnvelopeOpening
-        brideName={weddingData.brideName}
+        brideName={isCorp ? (weddingData.eventName || eventLabels[weddingData.eventType]) : weddingData.brideName}
         groomName={isCouple ? weddingData.groomName : null}
         eventLabel={eventLabels[weddingData.eventType] || tr.event_other}
         onComplete={() => setEnvelopeOpened(true)}
@@ -116,10 +117,20 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
                       <span className="block text-3xl sm:text-4xl text-gold font-light italic my-3">{tr.inv_and}</span>
                       <span className="block text-5xl sm:text-6xl md:text-7xl text-ink font-light tracking-tight">{weddingData.groomName}</span>
                     </>
+                  ) : isCorp ? (
+                    <span className="block text-4xl sm:text-5xl md:text-6xl text-ink font-light tracking-widest uppercase text-center">
+                      {weddingData.eventName || eventLabels[weddingData.eventType]}
+                    </span>
                   ) : (
                     <span className="block text-5xl sm:text-6xl md:text-7xl text-ink font-light tracking-tight">{weddingData.brideName}</span>
                   )}
                 </h1>
+
+                {isCorp && weddingData.organizer?.trim() && (
+                  <p className="text-[10px] tracking-[0.28em] uppercase text-gold/70 font-medium mt-2 mb-1">
+                    {tr.organizer_display}: {weddingData.organizer}
+                  </p>
+                )}
 
                 <GoldDividerOrnament />
 
@@ -174,7 +185,7 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
                     className="flex-1 flex items-center justify-center gap-2 btn-gold"
                   >
                     <MapPin size={13} strokeWidth={1.5} />
-                    {tr.inv_maps_btn}
+                    {tr.inv_maps_btn_full}
                   </a>
                   <a
                     href={weddingData.wazeUrl || '#'}
@@ -183,7 +194,7 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
                     className="flex-1 flex items-center justify-center gap-2 btn-outline-gold"
                   >
                     <Navigation size={13} strokeWidth={1.5} />
-                    {tr.inv_waze_btn}
+                    {tr.inv_waze_btn_full}
                   </a>
                 </div>
               </SectionWrapper>
@@ -289,12 +300,16 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
                     <span className="text-white/25 mx-3 italic font-light">&</span>
                     <span className="text-gold font-light">{weddingData.groomName}</span>
                   </>
+                ) : isCorp ? (
+                  <span className="text-gold font-light tracking-widest uppercase text-sm">
+                    {weddingData.eventName || eventLabels[weddingData.eventType]}
+                  </span>
                 ) : (
                   <span className="text-gold font-light">{weddingData.brideName}</span>
                 )}
               </div>
               <p className="text-white/25 text-[10px] tracking-[0.2em] uppercase font-medium mb-8">
-                {formatAzFullDate(weddingData.date, lang)}
+                {formatFullDateByLang(weddingData.date, lang)}
               </p>
               <div className="gold-divider mb-8 max-w-[120px] mx-auto opacity-25" />
               <p className="text-white/15 text-[10px] tracking-widest">{tr.footer_made}</p>

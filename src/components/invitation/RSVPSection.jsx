@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, X, Minus, Plus, Send } from 'lucide-react'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
-import { formatAzFullDate } from '../../utils/dateFormat'
+import { formatFullDateByLang } from '../../utils/dateFormat'
 import t from '../../data/translations'
 
 export default function RSVPSection({ lang, weddingData }) {
@@ -18,7 +18,7 @@ export default function RSVPSection({ lang, weddingData }) {
   }
 
   const deadline = weddingData?.date
-    ? formatAzFullDate(weddingData.date, lang)
+    ? formatFullDateByLang(weddingData.date, lang)
     : null
 
   const labels = {
