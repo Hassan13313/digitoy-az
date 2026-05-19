@@ -196,13 +196,13 @@ function IconPickerBtn({ value, onSelect }) {
         {value || '✨'}
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 z-[120] bg-white border border-neutral-200 rounded-lg p-2 grid grid-cols-5 gap-1 shadow-xl">
+        <div className="absolute right-0 top-full mt-1 z-[120] bg-white border border-neutral-200 rounded-lg shadow-xl w-48 p-2 grid grid-cols-4 gap-2">
           {PROGRAM_ICONS.map((ic) => (
             <button
               key={ic}
               type="button"
               onClick={() => { onSelect(ic); setOpen(false) }}
-              className={`w-9 h-9 flex items-center justify-center text-xl rounded hover:bg-amber-50 transition-colors ${value === ic ? 'bg-amber-100' : ''}`}
+              className={`flex items-center justify-center text-2xl rounded p-1 hover:bg-neutral-100 transition-colors ${value === ic ? 'bg-amber-100' : ''}`}
             >
               {ic}
             </button>
