@@ -183,6 +183,12 @@ const t = {
     maps_link_placeholder: 'Məkanın linkini bura yapışdırın',
     inv_maps_btn_full: 'Google Maps ilə get',
     inv_waze_btn_full: 'Waze ilə get',
+    venue_search_label: 'Tədbir məkanı / Şadlıq sarayı',
+    venue_search_placeholder: 'Məkanın və ya restoranın adını yazın...',
+    venue_search_btn: 'Axtar',
+    venue_search_success: 'Məkan uğurla seçildi və xəritələr sinxronlaşdırıldı!',
+    venue_search_no_results: 'Nəticə tapılmadı. Fərqli ad cəhd edin.',
+    venue_search_searching: 'Axtarılır...',
   },
   en: {
     app_name: 'Digitoy.az',
@@ -368,6 +374,12 @@ const t = {
     maps_link_placeholder: 'Paste the location link here',
     inv_maps_btn_full: 'Navigate with Google Maps',
     inv_waze_btn_full: 'Navigate with Waze',
+    venue_search_label: 'Event Venue / Restaurant',
+    venue_search_placeholder: 'Type the name of the venue...',
+    venue_search_btn: 'Search',
+    venue_search_success: 'Venue selected and maps synchronized!',
+    venue_search_no_results: 'No results found. Try a different name.',
+    venue_search_searching: 'Searching...',
   },
   ru: {
     app_name: 'Digitoy.az',
@@ -553,6 +565,12 @@ const t = {
     maps_link_placeholder: 'Вставьте ссылку на локацию',
     inv_maps_btn_full: 'Открыть в Google Maps',
     inv_waze_btn_full: 'Открыть в Waze',
+    venue_search_label: 'Место проведения / Ресторан',
+    venue_search_placeholder: 'Введите название места или ресторана...',
+    venue_search_btn: 'Найти',
+    venue_search_success: 'Место выбрано и карты синхронизированы!',
+    venue_search_no_results: 'Ничего не найдено. Попробуйте другое название.',
+    venue_search_searching: 'Поиск...',
   },
 }
 

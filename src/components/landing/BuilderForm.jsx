@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import {
   Heart, Diamond, Cake, Briefcase, Sparkles,
-  ChevronRight, ChevronLeft, Check, Crown, Shirt, Calendar, User,
+  ChevronRight, ChevronLeft, Check, Crown, Shirt, Calendar, User, MapPin, Search,
 } from 'lucide-react'
 import { DRESS_CODE_PALETTES, EVENT_TYPES } from '../../data/constants'
 import { formatFullDateByLang } from '../../utils/dateFormat'
@@ -28,19 +28,116 @@ const calendarTranslations = {
   },
 }
 
-/* ── Google Maps URL-dən Waze linki generasiyası ── */
-function generateWazeUrl(mapsUrl) {
-  if (!mapsUrl) return ''
-  try {
-    const u = new URL(mapsUrl)
-    const q = u.searchParams.get('q')
-    if (q) return `https://waze.com/ul?q=${encodeURIComponent(q)}&navigate=yes`
-    const coordMatch = mapsUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)
-    if (coordMatch) return `https://waze.com/ul?ll=${coordMatch[1]},${coordMatch[2]}&navigate=yes`
-    const searchMatch = mapsUrl.match(/\/maps\/(?:search|place)\/([^/@?]+)/)
-    if (searchMatch) return `https://waze.com/ul?q=${encodeURIComponent(decodeURIComponent(searchMatch[1]))}&navigate=yes`
-  } catch {}
-  return ''
+/* ── Nominatim ilə məkan axtarışı komponenti ── */
+function VenueSearchInput({ value, onChange, onSelect, lang, tr }) {
+  const [query, setQuery]     = useState(value || '')
+  const [results, setResults] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [open, setOpen]       = useState(false)
+  const [success, setSuccess] = useState(false)
+  const wrapRef = useRef(null)
+
+  /* Xaricdən value dəyişəndə query-ni sinxronla */
+  useEffect(() => { setQuery(value || '') }, [value])
+
+  /* Kənara klikdə dropdown-u bağla */
+  useEffect(() => {
+    const handler = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const search = async () => {
+    if (!query.trim()) return
+    setLoading(true)
+    setOpen(false)
+    setSuccess(false)
+    try {
+      const res  = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=6`,
+        { headers: { 'Accept-Language': lang === 'ru' ? 'ru' : lang === 'en' ? 'en' : 'az,en' } }
+      )
+      const data = await res.json()
+      setResults(data)
+      setOpen(data.length > 0)
+    } catch {
+      setResults([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSelect = (item) => {
+    const lat = parseFloat(item.lat)
+    const lon = parseFloat(item.lon)
+    const name = item.display_name.split(',')[0].trim()
+    const mapsUrl  = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`
+    const wazeUrl  = `https://waze.com/ul?ll=${lat},${lon}&navigate=yes`
+    setQuery(name)
+    setOpen(false)
+    setSuccess(true)
+    onSelect({ venueName: name, googleMapsUrl: mapsUrl, wazeUrl })
+    setTimeout(() => setSuccess(false), 4000)
+  }
+
+  return (
+    <div ref={wrapRef} className="relative">
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gold/50 pointer-events-none" />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => { setQuery(e.target.value); setSuccess(false) }}
+            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), search())}
+            placeholder={tr.venue_search_placeholder}
+            className="w-full pl-9 pr-4 py-3 bg-[#1a1a1a]/60 border border-gold/20 text-white/90 text-sm placeholder-white/25 rounded-none focus:outline-none focus:border-gold/50 transition-colors"
+          />
+        </div>
+        <button
+          type="button"
+          onClick={search}
+          disabled={loading}
+          className="px-4 py-3 bg-gold/90 hover:bg-gold text-espresso text-[11px] tracking-[0.14em] uppercase font-semibold transition-colors disabled:opacity-50"
+        >
+          {loading ? '...' : tr.venue_search_btn}
+        </button>
+      </div>
+
+      {/* Dropdown nəticələr */}
+      {open && results.length > 0 && (
+        <div className="absolute left-0 right-0 top-full mt-1 z-[110] backdrop-blur-md bg-[#1a1a1a]/90 border border-gold/20 shadow-2xl max-h-64 overflow-y-auto">
+          {results.map((item) => (
+            <button
+              key={item.place_id}
+              type="button"
+              onClick={() => handleSelect(item)}
+              className="w-full text-left px-4 py-3 hover:bg-gold/10 border-b border-white/5 last:border-0 transition-colors"
+            >
+              <p className="text-white/90 text-sm leading-snug">{item.display_name.split(',')[0]}</p>
+              <p className="text-white/35 text-[10px] mt-0.5 truncate">{item.display_name}</p>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Nəticə yoxdur bildirişi */}
+      {open && results.length === 0 && !loading && (
+        <div className="absolute left-0 right-0 top-full mt-1 z-[110] backdrop-blur-md bg-[#1a1a1a]/90 border border-gold/20 px-4 py-3">
+          <p className="text-white/40 text-sm">{tr.venue_search_no_results}</p>
+        </div>
+      )}
+
+      {/* Uğur bildirişi */}
+      {success && (
+        <p className="mt-2 text-[11px] tracking-[0.12em] text-gold font-medium flex items-center gap-1.5">
+          <MapPin size={11} /> {tr.venue_search_success}
+        </p>
+      )}
+    </div>
+  )
 }
 
 /* ── Köməkçi: YYYY-MM-DD → { year, month(0-based), day } ── */
@@ -505,31 +602,19 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
         {step === 2 && (
           <div className="space-y-8">
             <div>
-              <Label required>{tr.venue_label}</Label>
-              <Input
+              <Label required>{tr.venue_search_label}</Label>
+              <VenueSearchInput
                 value={data.venueName}
-                onChange={(e) => set('venueName', e.target.value)}
-                placeholder="Şahmar Restoran, Bakı"
-              />
-            </div>
-            <div>
-              <Label>{tr.maps_link_label}</Label>
-              <Input
-                value={data.googleMapsUrl}
-                onChange={(e) => {
-                  const url = e.target.value
-                  setData(d => ({
-                    ...d,
-                    googleMapsUrl: url,
-                    wazeUrl: generateWazeUrl(url),
-                  }))
+                onChange={(val) => set('venueName', val)}
+                onSelect={({ venueName, googleMapsUrl, wazeUrl }) => {
+                  setData(d => ({ ...d, venueName, googleMapsUrl, wazeUrl }))
+                  setErrors(e => ({ ...e, venueName: undefined }))
                 }}
-                placeholder={tr.maps_link_placeholder}
+                lang={lang}
+                tr={tr}
               />
-              {data.wazeUrl && (
-                <p className="mt-2 text-[10px] tracking-[0.14em] text-gold/70 font-light">
-                  ✓ Waze: {data.wazeUrl}
-                </p>
+              {errors.venueName && (
+                <p className="mt-1 text-[10px] text-red-400/80">{errors.venueName}</p>
               )}
             </div>
           </div>
