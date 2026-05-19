@@ -114,14 +114,9 @@ function VenueSearchInput({ value, onSelect, lang, tr }) {
         />
       </div>
 
-      {/* Hint qeydi */}
-      <p className="mt-1 text-xs text-white/30 font-light leading-relaxed">
-        {VENUE_HINTS[lang] || VENUE_HINTS.az}
-      </p>
-
       {/* Dropdown nəticələr */}
       {open && results.length > 0 && (
-        <div className="absolute left-0 right-0 top-[calc(100%-1.25rem)] mt-1 z-[110] backdrop-blur-md bg-[#1a1a1a]/90 border border-gold/20 shadow-2xl max-h-64 overflow-y-auto">
+        <div className="absolute left-0 right-0 top-full mt-1 z-[110] backdrop-blur-md bg-[#1a1a1a]/90 border border-gold/20 shadow-2xl max-h-64 overflow-y-auto">
           {results.map((item) => (
             <button
               key={item.place_id}
@@ -138,9 +133,16 @@ function VenueSearchInput({ value, onSelect, lang, tr }) {
 
       {/* Nəticə yoxdur */}
       {open && results.length === 0 && !loading && query.trim().length >= 2 && (
-        <div className="absolute left-0 right-0 top-[calc(100%-1.25rem)] mt-1 z-[110] backdrop-blur-md bg-[#1a1a1a]/90 border border-gold/20 px-4 py-3">
+        <div className="absolute left-0 right-0 top-full mt-1 z-[110] backdrop-blur-md bg-[#1a1a1a]/90 border border-gold/20 px-4 py-3">
           <p className="text-white/40 text-sm">{tr.venue_search_no_results}</p>
         </div>
+      )}
+
+      {/* Hint qeydi */}
+      {!success && (
+        <p className="mt-1.5 text-xs text-white/40 font-light leading-relaxed opacity-70">
+          {VENUE_HINTS[lang] || VENUE_HINTS.az}
+        </p>
       )}
 
       {/* Uğur bildirişi */}
