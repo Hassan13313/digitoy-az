@@ -531,11 +531,31 @@ function Textarea({ ...props }) {
 /* ══════════════════════════════════════════════════
    Əsas Builder Formu
 ══════════════════════════════════════════════════ */
-export default function BuilderForm({ lang, initialData, onSubmit }) {
+/* ── Ad → URL slug çevricisi ── */
+function toSlug(str = '') {
+  const MAP = {
+    ə:'e',ə:'e',Ə:'e',ğ:'g',Ğ:'g',ı:'i',İ:'i',ö:'o',Ö:'o',ü:'u',Ü:'u',ş:'s',Ş:'s',ç:'c',Ç:'c',
+    á:'a',é:'e',í:'i',ó:'o',ú:'u',ñ:'n',ä:'a',ü:'u',ö:'o',
+  }
+  return str
+    .split('').map(c => MAP[c] || c).join('')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+/* ── Base64 encode (BuilderForm-da istifadə) ── */
+function encodeDataLocal(data) {
+  try { return btoa(unescape(encodeURIComponent(JSON.stringify(data)))) } catch { return '' }
+}
+
+export default function BuilderForm({ lang, initialData, onSubmit, isAdmin = false }) {
   const tr = t[lang]
   const [step, setStep] = useState(1)
   const [data, setData] = useState(initialData)
   const [errors, setErrors] = useState({})
+  const [generatedLiveLink, setGeneratedLiveLink] = useState('')
+  const [linkCopied, setLinkCopied] = useState(false)
 
   const set = (key, val) => {
     setData((d) => ({ ...d, [key]: val }))
@@ -588,6 +608,30 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
   const handleSubmit = (e) => {
     if (e) { e.preventDefault(); e.stopPropagation() }
     if (validate()) onSubmit(data)
+  }
+
+  const handleApproveAndGenerateLink = () => {
+    const isCouple = COUPLE_TYPES.includes(data.eventType)
+    const isCorp   = CORP_TYPES.includes(data.eventType)
+    let slug = ''
+    if (isCouple) {
+      slug = `${toSlug(data.brideName)}-ve-${toSlug(data.groomName)}`
+    } else if (isCorp) {
+      slug = toSlug(data.eventName || 'tedbirr')
+    } else {
+      slug = toSlug(data.brideName || 'davetname')
+    }
+    const token = encodeDataLocal(data)
+    const link  = `${window.location.origin}/invite/${slug}?data=${token}`
+    setGeneratedLiveLink(link)
+    setLinkCopied(false)
+  }
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(generatedLiveLink).then(() => {
+      setLinkCopied(true)
+      setTimeout(() => setLinkCopied(false), 2500)
+    })
   }
 
   return (
@@ -887,6 +931,41 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
           </button>
         )}
       </div>
+
+      {/* ── Admin İdarəetmə Paneli ── */}
+      {isAdmin && (
+        <div className="mt-8 p-6 bg-emerald-50 border border-emerald-200 rounded-xl shadow-sm text-center">
+          <h3 className="text-base font-semibold text-emerald-800 mb-1 flex items-center justify-center gap-2">
+            ⚡ Rəqəmsal Admin Paneli
+          </h3>
+          <p className="text-sm text-emerald-600 mb-5 font-light leading-relaxed">
+            Yuxarıda müştərinin məlumatlarını redaktə edə bilərsiniz. Hər şey hazırdırsa, canlı linki generasiya edin.
+          </p>
+
+          <button
+            type="button"
+            onClick={handleApproveAndGenerateLink}
+            className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg shadow-md transition-colors w-full sm:w-auto"
+          >
+            Sifarişi Təsdiqlə və Canlı Linki Yarat
+          </button>
+
+          {generatedLiveLink && (
+            <div className="mt-4 p-3 bg-white border border-emerald-300 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-3">
+              <span className="font-mono text-xs text-emerald-700 break-all text-left select-all leading-relaxed">
+                {generatedLiveLink}
+              </span>
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                className="flex-shrink-0 px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded transition-colors whitespace-nowrap"
+              >
+                {linkCopied ? '✓ Kopyalandı' : 'Linki Kopyala'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

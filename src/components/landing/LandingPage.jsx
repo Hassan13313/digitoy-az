@@ -86,6 +86,7 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
               lang={lang}
               initialData={formData}
               onSubmit={handleFormSubmit}
+              isAdmin={isAdmin}
             />
           )}
         </div>
