@@ -617,10 +617,12 @@ export default function BuilderForm({ lang, initialData, onSubmit, isAdmin = fal
     if (isCouple) {
       slug = `${toSlug(data.brideName)}-ve-${toSlug(data.groomName)}`
     } else if (isCorp) {
-      slug = toSlug(data.eventName || 'tedbirr')
+      slug = toSlug(data.eventName || 'tedbir')
     } else {
       slug = toSlug(data.brideName || 'davetname')
     }
+    /* Datanı qalıcı yaddaşa yaz — link açılanda oradan oxunacaq */
+    localStorage.setItem(`wedding_${slug}`, JSON.stringify(data))
     const token = encodeDataLocal(data)
     const link  = `${window.location.origin}/invite/${slug}?data=${token}`
     setGeneratedLiveLink(link)
