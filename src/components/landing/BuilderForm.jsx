@@ -640,11 +640,11 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
               <Label>{tr.dresscode_type_label}</Label>
               <div className="grid grid-cols-2 gap-3 mt-1">
                 {[
-                  { id: 'blacktie',    label: 'Black Tie',    subKey: 'dresscode_blacktie_sub'    },
-                  { id: 'cocktail',    label: 'Cocktail',     subKey: 'dresscode_cocktail_sub'    },
-                  { id: 'smartcasual', label: 'Smart Casual', subKey: 'dresscode_smartcasual_sub' },
-                  { id: 'creative',    label: 'Creative',     subKey: 'dresscode_creative_sub'    },
-                ].map(({ id, label, subKey }) => {
+                  { id: 'blacktie',    label: 'Black Tie',    subKey: 'dresscode_blacktie_sub',    colors: ['#1A1A1A', '#F5F5F5', '#C9A84C'] },
+                  { id: 'cocktail',    label: 'Cocktail',     subKey: 'dresscode_cocktail_sub',    colors: ['#C4956A', '#E8D5C4', '#8B6347'] },
+                  { id: 'smartcasual', label: 'Smart Casual', subKey: 'dresscode_smartcasual_sub', colors: ['#6B8CAE', '#D4E4F0', '#4A6B8A'] },
+                  { id: 'creative',    label: 'Creative',     subKey: 'dresscode_creative_sub',    colors: ['#9B6B9B', '#F0C4D4', '#6B9B6B'] },
+                ].map(({ id, label, subKey, colors }) => {
                   const sub = tr[subKey] || subKey
                   const isActive = data.dressCodePalette === id
                   return (
@@ -658,7 +658,18 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
                           : 'border-beige-dark/60 hover:border-gold/35'
                       }`}
                     >
-                      <p className={`text-xs font-medium tracking-wide mb-0.5 ${isActive ? 'text-gold' : 'text-ink'}`}>{label}</p>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <div className="flex items-center gap-1">
+                          {colors.map((c) => (
+                            <span
+                              key={c}
+                              className="w-3 h-3 rounded-full border border-black/10 inline-block flex-shrink-0"
+                              style={{ backgroundColor: c }}
+                            />
+                          ))}
+                        </div>
+                        <p className={`text-xs font-medium tracking-wide ${isActive ? 'text-gold' : 'text-ink'}`}>{label}</p>
+                      </div>
                       <p className="text-[10px] text-brown-muted/70 font-light mb-4">{sub}</p>
                       {isActive && (
                         <div className="flex gap-4">

@@ -68,18 +68,25 @@ export default function Preview({ lang, data, onEdit, onView }) {
     {
       icon: Shirt, label: tr.dresscode_summary,
       value: (() => {
+        const DRESS_COLORS = {
+          blacktie:    ['#1A1A1A', '#F5F5F5', '#C9A84C'],
+          cocktail:    ['#C4956A', '#E8D5C4', '#8B6347'],
+          smartcasual: ['#6B8CAE', '#D4E4F0', '#4A6B8A'],
+          creative:    ['#9B6B9B', '#F0C4D4', '#6B9B6B'],
+        }
         const DRESS_LABELS = {
           blacktie: 'Black Tie', cocktail: 'Cocktail',
           smartcasual: 'Smart Casual', creative: 'Creative',
         }
-        const label = palette?.label[lang] || DRESS_LABELS[data.dressCodePalette] || data.dressCodePalette
-        const colors = palette?.colors || []
+        const id     = data.dressCodePalette
+        const label  = palette?.label[lang] || DRESS_LABELS[id] || id
+        const colors = palette?.colors || DRESS_COLORS[id] || []
         return (
-          <span className="flex items-center gap-2">
+          <span className="flex items-center gap-1.5">
             {colors.map((c) => (
-              <span key={c} className="w-3.5 h-3.5 rounded-full border border-white/50 shadow-sm inline-block" style={{ backgroundColor: c }} />
+              <span key={c} className="w-3.5 h-3.5 rounded-full border border-neutral-300 shadow-sm inline-block flex-shrink-0" style={{ backgroundColor: c }} />
             ))}
-            <span className={colors.length ? 'ml-1 font-light' : 'font-light'}>{label}</span>
+            <span className="ml-1 font-light">{label}</span>
           </span>
         )
       })(),
