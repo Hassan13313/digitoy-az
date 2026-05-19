@@ -114,6 +114,11 @@ function VenueSearchInput({ value, onSelect, lang, tr }) {
         />
       </div>
 
+      {/* Hint qeydi — həmişə görünür */}
+      <p className="text-xs text-amber-500/70 mt-1 block font-sans">
+        {VENUE_HINTS[lang] || VENUE_HINTS.az}
+      </p>
+
       {/* Dropdown nəticələr */}
       {open && results.length > 0 && (
         <div className="absolute left-0 right-0 top-full mt-1 z-[110] backdrop-blur-md bg-[#1a1a1a]/90 border border-gold/20 shadow-2xl max-h-64 overflow-y-auto">
@@ -136,13 +141,6 @@ function VenueSearchInput({ value, onSelect, lang, tr }) {
         <div className="absolute left-0 right-0 top-full mt-1 z-[110] backdrop-blur-md bg-[#1a1a1a]/90 border border-gold/20 px-4 py-3">
           <p className="text-white/40 text-sm">{tr.venue_search_no_results}</p>
         </div>
-      )}
-
-      {/* Hint qeydi */}
-      {!success && (
-        <p className="mt-1.5 text-xs text-white/40 font-light leading-relaxed opacity-70">
-          {VENUE_HINTS[lang] || VENUE_HINTS.az}
-        </p>
       )}
 
       {/* Uğur bildirişi */}
