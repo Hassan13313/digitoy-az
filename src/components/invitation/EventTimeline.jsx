@@ -33,8 +33,11 @@ const SECTION_LABELS = {
   az: 'Proqram', en: 'Program', ru: 'Программа',
 }
 
-export default function EventTimeline({ lang, eventType }) {
-  const events = PROGRAMS[eventType] || PROGRAMS.toy
+export default function EventTimeline({ lang, eventType, programSteps }) {
+  const defaultEvents = PROGRAMS[eventType] || PROGRAMS.toy
+  const events = (programSteps && programSteps.length > 0)
+    ? programSteps.filter(r => r.time || r.activity).map(r => ({ time: r.time, icon: '📌', az: r.activity, en: r.activity, ru: r.activity }))
+    : defaultEvents
   const [ref, visible] = useScrollReveal()
 
   return (

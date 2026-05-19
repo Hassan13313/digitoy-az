@@ -8,7 +8,7 @@ import { formatFullDateByLang } from '../../utils/dateFormat'
 import t from '../../data/translations'
 
 const EVENT_ICONS = { toy: Heart, nishan: Diamond, birthday: Cake, corporate: Briefcase, other: Sparkles }
-const TOTAL_STEPS = 5
+const TOTAL_STEPS = 6
 const COUPLE_TYPES = ['toy', 'nishan']
 const CORP_TYPES   = ['corporate', 'other']
 
@@ -423,7 +423,7 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
 
   const steps = [
     tr.step1_title, tr.step2_title, tr.step3_title,
-    tr.step4_title, tr.step5_title,
+    tr.step4_title, tr.step5_title, tr.step6_title,
   ]
 
   const validate = () => {
@@ -633,8 +633,63 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
           </div>
         )}
 
-        {/* STEP 3 */}
+        {/* STEP 3 — Tədbir Proqramı */}
         {step === 3 && (
+          <div className="space-y-6">
+            <div>
+              <div className="space-y-3">
+                {(data.programSteps || []).map((row, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      value={row.time}
+                      onChange={(e) => {
+                        const updated = [...(data.programSteps || [])]
+                        updated[i] = { ...updated[i], time: e.target.value }
+                        set('programSteps', updated)
+                      }}
+                      placeholder={tr.program_step_time_placeholder}
+                      className="luxury-input w-24 flex-shrink-0"
+                    />
+                    <input
+                      type="text"
+                      value={row.activity}
+                      onChange={(e) => {
+                        const updated = [...(data.programSteps || [])]
+                        updated[i] = { ...updated[i], activity: e.target.value }
+                        set('programSteps', updated)
+                      }}
+                      placeholder={tr.program_step_activity_placeholder}
+                      className="luxury-input flex-1"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updated = (data.programSteps || []).filter((_, idx) => idx !== i)
+                        set('programSteps', updated)
+                      }}
+                      className="text-brown-muted/40 hover:text-red-400 transition-colors flex-shrink-0"
+                      aria-label="Sil"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => set('programSteps', [...(data.programSteps || []), { time: '', activity: '' }])}
+                className="mt-4 text-[11px] tracking-[0.16em] uppercase text-gold/80 hover:text-gold border border-gold/25 hover:border-gold/50 px-4 py-2.5 transition-all duration-200 flex items-center gap-2"
+              >
+                {tr.program_add_row}
+              </button>
+              <p className="text-[11px] text-brown-muted/60 mt-3 font-light tracking-wide">{tr.program_hint}</p>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 4 — Dress Code */}
+        {step === 4 && (
           <div className="space-y-8">
             <div>
               <Label>{tr.dresscode_type_label}</Label>
@@ -699,8 +754,8 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
           </div>
         )}
 
-        {/* STEP 4 */}
-        {step === 4 && (
+        {/* STEP 5 — Oturma Planı */}
+        {step === 5 && (
           <div className="space-y-6">
             <div>
               <Label>{tr.seating_label}</Label>
@@ -715,8 +770,8 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
           </div>
         )}
 
-        {/* STEP 5 */}
-        {step === 5 && (
+        {/* STEP 6 — Foto Qalereya */}
+        {step === 6 && (
           <div className="space-y-6">
             <div>
               <Label>{tr.gallery_label}</Label>

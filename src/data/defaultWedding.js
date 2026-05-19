@@ -14,4 +14,5 @@ export const defaultWedding = {
   seatingPlan:
     'Masa 1: Əli, Leyla, Rauf, Nigar; Masa 2: Murad, Günel, Elnur, Sərvinaz; Masa 3: Nərmin, Anar, Könül, Babək; Masa 4: Fərqanə, Bəhruz, Sevinc, Tural; Masa 5: Həsən, Aytən, Kamran, Lalə',
   galleryLink: 'https://drive.google.com',
+  programSteps: [],
 }

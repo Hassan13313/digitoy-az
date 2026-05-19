@@ -201,7 +201,7 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
             </section>
 
             {/* ── EVENT TIMELINE (Program) ── */}
-            <EventTimeline lang={lang} eventType={weddingData.eventType} />
+            <EventTimeline lang={lang} eventType={weddingData.eventType} programSteps={weddingData.programSteps} />
 
             {/* ── DRESS CODE ── */}
             <section className="py-28 px-6 bg-beige">
