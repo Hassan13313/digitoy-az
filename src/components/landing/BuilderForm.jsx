@@ -190,19 +190,19 @@ function IconPickerBtn({ value, onSelect }) {
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className="w-9 h-9 flex items-center justify-center border border-gold/25 hover:border-gold/60 bg-beige/60 text-base transition-all"
+        className="w-10 h-10 flex items-center justify-center border border-amber-600/30 bg-white hover:bg-neutral-50 text-xl rounded transition-all"
         title="İkon seç"
       >
-        {value || '✦'}
+        {value || '✨'}
       </button>
       {open && (
-        <div className="absolute left-0 top-full mt-1 z-[120] bg-[#1a1a1a]/95 backdrop-blur-md border border-gold/20 p-2 grid grid-cols-5 gap-1 shadow-2xl">
+        <div className="absolute right-0 top-full mt-1 z-[120] bg-white border border-neutral-200 rounded-lg p-2 grid grid-cols-5 gap-1 shadow-xl">
           {PROGRAM_ICONS.map((ic) => (
             <button
               key={ic}
               type="button"
               onClick={() => { onSelect(ic); setOpen(false) }}
-              className={`w-8 h-8 flex items-center justify-center text-base hover:bg-gold/15 transition-colors ${value === ic ? 'bg-gold/20' : ''}`}
+              className={`w-9 h-9 flex items-center justify-center text-xl rounded hover:bg-amber-50 transition-colors ${value === ic ? 'bg-amber-100' : ''}`}
             >
               {ic}
             </button>
@@ -227,36 +227,40 @@ function ProgramStepEditor({ rows, onChange, tr }) {
   const removeRow = (i) => onChange(rows.filter((_, idx) => idx !== i))
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="space-y-3">
         {rows.map((row, i) => (
-          <div key={i} className="flex items-center gap-2">
+          <div key={i} className="flex flex-row items-center gap-3 w-full bg-neutral-50 border border-neutral-100 rounded-lg p-2.5">
+            {/* 1 — Saat */}
             <TimeInput
               value={row.time}
               onChange={(v) => update(i, 'time', v)}
               onComplete={() => activityRefs.current[i]?.focus()}
-              placeholder={tr.program_step_time_placeholder}
-              className="luxury-input w-[72px] flex-shrink-0 text-center"
+              placeholder="19:00"
+              className="w-[90px] flex-shrink-0 text-center p-2.5 border border-neutral-300 rounded bg-white font-mono text-sm focus:outline-none focus:border-gold/60 transition-colors"
             />
-            <IconPickerBtn
-              value={row.icon}
-              onSelect={(ic) => update(i, 'icon', ic)}
-            />
+            {/* 2 — Fəaliyyət */}
             <input
               ref={(el) => (activityRefs.current[i] = el)}
               type="text"
               value={row.activity}
               onChange={(e) => update(i, 'activity', e.target.value)}
               placeholder={tr.program_step_activity_placeholder}
-              className="luxury-input flex-1"
+              className="flex-1 min-w-0 p-2.5 border border-neutral-300 rounded bg-white text-sm focus:outline-none focus:border-gold/60 transition-colors"
             />
+            {/* 3 — İkon seçici */}
+            <IconPickerBtn
+              value={row.icon}
+              onSelect={(ic) => update(i, 'icon', ic)}
+            />
+            {/* 4 — Sil */}
             <button
               type="button"
               onClick={() => removeRow(i)}
-              className="text-brown-muted/40 hover:text-red-400 transition-colors flex-shrink-0"
+              className="flex-shrink-0 p-2 text-neutral-400 hover:text-red-500 transition-colors rounded"
               aria-label="Sil"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
             </button>
           </div>
         ))}
