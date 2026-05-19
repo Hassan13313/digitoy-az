@@ -36,7 +36,9 @@ const SECTION_LABELS = {
 export default function EventTimeline({ lang, eventType, programSteps }) {
   const defaultEvents = PROGRAMS[eventType] || PROGRAMS.toy
   const events = (programSteps && programSteps.length > 0)
-    ? programSteps.filter(r => r.time || r.activity).map(r => ({ time: r.time, icon: '📌', az: r.activity, en: r.activity, ru: r.activity }))
+    ? programSteps
+        .filter(r => r.time || r.activity)
+        .map(r => ({ time: r.time, icon: r.icon || '✦', az: r.activity, en: r.activity, ru: r.activity }))
     : defaultEvents
   const [ref, visible] = useScrollReveal()
 
@@ -79,14 +81,10 @@ export default function EventTimeline({ lang, eventType, programSteps }) {
                   </span>
                 </div>
 
-                {/* Icon dot */}
+                {/* Icon box */}
                 <div
-                  className="flex-shrink-0 w-9 h-9 flex items-center justify-center text-base"
-                  style={{
-                    background: '#FDFBF7',
-                    border: '1px solid rgba(197,160,89,0.3)',
-                    boxShadow: '0 2px 8px rgba(197,160,89,0.08)',
-                  }}
+                  className="flex-shrink-0 w-9 h-9 flex items-center justify-center text-base bg-white border border-amber-600/30 rounded p-1.5"
+                  style={{ boxShadow: '0 2px 8px rgba(197,160,89,0.08)' }}
                 >
                   {event.icon}
                 </div>

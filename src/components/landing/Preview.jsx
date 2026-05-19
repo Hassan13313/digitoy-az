@@ -65,14 +65,15 @@ export default function Preview({ lang, data, onEdit, onView }) {
       ),
     },
     { icon: MapPin, label: tr.venue_summary, value: data.venueName || '—' },
-    ...(data.programSteps?.length > 0 ? [{
+    ...(data.programSteps?.filter(r => r.time || r.activity).length > 0 ? [{
       icon: ListOrdered, label: tr.program_summary_label,
       value: (
-        <span className="flex flex-col gap-0.5">
-          {data.programSteps.map((row, i) => (
-            <span key={i} className="text-xs font-light">
-              {row.time && <span className="text-gold/80 mr-2 font-medium">{row.time}</span>}
-              {row.activity}
+        <span className="flex flex-col gap-1">
+          {data.programSteps.filter(r => r.time || r.activity).map((row, i) => (
+            <span key={i} className="flex items-center gap-2 text-xs font-light">
+              {row.time && <span className="text-gold/80 font-medium w-10 flex-shrink-0">{row.time}</span>}
+              {row.icon && <span className="text-sm leading-none">{row.icon}</span>}
+              <span>{row.activity}</span>
             </span>
           ))}
         </span>

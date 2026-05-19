@@ -153,6 +153,126 @@ function VenueSearchInput({ value, onSelect, lang, tr }) {
   )
 }
 
+/* ── Proqram Addımı Redaktoru ── */
+const PROGRAM_ICONS = ['🥂','💍','🎵','💃','🎂','🎤','❤️','🤵','🎆','☕']
+
+function TimeInput({ value, onChange, onComplete, placeholder, className }) {
+  const handleChange = (e) => {
+    const raw = e.target.value.replace(/\D/g, '').slice(0, 4)
+    let display = raw
+    if (raw.length >= 3) display = raw.slice(0, 2) + ':' + raw.slice(2)
+    onChange(display)
+    if (raw.length === 4) onComplete?.()
+  }
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      value={value}
+      onChange={handleChange}
+      placeholder={placeholder}
+      className={className}
+      maxLength={5}
+    />
+  )
+}
+
+function IconPickerBtn({ value, onSelect }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+  useEffect(() => {
+    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', h)
+    return () => document.removeEventListener('mousedown', h)
+  }, [])
+  return (
+    <div ref={ref} className="relative flex-shrink-0">
+      <button
+        type="button"
+        onClick={() => setOpen(v => !v)}
+        className="w-9 h-9 flex items-center justify-center border border-gold/25 hover:border-gold/60 bg-beige/60 text-base transition-all"
+        title="İkon seç"
+      >
+        {value || '✦'}
+      </button>
+      {open && (
+        <div className="absolute left-0 top-full mt-1 z-[120] bg-[#1a1a1a]/95 backdrop-blur-md border border-gold/20 p-2 grid grid-cols-5 gap-1 shadow-2xl">
+          {PROGRAM_ICONS.map((ic) => (
+            <button
+              key={ic}
+              type="button"
+              onClick={() => { onSelect(ic); setOpen(false) }}
+              className={`w-8 h-8 flex items-center justify-center text-base hover:bg-gold/15 transition-colors ${value === ic ? 'bg-gold/20' : ''}`}
+            >
+              {ic}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function ProgramStepEditor({ rows, onChange, tr }) {
+  const activityRefs = useRef([])
+
+  const update = (i, field, val) => {
+    const updated = [...rows]
+    updated[i] = { ...updated[i], [field]: val }
+    onChange(updated)
+  }
+
+  const addRow = () => onChange([...rows, { time: '', icon: '', activity: '' }])
+
+  const removeRow = (i) => onChange(rows.filter((_, idx) => idx !== i))
+
+  return (
+    <div className="space-y-6">
+      <div className="space-y-3">
+        {rows.map((row, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <TimeInput
+              value={row.time}
+              onChange={(v) => update(i, 'time', v)}
+              onComplete={() => activityRefs.current[i]?.focus()}
+              placeholder={tr.program_step_time_placeholder}
+              className="luxury-input w-[72px] flex-shrink-0 text-center"
+            />
+            <IconPickerBtn
+              value={row.icon}
+              onSelect={(ic) => update(i, 'icon', ic)}
+            />
+            <input
+              ref={(el) => (activityRefs.current[i] = el)}
+              type="text"
+              value={row.activity}
+              onChange={(e) => update(i, 'activity', e.target.value)}
+              placeholder={tr.program_step_activity_placeholder}
+              className="luxury-input flex-1"
+            />
+            <button
+              type="button"
+              onClick={() => removeRow(i)}
+              className="text-brown-muted/40 hover:text-red-400 transition-colors flex-shrink-0"
+              aria-label="Sil"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </button>
+          </div>
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={addRow}
+        className="text-[11px] tracking-[0.16em] uppercase text-gold/80 hover:text-gold border border-gold/25 hover:border-gold/50 px-4 py-2.5 transition-all duration-200 flex items-center gap-2"
+      >
+        {tr.program_add_row}
+      </button>
+      <p className="text-[11px] text-brown-muted/60 font-light tracking-wide">{tr.program_hint}</p>
+    </div>
+  )
+}
+
 /* ── Köməkçi: YYYY-MM-DD → { year, month(0-based), day } ── */
 function parseIso(iso) {
   if (!iso) return null
@@ -635,57 +755,11 @@ export default function BuilderForm({ lang, initialData, onSubmit }) {
 
         {/* STEP 3 — Tədbir Proqramı */}
         {step === 3 && (
-          <div className="space-y-6">
-            <div>
-              <div className="space-y-3">
-                {(data.programSteps || []).map((row, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <input
-                      type="text"
-                      value={row.time}
-                      onChange={(e) => {
-                        const updated = [...(data.programSteps || [])]
-                        updated[i] = { ...updated[i], time: e.target.value }
-                        set('programSteps', updated)
-                      }}
-                      placeholder={tr.program_step_time_placeholder}
-                      className="luxury-input w-24 flex-shrink-0"
-                    />
-                    <input
-                      type="text"
-                      value={row.activity}
-                      onChange={(e) => {
-                        const updated = [...(data.programSteps || [])]
-                        updated[i] = { ...updated[i], activity: e.target.value }
-                        set('programSteps', updated)
-                      }}
-                      placeholder={tr.program_step_activity_placeholder}
-                      className="luxury-input flex-1"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const updated = (data.programSteps || []).filter((_, idx) => idx !== i)
-                        set('programSteps', updated)
-                      }}
-                      className="text-brown-muted/40 hover:text-red-400 transition-colors flex-shrink-0"
-                      aria-label="Sil"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <button
-                type="button"
-                onClick={() => set('programSteps', [...(data.programSteps || []), { time: '', activity: '' }])}
-                className="mt-4 text-[11px] tracking-[0.16em] uppercase text-gold/80 hover:text-gold border border-gold/25 hover:border-gold/50 px-4 py-2.5 transition-all duration-200 flex items-center gap-2"
-              >
-                {tr.program_add_row}
-              </button>
-              <p className="text-[11px] text-brown-muted/60 mt-3 font-light tracking-wide">{tr.program_hint}</p>
-            </div>
-          </div>
+          <ProgramStepEditor
+            rows={data.programSteps || []}
+            onChange={(rows) => set('programSteps', rows)}
+            tr={tr}
+          />
         )}
 
         {/* STEP 4 — Dress Code */}
