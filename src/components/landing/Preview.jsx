@@ -67,14 +67,22 @@ export default function Preview({ lang, data, onEdit, onView }) {
     { icon: MapPin, label: tr.venue_summary, value: data.venueName || '—' },
     {
       icon: Shirt, label: tr.dresscode_summary,
-      value: (
-        <span className="flex items-center gap-2">
-          {palette?.colors.map((c) => (
-            <span key={c} className="w-3.5 h-3.5 rounded-full border border-white/50 shadow-sm inline-block" style={{ backgroundColor: c }} />
-          ))}
-          <span className="ml-1 font-light">{palette?.label[lang]}</span>
-        </span>
-      ),
+      value: (() => {
+        const DRESS_LABELS = {
+          blacktie: 'Black Tie', cocktail: 'Cocktail',
+          smartcasual: 'Smart Casual', creative: 'Creative',
+        }
+        const label = palette?.label[lang] || DRESS_LABELS[data.dressCodePalette] || data.dressCodePalette
+        const colors = palette?.colors || []
+        return (
+          <span className="flex items-center gap-2">
+            {colors.map((c) => (
+              <span key={c} className="w-3.5 h-3.5 rounded-full border border-white/50 shadow-sm inline-block" style={{ backgroundColor: c }} />
+            ))}
+            <span className={colors.length ? 'ml-1 font-light' : 'font-light'}>{label}</span>
+          </span>
+        )
+      })(),
     },
     { icon: Users, label: tr.seating_label, value: data.seatingPlan ? tr.seating_yes : tr.seating_no },
     { icon: Image, label: tr.gallery_label, value: data.galleryLink ? tr.gallery_yes : tr.gallery_no },
