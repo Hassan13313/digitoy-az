@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { ArrowLeft, MapPin, Navigation, Download, ExternalLink, ChevronDown } from 'lucide-react'
+import { ArrowLeft, MapPin, Navigation, Download, ExternalLink, ChevronDown, Camera } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { motion, AnimatePresence } from 'framer-motion'
 import FloralBackground from './FloralBackground'
@@ -12,7 +12,6 @@ import RSVPSection from './RSVPSection'
 import Guestbook from './Guestbook'
 import EventTimeline from './EventTimeline'
 import DynamicHeroAnimation from './DynamicHeroAnimation'
-import ThreeDSeatingChart from './ThreeDSeatingChart'
 import ThreeDDressCode from './ThreeDDressCode'
 import { DRESS_CODE_PALETTES } from '../../data/constants'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
@@ -283,12 +282,9 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
               </SectionWrapper>
             </section>
 
-            {/* ── SEATING PLAN — 3D if has data, else classic search ── */}
+            {/* ── SEATING — lüks axtarış UI ── */}
             {weddingData.seatingPlan && (
-              <>
-                <ThreeDSeatingChart seatingPlan={weddingData.seatingPlan} lang={lang} />
-                <SeatingSearch seatingPlan={weddingData.seatingPlan} lang={lang} />
-              </>
+              <SeatingSearch seatingPlan={weddingData.seatingPlan} lang={lang} />
             )}
 
             {/* ── GALLERY ── */}
@@ -313,14 +309,15 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
                       level="M"
                     />
                   </div>
-                  <p className="text-[9px] tracking-[0.28em] uppercase text-brown-muted/60 font-medium font-sans mb-4">Scan to upload</p>
-                  <button
-                    onClick={downloadTableCard}
-                    className="inline-flex items-center gap-2 text-[9px] tracking-[0.22em] uppercase font-medium font-sans text-gold/80 hover:text-gold transition-colors border border-gold/20 hover:border-gold/40 px-4 py-2.5"
+                  <p className="text-[9px] tracking-[0.28em] uppercase text-brown-muted/60 font-medium font-sans mb-5">Scan to upload</p>
+                  <a
+                    href={photoShareUrl}
+                    className="inline-flex items-center gap-2.5 btn-gold"
+                    style={{ textDecoration: 'none' }}
                   >
-                    <Download size={11} strokeWidth={1.5} />
-                    Masa Kartını HD Endir
-                  </button>
+                    <Camera size={12} strokeWidth={1.5} />
+                    Şəkilləri Paylaş
+                  </a>
                 </div>
 
                 <p className="text-sm text-brown-muted leading-[1.9] max-w-xs mx-auto mb-10 font-light tracking-wide">

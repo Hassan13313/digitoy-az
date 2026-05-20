@@ -1,8 +1,10 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import {
   Heart, Diamond, Cake, Briefcase, Sparkles,
   ChevronRight, ChevronLeft, Check, Crown, Shirt, Calendar, User, MapPin, Search,
+  Download, QrCode, Images, Archive,
 } from 'lucide-react'
+import { QRCodeSVG } from 'qrcode.react'
 import { DRESS_CODE_PALETTES, EVENT_TYPES } from '../../data/constants'
 import { formatFullDateByLang } from '../../utils/dateFormat'
 import t from '../../data/translations'
@@ -529,6 +531,246 @@ function Textarea({ ...props }) {
 }
 
 /* ══════════════════════════════════════════════════
+   Foto Qalereya Admin Addımı (Step 6)
+══════════════════════════════════════════════════ */
+function GalleryAdminStep({ data, isCouple, isCorp }) {
+  const [mockPhotos] = useState(() =>
+    Array.from({ length: 6 }, (_, i) => ({ id: i, label: `Şəkil ${i + 1}` }))
+  )
+  const [zipLoading, setZipLoading] = useState(false)
+  const [zipDone,    setZipDone]    = useState(false)
+
+  let slug = ''
+  if (isCouple) slug = `${toSlug(data.brideName || '')}-ve-${toSlug(data.groomName || '')}`
+  else if (isCorp) slug = toSlug(data.eventName || 'tedbir')
+  else slug = toSlug(data.brideName || 'davetname')
+
+  const photoShareUrl = slug
+    ? `${window.location.origin}/invite/${slug}/foto`
+    : `${window.location.origin}/invite/davetname/foto`
+
+  const downloadQR = useCallback(() => {
+    const names = isCouple
+      ? `${data.brideName || ''} & ${data.groomName || ''}`
+      : data.brideName || data.eventName || 'Digitoy'
+
+    const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="440" height="440" viewBox="0 0 440 440">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FDFAF4"/>
+      <stop offset="100%" stop-color="#F0E8D6"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="transparent"/>
+      <stop offset="35%" stop-color="#C5A059"/>
+      <stop offset="65%" stop-color="#C5A059"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </linearGradient>
+  </defs>
+  <rect width="440" height="440" fill="url(#bg)"/>
+  <rect x="1" y="1" width="438" height="438" fill="none" stroke="rgba(197,160,89,0.45)" stroke-width="1.2"/>
+  <rect x="14" y="14" width="412" height="412" fill="none" stroke="rgba(197,160,89,0.18)" stroke-width="0.6"/>
+  <path d="M26,26 L52,26 M26,26 L26,52" stroke="rgba(197,160,89,0.7)" stroke-width="1.8" fill="none"/>
+  <path d="M414,26 L388,26 M414,26 L414,52" stroke="rgba(197,160,89,0.7)" stroke-width="1.8" fill="none"/>
+  <path d="M26,414 L52,414 M26,414 L26,388" stroke="rgba(197,160,89,0.7)" stroke-width="1.8" fill="none"/>
+  <path d="M414,414 L388,414 M414,414 L414,388" stroke="rgba(197,160,89,0.7)" stroke-width="1.8" fill="none"/>
+  <text x="220" y="64" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="rgba(197,160,89,0.9)" letter-spacing="5">FOTO · PAYLAŞIM</text>
+  <rect x="110" y="74" width="220" height="0.8" fill="url(#gold)"/>
+  <text x="220" y="112" text-anchor="middle" font-family="Georgia,serif" font-size="24" font-weight="300" fill="#1A1A1A">${names}</text>
+  <text x="220" y="138" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="rgba(140,123,107,0.7)" letter-spacing="2">${data.date || ''}</text>
+  <rect x="150" y="152" width="140" height="0.6" fill="url(#gold)"/>
+  <rect x="145" y="166" width="150" height="150" rx="4" fill="white" stroke="rgba(197,160,89,0.3)" stroke-width="1"/>
+  <text x="220" y="248" text-anchor="middle" font-family="monospace" font-size="7" fill="rgba(140,123,107,0.45)">${photoShareUrl}</text>
+  <rect x="110" y="332" width="220" height="0.6" fill="url(#gold)"/>
+  <text x="220" y="356" text-anchor="middle" font-family="Georgia,serif" font-size="10" fill="rgba(140,123,107,0.7)" letter-spacing="3">TOY ŞƏKİLLƏRİNİZİ PAYLAŞIN</text>
+  <text x="220" y="398" text-anchor="middle" font-family="Georgia,serif" font-size="9" fill="rgba(197,160,89,0.65)" letter-spacing="2">digitoy.az</text>
+</svg>`
+
+    const blob = new Blob([svgContent], { type: 'image/svg+xml' })
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href = url
+    a.download = `masa-qr-${slug || 'digitoy'}.svg`
+    a.click()
+    URL.revokeObjectURL(url)
+  }, [data, slug, photoShareUrl, isCouple, isCorp])
+
+  const simulateZipDownload = () => {
+    setZipLoading(true)
+    setTimeout(() => { setZipLoading(false); setZipDone(true); setTimeout(() => setZipDone(false), 3000) }, 1800)
+  }
+
+  const BLOCK_STYLE = {
+    border: '1px solid rgba(197,160,89,0.2)',
+    background: 'linear-gradient(150deg, #FDFAF4 0%, #F8F3E8 100%)',
+    padding: '24px',
+    position: 'relative',
+    overflow: 'hidden',
+  }
+  const HEADER_STYLE = {
+    display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20,
+  }
+  const ICON_BOX = {
+    width: 38, height: 38, flexShrink: 0,
+    border: '1px solid rgba(197,160,89,0.3)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    background: 'rgba(197,160,89,0.06)',
+  }
+
+  return (
+    <div className="space-y-5">
+      {/* ── QR Kod Bölməsi ── */}
+      <div style={BLOCK_STYLE}>
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: 1,
+          background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.6) 30%, rgba(197,160,89,0.8) 50%, rgba(197,160,89,0.6) 70%, transparent)',
+        }} />
+        <div style={HEADER_STYLE}>
+          <div style={ICON_BOX}>
+            <QrCode size={18} strokeWidth={1.5} style={{ color: 'rgba(197,160,89,0.8)' }} />
+          </div>
+          <div>
+            <p style={{ fontSize: 8, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(197,160,89,0.85)', fontFamily: '"Inter",system-ui,sans-serif', fontWeight: 500, marginBottom: 3 }}>
+              Masa QR Kodu
+            </p>
+            <p style={{ fontFamily: '"Cormorant Garamond","Playfair Display",Georgia,serif', fontSize: 16, fontWeight: 300, color: '#1C1610' }}>
+              HD Masa Kartı — Mətbəə üçün
+            </p>
+          </div>
+        </div>
+
+        {/* QR preview */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 20 }}>
+          <div style={{
+            padding: 10, border: '1px solid rgba(197,160,89,0.2)',
+            background: 'rgba(255,255,255,0.8)', flexShrink: 0,
+          }}>
+            <QRCodeSVG value={photoShareUrl} size={90} bgColor="transparent" fgColor="rgba(26,20,12,0.85)" level="M" />
+          </div>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: 10, color: 'rgba(80,68,58,0.75)', fontFamily: '"Inter",system-ui,sans-serif', lineHeight: 1.6, marginBottom: 8 }}>
+              Qonaqlar bu QR kodu skanlayaraq toy şəkillərini sistemə yükləyə bilərlər.
+            </p>
+            <p style={{ fontSize: 9, letterSpacing: '0.06em', color: 'rgba(197,160,89,0.75)', fontFamily: '"Inter",system-ui,sans-serif', wordBreak: 'break-all' }}>
+              {photoShareUrl}
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={downloadQR}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            width: '100%', padding: '12px 18px',
+            border: '1px solid rgba(197,160,89,0.35)',
+            background: 'rgba(197,160,89,0.06)',
+            cursor: 'pointer',
+            fontSize: 9, letterSpacing: '0.28em', textTransform: 'uppercase',
+            color: 'rgba(197,160,89,0.9)', fontFamily: '"Inter",system-ui,sans-serif', fontWeight: 500,
+            transition: 'background 0.2s',
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(197,160,89,0.12)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'rgba(197,160,89,0.06)'}
+        >
+          <Download size={13} strokeWidth={1.5} />
+          Masa Kartını HD (SVG) Endir
+        </button>
+      </div>
+
+      {/* ── Foto Qalereya Admin Paneli ── */}
+      <div style={BLOCK_STYLE}>
+        <div style={HEADER_STYLE}>
+          <div style={ICON_BOX}>
+            <Images size={18} strokeWidth={1.5} style={{ color: 'rgba(197,160,89,0.8)' }} />
+          </div>
+          <div>
+            <p style={{ fontSize: 8, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(197,160,89,0.85)', fontFamily: '"Inter",system-ui,sans-serif', fontWeight: 500, marginBottom: 3 }}>
+              Canlı Qalereya
+            </p>
+            <p style={{ fontFamily: '"Cormorant Garamond","Playfair Display",Georgia,serif', fontSize: 16, fontWeight: 300, color: '#1C1610' }}>
+              Qonaq Şəkilləri İdarəetməsi
+            </p>
+          </div>
+        </div>
+
+        {/* Mock photo grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 16 }}>
+          {mockPhotos.map(p => (
+            <div key={p.id} style={{
+              aspectRatio: '1',
+              background: 'linear-gradient(135deg, rgba(197,160,89,0.08), rgba(197,160,89,0.04))',
+              border: '1px solid rgba(197,160,89,0.15)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              position: 'relative', overflow: 'hidden',
+            }}>
+              {/* Placeholder shimmer */}
+              <div style={{
+                position: 'absolute', inset: 0,
+                background: 'repeating-linear-gradient(90deg, transparent, transparent 50%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.06) 51%)',
+                backgroundSize: '8px 100%',
+              }} />
+              <div style={{ textAlign: 'center', position: 'relative', zIndex: 1 }}>
+                <div style={{
+                  width: 20, height: 20, margin: '0 auto 4px',
+                  border: '1px solid rgba(197,160,89,0.25)',
+                  borderRadius: '50%',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <span style={{ fontSize: 8, color: 'rgba(197,160,89,0.5)' }}>✦</span>
+                </div>
+                <p style={{ fontSize: 7, color: 'rgba(140,123,107,0.45)', fontFamily: '"Inter",system-ui,sans-serif' }}>{p.label}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Stats bar */}
+        <div style={{
+          display: 'flex', gap: 6, marginBottom: 14,
+        }}>
+          {[
+            { label: 'Yüklənmiş', val: '0' },
+            { label: 'Qonaqlar', val: '—' },
+            { label: 'Həcm', val: '0 MB' },
+          ].map((s, i) => (
+            <div key={i} style={{
+              flex: 1, padding: '9px 6px', textAlign: 'center',
+              border: '1px solid rgba(197,160,89,0.14)',
+              background: 'rgba(197,160,89,0.04)',
+            }}>
+              <p style={{ fontFamily: '"Cormorant Garamond","Playfair Display",Georgia,serif', fontSize: 18, fontWeight: 300, color: 'rgba(197,160,89,0.85)', lineHeight: 1 }}>{s.val}</p>
+              <p style={{ fontSize: 7.5, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(140,123,107,0.6)', fontFamily: '"Inter",system-ui,sans-serif', marginTop: 4 }}>{s.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Download zip */}
+        <button
+          type="button"
+          onClick={simulateZipDownload}
+          disabled={zipLoading}
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            width: '100%', padding: '12px 18px',
+            border: '1px solid rgba(197,160,89,0.35)',
+            background: zipDone ? 'rgba(197,160,89,0.15)' : 'rgba(197,160,89,0.06)',
+            cursor: zipLoading ? 'wait' : 'pointer',
+            fontSize: 9, letterSpacing: '0.28em', textTransform: 'uppercase',
+            color: 'rgba(197,160,89,0.9)', fontFamily: '"Inter",system-ui,sans-serif', fontWeight: 500,
+            transition: 'background 0.2s, opacity 0.2s',
+            opacity: zipLoading ? 0.6 : 1,
+          }}
+        >
+          <Archive size={13} strokeWidth={1.5} />
+          {zipLoading ? 'Hazırlanır…' : zipDone ? '✓ ZIP Hazırdır' : 'Bütün Şəkilləri .zip Endir'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/* ══════════════════════════════════════════════════
    Əsas Builder Formu
 ══════════════════════════════════════════════════ */
 /* ── Ad → URL slug çevricisi ── */
@@ -939,19 +1181,9 @@ export default function BuilderForm({ lang, initialData, onSubmit, isAdmin = fal
           </div>
         )}
 
-        {/* STEP 6 — Foto Qalereya */}
+        {/* STEP 6 — Foto Qalereya & QR İdarəetmə */}
         {step === 6 && (
-          <div className="space-y-6">
-            <div>
-              <Label>{tr.gallery_label}</Label>
-              <Input
-                value={data.galleryLink}
-                onChange={(e) => set('galleryLink', e.target.value)}
-                placeholder={tr.gallery_placeholder}
-              />
-              <p className="text-[11px] text-brown-muted/70 mt-3 leading-relaxed tracking-wide font-light">{tr.gallery_help}</p>
-            </div>
-          </div>
+          <GalleryAdminStep data={data} isCouple={isCouple} isCorp={isCorp} />
         )}
       </div>
 
