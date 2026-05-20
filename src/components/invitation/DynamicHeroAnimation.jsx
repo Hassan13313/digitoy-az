@@ -119,11 +119,12 @@ function GoldenRingsCanvas() {
 function LuxuryBirthdayCake() {
   /* 4 şam — müxtəlif rəng + müstəqil alov animasiyaları */
   const candles = [
-    { left: '22%', color: '#F8C8D4', delay: 0,    dur: 1.25 },
-    { left: '38%', color: '#C8E6F8', delay: 0.18, dur: 1.42 },
-    { left: '54%', color: '#F8E6C8', delay: 0.09, dur: 1.31 },
-    { left: '70%', color: '#D4F8C8', delay: 0.27, dur: 1.18 },
+    { left: '22%', color: '#F8C8D4', delay: 0    },
+    { left: '38%', color: '#C8E6F8', delay: 0.3  },
+    { left: '54%', color: '#F8E6C8', delay: 0.6  },
+    { left: '70%', color: '#D4F8C8', delay: 0.9  },
   ]
+  const flameDur = 1.3
 
   return (
     <div className="flex justify-center items-end select-none" style={{ paddingTop: 36, paddingBottom: 24, position: 'relative' }}>
@@ -160,7 +161,7 @@ function LuxuryBirthdayCake() {
               transform: 'translateX(-50%)',
               bottom: 30 + 6,
               display: 'flex', flexDirection: 'column', alignItems: 'center',
-              animation: `flame-${i} ${c.dur}s ${c.delay}s ease-in-out infinite`,
+              animation: `candle-flame ${flameDur}s ${c.delay}s ease-in-out infinite`,
             }}>
               {/* Outer glow halo */}
               <div style={{
@@ -168,7 +169,7 @@ function LuxuryBirthdayCake() {
                 background: 'radial-gradient(circle, rgba(255,200,50,0.35) 0%, transparent 70%)',
                 position: 'absolute', top: -3, left: '50%',
                 transform: 'translateX(-50%)',
-                animation: `halo-${i} ${c.dur * 0.8}s ${c.delay}s ease-in-out infinite`,
+                animation: `candle-halo ${flameDur * 0.8}s ${c.delay}s ease-in-out infinite`,
               }} />
               {/* Outer flame */}
               <div style={{
@@ -332,14 +333,14 @@ function LuxuryBirthdayCake() {
       </div>
 
       <style>{`
-        @keyframes flame-0 { 0%,100%{transform:translateX(-50%) rotate(-3deg) scaleY(1);}   50%{transform:translateX(-50%) rotate(3deg) scaleY(1.1);} }
-        @keyframes flame-1 { 0%,100%{transform:translateX(-50%) rotate(2deg)  scaleY(1);}   40%{transform:translateX(-50%) rotate(-4deg) scaleY(1.12);} }
-        @keyframes flame-2 { 0%,100%{transform:translateX(-50%) rotate(-2deg) scaleY(1.05);}60%{transform:translateX(-50%) rotate(3deg) scaleY(0.96);} }
-        @keyframes flame-3 { 0%,100%{transform:translateX(-50%) rotate(3deg)  scaleY(1);}   33%{transform:translateX(-50%) rotate(-3deg) scaleY(1.08);} }
-        @keyframes halo-0  { 0%,100%{opacity:0.3; transform:translateX(-50%) scale(1);}  50%{opacity:0.7; transform:translateX(-50%) scale(1.3);} }
-        @keyframes halo-1  { 0%,100%{opacity:0.25;transform:translateX(-50%) scale(1);}  50%{opacity:0.65;transform:translateX(-50%) scale(1.35);} }
-        @keyframes halo-2  { 0%,100%{opacity:0.35;transform:translateX(-50%) scale(1);}  50%{opacity:0.72;transform:translateX(-50%) scale(1.28);} }
-        @keyframes halo-3  { 0%,100%{opacity:0.28;transform:translateX(-50%) scale(1);}  50%{opacity:0.68;transform:translateX(-50%) scale(1.32);} }
+        @keyframes candle-flame {
+          0%,100% { transform:translateX(-50%) rotate(-3deg) scaleY(1);    }
+          50%     { transform:translateX(-50%) rotate(3deg)  scaleY(1.12); }
+        }
+        @keyframes candle-halo {
+          0%,100% { opacity:0.3; transform:translateX(-50%) scale(1);    }
+          50%     { opacity:0.7; transform:translateX(-50%) scale(1.32); }
+        }
       `}</style>
     </div>
   )
@@ -391,8 +392,8 @@ function LuxuryCorporateAmbience() {
 
   return (
     <div style={{
-      position: 'relative', height: 210, overflow: 'hidden',
-      background: 'linear-gradient(180deg, rgba(20,16,10,0.0) 0%, rgba(20,16,10,0.0) 100%)',
+      position: 'absolute', inset: 0,
+      pointerEvents: 'none',
     }}>
       {/* ── Bokeh glow layers ── */}
       {bokeh.map(b => (
@@ -512,10 +513,10 @@ function LuxuryCorporateAmbience() {
         @keyframes bokeh-float-2 { 0%,100%{transform:translate(-50%,-50%) scale(1);}    50%{transform:translate(-52%,-48%) scale(1.08);} }
         @keyframes bokeh-float-3 { 0%,100%{transform:translate(-50%,-50%) scale(1.08);} 50%{transform:translate(-50%,-53%) scale(0.95);} }
         @keyframes confetti-drop {
-          0%   { transform:translateY(0)   rotate(0deg);   opacity:0.95; }
+          0%   { transform:translateY(0)    rotate(0deg);   opacity:0.95; }
           15%  { opacity:1; }
           85%  { opacity:0.7; }
-          100% { transform:translateY(220px) rotate(600deg); opacity:0; }
+          100% { transform:translateY(100vh) rotate(600deg); opacity:0; }
         }
         @keyframes star-twinkle {
           0%,100% { opacity:0.15; transform:scale(0.6) rotate(0deg);   }

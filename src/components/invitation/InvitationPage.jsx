@@ -158,9 +158,15 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
                 )}
 
                 {/* Dynamic animation by event type */}
-                <div className="mt-10 max-w-xs mx-auto">
-                  <DynamicHeroAnimation eventType={weddingData.eventType || 'toy'} />
-                </div>
+                {isCorp ? (
+                  <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
+                    <DynamicHeroAnimation eventType={weddingData.eventType || 'toy'} />
+                  </div>
+                ) : (
+                  <div className="mt-10 max-w-xs mx-auto">
+                    <DynamicHeroAnimation eventType={weddingData.eventType || 'toy'} />
+                  </div>
+                )}
               </div>
 
               <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-float">
