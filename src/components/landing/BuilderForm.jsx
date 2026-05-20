@@ -8,6 +8,7 @@ import { QRCodeSVG } from 'qrcode.react'
 import { DRESS_CODE_PALETTES, EVENT_TYPES } from '../../data/constants'
 import { formatFullDateByLang } from '../../utils/dateFormat'
 import t from '../../data/translations'
+import GalleryManager from '../invitation/GalleryManager'
 
 const EVENT_ICONS = { toy: Heart, nishan: Diamond, birthday: Cake, corporate: Briefcase, other: Sparkles }
 const TOTAL_STEPS = 6
@@ -533,12 +534,7 @@ function Textarea({ ...props }) {
 /* ══════════════════════════════════════════════════
    Foto Qalereya Admin Addımı (Step 6)
 ══════════════════════════════════════════════════ */
-function GalleryAdminStep({ data, isCouple, isCorp }) {
-  const [mockPhotos] = useState(() =>
-    Array.from({ length: 6 }, (_, i) => ({ id: i, label: `Şəkil ${i + 1}` }))
-  )
-  const [zipLoading, setZipLoading] = useState(false)
-  const [zipDone,    setZipDone]    = useState(false)
+function GalleryAdminStep({ data, isCouple, isCorp, isAdmin = false }) {
 
   let slug = ''
   if (isCouple) slug = `${toSlug(data.brideName || '')}-ve-${toSlug(data.groomName || '')}`
@@ -595,10 +591,7 @@ function GalleryAdminStep({ data, isCouple, isCorp }) {
     URL.revokeObjectURL(url)
   }, [data, slug, photoShareUrl, isCouple, isCorp])
 
-  const simulateZipDownload = () => {
-    setZipLoading(true)
-    setTimeout(() => { setZipLoading(false); setZipDone(true); setTimeout(() => setZipDone(false), 3000) }, 1800)
-  }
+
 
   const BLOCK_STYLE = {
     border: '1px solid rgba(197,160,89,0.2)',
@@ -657,25 +650,27 @@ function GalleryAdminStep({ data, isCouple, isCorp }) {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={downloadQR}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            width: '100%', padding: '12px 18px',
-            border: '1px solid rgba(197,160,89,0.35)',
-            background: 'rgba(197,160,89,0.06)',
-            cursor: 'pointer',
-            fontSize: 9, letterSpacing: '0.28em', textTransform: 'uppercase',
-            color: 'rgba(197,160,89,0.9)', fontFamily: '"Inter",system-ui,sans-serif', fontWeight: 500,
-            transition: 'background 0.2s',
-          }}
-          onMouseEnter={e => e.currentTarget.style.background = 'rgba(197,160,89,0.12)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'rgba(197,160,89,0.06)'}
-        >
-          <Download size={13} strokeWidth={1.5} />
-          Masa Kartını HD (SVG) Endir
-        </button>
+        {isAdmin && (
+          <button
+            type="button"
+            onClick={downloadQR}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              width: '100%', padding: '12px 18px',
+              border: '1px solid rgba(197,160,89,0.35)',
+              background: 'rgba(197,160,89,0.06)',
+              cursor: 'pointer',
+              fontSize: 9, letterSpacing: '0.28em', textTransform: 'uppercase',
+              color: 'rgba(197,160,89,0.9)', fontFamily: '"Inter",system-ui,sans-serif', fontWeight: 500,
+              transition: 'background 0.2s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(197,160,89,0.12)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'rgba(197,160,89,0.06)'}
+          >
+            <Download size={13} strokeWidth={1.5} />
+            Masa Kartını HD (SVG) Endir
+          </button>
+        )}
       </div>
 
       {/* ── Foto Qalereya Admin Paneli ── */}
@@ -694,77 +689,7 @@ function GalleryAdminStep({ data, isCouple, isCorp }) {
           </div>
         </div>
 
-        {/* Mock photo grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 16 }}>
-          {mockPhotos.map(p => (
-            <div key={p.id} style={{
-              aspectRatio: '1',
-              background: 'linear-gradient(135deg, rgba(197,160,89,0.08), rgba(197,160,89,0.04))',
-              border: '1px solid rgba(197,160,89,0.15)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              position: 'relative', overflow: 'hidden',
-            }}>
-              {/* Placeholder shimmer */}
-              <div style={{
-                position: 'absolute', inset: 0,
-                background: 'repeating-linear-gradient(90deg, transparent, transparent 50%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.06) 51%)',
-                backgroundSize: '8px 100%',
-              }} />
-              <div style={{ textAlign: 'center', position: 'relative', zIndex: 1 }}>
-                <div style={{
-                  width: 20, height: 20, margin: '0 auto 4px',
-                  border: '1px solid rgba(197,160,89,0.25)',
-                  borderRadius: '50%',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <span style={{ fontSize: 8, color: 'rgba(197,160,89,0.5)' }}>✦</span>
-                </div>
-                <p style={{ fontSize: 7, color: 'rgba(140,123,107,0.45)', fontFamily: '"Inter",system-ui,sans-serif' }}>{p.label}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Stats bar */}
-        <div style={{
-          display: 'flex', gap: 6, marginBottom: 14,
-        }}>
-          {[
-            { label: 'Yüklənmiş', val: '0' },
-            { label: 'Qonaqlar', val: '—' },
-            { label: 'Həcm', val: '0 MB' },
-          ].map((s, i) => (
-            <div key={i} style={{
-              flex: 1, padding: '9px 6px', textAlign: 'center',
-              border: '1px solid rgba(197,160,89,0.14)',
-              background: 'rgba(197,160,89,0.04)',
-            }}>
-              <p style={{ fontFamily: '"Cormorant Garamond","Playfair Display",Georgia,serif', fontSize: 18, fontWeight: 300, color: 'rgba(197,160,89,0.85)', lineHeight: 1 }}>{s.val}</p>
-              <p style={{ fontSize: 7.5, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(140,123,107,0.6)', fontFamily: '"Inter",system-ui,sans-serif', marginTop: 4 }}>{s.label}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Download zip */}
-        <button
-          type="button"
-          onClick={simulateZipDownload}
-          disabled={zipLoading}
-          style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            width: '100%', padding: '12px 18px',
-            border: '1px solid rgba(197,160,89,0.35)',
-            background: zipDone ? 'rgba(197,160,89,0.15)' : 'rgba(197,160,89,0.06)',
-            cursor: zipLoading ? 'wait' : 'pointer',
-            fontSize: 9, letterSpacing: '0.28em', textTransform: 'uppercase',
-            color: 'rgba(197,160,89,0.9)', fontFamily: '"Inter",system-ui,sans-serif', fontWeight: 500,
-            transition: 'background 0.2s, opacity 0.2s',
-            opacity: zipLoading ? 0.6 : 1,
-          }}
-        >
-          <Archive size={13} strokeWidth={1.5} />
-          {zipLoading ? 'Hazırlanır…' : zipDone ? '✓ ZIP Hazırdır' : 'Bütün Şəkilləri .zip Endir'}
-        </button>
+        <GalleryManager slug={slug} />
       </div>
     </div>
   )
@@ -1183,7 +1108,7 @@ export default function BuilderForm({ lang, initialData, onSubmit, isAdmin = fal
 
         {/* STEP 6 — Foto Qalereya & QR İdarəetmə */}
         {step === 6 && (
-          <GalleryAdminStep data={data} isCouple={isCouple} isCorp={isCorp} />
+          <GalleryAdminStep data={data} isCouple={isCouple} isCorp={isCorp} isAdmin={isAdmin || adminMode} />
         )}
       </div>
 

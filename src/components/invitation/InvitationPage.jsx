@@ -320,19 +320,9 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
                   </a>
                 </div>
 
-                <p className="text-sm text-brown-muted leading-[1.9] max-w-xs mx-auto mb-10 font-light tracking-wide">
+                <p className="text-sm text-brown-muted leading-[1.9] max-w-xs mx-auto font-light tracking-wide">
                   {tr.inv_gallery_desc}
                 </p>
-
-                <a
-                  href={weddingData.galleryLink || '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 btn-gold"
-                >
-                  <ExternalLink size={13} strokeWidth={1.5} />
-                  {tr.inv_gallery_btn}
-                </a>
               </SectionWrapper>
             </section>
 
