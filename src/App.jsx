@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import LandingPage from './components/landing/LandingPage'
 import InvitationPage from './components/invitation/InvitationPage'
+import PhotoShare from './components/invitation/PhotoShare'
 import DigitoyOrijinalUI from './components/DigitoyOrijinalUI'
 import { defaultWedding } from './data/defaultWedding'
 import './App.css'
@@ -19,10 +20,10 @@ function decodeData(token) {
   } catch { return null }
 }
 
-/* URL-dən /invite/:slug oxu */
 function parseInviteSlug() {
-  const match = window.location.pathname.match(/^\/invite\/([^/?#]+)/)
-  return match ? match[1] : null
+  const match = window.location.pathname.match(/^\/invite\/([^/?#]+)(?:\/([^/?#]*))?/)
+  if (!match) return { slug: null, sub: null }
+  return { slug: match[1], sub: match[2] || null }
 }
 
 export default function App() {
@@ -32,9 +33,13 @@ export default function App() {
   const [isAdmin,     setIsAdmin]     = useState(false)
 
   useEffect(() => {
-    /* ── /invite/:slug → canlı dəvətnamə ── */
-    const slug = parseInviteSlug()
+    const { slug, sub } = parseInviteSlug()
     if (slug) {
+      /* foto paylaşım alt-route */
+      if (sub === 'foto') {
+        setView('photo')
+        return
+      }
       const stored = localStorage.getItem(`wedding_${slug}`)
       if (stored) {
         try {
@@ -44,14 +49,12 @@ export default function App() {
           return
         } catch {}
       }
-      /* localStorage yoxdursa URL token-dən cəhd et */
       const params = new URLSearchParams(window.location.search)
       const token  = params.get('data')
       if (token) {
         const decoded = decodeData(token)
         if (decoded) {
           setWeddingData({ ...defaultWedding, ...decoded })
-          /* Gələcək ziyarətlər üçün saxla */
           localStorage.setItem(`wedding_${slug}`, JSON.stringify(decoded))
           setView('invite')
           return
@@ -73,7 +76,10 @@ export default function App() {
 
   if (ACTIVE_UI === 'new') return <DigitoyOrijinalUI />
 
-  /* ── /invite/:slug — tam ekran dəvətnamə, admin UI yoxdur ── */
+  if (view === 'photo') {
+    return <PhotoShare />
+  }
+
   if (view === 'invite') {
     return (
       <div className="min-h-screen bg-cream">

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 /* ══════════════════════════════════════════════════
-   WAX SEAL — dinamik, premium balmumu möhür
+   BALMUMU MÖHÜR
 ══════════════════════════════════════════════════ */
 function sealInitials(eventType, brideName, groomName) {
   const first = (s) => ((s || '').trim()[0] || '').toUpperCase()
@@ -11,77 +11,67 @@ function sealInitials(eventType, brideName, groomName) {
     return b && g ? `${b}${g}` : b || g || null
   }
   if (eventType === 'birthday') return first(brideName) || null
-  return null // corporate/other → simvol
+  return null
 }
 
 function WaxSeal({ eventType, brideName, groomName, pulse = true }) {
-  const initials    = sealInitials(eventType, brideName, groomName)
-  const isCorp      = eventType === 'corporate' || eventType === 'other'
-  const isDeepRed   = eventType === 'toy' || eventType === 'nishan'
-  const sealGrad    = isDeepRed
+  const initials  = sealInitials(eventType, brideName, groomName)
+  const isCorp    = eventType === 'corporate' || eventType === 'other'
+  const isDeepRed = eventType === 'toy' || eventType === 'nishan'
+  const sealGrad  = isDeepRed
     ? 'radial-gradient(circle at 34% 30%, #8B1A1A 0%, #6B0F0F 40%, #4A0808 80%, #3A0505 100%)'
     : 'radial-gradient(circle at 34% 30%, #C8860A 0%, #A0600A 40%, #7A4008 80%, #5A2C04 100%)'
-  const rimColor    = isDeepRed ? 'rgba(180,50,50,0.55)' : 'rgba(197,160,89,0.55)'
+  const rimColor  = isDeepRed ? 'rgba(180,50,50,0.55)' : 'rgba(197,160,89,0.55)'
 
   return (
-    <div className="relative flex items-center justify-center" style={{ width: 60, height: 60 }}>
-      {/* Outer glow pulse */}
+    <div style={{ position: 'relative', width: 58, height: 58, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       {pulse && (
-        <div className="absolute rounded-full" style={{
-          inset: '-8px',
+        <div style={{
+          position: 'absolute', inset: -8, borderRadius: '50%',
           background: isDeepRed
             ? 'radial-gradient(circle, rgba(139,26,26,0.28) 0%, transparent 70%)'
             : 'radial-gradient(circle, rgba(197,160,89,0.28) 0%, transparent 70%)',
           animation: 'seal-glow 2.6s ease-in-out infinite',
         }} />
       )}
-      {/* Wax blob — irregular border-radius simulates real wax */}
       <div style={{
-        width: 56, height: 56,
+        width: 54, height: 54,
         background: sealGrad,
         borderRadius: '52% 48% 50% 46% / 48% 52% 46% 54%',
-        boxShadow: `0 4px 18px rgba(0,0,0,0.45), inset 0 2px 4px rgba(255,255,255,0.14), inset 0 -3px 6px rgba(0,0,0,0.35)`,
+        boxShadow: '0 4px 18px rgba(0,0,0,0.45), inset 0 2px 4px rgba(255,255,255,0.14), inset 0 -3px 6px rgba(0,0,0,0.35)',
         border: `1.5px solid ${rimColor}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        position: 'relative', overflow: 'hidden',
-        flexShrink: 0,
+        position: 'relative', overflow: 'hidden', flexShrink: 0,
       }}>
-        {/* Wax texture overlay — subtle radial lines */}
-        <svg className="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 56 56">
+        <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.1 }} viewBox="0 0 54 54">
           {[0,30,60,90,120,150].map(a => (
-            <line key={a}
-              x1="28" y1="28"
-              x2={28 + 30 * Math.cos(a * Math.PI / 180)}
-              y2={28 + 30 * Math.sin(a * Math.PI / 180)}
-              stroke="white" strokeWidth="0.8"
-            />
+            <line key={a} x1="27" y1="27"
+              x2={27 + 30 * Math.cos(a * Math.PI / 180)}
+              y2={27 + 30 * Math.sin(a * Math.PI / 180)}
+              stroke="white" strokeWidth="0.8" />
           ))}
         </svg>
-        {/* Inner emboss ring */}
         <div style={{
-          position: 'absolute', inset: 7,
-          borderRadius: '50%',
+          position: 'absolute', inset: 7, borderRadius: '50%',
           border: '1px solid rgba(255,255,255,0.20)',
           boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.25)',
         }} />
-        {/* Content */}
         <div style={{ position: 'relative', zIndex: 2 }}>
           {isCorp ? (
-            /* Corporate — öküz gözü / floral seal motif */
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
               <circle cx="12" cy="12" r="4" stroke="rgba(255,255,255,0.75)" strokeWidth="1"/>
               {[0,45,90,135,180,225,270,315].map((deg, i) => {
-                const r  = 9, rad = deg * Math.PI / 180
-                const x2 = 12 + r * Math.cos(rad), y2 = 12 + r * Math.sin(rad)
-                const mx = 12 + 6.5 * Math.cos(rad), my = 12 + 6.5 * Math.sin(rad)
-                return <line key={i} x1="12" y1="12" x2={x2} y2={y2} stroke="rgba(255,255,255,0.5)" strokeWidth="0.8" />
+                const r = 9, rad = deg * Math.PI / 180
+                return <line key={i} x1="12" y1="12"
+                  x2={12 + r * Math.cos(rad)} y2={12 + r * Math.sin(rad)}
+                  stroke="rgba(255,255,255,0.5)" strokeWidth="0.8" />
               })}
               <circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,0.3)" strokeWidth="0.6" strokeDasharray="2 2"/>
             </svg>
           ) : initials ? (
             <span style={{
-              fontFamily: '"Playfair Display", Georgia, serif',
-              fontSize: initials.length === 1 ? 20 : 14,
+              fontFamily: '"Cormorant Garamond", "Playfair Display", Georgia, serif',
+              fontSize: initials.length === 1 ? 20 : 13,
               fontWeight: 600,
               color: 'rgba(255,245,220,0.92)',
               textShadow: '0 1px 3px rgba(0,0,0,0.5)',
@@ -103,247 +93,344 @@ function WaxSeal({ eventType, brideName, groomName, pulse = true }) {
 }
 
 /* ══════════════════════════════════════════════════
-   PREMIUM ENVELOPE OPENING
+   PREMIUM ZƏRF AÇILIŞI
+   Anatomiya: arxa qat → cib qatı → dəvətnamə vərəqi → üçbucaq qapaq → möhür
+   Animasiya: qapaq açılır → vərəq yuxarı çıxır → tam ekran genişlənir
 ══════════════════════════════════════════════════ */
 export default function EnvelopeOpening({
   brideName, groomName, eventLabel, eventType = 'toy', onComplete,
 }) {
-  const [isOpen, setIsOpen] = useState(false)
-  const [done,   setDone]   = useState(false)
+  // phases: 'idle' → 'flap-open' → 'card-rising' → 'card-fullscreen' → done
+  const [phase, setPhase]   = useState('idle')
+  const [isDone, setIsDone] = useState(false)
 
   const handleClick = () => {
-    if (isOpen) return
-    setIsOpen(true)
-    setTimeout(() => { setDone(true); setTimeout(() => onComplete(), 650) }, 2100)
+    if (phase !== 'idle') return
+    setPhase('flap-open')
+    setTimeout(() => setPhase('card-rising'),     1050)
+    setTimeout(() => setPhase('card-fullscreen'), 2100)
+    setTimeout(() => { setIsDone(true) },          2750)
+    setTimeout(() => onComplete(),                 3100)
   }
 
-  const isCorp   = eventType === 'corporate' || eventType === 'other'
-  const isCouple = eventType === 'toy' || eventType === 'nishan'
+  const isCorp    = eventType === 'corporate' || eventType === 'other'
+  const isCouple  = eventType === 'toy' || eventType === 'nishan'
+  const flapOpen  = phase !== 'idle'
+  const cardRising = phase === 'card-rising' || phase === 'card-fullscreen'
+  const cardFullscreen = phase === 'card-fullscreen'
 
-  /* ── envelope palette ── */
+  /* Envelope colour tokens */
   const ENV = {
-    body:    'linear-gradient(165deg, #FBF8F0 0%, #F4EFE2 60%, #EDE5D4 100%)',
-    flap:    'linear-gradient(180deg, #F2EBD9 0%, #E8DFC8 100%)',
-    flapSh:  'linear-gradient(135deg, rgba(255,255,255,0.22) 0%, transparent 55%)',
-    edge:    'rgba(197,160,89,0.32)',
-    inner:   'linear-gradient(180deg, #FDFAF4 0%, #F8F3E8 100%)',
-    shadow:  '0 24px 80px rgba(0,0,0,0.13), 0 6px 24px rgba(197,160,89,0.12), inset 0 1px 0 rgba(255,255,255,0.7)',
+    body:   'linear-gradient(165deg, #FBF8F0 0%, #F4EFE2 60%, #EDE5D4 100%)',
+    flap:   'linear-gradient(180deg, #F2EBD9 0%, #E8DFC8 100%)',
+    flapBk: 'linear-gradient(180deg, #FDFAF4 0%, #F8F3E8 100%)',
+    edge:   'rgba(197,160,89,0.32)',
+    inner:  'linear-gradient(180deg, #FDFAF4 0%, #F8F3E8 100%)',
+    shadow: '0 28px 90px rgba(0,0,0,0.14), 0 6px 24px rgba(197,160,89,0.12), inset 0 1px 0 rgba(255,255,255,0.7)',
   }
 
   return (
     <AnimatePresence>
-      {!done && (
+      {!isDone && (
         <motion.div
+          key="envelope-overlay"
           className="fixed inset-0 z-50 flex items-center justify-center px-4"
           style={{ background: 'linear-gradient(160deg, #FAF7F0 0%, #F2EBD9 100%)' }}
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0, scale: 1.04 }}
-          transition={{ duration: 0.75, ease: [0.4, 0, 0.2, 1] }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.55, ease: 'easeOut' }}
         >
-          {/* Radial ambient glow */}
-          <div className="absolute inset-0 pointer-events-none" style={{
-            background: 'radial-gradient(ellipse 65% 45% at 50% 42%, rgba(197,160,89,0.13) 0%, transparent 68%)',
-          }} />
-          {/* Fine noise texture overlay */}
-          <div className="absolute inset-0 pointer-events-none opacity-[0.025]" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-            backgroundSize: '180px',
+          {/* Ambient radial glow */}
+          <div style={{
+            position: 'absolute', inset: 0, pointerEvents: 'none',
+            background: 'radial-gradient(ellipse 65% 45% at 50% 42%, rgba(197,160,89,0.14) 0%, transparent 70%)',
           }} />
 
-          <div
-            className="relative w-full max-w-[340px] cursor-pointer select-none"
-            style={{ perspective: '1600px' }}
-            onClick={handleClick}
-          >
-            {/* ════════ ENVELOPE BODY ════════ */}
-            <div
-              className="relative"
-              style={{
-                width: '100%', paddingBottom: '65%',
-                background: ENV.body,
-                border: `1px solid ${ENV.edge}`,
-                boxShadow: ENV.shadow,
-              }}
-            >
-              {/* Gold top trim line */}
-              <div className="absolute top-0 left-0 right-0 h-px" style={{
-                background: 'linear-gradient(to right, transparent 0%, rgba(197,160,89,0.6) 30%, rgba(197,160,89,0.8) 50%, rgba(197,160,89,0.6) 70%, transparent 100%)',
-              }} />
-              {/* Gold bottom trim line */}
-              <div className="absolute bottom-0 left-0 right-0 h-px" style={{
-                background: 'linear-gradient(to right, transparent 0%, rgba(197,160,89,0.4) 30%, rgba(197,160,89,0.55) 50%, rgba(197,160,89,0.4) 70%, transparent 100%)',
-              }} />
-
-              {/* ── Bottom fold triangles ── */}
-              {/* Left triangle */}
-              <div className="absolute bottom-0 left-0" style={{
-                width: 0, height: 0,
-                borderStyle: 'solid',
-                borderWidth: '0 0 94px 175px',
-                borderColor: 'transparent transparent rgba(205,195,178,0.6) transparent',
-              }} />
-              {/* Right triangle */}
-              <div className="absolute bottom-0 right-0" style={{
-                width: 0, height: 0,
-                borderStyle: 'solid',
-                borderWidth: '0 175px 94px 0',
-                borderColor: 'transparent rgba(205,195,178,0.6) transparent transparent',
-              }} />
-              {/* Center bottom gold diamond ornament */}
-              <div className="absolute bottom-0 left-1/2" style={{
-                transform: 'translateX(-50%) translateY(50%) rotate(45deg)',
-                width: 10, height: 10,
-                background: 'linear-gradient(135deg, rgba(197,160,89,0.5), rgba(197,160,89,0.2))',
-                border: '1px solid rgba(197,160,89,0.4)',
-              }} />
-
-              {/* ── FLAP (top lid) ── */}
+          {/* ── FULLSCREEN CARD EXPANSION OVERLAY ── */}
+          <AnimatePresence>
+            {cardFullscreen && (
               <motion.div
-                className="absolute top-0 left-0 right-0"
+                key="card-fullscreen"
                 style={{
-                  height: '60%',
-                  transformOrigin: 'top center',
-                  transformStyle: 'preserve-3d',
-                  zIndex: isOpen ? 0 : 20,
+                  position: 'absolute', inset: 0, zIndex: 10,
+                  background: 'linear-gradient(160deg, #FDFAF4 0%, #F8F3E8 50%, #F2EBD9 100%)',
                 }}
-                animate={isOpen ? { rotateX: -178 } : { rotateX: 0 }}
-                transition={{ type: 'spring', stiffness: 55, damping: 14, mass: 1.2 }}
+                initial={{ opacity: 0, scale: 0.08, borderRadius: '50%' }}
+                animate={{ opacity: 1, scale: 1, borderRadius: '0%' }}
+                transition={{ type: 'spring', stiffness: 58, damping: 20, mass: 1.2 }}
               >
-                {/* Flap front face */}
-                <div className="absolute inset-0" style={{
-                  background: ENV.flap,
-                  backfaceVisibility: 'hidden',
-                  clipPath: 'polygon(0 0, 100% 0, 50% 87%)',
-                  borderBottom: `1px solid ${ENV.edge}`,
-                }} />
-                {/* Flap light sheen */}
-                <div className="absolute inset-0" style={{
-                  backfaceVisibility: 'hidden',
-                  clipPath: 'polygon(0 0, 100% 0, 50% 87%)',
-                  background: ENV.flapSh,
-                }} />
-                {/* Flap fold crease subtle line */}
-                <div className="absolute inset-0" style={{
-                  backfaceVisibility: 'hidden',
-                  clipPath: 'polygon(0 0, 100% 0, 50% 87%)',
-                  background: 'linear-gradient(to bottom, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.04) 90%, transparent 100%)',
-                }} />
-                {/* Flap back */}
-                <div className="absolute inset-0" style={{
-                  background: ENV.inner,
-                  backfaceVisibility: 'hidden',
-                  transform: 'rotateX(180deg)',
-                  clipPath: 'polygon(0 0, 100% 0, 50% 87%)',
-                }} />
-
-                {/* ── WAX SEAL — at flap tip ── */}
-                <div className="absolute" style={{
-                  bottom: '-4px',
-                  left: '50%',
-                  transform: 'translateX(-50%) translateY(50%)',
-                  zIndex: 30,
-                }}>
-                  <motion.div
-                    animate={isOpen ? { scale: 0, opacity: 0 } : { scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.28 }}
-                  >
-                    <WaxSeal
-                      eventType={eventType}
-                      brideName={brideName}
-                      groomName={groomName}
-                      pulse={!isOpen}
-                    />
-                  </motion.div>
-                </div>
-              </motion.div>
-
-              {/* ── INNER CARD — slides up on open ── */}
-              <motion.div
-                className="absolute left-0 right-0 flex flex-col items-center justify-center text-center"
-                style={{
-                  top: '11%', height: '78%', zIndex: 10,
-                  background: ENV.inner,
-                  border: `1px solid rgba(221,213,200,0.65)`,
-                  boxShadow: '0 2px 20px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.8)',
-                  margin: '0 14px',
-                  padding: '0 24px',
-                }}
-                animate={isOpen ? { y: '-44%', opacity: 1 } : { y: 0, opacity: 0.97 }}
-                transition={{ delay: 0.55, duration: 0.9, ease: [0.35, 0, 0.15, 1] }}
-              >
-                {/* Card top gold rule */}
-                <div className="absolute top-0 left-8 right-8 h-px" style={{
-                  background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.5), transparent)',
-                }} />
-                {/* Card corner ornaments */}
-                {[['top-2','left-2'],['top-2','right-2'],['bottom-2','left-2'],['bottom-2','right-2']].map(([t,l],i) => (
-                  <div key={i} className={`absolute ${t} ${l} w-3 h-3`} style={{
-                    borderTop:    i < 2 ? '1px solid rgba(197,160,89,0.45)' : 'none',
-                    borderBottom: i >= 2 ? '1px solid rgba(197,160,89,0.45)' : 'none',
-                    borderLeft:   (i===0||i===2) ? '1px solid rgba(197,160,89,0.45)' : 'none',
-                    borderRight:  (i===1||i===3) ? '1px solid rgba(197,160,89,0.45)' : 'none',
+                {/* Corner ornaments on fullscreen */}
+                {[
+                  { top: 24, left: 24, bT: true,  bL: true,  bB: false, bR: false },
+                  { top: 24, right: 24, bT: true,  bR: true,  bB: false, bL: false },
+                  { bottom: 24, left: 24, bB: true, bL: true,  bT: false, bR: false },
+                  { bottom: 24, right: 24, bB: true, bR: true,  bT: false, bL: false },
+                ].map((o, i) => (
+                  <div key={i} style={{
+                    position: 'absolute',
+                    top: o.top, left: o.left, right: o.right, bottom: o.bottom,
+                    width: 28, height: 28,
+                    borderTop:    o.bT ? '1px solid rgba(197,160,89,0.4)' : 'none',
+                    borderLeft:   o.bL ? '1px solid rgba(197,160,89,0.4)' : 'none',
+                    borderRight:  o.bR ? '1px solid rgba(197,160,89,0.4)' : 'none',
+                    borderBottom: o.bB ? '1px solid rgba(197,160,89,0.4)' : 'none',
                   }} />
                 ))}
+                {/* Top/bottom gold lines */}
+                <div style={{
+                  position: 'absolute', top: 0, left: 0, right: 0, height: 1,
+                  background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.55) 30%, rgba(197,160,89,0.75) 50%, rgba(197,160,89,0.55) 70%, transparent)',
+                }} />
+                <div style={{
+                  position: 'absolute', bottom: 0, left: 0, right: 0, height: 1,
+                  background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.45) 30%, rgba(197,160,89,0.6) 50%, rgba(197,160,89,0.45) 70%, transparent)',
+                }} />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
+          {/* ── ENVELOPE ── */}
+          <div
+            className="relative w-full select-none"
+            style={{ maxWidth: 340, perspective: '1600px', cursor: phase === 'idle' ? 'pointer' : 'default' }}
+            onClick={handleClick}
+          >
+            {/* Envelope body container */}
+            <div style={{
+              position: 'relative',
+              width: '100%',
+              paddingBottom: '65%',
+              background: ENV.body,
+              border: `1px solid ${ENV.edge}`,
+              boxShadow: ENV.shadow,
+            }}>
+              {/* Gold trim top */}
+              <div style={{
+                position: 'absolute', top: 0, left: 0, right: 0, height: 1,
+                background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.65) 30%, rgba(197,160,89,0.85) 50%, rgba(197,160,89,0.65) 70%, transparent)',
+              }} />
+              {/* Gold trim bottom */}
+              <div style={{
+                position: 'absolute', bottom: 0, left: 0, right: 0, height: 1,
+                background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.45) 30%, rgba(197,160,89,0.6) 50%, rgba(197,160,89,0.45) 70%, transparent)',
+              }} />
+
+              {/* ── INVITATION CARD (z=2) — hidden inside envelope ── */}
+              <motion.div
+                style={{
+                  position: 'absolute',
+                  left: 14, right: 14, top: 8, bottom: 8,
+                  background: ENV.inner,
+                  border: '1px solid rgba(221,213,200,0.65)',
+                  boxShadow: '0 2px 20px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.8)',
+                  zIndex: cardRising ? 10 : 2,
+                  display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center',
+                  padding: '0 22px',
+                }}
+                initial={{ y: 0, opacity: 0 }}
+                animate={
+                  cardRising
+                    ? { y: '-52%', opacity: 1 }
+                    : { y: 0, opacity: 0 }
+                }
+                transition={
+                  cardRising
+                    ? { type: 'spring', stiffness: 56, damping: 14, mass: 1.1, delay: 0.05 }
+                    : { duration: 0.15 }
+                }
+              >
+                {/* Card corner ornaments */}
+                {[
+                  { top: 8, left: 8,   bT: true,  bL: true,  bB: false, bR: false },
+                  { top: 8, right: 8,  bT: true,  bR: true,  bB: false, bL: false },
+                  { bottom: 8, left: 8,  bB: true, bL: true,  bT: false, bR: false },
+                  { bottom: 8, right: 8, bB: true, bR: true,  bT: false, bL: false },
+                ].map((o, i) => (
+                  <div key={i} style={{
+                    position: 'absolute',
+                    top: o.top, left: o.left, right: o.right, bottom: o.bottom,
+                    width: 11, height: 11,
+                    borderTop:    o.bT ? '1px solid rgba(197,160,89,0.45)' : 'none',
+                    borderLeft:   o.bL ? '1px solid rgba(197,160,89,0.45)' : 'none',
+                    borderRight:  o.bR ? '1px solid rgba(197,160,89,0.45)' : 'none',
+                    borderBottom: o.bB ? '1px solid rgba(197,160,89,0.45)' : 'none',
+                  }} />
+                ))}
+                {/* Card top rule */}
+                <div style={{
+                  position: 'absolute', top: 0, left: 24, right: 24, height: 1,
+                  background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.5), transparent)',
+                }} />
+
+                {/* Event label */}
                 <p style={{
-                  fontFamily: 'system-ui, sans-serif',
-                  fontSize: '8px', letterSpacing: '0.42em',
+                  fontSize: '7.5px', letterSpacing: '0.4em',
                   textTransform: 'uppercase', color: '#C5A059',
-                  fontWeight: 500, marginBottom: '12px',
+                  fontWeight: 500, marginBottom: 9,
+                  fontFamily: '"Inter", system-ui, sans-serif',
                 }}>
                   {eventLabel}
                 </p>
 
-                {/* Thin gold divider */}
+                {/* Gold divider */}
                 <div style={{
-                  width: 36, height: 1, marginBottom: 12,
+                  width: 32, height: 1, marginBottom: 11,
                   background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.55), transparent)',
                 }} />
 
                 {/* Names */}
-                <div style={{ fontFamily: '"Playfair Display", Georgia, serif' }}>
+                <div style={{
+                  fontFamily: '"Cormorant Garamond", "Playfair Display", Georgia, serif',
+                  textAlign: 'center',
+                }}>
                   {isCouple ? (
                     <>
-                      <p style={{ fontSize: 20, color: '#1A1A1A', fontWeight: 300, lineHeight: 1.2 }}>{brideName}</p>
-                      <p style={{ fontSize: 13, color: '#C5A059', fontStyle: 'italic', margin: '3px 0' }}>&amp;</p>
-                      <p style={{ fontSize: 20, color: '#1A1A1A', fontWeight: 300, lineHeight: 1.2 }}>{groomName}</p>
+                      <p style={{ fontSize: 19, color: '#1A1A1A', fontWeight: 300, lineHeight: 1.2 }}>{brideName}</p>
+                      <p style={{ fontSize: 12, color: '#C5A059', fontStyle: 'italic', margin: '3px 0', fontWeight: 300 }}>&amp;</p>
+                      <p style={{ fontSize: 19, color: '#1A1A1A', fontWeight: 300, lineHeight: 1.2 }}>{groomName}</p>
                     </>
                   ) : (
                     <p style={{
-                      fontSize: isCorp ? 15 : 20, color: '#1A1A1A', fontWeight: 300,
+                      fontSize: isCorp ? 13 : 19,
+                      color: '#1A1A1A', fontWeight: 300,
                       letterSpacing: isCorp ? '0.12em' : '0',
                       textTransform: isCorp ? 'uppercase' : 'none',
-                    }}>{brideName}</p>
+                      lineHeight: 1.3,
+                    }}>
+                      {brideName}
+                    </p>
                   )}
                 </div>
 
                 {/* Bottom divider */}
                 <div style={{
-                  width: 36, height: 1, marginTop: 12, marginBottom: 10,
+                  width: 32, height: 1, marginTop: 11,
                   background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.55), transparent)',
                 }} />
 
                 {/* Pulse hint */}
                 <motion.p
-                  style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#8C7B6B' }}
-                  animate={{ opacity: isOpen ? 0 : [1, 0.38, 1] }}
-                  transition={isOpen ? {} : { duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+                  style={{
+                    marginTop: 8, fontSize: '7px', letterSpacing: '0.22em',
+                    textTransform: 'uppercase',
+                    color: '#8C7B6B',
+                    fontFamily: '"Inter", system-ui, sans-serif',
+                  }}
+                  animate={{ opacity: [1, 0.38, 1] }}
+                  transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
                 >
-                  {isOpen ? 'Açılır…' : 'Açmaq üçün toxunun'}
+                  Açılır…
                 </motion.p>
 
-                {/* Card bottom gold rule */}
-                <div className="absolute bottom-0 left-8 right-8 h-px" style={{
+                {/* Card bottom rule */}
+                <div style={{
+                  position: 'absolute', bottom: 0, left: 24, right: 24, height: 1,
                   background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.5), transparent)',
                 }} />
+              </motion.div>
+
+              {/* ── BOTTOM CİB FOLDS (z=3) — pocket walls covering card bottom ── */}
+              {/* Left triangle fold */}
+              <div style={{
+                position: 'absolute', bottom: 0, left: 0, zIndex: 3,
+                width: 0, height: 0,
+                borderStyle: 'solid',
+                borderWidth: '0 0 93px 172px',
+                borderColor: 'transparent transparent rgba(202,192,175,0.62) transparent',
+              }} />
+              {/* Right triangle fold */}
+              <div style={{
+                position: 'absolute', bottom: 0, right: 0, zIndex: 3,
+                width: 0, height: 0,
+                borderStyle: 'solid',
+                borderWidth: '0 172px 93px 0',
+                borderColor: 'transparent rgba(202,192,175,0.62) transparent transparent',
+              }} />
+              {/* Center bottom diamond ornament */}
+              <div style={{
+                position: 'absolute', bottom: 0, left: '50%', zIndex: 3,
+                transform: 'translateX(-50%) translateY(50%) rotate(45deg)',
+                width: 9, height: 9,
+                background: 'linear-gradient(135deg, rgba(197,160,89,0.5), rgba(197,160,89,0.2))',
+                border: '1px solid rgba(197,160,89,0.4)',
+              }} />
+
+              {/* ── ENVELOPE FLAP (z=4) — üçbucaq qapaq, yuxarıdan açılır ── */}
+              <motion.div
+                style={{
+                  position: 'absolute', top: 0, left: 0, right: 0,
+                  height: '58%',
+                  transformOrigin: 'top center',
+                  transformStyle: 'preserve-3d',
+                  zIndex: 4,
+                }}
+                animate={flapOpen ? { rotateX: -180 } : { rotateX: 0 }}
+                transition={{ type: 'spring', stiffness: 50, damping: 13, mass: 1.25 }}
+              >
+                {/* Flap front face */}
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  background: ENV.flap,
+                  backfaceVisibility: 'hidden',
+                  clipPath: 'polygon(0 0, 100% 0, 50% 88%)',
+                  borderBottom: `1px solid ${ENV.edge}`,
+                }} />
+                {/* Flap light sheen */}
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  backfaceVisibility: 'hidden',
+                  clipPath: 'polygon(0 0, 100% 0, 50% 88%)',
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.24) 0%, transparent 55%)',
+                }} />
+                {/* Flap fold depth shadow */}
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  backfaceVisibility: 'hidden',
+                  clipPath: 'polygon(0 0, 100% 0, 50% 88%)',
+                  background: 'linear-gradient(to bottom, rgba(0,0,0,0.01) 0%, rgba(0,0,0,0.04) 92%, transparent 100%)',
+                }} />
+                {/* Flap back — inner lining (görünür qapaq açıldıqda) */}
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  background: ENV.flapBk,
+                  backfaceVisibility: 'hidden',
+                  transform: 'rotateX(180deg)',
+                  clipPath: 'polygon(0 0, 100% 0, 50% 88%)',
+                }} />
+
+                {/* ── WAX SEAL — flap tipinin iti ucunda ── */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-1px',
+                  left: '50%',
+                  transform: 'translateX(-50%) translateY(50%)',
+                  zIndex: 5,
+                }}>
+                  <motion.div
+                    animate={flapOpen ? { scale: 0, opacity: 0 } : { scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.22, ease: 'easeIn' }}
+                  >
+                    <WaxSeal
+                      eventType={eventType}
+                      brideName={brideName}
+                      groomName={groomName}
+                      pulse={!flapOpen}
+                    />
+                  </motion.div>
+                </div>
               </motion.div>
             </div>
 
             {/* Instruction */}
             <motion.p
-              className="text-center mt-8"
-              style={{ fontSize: '10px', letterSpacing: '0.28em', textTransform: 'uppercase', color: '#9C8B78' }}
-              animate={{ opacity: isOpen ? 0 : 1 }}
+              style={{
+                textAlign: 'center', marginTop: 28,
+                fontSize: '10px', letterSpacing: '0.28em',
+                textTransform: 'uppercase', color: '#9C8B78',
+                fontFamily: '"Inter", system-ui, sans-serif',
+              }}
+              animate={{ opacity: phase === 'idle' ? 1 : 0 }}
               transition={{ duration: 0.3 }}
             >
               Dəvətnaməni açın

@@ -30,24 +30,31 @@ function TableMesh({ position, tableNum, isSelected, onClick }) {
           opacity={0}
         />
       </mesh>
+      {/* Gold ring around table top */}
+      <mesh position={[0, 0.195, 0]}>
+        <torusGeometry args={[0.78, 0.025, 8, 64]} />
+        <meshStandardMaterial color="#C5A059" metalness={0.95} roughness={0.05} emissive="#8A6018" emissiveIntensity={isSelected ? 0.5 : 0.15} />
+      </mesh>
       {/* Table top */}
-      <mesh ref={meshRef} position={[0, 0.15, 0]}>
-        <cylinderGeometry args={[0.75, 0.75, 0.08, 48]} />
+      <mesh ref={meshRef} position={[0, 0.15, 0]} castShadow>
+        <cylinderGeometry args={[0.75, 0.75, 0.09, 64]} />
         <meshStandardMaterial
-          color={isSelected ? '#C5A059' : '#F4F1EA'}
-          roughness={0.25}
-          metalness={isSelected ? 0.3 : 0.05}
+          color={isSelected ? '#C8A44A' : '#E8E0D0'}
+          roughness={isSelected ? 0.15 : 0.35}
+          metalness={isSelected ? 0.6 : 0.08}
+          emissive={isSelected ? '#8A6018' : '#000000'}
+          emissiveIntensity={isSelected ? 0.2 : 0}
         />
       </mesh>
       {/* Table leg */}
       <mesh position={[0, -0.18, 0]}>
-        <cylinderGeometry args={[0.06, 0.06, 0.55, 12]} />
-        <meshStandardMaterial color="#DDD5C8" roughness={0.5} />
+        <cylinderGeometry args={[0.055, 0.055, 0.55, 16]} />
+        <meshStandardMaterial color="#C5A059" metalness={0.8} roughness={0.2} />
       </mesh>
       {/* Base */}
       <mesh position={[0, -0.44, 0]}>
-        <cylinderGeometry args={[0.28, 0.28, 0.04, 24]} />
-        <meshStandardMaterial color="#DDD5C8" roughness={0.5} />
+        <cylinderGeometry args={[0.3, 0.3, 0.04, 32]} />
+        <meshStandardMaterial color="#C5A059" metalness={0.85} roughness={0.15} />
       </mesh>
       {/* Table number label */}
       <Text
@@ -151,9 +158,11 @@ export default function ThreeDSeatingChart({ seatingPlan, lang }) {
 
           <Canvas dpr={[1, 2]}>
             <PerspectiveCamera makeDefault position={[0, 5.5, 6.5]} fov={45} />
-            <ambientLight intensity={0.6} />
-            <pointLight position={[0, 8, 0]} intensity={1.8} color="#fff8e7" />
-            <pointLight position={[-5, 4, 5]} intensity={0.6} color="#f0e4c0" />
+            <ambientLight intensity={0.45} color="#FFF5E0" />
+            <pointLight position={[0, 10, 0]}  intensity={2.2} color="#FFF8E7" castShadow />
+            <pointLight position={[-6, 5, 4]}  intensity={0.9} color="#FFE0A0" />
+            <pointLight position={[6, 3, -4]}  intensity={0.6} color="#C5A059" />
+            <spotLight   position={[0, 12, 0]} intensity={1.5} color="#FFDDA0" angle={0.7} penumbra={0.8} />
             <Suspense fallback={null}>
               {tables.map((table, i) => (
                 <TableMesh
@@ -164,13 +173,18 @@ export default function ThreeDSeatingChart({ seatingPlan, lang }) {
                   onClick={() => setSelectedTable(prev => prev === table.num ? null : table.num)}
                 />
               ))}
-              {/* Floor */}
-              <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.47, 0]}>
-                <planeGeometry args={[14, 14]} />
-                <meshStandardMaterial color="#1c1917" roughness={0.85} />
+              {/* Luxury dark marble floor */}
+              <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.47, 0]} receiveShadow>
+                <planeGeometry args={[18, 18]} />
+                <meshStandardMaterial color="#181410" roughness={0.55} metalness={0.22} />
               </mesh>
-              {/* Floor grid lines */}
-              <gridHelper args={[12, 12, 'rgba(197,160,89,0.08)', 'rgba(197,160,89,0.05)']} position={[0, -0.46, 0]} />
+              {/* Subtle gold grid — finer, more delicate */}
+              <gridHelper args={[14, 20, 'rgba(197,160,89,0.06)', 'rgba(197,160,89,0.04)']} position={[0, -0.46, 0]} />
+              {/* Center floor ornament ring */}
+              <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.455, 0]}>
+                <ringGeometry args={[0.8, 0.84, 64]} />
+                <meshStandardMaterial color="#C5A059" metalness={0.9} roughness={0.1} opacity={0.35} transparent />
+              </mesh>
             </Suspense>
             <OrbitControls
               enableZoom

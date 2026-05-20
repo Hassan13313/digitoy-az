@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import { ArrowLeft, MapPin, Navigation, QrCode, ExternalLink, ChevronDown } from 'lucide-react'
+import { useState, useCallback } from 'react'
+import { ArrowLeft, MapPin, Navigation, Download, ExternalLink, ChevronDown } from 'lucide-react'
+import { QRCodeSVG } from 'qrcode.react'
 import { motion, AnimatePresence } from 'framer-motion'
 import FloralBackground from './FloralBackground'
 import CountdownTimer from './CountdownTimer'
@@ -54,8 +55,57 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
     other: weddingData.eventName || tr.event_other,
   }
 
-  // Primary palette color for 3D fabric
   const fabricColor = palette.colors[0] || '#C9A88A'
+
+  const pageSlug = (window.location.pathname.match(/\/invite\/([^/?#]+)/) || [])[1] || ''
+  const photoShareUrl = pageSlug
+    ? `https://digitoy.az/invite/${pageSlug}/foto`
+    : 'https://digitoy.az'
+
+  const downloadTableCard = useCallback(() => {
+    const names = isCouple
+      ? `${weddingData.brideName || ''} & ${weddingData.groomName || ''}`
+      : weddingData.brideName || weddingData.eventName || 'Digitoy'
+    const dateStr = weddingData.date || ''
+    const qrUrl = photoShareUrl
+
+    const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="420" height="420" viewBox="0 0 420 420">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FDFAF4"/><stop offset="100%" stop-color="#F2EAD6"/></linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="transparent"/><stop offset="40%" stop-color="#C5A059"/><stop offset="60%" stop-color="#C5A059"/><stop offset="100%" stop-color="transparent"/></linearGradient>
+  </defs>
+  <rect width="420" height="420" fill="url(#bg)"/>
+  <rect x="1" y="1" width="418" height="418" fill="none" stroke="rgba(197,160,89,0.4)" stroke-width="1"/>
+  <rect x="12" y="12" width="396" height="396" fill="none" stroke="rgba(197,160,89,0.18)" stroke-width="0.5"/>
+  <!-- Corner ornaments -->
+  <path d="M22,22 L42,22 M22,22 L22,42" stroke="rgba(197,160,89,0.65)" stroke-width="1.5" fill="none"/>
+  <path d="M398,22 L378,22 M398,22 L398,42" stroke="rgba(197,160,89,0.65)" stroke-width="1.5" fill="none"/>
+  <path d="M22,398 L42,398 M22,398 L22,378" stroke="rgba(197,160,89,0.65)" stroke-width="1.5" fill="none"/>
+  <path d="M398,398 L378,398 M398,398 L398,378" stroke="rgba(197,160,89,0.65)" stroke-width="1.5" fill="none"/>
+  <!-- Title -->
+  <text x="210" y="62" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="rgba(197,160,89,0.85)" letter-spacing="4">FOTO · PAYLAŞIM</text>
+  <rect x="105" y="72" width="210" height="0.8" fill="url(#gold)"/>
+  <!-- Names -->
+  <text x="210" y="108" text-anchor="middle" font-family="Georgia,serif" font-size="22" font-weight="300" fill="#1A1A1A">${names}</text>
+  <text x="210" y="132" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="rgba(140,123,107,0.7)" letter-spacing="2">${dateStr}</text>
+  <rect x="150" y="144" width="120" height="0.6" fill="url(#gold)"/>
+  <!-- QR placeholder area -->
+  <rect x="135" y="158" width="150" height="150" rx="4" fill="white" stroke="rgba(197,160,89,0.3)" stroke-width="1"/>
+  <text x="210" y="244" text-anchor="middle" font-family="Georgia,serif" font-size="10" fill="rgba(140,123,107,0.5)">${qrUrl}</text>
+  <!-- Footer label -->
+  <rect x="105" y="320" width="210" height="0.6" fill="url(#gold)"/>
+  <text x="210" y="342" text-anchor="middle" font-family="Georgia,serif" font-size="10" fill="rgba(140,123,107,0.65)" letter-spacing="3">TOY ŞƏKİLLƏRİNİZİ PAYLAŞIN</text>
+  <text x="210" y="380" text-anchor="middle" font-family="Georgia,serif" font-size="9" fill="rgba(197,160,89,0.6)" letter-spacing="2">digitoy.az</text>
+</svg>`
+
+    const blob = new Blob([svgContent], { type: 'image/svg+xml' })
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href = url
+    a.download = `masa-karti-${pageSlug || 'digitoy'}.svg`
+    a.click()
+    URL.revokeObjectURL(url)
+  }, [weddingData, pageSlug, photoShareUrl, isCouple])
 
   return (
     <div className="relative min-h-screen bg-cream overflow-x-hidden">
@@ -222,33 +272,11 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
                 <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">Style</p>
                 <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-10">{tr.inv_dresscode}</h2>
 
-                {/* 3D animated fabric */}
+                {/* Luxury dress code showcase */}
                 <div className="mb-8">
-                  <ThreeDDressCode color={fabricColor} />
+                  <ThreeDDressCode color={fabricColor} palette={palette} lang={lang} />
                 </div>
 
-                {/* Color swatches */}
-                <div className="flex justify-center gap-5 mb-8">
-                  {palette.colors.map((color, i) => (
-                    <div key={color} className="flex flex-col items-center gap-2.5">
-                      <div
-                        className="w-10 h-10 border border-white/60 shadow-sm"
-                        style={{
-                          backgroundColor: color,
-                          borderRadius: '1px',
-                          transform: `rotate(${i % 2 === 0 ? '-4deg' : '4deg'})`,
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                        }}
-                      />
-                      <div
-                        className="w-1.5 h-1.5 rounded-full opacity-50"
-                        style={{ backgroundColor: color }}
-                      />
-                    </div>
-                  ))}
-                </div>
-
-                <p className="font-serif text-lg text-ink mb-3 font-light">{palette.label[lang]}</p>
                 <p className="text-sm text-brown-muted leading-[1.9] max-w-xs mx-auto font-light tracking-wide">
                   {weddingData.dressCodeDescription || palette.description[lang]}
                 </p>
@@ -271,15 +299,28 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
                 <GoldDividerOrnament />
 
                 <div className="inline-flex flex-col items-center mb-8">
-                  <div className="w-28 h-28 border border-gold/20 bg-beige/60 flex items-center justify-center relative mb-4">
-                    <div className="absolute inset-2 border border-gold/10" />
-                    <QrCode size={56} className="text-gold/30" strokeWidth={1} />
-                    <div className="absolute top-1.5 left-1.5 w-3.5 h-3.5 border-l border-t border-gold/50" />
-                    <div className="absolute top-1.5 right-1.5 w-3.5 h-3.5 border-r border-t border-gold/50" />
-                    <div className="absolute bottom-1.5 left-1.5 w-3.5 h-3.5 border-l border-b border-gold/50" />
-                    <div className="absolute bottom-1.5 right-1.5 w-3.5 h-3.5 border-r border-b border-gold/50" />
+                  <div className="relative mb-4" style={{ padding: 12, border: '1px solid rgba(197,160,89,0.25)', background: 'rgba(253,250,244,0.8)' }}>
+                    {/* Corner gold ornaments */}
+                    <div className="absolute top-2 left-2 w-4 h-4 border-l border-t" style={{ borderColor: 'rgba(197,160,89,0.5)' }} />
+                    <div className="absolute top-2 right-2 w-4 h-4 border-r border-t" style={{ borderColor: 'rgba(197,160,89,0.5)' }} />
+                    <div className="absolute bottom-2 left-2 w-4 h-4 border-l border-b" style={{ borderColor: 'rgba(197,160,89,0.5)' }} />
+                    <div className="absolute bottom-2 right-2 w-4 h-4 border-r border-b" style={{ borderColor: 'rgba(197,160,89,0.5)' }} />
+                    <QRCodeSVG
+                      value={photoShareUrl}
+                      size={120}
+                      bgColor="transparent"
+                      fgColor="rgba(26,20,12,0.85)"
+                      level="M"
+                    />
                   </div>
-                  <p className="text-[9px] tracking-[0.28em] uppercase text-brown-muted/60 font-medium">Scan to upload</p>
+                  <p className="text-[9px] tracking-[0.28em] uppercase text-brown-muted/60 font-medium font-sans mb-4">Scan to upload</p>
+                  <button
+                    onClick={downloadTableCard}
+                    className="inline-flex items-center gap-2 text-[9px] tracking-[0.22em] uppercase font-medium font-sans text-gold/80 hover:text-gold transition-colors border border-gold/20 hover:border-gold/40 px-4 py-2.5"
+                  >
+                    <Download size={11} strokeWidth={1.5} />
+                    Masa Kartını HD Endir
+                  </button>
                 </div>
 
                 <p className="text-sm text-brown-muted leading-[1.9] max-w-xs mx-auto mb-10 font-light tracking-wide">
