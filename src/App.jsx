@@ -9,7 +9,14 @@ const ACTIVE_UI = 'v3'
 const ADMIN_KEY = 'digitoyadmin2026'
 
 function decodeData(token) {
-  try { return JSON.parse(decodeURIComponent(escape(atob(token)))) } catch { return null }
+  try {
+    const base64 = token.replace(/-/g, '+').replace(/_/g, '/') +
+      '=='.slice(0, (4 - (token.length % 4)) % 4)
+    const binaryString = atob(base64)
+    const bytes = new Uint8Array(binaryString.length)
+    for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i)
+    return JSON.parse(new TextDecoder().decode(bytes))
+  } catch { return null }
 }
 
 /* URL-dən /invite/:slug oxu */
@@ -61,14 +68,7 @@ export default function App() {
       setIsAdmin(true)
     }
 
-    const token = params.get('data')
-    if (token) {
-      const restored = decodeData(token)
-      if (restored) {
-        setWeddingData({ ...defaultWedding, ...restored })
-        window.history.replaceState({}, '', window.location.pathname)
-      }
-    }
+    /* URL token-i burada silmirik — BuilderForm özü oxuyacaq */
   }, [])
 
   if (ACTIVE_UI === 'new') return <DigitoyOrijinalUI />

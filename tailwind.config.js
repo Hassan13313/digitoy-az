@@ -14,9 +14,11 @@ export default {
         'brown-dark': '#5C4A3A',
         ink: '#1A1A1A',
         espresso: '#2C2523',
+        'birthday-accent': '#DB2777',
+        'birthday-light': '#FCE7F3',
       },
       fontFamily: {
-        serif: ['"Playfair Display"', 'Georgia', 'serif'],
+        serif: ['"Cormorant Garamond"', '"Playfair Display"', 'Georgia', 'serif'],
         sans: ['"Inter"', 'system-ui', 'sans-serif'],
       },
       animation: {

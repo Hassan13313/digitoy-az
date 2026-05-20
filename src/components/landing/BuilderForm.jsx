@@ -544,9 +544,25 @@ function toSlug(str = '') {
     .replace(/^-+|-+$/g, '')
 }
 
-/* ── Base64 encode (BuilderForm-da istifadə) ── */
+/* ── URL-safe Base64 encode (+ → -, / → _, = silinir) ── */
 function encodeDataLocal(data) {
-  try { return btoa(unescape(encodeURIComponent(JSON.stringify(data)))) } catch { return '' }
+  try {
+    const utf8Bytes = new TextEncoder().encode(JSON.stringify(data))
+    return btoa(String.fromCharCode(...utf8Bytes))
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+  } catch { return '' }
+}
+
+/* ── URL-safe Base64 decode ── */
+function decodeDataLocal(token) {
+  try {
+    const base64 = token.replace(/-/g, '+').replace(/_/g, '/') +
+      '=='.slice(0, (4 - (token.length % 4)) % 4)
+    const binaryString = atob(base64)
+    const bytes = new Uint8Array(binaryString.length)
+    for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i)
+    return JSON.parse(new TextDecoder().decode(bytes))
+  } catch { return null }
 }
 
 export default function BuilderForm({ lang, initialData, onSubmit, isAdmin = false }) {
@@ -556,6 +572,35 @@ export default function BuilderForm({ lang, initialData, onSubmit, isAdmin = fal
   const [errors, setErrors] = useState({})
   const [generatedLiveLink, setGeneratedLiveLink] = useState('')
   const [linkCopied, setLinkCopied] = useState(false)
+  const [adminMode,   setAdminMode]   = useState(isAdmin)
+  const [isHydrated,  setIsHydrated]  = useState(false)
+
+  /* ── URL-dən data hydration (admin idarəetmə linki) ── */
+  useEffect(() => {
+    const urlParams   = new URLSearchParams(window.location.search)
+    const adminToken  = urlParams.get('admin')
+    const encodedData = urlParams.get('data')
+
+    if (adminToken === 'digitoyadmin2026') {
+      setAdminMode(true)
+      localStorage.setItem('isAdmin', 'true')
+    }
+
+    if (encodedData) {
+      try {
+        const parsedData = decodeDataLocal(encodedData)
+        if (!parsedData) throw new Error('null result')
+        console.log('Deşifrə olunan data:', parsedData)
+        setData(prev => ({ ...prev, ...parsedData }))
+        window.history.replaceState({}, '', window.location.pathname)
+      } catch (err) {
+        console.error('Datanı deşifrə edərkən xəta baş verdi. Format düzgün deyil:', err)
+      }
+    }
+
+    /* Hydration tamamlandı — digər effektlər artıq işə düşə bilər */
+    setIsHydrated(true)
+  }, [])
 
   const set = (key, val) => {
     setData((d) => ({ ...d, [key]: val }))
@@ -935,7 +980,7 @@ export default function BuilderForm({ lang, initialData, onSubmit, isAdmin = fal
       </div>
 
       {/* ── Admin İdarəetmə Paneli ── */}
-      {isAdmin && (
+      {(isAdmin || adminMode) && (
         <div className="mt-8 p-6 bg-emerald-50 border border-emerald-200 rounded-xl shadow-sm text-center">
           <h3 className="text-base font-semibold text-emerald-800 mb-1 flex items-center justify-center gap-2">
             ⚡ Rəqəmsal Admin Paneli

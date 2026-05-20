@@ -9,7 +9,9 @@ const ADMIN_WA = '994557133696'
 /* ── Base64 token ── */
 function encodeData(data) {
   try {
-    return btoa(unescape(encodeURIComponent(JSON.stringify(data))))
+    const utf8Bytes = new TextEncoder().encode(JSON.stringify(data))
+    return btoa(String.fromCharCode(...utf8Bytes))
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
   } catch {
     return ''
   }

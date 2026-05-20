@@ -10,7 +10,7 @@ import EnvelopeOpening from './EnvelopeOpening'
 import RSVPSection from './RSVPSection'
 import Guestbook from './Guestbook'
 import EventTimeline from './EventTimeline'
-import ThreeDHeroRings from './ThreeDHeroRings'
+import DynamicHeroAnimation from './DynamicHeroAnimation'
 import ThreeDSeatingChart from './ThreeDSeatingChart'
 import ThreeDDressCode from './ThreeDDressCode'
 import { DRESS_CODE_PALETTES } from '../../data/constants'
@@ -64,6 +64,7 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
         brideName={isCorp ? (weddingData.eventName || eventLabels[weddingData.eventType]) : weddingData.brideName}
         groomName={isCouple ? weddingData.groomName : null}
         eventLabel={eventLabels[weddingData.eventType] || tr.event_other}
+        eventType={weddingData.eventType || 'toy'}
         onComplete={() => setEnvelopeOpened(true)}
       />
 
@@ -156,9 +157,9 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
                   <p className="mt-5 text-[10px] tracking-[0.28em] uppercase text-gold/70 font-medium">{weddingData.venueName}</p>
                 )}
 
-                {/* 3D Rings */}
+                {/* Dynamic animation by event type */}
                 <div className="mt-10 max-w-xs mx-auto">
-                  <ThreeDHeroRings />
+                  <DynamicHeroAnimation eventType={weddingData.eventType || 'toy'} />
                 </div>
               </div>
 
@@ -168,7 +169,13 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
             </section>
 
             {/* ── COUNTDOWN ── */}
-            <CountdownTimer date={weddingData.date} time={weddingData.time} lang={lang} />
+            <CountdownTimer
+              date={weddingData.date}
+              time={weddingData.time}
+              lang={lang}
+              eventType={weddingData.eventType || 'toy'}
+              eventName={weddingData.eventName || ''}
+            />
 
             {/* ── LOCATION ── */}
             <section className="py-28 px-6 bg-cream">
