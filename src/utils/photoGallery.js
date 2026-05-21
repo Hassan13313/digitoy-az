@@ -151,13 +151,43 @@ export function downloadItem(item) {
   a.click()
 }
 
-/* ── Download all items as individual files (ZIP simulation) ── */
+/* ── Download all items as a real ZIP archive via JSZip ── */
 export async function downloadAllAsZip(items, slug) {
-  /* In local mode we trigger individual downloads sequentially.
-     With USE_SUPABASE_STORAGE=true this would be replaced by
-     a server-side ZIP endpoint or jszip streaming. */
-  for (let i = 0; i < items.length; i++) {
-    await new Promise(r => setTimeout(r, 120))
-    downloadItem(items[i])
+  if (!items.length) return
+  try {
+    const JSZip = (await import('jszip')).default
+    const zip   = new JSZip()
+    const folder = zip.folder(slug || 'digitoy-gallery')
+
+    for (const item of items) {
+      const filename = item.name || `photo_${item.id}.jpg`
+      if (item.url?.startsWith('data:')) {
+        /* Base64 data URL — extract raw base64 string */
+        const base64 = item.url.split(',')[1]
+        if (base64) folder.file(filename, base64, { base64: true })
+      } else {
+        /* Remote URL — fetch as blob */
+        try {
+          const res  = await fetch(item.url)
+          const blob = await res.blob()
+          folder.file(filename, blob)
+        } catch { /* skip unreachable items */ }
+      }
+    }
+
+    const blob   = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } })
+    const url    = URL.createObjectURL(blob)
+    const a      = document.createElement('a')
+    a.href       = url
+    a.download   = `${slug || 'digitoy'}-gallery.zip`
+    a.click()
+    URL.revokeObjectURL(url)
+  } catch (err) {
+    console.error('ZIP yaratmaq mümkün olmadı:', err)
+    /* Fallback: sequential individual downloads */
+    for (const item of items) {
+      await new Promise(r => setTimeout(r, 120))
+      downloadItem(item)
+    }
   }
 }

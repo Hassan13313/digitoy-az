@@ -1,228 +1,278 @@
 /* ══════════════════════════════════════════════════
-   LUXURY DRESS CODE — Glassmorphism 3D showcase
-   No Three.js. Pure CSS depth, shimmer, gold glow.
+   LUXURY DRESS CODE — Minimalist geyim siluetləri
+   Bədən/baş yox — yalnız geyim xətləri (stroke only)
 ══════════════════════════════════════════════════ */
 
-const STYLE_ICONS = {
-  blacktie: (
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-      {/* Bow tie */}
-      <path d="M20 16 L13 12 L13 20 L20 17Z" fill="rgba(197,160,89,0.75)"/>
-      <path d="M20 16 L27 12 L27 20 L20 17Z" fill="rgba(197,160,89,0.6)"/>
-      <path d="M20 24 L13 20 L13 28 L20 23Z" fill="rgba(197,160,89,0.6)"/>
-      <path d="M20 24 L27 20 L27 28 L20 23Z" fill="rgba(197,160,89,0.75)"/>
-      <circle cx="20" cy="20" r="2.5" fill="rgba(197,160,89,0.9)"/>
-    </svg>
-  ),
-  cocktail: (
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-      <path d="M11 10 L29 10 L21.5 23 L21.5 32 L18.5 32 L18.5 23 Z" stroke="rgba(197,160,89,0.8)" strokeWidth="1.2" fill="rgba(197,160,89,0.08)"/>
-      <line x1="14" y1="32" x2="26" y2="32" stroke="rgba(197,160,89,0.55)" strokeWidth="1.2"/>
-      <circle cx="24.5" cy="13.5" r="3" fill="none" stroke="rgba(197,160,89,0.7)" strokeWidth="1"/>
-      <path d="M22 16 L27 11" stroke="rgba(197,160,89,0.5)" strokeWidth="0.8"/>
-    </svg>
-  ),
-  smartcasual: (
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-      {/* Shirt outline */}
-      <path d="M14 11 L11 16 L15 16 L15 30 L25 30 L25 16 L29 16 L26 11 L22.5 14 L20 11 L17.5 14 Z" stroke="rgba(197,160,89,0.75)" strokeWidth="1.1" fill="rgba(197,160,89,0.07)" strokeLinejoin="round"/>
-      <line x1="20" y1="11" x2="20" y2="22" stroke="rgba(197,160,89,0.5)" strokeWidth="0.9" strokeDasharray="2 2"/>
-    </svg>
-  ),
-  creative: (
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-      <circle cx="20" cy="20" r="11" stroke="rgba(197,160,89,0.65)" strokeWidth="1" strokeDasharray="3 2.5" fill="none"/>
-      <path d="M15 17 Q20 12 25 17 Q20 22 15 17Z" fill="rgba(197,160,89,0.55)"/>
-      <path d="M15 23 Q20 28 25 23 Q20 18 15 23Z" fill="rgba(197,160,89,0.45)"/>
-      <circle cx="20" cy="20" r="2" fill="rgba(197,160,89,0.8)"/>
-    </svg>
-  ),
-  pastel: (
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-      {[0,60,120,180,240,300].map((deg,i) => {
-        const r = 11, rad = deg * Math.PI / 180
-        return <circle key={i} cx={20 + r*Math.cos(rad)} cy={20 + r*Math.sin(rad)} r="4" fill="rgba(197,160,89,0.5)"/>
-      })}
-      <circle cx="20" cy="20" r="4.5" fill="rgba(197,160,89,0.85)"/>
-    </svg>
-  ),
+/* ─── BLACK TIE ─── */
+const MaleBlackTieIcon = () => (
+  <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Smokin yaxası — sol lapel */}
+    <path d="M36 14 L22 28 L22 58 L36 58" stroke="#D4AF37" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    {/* Smokin yaxası — sağ lapel */}
+    <path d="M36 14 L50 28 L50 58 L36 58" stroke="#D4AF37" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    {/* Ağ köynək şeridi */}
+    <path d="M36 18 L32 28 L40 28 L36 18Z" stroke="#D4AF37" strokeWidth="0.9" strokeLinejoin="round" fill="rgba(255,252,240,0.08)"/>
+    {/* Kəpənək qalstuk — sol qanad */}
+    <path d="M36 30 L29 26 L29 33 L36 30Z" stroke="#D4AF37" strokeWidth="1.1" strokeLinejoin="round" fill="rgba(212,175,55,0.12)"/>
+    {/* Kəpənək qalstuk — sağ qanad */}
+    <path d="M36 30 L43 26 L43 33 L36 30Z" stroke="#D4AF37" strokeWidth="1.1" strokeLinejoin="round" fill="rgba(212,175,55,0.12)"/>
+    {/* Mərkəz düyün */}
+    <circle cx="36" cy="30" r="2" stroke="#D4AF37" strokeWidth="1" fill="rgba(212,175,55,0.25)"/>
+    {/* Düymə sırası */}
+    <circle cx="36" cy="38" r="1" stroke="#D4AF37" strokeWidth="0.8" fill="none"/>
+    <circle cx="36" cy="44" r="1" stroke="#D4AF37" strokeWidth="0.8" fill="none"/>
+    <circle cx="36" cy="50" r="1" stroke="#D4AF37" strokeWidth="0.8" fill="none"/>
+    {/* Cib yaylığı */}
+    <path d="M24 32 L24 36 L28 36 L28 33" stroke="#D4AF37" strokeWidth="0.8" fill="rgba(212,175,55,0.1)"/>
+  </svg>
+)
+
+const FemaleLongGownIcon = () => (
+  <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Uzun libas — A-kəsim */}
+    <path d="M28 16 Q36 12 44 16 L50 36 L58 66 L14 66 L22 36 Z"
+      stroke="#D4AF37" strokeWidth="1.3" strokeLinejoin="round" fill="rgba(212,175,55,0.05)"/>
+    {/* Bel xətti */}
+    <path d="M26 30 Q36 26 46 30" stroke="#D4AF37" strokeWidth="1" fill="none"/>
+    {/* Dekolte */}
+    <path d="M28 16 Q32 22 36 20 Q40 22 44 16" stroke="#D4AF37" strokeWidth="1.1" fill="none"/>
+    {/* Sol askı */}
+    <path d="M28 16 L26 10" stroke="#D4AF37" strokeWidth="1" strokeLinecap="round"/>
+    {/* Sağ askı */}
+    <path d="M44 16 L46 10" stroke="#D4AF37" strokeWidth="1" strokeLinecap="round"/>
+    {/* Etek cizgi ornamenti */}
+    <path d="M20 52 Q36 48 52 52" stroke="#D4AF37" strokeWidth="0.7" fill="none" opacity="0.6"/>
+    <path d="M17 60 Q36 56 55 60" stroke="#D4AF37" strokeWidth="0.6" fill="none" opacity="0.4"/>
+  </svg>
+)
+
+/* ─── COCKTAIL ─── */
+const MaleCocktailIcon = () => (
+  <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Modern pencək — sol */}
+    <path d="M36 16 L20 26 L20 58 L36 58" stroke="#D4AF37" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    {/* Modern pencək — sağ */}
+    <path d="M36 16 L52 26 L52 58 L36 58" stroke="#D4AF37" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    {/* Notch lapel — sol */}
+    <path d="M24 26 L30 20 L36 26 L33 32" stroke="#D4AF37" strokeWidth="1" fill="none"/>
+    {/* Notch lapel — sağ */}
+    <path d="M48 26 L42 20 L36 26 L39 32" stroke="#D4AF37" strokeWidth="1" fill="none"/>
+    {/* Ince qalstuk */}
+    <path d="M36 26 L34 30 L35 48 L36 52 L37 48 L38 30 L36 26Z"
+      stroke="#D4AF37" strokeWidth="0.9" strokeLinejoin="round" fill="rgba(212,175,55,0.1)"/>
+    {/* Cib */}
+    <path d="M22 40 L22 46 L28 46 L28 40" stroke="#D4AF37" strokeWidth="0.8" fill="none"/>
+    <path d="M44 40 L44 46 L50 46 L50 40" stroke="#D4AF37" strokeWidth="0.8" fill="none"/>
+  </svg>
+)
+
+const FemaleKocktailDressIcon = () => (
+  <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Kokteyl don — diz üstü, A-xətti */}
+    <path d="M27 14 Q36 10 45 14 L50 30 L54 56 L18 56 L22 30 Z"
+      stroke="#D4AF37" strokeWidth="1.3" strokeLinejoin="round" fill="rgba(212,175,55,0.05)"/>
+    {/* V-dekolte */}
+    <path d="M27 14 L36 26 L45 14" stroke="#D4AF37" strokeWidth="1.1" fill="none"/>
+    {/* Bel inkisi */}
+    <path d="M24 28 Q36 24 48 28" stroke="#D4AF37" strokeWidth="1" fill="none"/>
+    {/* Sol askı */}
+    <path d="M27 14 L24 8" stroke="#D4AF37" strokeWidth="1" strokeLinecap="round"/>
+    {/* Sağ askı */}
+    <path d="M45 14 L48 8" stroke="#D4AF37" strokeWidth="1" strokeLinecap="round"/>
+    {/* Etek alt hissəsi ornament */}
+    <path d="M20 48 Q36 44 52 48" stroke="#D4AF37" strokeWidth="0.7" fill="none" opacity="0.55"/>
+  </svg>
+)
+
+/* ─── SMART CASUAL ─── */
+const MaleSmartCasualIcon = () => (
+  <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Modern köynək gövdəsi */}
+    <path d="M24 20 L24 58 L48 58 L48 20" stroke="#D4AF37" strokeWidth="1.3" strokeLinecap="round" fill="none"/>
+    {/* Yaxası — button-down stil */}
+    <path d="M24 20 L30 14 L36 18 L42 14 L48 20" stroke="#D4AF37" strokeWidth="1.1" strokeLinejoin="round" fill="none"/>
+    {/* Düymə sırası */}
+    <line x1="36" y1="22" x2="36" y2="54" stroke="#D4AF37" strokeWidth="0.8" strokeDasharray="2 4"/>
+    <circle cx="36" cy="26" r="1.2" stroke="#D4AF37" strokeWidth="0.8" fill="none"/>
+    <circle cx="36" cy="34" r="1.2" stroke="#D4AF37" strokeWidth="0.8" fill="none"/>
+    <circle cx="36" cy="42" r="1.2" stroke="#D4AF37" strokeWidth="0.8" fill="none"/>
+    {/* Qollar */}
+    <path d="M24 20 L14 34 L18 36 L24 28" stroke="#D4AF37" strokeWidth="1.1" strokeLinecap="round" fill="none"/>
+    <path d="M48 20 L58 34 L54 36 L48 28" stroke="#D4AF37" strokeWidth="1.1" strokeLinecap="round" fill="none"/>
+    {/* Manjet cizgisi */}
+    <path d="M14 34 L18 36" stroke="#D4AF37" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M54 36 L58 34" stroke="#D4AF37" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+)
+
+const FemaleSmartCasualIcon = () => (
+  <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Bluz */}
+    <path d="M26 14 Q36 10 46 14 L50 34 L22 34 Z"
+      stroke="#D4AF37" strokeWidth="1.2" strokeLinejoin="round" fill="rgba(212,175,55,0.05)"/>
+    {/* Yaxası */}
+    <path d="M26 14 Q30 20 36 18 Q42 20 46 14" stroke="#D4AF37" strokeWidth="1" fill="none"/>
+    {/* Qol cizgisi — sol */}
+    <path d="M26 14 L16 28" stroke="#D4AF37" strokeWidth="1.1" strokeLinecap="round"/>
+    {/* Qol cizgisi — sağ */}
+    <path d="M46 14 L56 28" stroke="#D4AF37" strokeWidth="1.1" strokeLinecap="round"/>
+    {/* Şalvar */}
+    <path d="M22 34 L20 58 L34 58 L36 44 L38 58 L52 58 L50 34 Z"
+      stroke="#D4AF37" strokeWidth="1.2" strokeLinejoin="round" fill="rgba(212,175,55,0.04)"/>
+    {/* Bel kəməri */}
+    <path d="M22 34 L50 34" stroke="#D4AF37" strokeWidth="1.4" strokeLinecap="round"/>
+    {/* Kəmər tokası */}
+    <rect x="33" y="32" width="6" height="4" rx="1" stroke="#D4AF37" strokeWidth="0.9" fill="none"/>
+  </svg>
+)
+
+/* ─── CREATIVE ─── */
+const MaleCreativeIcon = () => (
+  <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Asimmetrik ceket — sol açıq */}
+    <path d="M36 14 L18 22 L18 58 L36 58" stroke="#D4AF37" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    {/* Asimmetrik ceket — sağ bağlı */}
+    <path d="M36 14 L54 20 L54 58 L36 58" stroke="#D4AF37" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    {/* Wide lapel — sol */}
+    <path d="M20 22 L32 14 L38 24" stroke="#D4AF37" strokeWidth="1.1" fill="none" strokeLinejoin="round"/>
+    {/* İçəridə statement collar */}
+    <path d="M30 14 Q36 20 42 14" stroke="#D4AF37" strokeWidth="1.3" fill="none"/>
+    {/* Asimmetrik düymə — yalnız bir düymə */}
+    <circle cx="38" cy="36" r="2" stroke="#D4AF37" strokeWidth="1" fill="rgba(212,175,55,0.15)"/>
+    {/* Textura / desen işarəsi */}
+    <path d="M40 46 L46 42 M40 50 L46 46 M40 54 L46 50"
+      stroke="#D4AF37" strokeWidth="0.7" strokeLinecap="round" opacity="0.5"/>
+    {/* Kənar tikiş xətti */}
+    <path d="M18 22 L16 58" stroke="#D4AF37" strokeWidth="0.6" strokeDasharray="2 3" opacity="0.5"/>
+  </svg>
+)
+
+const FemaleCreativeIcon = () => (
+  <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Asimmetrik don — bir tərəfi uzun, bir tərəfi qısa */}
+    <path d="M28 12 Q36 8 44 12 L52 34 L56 66 L40 66 L36 40 L30 58 L16 58 L22 34 Z"
+      stroke="#D4AF37" strokeWidth="1.3" strokeLinejoin="round" fill="rgba(212,175,55,0.05)"/>
+    {/* Off-shoulder dekolte */}
+    <path d="M20 16 Q36 10 52 16" stroke="#D4AF37" strokeWidth="1.2" fill="none"/>
+    {/* Sol tərəf detaylı kənar */}
+    <path d="M22 34 L16 58" stroke="#D4AF37" strokeWidth="1.3" strokeLinecap="round"/>
+    {/* Sağ tərəf uzun etek */}
+    <path d="M52 34 L56 66" stroke="#D4AF37" strokeWidth="1.3" strokeLinecap="round"/>
+    {/* Bel inkisi ornamenti */}
+    <path d="M26 28 Q36 24 46 28" stroke="#D4AF37" strokeWidth="0.9" fill="none"/>
+    {/* Asimmetrik etek ornamenti */}
+    <path d="M18 50 Q28 46 36 50" stroke="#D4AF37" strokeWidth="0.7" fill="none" opacity="0.55"/>
+    <path d="M40 56 Q48 52 56 58" stroke="#D4AF37" strokeWidth="0.7" fill="none" opacity="0.45"/>
+    {/* Statement aksesuar — broş */}
+    <circle cx="36" cy="20" r="2.5" stroke="#D4AF37" strokeWidth="1" fill="rgba(212,175,55,0.2)"/>
+    <circle cx="36" cy="20" r="1" fill="rgba(212,175,55,0.5)" stroke="none"/>
+  </svg>
+)
+
+/* ─── Outfit map ─── */
+const OUTFITS = {
+  blacktie:    { male: <MaleBlackTieIcon />,     female: <FemaleLongGownIcon />,       label: 'Black Tie' },
+  cocktail:    { male: <MaleCocktailIcon />,     female: <FemaleKocktailDressIcon />,  label: 'Cocktail' },
+  smartcasual: { male: <MaleSmartCasualIcon />,  female: <FemaleSmartCasualIcon />,    label: 'Smart Casual' },
+  creative:    { male: <MaleCreativeIcon />,     female: <FemaleCreativeIcon />,       label: 'Creative' },
 }
 
-function ColorSphere({ color, size = 48 }) {
+const getOutfit = (paletteId) => OUTFITS[paletteId] || OUTFITS.smartcasual
+
+function FigureCard({ icon, figureLabel }) {
   return (
-    <div style={{
-      width: size, height: size,
-      position: 'relative',
-      cursor: 'default',
-      filter: 'drop-shadow(0 4px 10px rgba(0,0,0,0.14))',
-      transition: 'transform 0.25s ease, filter 0.25s ease',
-    }}
-    onMouseEnter={e => {
-      e.currentTarget.style.transform = 'translateY(-4px) scale(1.08)'
-      e.currentTarget.style.filter = 'drop-shadow(0 8px 18px rgba(0,0,0,0.2))'
-    }}
-    onMouseLeave={e => {
-      e.currentTarget.style.transform = ''
-      e.currentTarget.style.filter = 'drop-shadow(0 4px 10px rgba(0,0,0,0.14))'
-    }}
-    >
-      {/* Gold ring */}
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
       <div style={{
-        position: 'absolute', inset: 0, borderRadius: '50%',
-        padding: 4,
-        background: 'conic-gradient(from 45deg, rgba(197,160,89,0.8), rgba(230,200,130,0.95), rgba(180,140,60,0.7), rgba(230,200,130,0.95), rgba(197,160,89,0.8))',
-        boxShadow: '0 0 0 1px rgba(197,160,89,0.2), 0 2px 8px rgba(197,160,89,0.2)',
+        width: 112, height: 112,
+        borderRadius: '50%',
+        background: 'rgba(255,255,255,0.05)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+        border: '1px solid rgba(212,175,55,0.15)',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.1)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        position: 'relative',
+        overflow: 'hidden',
       }}>
-        {/* Color fill */}
+        {/* İç parıltı */}
         <div style={{
-          width: '100%', height: '100%',
-          borderRadius: '50%',
-          background: `radial-gradient(circle at 32% 28%, color-mix(in srgb, ${color} 60%, white 40%) 0%, ${color} 50%, color-mix(in srgb, ${color} 85%, black 15%) 100%)`,
-          boxShadow: 'inset 0 -3px 8px rgba(0,0,0,0.25), inset 0 2px 4px rgba(255,255,255,0.3)',
-          position: 'relative', overflow: 'hidden',
-        }}>
-          {/* Specular highlight */}
-          <div style={{
-            position: 'absolute', top: '15%', left: '20%',
-            width: '36%', height: '22%',
-            borderRadius: '50%',
-            background: 'radial-gradient(ellipse, rgba(255,255,255,0.55) 0%, transparent 80%)',
-            transform: 'rotate(-20deg)',
-            filter: 'blur(1px)',
-          }} />
-        </div>
+          position: 'absolute', inset: 0, borderRadius: '50%',
+          background: 'radial-gradient(circle at 50% 30%, rgba(212,175,55,0.1) 0%, transparent 65%)',
+          pointerEvents: 'none',
+        }} />
+        {icon}
       </div>
+      <p style={{
+        fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase',
+        color: 'rgba(212,175,55,0.6)', fontFamily: '"Inter",system-ui,sans-serif',
+        fontWeight: 500,
+      }}>
+        {figureLabel}
+      </p>
     </div>
   )
 }
 
-export default function ThreeDDressCode({ color = '#C9A88A', palette, lang }) {
-  const styleKey = palette?.id || 'smartcasual'
-  const iconEl   = STYLE_ICONS[styleKey] || STYLE_ICONS.smartcasual
-  const colors   = palette?.colors || [color]
-  const label    = palette?.label?.[lang] || palette?.label?.az || ''
+export default function ThreeDDressCode({ palette, lang }) {
+  const paletteId = palette?.id || 'smartcasual'
+  const outfit    = getOutfit(paletteId)
+  const label     = palette?.label?.[lang] || palette?.label?.az || outfit.label
 
   return (
     <div style={{
+      maxWidth: 420, margin: '0 auto',
+      background: 'rgba(255,255,255,0.04)',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
+      border: '1px solid rgba(212,175,55,0.15)',
+      borderRadius: 20,
+      boxShadow: '0 8px 48px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.12)',
+      padding: '28px 28px 24px',
       position: 'relative',
-      background: 'linear-gradient(145deg, #FBF8F0 0%, #F6EFE0 50%, #EDE4CE 100%)',
-      border: '1px solid rgba(197,160,89,0.2)',
       overflow: 'hidden',
     }}>
-      {/* Background shimmer bands */}
+      {/* Ambient glow */}
       <div style={{
-        position: 'absolute', inset: 0, pointerEvents: 'none',
-        background: 'repeating-linear-gradient(115deg, transparent, transparent 40px, rgba(255,255,255,0.04) 40px, rgba(255,255,255,0.04) 41px)',
+        position: 'absolute', inset: 0, pointerEvents: 'none', borderRadius: 20,
+        background: 'radial-gradient(ellipse 70% 40% at 50% 15%, rgba(212,175,55,0.07) 0%, transparent 70%)',
       }} />
 
-      {/* Glassmorphism top panel */}
+      {/* Üst qızılı xətt */}
       <div style={{
-        position: 'relative',
-        margin: '24px 24px 0',
-        background: 'rgba(255,255,255,0.42)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        border: '1px solid rgba(255,255,255,0.7)',
-        borderBottom: '1px solid rgba(197,160,89,0.15)',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.85)',
-        padding: '20px 20px 18px',
-        display: 'flex', alignItems: 'center', gap: 18,
-      }}>
-        {/* Style icon container — 3D depth */}
-        <div style={{
-          width: 64, height: 64, flexShrink: 0,
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.8), rgba(253,250,244,0.6))',
-          border: '1px solid rgba(197,160,89,0.28)',
-          borderBottom: '1px solid rgba(197,160,89,0.4)',
-          boxShadow: `
-            0 8px 20px rgba(0,0,0,0.08),
-            0 2px 4px rgba(0,0,0,0.04),
-            inset 0 1px 2px rgba(255,255,255,0.9),
-            0 0 0 1px rgba(197,160,89,0.08)
-          `,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          borderRadius: 2,
-          transform: 'perspective(200px) rotateY(-4deg)',
-        }}>
-          {iconEl}
-        </div>
-        {/* Label area */}
-        <div style={{ flex: 1 }}>
-          <p style={{
-            fontSize: 8, letterSpacing: '0.3em', textTransform: 'uppercase',
-            color: 'rgba(197,160,89,0.85)', marginBottom: 6,
-            fontFamily: '"Inter",system-ui,sans-serif', fontWeight: 500,
-          }}>
-            Dress Code · Style
-          </p>
-          {label && (
-            <p style={{
-              fontFamily: '"Cormorant Garamond","Playfair Display",Georgia,serif',
-              fontSize: 18, fontWeight: 300, fontStyle: 'italic',
-              color: '#1C1610', letterSpacing: '0.03em', lineHeight: 1.2,
-            }}>
-              {label}
-            </p>
-          )}
-          {/* Gold rule */}
-          <div style={{
-            height: 1, marginTop: 10,
-            background: 'linear-gradient(to right, rgba(197,160,89,0.5), transparent)',
-          }} />
-        </div>
-      </div>
+        position: 'absolute', top: 0, left: '15%', right: '15%', height: 1,
+        background: 'linear-gradient(to right, transparent, rgba(212,175,55,0.7) 40%, rgba(212,175,55,0.9) 50%, rgba(212,175,55,0.7) 60%, transparent)',
+      }} />
 
-      {/* Color spheres panel */}
-      <div style={{
-        margin: '0 24px 24px',
-        background: 'rgba(255,255,255,0.28)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
-        border: '1px solid rgba(255,255,255,0.6)',
-        borderTop: 'none',
-        boxShadow: '0 6px 20px rgba(0,0,0,0.05)',
-        padding: '22px 20px',
-      }}>
+      {/* Başlıq */}
+      <div style={{ textAlign: 'center', marginBottom: 24, position: 'relative' }}>
         <p style={{
-          fontSize: 8, letterSpacing: '0.28em', textTransform: 'uppercase',
-          color: 'rgba(140,123,107,0.65)', marginBottom: 18, textAlign: 'center',
-          fontFamily: '"Inter",system-ui,sans-serif', fontWeight: 500,
+          fontSize: 8, letterSpacing: '0.4em', textTransform: 'uppercase',
+          color: 'rgba(212,175,55,0.7)', fontFamily: '"Inter",system-ui,sans-serif',
+          fontWeight: 600, marginBottom: 8,
         }}>
-          Color Palette
+          Dress Code
+        </p>
+        <p style={{
+          fontFamily: '"Cormorant Garamond","Playfair Display",Georgia,serif',
+          fontSize: 22, fontWeight: 300, fontStyle: 'italic',
+          color: '#1C1610', letterSpacing: '0.04em', lineHeight: 1.2,
+        }}>
+          {label}
         </p>
         <div style={{
-          display: 'flex', justifyContent: 'center',
-          gap: 20, flexWrap: 'wrap',
-        }}>
-          {colors.map((c, i) => (
-            <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-              <ColorSphere color={c} size={52} />
-              <span style={{
-                fontSize: 7.5, letterSpacing: '0.08em',
-                color: 'rgba(140,123,107,0.6)', textTransform: 'uppercase',
-                fontFamily: '"Inter",system-ui,sans-serif',
-              }}>
-                {c}
-              </span>
-            </div>
-          ))}
-        </div>
+          height: 1, marginTop: 14,
+          background: 'linear-gradient(to right, transparent, rgba(212,175,55,0.4) 30%, rgba(212,175,55,0.55) 50%, rgba(212,175,55,0.4) 70%, transparent)',
+        }} />
       </div>
 
-      {/* Shimmer sweep animation */}
+      {/* Geyim ikonları */}
       <div style={{
-        position: 'absolute', inset: 0, pointerEvents: 'none',
-        background: 'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.14) 50%, transparent 70%)',
-        animation: 'glassmorphism-sweep 5s ease-in-out infinite',
-      }} />
-
-      <style>{`
-        @keyframes glassmorphism-sweep {
-          0%   { transform: translateX(-100%); }
-          60%  { transform: translateX(250%);  }
-          100% { transform: translateX(250%);  }
-        }
-      `}</style>
+        display: 'flex', justifyContent: 'center', gap: 28,
+        position: 'relative',
+      }}>
+        <FigureCard icon={outfit.male}   figureLabel="Kişi" />
+        <FigureCard icon={outfit.female} figureLabel="Qadın" />
+      </div>
     </div>
   )
 }

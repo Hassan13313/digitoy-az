@@ -2,81 +2,17 @@ import { useState } from 'react'
 import { Eye, MessageCircle, Edit2, Calendar, MapPin, Shirt, Users, Image, ListOrdered, ShieldCheck, Copy, Check } from 'lucide-react'
 import { DRESS_CODE_PALETTES } from '../../data/constants'
 import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
+import { encodeData, buildWhatsAppUrl } from '../../utils/whatsappOrder'
 import t from '../../data/translations'
 
 const ADMIN_WA = '994557133696'
 
-/* ── Base64 token ── */
-function encodeData(data) {
-  try {
-    const utf8Bytes = new TextEncoder().encode(JSON.stringify(data))
-    return btoa(String.fromCharCode(...utf8Bytes))
-      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-  } catch {
-    return ''
-  }
-}
-
-/* ── Dress code labels ── */
-const DRESS_LABELS = {
-  blacktie: 'Black Tie', cocktail: 'Cocktail',
-  smartcasual: 'Smart Casual', creative: 'Creative',
-}
+/* ── Dress code colors (lokal, yalnız vizual üçün) ── */
 const DRESS_COLORS = {
   blacktie:    ['#1A1A1A', '#F5F5F5', '#C9A84C'],
   cocktail:    ['#C4956A', '#E8D5C4', '#8B6347'],
   smartcasual: ['#6B8CAE', '#D4E4F0', '#4A6B8A'],
   creative:    ['#9B6B9B', '#F0C4D4', '#6B9B6B'],
-}
-
-/* ── WhatsApp mesaj formatı (adminin telefonuna gedir) ── */
-function buildWhatsAppMessage(data, lang) {
-  const tr = t[lang]
-  const isCouple = ['toy', 'nishan'].includes(data.eventType)
-  const isCorp   = ['corporate', 'other'].includes(data.eventType)
-  const eventLabels = {
-    toy: t.az.event_toy, nishan: t.az.event_nishan,
-    birthday: t.az.event_birthday, corporate: t.az.event_corporate,
-    other: data.eventName || t.az.event_other,
-  }
-  const { formattedDate, dayName } = formatAzDate(data.date, lang)
-  const dateStr = dayName ? `${formattedDate} — ${dayName}` : formattedDate
-  const timeStr = formatTime24(data.time)
-
-  const paletteObj = DRESS_CODE_PALETTES.find(p => p.id === data.dressCodePalette)
-  const dressLabel = paletteObj?.label[lang] || DRESS_LABELS[data.dressCodePalette] || data.dressCodePalette || '—'
-
-  const programCount = (data.programSteps || []).filter(r => r.time || r.activity).length
-
-  const token = encodeData(data)
-  const adminLink = `${window.location.origin}/builder?admin=digitoyadmin2026&data=${token}`
-
-  let nameLines = ''
-  if (isCouple) {
-    nameLines = `👰 Gəlin: ${data.brideName || '—'}\n🤵 Bəy: ${data.groomName || '—'}`
-  } else if (isCorp) {
-    nameLines = `🏢 Tədbir adı: ${data.eventName || '—'}`
-    if (data.organizer?.trim()) nameLines += `\n👤 Təşkilatçı: ${data.organizer}`
-  } else {
-    nameLines = `👤 Ad: ${data.brideName || '—'}`
-  }
-
-  const lines = [
-    `🤵‍♂️👰‍♀️ YENİ SİFARİŞ (Digitoy.az)`,
-    `----------------------------------`,
-    `✨ Tədbir: ${eventLabels[data.eventType] || data.eventType}`,
-    nameLines,
-    `📅 Tarix: ${dateStr}`,
-    `🕒 Saat: ${timeStr}`,
-    `📍 Məkan: ${data.venueName || '—'}`,
-    `👗 Geyim: ${dressLabel}`,
-    `📋 Proqram: ${programCount > 0 ? `${programCount} sətir daxil edilib` : 'daxil edilməyib'}`,
-    `----------------------------------`,
-    `🔗 Sifarişin İdarəetmə Linki (Sırf Admin Üçün):`,
-    adminLink,
-  ]
-
-  return encodeURIComponent(lines.join('\n'))
 }
 
 /* ── Admin paneli: linki kopyala düyməsi ── */
@@ -116,8 +52,7 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
   const dateDisplay = dayName ? `${formattedDate} — ${dayName}` : formattedDate
 
   /* WhatsApp link — adminin nömrəsinə gedir */
-  const waText = buildWhatsAppMessage(data, lang)
-  const waLink = `https://wa.me/${ADMIN_WA}?text=${waText}`
+  const waLink = buildWhatsAppUrl(data, lang, ADMIN_WA)
 
   /* Admin üçün idarəetmə linki */
   const token     = encodeData(data)

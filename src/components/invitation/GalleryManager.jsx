@@ -5,6 +5,7 @@
    100+ media — lazy load, no freeze
 ══════════════════════════════════════════════════ */
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Trash2, CheckSquare, Square, Download, Archive,
@@ -95,7 +96,7 @@ function LazyMedia({ item, selected, onToggle, onDelete, onPreview }) {
             onClick={e => e.stopPropagation()}
           >
             <button
-              onClick={() => onDelete(item.id)}
+              onClick={(e) => { e.stopPropagation(); onDelete(item.id) }}
               style={{
                 width: 28, height: 28, borderRadius: 2,
                 background: 'rgba(180,40,40,0.85)', border: 'none', cursor: 'pointer',
@@ -106,7 +107,7 @@ function LazyMedia({ item, selected, onToggle, onDelete, onPreview }) {
               <Trash2 size={12} color="white" strokeWidth={2} />
             </button>
             <button
-              onClick={() => downloadItem(item)}
+              onClick={(e) => { e.stopPropagation(); downloadItem(item) }}
               style={{
                 width: 28, height: 28, borderRadius: 2,
                 background: 'rgba(197,160,89,0.85)', border: 'none', cursor: 'pointer',
@@ -138,7 +139,7 @@ function LazyMedia({ item, selected, onToggle, onDelete, onPreview }) {
   )
 }
 
-/* ── Lightbox ── */
+/* ── Lightbox — React Portal ilə document.body-ə render olunur ── */
 function Lightbox({ item, onClose }) {
   useEffect(() => {
     const fn = (e) => { if (e.key === 'Escape') onClose() }
@@ -146,53 +147,84 @@ function Lightbox({ item, onClose }) {
     return () => window.removeEventListener('keydown', fn)
   }, [onClose])
 
-  return (
+  return createPortal(
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
       style={{
-        position: 'fixed', inset: 0, zIndex: 9999,
-        background: 'rgba(10,8,5,0.92)',
+        position: 'fixed', inset: 0, zIndex: 99999,
+        background: 'rgba(6,4,2,0.85)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 24,
       }}
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.9 }}
-        animate={{ scale: 1 }}
-        exit={{ scale: 0.9 }}
-        transition={{ type: 'spring', stiffness: 220, damping: 24 }}
+        initial={{ scale: 0.88, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.92, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 240, damping: 26 }}
         style={{ position: 'relative', maxWidth: '90vw', maxHeight: '90vh' }}
         onClick={e => e.stopPropagation()}
       >
+        {/* Media */}
         {item.type?.startsWith('video/') ? (
-          <video src={item.url} controls autoPlay style={{ maxWidth: '90vw', maxHeight: '85vh', display: 'block' }} />
+          <video
+            src={item.url} controls autoPlay
+            style={{
+              maxWidth: '90vw', maxHeight: '82vh', display: 'block',
+              border: '1px solid rgba(197,160,89,0.2)',
+              boxShadow: '0 40px 100px rgba(0,0,0,0.75)',
+            }}
+          />
         ) : (
-          <img src={item.url} alt={item.name} style={{ maxWidth: '90vw', maxHeight: '85vh', display: 'block', objectFit: 'contain' }} />
+          <img
+            src={item.url} alt={item.name}
+            style={{
+              maxWidth: '90vw', maxHeight: '82vh', display: 'block', objectFit: 'contain',
+              border: '1px solid rgba(197,160,89,0.2)',
+              boxShadow: '0 40px 100px rgba(0,0,0,0.75)',
+            }}
+          />
         )}
+
+        {/* Premium close button */}
         <button
           onClick={onClose}
           style={{
-            position: 'absolute', top: -14, right: -14,
-            width: 32, height: 32,
-            background: 'rgba(197,160,89,0.9)', border: 'none', cursor: 'pointer',
+            position: 'absolute', top: -18, right: -18,
+            width: 36, height: 36,
+            background: 'rgba(197,160,89,0.12)',
+            border: '1px solid rgba(197,160,89,0.5)',
+            backdropFilter: 'blur(8px)',
+            cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            borderRadius: 2,
+            transition: 'background 0.18s, border-color 0.18s',
           }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(197,160,89,0.28)'; e.currentTarget.style.borderColor = 'rgba(197,160,89,0.8)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(197,160,89,0.12)'; e.currentTarget.style.borderColor = 'rgba(197,160,89,0.5)' }}
         >
-          <X size={15} color="white" strokeWidth={2} />
+          <X size={15} color="rgba(197,160,89,1)" strokeWidth={2} />
         </button>
-        <p style={{
-          position: 'absolute', bottom: -28, left: 0, right: 0, textAlign: 'center',
-          fontSize: 10, letterSpacing: '0.12em', color: 'rgba(255,255,255,0.35)',
-          fontFamily: '"Inter",system-ui,sans-serif',
-        }}>
-          {item.name}
-        </p>
+
+        {/* Caption */}
+        {item.name && (
+          <p style={{
+            position: 'absolute', bottom: -30, left: 0, right: 0, textAlign: 'center',
+            fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase',
+            color: 'rgba(197,160,89,0.4)',
+            fontFamily: '"Inter",system-ui,sans-serif',
+          }}>
+            {item.name}
+          </p>
+        )}
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body,
   )
 }
 

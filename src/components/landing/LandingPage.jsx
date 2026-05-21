@@ -10,17 +10,28 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
   const tr = t[lang]
   const [showPreview, setShowPreview] = useState(false)
   const [formData, setFormData] = useState(weddingData)
+  const [returnToStep, setReturnToStep] = useState(null)
 
   const handleFormSubmit = (data) => {
     setFormData(data)
     setWeddingData(data)
+    setReturnToStep(null)
     setShowPreview(true)
     setTimeout(() => {
       document.getElementById('builder-section')?.scrollIntoView({ behavior: 'smooth' })
     }, 100)
   }
 
+  const handleEditFromPreview = () => {
+    setReturnToStep(6)
+    setShowPreview(false)
+    setTimeout(() => {
+      document.getElementById('builder-section')?.scrollIntoView({ behavior: 'smooth' })
+    }, 100)
+  }
+
   const scrollToBuilder = () => {
+    setReturnToStep(null)
     setShowPreview(false)
     document.getElementById('builder-section')?.scrollIntoView({ behavior: 'smooth' })
   }
@@ -77,7 +88,7 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
             <Preview
               lang={lang}
               data={formData}
-              onEdit={() => setShowPreview(false)}
+              onEdit={handleEditFromPreview}
               onView={onViewInvitation}
               isAdmin={isAdmin}
             />
@@ -85,6 +96,7 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
             <BuilderForm
               lang={lang}
               initialData={formData}
+              initialStep={returnToStep}
               onSubmit={handleFormSubmit}
               isAdmin={isAdmin}
             />

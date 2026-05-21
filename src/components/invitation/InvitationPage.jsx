@@ -13,7 +13,8 @@ import Guestbook from './Guestbook'
 import EventTimeline from './EventTimeline'
 import DynamicHeroAnimation from './DynamicHeroAnimation'
 import ThreeDDressCode from './ThreeDDressCode'
-import { DRESS_CODE_PALETTES } from '../../data/constants'
+import { DRESS_CODE_PALETTES, WHATSAPP_NUMBER } from '../../data/constants'
+import { buildWhatsAppUrl } from '../../utils/whatsappOrder'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
 import { formatAzDate, formatFullDateByLang, formatTime24 } from '../../utils/dateFormat'
 import t from '../../data/translations'
@@ -48,6 +49,14 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
   const isCouple = ['toy', 'nishan'].includes(weddingData.eventType)
   const isCorp   = ['corporate', 'other'].includes(weddingData.eventType)
 
+  /* ── slug helper (mirrors BuilderForm.toSlug) ── */
+  function toSlug(str = '') {
+    return str.toLowerCase()
+      .replace(/ç/g,'c').replace(/ğ/g,'g').replace(/[ışı]/g,'i')
+      .replace(/ö/g,'o').replace(/ş/g,'s').replace(/ü/g,'u')
+      .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'davetname'
+  }
+
   const eventLabels = {
     toy: tr.event_toy, nishan: tr.event_nishan,
     birthday: tr.event_birthday, corporate: tr.event_corporate,
@@ -57,9 +66,14 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
   const fabricColor = palette.colors[0] || '#C9A88A'
 
   const pageSlug = (window.location.pathname.match(/\/invite\/([^/?#]+)/) || [])[1] || ''
-  const photoShareUrl = pageSlug
-    ? `https://digitoy.az/invite/${pageSlug}/foto`
-    : 'https://digitoy.az'
+  const effectiveSlug = pageSlug || (
+    isCouple
+      ? `${toSlug(weddingData.brideName || '')}-ve-${toSlug(weddingData.groomName || '')}`
+      : isCorp
+        ? toSlug(weddingData.eventName || 'tedbir')
+        : toSlug(weddingData.brideName || 'davetname')
+  )
+  const photoShareUrl = `${window.location.origin}/invite/${effectiveSlug}/foto`
 
   const downloadTableCard = useCallback(() => {
     const names = isCouple
@@ -101,10 +115,15 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
     const url  = URL.createObjectURL(blob)
     const a    = document.createElement('a')
     a.href = url
-    a.download = `masa-karti-${pageSlug || 'digitoy'}.svg`
+    a.download = `masa-karti-${effectiveSlug || 'digitoy'}.svg`
     a.click()
     URL.revokeObjectURL(url)
-  }, [weddingData, pageSlug, photoShareUrl, isCouple])
+  }, [weddingData, effectiveSlug, photoShareUrl, isCouple])
+
+  /* ── WhatsApp sifariş — Preview.jsx ilə eyni mərkəzi funksiya ── */
+  const handleWhatsAppOrder = useCallback(() => {
+    window.open(buildWhatsAppUrl(weddingData, lang, WHATSAPP_NUMBER), '_blank')
+  }, [weddingData, lang])
 
   return (
     <div className="relative min-h-screen bg-cream overflow-x-hidden">
@@ -331,6 +350,105 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
 
             {/* ── GUESTBOOK ── */}
             <Guestbook lang={lang} />
+
+            {/* ── SİFARİŞ EKRANI — yalnız preview modunda görünür ── */}
+            {!pageSlug && (
+              <SectionWrapper>
+                <section style={{
+                  padding: '96px 24px',
+                  background: 'linear-gradient(180deg, #F8F3E8 0%, #EDE3CC 100%)',
+                  textAlign: 'center',
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}>
+                  {/* Ambient glow */}
+                  <div style={{
+                    position: 'absolute', inset: 0, pointerEvents: 'none',
+                    background: 'radial-gradient(ellipse 70% 50% at 50% 40%, rgba(197,160,89,0.12) 0%, transparent 70%)',
+                  }} />
+
+                  {/* Üst ornament */}
+                  <div style={{
+                    position: 'absolute', top: 0, left: 0, right: 0, height: 1,
+                    background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.7) 30%, rgba(197,160,89,1) 50%, rgba(197,160,89,0.7) 70%, transparent)',
+                  }} />
+
+                  <div className="max-w-lg mx-auto relative">
+                    {/* Künc ornamentləri */}
+                    <div style={{ position: 'absolute', top: -32, left: 0, width: 24, height: 24, borderTop: '1px solid rgba(197,160,89,0.5)', borderLeft: '1px solid rgba(197,160,89,0.5)' }} />
+                    <div style={{ position: 'absolute', top: -32, right: 0, width: 24, height: 24, borderTop: '1px solid rgba(197,160,89,0.5)', borderRight: '1px solid rgba(197,160,89,0.5)' }} />
+                    <div style={{ position: 'absolute', bottom: -32, left: 0, width: 24, height: 24, borderBottom: '1px solid rgba(197,160,89,0.5)', borderLeft: '1px solid rgba(197,160,89,0.5)' }} />
+                    <div style={{ position: 'absolute', bottom: -32, right: 0, width: 24, height: 24, borderBottom: '1px solid rgba(197,160,89,0.5)', borderRight: '1px solid rgba(197,160,89,0.5)' }} />
+
+                    <p style={{
+                      fontSize: 9, letterSpacing: '0.42em', textTransform: 'uppercase',
+                      color: 'rgba(197,160,89,0.85)', fontFamily: '"Inter",system-ui,sans-serif',
+                      fontWeight: 600, marginBottom: 20,
+                    }}>
+                      Digitoy.az · Premium
+                    </p>
+
+                    <div className="gold-divider mb-8 max-w-[60px] mx-auto" />
+
+                    <h2 style={{
+                      fontFamily: '"Cormorant Garamond","Playfair Display",Georgia,serif',
+                      fontSize: 36, fontWeight: 300, color: '#1A140C',
+                      letterSpacing: '-0.01em', lineHeight: 1.15, marginBottom: 16,
+                    }}>
+                      Dəvətnaməniz Hazırdır!
+                    </h2>
+
+                    <p style={{
+                      fontSize: 14, color: 'rgba(80,68,58,0.72)', fontFamily: '"Inter",system-ui,sans-serif',
+                      fontWeight: 300, lineHeight: 1.75, marginBottom: 40,
+                      letterSpacing: '0.01em',
+                    }}>
+                      Dizaynı tamamladınız. İndi tək bir toxunuşla dəvətnamənizi
+                      <br />sifariş verib canlıya ala bilərsiniz.
+                    </p>
+
+                    {/* WhatsApp sifariş düyməsi */}
+                    <motion.button
+                      type="button"
+                      onClick={handleWhatsAppOrder}
+                      whileHover={{ scale: 1.03, y: -2 }}
+                      whileTap={{ scale: 0.97 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 12,
+                        padding: '18px 44px',
+                        background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)',
+                        border: 'none', cursor: 'pointer',
+                        fontSize: 11, letterSpacing: '0.28em', textTransform: 'uppercase',
+                        color: 'white', fontFamily: '"Inter",system-ui,sans-serif', fontWeight: 700,
+                        boxShadow: '0 12px 48px rgba(37,211,102,0.38), 0 4px 16px rgba(0,0,0,0.12)',
+                        marginBottom: 20,
+                      }}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                      </svg>
+                      Dəvətnaməni Sifariş Ver
+                    </motion.button>
+
+                    <p style={{
+                      fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase',
+                      color: 'rgba(140,123,107,0.45)', fontFamily: '"Inter",system-ui,sans-serif',
+                    }}>
+                      WhatsApp vasitəsilə birbaşa əlaqə
+                    </p>
+
+                    <div className="gold-divider mt-8 max-w-[60px] mx-auto" />
+                  </div>
+
+                  {/* Alt ornament */}
+                  <div style={{
+                    position: 'absolute', bottom: 0, left: 0, right: 0, height: 1,
+                    background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.5) 40%, rgba(197,160,89,0.7) 50%, rgba(197,160,89,0.5) 60%, transparent)',
+                  }} />
+                </section>
+              </SectionWrapper>
+            )}
 
             {/* ── FOOTER ── */}
             <footer className="py-16 px-6 bg-espresso text-center">

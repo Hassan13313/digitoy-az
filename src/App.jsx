@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import LandingPage from './components/landing/LandingPage'
 import InvitationPage from './components/invitation/InvitationPage'
 import PhotoShare from './components/invitation/PhotoShare'
+import GalleryPage from './components/invitation/GalleryPage'
 import DigitoyOrijinalUI from './components/DigitoyOrijinalUI'
 import { defaultWedding } from './data/defaultWedding'
 import './App.css'
@@ -27,7 +28,7 @@ function parseInviteSlug() {
 }
 
 export default function App() {
-  const [view,        setView]        = useState('landing')   // 'landing' | 'invitation' | 'invite'
+  const [view,        setView]        = useState('landing')   // 'landing' | 'invitation' | 'invite' | 'photo' | 'gallery-page'
   const [lang,        setLang]        = useState('az')
   const [weddingData, setWeddingData] = useState(defaultWedding)
   const [isAdmin,     setIsAdmin]     = useState(false)
@@ -38,6 +39,11 @@ export default function App() {
       /* foto paylaşım alt-route */
       if (sub === 'foto') {
         setView('photo')
+        return
+      }
+      /* qalereya idarəetmə alt-route */
+      if (sub === 'qalereya-idare') {
+        setView('gallery-page')
         return
       }
       const stored = localStorage.getItem(`wedding_${slug}`)
@@ -78,6 +84,10 @@ export default function App() {
 
   if (view === 'photo') {
     return <PhotoShare />
+  }
+
+  if (view === 'gallery-page') {
+    return <GalleryPage />
   }
 
   if (view === 'invite') {

@@ -55,7 +55,7 @@ const t = {
     waze_label: 'Waze linki',
     palette_label: 'Rəng paleti',
     dresscode_desc_label: 'Geyim kodu haqqında qeyd (ixtiyari)',
-    dresscode_placeholder: 'Məs: Açıq rənglər tövsiyə olunur...',
+    dresscode_placeholder: 'Məs: Pastel çalarlarda geyinməyiniz xahiş olunur. Ağ rəngdən çəkinin.',
     seating_label: 'Oturma planı',
     seating_placeholder: 'Masa 1: Əli, Leyla; Masa 2: Murad, Günay',
     seating_help: 'Masaları ";" ilə, qonaqları "," ilə ayırın',
