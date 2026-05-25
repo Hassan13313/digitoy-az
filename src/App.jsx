@@ -5,6 +5,7 @@ import PhotoShare from './components/invitation/PhotoShare'
 import GalleryPage from './components/invitation/GalleryPage'
 import DigitoyOrijinalUI from './components/DigitoyOrijinalUI'
 import { defaultWedding } from './data/defaultWedding'
+import { getInvitation, saveInvitation } from './utils/api'
 import './App.css'
 
 const ACTIVE_UI = 'v3'
@@ -28,47 +29,15 @@ function parseInviteSlug() {
 }
 
 export default function App() {
-  const [view,        setView]        = useState('landing')   // 'landing' | 'invitation' | 'invite' | 'photo' | 'gallery-page'
+  const [view,        setView]        = useState('loading')
   const [lang,        setLang]        = useState('az')
   const [weddingData, setWeddingData] = useState(defaultWedding)
   const [isAdmin,     setIsAdmin]     = useState(false)
 
   useEffect(() => {
     const { slug, sub } = parseInviteSlug()
-    if (slug) {
-      /* foto paylaşım alt-route */
-      if (sub === 'foto') {
-        setView('photo')
-        return
-      }
-      /* qalereya idarəetmə alt-route */
-      if (sub === 'qalereya-idare') {
-        setView('gallery-page')
-        return
-      }
-      const stored = localStorage.getItem(`wedding_${slug}`)
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored)
-          setWeddingData({ ...defaultWedding, ...parsed })
-          setView('invite')
-          return
-        } catch {}
-      }
-      const params = new URLSearchParams(window.location.search)
-      const token  = params.get('data')
-      if (token) {
-        const decoded = decodeData(token)
-        if (decoded) {
-          setWeddingData({ ...defaultWedding, ...decoded })
-          localStorage.setItem(`wedding_${slug}`, JSON.stringify(decoded))
-          setView('invite')
-          return
-        }
-      }
-    }
 
-    /* ── Admin URL parametrləri ── */
+    /* ── Admin parametrləri ── */
     const params = new URLSearchParams(window.location.search)
     if (params.get('admin') === ADMIN_KEY) {
       localStorage.setItem('isAdmin', 'true')
@@ -77,10 +46,63 @@ export default function App() {
       setIsAdmin(true)
     }
 
-    /* URL token-i burada silmirik — BuilderForm özü oxuyacaq */
+    if (slug) {
+      if (sub === 'foto') { setView('photo'); return }
+      if (sub === 'qalereya-idare') { setView('gallery-page'); return }
+
+      /* ── Mərkəzi server-dən yüklə ── */
+      const loadFromServer = async () => {
+        try {
+          const data = await getInvitation(slug)
+          if (data) {
+            setWeddingData({ ...defaultWedding, ...data })
+            setView('invite')
+            return
+          }
+        } catch { /* server əlçatmaz → fallback */ }
+
+        /* ── Fallback: URL ?data token (admin linki) ── */
+        const token = params.get('data')
+        if (token) {
+          const decoded = decodeData(token)
+          if (decoded) {
+            setWeddingData({ ...defaultWedding, ...decoded })
+            setView('invite')
+            /* Arxa fonda serverə saxla ki, növbəti açılışda API-dən gəlsin */
+            saveInvitation(slug, decoded).catch(() => {})
+            return
+          }
+        }
+
+        /* Heç bir mənbədə tapılmadı → ana səhifə */
+        window.history.replaceState({}, '', '/')
+        setView('landing')
+      }
+
+      loadFromServer()
+      return
+    }
+
+    setView('landing')
   }, [])
 
   if (ACTIVE_UI === 'new') return <DigitoyOrijinalUI />
+
+  /* Server sorğusu bitənə qədər minimal yükləmə ekranı */
+  if (view === 'loading') {
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center">
+        <div style={{
+          width: 40, height: 40,
+          border: '1px solid rgba(197,160,89,0.25)',
+          borderTop: '1px solid rgba(197,160,89,0.8)',
+          borderRadius: '50%',
+          animation: 'spin 0.9s linear infinite',
+        }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    )
+  }
 
   if (view === 'photo') {
     return <PhotoShare />

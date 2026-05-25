@@ -9,11 +9,10 @@ import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Trash2, CheckSquare, Square, Download, Archive,
-  ImagePlus, ZoomIn, X, Check, RotateCcw, Film,
+  ImagePlus, X, Check, RotateCcw, Film,
 } from 'lucide-react'
-import {
-  loadGallery, deleteMedia, deleteMultiple, downloadAllAsZip, downloadItem,
-} from '../../utils/photoGallery'
+import { getPhotos, deletePhoto } from '../../utils/api'
+import { downloadAllAsZip, downloadItem } from '../../utils/photoGallery'
 
 /* ── Lazy image — loads only when in viewport ── */
 function LazyMedia({ item, selected, onToggle, onDelete, onPreview }) {
@@ -124,10 +123,12 @@ function LazyMedia({ item, selected, onToggle, onDelete, onPreview }) {
       {/* Checkbox */}
       <div
         onClick={e => { e.stopPropagation(); onToggle(item.id) }}
+        onTouchEnd={e => { e.preventDefault(); e.stopPropagation(); onToggle(item.id) }}
         style={{
           position: 'absolute', top: 5, left: 5,
           opacity: selected || hov ? 1 : 0,
           transition: 'opacity 0.15s',
+          touchAction: 'none',
         }}
       >
         {selected
@@ -263,19 +264,33 @@ function EmptyState() {
 const PAGE_SIZE = 30
 
 export default function GalleryManager({ slug, onRefresh }) {
-  const [items,     setItems]     = useState(() => loadGallery(slug))
+  const [items,     setItems]     = useState([])
+  const [loading,   setLoading]   = useState(false)
   const [selected,  setSelected]  = useState(new Set())
   const [preview,   setPreview]   = useState(null)
   const [page,      setPage]      = useState(1)
-  const [zipState,  setZipState]  = useState('idle') // idle | loading | done
+  const [zipState,  setZipState]  = useState('idle')
   const loadMoreRef = useRef()
 
-  /* Reload when slug changes */
+  /* Serverdən yüklə */
+  const fetchItems = useCallback(async () => {
+    if (!slug) return
+    setLoading(true)
+    try {
+      const photos = await getPhotos(slug)
+      setItems(photos)
+    } catch {
+      /* server əlçatmaz — boş siyahı saxla */
+    } finally {
+      setLoading(false)
+    }
+  }, [slug])
+
   useEffect(() => {
-    setItems(loadGallery(slug))
+    fetchItems()
     setSelected(new Set())
     setPage(1)
-  }, [slug])
+  }, [fetchItems])
 
   /* Infinite scroll sentinel */
   useEffect(() => {
@@ -301,16 +316,19 @@ export default function GalleryManager({ slug, onRefresh }) {
   const selectAll = () => setSelected(new Set(items.map(i => i.id)))
   const clearSel  = () => setSelected(new Set())
 
-  const handleDelete = useCallback((id) => {
-    const next = deleteMedia(slug, id)
-    setItems(next)
+  const handleDelete = useCallback(async (id) => {
+    try {
+      await deletePhoto(slug, id)
+    } catch { /* server xəta — yenə də UI-dan çıxar */ }
+    setItems(prev => prev.filter(i => i.id !== id))
     setSelected(s => { const n = new Set(s); n.delete(id); return n })
   }, [slug])
 
-  const handleDeleteSelected = () => {
-    const ids  = Array.from(selected)
-    const next = deleteMultiple(slug, ids)
-    setItems(next)
+  const handleDeleteSelected = async () => {
+    const ids = Array.from(selected)
+    await Promise.allSettled(ids.map(id => deletePhoto(slug, id)))
+    const idSet = new Set(ids)
+    setItems(prev => prev.filter(i => !idSet.has(i.id)))
     setSelected(new Set())
   }
 
@@ -361,15 +379,19 @@ export default function GalleryManager({ slug, onRefresh }) {
         borderBottom: '1px solid rgba(197,160,89,0.14)',
         marginBottom: 12,
       }}>
-        {/* Left: count + select all */}
+        {/* Left: count + select all + refresh */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{
             fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase',
             color: 'rgba(140,123,107,0.7)', fontFamily: '"Inter",system-ui,sans-serif',
           }}>
-            {items.length} media
+            {loading ? 'Yüklənir…' : `${items.length} media`}
             {selected.size > 0 && ` · ${selected.size} seçildi`}
           </span>
+          <BTN onClick={fetchItems} disabled={loading}>
+            <RotateCcw size={11} strokeWidth={1.5} />
+            Yenilə
+          </BTN>
           {items.length > 0 && (
             <BTN onClick={allSelected ? clearSel : selectAll}>
               {allSelected
@@ -380,27 +402,23 @@ export default function GalleryManager({ slug, onRefresh }) {
           )}
         </div>
 
-        {/* Right: actions */}
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {selected.size > 0 && (
+        {/* Right: actions — yalnız ≥1 şəkil seçildikdə görünür */}
+        {selected.size > 0 && (
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             <BTN danger onClick={handleDeleteSelected}>
               <Trash2 size={11} strokeWidth={1.5} />
               Seçilənləri Sil ({selected.size})
             </BTN>
-          )}
-          {items.length > 0 && (
             <BTN onClick={handleZipDownload} disabled={zipState === 'loading'}>
               {zipState === 'done'
                 ? <><Check size={11} strokeWidth={2} /> Tamamlandı</>
                 : zipState === 'loading'
                 ? <><Archive size={11} strokeWidth={1.5} /> Hazırlanır…</>
-                : <><Archive size={11} strokeWidth={1.5} />
-                    {selected.size > 0 ? `${selected.size} Faylı Endir` : 'Hamısını .ZIP Endir'}
-                  </>
+                : <><Archive size={11} strokeWidth={1.5} /> {selected.size} Faylı Endir</>
               }
             </BTN>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* ── Grid ── */}

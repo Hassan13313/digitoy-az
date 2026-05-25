@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { Eye, MessageCircle, Edit2, Calendar, MapPin, Shirt, Users, Image, ListOrdered, ShieldCheck, Copy, Check } from 'lucide-react'
 import { DRESS_CODE_PALETTES } from '../../data/constants'
 import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
 import { encodeData, buildWhatsAppUrl } from '../../utils/whatsappOrder'
+import { saveInvitation } from '../../utils/api'
 import t from '../../data/translations'
 
 const ADMIN_WA = '994557133696'
@@ -13,6 +14,10 @@ const DRESS_COLORS = {
   cocktail:    ['#C4956A', '#E8D5C4', '#8B6347'],
   smartcasual: ['#6B8CAE', '#D4E4F0', '#4A6B8A'],
   creative:    ['#9B6B9B', '#F0C4D4', '#6B9B6B'],
+}
+
+const DRESS_LABELS = {
+  blacktie: 'Black Tie', cocktail: 'Cocktail', smartcasual: 'Smart Casual', creative: 'Creative',
 }
 
 /* ── Admin paneli: linki kopyala düyməsi ── */
@@ -58,6 +63,25 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
   const token     = encodeData(data)
   const adminLink = `${window.location.origin}/builder?admin=digitoyadmin2026&data=${token}`
 
+  /* Slug hesabla */
+  function toSlug(str = '') {
+    return str.toLowerCase()
+      .replace(/ç/g,'c').replace(/ğ/g,'g').replace(/[ışı]/g,'i')
+      .replace(/ö/g,'o').replace(/ş/g,'s').replace(/ü/g,'u')
+      .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'davetname'
+  }
+  const isCouple2 = ['toy', 'nishan'].includes(data.eventType)
+  const isCorp2   = ['corporate', 'other'].includes(data.eventType)
+  const slug = isCouple2
+    ? `${toSlug(data.brideName || '')}-ve-${toSlug(data.groomName || '')}`
+    : isCorp2 ? toSlug(data.eventName || 'tedbir')
+    : toSlug(data.brideName || 'davetname')
+
+  /* WhatsApp click-də serverə saxla */
+  const handleWaClick = useCallback(() => {
+    saveInvitation(slug, data).catch(() => {})
+  }, [slug, data])
+
   /* Xülasə sətirləri */
   const rows = [
     {
@@ -88,7 +112,7 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
       icon: Shirt, label: tr.dresscode_summary,
       value: (() => {
         const id     = data.dressCodePalette
-        const label  = palette?.label[lang] || DRESS_LABELS[id] || id
+        const label  = palette?.label?.[lang] || DRESS_LABELS[id] || id
         const colors = palette?.colors || DRESS_COLORS[id] || []
         return (
           <span className="flex items-center gap-1.5">
@@ -154,6 +178,7 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
           href={waLink}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={handleWaClick}
           className="flex-1 flex items-center justify-center gap-2.5 btn-gold"
         >
           <MessageCircle size={14} strokeWidth={1.5} />

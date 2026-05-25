@@ -6,12 +6,12 @@ import {
 } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { DRESS_CODE_PALETTES, EVENT_TYPES, WHATSAPP_NUMBER } from '../../data/constants'
+import { PACKAGE_DEFS, getLockedSteps } from '../../data/packages'
 import { buildWhatsAppUrl } from '../../utils/whatsappOrder'
 import { formatFullDateByLang } from '../../utils/dateFormat'
 import t from '../../data/translations'
 
 const EVENT_ICONS = { toy: Heart, nishan: Diamond, birthday: Cake, corporate: Briefcase, other: Sparkles }
-const TOTAL_STEPS = 6
 const COUPLE_TYPES = ['toy', 'nishan']
 const CORP_TYPES   = ['corporate', 'other']
 
@@ -31,119 +31,239 @@ const calendarTranslations = {
   },
 }
 
-/* ── Nominatim məkan axtarışı ── */
+/* ── Məkan axtarışı (Google Maps + Nominatim fallback) ── */
 const VENUE_HINTS = {
   az: '*Məkan adlarını Azərbaycan hərfləri ilə və ya Google-da axtardığınız rəsmi şəkildə yazmağınız tövsiyə olunur.',
   en: '*It is recommended to type venue names with Azerbaijani characters or exactly as they appear on Google Search.',
   ru: '*Рекомендуется вводить названия мест на азербайджанской латинице или так, как они указаны в поиске Google.',
 }
 
+/* AZ hərflərini latına çevirir — hər iki variantla axtarış üçün */
+function latinize(s) {
+  const M = { ə:'e',Ə:'E',ş:'s',Ş:'S',ç:'c',Ç:'C',ğ:'g',Ğ:'G',ö:'o',Ö:'O',ü:'u',Ü:'U',ı:'i',İ:'I' }
+  return s.split('').map(c => M[c] ?? c).join('')
+}
+
+/* ── Google Maps sabitləri ── */
+const MAPS_KEY    = import.meta.env.VITE_GOOGLE_MAPS_KEY || ''
+const BAKU_CENTER = { lat: 40.4093, lng: 49.8671 }
+const MAP_STYLES  = [
+  { elementType: 'geometry',                                         stylers: [{ color: '#f5edd8' }] },
+  { elementType: 'labels.text.fill',                                 stylers: [{ color: '#8c7b6b' }] },
+  { elementType: 'labels.text.stroke',                               stylers: [{ color: '#fdfaf4' }] },
+  { featureType: 'water',          elementType: 'geometry',          stylers: [{ color: '#c8d5d5' }] },
+  { featureType: 'water',          elementType: 'labels.text.fill',  stylers: [{ color: '#7a9a9a' }] },
+  { featureType: 'road',           elementType: 'geometry',          stylers: [{ color: '#ede3cc' }] },
+  { featureType: 'road',           elementType: 'geometry.stroke',   stylers: [{ color: '#d4b896' }] },
+  { featureType: 'road.highway',   elementType: 'geometry',          stylers: [{ color: '#c8b07a' }] },
+  { featureType: 'poi',            elementType: 'geometry',          stylers: [{ color: '#e8dcc8' }] },
+  { featureType: 'poi.park',       elementType: 'geometry',          stylers: [{ color: '#d4e0c8' }] },
+  { featureType: 'transit',        elementType: 'geometry',          stylers: [{ color: '#ddd5c4' }] },
+  { featureType: 'administrative', elementType: 'geometry.stroke',   stylers: [{ color: '#c5a059' }] },
+]
+
+/* Singleton loader — bir dəfə yüklənir */
+let _mapsP = null
+const getMaps = () => {
+  if (_mapsP) return _mapsP
+  if (window.google?.maps?.places) return (_mapsP = Promise.resolve())
+  if (!MAPS_KEY) return Promise.reject(new Error('no-key'))
+  _mapsP = import('@googlemaps/js-api-loader')
+    .then(({ Loader }) => new Loader({ apiKey: MAPS_KEY, version: 'weekly', libraries: ['places'] }).load())
+  return _mapsP
+}
+
 function VenueSearchInput({ value, onSelect, lang, tr }) {
-  const [query,   setQuery]   = useState(value || '')
-  const [results, setResults] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [open,    setOpen]    = useState(false)
-  const [success, setSuccess] = useState(false)
-  const wrapRef    = useRef(null)
-  const debounceRef = useRef(null)
+  const [query,     setQuery]     = useState(value || '')
+  const [preds,     setPreds]     = useState([])
+  const [loading,   setLoading]   = useState(false)
+  const [open,      setOpen]      = useState(false)
+  const [success,   setSuccess]   = useState(false)
+  const [mapsReady, setMapsReady] = useState(false)
 
-  useEffect(() => { setQuery(value || '') }, [value])
+  const wrapRef      = useRef(null)
+  const mapDivRef    = useRef(null)
+  const mapRef       = useRef(null)
+  const markerRef    = useRef(null)
+  const svcRef       = useRef(null)   /* AutocompleteService */
+  const geocRef      = useRef(null)   /* Geocoder */
+  const debRef       = useRef(null)
+  const onSelectRef  = useRef(onSelect)
+  useEffect(() => { onSelectRef.current = onSelect }, [onSelect])
 
+  /* ── Google Maps yüklə ── */
   useEffect(() => {
-    const handler = (e) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false)
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
+    getMaps()
+      .then(() => {
+        svcRef.current  = new window.google.maps.places.AutocompleteService()
+        geocRef.current = new window.google.maps.Geocoder()
+        setMapsReady(true)
+      })
+      .catch((err) => { console.warn('[Digitoy Maps]', err?.message || err) })
   }, [])
 
-  const doSearch = async (q) => {
-    if (!q.trim() || q.trim().length < 2) { setResults([]); setOpen(false); return }
+  /* ── Xəritəni mount et ── */
+  const placeMarker = useCallback(({ lat, lng }) => {
+    if (!mapRef.current) return
+    markerRef.current?.setMap(null)
+    markerRef.current = new window.google.maps.Marker({
+      position: { lat, lng }, map: mapRef.current,
+      icon: { path: window.google.maps.SymbolPath.CIRCLE, scale: 9, fillColor: '#C5A059', fillOpacity: 1, strokeColor: '#fdfaf4', strokeWeight: 2.5 },
+    })
+    mapRef.current.panTo({ lat, lng }); mapRef.current.setZoom(15)
+  }, [])
+
+  useEffect(() => {
+    if (!mapsReady || !mapDivRef.current || mapRef.current) return
+    const map = new window.google.maps.Map(mapDivRef.current, {
+      center: BAKU_CENTER, zoom: 11, styles: MAP_STYLES,
+      zoomControl: true, streetViewControl: false, mapTypeControl: false, fullscreenControl: false,
+    })
+    mapRef.current = map
+    map.addListener('click', ({ latLng }) => {
+      const lat = latLng.lat(), lng = latLng.lng()
+      placeMarker({ lat, lng })
+      geocRef.current?.geocode({ location: { lat, lng } }, (res, st) => {
+        if (st !== 'OK' || !res[0]) return
+        const name = res[0].address_components?.[0]?.long_name || res[0].formatted_address.split(',')[0]
+        setQuery(name)
+        onSelectRef.current({ venueName: name, googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, wazeUrl: `https://waze.com/ul?ll=${lat},${lng}&navigate=yes` })
+        setSuccess(true); setTimeout(() => setSuccess(false), 4000)
+      })
+    })
+  }, [mapsReady, placeMarker])
+
+  useEffect(() => { setQuery(value || '') }, [value])
+  useEffect(() => {
+    const fn = e => { if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', fn); return () => document.removeEventListener('mousedown', fn)
+  }, [])
+
+  /* ── Google Places axtarışı (AZ-first + fallback) ── */
+  const searchGoogle = useCallback((q) => {
+    const svc    = svcRef.current
+    const latinQ = latinize(q)
+    const terms  = q === latinQ ? [q] : [q, latinQ]
+    const ask    = (t, opts) => new Promise(res => svc.getPlacePredictions({ input: t, ...opts }, p => res(p || [])))
     setLoading(true)
-    try {
-      const res  = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=6`,
-        { headers: { 'Accept-Language': lang === 'ru' ? 'ru' : lang === 'en' ? 'en' : 'az,en' } }
-      )
-      const data = await res.json()
-      setResults(data)
-      setOpen(true)
-    } catch {
-      setResults([])
-    } finally {
-      setLoading(false)
+    ;(async () => {
+      try {
+        for (const t of terms) {
+          const p = await ask(t, { componentRestrictions: { country: 'az' } })
+          if (p.length) { setPreds(p.slice(0, 6)); setOpen(true); return }
+        }
+        const p = await ask(terms[0], {})
+        setPreds(p.slice(0, 6)); setOpen(p.length > 0)
+      } finally { setLoading(false) }
+    })()
+  }, [])
+
+  /* ── Nominatim fallback (açar yoxdursa) ── */
+  const searchNominatim = useCallback((q) => {
+    const latinQ = latinize(q)
+    const terms  = q === latinQ ? [q] : [q, latinQ]
+    const hdrs   = { 'Accept-Language': lang === 'ru' ? 'ru' : lang === 'en' ? 'en' : 'az,en' }
+    const BASE   = 'https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=6'
+    const fetch_ = extra => Promise.all(
+      terms.map(t => fetch(`${BASE}${extra}&q=${encodeURIComponent(t)}`, { headers: hdrs }).then(r => r.json()))
+    ).then(arrs => { const s = new Set(); return arrs.flat().filter(r => { if (s.has(r.place_id)) return false; s.add(r.place_id); return true }) })
+    const toPred = n => ({ place_id: n.place_id, description: n.display_name, structured_formatting: { main_text: n.display_name.split(',')[0] }, _nom: n })
+    setLoading(true)
+    ;(async () => {
+      try {
+        const az = await fetch_('&countrycodes=az')
+        if (az.length) { setPreds(az.slice(0, 6).map(toPred)); setOpen(true); return }
+        const gl = await fetch_('')
+        setPreds(gl.slice(0, 6).map(toPred)); setOpen(gl.length > 0)
+      } catch { setPreds([]) } finally { setLoading(false) }
+    })()
+  }, [lang])
+
+  /* ── Prediction seçimi ── */
+  const handleSelectPred = useCallback((pred) => {
+    setOpen(false)
+    if (pred._nom) {
+      const { lat, lon, display_name } = pred._nom
+      const name = display_name.split(',')[0].trim()
+      setQuery(name); setPreds([])
+      onSelectRef.current({ venueName: name, googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`, wazeUrl: `https://waze.com/ul?ll=${lat},${lon}&navigate=yes` })
+      setSuccess(true); setTimeout(() => setSuccess(false), 4000)
+      return
     }
-  }
+    geocRef.current?.geocode({ placeId: pred.place_id }, (res, st) => {
+      if (st !== 'OK' || !res[0]) return
+      const lat  = res[0].geometry.location.lat()
+      const lng  = res[0].geometry.location.lng()
+      const name = pred.structured_formatting?.main_text || pred.description.split(',')[0]
+      setQuery(name); placeMarker({ lat, lng })
+      onSelectRef.current({ venueName: name, googleMapsUrl: `https://www.google.com/maps/place/?q=place_id:${pred.place_id}`, wazeUrl: `https://waze.com/ul?ll=${lat},${lng}&navigate=yes` })
+      setSuccess(true); setTimeout(() => setSuccess(false), 4000)
+    })
+  }, [placeMarker])
 
   const handleChange = (e) => {
     const q = e.target.value
-    setQuery(q)
-    setSuccess(false)
-    clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => doSearch(q), 300)
-  }
-
-  const handleSelect = (item) => {
-    const lat = parseFloat(item.lat)
-    const lon = parseFloat(item.lon)
-    const name = item.display_name.split(',')[0].trim()
-    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`
-    const wazeUrl = `https://waze.com/ul?ll=${lat},${lon}&navigate=yes`
-    setQuery(name)
-    setOpen(false)
-    setResults([])
-    setSuccess(true)
-    onSelect({ venueName: name, googleMapsUrl: mapsUrl, wazeUrl })
-    setTimeout(() => setSuccess(false), 4000)
+    setQuery(q); setSuccess(false)
+    clearTimeout(debRef.current)
+    if (q.trim().length < 3) { setPreds([]); setOpen(false); return }
+    debRef.current = setTimeout(() => mapsReady ? searchGoogle(q) : searchNominatim(q), 300)
   }
 
   return (
     <div ref={wrapRef} className="relative">
+      {/* ── Input (mövcud premium dizayn qorunur) ── */}
       <div className="relative">
         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gold/50 pointer-events-none" />
-        {loading && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 border border-gold/40 border-t-gold/80 rounded-full animate-spin" />
-        )}
+        {loading && <div className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 border border-gold/40 border-t-gold/80 rounded-full animate-spin" />}
         <input
-          type="text"
-          value={query}
-          onChange={handleChange}
-          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), doSearch(query))}
+          type="text" value={query} onChange={handleChange}
+          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), mapsReady ? searchGoogle(query) : searchNominatim(query))}
           placeholder={tr.venue_search_placeholder}
           className="w-full pl-9 pr-10 py-3 bg-[#1a1a1a]/60 border border-gold/20 text-white/90 text-sm placeholder-white/25 rounded-none focus:outline-none focus:border-gold/50 transition-colors"
         />
       </div>
 
-      <p className="text-xs text-amber-500/70 mt-1 block font-sans">
-        {VENUE_HINTS[lang] || VENUE_HINTS.az}
-      </p>
+      <p className="text-xs text-amber-500/70 mt-1 block font-sans">{VENUE_HINTS[lang] || VENUE_HINTS.az}</p>
 
-      {open && results.length > 0 && (
+      {/* ── Predictions dropdown ── */}
+      {open && preds.length > 0 && (
         <div className="absolute left-0 right-0 top-full mt-1 z-[110] backdrop-blur-md bg-[#1a1a1a]/90 border border-gold/20 shadow-2xl max-h-64 overflow-y-auto">
-          {results.map((item) => (
-            <button
-              key={item.place_id}
-              type="button"
-              onClick={() => handleSelect(item)}
-              className="w-full text-left px-4 py-3 hover:bg-gold/10 border-b border-white/5 last:border-0 transition-colors"
-            >
-              <p className="text-white/90 text-sm leading-snug">{item.display_name.split(',')[0]}</p>
-              <p className="text-white/35 text-[10px] mt-0.5 truncate">{item.display_name}</p>
+          {preds.map(pred => (
+            <button key={pred.place_id} type="button" onClick={() => handleSelectPred(pred)}
+              className="w-full text-left px-4 py-3 hover:bg-gold/10 border-b border-white/5 last:border-0 transition-colors">
+              <p className="text-white/90 text-sm leading-snug">{pred.structured_formatting?.main_text || pred.description.split(',')[0]}</p>
+              <p className="text-white/35 text-[10px] mt-0.5 truncate">{pred.description}</p>
             </button>
           ))}
         </div>
       )}
-
-      {open && results.length === 0 && !loading && query.trim().length >= 2 && (
+      {open && preds.length === 0 && !loading && query.trim().length >= 3 && (
         <div className="absolute left-0 right-0 top-full mt-1 z-[110] backdrop-blur-md bg-[#1a1a1a]/90 border border-gold/20 px-4 py-3">
           <p className="text-white/40 text-sm">{tr.venue_search_no_results}</p>
         </div>
       )}
-
       {success && (
         <p className="mt-2 text-[11px] tracking-[0.12em] text-gold font-medium flex items-center gap-1.5">
           <MapPin size={11} /> {tr.venue_search_success}
         </p>
+      )}
+
+      {/* ── Google Map (yalnız VITE_GOOGLE_MAPS_KEY mövcuddursa) ── */}
+      {MAPS_KEY && (
+        <div style={{ marginTop: 16, border: '1px solid rgba(197,160,89,0.22)', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, zIndex: 2, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.5) 40%, rgba(197,160,89,0.7) 50%, rgba(197,160,89,0.5) 60%, transparent)' }} />
+          {!mapsReady && (
+            <div style={{ height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(245,237,216,0.4)' }}>
+              <div className="w-5 h-5 border border-gold/30 border-t-gold/80 rounded-full animate-spin" />
+            </div>
+          )}
+          <div ref={mapDivRef} style={{ height: mapsReady ? 240 : 0, width: '100%' }} />
+          {mapsReady && (
+            <p style={{ position: 'absolute', bottom: 6, left: '50%', transform: 'translateX(-50%)', fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(197,160,89,0.75)', fontFamily: '"Inter",system-ui,sans-serif', background: 'rgba(253,250,244,0.82)', backdropFilter: 'blur(4px)', padding: '2px 10px', pointerEvents: 'none', zIndex: 1, whiteSpace: 'nowrap' }}>
+              Xəritədə nöqtəyə vurun — ünvan avtomatik yazılacaq
+            </p>
+          )}
+        </div>
       )}
     </div>
   )
@@ -226,38 +346,40 @@ function ProgramStepEditor({ rows, onChange, tr }) {
     <div className="space-y-4">
       <div className="space-y-3">
         {rows.map((row, i) => (
-          <div key={i} className="flex flex-row items-center gap-3 w-full bg-neutral-50 border border-neutral-100 rounded-lg p-2.5">
-            {/* 1 — Saat */}
-            <TimeInput
-              value={row.time}
-              onChange={(v) => update(i, 'time', v)}
-              onComplete={() => activityRefs.current[i]?.focus()}
-              placeholder="19:00"
-              className="w-[90px] flex-shrink-0 text-center p-2.5 border border-neutral-300 rounded bg-white font-mono text-sm focus:outline-none focus:border-gold/60 transition-colors"
-            />
-            {/* 2 — Fəaliyyət */}
+          <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-neutral-50 border border-neutral-100 rounded-lg p-3 sm:p-2.5">
+            {/* Mobil: saat + (sağda) ikon+sil düymələri */}
+            <div className="flex items-center gap-2">
+              <TimeInput
+                value={row.time}
+                onChange={(v) => update(i, 'time', v)}
+                onComplete={() => activityRefs.current[i]?.focus()}
+                placeholder="19:00"
+                className="w-[84px] sm:w-[90px] flex-shrink-0 text-center p-2.5 border border-neutral-300 rounded bg-white font-mono text-sm focus:outline-none focus:border-gold/60 transition-colors"
+              />
+              {/* Mobil-da sağa keç */}
+              <div className="flex items-center gap-1 ml-auto sm:hidden">
+                <IconPickerBtn value={row.icon} onSelect={(ic) => update(i, 'icon', ic)} />
+                <button type="button" onClick={() => removeRow(i)} className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-neutral-400 hover:text-red-500 transition-colors rounded touch-manipulation" aria-label="Sil">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                </button>
+              </div>
+            </div>
+            {/* Fəaliyyət input — mobil-da tam en */}
             <input
               ref={(el) => (activityRefs.current[i] = el)}
               type="text"
               value={row.activity}
               onChange={(e) => update(i, 'activity', e.target.value)}
               placeholder={tr.program_step_activity_placeholder}
-              className="flex-1 min-w-0 p-2.5 border border-neutral-300 rounded bg-white text-sm focus:outline-none focus:border-gold/60 transition-colors"
+              className="w-full sm:flex-1 sm:min-w-0 p-2.5 border border-neutral-300 rounded bg-white text-sm focus:outline-none focus:border-gold/60 transition-colors"
             />
-            {/* 3 — İkon seçici */}
-            <IconPickerBtn
-              value={row.icon}
-              onSelect={(ic) => update(i, 'icon', ic)}
-            />
-            {/* 4 — Sil */}
-            <button
-              type="button"
-              onClick={() => removeRow(i)}
-              className="flex-shrink-0 p-2 text-neutral-400 hover:text-red-500 transition-colors rounded"
-              aria-label="Sil"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-            </button>
+            {/* Desktop-da ikon+sil */}
+            <div className="hidden sm:flex items-center gap-1 flex-shrink-0">
+              <IconPickerBtn value={row.icon} onSelect={(ic) => update(i, 'icon', ic)} />
+              <button type="button" onClick={() => removeRow(i)} className="flex-shrink-0 p-2 text-neutral-400 hover:text-red-500 transition-colors rounded" aria-label="Sil">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -881,13 +1003,28 @@ function decodeDataLocal(token) {
 
 export default function BuilderForm({ lang, initialData, initialStep = null, onSubmit, isAdmin = false }) {
   const tr = t[lang]
-  const [step, setStep] = useState(initialStep ?? 1)
+
+  /* ── Paket kilidləmə ── */
+  const pkgId = localStorage.getItem('selected_package') || 'PREMIUM'
+  const lockedSteps = getLockedSteps(pkgId)
+  const visibleSteps = [1, 2, 3, 4, 5, 6].filter(n => !lockedSteps.includes(n))
+  const VISIBLE_TOTAL = visibleSteps.length
+
+  /* initialStep-i görünən addımlara uyğunlaşdır */
+  const safeInitialStep = (() => {
+    if (!initialStep) return 1
+    const idx = visibleSteps.indexOf(initialStep)
+    return idx >= 0 ? idx + 1 : visibleSteps.length
+  })()
+
+  const [step, setStep] = useState(safeInitialStep)
   const [data, setData] = useState(initialData)
   const [errors, setErrors] = useState({})
   const [generatedLiveLink, setGeneratedLiveLink] = useState('')
   const [linkCopied, setLinkCopied] = useState(false)
   const [adminMode,   setAdminMode]   = useState(isAdmin)
   const [isHydrated,  setIsHydrated]  = useState(false)
+  const [submitLoading, setSubmitLoading] = useState(false)
 
   /* ── URL-dən data hydration (admin idarəetmə linki) ── */
   useEffect(() => {
@@ -929,16 +1066,19 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     tr.step4_title, tr.step5_title, tr.step6_title,
   ]
 
+  /* Görünən addımlar içərisindəki mövqedən həqiqi addım nömrəsi */
+  const actualStep = visibleSteps[step - 1] ?? 1
+
   const validate = () => {
     const e = {}
-    if (step === 1) {
+    if (actualStep === 1) {
       if (isCorp && !data.eventName?.trim()) e.eventName = true
       if (!isCorp && !data.brideName.trim()) e.brideName = true
       if (isCouple && !data.groomName.trim()) e.groomName = true
       if (!data.date) e.date = true
       if (!data.time) e.time = true
     }
-    if (step === 2) {
+    if (actualStep === 2) {
       if (!data.venueName.trim()) e.venueName = true
     }
     setErrors(e)
@@ -955,7 +1095,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
   const next = (e) => {
     if (e) { e.preventDefault(); e.stopPropagation() }
     if (validate()) {
-      setStep((s) => Math.min(s + 1, TOTAL_STEPS))
+      setStep((s) => Math.min(s + 1, VISIBLE_TOTAL))
       scrollToTop()
     }
   }
@@ -964,9 +1104,18 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     setStep((s) => Math.max(s - 1, 1))
     scrollToTop()
   }
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     if (e) { e.preventDefault(); e.stopPropagation() }
-    if (validate()) onSubmit(data)
+    if (submitLoading) return
+    if (!validate()) return
+    setSubmitLoading(true)
+    try {
+      await onSubmit(data)
+    } catch {
+      /* üst komponent xətaları idarə edir */
+    } finally {
+      setSubmitLoading(false)
+    }
   }
 
   /* ── WhatsApp sifariş — mərkəzi funksiya ilə ── */
@@ -1012,13 +1161,14 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
   return (
     <div id="builder-top" className="max-w-2xl mx-auto">
       {/* Step indicator */}
-      <div className="flex items-center mb-14">
-        {steps.map((title, i) => {
+      <div className="flex items-center mb-8 sm:mb-14">
+        {visibleSteps.map((actualN, i) => {
           const n = i + 1
           const done = n < step
           const active = n === step
+          const title = steps[actualN - 1]
           return (
-            <div key={n} className="flex items-center flex-1 last:flex-none">
+            <div key={actualN} className="flex items-center flex-1 last:flex-none">
               <div className="flex flex-col items-center gap-2">
                 <div
                   className={`w-7 h-7 flex items-center justify-center text-[10px] font-medium transition-all duration-300 ${
@@ -1035,8 +1185,8 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
                   {title}
                 </span>
               </div>
-              {i < steps.length - 1 && (
-                <div className={`flex-1 h-px mx-2 transition-all duration-500 ${done ? 'step-line-active' : 'bg-beige-dark/60'}`} />
+              {i < visibleSteps.length - 1 && (
+                <div className={`flex-1 h-px mx-1 sm:mx-2 transition-all duration-500 ${done ? 'step-line-active' : 'bg-beige-dark/60'}`} />
               )}
             </div>
           )
@@ -1044,12 +1194,12 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
       </div>
 
       {/* Step content */}
-      <div className="bg-cream border border-beige-dark/60 px-10 py-12 overflow-visible min-h-[520px]">
-        <h3 className="font-serif text-xl text-ink mb-10 font-light tracking-tight">{steps[step - 1]}</h3>
+      <div className="bg-cream border border-beige-dark/60 px-4 sm:px-10 py-8 sm:py-12 overflow-visible min-h-[420px] sm:min-h-[520px]">
+        <h3 className="font-serif text-xl text-ink mb-10 font-light tracking-tight">{steps[actualStep - 1]}</h3>
 
         {/* STEP 1 */}
-        {step === 1 && (
-          <div className="space-y-8 pb-64">
+        {actualStep === 1 && (
+          <div className="space-y-8 pb-10 sm:pb-64">
             {/* Tədbir növü */}
             <div>
               <Label>{tr.event_type || 'Tədbir növü'}</Label>
@@ -1155,7 +1305,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
         )}
 
         {/* STEP 2 */}
-        {step === 2 && (
+        {actualStep === 2 && (
           <div className="space-y-8">
             <div>
               <Label required>{tr.venue_search_label}</Label>
@@ -1177,7 +1327,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
         )}
 
         {/* STEP 3 — Tədbir Proqramı */}
-        {step === 3 && (
+        {actualStep === 3 && (
           <ProgramStepEditor
             rows={data.programSteps || []}
             onChange={(rows) => set('programSteps', rows)}
@@ -1186,7 +1336,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
         )}
 
         {/* STEP 4 — Dress Code */}
-        {step === 4 && (
+        {actualStep === 4 && (
           <div className="space-y-8">
             <div>
               <Label>{tr.dresscode_type_label}</Label>
@@ -1252,7 +1402,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
         )}
 
         {/* STEP 5 — Oturma Planı */}
-        {step === 5 && (
+        {actualStep === 5 && (
           <div className="space-y-6">
             <div>
               <Label>{tr.seating_label}</Label>
@@ -1268,37 +1418,37 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
         )}
 
         {/* STEP 6 — Foto Qalereya & QR İdarəetmə */}
-        {step === 6 && (
+        {actualStep === 6 && (
           <GalleryAdminStep data={data} isCouple={isCouple} isCorp={isCorp} isAdmin={isAdmin || adminMode} />
         )}
       </div>
 
       {/* Navigation */}
-      <div className="flex justify-between mt-8">
+      <div className="flex justify-between mt-6 sm:mt-8">
         <button
           type="button"
           onClick={prev}
           disabled={step === 1}
-          className="flex items-center gap-2 px-7 py-3.5 border border-beige-dark/70 text-brown-muted text-[10px] tracking-[0.22em] uppercase hover:border-gold/50 hover:text-gold transition-all duration-200 active:scale-95 disabled:opacity-25 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-4 sm:px-7 py-3 sm:py-3.5 min-h-[44px] border border-beige-dark/70 text-brown-muted text-[10px] tracking-[0.22em] uppercase hover:border-gold/50 hover:text-gold transition-all duration-200 active:scale-95 disabled:opacity-25 disabled:cursor-not-allowed touch-manipulation"
         >
           <ChevronLeft size={13} strokeWidth={1.5} />
           {tr.btn_prev}
         </button>
 
-        {step < TOTAL_STEPS ? (
-          <button type="button" onClick={next} className="flex items-center gap-2 btn-gold">
+        {step < VISIBLE_TOTAL ? (
+          <button type="button" onClick={next} className="flex items-center gap-2 btn-gold min-h-[44px] touch-manipulation">
             {tr.btn_next}
             <ChevronRight size={13} strokeWidth={1.5} />
           </button>
         ) : (
-          <button type="button" onClick={handleSubmit} className="btn-gold">
-            {tr.btn_create}
+          <button type="button" onClick={handleSubmit} disabled={submitLoading} className="btn-gold min-h-[44px] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed">
+            {submitLoading ? '…' : tr.btn_create}
           </button>
         )}
       </div>
 
       {/* ── WhatsApp Sifariş Düyməsi (son addımda) ── */}
-      {step === TOTAL_STEPS && (
+      {step === VISIBLE_TOTAL && (
         <div style={{
           marginTop: 16,
           padding: '28px 24px',
