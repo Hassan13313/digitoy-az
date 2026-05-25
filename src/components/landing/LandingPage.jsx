@@ -3,7 +3,6 @@ import LanguageSwitcher from '../LanguageSwitcher'
 import Hero, { FeaturesSection, FAQSection, HeroFooter } from './Hero'
 import BuilderForm from './BuilderForm'
 import Preview from './Preview'
-import Pricing from './Pricing'
 import PackageSelect from './PackageSelect'
 import t from '../../data/translations'
 
@@ -139,17 +138,10 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
         </div>
       </section>
 
-      {/* ── 4. Pricing (display bölməsi) ── */}
-      <Pricing lang={lang} onSelect={(pkgId) => {
-        /* Pricing "Seç" düymələri → paket seç + builder-ə keç */
-        const map = { basic: 'SADE', premium: 'VIP', vip: 'PREMIUM' }
-        handlePackageSelect(map[pkgId] || 'VIP')
-      }} />
-
-      {/* ── 5. FAQ ── */}
+      {/* ── 4. FAQ ── */}
       <FAQSection lang={lang} />
 
-      {/* ── 6. Footer ── */}
+      {/* ── 5. Footer ── */}
       <HeroFooter lang={lang} />
     </div>
   )
