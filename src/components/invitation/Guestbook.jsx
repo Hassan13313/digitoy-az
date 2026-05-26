@@ -32,9 +32,9 @@ const LABELS = {
   },
 }
 
-export default function Guestbook({ lang }) {
+export default function Guestbook({ lang, initialMessages }) {
   const L = LABELS[lang] || LABELS.az
-  const [messages, setMessages] = useState(INITIAL_MESSAGES)
+  const [messages, setMessages] = useState(initialMessages || INITIAL_MESSAGES)
   const [name, setName] = useState('')
   const [text, setText] = useState('')
   const [ref, visible] = useScrollReveal()

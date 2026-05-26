@@ -41,7 +41,7 @@ function GoldDividerOrnament() {
 }
 
 
-export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
+export default function InvitationPage({ lang, setLang, weddingData, onBack, isDemoMode = false, initialGuestbook }) {
   const tr = t[lang]
   const [envelopeOpened, setEnvelopeOpened] = useState(false)
   const palette = DRESS_CODE_PALETTES.find((p) => p.id === weddingData.dressCodePalette) || DRESS_CODE_PALETTES[0]
@@ -263,20 +263,32 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
                     href={weddingData.googleMapsUrl || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 py-3 px-5 bg-[#d4af37] text-black text-xs tracking-widest uppercase font-medium transition-opacity hover:opacity-90"
+                    className="flex-1 flex items-center justify-center gap-2 py-3 px-3 bg-[#d4af37] text-black text-xs tracking-widest uppercase font-medium transition-opacity hover:opacity-90"
                   >
                     <MapPin size={13} strokeWidth={1.5} />
-                    Google Maps
+                    <span className="hidden sm:inline">Google Maps</span>
+                    <span className="sm:hidden">Maps</span>
                   </a>
                   <a
                     href={weddingData.wazeUrl || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 py-3 px-5 border border-[#d4af37] text-[#d4af37] text-xs tracking-widest uppercase font-medium transition-opacity hover:opacity-80"
+                    className="flex-1 flex items-center justify-center gap-2 py-3 px-3 border border-[#d4af37] text-[#d4af37] text-xs tracking-widest uppercase font-medium transition-opacity hover:opacity-80"
                   >
                     <Navigation size={13} strokeWidth={1.5} />
                     Waze
                   </a>
+                  {weddingData.appleMapsUrl && (
+                    <a
+                      href={weddingData.appleMapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-2 py-3 px-3 border border-[#d4af37] text-[#d4af37] text-xs tracking-widest uppercase font-medium transition-opacity hover:opacity-80"
+                    >
+                      <ExternalLink size={13} strokeWidth={1.5} />
+                      Apple Maps
+                    </a>
+                  )}
                 </div>
               </SectionWrapper>
             </section>
@@ -312,6 +324,28 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
                 <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">Gallery</p>
                 <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-5">{tr.inv_gallery}</h2>
                 <GoldDividerOrnament />
+
+                {/* Demo sample photos grid */}
+                {weddingData.demoPhotos?.length > 0 && (
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(3,1fr)',
+                    gap: 6,
+                    marginBottom: 28,
+                    width: '100%',
+                  }}>
+                    {weddingData.demoPhotos.map((url, i) => (
+                      <div key={i} style={{ aspectRatio: '3/2', overflow: 'hidden', background: '#f0e8d8' }}>
+                        <img
+                          src={url}
+                          alt=""
+                          loading="lazy"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 <div className="inline-flex flex-col items-center mb-8">
                   <div className="relative mb-4" style={{ padding: 12, border: '1px solid rgba(197,160,89,0.25)', background: 'rgba(253,250,244,0.8)' }}>
@@ -349,10 +383,10 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack }) {
             <RSVPSection lang={lang} weddingData={weddingData} />
 
             {/* ── GUESTBOOK ── */}
-            <Guestbook lang={lang} />
+            <Guestbook lang={lang} initialMessages={initialGuestbook} />
 
-            {/* ── SİFARİŞ EKRANI — yalnız preview modunda görünür ── */}
-            {!pageSlug && (
+            {/* ── SİFARİŞ EKRANI — yalnız preview modunda görünür, demo-da gizli ── */}
+            {!pageSlug && !isDemoMode && (
               <SectionWrapper>
                 <section style={{
                   padding: '96px 24px',

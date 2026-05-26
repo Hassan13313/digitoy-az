@@ -5,6 +5,7 @@ import PhotoShare from './components/invitation/PhotoShare'
 import GalleryPage from './components/invitation/GalleryPage'
 import DigitoyOrijinalUI from './components/DigitoyOrijinalUI'
 import { defaultWedding } from './data/defaultWedding'
+import { demoInvitation, demoGuestbook } from './data/demoInvitation'
 import { getInvitation, saveInvitation } from './utils/api'
 import './App.css'
 
@@ -35,6 +36,11 @@ export default function App() {
   const [isAdmin,     setIsAdmin]     = useState(false)
 
   useEffect(() => {
+    if (window.location.pathname === '/demo') {
+      setView('demo')
+      return
+    }
+
     const { slug, sub } = parseInviteSlug()
 
     /* ── Admin parametrləri ── */
@@ -104,6 +110,24 @@ export default function App() {
     )
   }
 
+  if (view === 'demo') {
+    return (
+      <div className="min-h-screen bg-cream">
+        <InvitationPage
+          lang={lang}
+          setLang={setLang}
+          weddingData={demoInvitation}
+          isDemoMode={true}
+          initialGuestbook={demoGuestbook}
+          onBack={() => {
+            window.history.pushState({}, '', '/')
+            setView('landing')
+          }}
+        />
+      </div>
+    )
+  }
+
   if (view === 'photo') {
     return <PhotoShare />
   }
@@ -136,7 +160,10 @@ export default function App() {
           setLang={setLang}
           weddingData={weddingData}
           setWeddingData={setWeddingData}
-          onViewInvitation={() => setView('invitation')}
+          onViewInvitation={() => {
+            window.history.pushState({}, '', '/demo')
+            setView('demo')
+          }}
           isAdmin={isAdmin}
         />
       ) : (
