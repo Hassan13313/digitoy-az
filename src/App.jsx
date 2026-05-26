@@ -7,6 +7,8 @@ import DigitoyOrijinalUI from './components/DigitoyOrijinalUI'
 import { defaultWedding } from './data/defaultWedding'
 import { demoInvitation, demoGuestbook } from './data/demoInvitation'
 import { getInvitation, saveInvitation } from './utils/api'
+import SmoothCursor from './components/ui/SmoothCursor'
+import ScrollProgress from './components/ui/ScrollProgress'
 import './App.css'
 
 const ACTIVE_UI = 'v3'
@@ -94,8 +96,10 @@ export default function App() {
 
   if (ACTIVE_UI === 'new') return <DigitoyOrijinalUI />
 
+
   /* Server sorğusu bitənə qədər minimal yükləmə ekranı */
   if (view === 'loading') {
+
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">
         <div style={{
@@ -154,6 +158,9 @@ export default function App() {
 
   return (
     <>
+      <SmoothCursor />
+      <ScrollProgress />
+
       {/* LandingPage həmişə mounted qalır — form data qorunur */}
       <div className="min-h-screen bg-cream" style={view === 'invitation' ? { display: 'none' } : {}}>
         <LandingPage
@@ -172,7 +179,12 @@ export default function App() {
             lang={lang}
             setLang={setLang}
             weddingData={weddingData}
-            onBack={() => setView('landing')}
+            onBack={() => {
+              setView('landing')
+              setTimeout(() => {
+                document.getElementById('builder-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }, 80)
+            }}
           />
         </div>
       )}

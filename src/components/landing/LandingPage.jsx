@@ -4,13 +4,39 @@ import Hero, { FeaturesSection, FAQSection, HeroFooter } from './Hero'
 import BuilderForm from './BuilderForm'
 import Preview from './Preview'
 import PackageSelect from './PackageSelect'
+import TestimonialsSection from './TestimonialsSection'
+import TubelightNavbar from '../ui/TubelightNavbar'
+import SienaParallax from '../ui/SienaParallax'
+import StickyScrollReveal from '../ui/StickyScrollReveal'
 import t from '../../data/translations'
+
+const NAV_TABS = {
+  az: [
+    { id: 'demo',     label: 'Demo Gör' },
+    { id: 'packages', label: 'Paketlər' },
+    { id: 'how',      label: 'Necə İşləyir?' },
+    { id: 'contact',  label: 'Əlaqə' },
+  ],
+  en: [
+    { id: 'demo',     label: 'See Demo' },
+    { id: 'packages', label: 'Packages' },
+    { id: 'how',      label: 'How It Works' },
+    { id: 'contact',  label: 'Contact' },
+  ],
+  ru: [
+    { id: 'demo',     label: 'Демо' },
+    { id: 'packages', label: 'Пакеты' },
+    { id: 'how',      label: 'Как Это Работает' },
+    { id: 'contact',  label: 'Контакт' },
+  ],
+}
 
 export default function LandingPage({ lang, setLang, weddingData, setWeddingData, onViewInvitation, onDemo, isAdmin = false }) {
   const tr = t[lang]
   const [showPreview,     setShowPreview]     = useState(false)
   const [formData,        setFormData]        = useState(weddingData)
   const [returnToStep,    setReturnToStep]    = useState(null)
+  const [activeTab,       setActiveTab]       = useState('packages')
 
   /*
    * selectedPackage — hər zaman null başlayır.
@@ -23,6 +49,15 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
   useEffect(() => {
     try { localStorage.removeItem('selected_package') } catch {}
   }, [])
+
+  /* Preview göstərildikdə builder bölməsinə scroll et */
+  useEffect(() => {
+    if (showPreview) {
+      setTimeout(() => {
+        document.getElementById('builder-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 100)
+    }
+  }, [showPreview])
 
   /* ── Hadisə işləyiciləri ── */
 
@@ -45,7 +80,22 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
     setReturnToStep(null)
     setShowPreview(false)
     setSelectedPackage(null)           // paket seçimi məcburidir
+    setActiveTab('packages')
     document.getElementById('builder-section')?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const handleTabClick = (tab) => {
+    setActiveTab(tab.id)
+    if (tab.id === 'demo') { onDemo(); return }
+    if (tab.id === 'packages') {
+      scrollToBuilder(); return
+    }
+    if (tab.id === 'how') {
+      document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' }); return
+    }
+    if (tab.id === 'contact') {
+      document.getElementById('site-footer')?.scrollIntoView({ behavior: 'smooth' }); return
+    }
   }
 
   /* Paket seçildikdə çağırılır — yalnız bundan sonra BuilderForm açılır */
@@ -60,40 +110,34 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
   return (
     <div className="min-h-screen bg-cream">
 
-      {/* ── Header ── */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-cream/92 backdrop-blur-md border-b border-beige-dark/35">
-        <div className="max-w-6xl mx-auto px-8 h-16 flex items-center justify-between">
+      {/* ── Tubelight Navbar ── */}
+      <TubelightNavbar
+        lang={lang}
+        tabs={NAV_TABS[lang] || NAV_TABS.az}
+        activeTab={activeTab}
+        onTabClick={handleTabClick}
+        logo={
           <div className="font-serif text-lg text-ink tracking-widest">
             <span className="text-gold font-light">Digitoy</span>
             <span className="text-brown-muted/50 font-light">.az</span>
           </div>
-          <nav className="hidden sm:flex items-center gap-8">
-            <button
-              onClick={onDemo}
-              className="text-[10px] tracking-[0.22em] uppercase text-brown-muted hover:text-gold transition-colors duration-300 font-medium"
-            >
-              {tr.nav_demo}
-            </button>
-            {/* Header düyməsi → həmişə PackageSelect-ə */}
-            <button
-              onClick={scrollToBuilder}
-              className="text-[10px] tracking-[0.22em] uppercase px-5 py-2.5 border border-gold/35 text-gold hover:bg-gold hover:text-white transition-all duration-300 font-medium"
-            >
-              {tr.nav_create}
-            </button>
-          </nav>
-          <LanguageSwitcher lang={lang} setLang={setLang} />
-        </div>
-      </header>
+        }
+        rightContent={<LanguageSwitcher lang={lang} setLang={setLang} />}
+      />
 
       {/* ── 1. Hero ── */}
-      {/* onStart → scrollToBuilder → PackageSelect məcburi */}
       <Hero lang={lang} onStart={scrollToBuilder} onDemo={onDemo} />
+
+      {/* ── Siena Parallax ── */}
+      <SienaParallax lang={lang} />
 
       {/* ── 2. Features ── */}
       <FeaturesSection lang={lang} />
 
-      {/* ── 3. Builder / PackageSelect bölməsi ── */}
+      {/* ── 3. How It Works (Sticky Scroll Reveal) ── */}
+      <StickyScrollReveal lang={lang} />
+
+      {/* ── 4. Builder / PackageSelect bölməsi ── */}
       <section id="builder-section" className="py-12 md:py-24 px-4 sm:px-6 bg-beige/80 backdrop-blur-sm relative z-10">
         <div className="max-w-6xl mx-auto">
 
@@ -138,7 +182,10 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
         </div>
       </section>
 
-      {/* ── 4. FAQ ── */}
+      {/* ── 4. Testimonials ── */}
+      <TestimonialsSection lang={lang} />
+
+      {/* ── 5. FAQ ── */}
       <FAQSection lang={lang} />
 
       {/* ── 5. Footer ── */}

@@ -4,16 +4,26 @@
 
 @layer base {
   * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
   body {
     @apply bg-cream font-sans text-espresso;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     margin: 0;
+    overflow-x: hidden;
+    max-width: 100vw;
   }
   #root {
-    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    max-width: 100vw;
   }
+  /* Navbar height offset for scroll-into-view targets */
+  [id] { scroll-margin-top: 72px; }
 }
 
 @layer utilities {

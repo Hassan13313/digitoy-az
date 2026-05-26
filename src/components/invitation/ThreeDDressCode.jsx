@@ -188,23 +188,24 @@ function FigureCard({ icon, figureLabel }) {
         background: 'rgba(255,255,255,0.05)',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
-        border: '1px solid rgba(212,175,55,0.15)',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.1)',
+        border: '1px solid rgba(212,175,55,0.22)',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.1), 0 0 18px rgba(217,119,6,0.22), inset 0 1px 0 rgba(255,255,255,0.12)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         position: 'relative',
         overflow: 'hidden',
+        transition: 'box-shadow 0.3s ease',
       }}>
         {/* İç parıltı */}
         <div style={{
           position: 'absolute', inset: 0, borderRadius: '50%',
-          background: 'radial-gradient(circle at 50% 30%, rgba(212,175,55,0.1) 0%, transparent 65%)',
+          background: 'radial-gradient(circle at 50% 28%, rgba(212,175,55,0.14) 0%, transparent 65%)',
           pointerEvents: 'none',
         }} />
         {icon}
       </div>
       <p style={{
-        fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase',
-        color: 'rgba(212,175,55,0.6)', fontFamily: '"Inter",system-ui,sans-serif',
+        fontSize: 9, letterSpacing: '0.28em', textTransform: 'uppercase',
+        color: 'rgba(212,175,55,0.75)', fontFamily: '"Inter",system-ui,sans-serif',
         fontWeight: 500,
       }}>
         {figureLabel}
@@ -213,10 +214,17 @@ function FigureCard({ icon, figureLabel }) {
   )
 }
 
-export default function ThreeDDressCode({ palette, lang }) {
+const FIGURE_LABELS = {
+  az: { male: 'Kişi', female: 'Xanım' },
+  en: { male: 'Groom', female: 'Bride' },
+  ru: { male: 'Мужчина', female: 'Женщина' },
+}
+
+export default function ThreeDDressCode({ palette, lang = 'az' }) {
   const paletteId = palette?.id || 'smartcasual'
   const outfit    = getOutfit(paletteId)
   const label     = palette?.label?.[lang] || palette?.label?.az || outfit.label
+  const figures   = FIGURE_LABELS[lang] || FIGURE_LABELS.az
 
   return (
     <div style={{
@@ -270,8 +278,8 @@ export default function ThreeDDressCode({ palette, lang }) {
         display: 'flex', justifyContent: 'center', gap: 28,
         position: 'relative',
       }}>
-        <FigureCard icon={outfit.male}   figureLabel="Kişi" />
-        <FigureCard icon={outfit.female} figureLabel="Qadın" />
+        <FigureCard icon={outfit.male}   figureLabel={figures.male} />
+        <FigureCard icon={outfit.female} figureLabel={figures.female} />
       </div>
     </div>
   )

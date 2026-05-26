@@ -1247,9 +1247,10 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
 
   const scrollToTop = () => {
     setTimeout(() => {
+      const section = document.getElementById('builder-section')
       const el = document.getElementById('builder-top')
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 50)
+      ;(section || el)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 60)
   }
 
   const next = (e) => {
