@@ -145,63 +145,46 @@ function VenueSearchInput({ value, onSelect, lang, tr }) {
   }, [])
 
   return (
-    <div ref={wrapRef} className="space-y-3">
-
-      {/* ── Axtarış inputu ── */}
+    <div ref={wrapRef} className="relative">
       <div className="relative">
-        <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gold/60 pointer-events-none" />
-        {loading
-          ? <div className="absolute right-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 border border-gold/40 border-t-gold rounded-full animate-spin" />
-          : query && <button type="button" onClick={() => { setQuery(''); setPreds([]); setOpen(false); setSuccess(false) }} className="absolute right-4 top-1/2 -translate-y-1/2 text-brown-muted/40 hover:text-brown-muted transition-colors"><X size={13} /></button>
-        }
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gold/50 pointer-events-none" />
+        {loading && <div className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 border border-gold/40 border-t-gold/80 rounded-full animate-spin" />}
         <input
-          type="text"
-          value={query}
-          onChange={handleChange}
+          type="text" value={query} onChange={handleChange}
           onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), search(query))}
           placeholder={tr.venue_search_placeholder}
-          className="w-full pl-10 pr-10 py-3.5 bg-beige border border-beige-dark/70 text-ink text-sm placeholder-brown-muted/40 focus:outline-none focus:border-gold/60 transition-colors"
+          className="w-full pl-9 pr-10 py-3 bg-[#1a1a1a]/60 border border-gold/20 text-white/90 text-sm placeholder-white/25 rounded-none focus:outline-none focus:border-gold/50 transition-colors"
         />
       </div>
 
-      {/* ── Seçilmiş məkan badge ── */}
-      {success && (
-        <div className="flex items-center gap-2 px-3 py-2 bg-gold/8 border border-gold/25">
-          <MapPin size={11} className="text-gold flex-shrink-0" strokeWidth={1.5} />
-          <span className="text-[11px] tracking-[0.1em] text-gold font-medium truncate">{query}</span>
-          <span className="ml-auto text-[9px] tracking-[0.2em] uppercase text-gold/60">Seçildi</span>
-        </div>
-      )}
-
-      {/* ── Dropdown nəticələr ── */}
       {open && preds.length > 0 && (
-        <div className="absolute left-0 right-0 z-[110] bg-beige border border-beige-dark/80 shadow-lg max-h-60 overflow-y-auto">
-          {preds.map(pred => {
-            const main = pred.display_name.split(',')[0]
-            const sub  = pred.display_name.split(',').slice(1, 3).join(',').trim()
-            return (
-              <button key={pred.place_id} type="button" onClick={() => handleSelectPred(pred)}
-                className="w-full text-left px-4 py-3 hover:bg-gold/6 border-b border-beige-dark/40 last:border-0 transition-colors group">
-                <p className="text-sm text-ink font-light leading-snug group-hover:text-gold transition-colors">{main}</p>
-                {sub && <p className="text-[10px] text-brown-muted/55 mt-0.5 truncate font-light">{sub}</p>}
-              </button>
-            )
-          })}
+        <div className="absolute left-0 right-0 top-full mt-1 z-[110] backdrop-blur-md bg-[#1a1a1a]/90 border border-gold/20 shadow-2xl max-h-64 overflow-y-auto">
+          {preds.map(pred => (
+            <button key={pred.place_id} type="button" onClick={() => handleSelectPred(pred)}
+              className="w-full text-left px-4 py-3 hover:bg-gold/10 border-b border-white/5 last:border-0 transition-colors">
+              <p className="text-white/90 text-sm leading-snug">{pred.display_name.split(',')[0]}</p>
+              <p className="text-white/35 text-[10px] mt-0.5 truncate">{pred.display_name}</p>
+            </button>
+          ))}
         </div>
       )}
       {open && preds.length === 0 && !loading && query.trim().length >= 2 && (
-        <div className="absolute left-0 right-0 z-[110] bg-beige border border-beige-dark/80 px-4 py-3">
-          <p className="text-sm text-brown-muted/55 font-light">{tr.venue_search_no_results}</p>
+        <div className="absolute left-0 right-0 top-full mt-1 z-[110] backdrop-blur-md bg-[#1a1a1a]/90 border border-gold/20 px-4 py-3">
+          <p className="text-white/40 text-sm">{tr.venue_search_no_results}</p>
         </div>
+      )}
+      {success && (
+        <p className="mt-2 text-[11px] tracking-[0.12em] text-gold font-medium flex items-center gap-1.5">
+          <MapPin size={11} /> {tr.venue_search_success}
+        </p>
       )}
 
       {/* ── Leaflet xəritəsi ── */}
-      <div className="relative border border-beige-dark/60 overflow-hidden" style={{ marginTop: 4 }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, zIndex: 401, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.55) 35%, rgba(197,160,89,0.8) 50%, rgba(197,160,89,0.55) 65%, transparent)' }} />
-        <div ref={mapDivRef} style={{ height: 280, width: '100%' }} />
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 36, zIndex: 401, background: 'linear-gradient(to top, rgba(253,250,244,0.7), transparent)', pointerEvents: 'none' }} />
-        <p style={{ position: 'absolute', bottom: 8, left: '50%', transform: 'translateX(-50%)', fontSize: 8, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(140,123,107,0.7)', fontFamily: '"Inter",system-ui,sans-serif', background: 'rgba(253,250,244,0.9)', backdropFilter: 'blur(6px)', padding: '3px 12px', pointerEvents: 'none', zIndex: 402, whiteSpace: 'nowrap', border: '1px solid rgba(197,160,89,0.18)' }}>
-          Xəritədə nöqtəyə vurun — ünvan avtomatik doldurulacaq
+      <div style={{ marginTop: 16, border: '1px solid rgba(197,160,89,0.22)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, zIndex: 2, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.5) 40%, rgba(197,160,89,0.7) 50%, rgba(197,160,89,0.5) 60%, transparent)' }} />
+        <div ref={mapDivRef} style={{ height: 240, width: '100%', zIndex: 1 }} />
+        <p style={{ position: 'absolute', bottom: 6, left: '50%', transform: 'translateX(-50%)', fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(197,160,89,0.8)', fontFamily: '"Inter",system-ui,sans-serif', background: 'rgba(253,250,244,0.88)', backdropFilter: 'blur(4px)', padding: '2px 10px', pointerEvents: 'none', zIndex: 10, whiteSpace: 'nowrap' }}>
+          Xəritədə nöqtəyə vurun — ünvan avtomatik yazılacaq
         </p>
       </div>
     </div>
