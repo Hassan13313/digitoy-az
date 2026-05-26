@@ -1061,11 +1061,11 @@ function SeatingPlanEditor({ value, onChange, lang }) {
   )
 }
 
-export default function BuilderForm({ lang, initialData, initialStep = null, onSubmit, isAdmin = false }) {
+export default function BuilderForm({ lang, initialData, initialStep = null, onSubmit, onDataChange, isAdmin = false }) {
   const tr = t[lang]
 
-  /* ── Paket kilidləmə ── */
-  const pkgId = localStorage.getItem('selected_package') || 'PREMIUM'
+  /* ── Paket kilidləmə — admin həmişə PREMIUM alır ── */
+  const pkgId = isAdmin ? 'PREMIUM' : (localStorage.getItem('selected_package') || 'PREMIUM')
   const lockedSteps = getLockedSteps(pkgId)
   const visibleSteps = [1, 2, 3, 4, 5, 6].filter(n => !lockedSteps.includes(n))
   const VISIBLE_TOTAL = visibleSteps.length
@@ -1114,7 +1114,11 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
   }, [])
 
   const set = (key, val) => {
-    setData((d) => ({ ...d, [key]: val }))
+    setData((d) => {
+      const next = { ...d, [key]: val }
+      onDataChange?.(next)
+      return next
+    })
     setErrors((e) => ({ ...e, [key]: undefined }))
   }
 
