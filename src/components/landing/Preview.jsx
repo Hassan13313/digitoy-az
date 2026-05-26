@@ -173,26 +173,24 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
         </div>
       </div>
 
-      {/* Düymələr — admin modunda WA sifariş düyməsi gizlənir */}
+      {/* Müştəri düymələri */}
       <div className="flex flex-col sm:flex-row gap-3">
-        {!isAdmin && (
-          <a
-            href={waLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={handleWaClick}
-            className="flex-1 flex items-center justify-center gap-2.5 btn-gold"
-          >
-            <MessageCircle size={14} strokeWidth={1.5} />
-            {tr.preview_whatsapp}
-          </a>
-        )}
+        <a
+          href={waLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={handleWaClick}
+          className="flex-1 flex items-center justify-center gap-2.5 btn-gold"
+        >
+          <MessageCircle size={14} strokeWidth={1.5} />
+          {tr.preview_whatsapp}
+        </a>
         <button
           onClick={onView}
-          className={`${isAdmin ? 'w-full' : 'flex-1'} flex items-center justify-center gap-2.5 ${isAdmin ? 'btn-gold' : 'btn-outline-gold'}`}
+          className="flex-1 flex items-center justify-center gap-2.5 btn-outline-gold"
         >
           <Eye size={14} strokeWidth={1.5} />
-          {isAdmin ? 'Dəvətnaməni Müştəri Kimi Aç' : tr.preview_view}
+          {tr.preview_view}
         </button>
       </div>
 
