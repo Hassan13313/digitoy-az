@@ -80,6 +80,7 @@ function VenueSearchInput({ value, onSelect, lang, tr }) {
   const [open,      setOpen]      = useState(false)
   const [success,   setSuccess]   = useState(false)
   const [mapsReady, setMapsReady] = useState(false)
+  const [mapsError, setMapsError] = useState(null)
 
   const wrapRef      = useRef(null)
   const mapDivRef    = useRef(null)
@@ -98,8 +99,13 @@ function VenueSearchInput({ value, onSelect, lang, tr }) {
         svcRef.current  = new window.google.maps.places.AutocompleteService()
         geocRef.current = new window.google.maps.Geocoder()
         setMapsReady(true)
+        setMapsError(null)
       })
-      .catch((err) => { console.warn('[Digitoy Maps]', err?.message || err) })
+      .catch((err) => {
+        const msg = err?.message || String(err)
+        console.error('[Digitoy Maps yükləmə xətası]', msg)
+        setMapsError(msg)
+      })
   }, [])
 
   /* ── Xəritəni mount et ── */
@@ -252,11 +258,29 @@ function VenueSearchInput({ value, onSelect, lang, tr }) {
       {MAPS_KEY && (
         <div style={{ marginTop: 16, border: '1px solid rgba(197,160,89,0.22)', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, zIndex: 2, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.5) 40%, rgba(197,160,89,0.7) 50%, rgba(197,160,89,0.5) 60%, transparent)' }} />
-          {!mapsReady && (
+
+          {/* Xəta vəziyyəti */}
+          {mapsError && (
+            <div style={{ height: 120, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'rgba(26,17,5,0.55)', padding: '0 16px', textAlign: 'center' }}>
+              <p style={{ fontSize: 11, color: 'rgba(197,160,89,0.85)', fontFamily: '"Inter",system-ui,sans-serif', letterSpacing: '0.04em' }}>
+                Google Maps açıla bilmir — API açarı məhdudlaşdırılıb.
+              </p>
+              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontFamily: '"Inter",system-ui,sans-serif' }}>
+                Google Cloud Console → Credentials → HTTP referrers → localhost:5173/* əlavə edin
+              </p>
+              <p style={{ fontSize: 10, color: 'rgba(197,160,89,0.6)', fontFamily: '"Inter",system-ui,sans-serif' }}>
+                Axtarış hələ işləyir (OpenStreetMap vasitəsilə)
+              </p>
+            </div>
+          )}
+
+          {/* Yüklənir */}
+          {!mapsReady && !mapsError && (
             <div style={{ height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(245,237,216,0.4)' }}>
               <div className="w-5 h-5 border border-gold/30 border-t-gold/80 rounded-full animate-spin" />
             </div>
           )}
+
           <div ref={mapDivRef} style={{ height: mapsReady ? 240 : 0, width: '100%' }} />
           {mapsReady && (
             <p style={{ position: 'absolute', bottom: 6, left: '50%', transform: 'translateX(-50%)', fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(197,160,89,0.75)', fontFamily: '"Inter",system-ui,sans-serif', background: 'rgba(253,250,244,0.82)', backdropFilter: 'blur(4px)', padding: '2px 10px', pointerEvents: 'none', zIndex: 1, whiteSpace: 'nowrap' }}>
