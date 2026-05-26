@@ -6,7 +6,6 @@ import GalleryPage from './components/invitation/GalleryPage'
 import DigitoyOrijinalUI from './components/DigitoyOrijinalUI'
 import { defaultWedding } from './data/defaultWedding'
 import { demoInvitation, demoGuestbook } from './data/demoInvitation'
-import { getInvitation, saveInvitation } from './utils/api'
 import SmoothCursor from './components/ui/SmoothCursor'
 import ScrollProgress from './components/ui/ScrollProgress'
 import './App.css'
@@ -59,55 +58,47 @@ export default function App() {
     const hasAdminAccess = isAdminParam || isAdminLocal
 
     if (slug) {
-      if (sub === 'foto') { setView('photo'); return }
+      if (sub === 'foto')           { setView('photo');        return }
       if (sub === 'qalereya-idare') { setView('gallery-page'); return }
 
-      /* ── Server-dən yüklə, URL token fallback ── */
-      const loadFromServer = async () => {
-        let loaded = null
+      const viewParam = params.get('view')
+      const dParam    = params.get('d')
+      const dataParam = params.get('data')
 
-        try {
-          const dbData = await getInvitation(slug)
-          if (dbData) {
-            loaded = dbData
-            /* DB-dən gəldisə, URL-dəki köhnə ?data= tokenini təmizlə */
-            const clean = new URL(window.location.href)
-            clean.searchParams.delete('data')
-            window.history.replaceState({}, '', clean.toString())
-          }
-        } catch { /* server əlçatmaz → URL token-ə bax */ }
+      /* ── Yekun müştəri dəvətnaməsi: ?view=live&d=TOKEN ── */
+      if (viewParam === 'live' && dParam) {
+        const decoded = decodeData(dParam)
+        if (decoded) setWeddingData({ ...defaultWedding, ...decoded })
+        setView('invite')
+        return
+      }
 
-        /* Fallback: URL-dəki data token */
-        if (!loaded) {
-          const token = params.get('data')
-          if (token) {
-            const decoded = decodeData(token)
-            if (decoded) {
-              loaded = decoded
-              /* Tokeni DB-yə yaz, sonra URL-i təmizlə */
-              saveInvitation(slug, decoded).catch(() => {})
-            }
-          }
+      /* ── Admin modu: ?admin=KEY&data=TOKEN ── */
+      if (hasAdminAccess) {
+        if (dataParam) {
+          const decoded = decodeData(dataParam)
+          if (decoded) setWeddingData({ ...defaultWedding, ...decoded })
         }
-
-        if (loaded) setWeddingData({ ...defaultWedding, ...loaded })
-
         setAdminSlug(slug)
-        if (hasAdminAccess) {
-          /* Admin: data olsa da olmasa da builder modunda aç */
-          setView('admin-review')
-        } else if (loaded) {
+        setView('admin-review')
+        return
+      }
+
+      /* ── Köhnə format: birbaşa ?data= parametrli link (geriyə uyğunluq) ── */
+      if (dataParam) {
+        const decoded = decodeData(dataParam)
+        if (decoded) {
+          setWeddingData({ ...defaultWedding, ...decoded })
           setView('invite')
-        } else {
-          /* Data yoxdur, admin deyil → ana səhifə */
-          window.history.replaceState({}, '', '/')
-          try { localStorage.removeItem('isAdmin') } catch {}
-          setIsAdmin(false)
-          setView('landing')
+          return
         }
       }
 
-      loadFromServer()
+      /* ── Heç bir data yoxdur — ana səhifəyə yönləndir ── */
+      window.history.replaceState({}, '', '/')
+      try { localStorage.removeItem('isAdmin') } catch {}
+      setIsAdmin(false)
+      setView('landing')
       return
     }
 
@@ -122,7 +113,7 @@ export default function App() {
       }
     }
 
-    /* Admin sessiyası bu URL-də aktiv deyil — localStorage temizlə */
+    /* ── Admin sessiyası bu URL-də aktiv deyil — localStorage temizlə ── */
     if (!isAdminParam) {
       try { localStorage.removeItem('isAdmin') } catch {}
       setIsAdmin(false)
@@ -132,10 +123,8 @@ export default function App() {
 
   if (ACTIVE_UI === 'new') return <DigitoyOrijinalUI />
 
-
-  /* Server sorğusu bitənə qədər minimal yükləmə ekranı */
+  /* URL ayrıştırılana qədər minimal yükləmə ekranı */
   if (view === 'loading') {
-
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">
         <div style={{
@@ -187,12 +176,6 @@ export default function App() {
           setWeddingData={setWeddingData}
           onViewInvitation={() => {
             if (adminSlug) window.history.pushState({}, '', `/invite/${adminSlug}`)
-            setView('invite')
-          }}
-          onApproveOrder={(slug, approvedData) => {
-            setWeddingData({ ...defaultWedding, ...approvedData })
-            setAdminSlug(slug)
-            window.history.pushState({}, '', `/invite/${slug}`)
             setView('invite')
           }}
           onDemo={() => { window.history.pushState({}, '', '/demo'); setView('demo') }}

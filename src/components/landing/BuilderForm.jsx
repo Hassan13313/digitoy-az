@@ -9,8 +9,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { DRESS_CODE_PALETTES, EVENT_TYPES, WHATSAPP_NUMBER } from '../../data/constants'
 import { PACKAGE_DEFS, getLockedSteps } from '../../data/packages'
-import { buildWhatsAppUrl } from '../../utils/whatsappOrder'
-import { saveInvitation } from '../../utils/api'
+import { buildWhatsAppUrl, buildLiveLink, encodeData } from '../../utils/whatsappOrder'
 import { formatFullDateByLang } from '../../utils/dateFormat'
 import t from '../../data/translations'
 
@@ -1061,7 +1060,7 @@ function SeatingPlanEditor({ value, onChange, lang }) {
   )
 }
 
-export default function BuilderForm({ lang, initialData, initialStep = null, onSubmit, onApprove, isAdmin = false }) {
+export default function BuilderForm({ lang, initialData, initialStep = null, onSubmit, isAdmin = false }) {
   const tr = t[lang]
 
   /* ── Paket kilidləmə — admin həmişə PREMIUM alır ── */
@@ -1081,8 +1080,9 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
   const [data, setData] = useState(initialData)
   const [errors, setErrors] = useState({})
   const [generatedLiveLink, setGeneratedLiveLink] = useState('')
-  const [linkCopied, setLinkCopied] = useState(false)
-  const [adminMode,   setAdminMode]   = useState(isAdmin)
+  const [linkCopied,        setLinkCopied]        = useState(false)
+  const [showApproveModal,  setShowApproveModal]  = useState(false)
+  const [adminMode,         setAdminMode]         = useState(isAdmin)
   const [isHydrated,  setIsHydrated]  = useState(false)
   const [submitLoading, setSubmitLoading] = useState(false)
 
@@ -1187,23 +1187,19 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     return toSlug(data.brideName || 'davetname')
   }
 
-  /* ── WhatsApp sifariş — mərkəzi funksiya ilə ── */
+  /* ── WhatsApp sifariş — admin linki bütün formData ilə kodlanır ── */
   const handleWhatsAppOrder = () => {
     const slug = computeSlug()
-    saveInvitation(slug, data).catch(() => {})
     window.open(buildWhatsAppUrl(data, lang, WHATSAPP_NUMBER, slug), '_blank')
   }
 
+  /* ── Admin Təsdiqi: yekun link URL-ə kodlanır, modal açılır ── */
   const handleApproveAndGenerateLink = () => {
     const slug = computeSlug()
-    saveInvitation(slug, data).catch(() => {})
-    if (onApprove) {
-      onApprove(slug, data)
-    } else {
-      const link = `${window.location.origin}/invite/${slug}`
-      setGeneratedLiveLink(link)
-      setLinkCopied(false)
-    }
+    const link = buildLiveLink(slug, data)
+    setGeneratedLiveLink(link)
+    setLinkCopied(false)
+    setShowApproveModal(true)
   }
 
   const handleCopyLink = () => {
@@ -1215,6 +1211,74 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
 
   return (
     <div id="builder-top" className="max-w-2xl mx-auto">
+
+      {/* ── Təsdiq Modalı ── */}
+      {showApproveModal && (
+        <div
+          className="fixed inset-0 flex items-center justify-center z-[200] px-4"
+          style={{ background: 'rgba(15,10,5,0.65)', backdropFilter: 'blur(6px)' }}
+          onClick={e => { if (e.target === e.currentTarget) setShowApproveModal(false) }}
+        >
+          <div className="bg-cream border border-beige-dark/60 shadow-2xl max-w-lg w-full animate-fade-up" style={{ position: 'relative' }}>
+            {/* Üst qızıl xətt */}
+            <div style={{ height: 1, background: 'linear-gradient(to right,transparent,rgba(197,160,89,0.9) 30%,rgba(197,160,89,1) 50%,rgba(197,160,89,0.9) 70%,transparent)' }} />
+
+            <div className="px-10 py-10">
+              {/* Bağla düyməsi */}
+              <button
+                onClick={() => setShowApproveModal(false)}
+                className="absolute top-5 right-5 text-brown-muted/40 hover:text-gold transition-colors"
+                style={{ lineHeight: 1 }}
+              >
+                <X size={16} strokeWidth={1.5} />
+              </button>
+
+              <div className="text-center mb-8">
+                <div className="gold-divider mb-6 max-w-[60px] mx-auto" />
+                <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-3 font-medium">Uğurlu Təsdiq</p>
+                <h3 className="font-serif text-2xl text-ink font-light tracking-tight mb-3">
+                  Sifariş Təsdiqləndi!
+                </h3>
+                <p className="text-brown-muted text-sm font-light leading-relaxed max-w-sm mx-auto">
+                  Müştəriyə göndəriləcək yekun dəvətnamə linki hazırdır. Kopyalayıb WhatsApp vasitəsilə müştəriyə göndərin.
+                </p>
+              </div>
+
+              {/* Link qutusu */}
+              <div className="bg-beige border border-beige-dark/60 px-5 py-4 mb-6">
+                <p className="text-[9px] tracking-[0.22em] uppercase text-brown-muted/60 mb-2 font-medium">
+                  🔗 Müştəri Dəvətnamə Linki
+                </p>
+                <p className="font-mono text-xs text-ink break-all leading-relaxed select-all">
+                  {generatedLiveLink}
+                </p>
+              </div>
+
+              {/* Düymələr */}
+              <div className="flex gap-3">
+                <button
+                  onClick={handleCopyLink}
+                  className="flex-1 btn-gold text-xs"
+                >
+                  {linkCopied ? '✓ Kopyalandı!' : 'Linki Kopyala'}
+                </button>
+                <button
+                  onClick={() => setShowApproveModal(false)}
+                  className="flex-1 btn-outline-gold text-xs"
+                >
+                  Bağla
+                </button>
+              </div>
+
+              <div className="gold-divider mt-8 max-w-[60px] mx-auto" />
+            </div>
+
+            {/* Alt qızıl xətt */}
+            <div style={{ height: 1, background: 'linear-gradient(to right,transparent,rgba(197,160,89,0.9) 30%,rgba(197,160,89,1) 50%,rgba(197,160,89,0.9) 70%,transparent)' }} />
+          </div>
+        </div>
+      )}
+
       {/* Step indicator */}
       <div className="flex items-center mb-8 sm:mb-14">
         {visibleSteps.map((actualN, i) => {
@@ -1552,36 +1616,28 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
 
       {/* ── Admin İdarəetmə Paneli ── */}
       {(isAdmin || adminMode) && (
-        <div className="mt-8 p-6 bg-emerald-50 border border-emerald-200 rounded-xl shadow-sm text-center">
-          <h3 className="text-base font-semibold text-emerald-800 mb-1 flex items-center justify-center gap-2">
-            ⚡ Rəqəmsal Admin Paneli
-          </h3>
-          <p className="text-sm text-emerald-600 mb-5 font-light leading-relaxed">
-            Yuxarıda müştərinin məlumatlarını redaktə edə bilərsiniz. Hər şey hazırdırsa, canlı linki generasiya edin.
-          </p>
-
-          <button
-            type="button"
-            onClick={handleApproveAndGenerateLink}
-            className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg shadow-md transition-colors w-full sm:w-auto"
-          >
-            Sifarişi Təsdiqlə və Canlı Linki Yarat
-          </button>
-
-          {generatedLiveLink && (
-            <div className="mt-4 p-3 bg-white border border-emerald-300 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-3">
-              <span className="font-mono text-xs text-emerald-700 break-all text-left select-all leading-relaxed">
-                {generatedLiveLink}
-              </span>
-              <button
-                type="button"
-                onClick={handleCopyLink}
-                className="flex-shrink-0 px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded transition-colors whitespace-nowrap"
-              >
-                {linkCopied ? '✓ Kopyalandı' : 'Linki Kopyala'}
-              </button>
-            </div>
-          )}
+        <div
+          className="mt-8 border border-emerald-600/25"
+          style={{ background: 'linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%)' }}
+        >
+          <div style={{ height: 1, background: 'linear-gradient(to right,transparent,rgba(16,185,129,0.6) 40%,rgba(16,185,129,0.8) 50%,rgba(16,185,129,0.6) 60%,transparent)' }} />
+          <div className="px-8 py-7 text-center">
+            <p className="text-[10px] tracking-[0.28em] uppercase text-emerald-700 font-semibold mb-2">
+              ⚡ Admin Paneli
+            </p>
+            <p className="text-sm text-emerald-800/70 font-light leading-relaxed mb-6 max-w-sm mx-auto">
+              Müştərinin məlumatlarını yuxarıda redaktə edin. Hər şey hazır olduqda müştəriyə göndəriləcək yekun linki yaradın.
+            </p>
+            <button
+              type="button"
+              onClick={handleApproveAndGenerateLink}
+              className="inline-flex items-center gap-2.5 px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] tracking-[0.2em] uppercase font-semibold transition-colors duration-200 shadow-md"
+            >
+              <Check size={13} strokeWidth={2.5} />
+              Sifarişi Təsdiqlə
+            </button>
+          </div>
+          <div style={{ height: 1, background: 'linear-gradient(to right,transparent,rgba(16,185,129,0.6) 40%,rgba(16,185,129,0.8) 50%,rgba(16,185,129,0.6) 60%,transparent)' }} />
         </div>
       )}
     </div>

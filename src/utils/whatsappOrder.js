@@ -2,7 +2,7 @@ import { DRESS_CODE_PALETTES } from '../data/constants'
 import { formatAzDate, formatTime24 } from './dateFormat'
 import t from '../data/translations'
 
-/* ── URL-safe Base64 encode (fallback üçün saxlanılır) ── */
+/* ── URL-safe Base64 encode ── */
 export function encodeData(data) {
   try {
     const utf8Bytes = new TextEncoder().encode(JSON.stringify(data))
@@ -17,33 +17,18 @@ function getBasePlatformUrl() {
   return isLocalhost ? window.location.origin : 'https://digitoy.az'
 }
 
-/* ── Yalnız əsas sahələri kodlaşdır (URL qısa qalsın) ── */
-function encodeAdminToken(data) {
-  try {
-    /* Yalnız əsas şəxsiyyət + zaman + məkan — map URL-ləri və proqram DB-dən gəlir */
-    const pick = {
-      eventType:        data.eventType,
-      brideName:        data.brideName,
-      groomName:        data.groomName,
-      eventName:        data.eventName,
-      organizer:        data.organizer,
-      date:             data.date,
-      time:             data.time,
-      venueName:        data.venueName,
-      dressCodePalette: data.dressCodePalette,
-      package:          data.package || data.selectedPackage,
-    }
-    const utf8 = new TextEncoder().encode(JSON.stringify(pick))
-    return btoa(String.fromCharCode(...utf8))
-      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-  } catch { return '' }
+/* ── Admin idarəetmə linki — bütün formData URL-ə kodlanmış ── */
+export function buildAdminLink(slug, data = null) {
+  const base = `${getBasePlatformUrl()}/invite/${slug}?admin=digitoyadmin2026`
+  if (!data) return base
+  const token = encodeData(data)
+  return token ? `${base}&data=${token}` : base
 }
 
-/* ── Admin idarəetmə linki — qısa slug + minimal data token ── */
-export function buildAdminLink(slug, data = null) {
-  const base  = `${getBasePlatformUrl()}/invite/${slug}?admin=digitoyadmin2026`
-  const token = data ? encodeAdminToken(data) : ''
-  return token ? `${base}&data=${token}` : base
+/* ── Yekun müştəri dəvətnamə linki (admin təsdiqindən sonra) ── */
+export function buildLiveLink(slug, data) {
+  const encoded = encodeData(data)
+  return `${getBasePlatformUrl()}/invite/${slug}?view=live&d=${encoded}`
 }
 
 const PACKAGE_LABELS = {
@@ -74,7 +59,6 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '') {
 
   const programCount = (data.programSteps || []).filter(r => r.time || r.activity).length
 
-  /* Slug varsa data-tokenli qısa link, yoxdursa köhnə fallback */
   const adminLink = slug
     ? buildAdminLink(slug, data)
     : `${getBasePlatformUrl()}/?admin=digitoyadmin2026&data=${encodeData(data)}`

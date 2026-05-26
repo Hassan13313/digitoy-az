@@ -38,7 +38,7 @@ const NAV_TABS = {
   ],
 }
 
-export default function LandingPage({ lang, setLang, weddingData, setWeddingData, onViewInvitation, onApproveOrder, onDemo, isAdmin = false, initialShowPreview = false }) {
+export default function LandingPage({ lang, setLang, weddingData, setWeddingData, onViewInvitation, onDemo, isAdmin = false, initialShowPreview = false }) {
   const tr = t[lang]
   const [showPreview,     setShowPreview]     = useState(initialShowPreview)
   const [formData,        setFormData]        = useState(weddingData)
@@ -182,7 +182,6 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
               initialData={formData}
               initialStep={returnToStep}
               onSubmit={handleFormSubmit}
-              onApprove={onApproveOrder}
               isAdmin={isAdmin}
             />
           )}

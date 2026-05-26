@@ -16,7 +16,6 @@ import ThreeDDressCode from './ThreeDDressCode'
 import { DRESS_CODE_PALETTES, WHATSAPP_NUMBER } from '../../data/constants'
 import { getLockedSteps } from '../../data/packages'
 import { buildWhatsAppUrl } from '../../utils/whatsappOrder'
-import { saveInvitation } from '../../utils/api'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
 import { formatAzDate, formatFullDateByLang, formatTime24 } from '../../utils/dateFormat'
 import t from '../../data/translations'
@@ -131,9 +130,8 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
     URL.revokeObjectURL(url)
   }, [weddingData, effectiveSlug, photoShareUrl, isCouple])
 
-  /* ── WhatsApp sifariş — eyni mərkəzi funksiya, slug ilə ── */
+  /* ── WhatsApp sifariş — URL-driven, DB yazma yoxdur ── */
   const handleWhatsAppOrder = useCallback(() => {
-    saveInvitation(effectiveSlug, weddingData).catch(() => {})
     window.open(buildWhatsAppUrl(weddingData, lang, WHATSAPP_NUMBER, effectiveSlug), '_blank')
   }, [weddingData, lang, effectiveSlug])
 

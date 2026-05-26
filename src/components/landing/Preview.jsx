@@ -3,7 +3,6 @@ import { Eye, MessageCircle, Edit2, Calendar, MapPin, Shirt, Users, Image, ListO
 import { DRESS_CODE_PALETTES } from '../../data/constants'
 import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
 import { buildWhatsAppUrl, buildAdminLink } from '../../utils/whatsappOrder'
-import { saveInvitation } from '../../utils/api'
 import t from '../../data/translations'
 
 const ADMIN_WA = '994557133696'
@@ -73,15 +72,12 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
   /* WhatsApp link — adminin nömrəsinə gedir, slug ilə qısa admin link */
   const waLink = buildWhatsAppUrl(data, lang, ADMIN_WA, slug)
 
-  /* Admin idarəetmə linki — qısa slug əsaslı */
-  const adminLink  = buildAdminLink(slug)
-  /* Müştəriyə göndəriləcək canlı dəvətnamə linki */
+  /* Admin idarəetmə linki — bütün formData ilə kodlanmış */
+  const adminLink  = buildAdminLink(slug, data)
+  /* Müştəriyə göndəriləcək canlı dəvətnamə linki (admin təsdiqindən sonra) */
   const inviteLink = `${window.location.origin}/invite/${slug}`
 
-  /* WhatsApp click-də serverə saxla */
-  const handleWaClick = useCallback(() => {
-    saveInvitation(slug, data).catch(() => {})
-  }, [slug, data])
+  const handleWaClick = useCallback(() => {}, []) /* URL-driven: DB yazma yoxdur */
 
   /* Xülasə sətirləri */
   const rows = [
