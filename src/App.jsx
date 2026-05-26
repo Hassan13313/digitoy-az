@@ -101,6 +101,8 @@ export default function App() {
         } else {
           /* Data yoxdur, admin deyil → ana səhifə */
           window.history.replaceState({}, '', '/')
+          try { localStorage.removeItem('isAdmin') } catch {}
+          setIsAdmin(false)
           setView('landing')
         }
       }
@@ -120,6 +122,11 @@ export default function App() {
       }
     }
 
+    /* Admin sessiyası bu URL-də aktiv deyil — localStorage temizlə */
+    if (!isAdminParam) {
+      try { localStorage.removeItem('isAdmin') } catch {}
+      setIsAdmin(false)
+    }
     setView('landing')
   }, [])
 
@@ -180,6 +187,12 @@ export default function App() {
           setWeddingData={setWeddingData}
           onViewInvitation={() => {
             if (adminSlug) window.history.pushState({}, '', `/invite/${adminSlug}`)
+            setView('invite')
+          }}
+          onApproveOrder={(slug, approvedData) => {
+            setWeddingData({ ...defaultWedding, ...approvedData })
+            setAdminSlug(slug)
+            window.history.pushState({}, '', `/invite/${slug}`)
             setView('invite')
           }}
           onDemo={() => { window.history.pushState({}, '', '/demo'); setView('demo') }}

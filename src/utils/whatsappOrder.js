@@ -20,6 +20,7 @@ function getBasePlatformUrl() {
 /* ── Yalnız əsas sahələri kodlaşdır (URL qısa qalsın) ── */
 function encodeAdminToken(data) {
   try {
+    /* Yalnız əsas şəxsiyyət + zaman + məkan — map URL-ləri və proqram DB-dən gəlir */
     const pick = {
       eventType:        data.eventType,
       brideName:        data.brideName,
@@ -29,11 +30,7 @@ function encodeAdminToken(data) {
       date:             data.date,
       time:             data.time,
       venueName:        data.venueName,
-      googleMapsUrl:    data.googleMapsUrl,
-      wazeUrl:          data.wazeUrl,
-      appleMapsUrl:     data.appleMapsUrl,
       dressCodePalette: data.dressCodePalette,
-      programSteps:     data.programSteps,
       package:          data.package || data.selectedPackage,
     }
     const utf8 = new TextEncoder().encode(JSON.stringify(pick))

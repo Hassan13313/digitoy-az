@@ -1061,7 +1061,7 @@ function SeatingPlanEditor({ value, onChange, lang }) {
   )
 }
 
-export default function BuilderForm({ lang, initialData, initialStep = null, onSubmit, isAdmin = false }) {
+export default function BuilderForm({ lang, initialData, initialStep = null, onSubmit, onApprove, isAdmin = false }) {
   const tr = t[lang]
 
   /* ── Paket kilidləmə — admin həmişə PREMIUM alır ── */
@@ -1197,9 +1197,13 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
   const handleApproveAndGenerateLink = () => {
     const slug = computeSlug()
     saveInvitation(slug, data).catch(() => {})
-    const link = `${window.location.origin}/invite/${slug}`
-    setGeneratedLiveLink(link)
-    setLinkCopied(false)
+    if (onApprove) {
+      onApprove(slug, data)
+    } else {
+      const link = `${window.location.origin}/invite/${slug}`
+      setGeneratedLiveLink(link)
+      setLinkCopied(false)
+    }
   }
 
   const handleCopyLink = () => {
