@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Upload, ImageIcon, Check, X, Film } from 'lucide-react'
-import { uploadMedia } from '../../utils/photoGallery'
+import { uploadPhoto } from '../../utils/api'
 
 export default function PhotoShare() {
   const [queue,     setQueue]     = useState([])   // { file, preview, id, status }
@@ -42,7 +42,7 @@ export default function PhotoShare() {
     for (const item of queue) {
       setQueue(prev => prev.map(q => q.id === item.id ? { ...q, status: 'uploading' } : q))
       try {
-        await uploadMedia(item.file, slug)
+        await uploadPhoto(item.file, slug)
         setQueue(prev => prev.map(q => q.id === item.id ? { ...q, status: 'done' } : q))
       } catch {
         setQueue(prev => prev.map(q => q.id === item.id ? { ...q, status: 'error' } : q))

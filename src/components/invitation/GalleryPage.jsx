@@ -4,9 +4,8 @@ import {
   Trash2, CheckSquare, Square, Download, Archive,
   ImagePlus, X, Check, RotateCcw, Film, ArrowLeft,
 } from 'lucide-react'
-import {
-  loadGallery, deleteMedia, deleteMultiple, downloadAllAsZip, downloadItem,
-} from '../../utils/photoGallery'
+import { getPhotos, deletePhoto } from '../../utils/api'
+import { downloadAllAsZip, downloadItem } from '../../utils/photoGallery'
 
 const PAGE_SIZE = 30
 
@@ -241,26 +240,32 @@ function Btn({ children, danger, disabled, onClick, style: extraStyle = {} }) {
 export default function GalleryPage() {
   const slug = (window.location.pathname.match(/\/invite\/([^/?#]+)/) || [])[1] || 'preview'
 
-  const [items,    setItems]    = useState(() => loadGallery(slug))
+  const [items,    setItems]    = useState([])
+  const [loading,  setLoading]  = useState(false)
   const [selected, setSelected] = useState(new Set())
   const [preview,  setPreview]  = useState(null)
   const [page,     setPage]     = useState(1)
-  const [zipState, setZipState] = useState('idle') // idle | loading | done | error
+  const [zipState, setZipState] = useState('idle')
   const [delConfirm, setDelConfirm] = useState(false)
   const sentinelRef = useRef()
 
-  /* Qonaqlar yeni şəkil yüklədikdə səhifəni canlı yenilə */
-  useEffect(() => {
-    const storageKey = `gallery_${slug}`
-    const onStorage = (e) => {
-      if (e.key === storageKey) {
-        setItems(loadGallery(slug))
-        setPage(1)
-      }
-    }
-    window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
+  /* Serverdən yüklə */
+  const fetchItems = useCallback(async () => {
+    setLoading(true)
+    try {
+      const photos = await getPhotos(slug)
+      setItems(photos)
+    } catch { /* server əlçatmaz */ }
+    finally { setLoading(false) }
   }, [slug])
+
+  useEffect(() => { fetchItems() }, [fetchItems])
+
+  /* 30 saniyədə bir avtomatik yeniləmə — real-time sinxronizasiya */
+  useEffect(() => {
+    const timer = setInterval(fetchItems, 30000)
+    return () => clearInterval(timer)
+  }, [fetchItems])
 
   /* Infinite scroll sentinel */
   useEffect(() => {
@@ -286,15 +291,17 @@ export default function GalleryPage() {
   const clearSel  = () => setSelected(new Set())
   const allSelected = items.length > 0 && selected.size === items.length
 
-  const handleDelete = useCallback((id) => {
-    const next = deleteMedia(slug, id)
-    setItems(next)
+  const handleDelete = useCallback(async (id) => {
+    try { await deletePhoto(slug, id) } catch {}
+    setItems(prev => prev.filter(i => i.id !== id))
     setSelected(s => { const n = new Set(s); n.delete(id); return n })
   }, [slug])
 
-  const handleDeleteSelected = () => {
-    const next = deleteMultiple(slug, Array.from(selected))
-    setItems(next)
+  const handleDeleteSelected = async () => {
+    const ids = Array.from(selected)
+    await Promise.allSettled(ids.map(id => deletePhoto(slug, id)))
+    const idSet = new Set(ids)
+    setItems(prev => prev.filter(i => !idSet.has(i.id)))
     setSelected(new Set())
     setDelConfirm(false)
   }
@@ -369,7 +376,7 @@ export default function GalleryPage() {
           </div>
 
           <div style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(140,123,107,0.5)' }}>
-            {items.length} media
+            {loading ? '…' : `${items.length} media`}
           </div>
         </div>
       </header>
@@ -392,12 +399,16 @@ export default function GalleryPage() {
             background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.55) 40%, rgba(197,160,89,0.8) 50%, rgba(197,160,89,0.55) 60%, transparent)',
           }} />
 
-          {/* Sol: say + seçim */}
+          {/* Sol: say + seçim + yenilə */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(140,123,107,0.65)' }}>
-              {items.length} fayl
+              {loading ? 'Yüklənir…' : `${items.length} fayl`}
               {selected.size > 0 && <span style={{ color: 'rgba(197,160,89,0.9)' }}> · {selected.size} seçildi</span>}
             </span>
+            <Btn onClick={fetchItems} disabled={loading}>
+              <RotateCcw size={11} strokeWidth={1.5} />
+              Yenilə
+            </Btn>
             {items.length > 0 && (
               <Btn onClick={allSelected ? clearSel : selectAll}>
                 {allSelected
