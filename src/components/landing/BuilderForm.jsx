@@ -75,13 +75,14 @@ const getMaps = () => {
 }
 
 function VenueSearchInput({ value, onSelect, lang, tr }) {
-  const [query,     setQuery]     = useState(value || '')
-  const [preds,     setPreds]     = useState([])
-  const [loading,   setLoading]   = useState(false)
-  const [open,      setOpen]      = useState(false)
-  const [success,   setSuccess]   = useState(false)
-  const [mapsReady, setMapsReady] = useState(false)
-  const [mapsError, setMapsError] = useState(null)
+  const [query,          setQuery]          = useState(value || '')
+  const [preds,          setPreds]          = useState([])
+  const [loading,        setLoading]        = useState(false)
+  const [open,           setOpen]           = useState(false)
+  const [success,        setSuccess]        = useState(false)
+  const [mapsReady,      setMapsReady]      = useState(false)
+  const [mapsError,      setMapsError]      = useState(null)
+  const [selectedCoords, setSelectedCoords] = useState(null)
 
   const wrapRef      = useRef(null)
   const mapDivRef    = useRef(null)
@@ -130,6 +131,7 @@ function VenueSearchInput({ value, onSelect, lang, tr }) {
     map.addListener('click', ({ latLng }) => {
       const lat = latLng.lat(), lng = latLng.lng()
       placeMarker({ lat, lng })
+      setSelectedCoords({ lat, lng })
       geocRef.current?.geocode({ location: { lat, lng } }, (res, st) => {
         if (st !== 'OK' || !res[0]) return
         const name = res[0].address_components?.[0]?.long_name || res[0].formatted_address.split(',')[0]
@@ -193,6 +195,7 @@ function VenueSearchInput({ value, onSelect, lang, tr }) {
       const { lat, lon, display_name } = pred._nom
       const name = display_name.split(',')[0].trim()
       setQuery(name); setPreds([])
+      setSelectedCoords({ lat: parseFloat(lat), lng: parseFloat(lon) })
       onSelectRef.current({ venueName: name, googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`, wazeUrl: `https://waze.com/ul?ll=${lat},${lon}&navigate=yes` })
       setSuccess(true); setTimeout(() => setSuccess(false), 4000)
       return
@@ -203,6 +206,7 @@ function VenueSearchInput({ value, onSelect, lang, tr }) {
       const lng  = res[0].geometry.location.lng()
       const name = pred.structured_formatting?.main_text || pred.description.split(',')[0]
       setQuery(name); placeMarker({ lat, lng })
+      setSelectedCoords({ lat, lng })
       onSelectRef.current({ venueName: name, googleMapsUrl: `https://www.google.com/maps/place/?q=place_id:${pred.place_id}`, wazeUrl: `https://waze.com/ul?ll=${lat},${lng}&navigate=yes` })
       setSuccess(true); setTimeout(() => setSuccess(false), 4000)
     })
@@ -260,20 +264,26 @@ function VenueSearchInput({ value, onSelect, lang, tr }) {
         <div style={{ marginTop: 16, border: '1px solid rgba(197,160,89,0.22)', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, zIndex: 2, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.5) 40%, rgba(197,160,89,0.7) 50%, rgba(197,160,89,0.5) 60%, transparent)' }} />
 
-          {/* Xəta vəziyyəti */}
-          {mapsError && (
-            <div style={{ height: 120, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'rgba(26,17,5,0.55)', padding: '0 16px', textAlign: 'center' }}>
-              <p style={{ fontSize: 11, color: 'rgba(197,160,89,0.85)', fontFamily: '"Inter",system-ui,sans-serif', letterSpacing: '0.04em' }}>
-                Google Maps açıla bilmir — API açarı məhdudlaşdırılıb.
-              </p>
-              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontFamily: '"Inter",system-ui,sans-serif' }}>
-                Google Cloud Console → Credentials → HTTP referrers → localhost:5173/* əlavə edin
-              </p>
-              <p style={{ fontSize: 10, color: 'rgba(197,160,89,0.6)', fontFamily: '"Inter",system-ui,sans-serif' }}>
-                Axtarış hələ işləyir (OpenStreetMap vasitəsilə)
-              </p>
-            </div>
-          )}
+          {/* Google Maps yükləmə xətasında OSM fallback xəritə */}
+          {mapsError && (() => {
+            const lat = selectedCoords?.lat ?? BAKU_CENTER.lat
+            const lng = selectedCoords?.lng ?? BAKU_CENTER.lng
+            const d   = selectedCoords ? 0.008 : 0.11
+            const src = `https://www.openstreetmap.org/export/embed.html?bbox=${lng-d},${lat-d},${lng+d},${lat+d}&layer=mapnik${selectedCoords ? `&marker=${lat},${lng}` : ''}`
+            return (
+              <div style={{ position: 'relative', height: 240, overflow: 'hidden' }}>
+                <iframe
+                  src={src}
+                  style={{ width: '100%', height: '100%', border: 'none', display: 'block', filter: 'sepia(0.2) saturate(0.85) brightness(0.97)' }}
+                  title="Məkan xəritəsi"
+                  loading="lazy"
+                />
+                <p style={{ position: 'absolute', bottom: 6, left: '50%', transform: 'translateX(-50%)', fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(197,160,89,0.8)', fontFamily: '"Inter",system-ui,sans-serif', background: 'rgba(253,250,244,0.88)', backdropFilter: 'blur(4px)', padding: '2px 10px', pointerEvents: 'none', zIndex: 1, whiteSpace: 'nowrap' }}>
+                  OpenStreetMap · Axtarış aktivdir
+                </p>
+              </div>
+            )
+          })()}
 
           {/* Yüklənir */}
           {!mapsReady && !mapsError && (
