@@ -9,6 +9,7 @@ import { demoInvitation, demoGuestbook } from './data/demoInvitation'
 import { getInvitation, saveInvitation } from './utils/api'
 import SmoothCursor from './components/ui/SmoothCursor'
 import ScrollProgress from './components/ui/ScrollProgress'
+import AnimatedBackground from './components/ui/AnimatedBackground'
 import './App.css'
 
 const ACTIVE_UI = 'v3'
@@ -124,36 +125,41 @@ export default function App() {
 
   /* Server sorğusu bitənə qədər minimal yükləmə ekranı */
   if (view === 'loading') {
-
     return (
-      <div className="min-h-screen bg-cream flex items-center justify-center">
-        <div style={{
-          width: 40, height: 40,
-          border: '1px solid rgba(197,160,89,0.25)',
-          borderTop: '1px solid rgba(197,160,89,0.8)',
-          borderRadius: '50%',
-          animation: 'spin 0.9s linear infinite',
-        }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
+      <>
+        <AnimatedBackground />
+        <div className="min-h-screen bg-transparent flex items-center justify-center" style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{
+            width: 40, height: 40,
+            border: '1px solid rgba(197,160,89,0.25)',
+            borderTop: '1px solid rgba(197,160,89,0.8)',
+            borderRadius: '50%',
+            animation: 'spin 0.9s linear infinite',
+          }} />
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      </>
     )
   }
 
   if (view === 'demo') {
     return (
-      <div className="min-h-screen bg-cream">
-        <InvitationPage
-          lang={lang}
-          setLang={setLang}
-          weddingData={demoInvitation}
-          isDemoMode={true}
-          initialGuestbook={demoGuestbook}
-          onBack={() => {
-            window.history.pushState({}, '', '/')
-            setView('landing')
-          }}
-        />
-      </div>
+      <>
+        <AnimatedBackground />
+        <div className="min-h-screen bg-transparent" style={{ position: 'relative', zIndex: 1 }}>
+          <InvitationPage
+            lang={lang}
+            setLang={setLang}
+            weddingData={demoInvitation}
+            isDemoMode={true}
+            initialGuestbook={demoGuestbook}
+            onBack={() => {
+              window.history.pushState({}, '', '/')
+              setView('landing')
+            }}
+          />
+        </div>
+      </>
     )
   }
 
@@ -168,48 +174,55 @@ export default function App() {
   /* ── Admin Review: builder preview modu, data əvvəlcədən yüklənib ── */
   if (view === 'admin-review') {
     return (
-      <div className="min-h-screen bg-cream">
-        <LandingPage
-          lang={lang}
-          setLang={setLang}
-          weddingData={weddingData}
-          setWeddingData={setWeddingData}
-          onViewInvitation={() => {
-            if (adminSlug) window.history.pushState({}, '', `/invite/${adminSlug}`)
-            setView('invite')
-          }}
-          onDemo={() => { window.history.pushState({}, '', '/demo'); setView('demo') }}
-          isAdmin={true}
-          initialShowPreview={true}
-        />
-      </div>
+      <>
+        <AnimatedBackground />
+        <div className="min-h-screen bg-transparent" style={{ position: 'relative', zIndex: 1 }}>
+          <LandingPage
+            lang={lang}
+            setLang={setLang}
+            weddingData={weddingData}
+            setWeddingData={setWeddingData}
+            onViewInvitation={() => {
+              if (adminSlug) window.history.pushState({}, '', `/invite/${adminSlug}`)
+              setView('invite')
+            }}
+            onDemo={() => { window.history.pushState({}, '', '/demo'); setView('demo') }}
+            isAdmin={true}
+            initialShowPreview={true}
+          />
+        </div>
+      </>
     )
   }
 
   if (view === 'invite') {
     return (
-      <div className="min-h-screen bg-cream">
-        <InvitationPage
-          lang={lang}
-          setLang={setLang}
-          weddingData={weddingData}
-          isAdmin={isAdmin}
-          onBack={() => {
-            window.history.pushState({}, '', '/')
-            setView('landing')
-          }}
-        />
-      </div>
+      <>
+        <AnimatedBackground />
+        <div className="min-h-screen bg-transparent" style={{ position: 'relative', zIndex: 1 }}>
+          <InvitationPage
+            lang={lang}
+            setLang={setLang}
+            weddingData={weddingData}
+            isAdmin={isAdmin}
+            onBack={() => {
+              window.history.pushState({}, '', '/')
+              setView('landing')
+            }}
+          />
+        </div>
+      </>
     )
   }
 
   return (
     <>
+      <AnimatedBackground />
       <SmoothCursor />
       <ScrollProgress />
 
       {/* LandingPage həmişə mounted qalır — form data qorunur */}
-      <div className="min-h-screen bg-cream" style={view === 'invitation' ? { display: 'none' } : {}}>
+      <div className="min-h-screen bg-transparent" style={view === 'invitation' ? { display: 'none', position: 'relative', zIndex: 1 } : { position: 'relative', zIndex: 1 }}>
         <LandingPage
           lang={lang}
           setLang={setLang}
@@ -221,7 +234,7 @@ export default function App() {
         />
       </div>
       {view === 'invitation' && (
-        <div className="min-h-screen bg-cream">
+        <div className="min-h-screen bg-transparent" style={{ position: 'relative', zIndex: 1 }}>
           <InvitationPage
             lang={lang}
             setLang={setLang}
