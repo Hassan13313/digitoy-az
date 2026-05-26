@@ -96,26 +96,37 @@ function VenueSearchInput({ value, onSelect, lang, tr }) {
     mapRef.current.setView([lat, lng], 15, { animate: true })
   }, [])
 
-  /* ── Nominatim axtarışı — AZ üstünlüklü, 2+ hərf, 150ms debounce ── */
+  /* ── Nominatim axtarışı — AZ üstünlüklü, 2+ hərf, 400ms debounce ── */
   const search = useCallback((q) => {
     if (q.trim().length < 2) return
     const latinQ = latinize(q)
     const terms  = q === latinQ ? [q] : [q, latinQ]
     const hdrs   = { 'Accept-Language': lang === 'ru' ? 'ru' : lang === 'en' ? 'en' : 'az,en' }
-    const BASE   = 'https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=7'
+    const BASE   = 'https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=7&email=memmedovh90@gmail.com'
     setLoading(true)
+    setOpen(false)
     ;(async () => {
       try {
-        for (const t of terms) {
-          const r = await fetch(`${BASE}&countrycodes=az&q=${encodeURIComponent(t)}`, { headers: hdrs })
+        for (const term of terms) {
+          const r = await fetch(`${BASE}&countrycodes=az&q=${encodeURIComponent(term)}`, { headers: hdrs })
+          if (!r.ok) continue
           const d = await r.json()
-          if (d.length) { setPreds(d.slice(0, 7)); setOpen(true); return }
+          if (Array.isArray(d) && d.length) { setPreds(d.slice(0, 7)); setOpen(true); return }
         }
         const r = await fetch(`${BASE}&q=${encodeURIComponent(terms[0])}`, { headers: hdrs })
-        const d = await r.json()
-        setPreds(d.slice(0, 7)); setOpen(d.length > 0)
-      } catch { setPreds([]) }
-      finally { setLoading(false) }
+        if (r.ok) {
+          const d = await r.json()
+          setPreds(Array.isArray(d) ? d.slice(0, 7) : [])
+        } else {
+          setPreds([])
+        }
+        setOpen(true)
+      } catch {
+        setPreds([])
+        setOpen(true)
+      } finally {
+        setLoading(false)
+      }
     })()
   }, [lang])
 
@@ -135,7 +146,7 @@ function VenueSearchInput({ value, onSelect, lang, tr }) {
     setQuery(q); setSuccess(false)
     clearTimeout(debRef.current)
     if (q.trim().length < 2) { setPreds([]); setOpen(false); return }
-    debRef.current = setTimeout(() => search(q), 150)
+    debRef.current = setTimeout(() => search(q), 400)
   }
 
   useEffect(() => { setQuery(value || '') }, [value])
