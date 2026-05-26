@@ -38,19 +38,20 @@ const NAV_TABS = {
   ],
 }
 
-export default function LandingPage({ lang, setLang, weddingData, setWeddingData, onViewInvitation, onDemo, isAdmin = false }) {
+export default function LandingPage({ lang, setLang, weddingData, setWeddingData, onViewInvitation, onDemo, isAdmin = false, initialShowPreview = false }) {
   const tr = t[lang]
-  const [showPreview,     setShowPreview]     = useState(false)
+  const [showPreview,     setShowPreview]     = useState(initialShowPreview)
   const [formData,        setFormData]        = useState(weddingData)
   const [returnToStep,    setReturnToStep]    = useState(null)
   const [activeTab,       setActiveTab]       = useState('packages')
 
   /*
-   * selectedPackage — hər zaman null başlayır.
-   * İstifadəçi mütləq PackageSelect ekranından keçərək seçim etməlidir.
-   * localStorage yalnız BuilderForm addım kilidləmə üçün istifadə olunur.
+   * selectedPackage — normalda null başlayır (PackageSelect məcburi).
+   * Admin review modunda PREMIUM avtomatik seçilir — bütün addımlar görünür.
    */
-  const [selectedPackage, setSelectedPackage] = useState(null)
+  const [selectedPackage, setSelectedPackage] = useState(
+    (initialShowPreview && isAdmin) ? 'PREMIUM' : null
+  )
 
   /* Köhnə localStorage keşini təmizlə — hər sessiyada təmiz başla */
   useEffect(() => {
@@ -67,15 +68,18 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
   /* ── Hadisə işləyiciləri ── */
 
   const handleFormSubmit = (data) => {
-    setFormData(data)
-    setWeddingData(data)
+    /* Paketi formData-ya əlavə et ki, admin linki və WhatsApp mesajı onu göstərsin */
+    const enriched = selectedPackage ? { ...data, package: selectedPackage } : data
+    setFormData(enriched)
+    setWeddingData(enriched)
     setReturnToStep(null)
     setShowPreview(true)
     setTimeout(() => scrollToSection('builder-content'), 100)
   }
 
   const handleEditFromPreview = () => {
-    setReturnToStep(6)
+    /* Admin review modunda addım 1-dən başla; müştəridə son addıma qayıt */
+    setReturnToStep(isAdmin ? 1 : 6)
     setShowPreview(false)
     setTimeout(() => scrollToSection('builder-content'), 100)
   }

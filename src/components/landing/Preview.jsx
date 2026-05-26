@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react'
 import { Eye, MessageCircle, Edit2, Calendar, MapPin, Shirt, Users, Image, ListOrdered, ShieldCheck, Copy, Check } from 'lucide-react'
 import { DRESS_CODE_PALETTES } from '../../data/constants'
 import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
-import { encodeData, buildWhatsAppUrl } from '../../utils/whatsappOrder'
+import { buildWhatsAppUrl, buildAdminLink } from '../../utils/whatsappOrder'
 import { saveInvitation } from '../../utils/api'
 import t from '../../data/translations'
 
@@ -56,13 +56,6 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
   const timeStr    = formatTime24(data.time)
   const dateDisplay = dayName ? `${formattedDate} — ${dayName}` : formattedDate
 
-  /* WhatsApp link — adminin nömrəsinə gedir */
-  const waLink = buildWhatsAppUrl(data, lang, ADMIN_WA)
-
-  /* Admin üçün idarəetmə linki */
-  const token     = encodeData(data)
-  const adminLink = `${window.location.origin}/builder?admin=digitoyadmin2026&data=${token}`
-
   /* Slug hesabla */
   function toSlug(str = '') {
     return str.toLowerCase()
@@ -76,6 +69,14 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
     ? `${toSlug(data.brideName || '')}-ve-${toSlug(data.groomName || '')}`
     : isCorp2 ? toSlug(data.eventName || 'tedbir')
     : toSlug(data.brideName || 'davetname')
+
+  /* WhatsApp link — adminin nömrəsinə gedir, slug ilə qısa admin link */
+  const waLink = buildWhatsAppUrl(data, lang, ADMIN_WA, slug)
+
+  /* Admin idarəetmə linki — qısa slug əsaslı */
+  const adminLink  = buildAdminLink(slug)
+  /* Müştəriyə göndəriləcək canlı dəvətnamə linki */
+  const inviteLink = `${window.location.origin}/invite/${slug}`
 
   /* WhatsApp click-də serverə saxla */
   const handleWaClick = useCallback(() => {
@@ -201,26 +202,39 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
         {tr.preview_edit}
       </button>
 
-      {/* ── Admin Aktivasiya Paneli ── */}
+      {/* ── Admin Paneli ── */}
       {isAdmin && (
-        <div className="mt-10 border border-emerald-600/30 bg-emerald-50/60 rounded-lg px-8 py-7">
-          <div className="flex items-center gap-2.5 mb-5">
+        <div className="mt-10 border border-emerald-600/30 bg-emerald-50/60 rounded-lg px-8 py-7 space-y-5">
+          <div className="flex items-center gap-2.5">
             <ShieldCheck size={16} className="text-emerald-700" strokeWidth={1.5} />
             <p className="text-[11px] tracking-[0.22em] uppercase text-emerald-800 font-semibold">Admin Paneli</p>
           </div>
 
-          <p className="text-xs text-emerald-900/70 font-light mb-4 leading-relaxed">
-            Müştəriyə göndərmək üçün aşağıdakı idarəetmə linkini kopyala. Bu link vasitəsilə sifariş məlumatlarına geri qayıda, redaktə edə və canlı dəvətnamə yarada bilərsən.
-          </p>
-
-          <div className="bg-white border border-emerald-200 rounded px-4 py-3 mb-3">
-            <p className="text-[10px] text-emerald-700/60 mb-1 uppercase tracking-widest font-medium">İdarəetmə Linki</p>
-            <p className="text-xs text-emerald-900 font-mono break-all leading-relaxed">{adminLink}</p>
+          {/* Admin idarəetmə linki */}
+          <div>
+            <p className="text-xs text-emerald-900/70 font-light mb-3 leading-relaxed">
+              Bu link vasitəsilə sifarişi redaktə edə, məlumatları yeniləyə bilərsən.
+            </p>
+            <div className="bg-white border border-emerald-200 rounded px-4 py-3 mb-2">
+              <p className="text-[10px] text-emerald-700/60 mb-1 uppercase tracking-widest font-medium">🔐 Admin İdarəetmə Linki</p>
+              <p className="text-xs text-emerald-900 font-mono break-all leading-relaxed">{adminLink}</p>
+            </div>
+            <div className="flex items-center justify-between">
+              <CopyBtn text={adminLink} />
+              <span className="text-[10px] text-emerald-700/50 font-light">Yalnız admin üçün</span>
+            </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <CopyBtn text={adminLink} />
-            <span className="text-[10px] text-emerald-700/50 font-light">Yalnız admin üçün</span>
+          {/* Müştəri dəvətnamə linki */}
+          <div className="border-t border-emerald-200/60 pt-5">
+            <p className="text-xs text-emerald-900/70 font-light mb-3 leading-relaxed">
+              Sifarişi təsdiqləyib canlı dəvətnaməni müştəriyə göndər.
+            </p>
+            <div className="bg-white border border-blue-200 rounded px-4 py-3 mb-2">
+              <p className="text-[10px] text-blue-700/60 mb-1 uppercase tracking-widest font-medium">🔗 Müştəri Dəvətnamə Linki</p>
+              <p className="text-xs text-blue-900 font-mono break-all leading-relaxed">{inviteLink}</p>
+            </div>
+            <CopyBtn text={inviteLink} />
           </div>
         </div>
       )}

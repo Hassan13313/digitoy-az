@@ -36,6 +36,7 @@ export default function App() {
   const [lang,        setLang]        = useState('az')
   const [weddingData, setWeddingData] = useState(defaultWedding)
   const [isAdmin,     setIsAdmin]     = useState(false)
+  const [adminSlug,   setAdminSlug]   = useState('')
 
   useEffect(() => {
     if (window.location.pathname === '/demo') {
@@ -44,15 +45,18 @@ export default function App() {
     }
 
     const { slug, sub } = parseInviteSlug()
-
-    /* ── Admin parametrləri ── */
     const params = new URLSearchParams(window.location.search)
-    if (params.get('admin') === ADMIN_KEY) {
+
+    /* ── Admin səlahiyyət yoxlaması ── */
+    const isAdminParam = params.get('admin') === ADMIN_KEY
+    const isAdminLocal = localStorage.getItem('isAdmin') === 'true'
+    if (isAdminParam) {
       localStorage.setItem('isAdmin', 'true')
       setIsAdmin(true)
-    } else if (localStorage.getItem('isAdmin') === 'true') {
+    } else if (isAdminLocal) {
       setIsAdmin(true)
     }
+    const hasAdminAccess = isAdminParam || isAdminLocal
 
     if (slug) {
       if (sub === 'foto') { setView('photo'); return }
@@ -64,19 +68,29 @@ export default function App() {
           const data = await getInvitation(slug)
           if (data) {
             setWeddingData({ ...defaultWedding, ...data })
-            setView('invite')
+            if (hasAdminAccess) {
+              /* Admin: builder preview modunda göstər */
+              setAdminSlug(slug)
+              setView('admin-review')
+            } else {
+              setView('invite')
+            }
             return
           }
         } catch { /* server əlçatmaz → fallback */ }
 
-        /* ── Fallback: URL ?data token (admin linki) ── */
+        /* ── Fallback: URL ?data token ── */
         const token = params.get('data')
         if (token) {
           const decoded = decodeData(token)
           if (decoded) {
             setWeddingData({ ...defaultWedding, ...decoded })
-            setView('invite')
-            /* Arxa fonda serverə saxla ki, növbəti açılışda API-dən gəlsin */
+            if (hasAdminAccess) {
+              setAdminSlug(slug)
+              setView('admin-review')
+            } else {
+              setView('invite')
+            }
             saveInvitation(slug, decoded).catch(() => {})
             return
           }
@@ -89,6 +103,17 @@ export default function App() {
 
       loadFromServer()
       return
+    }
+
+    /* ── Slug yoxdur: köklü URL-də admin+data parametrləri yoxla ── */
+    const token = params.get('data')
+    if (hasAdminAccess && token) {
+      const decoded = decodeData(token)
+      if (decoded) {
+        setWeddingData({ ...defaultWedding, ...decoded })
+        setView('admin-review')
+        return
+      }
     }
 
     setView('landing')
@@ -140,6 +165,27 @@ export default function App() {
     return <GalleryPage />
   }
 
+  /* ── Admin Review: builder preview modu, data əvvəlcədən yüklənib ── */
+  if (view === 'admin-review') {
+    return (
+      <div className="min-h-screen bg-cream">
+        <LandingPage
+          lang={lang}
+          setLang={setLang}
+          weddingData={weddingData}
+          setWeddingData={setWeddingData}
+          onViewInvitation={() => {
+            if (adminSlug) window.history.pushState({}, '', `/invite/${adminSlug}`)
+            setView('invite')
+          }}
+          onDemo={() => { window.history.pushState({}, '', '/demo'); setView('demo') }}
+          isAdmin={true}
+          initialShowPreview={true}
+        />
+      </div>
+    )
+  }
+
   if (view === 'invite') {
     return (
       <div className="min-h-screen bg-cream">
@@ -147,6 +193,7 @@ export default function App() {
           lang={lang}
           setLang={setLang}
           weddingData={weddingData}
+          isAdmin={isAdmin}
           onBack={() => {
             window.history.pushState({}, '', '/')
             setView('landing')
