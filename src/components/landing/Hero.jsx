@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { ChevronDown, Sparkles, Timer, MapPin, Shirt, Users, Camera, Music, Crown, ChevronLeft, ChevronRight, UserCheck, Clock, BookOpen, User } from 'lucide-react'
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import t from '../../data/translations'
 import BlurFade from '../ui/BlurFade'
 import AnimatedShinyText from '../ui/AnimatedShinyText'
@@ -370,205 +370,18 @@ function SilkBackground() {
   )
 }
 
-/* ── Static dust particles for hero parallax ── */
-const DUST = Array.from({ length: 42 }, (_, i) => ({
-  id: i,
-  left:  `${8 + (i * 17.3) % 84}%`,
-  top:   `${5 + (i * 11.7) % 88}%`,
-  size:  1.2 + (i % 4) * 0.7,
-  delay: (i * 0.14) % 3,
-  depth: 0.01 + (i % 5) * 0.008,
-}))
-
-/* Particle sub-component — hooks called at top level (not in map) */
-function DustParticle({ springX, springY, left, top, size, delay, depth }) {
-  const x = useTransform(springX, v => v * depth)
-  const y = useTransform(springY, v => v * depth)
-  return (
-    <motion.div
-      aria-hidden="true"
-      style={{
-        position: 'absolute', left, top,
-        width: size, height: size,
-        borderRadius: '50%',
-        background: 'rgba(197,160,89,0.55)',
-        pointerEvents: 'none',
-        x, y,
-      }}
-      animate={{ opacity: [0.3, 0.7, 0.3] }}
-      transition={{ duration: 2.5 + delay, repeat: Infinity, ease: 'easeInOut' }}
-    />
-  )
-}
-
-/* Second card — depth transforms computed in its own component */
-function FloatingCardLeft({ springX, springY }) {
-  const x = useTransform(springX, v => v * -0.02)
-  const y = useTransform(springY, v => v * 0.022)
-  return (
-    <motion.div
-      className="hidden lg:block"
-      aria-hidden="true"
-      style={{
-        position: 'absolute', left: '5%', bottom: '28%',
-        width: 110, height: 150,
-        borderRadius: 10,
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        background: 'rgba(255,255,255,0.10)',
-        border: '1px solid rgba(255,255,255,0.22)',
-        boxShadow: '0 16px 40px rgba(44,26,14,0.10)',
-        rotateY: -12, rotateX: 5,
-        transformStyle: 'preserve-3d',
-        pointerEvents: 'none',
-        x, y,
-      }}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 0.7, y: 0 }}
-      transition={{ delay: 1, duration: 1, ease: [0.16, 1, 0.3, 1] }}
-    />
-  )
-}
-
 export default function Hero({ lang, onStart, onDemo }) {
   const tr = t[lang]
   const [activeFeature, setActiveFeature] = useState(null)
   const features = featureKeys.map(k => ({ key: k, label: tr[`f_${k}`] }))
 
-  /* ── Mouse parallax ── */
-  const heroRef = useRef(null)
-  const rawX = useMotionValue(0)
-  const rawY = useMotionValue(0)
-  const springX = useSpring(rawX, { stiffness: 55, damping: 20 })
-  const springY = useSpring(rawY, { stiffness: 55, damping: 20 })
-
-  /* depth multipliers */
-  const x1 = useTransform(springX, v => v * 0.018)
-  const y1 = useTransform(springY, v => v * 0.018)
-  const x2 = useTransform(springX, v => v * 0.032)
-  const y2 = useTransform(springY, v => v * 0.032)
-  const x3 = useTransform(springX, v => v * 0.048)
-  const y3 = useTransform(springY, v => v * 0.048)
-  const xCard = useTransform(springX, v => v * 0.025)
-  const yCard = useTransform(springY, v => v * 0.025)
-
-  const onMouseMove = useCallback((e) => {
-    const rect = heroRef.current?.getBoundingClientRect()
-    if (!rect) return
-    rawX.set(e.clientX - rect.left - rect.width / 2)
-    rawY.set(e.clientY - rect.top  - rect.height / 2)
-  }, [rawX, rawY])
-
-  const onMouseLeave = useCallback(() => {
-    rawX.set(0); rawY.set(0)
-  }, [rawX, rawY])
-
   return (
-    <section
-      ref={heroRef}
-      onMouseMove={onMouseMove}
-      onMouseLeave={onMouseLeave}
-      className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-36 pb-28 overflow-hidden"
-    >
+    <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-36 pb-28 overflow-hidden">
       <SilkBackground />
 
-      {/* ── FLOATING 3D LAYER ── */}
-
-      {/* Dust particles */}
-      {DUST.map(p => (
-        <DustParticle key={p.id} springX={springX} springY={springY} {...p} />
-      ))}
-
-      {/* Gold ring — large, behind headline */}
-      <motion.div
-        aria-hidden="true"
-        style={{
-          position: 'absolute', top: '12%', left: '50%',
-          width: 420, height: 420,
-          marginLeft: -210,
-          borderRadius: '50%',
-          border: '1px solid rgba(197,160,89,0.14)',
-          pointerEvents: 'none',
-          x: x1, y: y1,
-        }}
-      />
-      {/* Gold ring — medium, right */}
-      <motion.div
-        aria-hidden="true"
-        style={{
-          position: 'absolute', top: '28%', right: '8%',
-          width: 200, height: 200,
-          borderRadius: '50%',
-          border: '1px solid rgba(197,160,89,0.20)',
-          pointerEvents: 'none',
-          x: x2, y: y2,
-        }}
-      />
-      {/* Gold ring — small, left */}
-      <motion.div
-        aria-hidden="true"
-        style={{
-          position: 'absolute', top: '55%', left: '6%',
-          width: 110, height: 110,
-          borderRadius: '50%',
-          border: '1.5px solid rgba(197,160,89,0.25)',
-          pointerEvents: 'none',
-          x: x3, y: y3,
-        }}
-        animate={{ rotate: 360 }}
-        transition={{ duration: 24, repeat: Infinity, ease: 'linear' }}
-      />
-
-      {/* Invitation card mockup — desktop only */}
-      <motion.div
-        className="hidden lg:block"
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          right: '6%', top: '18%',
-          width: 160, height: 220,
-          borderRadius: 14,
-          backdropFilter: 'blur(20px) saturate(160%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(160%)',
-          background: 'rgba(255,255,255,0.14)',
-          border: '1px solid rgba(255,255,255,0.30)',
-          boxShadow: '0 24px 60px rgba(44,26,14,0.14), inset 0 1px 0 rgba(255,255,255,0.40)',
-          rotateY: 14, rotateX: 7,
-          transformStyle: 'preserve-3d',
-          pointerEvents: 'none',
-          x: xCard, y: yCard,
-        }}
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8, duration: 1, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <div style={{ padding: '22px 18px', textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 10 }}>
-          <div style={{ fontSize: 7, letterSpacing: '0.28em', color: 'rgba(197,160,89,0.85)', textTransform: 'uppercase' }}>✦ Wedding ✦</div>
-          <div style={{ height: 1, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.4), transparent)' }} />
-          <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 17, color: '#2C1A0E', fontWeight: 300, lineHeight: 1.3 }}>Aynur<br />&amp; Rauf</div>
-          <div style={{ height: 1, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.4), transparent)' }} />
-          <div style={{ fontSize: 8, color: 'rgba(139,111,94,0.7)', letterSpacing: '0.14em' }}>15.11.2025</div>
-          <div style={{ fontSize: 7, color: 'rgba(139,111,94,0.5)', letterSpacing: '0.08em' }}>Buta Palace</div>
-        </div>
-      </motion.div>
-
-      {/* Second small card — left side, desktop only */}
-      <FloatingCardLeft springX={springX} springY={springY} />
-
-      {/* ── Announcement badge — glass pill ── */}
+      {/* ── Announcement badge — E3 AnimatedShinyText ── */}
       <BlurFade delay={0.1}>
-        <div style={{
-          position: 'relative',
-          display: 'flex', alignItems: 'center', gap: 10,
-          marginBottom: 48,
-          padding: '8px 20px',
-          backdropFilter: 'blur(20px) saturate(160%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(160%)',
-          background: 'rgba(255,255,255,0.16)',
-          border: '1px solid rgba(197,160,89,0.28)',
-          borderRadius: 100,
-          boxShadow: '0 4px 20px rgba(197,160,89,0.10), inset 0 1px 0 rgba(255,255,255,0.40)',
-        }}>
+        <div className="relative flex items-center gap-2.5 mb-12 px-6 py-2.5 border border-gold/30 bg-gold/[0.04]">
           <Sparkles size={11} className="text-gold" strokeWidth={1.5} />
           <AnimatedShinyText style={{
             fontSize: 10, letterSpacing: '0.28em', textTransform: 'uppercase',
@@ -580,17 +393,15 @@ export default function Hero({ lang, onStart, onDemo }) {
         </div>
       </BlurFade>
 
-      {/* ── H1 ── */}
-      <h1 className="relative font-serif text-center leading-[1.08] mb-8 max-w-3xl" style={{ zIndex: 2 }}>
+      {/* ── H1 — BlurFade stagger ── */}
+      <h1 className="relative font-serif text-center leading-[1.08] mb-8 max-w-3xl">
         <BlurFade delay={0.2}>
-          <span className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-ink font-light tracking-tight"
-            style={{ textShadow: '0 2px 40px rgba(197,160,89,0.12)' }}>
+          <span className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-ink font-light tracking-tight">
             {tr.hero_line1}
           </span>
         </BlurFade>
         <BlurFade delay={0.35}>
-          <span className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-gold font-light mt-2"
-            style={{ textShadow: '0 2px 32px rgba(197,160,89,0.28)' }}>
+          <span className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-gold font-light mt-2">
             <SparklesText color="#C5A059" density={4}>
               {tr.hero_line2}
             </SparklesText>
@@ -611,33 +422,20 @@ export default function Hero({ lang, onStart, onDemo }) {
 
       {/* Subtitle */}
       <BlurFade delay={0.5}>
-        <p className="relative text-brown-muted text-center text-base sm:text-lg leading-[1.8] max-w-sm mb-12 font-light tracking-wide">
+        <p className="relative text-brown-muted text-center text-base sm:text-lg leading-[1.8] max-w-sm mb-14 font-light tracking-wide">
           {tr.hero_subtitle}
         </p>
       </BlurFade>
 
-      {/* ── CTA — glass panel ── */}
+      {/* ── CTA Buttons — ShimmerButton ── */}
       <BlurFade delay={0.6}>
-        <div style={{
-          position: 'relative',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
-          padding: '20px 28px',
-          backdropFilter: 'blur(24px) saturate(160%)',
-          WebkitBackdropFilter: 'blur(24px) saturate(160%)',
-          background: 'rgba(255,255,255,0.13)',
-          border: '1px solid rgba(255,255,255,0.28)',
-          borderRadius: 20,
-          boxShadow: '0 8px 32px rgba(44,26,14,0.08), inset 0 1px 0 rgba(255,255,255,0.40)',
-          marginBottom: 72,
-        }}>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <ShimmerButton onClick={onStart} variant="gold">
-              {tr.hero_cta}
-            </ShimmerButton>
-            <ShimmerButton onClick={onDemo} variant="outline">
-              {tr.hero_demo}
-            </ShimmerButton>
-          </div>
+        <div className="relative flex flex-col sm:flex-row gap-3 mb-20">
+          <ShimmerButton onClick={onStart} variant="gold">
+            {tr.hero_cta}
+          </ShimmerButton>
+          <ShimmerButton onClick={onDemo} variant="outline">
+            {tr.hero_demo}
+          </ShimmerButton>
         </div>
       </BlurFade>
 
@@ -651,20 +449,9 @@ export default function Hero({ lang, onStart, onDemo }) {
               <button
                 key={key}
                 onClick={() => setActiveFeature(isActive ? null : key)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase',
-                  padding: '7px 14px',
-                  backdropFilter: isActive ? 'blur(16px)' : 'blur(12px)',
-                  WebkitBackdropFilter: isActive ? 'blur(16px)' : 'blur(12px)',
-                  background: isActive ? 'rgba(197,160,89,0.14)' : 'rgba(255,255,255,0.18)',
-                  border: `1px solid ${isActive ? 'rgba(197,160,89,0.55)' : 'rgba(255,255,255,0.30)'}`,
-                  borderRadius: 100,
-                  color: isActive ? '#C5A059' : '#8B6F5E',
-                  cursor: 'pointer',
-                  transition: 'all 0.25s ease',
-                  boxShadow: isActive ? '0 0 16px rgba(197,160,89,0.18)' : 'none',
-                }}
+                className={`flex items-center gap-2 text-[10px] tracking-[0.12em] px-4 py-2 border uppercase transition-all duration-300 active:scale-95 cursor-pointer ${
+                  isActive ? 'bg-gold/15 border-gold/60 text-gold' : 'bg-beige border-beige-dark/60 text-brown-muted hover:border-gold/40 hover:text-gold/80'
+                }`}
               >
                 <Icon size={10} strokeWidth={1.5} />
                 {label}
@@ -677,15 +464,7 @@ export default function Hero({ lang, onStart, onDemo }) {
       {/* Feature panel */}
       <div className={`relative max-w-2xl w-full mx-auto mt-8 transition-all duration-500 overflow-visible ${activeFeature ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         {activeFeature && (
-          <div style={{
-            backdropFilter: 'blur(32px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(32px) saturate(180%)',
-            background: 'rgba(255,255,255,0.18)',
-            border: '1px solid rgba(255,255,255,0.30)',
-            borderRadius: 20,
-            padding: 24,
-            boxShadow: '0 16px 48px rgba(44,26,14,0.12), inset 0 1px 0 rgba(255,255,255,0.45)',
-          }}>
+          <div className="bg-white/40 backdrop-blur-md border border-amber-500/10 hover:border-amber-500/30 rounded-2xl p-6 shadow-xl transition-all duration-500">
             <FeatureContent featureKey={activeFeature} tr={tr} />
           </div>
         )}
