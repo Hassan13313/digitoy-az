@@ -548,6 +548,7 @@ export function HeroFooter({ lang = 'az' }) {
   const tr = t[lang]
   return (
     <footer id="site-footer" className="relative z-10 bg-espresso/95 backdrop-blur-md pt-14 pb-8 px-6">
+      <div id="contact-section" />
       <div className="max-w-5xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 pb-10 border-b border-white/10">
           <div>

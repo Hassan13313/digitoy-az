@@ -32,8 +32,13 @@ export default function TubelightNavbar({ lang, tabs, onTabClick, activeTab, log
   }, [menuOpen])
 
   const handleTab = (tab) => {
-    setMenuOpen(false)
-    onTabClick(tab)
+    if (menuOpen) {
+      /* Menu bağlanma animasiyası 250ms — scroll 300ms sonra başlayır ki overlay blok etməsin */
+      setMenuOpen(false)
+      setTimeout(() => onTabClick(tab), 300)
+    } else {
+      onTabClick(tab)
+    }
   }
 
   return (

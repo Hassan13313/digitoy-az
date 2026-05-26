@@ -86,15 +86,15 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
     setShowPreview(false)
     setSelectedPackage(null)
     setActiveTab('packages')
-    scrollToSection('builder-content')
+    scrollToSection('pricing-section')
   }
 
   const handleTabClick = (tab) => {
     setActiveTab(tab.id)
-    if (tab.id === 'demo') { onDemo(); return }
+    if (tab.id === 'demo')     { onDemo(); return }
     if (tab.id === 'packages') { scrollToBuilder(); return }
-    if (tab.id === 'how')     { scrollToSection('how-it-works'); return }
-    if (tab.id === 'contact') { scrollToSection('site-footer'); return }
+    if (tab.id === 'how')      { scrollToSection('how-it-works'); return }
+    if (tab.id === 'contact')  { scrollToSection('contact-section'); return }
   }
 
   /* Paket seçildikdə çağırılır — yalnız bundan sonra BuilderForm açılır */
@@ -132,6 +132,9 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
 
       {/* ── 3. How It Works (Sticky Scroll Reveal) ── */}
       <StickyScrollReveal lang={lang} />
+
+      {/* Naviqasiya anchor — packages tab hədəfi */}
+      <div id="pricing-section" />
 
       {/* ── 4. Builder / PackageSelect bölməsi ── */}
       <section id="builder-section" className="py-12 md:py-24 px-4 sm:px-6 bg-beige/80 backdrop-blur-sm relative z-10">
