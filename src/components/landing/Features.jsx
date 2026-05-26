@@ -1,4 +1,5 @@
 import { Timer, MapPin, Shirt, Users, Camera, Music } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
 import t from '../../data/translations'
 
@@ -16,7 +17,7 @@ export default function Features({ lang }) {
   }))
 
   return (
-    <section className="py-32 px-6 bg-beige/80 backdrop-blur-sm relative z-10">
+    <section className="py-32 px-6 relative z-10">
       <div
         ref={ref}
         className={`max-w-4xl mx-auto reveal-hidden ${visible ? 'reveal-visible' : ''}`}
@@ -28,20 +29,42 @@ export default function Features({ lang }) {
           <div className="gold-divider mt-8 max-w-[160px] mx-auto" />
         </div>
 
-        {/* Feature grid — fine border lines between cells */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-px bg-beige-dark/50">
+        {/* Feature grid — glass tiles */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {features.map(({ icon: Icon, title, desc }, i) => (
-            <div
+            <motion.div
               key={title}
-              className="bg-cream px-10 py-12 group hover:bg-beige/60 transition-colors duration-400"
-              style={{ transitionDelay: `${i * 50}ms` }}
+              style={{
+                backdropFilter: 'blur(24px) saturate(160%)',
+                WebkitBackdropFilter: 'blur(24px) saturate(160%)',
+                background: 'rgba(255,255,255,0.16)',
+                border: '1px solid rgba(255,255,255,0.28)',
+                borderRadius: 16,
+                padding: '32px 28px',
+                boxShadow: '0 4px 24px rgba(44,26,14,0.07), inset 0 1px 0 rgba(255,255,255,0.40)',
+                transitionDelay: `${i * 50}ms`,
+              }}
+              whileHover={{
+                y: -6,
+                background: 'rgba(255,255,255,0.22)',
+                boxShadow: '0 16px 40px rgba(44,26,14,0.12), inset 0 1px 0 rgba(255,255,255,0.50)',
+              }}
+              transition={{ type: 'spring', stiffness: 280, damping: 24 }}
             >
-              <div className="w-9 h-9 border border-gold/25 flex items-center justify-center mb-7 group-hover:border-gold/50 transition-colors duration-300">
-                <Icon size={16} className="text-gold" strokeWidth={1.5} />
+              <div style={{
+                width: 36, height: 36,
+                backdropFilter: 'blur(12px)',
+                background: 'rgba(197,160,89,0.08)',
+                border: '1px solid rgba(197,160,89,0.28)',
+                borderRadius: 10,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                marginBottom: 20,
+              }}>
+                <Icon size={15} color="#C5A059" strokeWidth={1.5} />
               </div>
               <h3 className="font-serif text-[15px] text-ink mb-3 font-light">{title}</h3>
               <p className="text-xs text-brown-muted leading-[1.9] tracking-wide">{desc}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

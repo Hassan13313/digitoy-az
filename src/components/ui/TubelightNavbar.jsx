@@ -47,12 +47,14 @@ export default function TubelightNavbar({ lang, tabs, onTabClick, activeTab, log
       style={{
         position: 'fixed', top: 0, left: 0, right: 0,
         zIndex: 50,
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(221,213,200,0.35)',
-        background: 'rgba(253,251,247,0.92)',
-        transition: 'box-shadow 0.4s ease',
-        boxShadow: scrolled ? '0 4px 32px rgba(0,0,0,0.07)' : 'none',
+        backdropFilter: 'blur(28px) saturate(165%)',
+        WebkitBackdropFilter: 'blur(28px) saturate(165%)',
+        borderBottom: '1px solid rgba(197,160,89,0.14)',
+        background: scrolled ? 'rgba(245,240,232,0.72)' : 'rgba(245,240,232,0.55)',
+        transition: 'box-shadow 0.4s ease, background 0.4s ease',
+        boxShadow: scrolled
+          ? '0 4px 40px rgba(44,26,14,0.10), inset 0 -1px 0 rgba(197,160,89,0.08)'
+          : 'none',
       }}
       animate={{ height: scrolled ? 52 : 64 }}
       transition={{ duration: 0.3, ease: [0.32, 0, 0, 1] }}
@@ -186,9 +188,9 @@ export default function TubelightNavbar({ lang, tabs, onTabClick, activeTab, log
             style={{
               overflow: 'hidden',
               borderTop: '1px solid rgba(221,213,200,0.4)',
-              background: 'rgba(253,251,247,0.97)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
+              background: 'rgba(245,240,232,0.82)',
+              backdropFilter: 'blur(28px) saturate(165%)',
+              WebkitBackdropFilter: 'blur(28px) saturate(165%)',
             }}
           >
             <div style={{ padding: '8px 20px 16px' }}>

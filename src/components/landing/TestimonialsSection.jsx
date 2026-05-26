@@ -59,11 +59,13 @@ function TestimonialCard({ testimonial, isActive, direction }) {
       exit={{ opacity: 0, x: -direction * 60, scale: 0.94 }}
       transition={{ type: 'spring', stiffness: 240, damping: 28 }}
       style={{
-        background: 'rgba(255,255,255,0.55)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(197,160,89,0.2)',
-        padding: '40px 36px',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.06), 0 4px 16px rgba(197,160,89,0.08)',
+        backdropFilter: 'blur(32px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(32px) saturate(180%)',
+        background: 'rgba(255,255,255,0.20)',
+        border: '1px solid rgba(255,255,255,0.35)',
+        borderRadius: 20,
+        padding: '44px 40px',
+        boxShadow: '0 20px 60px rgba(44,26,14,0.10), inset 0 1px 0 rgba(255,255,255,0.50)',
         position: 'relative',
         overflow: 'hidden',
       }}
@@ -154,7 +156,7 @@ export default function TestimonialsSection({ lang = 'az' }) {
   return (
     <section style={{
       padding: '80px 24px', position: 'relative', overflow: 'hidden',
-      background: 'linear-gradient(160deg, #FAF6EE 0%, #F4F1EA 50%, #FAF6EE 100%)',
+      background: 'transparent',
     }}>
       {/* Floating particles */}
       {particles.map((p, i) => <Particle key={i} {...p} />)}
@@ -199,9 +201,13 @@ export default function TestimonialsSection({ lang = 'az' }) {
         {/* Dots navigation */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 32, alignItems: 'center' }}>
           <button onClick={prev} style={{
-            width: 32, height: 32, borderRadius: '50%', border: '1px solid rgba(197,160,89,0.4)',
-            background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#C5A059', transition: 'all 0.2s',
+            width: 36, height: 36, borderRadius: '50%',
+            backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+            background: 'rgba(255,255,255,0.20)',
+            border: '1px solid rgba(197,160,89,0.35)',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#C5A059', transition: 'all 0.25s ease',
+            boxShadow: '0 4px 16px rgba(44,26,14,0.08)',
           }}>‹</button>
 
           {items.map((_, i) => (
@@ -219,9 +225,13 @@ export default function TestimonialsSection({ lang = 'az' }) {
           ))}
 
           <button onClick={next} style={{
-            width: 32, height: 32, borderRadius: '50%', border: '1px solid rgba(197,160,89,0.4)',
-            background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#C5A059', transition: 'all 0.2s',
+            width: 36, height: 36, borderRadius: '50%',
+            backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+            background: 'rgba(255,255,255,0.20)',
+            border: '1px solid rgba(197,160,89,0.35)',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#C5A059', transition: 'all 0.25s ease',
+            boxShadow: '0 4px 16px rgba(44,26,14,0.08)',
           }}>›</button>
         </div>
       </div>

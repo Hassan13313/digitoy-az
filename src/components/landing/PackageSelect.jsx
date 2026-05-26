@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { Check, Crown, Lock } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { PACKAGE_DEFS, PKG_FEATURES } from '../../data/packages'
@@ -26,13 +26,25 @@ const UI = {
 
 const S = {
   vipCard: {
-    background: 'linear-gradient(155deg, #1a1105 0%, #2c1c08 55%, #2C2523 100%)',
-    border: '2px solid rgba(197,160,89,0.48)',
-    boxShadow: '0 16px 64px rgba(197,160,89,0.24), inset 0 1px 0 rgba(197,160,89,0.14)',
+    background: 'linear-gradient(155deg, rgba(26,17,5,0.88) 0%, rgba(44,28,8,0.82) 55%, rgba(44,37,35,0.88) 100%)',
+    border: '2px solid rgba(197,160,89,0.55)',
+    backdropFilter: 'blur(32px) saturate(180%)',
+    WebkitBackdropFilter: 'blur(32px) saturate(180%)',
+    boxShadow: '0 0 80px rgba(197,160,89,0.22), 0 16px 64px rgba(0,0,0,0.40), inset 0 1px 0 rgba(197,160,89,0.16)',
   },
   lightCard: {
-    background: 'linear-gradient(155deg, #FDFBF7 0%, #F4F1EA 100%)',
-    border: '1px solid rgba(221,213,200,0.7)',
+    background: 'rgba(255,255,255,0.20)',
+    border: '1px solid rgba(255,255,255,0.35)',
+    backdropFilter: 'blur(32px) saturate(175%)',
+    WebkitBackdropFilter: 'blur(32px) saturate(175%)',
+    boxShadow: '0 8px 40px rgba(44,26,14,0.09), inset 0 1px 0 rgba(255,255,255,0.50)',
+  },
+  premiumCard: {
+    background: 'rgba(255,255,255,0.22)',
+    border: '1px solid rgba(197,160,89,0.25)',
+    backdropFilter: 'blur(32px) saturate(175%)',
+    WebkitBackdropFilter: 'blur(32px) saturate(175%)',
+    boxShadow: '0 8px 40px rgba(197,160,89,0.10), inset 0 1px 0 rgba(255,255,255,0.50)',
   },
   dividerVip:   { height: 1, background: 'rgba(255,255,255,0.08)',   margin: '24px 0' },
   dividerLight: { height: 1, background: 'linear-gradient(to right,transparent,rgba(197,160,89,0.32),transparent)', margin: '24px 0' },
@@ -182,6 +194,17 @@ export default function PackageSelect({ lang, onSelect }) {
           <FractalDotGrid />
         </div>
 
+        {/* VİP ambient glow */}
+        <div aria-hidden="true" style={{
+          position: 'absolute', top: '50%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 380, height: 380,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(197,160,89,0.18) 0%, transparent 68%)',
+          filter: 'blur(50px)',
+          pointerEvents: 'none', zIndex: 0,
+        }} />
+
         {/* Kart grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(260px,100%),1fr))', gap: 20, position: 'relative', zIndex: 1 }}>
           {pkgIds.map((pkgId, idx) => {
@@ -206,7 +229,7 @@ export default function PackageSelect({ lang, onSelect }) {
                         position: 'relative',
                         display: 'flex', flexDirection: 'column',
                         padding: '44px 32px 32px',
-                        ...(isVip ? S.vipCard : S.lightCard),
+                        ...(isVip ? S.vipCard : pkgId === 'PREMIUM' ? S.premiumCard : S.lightCard),
                         ...(isVip ? { '--border-beam-bg': '#1a1105' } : {}),
                       }}
                     >
