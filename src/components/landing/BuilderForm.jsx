@@ -70,7 +70,7 @@ const getMaps = (force = false) => {
   if (window.google?.maps?.places) return (_mapsP = Promise.resolve())
   if (!MAPS_KEY) return Promise.reject(new Error('no-key'))
   _mapsP = import('@googlemaps/js-api-loader')
-    .then(({ Loader }) => new Loader({ apiKey: MAPS_KEY, version: 'weekly', libraries: ['places'], authReferrerPolicy: 'origin' }).load())
+    .then(({ Loader }) => new Loader({ apiKey: MAPS_KEY, version: 'weekly', libraries: ['places'] }).load())
     .catch(err => { _mapsP = null; throw err })
   return _mapsP
 }
