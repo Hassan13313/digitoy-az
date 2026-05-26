@@ -63,14 +63,15 @@ const MAP_STYLES  = [
   { featureType: 'administrative', elementType: 'geometry.stroke',   stylers: [{ color: '#c5a059' }] },
 ]
 
-/* Singleton loader — bir dəfə yüklənir */
+/* Singleton loader — xəta olduqda sıfırlanır ki, retry mümkün olsun */
 let _mapsP = null
-const getMaps = () => {
-  if (_mapsP) return _mapsP
+const getMaps = (force = false) => {
+  if (!force && _mapsP) return _mapsP
   if (window.google?.maps?.places) return (_mapsP = Promise.resolve())
   if (!MAPS_KEY) return Promise.reject(new Error('no-key'))
   _mapsP = import('@googlemaps/js-api-loader')
     .then(({ Loader }) => new Loader({ apiKey: MAPS_KEY, version: 'weekly', libraries: ['places'], authReferrerPolicy: 'origin' }).load())
+    .catch(err => { _mapsP = null; throw err })
   return _mapsP
 }
 
@@ -264,26 +265,30 @@ function VenueSearchInput({ value, onSelect, lang, tr }) {
         <div style={{ marginTop: 16, border: '1px solid rgba(197,160,89,0.22)', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, zIndex: 2, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.5) 40%, rgba(197,160,89,0.7) 50%, rgba(197,160,89,0.5) 60%, transparent)' }} />
 
-          {/* Google Maps yükləmə xətasında OSM fallback xəritə */}
-          {mapsError && (() => {
-            const lat = selectedCoords?.lat ?? BAKU_CENTER.lat
-            const lng = selectedCoords?.lng ?? BAKU_CENTER.lng
-            const d   = selectedCoords ? 0.008 : 0.11
-            const src = `https://www.openstreetmap.org/export/embed.html?bbox=${lng-d},${lat-d},${lng+d},${lat+d}&layer=mapnik${selectedCoords ? `&marker=${lat},${lng}` : ''}`
-            return (
-              <div style={{ position: 'relative', height: 240, overflow: 'hidden' }}>
-                <iframe
-                  src={src}
-                  style={{ width: '100%', height: '100%', border: 'none', display: 'block', filter: 'sepia(0.2) saturate(0.85) brightness(0.97)' }}
-                  title="Məkan xəritəsi"
-                  loading="lazy"
-                />
-                <p style={{ position: 'absolute', bottom: 6, left: '50%', transform: 'translateX(-50%)', fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(197,160,89,0.8)', fontFamily: '"Inter",system-ui,sans-serif', background: 'rgba(253,250,244,0.88)', backdropFilter: 'blur(4px)', padding: '2px 10px', pointerEvents: 'none', zIndex: 1, whiteSpace: 'nowrap' }}>
-                  OpenStreetMap · Axtarış aktivdir
-                </p>
-              </div>
-            )
-          })()}
+          {/* Google Maps xəta → yenidən yüklə düyməsi */}
+          {mapsError && (
+            <div style={{ height: 120, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, background: 'rgba(26,17,5,0.5)' }}>
+              <p style={{ fontSize: 11, color: 'rgba(197,160,89,0.85)', fontFamily: '"Inter",system-ui,sans-serif', letterSpacing: '0.04em', margin: 0 }}>
+                Google Maps yüklənə bilmədi
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setMapsError(null)
+                  getMaps(true)
+                    .then(() => {
+                      svcRef.current  = new window.google.maps.places.AutocompleteService()
+                      geocRef.current = new window.google.maps.Geocoder()
+                      setMapsReady(true)
+                    })
+                    .catch(err => setMapsError(err?.message || String(err)))
+                }}
+                style={{ fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(197,160,89,0.9)', background: 'transparent', border: '1px solid rgba(197,160,89,0.35)', padding: '5px 14px', cursor: 'pointer', fontFamily: '"Inter",system-ui,sans-serif' }}
+              >
+                Yenidən cəhd et
+              </button>
+            </div>
+          )}
 
           {/* Yüklənir */}
           {!mapsReady && !mapsError && (
