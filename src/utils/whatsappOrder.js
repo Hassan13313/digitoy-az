@@ -17,9 +17,36 @@ function getBasePlatformUrl() {
   return isLocalhost ? window.location.origin : 'https://digitoy.az'
 }
 
-/* ── Admin idarəetmə linki (qısa, slug əsaslı) ── */
-export function buildAdminLink(slug) {
-  return `${getBasePlatformUrl()}/invite/${slug}?admin=digitoyadmin2026`
+/* ── Yalnız əsas sahələri kodlaşdır (URL qısa qalsın) ── */
+function encodeAdminToken(data) {
+  try {
+    const pick = {
+      eventType:        data.eventType,
+      brideName:        data.brideName,
+      groomName:        data.groomName,
+      eventName:        data.eventName,
+      organizer:        data.organizer,
+      date:             data.date,
+      time:             data.time,
+      venueName:        data.venueName,
+      googleMapsUrl:    data.googleMapsUrl,
+      wazeUrl:          data.wazeUrl,
+      appleMapsUrl:     data.appleMapsUrl,
+      dressCodePalette: data.dressCodePalette,
+      programSteps:     data.programSteps,
+      package:          data.package || data.selectedPackage,
+    }
+    const utf8 = new TextEncoder().encode(JSON.stringify(pick))
+    return btoa(String.fromCharCode(...utf8))
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+  } catch { return '' }
+}
+
+/* ── Admin idarəetmə linki — qısa slug + minimal data token ── */
+export function buildAdminLink(slug, data = null) {
+  const base  = `${getBasePlatformUrl()}/invite/${slug}?admin=digitoyadmin2026`
+  const token = data ? encodeAdminToken(data) : ''
+  return token ? `${base}&data=${token}` : base
 }
 
 const PACKAGE_LABELS = {
@@ -50,9 +77,9 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '') {
 
   const programCount = (data.programSteps || []).filter(r => r.time || r.activity).length
 
-  /* Slug varsa qısa link, yoxdursa Base64 fallback */
+  /* Slug varsa data-tokenli qısa link, yoxdursa köhnə fallback */
   const adminLink = slug
-    ? buildAdminLink(slug)
+    ? buildAdminLink(slug, data)
     : `${getBasePlatformUrl()}/?admin=digitoyadmin2026&data=${encodeData(data)}`
 
   let nameLines = ''

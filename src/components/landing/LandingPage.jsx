@@ -47,10 +47,10 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
 
   /*
    * selectedPackage — normalda null başlayır (PackageSelect məcburi).
-   * Admin review modunda PREMIUM avtomatik seçilir — bütün addımlar görünür.
+   * Admin modunda həmişə PREMIUM — bütün 6 addım görünür, PackageSelect atlanır.
    */
   const [selectedPackage, setSelectedPackage] = useState(
-    (initialShowPreview && isAdmin) ? 'PREMIUM' : null
+    isAdmin ? 'PREMIUM' : null
   )
 
   /* Köhnə localStorage keşini təmizlə — hər sessiyada təmiz başla */

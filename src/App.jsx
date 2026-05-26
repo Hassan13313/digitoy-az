@@ -62,43 +62,47 @@ export default function App() {
       if (sub === 'foto') { setView('photo'); return }
       if (sub === 'qalereya-idare') { setView('gallery-page'); return }
 
-      /* ── Mərkəzi server-dən yüklə ── */
+      /* ── Server-dən yüklə, URL token fallback ── */
       const loadFromServer = async () => {
-        try {
-          const data = await getInvitation(slug)
-          if (data) {
-            setWeddingData({ ...defaultWedding, ...data })
-            if (hasAdminAccess) {
-              /* Admin: builder preview modunda göstər */
-              setAdminSlug(slug)
-              setView('admin-review')
-            } else {
-              setView('invite')
-            }
-            return
-          }
-        } catch { /* server əlçatmaz → fallback */ }
+        let loaded = null
 
-        /* ── Fallback: URL ?data token ── */
-        const token = params.get('data')
-        if (token) {
-          const decoded = decodeData(token)
-          if (decoded) {
-            setWeddingData({ ...defaultWedding, ...decoded })
-            if (hasAdminAccess) {
-              setAdminSlug(slug)
-              setView('admin-review')
-            } else {
-              setView('invite')
+        try {
+          const dbData = await getInvitation(slug)
+          if (dbData) {
+            loaded = dbData
+            /* DB-dən gəldisə, URL-dəki köhnə ?data= tokenini təmizlə */
+            const clean = new URL(window.location.href)
+            clean.searchParams.delete('data')
+            window.history.replaceState({}, '', clean.toString())
+          }
+        } catch { /* server əlçatmaz → URL token-ə bax */ }
+
+        /* Fallback: URL-dəki data token */
+        if (!loaded) {
+          const token = params.get('data')
+          if (token) {
+            const decoded = decodeData(token)
+            if (decoded) {
+              loaded = decoded
+              /* Tokeni DB-yə yaz, sonra URL-i təmizlə */
+              saveInvitation(slug, decoded).catch(() => {})
             }
-            saveInvitation(slug, decoded).catch(() => {})
-            return
           }
         }
 
-        /* Heç bir mənbədə tapılmadı → ana səhifə */
-        window.history.replaceState({}, '', '/')
-        setView('landing')
+        if (loaded) setWeddingData({ ...defaultWedding, ...loaded })
+
+        setAdminSlug(slug)
+        if (hasAdminAccess) {
+          /* Admin: data olsa da olmasa da builder modunda aç */
+          setView('admin-review')
+        } else if (loaded) {
+          setView('invite')
+        } else {
+          /* Data yoxdur, admin deyil → ana səhifə */
+          window.history.replaceState({}, '', '/')
+          setView('landing')
+        }
       }
 
       loadFromServer()
@@ -165,7 +169,7 @@ export default function App() {
     return <GalleryPage />
   }
 
-  /* ── Admin Review: builder preview modu, data əvvəlcədən yüklənib ── */
+  /* ── Admin Builder Modu: data dolu Builder açılır, admin redaktə edib təsdiqlər ── */
   if (view === 'admin-review') {
     return (
       <div className="min-h-screen bg-cream">
@@ -180,7 +184,7 @@ export default function App() {
           }}
           onDemo={() => { window.history.pushState({}, '', '/demo'); setView('demo') }}
           isAdmin={true}
-          initialShowPreview={true}
+          initialShowPreview={false}
         />
       </div>
     )

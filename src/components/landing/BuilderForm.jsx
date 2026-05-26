@@ -1064,8 +1064,8 @@ function SeatingPlanEditor({ value, onChange, lang }) {
 export default function BuilderForm({ lang, initialData, initialStep = null, onSubmit, isAdmin = false }) {
   const tr = t[lang]
 
-  /* ── Paket kilidləmə ── */
-  const pkgId = localStorage.getItem('selected_package') || 'PREMIUM'
+  /* ── Paket kilidləmə — admin həmişə PREMIUM alır ── */
+  const pkgId = isAdmin ? 'PREMIUM' : (localStorage.getItem('selected_package') || 'PREMIUM')
   const lockedSteps = getLockedSteps(pkgId)
   const visibleSteps = [1, 2, 3, 4, 5, 6].filter(n => !lockedSteps.includes(n))
   const VISIBLE_TOTAL = visibleSteps.length
