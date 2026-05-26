@@ -6,9 +6,16 @@ import Preview from './Preview'
 import PackageSelect from './PackageSelect'
 import TestimonialsSection from './TestimonialsSection'
 import TubelightNavbar from '../ui/TubelightNavbar'
-import SienaParallax from '../ui/SienaParallax'
 import StickyScrollReveal from '../ui/StickyScrollReveal'
 import t from '../../data/translations'
+
+/* Navbar yüksəkliyi 72px — scroll hesablamada çıxılır */
+function scrollToSection(id) {
+  const el = document.getElementById(id)
+  if (!el) return
+  const top = el.getBoundingClientRect().top + window.pageYOffset - 72
+  window.scrollTo({ top, behavior: 'smooth' })
+}
 
 const NAV_TABS = {
   az: [
@@ -53,9 +60,7 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
   /* Preview göstərildikdə builder bölməsinə scroll et */
   useEffect(() => {
     if (showPreview) {
-      setTimeout(() => {
-        document.getElementById('builder-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }, 100)
+      setTimeout(() => scrollToSection('builder-content'), 100)
     }
   }, [showPreview])
 
@@ -66,36 +71,30 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
     setWeddingData(data)
     setReturnToStep(null)
     setShowPreview(true)
-    setTimeout(() => document.getElementById('builder-section')?.scrollIntoView({ behavior: 'smooth' }), 100)
+    setTimeout(() => scrollToSection('builder-content'), 100)
   }
 
   const handleEditFromPreview = () => {
     setReturnToStep(6)
     setShowPreview(false)
-    setTimeout(() => document.getElementById('builder-section')?.scrollIntoView({ behavior: 'smooth' }), 100)
+    setTimeout(() => scrollToSection('builder-content'), 100)
   }
 
   /* "İndi Başla" / "Özün Yarat" — həmişə PackageSelect-ə yönləndirir */
   const scrollToBuilder = () => {
     setReturnToStep(null)
     setShowPreview(false)
-    setSelectedPackage(null)           // paket seçimi məcburidir
+    setSelectedPackage(null)
     setActiveTab('packages')
-    document.getElementById('builder-section')?.scrollIntoView({ behavior: 'smooth' })
+    scrollToSection('builder-content')
   }
 
   const handleTabClick = (tab) => {
     setActiveTab(tab.id)
     if (tab.id === 'demo') { onDemo(); return }
-    if (tab.id === 'packages') {
-      scrollToBuilder(); return
-    }
-    if (tab.id === 'how') {
-      document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' }); return
-    }
-    if (tab.id === 'contact') {
-      document.getElementById('site-footer')?.scrollIntoView({ behavior: 'smooth' }); return
-    }
+    if (tab.id === 'packages') { scrollToBuilder(); return }
+    if (tab.id === 'how')     { scrollToSection('how-it-works'); return }
+    if (tab.id === 'contact') { scrollToSection('site-footer'); return }
   }
 
   /* Paket seçildikdə çağırılır — yalnız bundan sonra BuilderForm açılır */
@@ -104,7 +103,7 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
     setSelectedPackage(pkgId)
     setReturnToStep(null)
     setShowPreview(false)
-    setTimeout(() => document.getElementById('builder-section')?.scrollIntoView({ behavior: 'smooth' }), 80)
+    setTimeout(() => scrollToSection('builder-content'), 80)
   }
 
   return (
@@ -127,9 +126,6 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
 
       {/* ── 1. Hero ── */}
       <Hero lang={lang} onStart={scrollToBuilder} onDemo={onDemo} />
-
-      {/* ── Siena Parallax ── */}
-      <SienaParallax lang={lang} />
 
       {/* ── 2. Features ── */}
       <FeaturesSection lang={lang} />
@@ -156,6 +152,9 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
               <div className="gold-divider mt-8 max-w-[160px] mx-auto" />
             </div>
           )}
+
+          {/* Dəqiq scroll hədəfi — padding/başlıqdan sonra */}
+          <div id="builder-content" />
 
           {/* Axış: Preview → PackageSelect → BuilderForm */}
           {showPreview ? (

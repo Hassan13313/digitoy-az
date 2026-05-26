@@ -1,5 +1,54 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+
+/* Gold particles that burst when envelope opens */
+function GoldParticle({ x, y, angle, speed, size, delay }) {
+  const rad   = (angle * Math.PI) / 180
+  const destX = Math.cos(rad) * speed
+  const destY = Math.sin(rad) * speed
+
+  return (
+    <motion.div
+      style={{
+        position: 'absolute',
+        left: `calc(50% + ${x}px)`,
+        top:  `calc(50% + ${y}px)`,
+        width: size, height: size,
+        borderRadius: size > 4 ? '1px' : '50%',
+        background: size > 5
+          ? 'linear-gradient(135deg, #E8D5A3, #C5A059)'
+          : 'radial-gradient(circle, #E8D5A3 0%, #C5A059 100%)',
+        rotate: angle,
+        zIndex: 20,
+        pointerEvents: 'none',
+      }}
+      initial={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+      animate={{ opacity: 0, x: destX, y: destY, scale: 0, rotate: angle + 360 }}
+      transition={{
+        duration: 1.1 + Math.random() * 0.8,
+        delay,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+    />
+  )
+}
+
+function ParticleBurst({ active }) {
+  if (!active) return null
+  const particles = Array.from({ length: 36 }, (_, i) => ({
+    angle:  (i * 10) + (Math.random() * 8 - 4),
+    speed:  80 + Math.random() * 160,
+    size:   Math.random() < 0.3 ? (3 + Math.random() * 4) : (2 + Math.random() * 3),
+    delay:  Math.random() * 0.12,
+    x:      (Math.random() - 0.5) * 20,
+    y:      (Math.random() - 0.5) * 20,
+  }))
+  return (
+    <>
+      {particles.map((p, i) => <GoldParticle key={i} {...p} />)}
+    </>
+  )
+}
 
 /* ══════════════════════════════════════════════════
    BALMUMU MÖHÜR — nahamar kənar, real wax effekti
@@ -126,17 +175,20 @@ function WaxSeal({ eventType, brideName, groomName, pulse = true }) {
 export default function EnvelopeOpening({
   brideName, groomName, eventLabel, eventType = 'toy', onComplete,
 }) {
-  const [phase, setPhase]   = useState('idle')
-  const [isDone, setIsDone] = useState(false)
+  const [phase,       setPhase]       = useState('idle')
+  const [isDone,      setIsDone]      = useState(false)
+  const [showParticles, setShowParticles] = useState(false)
 
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     if (phase !== 'idle') return
     setPhase('flap-open')
-    setTimeout(() => setPhase('card-rising'),     1100)
-    setTimeout(() => setPhase('card-fullscreen'), 2200)
-    setTimeout(() => setIsDone(true),              2900)
-    setTimeout(() => onComplete(),                 3200)
-  }
+    setTimeout(() => setShowParticles(true),        650)
+    setTimeout(() => setPhase('card-rising'),       1100)
+    setTimeout(() => setShowParticles(false),       1800)
+    setTimeout(() => setPhase('card-fullscreen'),   2200)
+    setTimeout(() => setIsDone(true),               2900)
+    setTimeout(() => onComplete(),                  3200)
+  }, [phase, onComplete])
 
   const isCorp         = eventType === 'corporate' || eventType === 'other'
   const isCouple       = eventType === 'toy' || eventType === 'nishan'
@@ -158,7 +210,9 @@ export default function EnvelopeOpening({
           key="envelope-overlay"
           className="fixed inset-0 z-50 flex items-center justify-center px-4"
           style={{
-            background: 'linear-gradient(145deg, #FAF6EE 0%, #F2EAD8 50%, #EAE0CC 100%)',
+            background: 'linear-gradient(145deg, rgba(250,246,238,0.92) 0%, rgba(242,234,216,0.94) 50%, rgba(234,224,204,0.92) 100%)',
+            backdropFilter: 'blur(24px)',
+            WebkitBackdropFilter: 'blur(24px)',
           }}
           initial={{ opacity: 1 }}
           exit={{ opacity: 0, transition: { duration: 0.6, ease: 'easeOut' } }}
@@ -186,7 +240,7 @@ export default function EnvelopeOpening({
                 }}
                 initial={{ opacity: 0, scale: 0.06, borderRadius: '50%' }}
                 animate={{ opacity: 1, scale: 1, borderRadius: '0%' }}
-                transition={{ type: 'spring', stiffness: 52, damping: 18, mass: 1.3 }}
+                transition={{ type: 'spring', stiffness: 60, damping: 15, mass: 1.2 }}
               >
                 {/* Corner ornaments */}
                 {[
@@ -216,6 +270,9 @@ export default function EnvelopeOpening({
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* ── Gold particle burst ── */}
+          <ParticleBurst active={showParticles} />
 
           {/* ── ENVELOPE ── */}
           <div
@@ -290,7 +347,7 @@ export default function EnvelopeOpening({
                 animate={cardRising ? { y: '-54%', opacity: 1 } : { y: 0, opacity: 0 }}
                 transition={
                   cardRising
-                    ? { type: 'spring', stiffness: 52, damping: 13, mass: 1.2, delay: 0.06 }
+                    ? { type: 'spring', stiffness: 60, damping: 15, mass: 1.1, delay: 0.08 }
                     : { duration: 0.15 }
                 }
               >
@@ -422,7 +479,7 @@ export default function EnvelopeOpening({
                   zIndex: 4,
                 }}
                 animate={flapOpen ? { rotateX: -180 } : { rotateX: 0 }}
-                transition={{ type: 'spring', stiffness: 46, damping: 12, mass: 1.4 }}
+                transition={{ type: 'spring', stiffness: 60, damping: 15, mass: 1.2 }}
               >
                 {/* Flap front */}
                 <div style={{

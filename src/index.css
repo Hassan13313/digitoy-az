@@ -5,7 +5,7 @@
 @layer base {
   * { box-sizing: border-box; }
   html {
-    scroll-behavior: smooth;
+    /* scroll-behavior intentionally omitted — handled per-call in JS */
     overflow-x: hidden;
     max-width: 100vw;
   }

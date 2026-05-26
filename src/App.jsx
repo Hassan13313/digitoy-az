@@ -182,7 +182,8 @@ export default function App() {
             onBack={() => {
               setView('landing')
               setTimeout(() => {
-                document.getElementById('builder-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                const el = document.getElementById('builder-content')
+                if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 72, behavior: 'smooth' })
               }, 80)
             }}
           />
