@@ -11,9 +11,15 @@ export function encodeData(data) {
   } catch { return '' }
 }
 
+/* ── Localhost vs produksiya base URL ── */
+function getBasePlatformUrl() {
+  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  return isLocalhost ? window.location.origin : 'https://digitoy.az'
+}
+
 /* ── Admin idarəetmə linki (qısa, slug əsaslı) ── */
 export function buildAdminLink(slug) {
-  return `${window.location.origin}/invite/${slug}?admin=digitoyadmin2026`
+  return `${getBasePlatformUrl()}/invite/${slug}?admin=digitoyadmin2026`
 }
 
 const PACKAGE_LABELS = {
@@ -47,7 +53,7 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '') {
   /* Slug varsa qısa link, yoxdursa Base64 fallback */
   const adminLink = slug
     ? buildAdminLink(slug)
-    : `${window.location.origin}/?admin=digitoyadmin2026&data=${encodeData(data)}`
+    : `${getBasePlatformUrl()}/?admin=digitoyadmin2026&data=${encodeData(data)}`
 
   let nameLines = ''
   if (isCouple) {

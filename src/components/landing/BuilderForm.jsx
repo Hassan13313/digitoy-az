@@ -8,6 +8,7 @@ import { QRCodeSVG } from 'qrcode.react'
 import { DRESS_CODE_PALETTES, EVENT_TYPES, WHATSAPP_NUMBER } from '../../data/constants'
 import { PACKAGE_DEFS, getLockedSteps } from '../../data/packages'
 import { buildWhatsAppUrl } from '../../utils/whatsappOrder'
+import { saveInvitation } from '../../utils/api'
 import { formatFullDateByLang } from '../../utils/dateFormat'
 import t from '../../data/translations'
 
@@ -1004,15 +1005,6 @@ function toSlug(str = '') {
     .replace(/^-+|-+$/g, '')
 }
 
-/* ── URL-safe Base64 encode (+ → -, / → _, = silinir) ── */
-function encodeDataLocal(data) {
-  try {
-    const utf8Bytes = new TextEncoder().encode(JSON.stringify(data))
-    return btoa(String.fromCharCode(...utf8Bytes))
-      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-  } catch { return '' }
-}
-
 /* ── URL-safe Base64 decode ── */
 function decodeDataLocal(token) {
   try {
@@ -1278,35 +1270,26 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     }
   }
 
-  /* ── WhatsApp sifariş — mərkəzi funksiya ilə ── */
-  const handleWhatsAppOrder = () => {
-    /* Məlumatları əvvəlcə localStorage-a yaz */
+  /* ── Slug hesablama ── */
+  const computeSlug = () => {
     const isC = COUPLE_TYPES.includes(data.eventType)
     const isP = CORP_TYPES.includes(data.eventType)
-    let slug = ''
-    if (isC)      slug = `${toSlug(data.brideName)}-ve-${toSlug(data.groomName)}`
-    else if (isP) slug = toSlug(data.eventName || 'tedbir')
-    else          slug = toSlug(data.brideName || 'davetname')
-    localStorage.setItem(`wedding_${slug}`, JSON.stringify(data))
+    if (isC) return `${toSlug(data.brideName)}-ve-${toSlug(data.groomName)}`
+    if (isP) return toSlug(data.eventName || 'tedbir')
+    return toSlug(data.brideName || 'davetname')
+  }
 
-    window.open(buildWhatsAppUrl(data, lang, WHATSAPP_NUMBER), '_blank')
+  /* ── WhatsApp sifariş — mərkəzi funksiya ilə ── */
+  const handleWhatsAppOrder = () => {
+    const slug = computeSlug()
+    saveInvitation(slug, data).catch(() => {})
+    window.open(buildWhatsAppUrl(data, lang, WHATSAPP_NUMBER, slug), '_blank')
   }
 
   const handleApproveAndGenerateLink = () => {
-    const isCouple = COUPLE_TYPES.includes(data.eventType)
-    const isCorp   = CORP_TYPES.includes(data.eventType)
-    let slug = ''
-    if (isCouple) {
-      slug = `${toSlug(data.brideName)}-ve-${toSlug(data.groomName)}`
-    } else if (isCorp) {
-      slug = toSlug(data.eventName || 'tedbir')
-    } else {
-      slug = toSlug(data.brideName || 'davetname')
-    }
-    /* Datanı qalıcı yaddaşa yaz — link açılanda oradan oxunacaq */
-    localStorage.setItem(`wedding_${slug}`, JSON.stringify(data))
-    const token = encodeDataLocal(data)
-    const link  = `${window.location.origin}/invite/${slug}?data=${token}`
+    const slug = computeSlug()
+    saveInvitation(slug, data).catch(() => {})
+    const link = `${window.location.origin}/invite/${slug}`
     setGeneratedLiveLink(link)
     setLinkCopied(false)
   }
