@@ -14,6 +14,7 @@ import EventTimeline from './EventTimeline'
 import DynamicHeroAnimation from './DynamicHeroAnimation'
 import ThreeDDressCode from './ThreeDDressCode'
 import { DRESS_CODE_PALETTES, WHATSAPP_NUMBER } from '../../data/constants'
+import { getLockedSteps } from '../../data/packages'
 import { buildWhatsAppUrl } from '../../utils/whatsappOrder'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
 import { formatAzDate, formatFullDateByLang, formatTime24 } from '../../utils/dateFormat'
@@ -66,6 +67,15 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
   const fabricColor = palette.colors[0] || '#C9A88A'
 
   const pageSlug = (window.location.pathname.match(/\/invite\/([^/?#]+)/) || [])[1] || ''
+
+  /* Preview mode-da (builder → "Dəvətnaməni Gör") pakete görə bölmələri gizlə */
+  const previewPkg = (!pageSlug && !isDemoMode)
+    ? (localStorage.getItem('selected_package') || 'PREMIUM')
+    : 'PREMIUM'
+  const previewLocked  = getLockedSteps(previewPkg)
+  const canShowSeating = !previewLocked.includes(5)
+  const canShowGallery = !previewLocked.includes(6)
+
   const effectiveSlug = pageSlug || (
     isCouple
       ? `${toSlug(weddingData.brideName || '')}-ve-${toSlug(weddingData.groomName || '')}`
@@ -314,12 +324,12 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
             </section>
 
             {/* ── SEATING — lüks axtarış UI ── */}
-            {weddingData.seatingPlan && (
+            {weddingData.seatingPlan && canShowSeating && (
               <SeatingSearch seatingPlan={weddingData.seatingPlan} lang={lang} />
             )}
 
             {/* ── GALLERY ── */}
-            <section className="py-28 px-6 bg-cream">
+            {canShowGallery && <section className="py-28 px-6 bg-cream">
               <SectionWrapper className="max-w-lg mx-auto text-center">
                 <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">Gallery</p>
                 <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-5">{tr.inv_gallery}</h2>
@@ -377,7 +387,7 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
                   {tr.inv_gallery_desc}
                 </p>
               </SectionWrapper>
-            </section>
+            </section>}
 
             {/* ── RSVP ── */}
             <RSVPSection lang={lang} weddingData={weddingData} />

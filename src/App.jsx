@@ -153,27 +153,29 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-cream">
-      {view === 'landing' ? (
+    <>
+      {/* LandingPage həmişə mounted qalır — form data qorunur */}
+      <div className="min-h-screen bg-cream" style={view === 'invitation' ? { display: 'none' } : {}}>
         <LandingPage
           lang={lang}
           setLang={setLang}
           weddingData={weddingData}
           setWeddingData={setWeddingData}
-          onViewInvitation={() => {
-            window.history.pushState({}, '', '/demo')
-            setView('demo')
-          }}
+          onViewInvitation={() => setView('invitation')}
+          onDemo={() => { window.history.pushState({}, '', '/demo'); setView('demo') }}
           isAdmin={isAdmin}
         />
-      ) : (
-        <InvitationPage
-          lang={lang}
-          setLang={setLang}
-          weddingData={weddingData}
-          onBack={() => setView('landing')}
-        />
+      </div>
+      {view === 'invitation' && (
+        <div className="min-h-screen bg-cream">
+          <InvitationPage
+            lang={lang}
+            setLang={setLang}
+            weddingData={weddingData}
+            onBack={() => setView('landing')}
+          />
+        </div>
       )}
-    </div>
+    </>
   )
 }

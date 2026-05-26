@@ -6,7 +6,7 @@ import Preview from './Preview'
 import PackageSelect from './PackageSelect'
 import t from '../../data/translations'
 
-export default function LandingPage({ lang, setLang, weddingData, setWeddingData, onViewInvitation, isAdmin = false }) {
+export default function LandingPage({ lang, setLang, weddingData, setWeddingData, onViewInvitation, onDemo, isAdmin = false }) {
   const tr = t[lang]
   const [showPreview,     setShowPreview]     = useState(false)
   const [formData,        setFormData]        = useState(weddingData)
@@ -69,7 +69,7 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
           </div>
           <nav className="hidden sm:flex items-center gap-8">
             <button
-              onClick={onViewInvitation}
+              onClick={onDemo}
               className="text-[10px] tracking-[0.22em] uppercase text-brown-muted hover:text-gold transition-colors duration-300 font-medium"
             >
               {tr.nav_demo}
@@ -88,7 +88,7 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
 
       {/* ── 1. Hero ── */}
       {/* onStart → scrollToBuilder → PackageSelect məcburi */}
-      <Hero lang={lang} onStart={scrollToBuilder} onDemo={onViewInvitation} />
+      <Hero lang={lang} onStart={scrollToBuilder} onDemo={onDemo} />
 
       {/* ── 2. Features ── */}
       <FeaturesSection lang={lang} />

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import {
   Heart, Diamond, Cake, Briefcase, Sparkles,
   ChevronRight, ChevronLeft, Check, Crown, Shirt, Calendar, User, MapPin, Search,
-  Download, QrCode, Archive,
+  Download, QrCode, Archive, Minus, Plus, X,
 } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { DRESS_CODE_PALETTES, EVENT_TYPES, WHATSAPP_NUMBER } from '../../data/constants'
@@ -69,7 +69,7 @@ const getMaps = () => {
   if (window.google?.maps?.places) return (_mapsP = Promise.resolve())
   if (!MAPS_KEY) return Promise.reject(new Error('no-key'))
   _mapsP = import('@googlemaps/js-api-loader')
-    .then(({ Loader }) => new Loader({ apiKey: MAPS_KEY, version: 'weekly', libraries: ['places'] }).load())
+    .then(({ Loader }) => new Loader({ apiKey: MAPS_KEY, version: 'weekly', libraries: ['places'], authReferrerPolicy: 'origin' }).load())
   return _mapsP
 }
 
@@ -1025,6 +1025,142 @@ function decodeDataLocal(token) {
   } catch { return null }
 }
 
+/* ── Oturma Planı Editor ── */
+const SEATING_UI = {
+  az: { addTable: 'Masa əlavə et', addGuest: '+ Qonaq', tableName: 'Masa adı', guestName: 'Qonaq adı', noTables: 'Masa əlavə etmək üçün düyməyə basın' },
+  en: { addTable: 'Add Table', addGuest: '+ Guest', tableName: 'Table name', guestName: 'Guest name', noTables: 'Press the button to add a table' },
+  ru: { addTable: 'Добавить стол', addGuest: '+ Гость', tableName: 'Название стола', guestName: 'Имя гостя', noTables: 'Нажмите кнопку чтобы добавить стол' },
+}
+
+function parseTables(str) {
+  if (!str?.trim()) return []
+  return str.split(';').map((chunk, i) => {
+    const colonIdx = chunk.indexOf(':')
+    const name = colonIdx >= 0 ? chunk.slice(0, colonIdx).trim() : chunk.trim()
+    const guests = colonIdx >= 0
+      ? chunk.slice(colonIdx + 1).split(',').map(g => g.trim()).filter(Boolean)
+      : []
+    return { id: `t${i}_${Date.now()}`, name: name || `Masa ${i + 1}`, guests }
+  }).filter(t => t.name)
+}
+
+function serializeTables(tables) {
+  return tables.map(t => {
+    const validGuests = t.guests.filter(Boolean)
+    return validGuests.length ? `${t.name}: ${validGuests.join(', ')}` : t.name
+  }).join('; ')
+}
+
+function SeatingPlanEditor({ value, onChange, lang }) {
+  const L = SEATING_UI[lang] || SEATING_UI.az
+  const [tables, setTables] = useState(() => parseTables(value))
+
+  const commit = (next) => { setTables(next); onChange(serializeTables(next)) }
+
+  const addTable = () => commit([...tables, { id: `t${Date.now()}`, name: `Masa ${tables.length + 1}`, guests: [] }])
+  const removeTable = (id) => commit(tables.filter(t => t.id !== id))
+  const renameTable = (id, name) => commit(tables.map(t => t.id === id ? { ...t, name } : t))
+  const addGuest = (id) => commit(tables.map(t => t.id === id ? { ...t, guests: [...t.guests, ''] } : t))
+  const removeGuest = (id, gi) => commit(tables.map(t => t.id === id ? { ...t, guests: t.guests.filter((_, i) => i !== gi) } : t))
+  const editGuest = (id, gi, val) => commit(tables.map(t => t.id === id ? { ...t, guests: t.guests.map((g, i) => i === gi ? val : g) } : t))
+
+  const cardStyle = {
+    border: '1px solid rgba(197,160,89,0.28)',
+    background: 'rgba(253,250,244,0.9)',
+    padding: '16px 16px 12px',
+    marginBottom: 0,
+  }
+  const inputBase = {
+    background: 'transparent',
+    border: 'none',
+    borderBottom: '1px solid rgba(197,160,89,0.35)',
+    outline: 'none',
+    fontFamily: 'inherit',
+    color: '#1a1a1a',
+    width: '100%',
+    padding: '6px 0',
+  }
+  const iconBtn = {
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    border: '1px solid rgba(197,160,89,0.25)', background: 'transparent',
+    color: 'rgba(140,123,107,0.65)', cursor: 'pointer', flexShrink: 0,
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {tables.length === 0 && (
+        <p style={{ color: 'rgba(140,123,107,0.45)', fontSize: 12, fontFamily: 'serif', fontStyle: 'italic', textAlign: 'center', padding: '20px 0' }}>
+          {L.noTables}
+        </p>
+      )}
+
+      {tables.map((table) => (
+        <div key={table.id} style={cardStyle}>
+          {/* Masa başlığı */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+            <input
+              type="text"
+              value={table.name}
+              onChange={(e) => renameTable(table.id, e.target.value)}
+              placeholder={L.tableName}
+              style={{ ...inputBase, minHeight: 44, fontSize: 13, fontWeight: 500, letterSpacing: '0.06em', flex: 1 }}
+            />
+            <button type="button" onClick={() => removeTable(table.id)}
+              style={{ ...iconBtn, minWidth: 36, minHeight: 36 }}>
+              <X size={13} strokeWidth={1.5} />
+            </button>
+          </div>
+
+          {/* Qonaqlar */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {table.guests.map((guest, gi) => (
+              <div key={gi} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <input
+                  type="text"
+                  value={guest}
+                  onChange={(e) => editGuest(table.id, gi, e.target.value)}
+                  placeholder={L.guestName}
+                  style={{ ...inputBase, minHeight: 40, fontSize: 12, fontWeight: 300, flex: 1 }}
+                />
+                <button type="button" onClick={() => removeGuest(table.id, gi)}
+                  style={{ ...iconBtn, border: 'none', minWidth: 28, minHeight: 28 }}>
+                  <Minus size={11} strokeWidth={1.5} />
+                </button>
+              </div>
+            ))}
+            <button type="button" onClick={() => addGuest(table.id)}
+              style={{
+                alignSelf: 'flex-start', marginTop: 6, minHeight: 36, padding: '0 10px',
+                border: '1px solid rgba(197,160,89,0.3)', background: 'transparent',
+                color: 'rgba(197,160,89,0.85)', fontSize: 10, letterSpacing: '0.14em',
+                fontFamily: 'inherit', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: 4,
+              }}>
+              <Plus size={10} strokeWidth={1.5} />
+              {L.addGuest}
+            </button>
+          </div>
+        </div>
+      ))}
+
+      {/* Masa əlavə et */}
+      <button type="button" onClick={addTable}
+        style={{
+          minHeight: 44,
+          border: '1px dashed rgba(197,160,89,0.4)',
+          background: 'transparent',
+          color: 'rgba(197,160,89,0.85)',
+          fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase',
+          fontFamily: 'inherit', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+        }}>
+        <Plus size={11} strokeWidth={1.5} />
+        {L.addTable}
+      </button>
+    </div>
+  )
+}
+
 export default function BuilderForm({ lang, initialData, initialStep = null, onSubmit, isAdmin = false }) {
   const tr = t[lang]
 
@@ -1430,13 +1566,11 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
           <div className="space-y-6">
             <div>
               <Label>{tr.seating_label}</Label>
-              <Textarea
+              <SeatingPlanEditor
                 value={data.seatingPlan}
-                onChange={(e) => set('seatingPlan', e.target.value)}
-                placeholder={tr.seating_placeholder}
-                rows={7}
+                onChange={(val) => set('seatingPlan', val)}
+                lang={lang}
               />
-              <p className="text-[11px] text-brown-muted/70 mt-3 leading-relaxed tracking-wide font-light">{tr.seating_help}</p>
             </div>
           </div>
         )}
