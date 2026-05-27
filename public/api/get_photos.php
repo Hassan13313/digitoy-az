@@ -15,25 +15,36 @@ if (!$slug || !preg_match('/^[a-z0-9\-]{2,120}$/', $slug)) {
     exit;
 }
 
-$db   = getDB();
-$stmt = $db->prepare(
-    "SELECT id, url, filename, mime_type, file_size, uploaded_at
-     FROM photos
-     WHERE slug = :slug
-     ORDER BY uploaded_at DESC"
-);
-$stmt->execute([':slug' => $slug]);
-$rows = $stmt->fetchAll();
+/* Diskdən oxu — DB lazım deyil */
+$uploadDir = __DIR__ . '/../uploads/' . $slug . '/';
+$baseUrl   = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
 
-$photos = array_map(fn($r) => [
-    'id'         => (string) $r['id'],
-    'url'        => $r['url'],
-    'thumbUrl'   => $r['url'],
-    'name'       => $r['filename'],
-    'type'       => $r['mime_type'],
-    'size'       => (int) $r['file_size'],
-    'uploadedAt' => $r['uploaded_at'],
-    'source'     => 'server',
-], $rows);
+$photos = [];
+if (is_dir($uploadDir)) {
+    $imgExt   = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic'];
+    $videoExt = ['mp4', 'mov', 'quicktime'];
+
+    foreach (scandir($uploadDir) as $file) {
+        if ($file === '.' || $file === '..') continue;
+        $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+        if (!in_array($ext, array_merge($imgExt, $videoExt))) continue;
+
+        $mime = in_array($ext, $videoExt) ? 'video/mp4' : 'image/jpeg';
+        $stat = stat($uploadDir . $file);
+
+        $photos[] = [
+            'id'         => $file,
+            'url'        => $baseUrl . '/uploads/' . $slug . '/' . $file,
+            'thumbUrl'   => $baseUrl . '/uploads/' . $slug . '/' . $file,
+            'name'       => $file,
+            'type'       => $mime,
+            'size'       => $stat ? (int) $stat['size'] : 0,
+            'uploadedAt' => $stat ? date('Y-m-d H:i:s', $stat['mtime']) : '',
+            'source'     => 'server',
+        ];
+    }
+
+    usort($photos, fn($a, $b) => strcmp($b['uploadedAt'], $a['uploadedAt']));
+}
 
 echo json_encode(['ok' => true, 'slug' => $slug, 'photos' => $photos]);

@@ -66,4 +66,4 @@ function ensureTables(): void {
     ");
 }
 
-ensureTables();
+// ensureTables() yalnız invitations üçün lazımdır — foto skriptlər çağırmır
