@@ -39,11 +39,13 @@ export default function PhotoShare() {
     if (!queue.length || uploading) return
     setUploading(true)
 
+    let successCount = 0
     for (const item of queue) {
       setQueue(prev => prev.map(q => q.id === item.id ? { ...q, status: 'uploading' } : q))
       try {
         await uploadPhoto(item.file, slug)
         setQueue(prev => prev.map(q => q.id === item.id ? { ...q, status: 'done' } : q))
+        successCount++
       } catch {
         setQueue(prev => prev.map(q => q.id === item.id ? { ...q, status: 'error' } : q))
       }
@@ -51,6 +53,12 @@ export default function PhotoShare() {
 
     setUploading(false)
     setDone(true)
+
+    if (successCount > 0) {
+      setTimeout(() => {
+        window.location.href = `/invite/${slug}/qalereya-idare`
+      }, 1500)
+    }
   }
 
   const pendingCount = queue.filter(q => q.status === 'pending').length

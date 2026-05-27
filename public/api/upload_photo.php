@@ -1,4 +1,9 @@
 <?php
+@ini_set('upload_max_filesize', '128M');
+@ini_set('post_max_size',       '128M');
+@ini_set('max_execution_time',  '300');
+@ini_set('memory_limit',        '256M');
+
 require_once __DIR__ . '/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -38,10 +43,22 @@ if ($file['size'] > 52428800) {
     exit;
 }
 
-/* Qovluq yarat */
+/* Qovluq yarat — parent uploads/ + slug/ */
 $uploadDir = __DIR__ . '/../uploads/' . $slug . '/';
 if (!is_dir($uploadDir)) {
-    mkdir($uploadDir, 0755, true);
+    if (!mkdir($uploadDir, 0755, true) && !is_dir($uploadDir)) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Cannot create upload directory']);
+        exit;
+    }
+}
+if (!is_writable($uploadDir)) {
+    chmod($uploadDir, 0755);
+    if (!is_writable($uploadDir)) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Upload directory not writable']);
+        exit;
+    }
 }
 
 /* Unikal fayl adı */
