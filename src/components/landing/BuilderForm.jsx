@@ -5,8 +5,7 @@ import {
   Download, QrCode, Archive, Minus, Plus, X,
 } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
-import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
+import { Loader } from '@googlemaps/js-api-loader'
 import { DRESS_CODE_PALETTES, EVENT_TYPES, WHATSAPP_NUMBER } from '../../data/constants'
 import { PACKAGE_DEFS, getLockedSteps } from '../../data/packages'
 import { buildWhatsAppUrl, buildLiveLink, encodeData } from '../../utils/whatsappOrder'
@@ -33,168 +32,156 @@ const calendarTranslations = {
   },
 }
 
-/* AZ hərflərini latına çevirir — hər iki variantla axtarış üçün */
-function latinize(s) {
-  const M = { ə:'e',Ə:'E',ş:'s',Ş:'S',ç:'c',Ç:'C',ğ:'g',Ğ:'G',ö:'o',Ö:'O',ü:'u',Ü:'U',ı:'i',İ:'I' }
-  return s.split('').map(c => M[c] ?? c).join('')
+const GMAPS_KEY   = import.meta.env.VITE_GOOGLE_MAPS_KEY
+const BAKU_CENTER = { lat: 40.4093, lng: 49.8671 }
+
+const DARK_MAP_STYLES = [
+  { elementType: 'geometry',            stylers: [{ color: '#1c1c1c' }] },
+  { elementType: 'labels.text.stroke',  stylers: [{ color: '#1c1c1c' }] },
+  { elementType: 'labels.text.fill',    stylers: [{ color: '#9a9a9a' }] },
+  { featureType: 'road',    elementType: 'geometry',         stylers: [{ color: '#2e2e2e' }] },
+  { featureType: 'road',    elementType: 'labels.text.fill', stylers: [{ color: '#7a7a7a' }] },
+  { featureType: 'water',   elementType: 'geometry',         stylers: [{ color: '#0d0d0d' }] },
+  { featureType: 'poi',     stylers: [{ visibility: 'off' }] },
+  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+  { featureType: 'administrative.locality', elementType: 'labels.text.fill', stylers: [{ color: '#C5A059' }] },
+]
+
+function toNavUrls(lat, lng) {
+  return {
+    googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,
+    wazeUrl: `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`,
+  }
 }
 
-const BAKU_CENTER = [40.4093, 49.8671]
-
-const GOLD_MARKER = L.divIcon({
-  className: '',
-  html: '<div style="width:16px;height:16px;background:#C5A059;border:2.5px solid #fdfaf4;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.35)"></div>',
-  iconSize: [16, 16],
-  iconAnchor: [8, 8],
-})
-
 function VenueSearchInput({ value, onSelect, lang, tr }) {
-  const [query,   setQuery]   = useState(value || '')
-  const [preds,   setPreds]   = useState([])
-  const [loading, setLoading] = useState(false)
-  const [open,    setOpen]    = useState(false)
-  const [success, setSuccess] = useState(false)
-
-  const wrapRef     = useRef(null)
+  const inputRef    = useRef(null)
   const mapDivRef   = useRef(null)
   const mapRef      = useRef(null)
-  const markerRef   = useRef(null)
-  const debRef      = useRef(null)
   const onSelectRef = useRef(onSelect)
   useEffect(() => { onSelectRef.current = onSelect }, [onSelect])
 
-  /* ── Leaflet xəritəsi — API açarı lazım deyil ── */
-  useEffect(() => {
-    if (!mapDivRef.current || mapRef.current) return
-    const map = L.map(mapDivRef.current, { center: BAKU_CENTER, zoom: 11, zoomControl: true })
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19, attribution: '© OpenStreetMap',
-    }).addTo(map)
-    mapRef.current = map
+  const [success, setSuccess] = useState(false)
 
-    map.on('click', async ({ latlng }) => {
-      const { lat, lng } = latlng
-      placeMarker(lat, lng)
-      try {
-        const res  = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=az,en`)
-        const data = await res.json()
-        const name = data.name || data.display_name?.split(',')[0] || ''
-        setQuery(name)
-        onSelectRef.current({ venueName: name, googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, wazeUrl: `https://waze.com/ul?ll=${lat},${lng}&navigate=yes` })
-        setSuccess(true); setTimeout(() => setSuccess(false), 4000)
-      } catch {}
+  useEffect(() => {
+    const loader = new Loader({
+      apiKey: GMAPS_KEY,
+      version: 'weekly',
+      libraries: ['places'],
+      language: 'az',
     })
 
-    return () => { map.remove(); mapRef.current = null; markerRef.current = null }
-  }, [])
+    let marker = null
 
-  const placeMarker = useCallback((lat, lng) => {
-    if (!mapRef.current) return
-    if (markerRef.current) markerRef.current.remove()
-    markerRef.current = L.marker([lat, lng], { icon: GOLD_MARKER }).addTo(mapRef.current)
-    mapRef.current.setView([lat, lng], 15, { animate: true })
-  }, [])
+    const flash = () => { setSuccess(true); setTimeout(() => setSuccess(false), 4000) }
 
-  /* ── Nominatim axtarışı — AZ üstünlüklü, 2+ hərf, 400ms debounce ── */
-  const search = useCallback((q) => {
-    if (q.trim().length < 2) return
-    const latinQ = latinize(q)
-    const terms  = q === latinQ ? [q] : [q, latinQ]
-    const hdrs   = { 'Accept-Language': lang === 'ru' ? 'ru' : lang === 'en' ? 'en' : 'az,en' }
-    const BASE   = 'https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=7&email=memmedovh90@gmail.com'
-    setLoading(true)
-    setOpen(false)
-    ;(async () => {
-      try {
-        for (const term of terms) {
-          const r = await fetch(`${BASE}&countrycodes=az&q=${encodeURIComponent(term)}`, { headers: hdrs })
-          if (!r.ok) continue
-          const d = await r.json()
-          if (Array.isArray(d) && d.length) { setPreds(d.slice(0, 7)); setOpen(true); return }
-        }
-        const r = await fetch(`${BASE}&q=${encodeURIComponent(terms[0])}`, { headers: hdrs })
-        if (r.ok) {
-          const d = await r.json()
-          setPreds(Array.isArray(d) ? d.slice(0, 7) : [])
-        } else {
-          setPreds([])
-        }
-        setOpen(true)
-      } catch {
-        setPreds([])
-        setOpen(true)
-      } finally {
-        setLoading(false)
+    const placeMarker = (latLng) => {
+      if (!mapRef.current) return
+      if (marker) {
+        marker.setPosition(latLng)
+      } else {
+        marker = new window.google.maps.Marker({
+          position: latLng,
+          map: mapRef.current,
+          draggable: true,
+          icon: {
+            path: window.google.maps.SymbolPath.CIRCLE,
+            scale: 9,
+            fillColor: '#C5A059',
+            fillOpacity: 1,
+            strokeColor: '#fdfaf4',
+            strokeWeight: 2.5,
+          },
+          animation: window.google.maps.Animation.DROP,
+        })
+        marker.addListener('dragend', () => {
+          const pos = marker.getPosition()
+          new window.google.maps.Geocoder().geocode({ location: pos }, (results, status) => {
+            const name = status === 'OK' && results[0]
+              ? (results[0].name || results[0].formatted_address.split(',')[0])
+              : ''
+            if (inputRef.current) inputRef.current.value = name
+            onSelectRef.current({ venueName: name, ...toNavUrls(pos.lat(), pos.lng()) })
+            flash()
+          })
+        })
       }
-    })()
-  }, [lang])
+      mapRef.current.panTo(latLng)
+      mapRef.current.setZoom(16)
+    }
 
-  const handleSelectPred = useCallback((pred) => {
-    setOpen(false); setPreds([])
-    const lat  = parseFloat(pred.lat)
-    const lng  = parseFloat(pred.lon)
-    const name = pred.display_name.split(',')[0].trim()
-    setQuery(name)
-    placeMarker(lat, lng)
-    onSelectRef.current({ venueName: name, googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, wazeUrl: `https://waze.com/ul?ll=${lat},${lng}&navigate=yes` })
-    setSuccess(true); setTimeout(() => setSuccess(false), 4000)
-  }, [placeMarker])
+    const geocodeAndEmit = (latLng) => {
+      new window.google.maps.Geocoder().geocode({ location: latLng }, (results, status) => {
+        const name = status === 'OK' && results[0]
+          ? (results[0].name || results[0].formatted_address.split(',')[0])
+          : ''
+        if (inputRef.current) inputRef.current.value = name
+        onSelectRef.current({ venueName: name, ...toNavUrls(latLng.lat(), latLng.lng()) })
+        flash()
+      })
+    }
 
-  const handleChange = (e) => {
-    const q = e.target.value
-    setQuery(q); setSuccess(false)
-    clearTimeout(debRef.current)
-    if (q.trim().length < 2) { setPreds([]); setOpen(false); return }
-    debRef.current = setTimeout(() => search(q), 400)
-  }
+    loader.load().then(() => {
+      if (!mapDivRef.current || mapRef.current) return
 
-  useEffect(() => { setQuery(value || '') }, [value])
-  useEffect(() => {
-    const fn = e => { if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false) }
-    document.addEventListener('mousedown', fn); return () => document.removeEventListener('mousedown', fn)
-  }, [])
+      const map = new window.google.maps.Map(mapDivRef.current, {
+        center: BAKU_CENTER,
+        zoom: 11,
+        disableDefaultUI: true,
+        zoomControl: true,
+        styles: DARK_MAP_STYLES,
+      })
+      mapRef.current = map
+
+      map.addListener('click', (e) => {
+        placeMarker(e.latLng)
+        geocodeAndEmit(e.latLng)
+      })
+
+      if (!inputRef.current) return
+
+      const ac = new window.google.maps.places.Autocomplete(inputRef.current, {
+        componentRestrictions: { country: 'az' },
+        fields: ['geometry', 'name', 'formatted_address'],
+      })
+
+      ac.addListener('place_changed', () => {
+        const place = ac.getPlace()
+        if (!place.geometry?.location) return
+        const lat  = place.geometry.location.lat()
+        const lng  = place.geometry.location.lng()
+        const name = place.name || (place.formatted_address || '').split(',')[0]
+        placeMarker(place.geometry.location)
+        onSelectRef.current({ venueName: name, ...toNavUrls(lat, lng) })
+        flash()
+      })
+    }).catch(() => {})
+
+    return () => { mapRef.current = null; marker = null }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div ref={wrapRef} className="relative">
+    <div className="relative">
       <div className="relative">
         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gold/50 pointer-events-none" />
-        {loading && <div className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 border border-gold/40 border-t-gold/80 rounded-full animate-spin" />}
         <input
-          type="text" value={query} onChange={handleChange}
-          onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), search(query))}
+          ref={inputRef}
+          type="text"
+          defaultValue={value || ''}
           placeholder={tr.venue_search_placeholder}
-          className="w-full pl-9 pr-10 py-3 bg-[#1a1a1a]/60 border border-gold/20 text-white/90 text-sm placeholder-white/25 rounded-none focus:outline-none focus:border-gold/50 transition-colors"
+          className="w-full pl-9 pr-4 py-3 bg-[#1a1a1a]/60 border border-gold/20 text-white/90 text-sm placeholder-white/25 rounded-none focus:outline-none focus:border-gold/50 transition-colors"
         />
       </div>
-
-      {open && preds.length > 0 && (
-        <div className="absolute left-0 right-0 top-full mt-1 z-[110] backdrop-blur-md bg-[#1a1a1a]/90 border border-gold/20 shadow-2xl max-h-64 overflow-y-auto">
-          {preds.map(pred => (
-            <button key={pred.place_id} type="button" onClick={() => handleSelectPred(pred)}
-              className="w-full text-left px-4 py-3 hover:bg-gold/10 border-b border-white/5 last:border-0 transition-colors">
-              <p className="text-white/90 text-sm leading-snug">{pred.display_name.split(',')[0]}</p>
-              <p className="text-white/35 text-[10px] mt-0.5 truncate">{pred.display_name}</p>
-            </button>
-          ))}
-        </div>
-      )}
-      {open && preds.length === 0 && !loading && query.trim().length >= 2 && (
-        <div className="absolute left-0 right-0 top-full mt-1 z-[110] backdrop-blur-md bg-[#1a1a1a]/90 border border-gold/20 px-4 py-3">
-          <p className="text-white/40 text-sm">{tr.venue_search_no_results}</p>
-        </div>
-      )}
       {success && (
         <p className="mt-2 text-[11px] tracking-[0.12em] text-gold font-medium flex items-center gap-1.5">
           <MapPin size={11} /> {tr.venue_search_success}
         </p>
       )}
-
-      {/* ── Leaflet xəritəsi ── */}
       <div style={{ marginTop: 16, border: '1px solid rgba(197,160,89,0.22)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, zIndex: 2, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.5) 40%, rgba(197,160,89,0.7) 50%, rgba(197,160,89,0.5) 60%, transparent)' }} />
         <div ref={mapDivRef} style={{ height: 240, width: '100%', zIndex: 1 }} />
-        <p style={{ position: 'absolute', bottom: 6, left: '50%', transform: 'translateX(-50%)', fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(197,160,89,0.8)', fontFamily: '"Inter",system-ui,sans-serif', background: 'rgba(253,250,244,0.88)', backdropFilter: 'blur(4px)', padding: '2px 10px', pointerEvents: 'none', zIndex: 10, whiteSpace: 'nowrap' }}>
-          Xəritədə nöqtəyə vurun — ünvan avtomatik yazılacaq
+        <p style={{ position: 'absolute', bottom: 6, left: '50%', transform: 'translateX(-50%)', fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(197,160,89,0.8)', fontFamily: '"Inter",system-ui,sans-serif', background: 'rgba(10,10,10,0.85)', backdropFilter: 'blur(4px)', padding: '2px 10px', pointerEvents: 'none', zIndex: 10, whiteSpace: 'nowrap' }}>
+          Məkanı axtarın və ya xəritəyə vurun
         </p>
       </div>
     </div>
