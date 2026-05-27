@@ -65,6 +65,18 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
     }
   }, [showPreview])
 
+  /* Admin dərin link: mount zamanı birbaşa builder-ə jump et */
+  useEffect(() => {
+    if (!isAdmin) return
+    const t = setTimeout(() => {
+      const el = document.getElementById('builder-content')
+      if (!el) return
+      const top = el.getBoundingClientRect().top + window.pageYOffset - 72
+      window.scrollTo({ top, behavior: 'auto' })
+    }, 300)
+    return () => clearTimeout(t)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   /* ── Hadisə işləyiciləri ── */
 
   const handleFormSubmit = (data) => {
@@ -90,7 +102,7 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
     setShowPreview(false)
     setSelectedPackage(null)
     setActiveTab('packages')
-    scrollToSection('pricing-section')
+    setTimeout(() => scrollToSection('pricing-section'), 80)
   }
 
   const handleTabClick = (tab) => {
