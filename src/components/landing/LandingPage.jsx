@@ -117,6 +117,7 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
   const handlePackageSelect = (pkgId) => {
     try { localStorage.setItem('selected_package', pkgId) } catch {}
     setSelectedPackage(pkgId)
+    setFormData(d => ({ ...d, package: pkgId }))   // initialData.package-i sinxronlaşdır
     setReturnToStep(null)
     setShowPreview(false)
     setTimeout(() => scrollToSection('builder-content'), 80)
