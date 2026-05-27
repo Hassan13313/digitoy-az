@@ -53,12 +53,6 @@ export default function PhotoShare() {
 
     setUploading(false)
     setDone(true)
-
-    if (successCount > 0) {
-      setTimeout(() => {
-        window.location.href = `/invite/${slug}/qalereya-idare`
-      }, 1500)
-    }
   }
 
   const pendingCount = queue.filter(q => q.status === 'pending').length
