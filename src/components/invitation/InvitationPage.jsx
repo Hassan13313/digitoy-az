@@ -14,7 +14,7 @@ import EventTimeline from './EventTimeline'
 import DynamicHeroAnimation from './DynamicHeroAnimation'
 import ThreeDDressCode from './ThreeDDressCode'
 import { DRESS_CODE_PALETTES, WHATSAPP_NUMBER } from '../../data/constants'
-import { getLockedSteps } from '../../data/packages'
+import { getPackageGates } from '../../data/packages'
 import { buildWhatsAppUrl } from '../../utils/whatsappOrder'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
 import { formatAzDate, formatFullDateByLang, formatTime24 } from '../../utils/dateFormat'
@@ -68,13 +68,9 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
 
   const pageSlug = (window.location.pathname.match(/\/invite\/([^/?#]+)/) || [])[1] || ''
 
-  /* Preview mode-da (builder → "Dəvətnaməni Gör") pakete görə bölmələri gizlə */
-  const previewPkg = (!pageSlug && !isDemoMode)
-    ? (localStorage.getItem('selected_package') || 'PREMIUM')
-    : 'PREMIUM'
-  const previewLocked  = getLockedSteps(previewPkg)
-  const canShowSeating = !previewLocked.includes(5)
-  const canShowGallery = !previewLocked.includes(6)
+  /* Feature gating — həmişə weddingData.package-dən oxunur, rol/URL fərqi yoxdur */
+  const activePkgId = isDemoMode ? 'PREMIUM' : (weddingData.package || 'SADE')
+  const { allowSeating: canShowSeating, allowGallery: canShowGallery } = getPackageGates(activePkgId)
 
   const effectiveSlug = pageSlug || (
     isCouple

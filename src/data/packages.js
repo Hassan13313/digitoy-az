@@ -52,3 +52,12 @@ export const PKG_FEATURES = {
 export function getLockedSteps(pkgId) {
   return PACKAGE_DEFS[pkgId]?.lockedSteps ?? []
 }
+
+/* Paket ID-dən feature gates qaytarır — bütün komponentlər bu funksiyanı istifadə edir */
+export function getPackageGates(pkgId) {
+  const locked = getLockedSteps(pkgId || 'SADE')
+  return {
+    allowSeating: !locked.includes(5),
+    allowGallery: !locked.includes(6),
+  }
+}

@@ -47,10 +47,10 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
 
   /*
    * selectedPackage — normalda null başlayır (PackageSelect məcburi).
-   * Admin modunda həmişə PREMIUM — bütün 6 addım görünür, PackageSelect atlanır.
+   * Admin modunda weddingData.package oxunur — paketi bypass etmir.
    */
   const [selectedPackage, setSelectedPackage] = useState(
-    isAdmin ? 'PREMIUM' : null
+    isAdmin ? (weddingData?.package || 'SADE') : null
   )
 
   /* Köhnə localStorage keşini təmizlə — hər sessiyada təmiz başla */
@@ -68,8 +68,8 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
   /* ── Hadisə işləyiciləri ── */
 
   const handleFormSubmit = (data) => {
-    /* Paketi formData-ya əlavə et ki, admin linki və WhatsApp mesajı onu göstərsin */
-    const enriched = selectedPackage ? { ...data, package: selectedPackage } : data
+    /* Paket həmişə data-da olur — mövcudsa qoru, yoxdursa selectedPackage-dən al */
+    const enriched = { ...data, package: data.package || selectedPackage || 'SADE' }
     setFormData(enriched)
     setWeddingData(enriched)
     setReturnToStep(null)

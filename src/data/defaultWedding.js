@@ -14,4 +14,5 @@ export const defaultWedding = {
   seatingPlan: '',
   galleryLink: '',
   programSteps: [],
+  package: 'SADE',
 }
