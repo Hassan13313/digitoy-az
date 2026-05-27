@@ -5,7 +5,22 @@ import {
   Download, QrCode, Archive, Minus, Plus, X,
 } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
-import { Loader } from '@googlemaps/js-api-loader'
+/* Google Maps JS API — singleton promise, script injected once */
+let _mapsPromise = null
+function loadGoogleMaps(apiKey) {
+  if (_mapsPromise) return _mapsPromise
+  if (window.google?.maps?.places) return Promise.resolve()
+  _mapsPromise = new Promise((resolve, reject) => {
+    const s = document.createElement('script')
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&language=az`
+    s.async = true
+    s.defer = true
+    s.onload  = () => resolve()
+    s.onerror = (e) => { _mapsPromise = null; reject(e) }
+    document.head.appendChild(s)
+  })
+  return _mapsPromise
+}
 import { DRESS_CODE_PALETTES, EVENT_TYPES, WHATSAPP_NUMBER } from '../../data/constants'
 import { PACKAGE_DEFS, getLockedSteps } from '../../data/packages'
 import { buildWhatsAppUrl, buildLiveLink, encodeData } from '../../utils/whatsappOrder'
@@ -64,13 +79,6 @@ function VenueSearchInput({ value, onSelect, lang, tr }) {
   const [success, setSuccess] = useState(false)
 
   useEffect(() => {
-    const loader = new Loader({
-      apiKey: GMAPS_KEY,
-      version: 'weekly',
-      libraries: ['places'],
-      language: 'az',
-    })
-
     let marker = null
 
     const flash = () => { setSuccess(true); setTimeout(() => setSuccess(false), 4000) }
@@ -121,7 +129,7 @@ function VenueSearchInput({ value, onSelect, lang, tr }) {
       })
     }
 
-    loader.load().then(() => {
+    loadGoogleMaps(GMAPS_KEY).then(() => {
       if (!mapDivRef.current || mapRef.current) return
 
       const map = new window.google.maps.Map(mapDivRef.current, {
