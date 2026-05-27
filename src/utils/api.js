@@ -5,7 +5,9 @@
    Production: https://digitoy.az/api/...
 ══════════════════════════════════════════════════ */
 
-const BASE = '/api'
+const isLocalhost = typeof window !== 'undefined' &&
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+const BASE = isLocalhost ? 'https://digitoy.az/api' : '/api'
 
 /* ── Dəvətnaməni serverə saxla (UPSERT) ── */
 export async function saveInvitation(slug, formData) {
