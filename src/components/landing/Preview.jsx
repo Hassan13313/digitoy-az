@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { motion } from 'framer-motion'
 import { Eye, MessageCircle, Edit2, Calendar, MapPin, Shirt, Users, Image, ListOrdered, ShieldCheck, Copy, Check } from 'lucide-react'
 import { DRESS_CODE_PALETTES } from '../../data/constants'
 import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
@@ -140,82 +141,121 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
 
   return (
     <div className="max-w-2xl mx-auto animate-fade-up">
-      {/* Header */}
-      <div className="text-center mb-12">
-        <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-3 font-medium">Preview</p>
-        <h2 className="font-serif text-2xl text-ink font-light tracking-tight">{tr.preview_title}</h2>
-        <div className="gold-divider mt-6 max-w-[160px] mx-auto" />
-      </div>
-
-      {/* Name card */}
-      <div className="bg-beige border border-beige-dark/60 px-10 py-10 mb-px text-center">
-        <p className="text-[10px] tracking-[0.28em] uppercase text-brown-muted mb-4 font-medium">
-          {eventLabels[data.eventType] || tr.event_other}
-        </p>
-        <h3 className="font-serif text-3xl text-ink font-light tracking-tight">
-          {isCouple ? (
-            <>
-              {data.brideName || '—'}
-              <span className="text-gold mx-4 font-serif italic font-light">&</span>
-              {data.groomName || '—'}
-            </>
-          ) : (
-            data.brideName || data.eventName || '—'
-          )}
-        </h3>
-      </div>
-
-      {/* Details */}
-      <div className="bg-cream border border-beige-dark/60 border-t-0 px-10 py-8 mb-8">
-        <div className="space-y-6">
-          {rows.map(({ icon: Icon, label, value }) => (
-            <div key={label} className="flex items-start gap-5">
-              <div className="w-7 h-7 border border-beige-dark/80 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <Icon size={12} className="text-gold" strokeWidth={1.5} />
-              </div>
-              <div>
-                <p className="text-[9px] tracking-[0.22em] uppercase text-brown-muted mb-1 font-medium">{label}</p>
-                <div className="text-sm text-ink font-light flex items-center">{value}</div>
-              </div>
-            </div>
-          ))}
+      {/* Section header */}
+      <div className="text-center mb-10">
+        <p className="font-mono text-[10px] tracking-[0.42em] uppercase text-gold-dark mb-3">Preview</p>
+        <h2 className="font-serif text-2xl text-espresso font-light tracking-tight">{tr.preview_title}</h2>
+        <div className="flex items-center justify-center gap-3 mt-5 max-w-[140px] mx-auto">
+          <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.55))' }} />
+          <div className="w-1.5 h-1.5 border border-gold/60 rotate-45" />
+          <div className="flex-1 h-px" style={{ background: 'linear-gradient(to left, transparent, rgba(197,160,89,0.55))' }} />
         </div>
       </div>
 
-      {/* Müştəri düymələri */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <a
+      {/* ── Luxury receipt card ── */}
+      <div
+        className="rounded-2xl overflow-hidden mb-6"
+        style={{
+          background: 'linear-gradient(160deg, #FDFCF9 0%, #F8F5EF 100%)',
+          boxShadow: '0 20px 60px rgba(44,26,14,0.08), 0 6px 20px rgba(44,26,14,0.05), inset 0 1px 0 rgba(255,255,255,0.9)',
+          border: '1px solid rgba(221,213,200,0.55)',
+        }}
+      >
+        {/* Name header */}
+        <div className="px-8 pt-8 pb-7 text-center">
+          <p className="font-mono text-[9px] tracking-[0.34em] uppercase text-brown-muted/70 mb-3">
+            {eventLabels[data.eventType] || tr.event_other}
+          </p>
+          <h3 className="font-serif text-[28px] text-espresso font-light tracking-tight leading-tight">
+            {isCouple ? (
+              <>
+                {data.brideName || '—'}
+                <span className="text-gold mx-3 font-serif italic font-light">&amp;</span>
+                {data.groomName || '—'}
+              </>
+            ) : (
+              data.brideName || data.eventName || '—'
+            )}
+          </h3>
+        </div>
+
+        {/* Gold hairline divider */}
+        <div className="mx-8 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.45) 30%, rgba(197,160,89,0.45) 70%, transparent)' }} />
+
+        {/* Data rows */}
+        <div className="px-8 py-7 space-y-5">
+          {rows.map(({ icon: Icon, label, value }) => {
+            const isEmpty = typeof value === 'string' && (value === tr.seating_no || value === tr.gallery_no || value === '—')
+            return (
+              <div key={label} className="flex items-start gap-4">
+                {/* Frameless icon marker */}
+                <div className="w-8 h-8 flex items-center justify-center flex-shrink-0 mt-0.5 rounded-lg"
+                  style={{ background: 'rgba(197,160,89,0.07)' }}>
+                  <Icon size={13} className="text-gold" strokeWidth={1.4} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-mono text-[9px] tracking-[0.28em] uppercase text-brown-muted/65 mb-1 font-semibold">{label}</p>
+                  {isEmpty ? (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] italic text-brown-muted/50 font-light"
+                      style={{ background: 'rgba(139,107,91,0.06)', border: '1px solid rgba(139,107,91,0.12)' }}>
+                      —
+                    </span>
+                  ) : (
+                    <div className="text-[13.5px] text-espresso font-light leading-snug">{value}</div>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* CTA buttons */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-3">
+        <motion.a
           href={waLink}
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleWaClick}
-          className="flex-1 flex items-center justify-center gap-2.5 btn-gold"
+          className="flex-1 flex items-center justify-center gap-2.5 btn-gold min-h-[52px]"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
         >
           <MessageCircle size={14} strokeWidth={1.5} />
           {tr.preview_whatsapp}
-        </a>
-        <button
+        </motion.a>
+        <motion.button
           onClick={onView}
-          className="flex-1 flex items-center justify-center gap-2.5 btn-outline-gold"
+          className="flex-1 flex items-center justify-center gap-2.5 btn-outline-gold min-h-[52px]"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
         >
           <Eye size={14} strokeWidth={1.5} />
           {tr.preview_view}
-        </button>
+        </motion.button>
       </div>
 
+      {/* Edit link */}
       <button
         onClick={onEdit}
-        className="w-full mt-4 flex items-center justify-center gap-2 text-[10px] tracking-[0.18em] uppercase text-brown-muted hover:text-gold transition-colors duration-200 py-3"
+        className="group w-full flex items-center justify-center gap-2 text-[10px] tracking-[0.18em] uppercase text-brown-muted hover:text-gold transition-colors duration-200 py-3"
       >
         <Edit2 size={11} strokeWidth={1.5} />
-        {tr.preview_edit}
+        <span className="relative">
+          {tr.preview_edit}
+          <span className="absolute bottom-0 left-0 w-0 group-hover:w-full h-px bg-gold transition-all duration-300" />
+        </span>
       </button>
 
       {/* ── Admin Paneli ── */}
       {isAdmin && (
         <div
-          className="mt-10 border border-emerald-600/25"
-          style={{ background: 'linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%)' }}
+          className="mt-8 rounded-2xl overflow-hidden"
+          style={{
+            background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+            border: '1px solid rgba(16,185,129,0.22)',
+            boxShadow: '0 8px 24px rgba(16,185,129,0.08)',
+          }}
         >
           <div style={{ height: 1, background: 'linear-gradient(to right,transparent,rgba(16,185,129,0.6) 40%,rgba(16,185,129,0.8) 50%,rgba(16,185,129,0.6) 60%,transparent)' }} />
           <div className="px-8 py-7 text-center">
@@ -228,30 +268,34 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
             </p>
 
             {!linkGenerated ? (
-              <button
+              <motion.button
                 type="button"
                 onClick={handleApprove}
-                className="inline-flex items-center gap-2.5 px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] tracking-[0.2em] uppercase font-semibold transition-colors duration-200 shadow-md"
+                className="inline-flex items-center gap-2.5 px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] tracking-[0.2em] uppercase font-semibold transition-colors duration-200 shadow-md rounded-xl"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
               >
                 <Check size={13} strokeWidth={2.5} />
                 Sifarişi Təsdiqlə
-              </button>
+              </motion.button>
             ) : (
               <div className="space-y-3">
                 <p className="text-[10px] tracking-[0.2em] uppercase text-emerald-700 font-semibold">
                   ✓ Link hazırlandı — müştəriyə göndər
                 </p>
-                <div className="bg-cream border border-beige-dark/70 px-4 py-3 text-left">
+                <div className="bg-cream border border-beige-dark/70 rounded-xl px-4 py-3 text-left">
                   <p className="text-xs text-espresso font-mono break-all leading-relaxed">{liveLink}</p>
                 </div>
-                <button
+                <motion.button
                   type="button"
                   onClick={handleCopyLink}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 border border-emerald-600 text-emerald-700 text-[10px] tracking-[0.18em] uppercase font-semibold hover:bg-emerald-600 hover:text-white transition-colors duration-200"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 border border-emerald-600 text-emerald-700 text-[10px] tracking-[0.18em] uppercase font-semibold hover:bg-emerald-600 hover:text-white transition-colors duration-200 rounded-xl"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
                 >
                   {linkCopied ? <Check size={12} strokeWidth={2.5} /> : <Copy size={12} strokeWidth={1.5} />}
                   {linkCopied ? 'Kopyalandı!' : 'Linki Kopyala'}
-                </button>
+                </motion.button>
               </div>
             )}
           </div>

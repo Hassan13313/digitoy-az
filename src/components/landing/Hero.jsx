@@ -405,115 +405,165 @@ function SilkBackground() {
 
 export default function Hero({ lang, onStart, onDemo }) {
   const tr = t[lang]
-  const [activeFeature, setActiveFeature] = useState(null)
+  const [activeFeature, setActiveFeature] = useState('countdown')
   const features = featureKeys.map(k => ({ key: k, label: tr[`f_${k}`] }))
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-36 pb-28 overflow-hidden">
+    <section className="relative min-h-screen overflow-hidden pt-24 pb-16 lg:pt-32 lg:pb-24">
       <SilkBackground />
-      <GoldRings />
 
-      {/* ── Announcement badge — glass-gold pill ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: [0.32, 0, 0.68, 1] }}
-        className="relative inline-flex items-center gap-2.5 px-[18px] py-2 rounded-full glass-gold text-[11px] font-semibold tracking-[0.32em] text-gold-dark uppercase mb-12"
-      >
-        <span className="text-gold">✦</span>
-        <span>Premium Digital Invitation</span>
-        <span className="text-gold">✦</span>
-      </motion.div>
-
-      {/* ── H1 ── */}
-      <motion.h1
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.05, ease: [0.32, 0, 0.68, 1] }}
-        className="relative font-serif font-normal text-espresso text-center mt-0 mb-3.5 leading-[1.02] tracking-[-0.01em] max-w-3xl"
-        style={{ fontSize: 'clamp(48px, 6vw, 84px)' }}
-      >
-        {tr.hero_line1}{' '}
-        <span className="italic text-gold-gradient" style={{ filter: 'drop-shadow(0 4px 24px rgba(197,160,89,0.35))' }}>
-          {tr.hero_line2}
-        </span>
-      </motion.h1>
-
-      {/* Gold divider ornament */}
-      <BlurFade delay={0.45}>
-        <div className="relative flex items-center gap-3 mb-10 w-full max-w-[200px]">
-          <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.55))' }} />
-          <div className="w-1 h-1 bg-gold rotate-45 opacity-70" />
-          <div className="w-2 h-2 border border-gold/60 rotate-45" />
-          <div className="w-1 h-1 bg-gold rotate-45 opacity-70" />
-          <div className="flex-1 h-px" style={{ background: 'linear-gradient(to left, transparent, rgba(197,160,89,0.55))' }} />
-        </div>
-      </BlurFade>
-
-      {/* ── Subtitle ── */}
-      <motion.p
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.12, ease: [0.32, 0, 0.68, 1] }}
-        className="relative text-brown-dark text-[17px] text-center leading-[1.65] max-w-[480px] mb-8"
-      >
-        {tr.hero_subtitle}
-      </motion.p>
-
-      {/* ── CTA Buttons ── */}
-      <BlurFade delay={0.6}>
-        <div className="relative flex flex-col sm:flex-row gap-3 mb-20">
-          <motion.button
-            onClick={onStart}
-            className="btn-gold min-h-[52px]"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.96 }}
-          >
-            {tr.hero_cta}
-          </motion.button>
-          <motion.button
-            onClick={onDemo}
-            className="btn-ghost-gold min-h-[52px]"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.96 }}
-          >
-            {tr.hero_demo}
-          </motion.button>
-        </div>
-      </BlurFade>
-
-      {/* ── Feature pills ── */}
-      <BlurFade delay={0.7}>
-        <div className="relative flex flex-wrap justify-center gap-2 max-w-xl">
-          {features.map(({ key, label }) => {
-            const Icon = featureIcons[key]
-            const isActive = activeFeature === key
-            return (
-              <button
-                key={key}
-                onClick={() => setActiveFeature(isActive ? null : key)}
-                className={`flex items-center gap-2 text-[10px] tracking-[0.12em] px-4 py-2 border uppercase transition-all duration-300 active:scale-95 cursor-pointer ${
-                  isActive ? 'bg-gold/15 border-gold/60 text-gold' : 'bg-beige border-beige-dark/60 text-brown-muted hover:border-gold/40 hover:text-gold/80'
-                }`}
-              >
-                <Icon size={10} strokeWidth={1.5} />
-                {label}
-              </button>
-            )
-          })}
-        </div>
-      </BlurFade>
-
-      {/* Feature panel */}
-      <div className={`relative max-w-2xl w-full mx-auto mt-8 transition-all duration-500 overflow-visible ${activeFeature ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-        {activeFeature && (
-          <div className="bg-white/40 backdrop-blur-md border border-amber-500/10 hover:border-amber-500/30 rounded-2xl p-6 shadow-xl transition-all duration-500">
-            <FeatureContent featureKey={activeFeature} tr={tr} />
-          </div>
-        )}
+      {/* Gold rings — offset right on desktop */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden>
+        <motion.div
+          className="absolute top-1/2 right-0 lg:right-[8%] -translate-y-1/2"
+          style={{ zIndex: 0 }}
+        >
+          <div className="absolute rounded-full border border-gold/[0.10]" style={{ width: 320, height: 320, top: '50%', left: '50%', marginTop: -160, marginLeft: -160 }} />
+          <div className="absolute rounded-full border border-gold/[0.06]" style={{ width: 520, height: 520, top: '50%', left: '50%', marginTop: -260, marginLeft: -260 }} />
+          <div className="absolute rounded-full border border-gold/[0.04]" style={{ width: 720, height: 720, top: '50%', left: '50%', marginTop: -360, marginLeft: -360 }} />
+        </motion.div>
       </div>
 
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-float">
+      {/* ── 2-column grid ── */}
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center max-w-7xl mx-auto px-6">
+
+        {/* ══ LEFT COLUMN ══ */}
+        <div className="lg:col-span-5 flex flex-col items-start">
+          {/* Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: [0.32, 0, 0.68, 1] }}
+            className="inline-flex items-center gap-2.5 px-[18px] py-2 rounded-full glass-gold text-[11px] font-semibold tracking-[0.32em] text-gold-dark uppercase mb-8"
+          >
+            <span className="text-gold">✦</span>
+            <span>Premium Digital Invitation</span>
+            <span className="text-gold">✦</span>
+          </motion.div>
+
+          {/* H1 */}
+          <motion.h1
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.05, ease: [0.32, 0, 0.68, 1] }}
+            className="font-serif font-normal text-espresso leading-[1.02] tracking-[-0.01em] mb-5"
+            style={{ fontSize: 'clamp(38px, 5vw, 64px)' }}
+          >
+            {tr.hero_line1}{' '}
+            <span className="italic text-gold-gradient" style={{ filter: 'drop-shadow(0 4px 24px rgba(197,160,89,0.35))' }}>
+              {tr.hero_line2}
+            </span>
+          </motion.h1>
+
+          {/* Gold divider */}
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-1 h-1 bg-gold rotate-45 opacity-70" />
+            <div className="w-2 h-2 border border-gold/60 rotate-45" />
+            <div className="w-1 h-1 bg-gold rotate-45 opacity-70" />
+            <div className="w-16 h-px" style={{ background: 'linear-gradient(to right, rgba(197,160,89,0.55), transparent)' }} />
+          </div>
+
+          {/* Subtitle */}
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.12, ease: [0.32, 0, 0.68, 1] }}
+            className="text-brown-dark text-[16px] leading-[1.65] mb-10 max-w-[420px]"
+          >
+            {tr.hero_subtitle}
+          </motion.p>
+
+          {/* CTA Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: [0.32, 0, 0.68, 1] }}
+            className="flex flex-col sm:flex-row gap-3"
+          >
+            <motion.button onClick={onStart} className="btn-gold min-h-[52px]" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}>
+              {tr.hero_cta}
+            </motion.button>
+            <motion.button onClick={onDemo} className="btn-ghost-gold min-h-[52px]" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}>
+              {tr.hero_demo}
+            </motion.button>
+          </motion.div>
+        </div>
+
+        {/* ══ RIGHT COLUMN — Interactive Feature Showcase ══ */}
+        <motion.div
+          className="lg:col-span-7"
+          initial={{ opacity: 0, x: 24 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.7, delay: 0.25, ease: [0.32, 0, 0.68, 1] }}
+        >
+          {/* Showcase container */}
+          <div
+            className="rounded-2xl p-5 sm:p-6"
+            style={{
+              background: 'rgba(255,255,255,0.38)',
+              backdropFilter: 'blur(24px) saturate(160%)',
+              WebkitBackdropFilter: 'blur(24px) saturate(160%)',
+              border: '1px solid rgba(255,255,255,0.55)',
+              boxShadow: '0 24px 64px rgba(44,26,14,0.10), 0 8px 24px rgba(44,26,14,0.06), inset 0 1px 0 rgba(255,255,255,0.7)',
+            }}
+          >
+            {/* Tab strip — multi-row flex */}
+            <div className="flex flex-wrap gap-x-1.5 gap-y-2 justify-center mb-5">
+                {features.map(({ key, label }) => {
+                  const Icon = featureIcons[key]
+                  const isActive = activeFeature === key
+                  return (
+                    <motion.button
+                      key={key}
+                      onClick={() => setActiveFeature(key)}
+                      className={`relative flex items-center gap-1.5 px-3 py-2 rounded-full text-[10px] tracking-[0.14em] font-medium uppercase whitespace-nowrap transition-colors duration-200 ${
+                        isActive ? 'text-white' : 'text-brown-muted hover:text-gold'
+                      }`}
+                    >
+                      {isActive && (
+                        <motion.div
+                          layoutId="tab-bg"
+                          className="absolute inset-0 rounded-full bg-gold"
+                          transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                        />
+                      )}
+                      <span className="relative z-10 flex items-center gap-1.5">
+                        <Icon size={10} strokeWidth={isActive ? 2 : 1.5} />
+                        {label}
+                      </span>
+                    </motion.button>
+                  )
+                })}
+            </div>
+
+            {/* Feature canvas */}
+            <div
+              className="rounded-xl p-5 min-h-[280px] flex items-center"
+              style={{
+                background: 'rgba(255,255,255,0.45)',
+                border: '1px solid rgba(255,255,255,0.6)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.8)',
+              }}
+            >
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeFeature}
+                  className="w-full"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.28, ease: [0.32, 0, 0.68, 1] }}
+                >
+                  <FeatureContent featureKey={activeFeature} tr={tr} />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
+        </motion.div>
+
+      </div>
+
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-float">
         <ChevronDown size={18} className="text-gold/35" strokeWidth={1.5} />
       </div>
     </section>
@@ -543,25 +593,46 @@ export function FAQSection({ lang = 'az' }) {
             </div>
           </div>
         </BlurFade>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {faqs.map(({ q, a }, i) => {
             const isOpen = open === i
             return (
               <BlurFade key={i} delay={i * 0.08}>
-                <div className="bg-white/30 backdrop-blur-sm border border-white/30 rounded-xl overflow-hidden">
+                <div
+                  className="rounded-2xl overflow-hidden transition-all duration-300"
+                  style={{
+                    background: isOpen ? 'rgba(255,255,255,0.72)' : 'rgba(255,255,255,0.42)',
+                    backdropFilter: 'blur(20px) saturate(160%)',
+                    WebkitBackdropFilter: 'blur(20px) saturate(160%)',
+                    border: isOpen ? '1px solid rgba(197,160,89,0.35)' : '1px solid rgba(255,255,255,0.55)',
+                    boxShadow: isOpen
+                      ? '0 12px 40px rgba(44,26,14,0.10), 0 4px 12px rgba(44,26,14,0.06), inset 0 1px 0 rgba(255,255,255,0.8)'
+                      : '0 4px 20px rgba(44,26,14,0.06), inset 0 1px 0 rgba(255,255,255,0.7)',
+                  }}
+                >
                   <button
                     onClick={() => setOpen(isOpen ? null : i)}
-                    className="w-full flex items-center justify-between px-5 sm:px-6 py-4 text-left min-h-[52px] touch-manipulation"
+                    className="w-full flex items-center justify-between px-6 py-5 text-left min-h-[60px] touch-manipulation gap-4"
                     aria-expanded={isOpen}
                   >
-                    <span className="text-sm text-ink font-light pr-4 leading-relaxed">{q}</span>
-                    <motion.span
-                      className="flex-shrink-0 text-gold"
-                      animate={{ rotate: isOpen ? 180 : 0 }}
-                      transition={{ duration: 0.25, ease: [0.32, 0, 0.68, 1] }}
+                    <span className="text-[14px] text-espresso font-light leading-relaxed flex-1">{q}</span>
+                    {/* Circular +/× emblem */}
+                    <motion.div
+                      className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-base font-light leading-none select-none"
+                      animate={isOpen
+                        ? { backgroundColor: 'rgba(197,160,89,1)', color: '#fff', rotate: 0 }
+                        : { backgroundColor: 'rgba(197,160,89,0.12)', color: '#C5A059', rotate: 0 }
+                      }
+                      transition={{ duration: 0.22 }}
                     >
-                      <ChevronDown size={16} strokeWidth={1.5} />
-                    </motion.span>
+                      <motion.span
+                        animate={{ rotate: isOpen ? 45 : 0 }}
+                        transition={{ duration: 0.22 }}
+                        style={{ display: 'block', lineHeight: 1 }}
+                      >
+                        +
+                      </motion.span>
+                    </motion.div>
                   </button>
                   <AnimatePresence initial={false}>
                     {isOpen && (
@@ -570,10 +641,13 @@ export function FAQSection({ lang = 'az' }) {
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.28, ease: [0.32, 0, 0.68, 1] }}
+                        transition={{ duration: 0.3, ease: [0.32, 0, 0.68, 1] }}
                         style={{ overflow: 'hidden' }}
                       >
-                        <p className="px-5 sm:px-6 pb-5 text-[13px] text-brown-muted font-light leading-[1.85] border-t border-white/30 pt-3">{a}</p>
+                        <div className="px-6 pb-6 pt-0">
+                          <div className="h-px mb-4" style={{ background: 'linear-gradient(to right, rgba(197,160,89,0.25), transparent)' }} />
+                          <p className="text-[13.5px] text-brown-dark font-light leading-[1.9]">{a}</p>
+                        </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -601,12 +675,30 @@ export function HeroFooter({ lang = 'az' }) {
             </div>
             <p className="text-white/40 text-[11px] font-light tracking-wide max-w-[220px] leading-relaxed">{tr.footer_tagline}</p>
           </div>
-          <div className="flex items-center gap-4">
-            <a href="#" aria-label="Instagram" className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center hover:border-gold/50 hover:bg-gold/10 transition-all duration-300">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(197,160,89,0.7)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="rgba(197,160,89,0.7)" stroke="none"/></svg>
+          <div className="flex items-center gap-3">
+            {/* WhatsApp */}
+            <a href="https://wa.me/994557133696" aria-label="WhatsApp" target="_blank" rel="noopener noreferrer"
+              className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center hover:border-gold/50 hover:bg-gold/10 hover:scale-105 transition-all duration-300">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                <path d="M20.52 3.48A11.93 11.93 0 0 0 12 0C5.37 0 0 5.37 0 12c0 2.11.55 4.16 1.6 5.97L0 24l6.18-1.62A11.94 11.94 0 0 0 12 24c6.63 0 12-5.37 12-12 0-3.2-1.25-6.21-3.48-8.52zM12 22c-1.85 0-3.67-.5-5.25-1.44l-.38-.22-3.67.96.98-3.58-.25-.38A9.94 9.94 0 0 1 2 12C2 6.48 6.48 2 12 2c2.67 0 5.18 1.04 7.07 2.93A9.94 9.94 0 0 1 22 12c0 5.52-4.48 10-10 10z" fill="rgba(197,160,89,0.75)"/>
+                <path d="M17.5 14.4c-.3-.15-1.75-.86-2.02-.96s-.47-.15-.67.15-.77.96-.94 1.16-.35.22-.64.07a8.08 8.08 0 0 1-2.38-1.47 8.93 8.93 0 0 1-1.64-2.05c-.17-.3 0-.46.13-.6l.44-.52c.14-.17.18-.3.27-.5s.05-.37-.02-.52-.67-1.6-.91-2.2c-.24-.57-.49-.5-.67-.5h-.57c-.2 0-.52.07-.79.37s-1.04 1.02-1.04 2.48 1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.7.62.71.23 1.36.2 1.87.12.57-.09 1.75-.72 2-1.41s.25-1.29.17-1.41-.27-.2-.57-.35z" fill="rgba(197,160,89,0.75)"/>
+              </svg>
             </a>
-            <a href="https://wa.me/994555696549" aria-label="WhatsApp" className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center hover:border-gold/50 hover:bg-gold/10 transition-all duration-300">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M20.52 3.48A11.93 11.93 0 0 0 12 0C5.37 0 0 5.37 0 12c0 2.11.55 4.16 1.6 5.97L0 24l6.18-1.62A11.94 11.94 0 0 0 12 24c6.63 0 12-5.37 12-12 0-3.2-1.25-6.21-3.48-8.52zM12 22c-1.85 0-3.67-.5-5.25-1.44l-.38-.22-3.67.96.98-3.58-.25-.38A9.94 9.94 0 0 1 2 12C2 6.48 6.48 2 12 2c2.67 0 5.18 1.04 7.07 2.93A9.94 9.94 0 0 1 22 12c0 5.52-4.48 10-10 10z" fill="rgba(197,160,89,0.7)"/></svg>
+            {/* Instagram */}
+            <a href="https://www.instagram.com/digitoy.az/" aria-label="Instagram" target="_blank" rel="noopener noreferrer"
+              className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center hover:border-gold/50 hover:bg-gold/10 hover:scale-105 transition-all duration-300">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(197,160,89,0.75)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5"/>
+                <circle cx="12" cy="12" r="5"/>
+                <circle cx="17.5" cy="6.5" r="1" fill="rgba(197,160,89,0.75)" stroke="none"/>
+              </svg>
+            </a>
+            {/* TikTok */}
+            <a href="https://www.tiktok.com/@digitoy.az" aria-label="TikTok" target="_blank" rel="noopener noreferrer"
+              className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center hover:border-gold/50 hover:bg-gold/10 hover:scale-105 transition-all duration-300">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="rgba(197,160,89,0.75)">
+                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/>
+              </svg>
             </a>
           </div>
         </div>

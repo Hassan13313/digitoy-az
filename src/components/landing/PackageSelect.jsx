@@ -15,21 +15,15 @@ const UI = {
   ru: { title: 'Выберите пакет', subtitle: 'Выберите лучший пакет для вашего мероприятия.', popular: '★ САМЫЙ ПОПУЛЯРНЫЙ', btn: 'НАЧАТЬ', pricing: 'PRICING' },
 }
 
-const STATS = {
-  az: [{ value: '300+', label: 'Xoşbəxt cüt' }, { value: '850+', label: 'Dəvətnamə' }, { value: '3 dil', label: 'Dil dəstəyi' }],
-  en: [{ value: '300+', label: 'Happy Couples' }, { value: '850+', label: 'Invitations' }, { value: '3 lang', label: 'Languages' }],
-  ru: [{ value: '300+', label: 'Счастливых Пар' }, { value: '850+', label: 'Приглашений' }, { value: '3 яз', label: 'Языков' }],
-}
 
 export default function PackageSelect({ lang, onSelect }) {
   const ui     = UI[lang]         || UI.az
   const labels = PKG_LABELS[lang] || PKG_LABELS.az
   const feats  = PKG_FEATURES[lang] || PKG_FEATURES.az
-  const stats  = STATS[lang]      || STATS.az
   const pkgIds = ['SADE', 'VIP', 'PREMIUM']
 
   return (
-    <section id="paketler" className="relative bg-transparent py-[120px]">
+    <section id="paketler" className="relative bg-transparent py-[120px] scroll-mt-20">
       <div className="max-w-[1240px] mx-auto px-6">
 
         {/* Header */}
@@ -53,23 +47,6 @@ export default function PackageSelect({ lang, onSelect }) {
           </p>
         </motion.div>
 
-        {/* Stats row */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-50px' }}
-          transition={{ duration: 0.6, delay: 0.1, ease: [0.32, 0, 0.68, 1] }}
-          className="glass rounded-[22px] max-w-[760px] mx-auto mb-14"
-          style={{ padding: '22px 28px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 18 }}
-        >
-          {stats.map((s, i) => (
-            <div key={i} className="text-center">
-              <div className="font-serif italic text-[44px] leading-none text-gold-gradient">{s.value}</div>
-              <div className="mt-1.5 font-mono text-[10px] tracking-[0.32em] text-brown-muted uppercase">{s.label}</div>
-            </div>
-          ))}
-        </motion.div>
-
         {/* Cards */}
         <div className="digitoy-pkg-grid grid gap-[22px]" style={{ gridTemplateColumns: '1fr 1.08fr 1fr', alignItems: 'stretch' }}>
           {pkgIds.map((pkgId, idx) => {
@@ -77,6 +54,7 @@ export default function PackageSelect({ lang, onSelect }) {
             const feat  = feats[pkgId]
             return (
               <BlurFade key={pkgId} delay={idx * 0.1}>
+                <div id={def.popular ? 'vip-package-card' : idx === 0 ? 'first-pricing-card' : undefined} className="h-full">
                 <PackageCard
                   pkgId={pkgId}
                   label={labels[pkgId]}
@@ -87,6 +65,7 @@ export default function PackageSelect({ lang, onSelect }) {
                   btn={ui.btn}
                   onSelect={() => onSelect(pkgId)}
                 />
+                </div>
               </BlurFade>
             )
           })}
@@ -120,7 +99,19 @@ function PackageCard({ pkgId, label, price, isVip, feat, popular, btn, onSelect 
     : (hovered ? '0 28px 70px rgba(44,26,14,0.18), inset 0 1px 0 rgba(255,255,255,0.7)' : '0 12px 36px rgba(44,26,14,0.08), inset 0 1px 0 rgba(255,255,255,0.55)')
 
   return (
-    <div className="relative h-full">
+    <div className="relative h-full" style={{ overflow: 'visible' }}>
+      {/* "Most Popular" badge — OUTSIDE card, no overflow clipping */}
+      {isVip && (
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 whitespace-nowrap z-40 px-5 py-2 rounded-full font-mono text-[10px] tracking-[0.32em] font-semibold text-espresso"
+          style={{
+            background: 'linear-gradient(135deg, #E8D5A3 0%, #C5A059 50%, #E8D5A3 100%)',
+            backgroundSize: '200% 100%',
+            boxShadow: '0 10px 24px rgba(197,160,89,0.4), inset 0 1px 0 rgba(255,255,255,0.4)',
+            animation: 'digitoy-shimmer-bg 3s linear infinite',
+          }}
+        >{popular}</div>
+      )}
+
       <motion.div
         onHoverStart={() => setHovered(true)}
         onHoverEnd={() => setHovered(false)}
@@ -141,7 +132,6 @@ function PackageCard({ pkgId, label, price, isVip, feat, popular, btn, onSelect 
             transition: 'opacity 400ms ease', pointerEvents: 'none',
           }} />
         )}
-
         {/* VIP BorderBeam */}
         {isVip && (
           <span aria-hidden="true" style={{
@@ -151,18 +141,6 @@ function PackageCard({ pkgId, label, price, isVip, feat, popular, btn, onSelect 
             WebkitMaskComposite: 'xor', maskComposite: 'exclude',
             animation: 'digitoy-beam 6s linear infinite', pointerEvents: 'none',
           }} />
-        )}
-
-        {/* "Most Popular" badge */}
-        {isVip && (
-          <div className="absolute -top-4 left-1/2 -translate-x-1/2 whitespace-nowrap z-[2] px-5 py-2 rounded-full font-mono text-[10px] tracking-[0.32em] font-semibold text-espresso"
-            style={{
-              background: 'linear-gradient(135deg, #E8D5A3 0%, #C5A059 50%, #E8D5A3 100%)',
-              backgroundSize: '200% 100%',
-              boxShadow: '0 10px 24px rgba(197,160,89,0.4), inset 0 1px 0 rgba(255,255,255,0.4)',
-              animation: 'digitoy-shimmer-bg 3s linear infinite',
-            }}
-          >{popular}</div>
         )}
 
         {/* Package name */}

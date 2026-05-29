@@ -105,13 +105,22 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  /* "İndi Başla" / "Özün Yarat" — həmişə PackageSelect-ə yönləndirir */
+  /* "İndi Başla" / "Özün Yarat" — İlk kart üzərindən -240px offset ilə scroll */
   const scrollToBuilder = () => {
     setReturnToStep(null)
     setShowPreview(false)
     setSelectedPackage(null)
     setActiveTab('packages')
-    setTimeout(() => scrollToSection('pricing-section'), 80)
+    setTimeout(() => {
+      const firstCard = document.getElementById('first-pricing-card')
+      const fallback  = document.getElementById('paketler')
+      const el = firstCard || fallback
+      if (el) {
+        const yOffset = firstCard ? -240 : -120
+        const yPosition = el.getBoundingClientRect().top + window.scrollY + yOffset
+        window.scrollTo({ top: yPosition, behavior: 'smooth' })
+      }
+    }, 80)
   }
 
   const handleTabClick = (tab) => {
