@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { ArrowLeft, MapPin, Navigation, Download, ExternalLink, ChevronDown, Camera } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -42,9 +42,19 @@ function GoldDividerOrnament() {
 }
 
 
+function getEventAudioId(eventType) {
+  const t = String(eventType ?? '').toLowerCase().trim()
+  if (t === 'birthday' || t === 'ad_gunu' || t === 'corporate' || t === 'korporativ') {
+    return 'WCce-3XMdJs' // Rauf — ad günü / korporativ
+  }
+  return '7maJOI3QMu0' // Orxan Qarabasma — toy / xına / default
+}
+
 export default function InvitationPage({ lang, setLang, weddingData, onBack, isDemoMode = false, initialGuestbook }) {
   const tr = t[lang]
   const [envelopeOpened, setEnvelopeOpened] = useState(false)
+  const musicRef = useRef(null)
+  const audioVideoId = getEventAudioId(weddingData?.eventType)
   const palette = DRESS_CODE_PALETTES.find((p) => p.id === weddingData.dressCodePalette) || DRESS_CODE_PALETTES[0]
 
   const isCouple = ['toy', 'nishan'].includes(weddingData.eventType)
@@ -139,7 +149,10 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
         groomName={isCouple ? weddingData.groomName : null}
         eventLabel={eventLabels[weddingData.eventType] || tr.event_other}
         eventType={weddingData.eventType || 'toy'}
-        onComplete={() => setEnvelopeOpened(true)}
+        onComplete={() => {
+          setEnvelopeOpened(true)
+          setTimeout(() => musicRef.current?.play(), 1800)
+        }}
       />
 
       {/* Main invitation — fades in after envelope */}
@@ -151,7 +164,7 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
             transition={{ duration: 0.9 }}
           >
             <FloralBackground />
-            <MusicToggle lang={lang} />
+            <MusicToggle ref={musicRef} lang={lang} videoId={audioVideoId} />
 
             {/* Sticky minimal header */}
             <header className="fixed top-0 left-0 right-0 z-40 bg-cream/88 backdrop-blur-md border-b border-beige-dark/30">

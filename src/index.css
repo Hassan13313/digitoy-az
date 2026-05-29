@@ -36,13 +36,15 @@
 
   .reveal-hidden {
     opacity: 0;
-    transform: translateY(24px);
+    transform: translateY(24px) translateZ(0);
     transition: opacity 0.9s ease-out, transform 0.9s ease-out;
+    will-change: transform, opacity;
   }
 
   .reveal-visible {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) translateZ(0);
+    will-change: auto;
   }
 
   .gold-divider {
@@ -76,6 +78,17 @@
   .card-premium {
     @apply bg-cream border border-beige-dark/70;
   }
+}
+
+/* Touch: remove 300ms tap delay and highlight flash */
+button, [role="button"], a, label, select {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* iOS momentum scrolling */
+.overflow-y-auto, .overflow-y-scroll {
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Custom scrollbar */

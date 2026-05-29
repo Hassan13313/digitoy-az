@@ -1,12 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Send, Heart } from 'lucide-react'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
-
-const INITIAL_MESSAGES = [
-  { name: 'Ayan & Elnur', text: 'Ömür boyu xoşbəxtlik arzulayırıq! Çox gözəl cütlüksünüz.' },
-  { name: 'Rauf bəy', text: 'Təbriklər! Toy günü görüşərik!' },
-]
+import { getGuestResponses, submitGuestResponse } from '../../utils/api'
 
 const LABELS = {
   az: {
@@ -15,6 +11,7 @@ const LABELS = {
     namePh: 'Adınız, Soyadınız',
     msgPh: 'Ürək sözləriniz...',
     btn: 'Paylaş',
+    sending: 'Göndərilir...',
   },
   en: {
     title: 'Guestbook',
@@ -22,6 +19,7 @@ const LABELS = {
     namePh: 'Your name',
     msgPh: 'Your message...',
     btn: 'Share',
+    sending: 'Sending...',
   },
   ru: {
     title: 'Книга пожеланий',
@@ -29,22 +27,55 @@ const LABELS = {
     namePh: 'Ваше имя',
     msgPh: 'Ваше пожелание...',
     btn: 'Отправить',
+    sending: 'Отправка...',
   },
+}
+
+function getSlug() {
+  return (window.location.pathname.match(/\/invite\/([^/?#]+)/) || [])[1] || null
 }
 
 export default function Guestbook({ lang, initialMessages }) {
   const L = LABELS[lang] || LABELS.az
-  const [messages, setMessages] = useState(initialMessages || INITIAL_MESSAGES)
-  const [name, setName] = useState('')
-  const [text, setText] = useState('')
+  const slug = getSlug()
+
+  const [messages, setMessages] = useState(initialMessages || [])
+  const [name,     setName]     = useState('')
+  const [text,     setText]     = useState('')
+  const [sending,  setSending]  = useState(false)
   const [ref, visible] = useScrollReveal()
 
-  const handleAdd = (e) => {
+  /* Serverdən mövcud mesajları çək */
+  useEffect(() => {
+    if (!slug) return
+    getGuestResponses(slug)
+      .then(data => { if (data.messages?.length) setMessages(data.messages) })
+      .catch(() => {})
+  }, [slug])
+
+  const handleAdd = async (e) => {
     e.preventDefault()
-    if (!name.trim() || !text.trim()) return
-    setMessages([{ name: name.trim(), text: text.trim() }, ...messages])
+    if (!name.trim() || !text.trim() || sending) return
+
+    const optimistic = { name: name.trim(), text: text.trim() }
+    setMessages(prev => [optimistic, ...prev])
     setName('')
     setText('')
+    setSending(true)
+
+    try {
+      if (slug) {
+        await submitGuestResponse({
+          invitationId: slug,
+          guestName:    optimistic.name,
+          message:      optimistic.text,
+        })
+      }
+    } catch {
+      /* Şəbəkə xətasında optimistic mesaj qalır — istifadəçini narahat etmirik */
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
@@ -85,11 +116,11 @@ export default function Guestbook({ lang, initialMessages }) {
             </div>
             <button
               type="submit"
-              disabled={!name.trim() || !text.trim()}
+              disabled={!name.trim() || !text.trim() || sending}
               className="w-full flex items-center justify-center gap-2.5 btn-gold disabled:opacity-30"
             >
               <Send size={12} strokeWidth={1.5} />
-              {L.btn}
+              {sending ? L.sending : L.btn}
             </button>
           </div>
         </form>
@@ -99,9 +130,10 @@ export default function Guestbook({ lang, initialMessages }) {
           <AnimatePresence initial={false}>
             {messages.map((msg, i) => (
               <motion.div
-                key={msg.name + i}
+                key={(msg.name || msg.guest_name) + i}
                 initial={{ opacity: 0, y: -12 }}
                 animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35 }}
                 className="bg-cream border border-beige-dark/50 px-6 py-5 flex gap-4"
               >
                 <div className="flex-shrink-0 mt-0.5">
@@ -109,10 +141,10 @@ export default function Guestbook({ lang, initialMessages }) {
                 </div>
                 <div>
                   <p className="text-[10px] tracking-[0.18em] uppercase text-ink font-medium font-sans mb-1.5">
-                    {msg.name}
+                    {msg.name || msg.guest_name}
                   </p>
                   <p className="text-[13px] text-brown-muted font-light font-serif italic leading-relaxed">
-                    "{msg.text}"
+                    "{msg.text || msg.message}"
                   </p>
                 </div>
               </motion.div>

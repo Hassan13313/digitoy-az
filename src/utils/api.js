@@ -47,6 +47,30 @@ export async function getPhotos(slug) {
   return json.photos ?? []
 }
 
+/* ── Qonaq cavablarını çək (Guestbook + RSVP) ── */
+export async function getGuestResponses(invitationId) {
+  const res = await fetch(`${BASE}/get_guest_responses.php?invitation_id=${encodeURIComponent(invitationId)}`)
+  if (!res.ok) throw new Error(`get_guest_responses: ${res.status}`)
+  return res.json()
+}
+
+/* ── Qonaq cavabı göndər ── */
+export async function submitGuestResponse({ invitationId, guestName, message, attendanceStatus, extraGuests }) {
+  const res = await fetch(`${BASE}/submit_guest_response.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      invitation_id:     invitationId,
+      guest_name:        guestName,
+      message:           message || null,
+      attendance_status: attendanceStatus || null,
+      extra_guests:      extraGuests || 0,
+    }),
+  })
+  if (!res.ok) throw new Error(`submit_guest_response: ${res.status}`)
+  return res.json()
+}
+
 /* ── Şəkili sil ── */
 export async function deletePhoto(slug, id) {
   const res = await fetch(`${BASE}/delete_photo.php`, {

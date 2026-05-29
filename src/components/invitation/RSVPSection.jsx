@@ -4,18 +4,7 @@ import { Check, X, Minus, Plus, Send } from 'lucide-react'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
 import { formatFullDateByLang } from '../../utils/dateFormat'
 import t from '../../data/translations'
-
-/* ── LocalStorage-based stats ── */
-function loadStats(slug) {
-  try { return JSON.parse(localStorage.getItem(`rsvp_${slug}`) || '{"yes":0,"no":0,"guests":0}') }
-  catch { return { yes: 0, no: 0, guests: 0 } }
-}
-function saveStats(slug, patch) {
-  const s = loadStats(slug)
-  const next = { yes: s.yes + (patch.yes||0), no: s.no + (patch.no||0), guests: s.guests + (patch.guests||0) }
-  localStorage.setItem(`rsvp_${slug}`, JSON.stringify(next))
-  return next
-}
+import { getGuestResponses, submitGuestResponse } from '../../utils/api'
 
 function RSVPStats({ stats, lang }) {
   const total = stats.yes + stats.no
@@ -124,24 +113,50 @@ export default function RSVPSection({ lang, weddingData }) {
   const [status,    setStatus]    = useState(null)
   const [plusOne,   setPlusOne]   = useState(0)
   const [submitted, setSubmitted] = useState(false)
+  const [sending,   setSending]   = useState(false)
   const [stats,     setStats]     = useState(null)
   const [ref, visible] = useScrollReveal()
 
-  const slug = (window.location.pathname.match(/\/invite\/([^/?#]+)/) || [])[1] || 'preview'
+  const slug = (window.location.pathname.match(/\/invite\/([^/?#]+)/) || [])[1] || null
 
+  /* Serverdən cari statistikanı çək */
   useEffect(() => {
-    setStats(loadStats(slug))
+    if (!slug) return
+    getGuestResponses(slug)
+      .then(data => setStats(data.rsvp ?? { yes: 0, no: 0, guests: 0 }))
+      .catch(() => {})
   }, [slug])
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    const next = saveStats(slug, {
-      yes:    status === 'yes' ? 1 : 0,
-      no:     status === 'no'  ? 1 : 0,
-      guests: status === 'yes' ? plusOne : 0,
+    if (sending || !status) return
+    setSending(true)
+
+    /* Optimistic update */
+    setStats(prev => {
+      const base = prev ?? { yes: 0, no: 0, guests: 0 }
+      return {
+        yes:    base.yes    + (status === 'yes' ? 1 : 0),
+        no:     base.no     + (status === 'no'  ? 1 : 0),
+        guests: base.guests + (status === 'yes' ? plusOne : 0),
+      }
     })
-    setStats(next)
     setSubmitted(true)
+
+    try {
+      if (slug) {
+        await submitGuestResponse({
+          invitationId:     slug,
+          guestName:        '—',
+          attendanceStatus: status,
+          extraGuests:      status === 'yes' ? plusOne : 0,
+        })
+      }
+    } catch {
+      /* Şəbəkə xətasında optimistic state qalır */
+    } finally {
+      setSending(false)
+    }
   }
 
   const deadline = weddingData?.date ? formatFullDateByLang(weddingData.date, lang) : null
@@ -282,11 +297,11 @@ export default function RSVPSection({ lang, weddingData }) {
 
               <button
                 type="submit"
-                disabled={!status}
+                disabled={!status || sending}
                 className="w-full flex items-center justify-center gap-2.5 btn-gold disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <Send size={12} strokeWidth={1.5} />
-                {L.send}
+                {sending ? '...' : L.send}
               </button>
             </motion.form>
           )}

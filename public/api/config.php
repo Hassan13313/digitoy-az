@@ -66,4 +66,18 @@ function ensureTables(): void {
     ");
 }
 
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS guest_responses (
+            id                INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            invitation_id     VARCHAR(120) NOT NULL,
+            guest_name        VARCHAR(255) NOT NULL,
+            message           TEXT,
+            attendance_status ENUM('yes','no') DEFAULT NULL,
+            extra_guests      TINYINT UNSIGNED NOT NULL DEFAULT 0,
+            created_at        DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_inv (invitation_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ");
+}
+
 // ensureTables() yalnız invitations üçün lazımdır — foto skriptlər çağırmır

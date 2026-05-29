@@ -6,7 +6,6 @@ import GalleryPage from './components/invitation/GalleryPage'
 import DigitoyOrijinalUI from './components/DigitoyOrijinalUI'
 import { defaultWedding } from './data/defaultWedding'
 import { demoInvitation, demoGuestbook } from './data/demoInvitation'
-import SmoothCursor from './components/ui/SmoothCursor'
 import ScrollProgress from './components/ui/ScrollProgress'
 import './App.css'
 
@@ -205,7 +204,6 @@ export default function App() {
 
   return (
     <>
-      <SmoothCursor />
       <ScrollProgress />
 
       {/* LandingPage həmişə mounted qalır — form data qorunur */}

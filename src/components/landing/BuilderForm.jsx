@@ -197,7 +197,12 @@ function VenueSearchInput({ value, onSelect, lang, tr }) {
 }
 
 /* ── Proqram Addımı Redaktoru ── */
-const PROGRAM_ICONS = ['🥂','💍','🎵','💃','🎂','🎤','❤️','🤵','🎆','☕']
+const PROGRAM_ICONS = [
+  '🥂','💍','🎵','💃','🎂','🎤','❤️','🤵','🎆','☕',
+  '💐','🎀','💌','🍾','🕊️',
+  '🎁','🎉','🎈','🎊','🎙️',
+  '📸','🍸','🕰️','🎗️','👑',
+]
 
 function TimeInput({ value, onChange, onComplete, placeholder, className }) {
   const handleChange = (e) => {
@@ -1274,8 +1279,18 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
         </div>
       )}
 
+      {/* Mobile step label — compact "Addım X / Y · Title" */}
+      <div className="sm:hidden flex items-center justify-between mb-4">
+        <span className="text-[9px] tracking-[0.28em] uppercase text-gold font-medium font-sans">
+          {step} / {VISIBLE_TOTAL}
+        </span>
+        <span className="text-[9px] tracking-[0.14em] uppercase text-brown-muted/60 font-sans truncate ml-3 max-w-[60%] text-right">
+          {steps[actualStep - 1]}
+        </span>
+      </div>
+
       {/* Step indicator */}
-      <div className="flex items-center mb-8 sm:mb-14">
+      <div className="flex items-center mb-6 sm:mb-14">
         {visibleSteps.map((actualN, i) => {
           const n = i + 1
           const done = n < step

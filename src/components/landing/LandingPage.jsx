@@ -96,6 +96,14 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
     setTimeout(() => scrollToSection('builder-content'), 100)
   }
 
+  const handleLogoClick = () => {
+    setReturnToStep(null)
+    setShowPreview(false)
+    setSelectedPackage(null)
+    setActiveTab('packages')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   /* "İndi Başla" / "Özün Yarat" — həmişə PackageSelect-ə yönləndirir */
   const scrollToBuilder = () => {
     setReturnToStep(null)
@@ -133,10 +141,13 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
         activeTab={activeTab}
         onTabClick={handleTabClick}
         logo={
-          <div className="font-serif text-lg text-ink tracking-widest">
+          <button
+            onClick={handleLogoClick}
+            className="font-serif text-lg text-ink tracking-widest cursor-pointer hover:opacity-70 transition-opacity duration-200 bg-transparent border-none p-0"
+          >
             <span className="text-gold font-light">Digitoy</span>
             <span className="text-brown-muted/50 font-light">.az</span>
-          </div>
+          </button>
         }
         rightContent={<LanguageSwitcher lang={lang} setLang={setLang} />}
       />
