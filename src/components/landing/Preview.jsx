@@ -127,7 +127,7 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
         return (
           <span className="flex items-center gap-1.5">
             {colors.map(c => (
-              <span key={c} className="w-3.5 h-3.5 rounded-full border border-neutral-300 shadow-sm inline-block flex-shrink-0" style={{ backgroundColor: c }} />
+              <span key={c} className="w-3.5 h-3.5 rounded-full border border-beige-dark/40 shadow-sm inline-block flex-shrink-0" style={{ backgroundColor: c }} />
             ))}
             <span className="ml-1 font-light">{label}</span>
           </span>
@@ -241,8 +241,8 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
                 <p className="text-[10px] tracking-[0.2em] uppercase text-emerald-700 font-semibold">
                   ✓ Link hazırlandı — müştəriyə göndər
                 </p>
-                <div className="bg-white border border-emerald-200 px-4 py-3 text-left">
-                  <p className="text-xs text-emerald-900 font-mono break-all leading-relaxed">{liveLink}</p>
+                <div className="bg-cream border border-beige-dark/70 px-4 py-3 text-left">
+                  <p className="text-xs text-espresso font-mono break-all leading-relaxed">{liveLink}</p>
                 </div>
                 <button
                   type="button"

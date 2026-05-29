@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { ChevronDown, Sparkles, Timer, MapPin, Shirt, Users, Camera, Music, Crown, ChevronLeft, ChevronRight, UserCheck, Clock, BookOpen, User } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import t from '../../data/translations'
 import BlurFade from '../ui/BlurFade'
 import AnimatedShinyText from '../ui/AnimatedShinyText'
@@ -332,6 +332,39 @@ function FeatureContent({ featureKey, tr }) {
   return null
 }
 
+/* ── Gold concentric rings — parallax-aware decorator ── */
+function GoldRings() {
+  const mx = useMotionValue(0)
+  const my = useMotionValue(0)
+  const sx = useSpring(mx, { stiffness: 80, damping: 20 })
+  const sy = useSpring(my, { stiffness: 80, damping: 20 })
+  const ringsX = useTransform(sx, (v) => -v * 8)
+  const ringsY = useTransform(sy, (v) => -v * 8)
+
+  useEffect(() => {
+    const onMove = (e) => {
+      const cx = window.innerWidth / 2
+      const cy = window.innerHeight / 2
+      mx.set((e.clientX - cx) / window.innerWidth)
+      my.set((e.clientY - cy) / window.innerHeight)
+    }
+    window.addEventListener('mousemove', onMove)
+    return () => window.removeEventListener('mousemove', onMove)
+  }, [mx, my])
+
+  return (
+    <motion.div
+      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+      style={{ x: ringsX, y: ringsY, zIndex: 0 }}
+      aria-hidden
+    >
+      <div className="absolute rounded-full border border-gold/[0.12]" style={{ width: 280, height: 280, top: '50%', left: '50%', marginTop: -140, marginLeft: -140 }} />
+      <div className="absolute rounded-full border border-gold/[0.08]" style={{ width: 480, height: 480, top: '50%', left: '50%', marginTop: -240, marginLeft: -240 }} />
+      <div className="absolute rounded-full border border-gold/[0.05]" style={{ width: 680, height: 680, top: '50%', left: '50%', marginTop: -340, marginLeft: -340 }} />
+    </motion.div>
+  )
+}
+
 /* ── Silk-inspired animated background (CSS-based, no WebGL needed) ── */
 function SilkBackground() {
   return (
@@ -378,36 +411,33 @@ export default function Hero({ lang, onStart, onDemo }) {
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-36 pb-28 overflow-hidden">
       <SilkBackground />
+      <GoldRings />
 
-      {/* ── Announcement badge — E3 AnimatedShinyText ── */}
-      <BlurFade delay={0.1}>
-        <div className="relative flex items-center gap-2.5 mb-12 px-6 py-2.5 border border-gold/30 bg-gold/[0.04]">
-          <Sparkles size={11} className="text-gold" strokeWidth={1.5} />
-          <AnimatedShinyText style={{
-            fontSize: 10, letterSpacing: '0.28em', textTransform: 'uppercase',
-            color: '#C5A059', fontWeight: 500, fontFamily: 'Inter,system-ui,sans-serif',
-          }}>
-            Premium Digital Invitation
-          </AnimatedShinyText>
-          <Sparkles size={11} className="text-gold" strokeWidth={1.5} />
-        </div>
-      </BlurFade>
+      {/* ── Announcement badge — glass-gold pill ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: [0.32, 0, 0.68, 1] }}
+        className="relative inline-flex items-center gap-2.5 px-[18px] py-2 rounded-full glass-gold text-[11px] font-semibold tracking-[0.32em] text-gold-dark uppercase mb-12"
+      >
+        <span className="text-gold">✦</span>
+        <span>Premium Digital Invitation</span>
+        <span className="text-gold">✦</span>
+      </motion.div>
 
-      {/* ── H1 — BlurFade stagger ── */}
-      <h1 className="relative font-serif text-center leading-[1.08] mb-8 max-w-3xl">
-        <BlurFade delay={0.2}>
-          <span className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-ink font-light tracking-tight">
-            {tr.hero_line1}
-          </span>
-        </BlurFade>
-        <BlurFade delay={0.35}>
-          <span className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-gold font-light mt-2">
-            <SparklesText color="#C5A059" density={4}>
-              {tr.hero_line2}
-            </SparklesText>
-          </span>
-        </BlurFade>
-      </h1>
+      {/* ── H1 ── */}
+      <motion.h1
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.05, ease: [0.32, 0, 0.68, 1] }}
+        className="relative font-serif font-normal text-espresso text-center mt-0 mb-3.5 leading-[1.02] tracking-[-0.01em] max-w-3xl"
+        style={{ fontSize: 'clamp(48px, 6vw, 84px)' }}
+      >
+        {tr.hero_line1}{' '}
+        <span className="italic text-gold-gradient" style={{ filter: 'drop-shadow(0 4px 24px rgba(197,160,89,0.35))' }}>
+          {tr.hero_line2}
+        </span>
+      </motion.h1>
 
       {/* Gold divider ornament */}
       <BlurFade delay={0.45}>
@@ -420,22 +450,35 @@ export default function Hero({ lang, onStart, onDemo }) {
         </div>
       </BlurFade>
 
-      {/* Subtitle */}
-      <BlurFade delay={0.5}>
-        <p className="relative text-brown-muted text-center text-base sm:text-lg leading-[1.8] max-w-sm mb-14 font-light tracking-wide">
-          {tr.hero_subtitle}
-        </p>
-      </BlurFade>
+      {/* ── Subtitle ── */}
+      <motion.p
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.12, ease: [0.32, 0, 0.68, 1] }}
+        className="relative text-brown-dark text-[17px] text-center leading-[1.65] max-w-[480px] mb-8"
+      >
+        {tr.hero_subtitle}
+      </motion.p>
 
-      {/* ── CTA Buttons — ShimmerButton ── */}
+      {/* ── CTA Buttons ── */}
       <BlurFade delay={0.6}>
         <div className="relative flex flex-col sm:flex-row gap-3 mb-20">
-          <ShimmerButton onClick={onStart} variant="gold">
+          <motion.button
+            onClick={onStart}
+            className="btn-gold min-h-[52px]"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.96 }}
+          >
             {tr.hero_cta}
-          </ShimmerButton>
-          <ShimmerButton onClick={onDemo} variant="outline">
+          </motion.button>
+          <motion.button
+            onClick={onDemo}
+            className="btn-ghost-gold min-h-[52px]"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.96 }}
+          >
             {tr.hero_demo}
-          </ShimmerButton>
+          </motion.button>
         </div>
       </BlurFade>
 

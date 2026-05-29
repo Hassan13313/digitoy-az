@@ -282,7 +282,7 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
                     href={weddingData.googleMapsUrl || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 py-3 px-3 bg-[#d4af37] text-black text-xs tracking-widest uppercase font-medium transition-opacity hover:opacity-90"
+                    className="flex-1 flex items-center justify-center gap-2 btn-gold text-xs"
                   >
                     <MapPin size={13} strokeWidth={1.5} />
                     <span className="hidden sm:inline">Google Maps</span>
@@ -292,7 +292,7 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
                     href={weddingData.wazeUrl || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 py-3 px-3 border border-[#d4af37] text-[#d4af37] text-xs tracking-widest uppercase font-medium transition-opacity hover:opacity-80"
+                    className="flex-1 flex items-center justify-center gap-2 btn-outline-gold text-xs"
                   >
                     <Navigation size={13} strokeWidth={1.5} />
                     Waze
@@ -302,7 +302,7 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
                       href={weddingData.appleMapsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 py-3 px-3 border border-[#d4af37] text-[#d4af37] text-xs tracking-widest uppercase font-medium transition-opacity hover:opacity-80"
+                      className="flex-1 flex items-center justify-center gap-2 btn-outline-gold text-xs"
                     >
                       <ExternalLink size={13} strokeWidth={1.5} />
                       Apple Maps
@@ -433,29 +433,17 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
                     <div style={{ position: 'absolute', bottom: -32, left: 0, width: 24, height: 24, borderBottom: '1px solid rgba(197,160,89,0.5)', borderLeft: '1px solid rgba(197,160,89,0.5)' }} />
                     <div style={{ position: 'absolute', bottom: -32, right: 0, width: 24, height: 24, borderBottom: '1px solid rgba(197,160,89,0.5)', borderRight: '1px solid rgba(197,160,89,0.5)' }} />
 
-                    <p style={{
-                      fontSize: 9, letterSpacing: '0.42em', textTransform: 'uppercase',
-                      color: 'rgba(197,160,89,0.85)', fontFamily: '"Inter",system-ui,sans-serif',
-                      fontWeight: 600, marginBottom: 20,
-                    }}>
+                    <p className="font-mono text-[9px] tracking-[0.42em] uppercase text-gold/85 font-semibold mb-5">
                       Digitoy.az · Premium
                     </p>
 
                     <div className="gold-divider mb-8 max-w-[60px] mx-auto" />
 
-                    <h2 style={{
-                      fontFamily: '"Cormorant Garamond","Playfair Display",Georgia,serif',
-                      fontSize: 36, fontWeight: 300, color: '#1A140C',
-                      letterSpacing: '-0.01em', lineHeight: 1.15, marginBottom: 16,
-                    }}>
+                    <h2 className="font-serif text-[36px] font-light text-espresso leading-[1.15] tracking-[-0.01em] mb-4">
                       Dəvətnaməniz Hazırdır!
                     </h2>
 
-                    <p style={{
-                      fontSize: 14, color: 'rgba(80,68,58,0.72)', fontFamily: '"Inter",system-ui,sans-serif',
-                      fontWeight: 300, lineHeight: 1.75, marginBottom: 40,
-                      letterSpacing: '0.01em',
-                    }}>
+                    <p className="text-sm text-brown-dark/72 font-light leading-[1.75] tracking-[0.01em] mb-10">
                       Dizaynı tamamladınız. İndi tək bir toxunuşla dəvətnamənizi
                       <br />sifariş verib canlıya ala bilərsiniz.
                     </p>

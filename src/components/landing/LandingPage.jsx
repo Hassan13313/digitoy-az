@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import LanguageSwitcher from '../LanguageSwitcher'
 import Hero, { FeaturesSection, FAQSection, HeroFooter } from './Hero'
 import BuilderForm from './BuilderForm'
@@ -143,7 +144,8 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
         logo={
           <button
             onClick={handleLogoClick}
-            className="font-serif text-lg text-ink tracking-widest cursor-pointer hover:opacity-70 transition-opacity duration-200 bg-transparent border-none p-0"
+            title="Digitoy.az — Ana Səhifə"
+            className="font-serif text-lg text-ink tracking-widest cursor-pointer bg-transparent border-0 p-0"
           >
             <span className="text-gold font-light">Digitoy</span>
             <span className="text-brown-muted/50 font-light">.az</span>
@@ -188,27 +190,33 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
           <div id="builder-content" />
 
           {/* Axış: Preview → PackageSelect → BuilderForm */}
-          {showPreview ? (
-            <Preview
-              lang={lang}
-              data={formData}
-              onEdit={handleEditFromPreview}
-              onView={onViewInvitation}
-              isAdmin={isAdmin}
-            />
-          ) : !selectedPackage ? (
-            /* Paket seçilməyibsə: PackageSelect göstər */
-            <PackageSelect lang={lang} onSelect={handlePackageSelect} />
-          ) : (
-            /* Paket seçildikdən sonra: BuilderForm */
-            <BuilderForm
-              lang={lang}
-              initialData={formData}
-              initialStep={returnToStep}
-              onSubmit={handleFormSubmit}
-              isAdmin={isAdmin}
-            />
-          )}
+          <AnimatePresence mode="wait">
+            {showPreview ? (
+              <motion.div key="preview" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.35, ease: [0.32, 0, 0.68, 1] }}>
+                <Preview
+                  lang={lang}
+                  data={formData}
+                  onEdit={handleEditFromPreview}
+                  onView={onViewInvitation}
+                  isAdmin={isAdmin}
+                />
+              </motion.div>
+            ) : !selectedPackage ? (
+              <motion.div key="packages" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.35, ease: [0.32, 0, 0.68, 1] }}>
+                <PackageSelect lang={lang} onSelect={handlePackageSelect} />
+              </motion.div>
+            ) : (
+              <motion.div key="builder" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.4, ease: [0.32, 0, 0.68, 1] }}>
+                <BuilderForm
+                  lang={lang}
+                  initialData={formData}
+                  initialStep={returnToStep}
+                  onSubmit={handleFormSubmit}
+                  isAdmin={isAdmin}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </section>
 

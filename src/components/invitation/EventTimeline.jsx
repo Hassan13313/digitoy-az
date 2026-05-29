@@ -83,10 +83,10 @@ export default function EventTimeline({ lang, eventType, programSteps }) {
 
                 {/* Icon box */}
                 <div
-                  className="flex-shrink-0 w-9 h-9 flex items-center justify-center text-base bg-white border border-amber-600/30 rounded p-1.5"
+                  className="flex-shrink-0 w-9 h-9 flex items-center justify-center bg-cream border border-gold/30 rounded-lg p-1.5"
                   style={{ boxShadow: '0 2px 8px rgba(197,160,89,0.08)' }}
                 >
-                  {event.icon}
+                  <span className="text-base">{event.icon}</span>
                 </div>
 
                 {/* Title */}

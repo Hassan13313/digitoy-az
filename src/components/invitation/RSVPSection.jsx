@@ -193,13 +193,17 @@ export default function RSVPSection({ lang, weddingData }) {
     <section className="py-28 px-6 bg-cream">
       <div
         ref={ref}
-        className={`max-w-lg mx-auto reveal-hidden ${visible ? 'reveal-visible' : ''}`}
+        className={`max-w-[540px] mx-auto px-6 text-center reveal-hidden ${visible ? 'reveal-visible' : ''}`}
       >
         <div className="text-center mb-12">
-          <p className="text-[9px] tracking-[0.38em] uppercase text-gold mb-5 font-medium font-sans">RSVP</p>
-          <h2 className="font-serif text-3xl text-ink font-light tracking-tight">{L.title}</h2>
+          <div className="inline-flex items-center gap-3 font-mono text-[10px] tracking-[0.42em] text-gold-dark uppercase">
+            <span className="w-[22px] h-px bg-gold opacity-60" />
+            RSVP
+            <span className="w-[22px] h-px bg-gold opacity-60" />
+          </div>
+          <h2 className="font-serif font-normal text-espresso mt-3 mb-2.5" style={{ fontSize: 'clamp(32px, 4vw, 48px)' }}>{L.title}</h2>
           {L.subtitle && (
-            <p className="text-brown-muted text-xs mt-3 tracking-wide font-light font-sans">{L.subtitle}</p>
+            <p className="text-brown-dark text-[15px] leading-[1.6] mb-7">{L.subtitle}</p>
           )}
           <div className="gold-divider mt-8 max-w-[100px] mx-auto" />
         </div>
@@ -236,12 +240,14 @@ export default function RSVPSection({ lang, weddingData }) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
-              <div className="grid grid-cols-2 gap-px bg-beige-dark/40">
+              <div className="flex gap-3 justify-center flex-wrap mb-5">
                 <button
                   type="button"
                   onClick={() => setStatus('yes')}
-                  className={`py-5 text-[10px] tracking-[0.22em] uppercase font-medium font-sans transition-all duration-200 ${
-                    status === 'yes' ? 'bg-gold text-cream' : 'bg-cream text-brown-muted hover:bg-beige'
+                  className={`min-h-[52px] px-7 rounded-full font-semibold text-[13px] tracking-[0.18em] uppercase transition-all duration-200 ${
+                    status === 'yes'
+                      ? 'bg-gradient-to-br from-gold to-gold-dark text-white border border-transparent'
+                      : 'bg-gold/[0.12] border border-gold/50 text-gold-dark'
                   }`}
                 >
                   {L.yes}
@@ -249,8 +255,10 @@ export default function RSVPSection({ lang, weddingData }) {
                 <button
                   type="button"
                   onClick={() => { setStatus('no'); setPlusOne(0) }}
-                  className={`py-5 text-[10px] tracking-[0.22em] uppercase font-medium font-sans transition-all duration-200 ${
-                    status === 'no' ? 'bg-espresso text-cream' : 'bg-cream text-brown-muted hover:bg-beige'
+                  className={`min-h-[52px] px-7 rounded-full font-semibold text-[13px] tracking-[0.18em] uppercase transition-all duration-200 ${
+                    status === 'no'
+                      ? 'bg-espresso/85 text-white border border-transparent'
+                      : 'bg-white/40 border border-gold/25 text-espresso'
                   }`}
                 >
                   {L.no}
@@ -298,7 +306,7 @@ export default function RSVPSection({ lang, weddingData }) {
               <button
                 type="submit"
                 disabled={!status || sending}
-                className="w-full flex items-center justify-center gap-2.5 btn-gold disabled:opacity-30 disabled:cursor-not-allowed"
+                className="btn-gold w-full min-h-[52px] flex items-center justify-center gap-2.5 disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <Send size={12} strokeWidth={1.5} />
                 {sending ? '...' : L.send}

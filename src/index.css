@@ -1,3 +1,4 @@
+@import './styles/glass.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -70,6 +71,20 @@
     transform: scale(1.015);
   }
   .btn-outline-gold:active { transform: scale(0.95); }
+
+  .btn-ghost-gold {
+    @apply font-sans font-medium tracking-[0.18em] px-9 py-3.5 rounded-none transition-all duration-300 uppercase text-xs;
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(44, 26, 14, 0.18);
+    color: #2C1A0E;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .btn-ghost-gold:hover {
+    background: rgba(255, 255, 255, 0.72);
+    transform: scale(1.015);
+  }
+  .btn-ghost-gold:active { transform: scale(0.95); }
 
   .luxury-input {
     @apply w-full border-0 border-b border-beige-dark bg-transparent text-ink text-sm px-0 py-3 focus:outline-none focus:border-gold transition-colors duration-300 placeholder:text-brown-muted/40 rounded-none;

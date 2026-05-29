@@ -1,298 +1,214 @@
-import { useRef, useState } from 'react'
-import { Check, Crown, Lock } from 'lucide-react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { PACKAGE_DEFS, PKG_FEATURES } from '../../data/packages'
-import ThreeDCard from '../ui/ThreeDCard'
-import CardSpotlight from '../ui/CardSpotlight'
-import GlowingCard from '../ui/GlowingCard'
-import BorderBeam from '../ui/BorderBeam'
-import ShimmerButton from '../ui/ShimmerButton'
-import SparklesText from '../ui/SparklesText'
-import AnimatedShinyText from '../ui/AnimatedShinyText'
-import AnimatedNumber from '../ui/AnimatedNumber'
 import BlurFade from '../ui/BlurFade'
 
 const PKG_LABELS = {
-  az: { SADE: 'Sadə', VIP: 'VİP', PREMIUM: 'Premium' },
-  en: { SADE: 'Basic', VIP: 'VIP', PREMIUM: 'Premium' },
-  ru: { SADE: 'Базовый', VIP: 'VIP', PREMIUM: 'Премиум' },
+  az: { SADE: 'SADƏ', VIP: 'VİP', PREMIUM: 'PREMIUM' },
+  en: { SADE: 'BASIC', VIP: 'VIP', PREMIUM: 'PREMIUM' },
+  ru: { SADE: 'БАЗОВЫЙ', VIP: 'VIP', PREMIUM: 'ПРЕМИУМ' },
 }
 
 const UI = {
-  az: { title: 'Paketinizi Seçin', subtitle: 'Toyunuza ən uyğun paketi seçin', popular: 'Ən Çox Seçilən', btn: 'İndi Başla', azn: '₼' },
-  en: { title: 'Choose Your Package', subtitle: 'Select the best package for your event', popular: 'Most Popular', btn: 'Get Started', azn: 'AZN' },
-  ru: { title: 'Выберите пакет', subtitle: 'Выберите лучший пакет для вашего мероприятия', popular: 'Самый популярный', btn: 'Начать', azn: 'AZN' },
+  az: { title: 'Paketinizi Seçin', subtitle: 'Toyunuza ən uyğun paketi seçin — dəyər zərif detallarda yaşayır.', popular: '★ ƏN ÇOX SEÇİLƏN', btn: 'SEÇİM ET', pricing: 'PRICING' },
+  en: { title: 'Choose Your Package', subtitle: 'Select the best package for your event.', popular: '★ MOST POPULAR', btn: 'GET STARTED', pricing: 'PRICING' },
+  ru: { title: 'Выберите пакет', subtitle: 'Выберите лучший пакет для вашего мероприятия.', popular: '★ САМЫЙ ПОПУЛЯРНЫЙ', btn: 'НАЧАТЬ', pricing: 'PRICING' },
 }
 
-const S = {
-  vipCard: {
-    background: 'linear-gradient(155deg, #1a1105 0%, #2c1c08 55%, #2C2523 100%)',
-    border: '2px solid rgba(197,160,89,0.48)',
-    boxShadow: '0 16px 64px rgba(197,160,89,0.24), inset 0 1px 0 rgba(197,160,89,0.14)',
-  },
-  lightCard: {
-    background: 'linear-gradient(155deg, #FDFBF7 0%, #F4F1EA 100%)',
-    border: '1px solid rgba(221,213,200,0.7)',
-  },
-  dividerVip:   { height: 1, background: 'rgba(255,255,255,0.08)',   margin: '24px 0' },
-  dividerLight: { height: 1, background: 'linear-gradient(to right,transparent,rgba(197,160,89,0.32),transparent)', margin: '24px 0' },
-}
-
-/* Fractal dot grid background — CU6 */
-function FractalDotGrid() {
-  const canvasRef = useRef(null)
-  const animRef = useRef(null)
-  const mouseRef = useRef({ x: 0, y: 0 })
-
-  const setupCanvas = (canvas) => {
-    if (!canvas) return
-    canvasRef.current = canvas
-    const ctx = canvas.getContext('2d')
-    const dpr = window.devicePixelRatio || 1
-    let W = canvas.offsetWidth
-    let H = canvas.offsetHeight
-    canvas.width = W * dpr
-    canvas.height = H * dpr
-    ctx.scale(dpr, dpr)
-
-    const spacing = 28
-    const cols = Math.ceil(W / spacing) + 1
-    const rows = Math.ceil(H / spacing) + 1
-
-    const draw = () => {
-      ctx.clearRect(0, 0, W, H)
-      const mx = mouseRef.current.x
-      const my = mouseRef.current.y
-
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const x = c * spacing
-          const y = r * spacing
-          const dist = Math.sqrt((x - mx) ** 2 + (y - my) ** 2)
-          const influence = Math.max(0, 1 - dist / 160)
-          const size = 1.2 + influence * 3.5
-          const alpha = 0.08 + influence * 0.35
-
-          ctx.beginPath()
-          ctx.arc(x, y, size, 0, Math.PI * 2)
-          ctx.fillStyle = `rgba(197,160,89,${alpha})`
-          ctx.fill()
-        }
-      }
-      animRef.current = requestAnimationFrame(draw)
-    }
-
-    draw()
-
-    const onMouse = (e) => {
-      const rect = canvas.getBoundingClientRect()
-      mouseRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top }
-    }
-    canvas.parentElement.addEventListener('mousemove', onMouse)
-    return () => {
-      cancelAnimationFrame(animRef.current)
-      canvas.parentElement?.removeEventListener('mousemove', onMouse)
-    }
-  }
-
-  return (
-    <canvas
-      ref={setupCanvas}
-      style={{
-        position: 'absolute', inset: 0,
-        width: '100%', height: '100%',
-        pointerEvents: 'none', zIndex: 0,
-        opacity: 0.85,
-      }}
-    />
-  )
-}
-
-/* Stats row — CU7 Animated Numbers */
-function StatsRow({ lang }) {
-  const stats = lang === 'az'
-    ? [
-        { value: 300, suffix: '+', label: 'Xoşbəxt Cüt' },
-        { value: 850, suffix: '+', label: 'Dəvətnamə' },
-        { value: 3,   suffix: ' dil', label: 'Dil Dəstəyi' },
-      ]
-    : lang === 'en'
-    ? [
-        { value: 300, suffix: '+', label: 'Happy Couples' },
-        { value: 850, suffix: '+', label: 'Invitations' },
-        { value: 3,   suffix: ' lang', label: 'Languages' },
-      ]
-    : [
-        { value: 300, suffix: '+', label: 'Счастливых Пар' },
-        { value: 850, suffix: '+', label: 'Приглашений' },
-        { value: 3,   suffix: ' яз', label: 'Языков' },
-      ]
-
-  return (
-    <div style={{ display: 'flex', justifyContent: 'center', gap: 48, marginBottom: 40, flexWrap: 'wrap' }}>
-      {stats.map(({ value, suffix, label }) => (
-        <div key={label} style={{ textAlign: 'center' }}>
-          <div style={{
-            fontFamily: '"Cormorant Garamond","Playfair Display",Georgia,serif',
-            fontSize: 36, fontWeight: 300, color: '#C5A059', lineHeight: 1,
-          }}>
-            <AnimatedNumber value={value} suffix={suffix} duration={1.8} />
-          </div>
-          <p style={{
-            fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase',
-            color: '#8C7B6B', marginTop: 6, fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 500,
-          }}>
-            {label}
-          </p>
-        </div>
-      ))}
-    </div>
-  )
+const STATS = {
+  az: [{ value: '300+', label: 'Xoşbəxt cüt' }, { value: '850+', label: 'Dəvətnamə' }, { value: '3 dil', label: 'Dil dəstəyi' }],
+  en: [{ value: '300+', label: 'Happy Couples' }, { value: '850+', label: 'Invitations' }, { value: '3 lang', label: 'Languages' }],
+  ru: [{ value: '300+', label: 'Счастливых Пар' }, { value: '850+', label: 'Приглашений' }, { value: '3 яз', label: 'Языков' }],
 }
 
 export default function PackageSelect({ lang, onSelect }) {
   const ui     = UI[lang]         || UI.az
   const labels = PKG_LABELS[lang] || PKG_LABELS.az
   const feats  = PKG_FEATURES[lang] || PKG_FEATURES.az
+  const stats  = STATS[lang]      || STATS.az
   const pkgIds = ['SADE', 'VIP', 'PREMIUM']
 
   return (
-    <div style={{ maxWidth: 960, margin: '0 auto', position: 'relative', padding: '0 8px' }}>
+    <section id="paketler" className="relative bg-transparent py-[120px]">
+      <div className="max-w-[1240px] mx-auto px-6">
 
-      {/* ── Başlıq ── */}
-      <BlurFade delay={0} style={{ textAlign: 'center', marginBottom: 36 }}>
-        <p style={{ fontSize: 10, letterSpacing: '0.32em', textTransform: 'uppercase', color: '#C5A059', marginBottom: 18, fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 500 }}>
-          Pricing
-        </p>
-        <h2 style={{ fontFamily: '"Cormorant Garamond","Playfair Display",Georgia,serif', fontSize: 'clamp(26px,5vw,40px)', fontWeight: 300, letterSpacing: '-0.02em', color: '#1A1A1A', margin: '0 0 12px' }}>
-          {ui.title}
-        </h2>
-        <p style={{ fontSize: 14, fontWeight: 300, letterSpacing: '0.04em', color: '#8C7B6B', fontFamily: 'Inter,system-ui,sans-serif', marginBottom: 24 }}>
-          {ui.subtitle}
-        </p>
-        <div style={{ height: 1, background: 'linear-gradient(to right,transparent,rgba(197,160,89,0.38),transparent)', maxWidth: 160, margin: '0 auto 32px' }} />
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.6, ease: [0.32, 0, 0.68, 1] }}
+          className="text-center mb-10"
+        >
+          <div className="inline-flex items-center gap-3 font-mono text-[11px] tracking-[0.42em] uppercase text-gold-dark mb-4">
+            <span className="w-6 h-px bg-gold opacity-60" />
+            {ui.pricing}
+            <span className="w-6 h-px bg-gold opacity-60" />
+          </div>
+          <h2 className="font-serif font-normal text-espresso mt-0 mb-2.5" style={{ fontSize: 'clamp(40px, 5vw, 60px)', lineHeight: 1.05 }}>
+            {ui.title}
+          </h2>
+          <p className="text-brown-dark text-base leading-[1.6] max-w-[540px] mx-auto">
+            {ui.subtitle}
+          </p>
+        </motion.div>
 
-        {/* Stats — CU7 */}
-        <StatsRow lang={lang} />
-      </BlurFade>
+        {/* Stats row */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.6, delay: 0.1, ease: [0.32, 0, 0.68, 1] }}
+          className="glass rounded-[22px] max-w-[760px] mx-auto mb-14"
+          style={{ padding: '22px 28px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 18 }}
+        >
+          {stats.map((s, i) => (
+            <div key={i} className="text-center">
+              <div className="font-serif italic text-[44px] leading-none text-gold-gradient">{s.value}</div>
+              <div className="mt-1.5 font-mono text-[10px] tracking-[0.32em] text-brown-muted uppercase">{s.label}</div>
+            </div>
+          ))}
+        </motion.div>
 
-      {/* Fractal dot grid background — CU6 */}
-      <div style={{ position: 'relative' }}>
-        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-          <FractalDotGrid />
-        </div>
-
-        {/* Kart grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(260px,100%),1fr))', gap: 20, position: 'relative', zIndex: 1 }}>
+        {/* Cards */}
+        <div className="digitoy-pkg-grid grid gap-[22px]" style={{ gridTemplateColumns: '1fr 1.08fr 1fr', alignItems: 'stretch' }}>
           {pkgIds.map((pkgId, idx) => {
             const def   = PACKAGE_DEFS[pkgId]
             const feat  = feats[pkgId]
-            const isVip = def.popular
-
             return (
               <BlurFade key={pkgId} delay={idx * 0.1}>
-                {/* GlowingCard wrapper — kənar glow */}
-                <GlowingCard
-                  glowColor={isVip ? 'rgba(197,160,89,0.6)' : 'rgba(197,160,89,0.35)'}
-                  style={{ borderRadius: 0, height: '100%' }}
-                >
-                  {/* 3D Card tilt */}
-                  <ThreeDCard intensity={isVip ? 8 : 10} style={{ height: '100%' }}>
-
-                    {/* Card inner with Spotlight */}
-                    <CardSpotlight
-                      spotColor={isVip ? 'rgba(197,160,89,0.12)' : 'rgba(197,160,89,0.07)'}
-                      style={{
-                        position: 'relative',
-                        display: 'flex', flexDirection: 'column',
-                        padding: '44px 32px 32px',
-                        ...(isVip ? S.vipCard : S.lightCard),
-                        ...(isVip ? { '--border-beam-bg': '#1a1105' } : {}),
-                      }}
-                    >
-                      {/* VİP Border Beam */}
-                      {isVip && (
-                        <BorderBeam duration={4} colorFrom="#C5A059" colorTo="#E8D5A3" />
-                      )}
-
-                      {/* VİP badge */}
-                      {isVip && (
-                        <div style={{
-                          position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)',
-                          background: 'linear-gradient(135deg, #C5A059 0%, #B8903A 100%)',
-                          display: 'flex', alignItems: 'center', gap: 6,
-                          padding: '5px 18px', zIndex: 10, whiteSpace: 'nowrap',
-                        }}>
-                          <Crown size={9} color="white" strokeWidth={1.5} />
-                          <AnimatedShinyText style={{
-                            color: 'white', fontSize: 9, letterSpacing: '0.25em',
-                            textTransform: 'uppercase', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 600,
-                          }}>
-                            {ui.popular}
-                          </AnimatedShinyText>
-                        </div>
-                      )}
-
-                      {/* Paket adı */}
-                      <p style={{ fontSize: 10, letterSpacing: '0.3em', textTransform: 'uppercase', color: isVip ? '#C5A059' : '#8C7B6B', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 600, marginBottom: 14, position: 'relative', zIndex: 2 }}>
-                        {isVip
-                          ? <SparklesText color="#C5A059" density={3}>{labels[pkgId]}</SparklesText>
-                          : labels[pkgId]
-                        }
-                      </p>
-
-                      {/* Qiymət */}
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 6, position: 'relative', zIndex: 2 }}>
-                        <span style={{ fontFamily: '"Cormorant Garamond","Playfair Display",Georgia,serif', fontSize: 'clamp(44px,8vw,62px)', fontWeight: 300, letterSpacing: '-0.02em', color: isVip ? '#fff' : '#1A1A1A', lineHeight: 1 }}>
-                          {def.price}
-                        </span>
-                        <span style={{ fontSize: 16, fontWeight: 300, color: isVip ? 'rgba(197,160,89,0.9)' : '#8C7B6B', fontFamily: 'Inter,system-ui,sans-serif' }}>
-                          {ui.azn}
-                        </span>
-                      </div>
-
-                      {/* Divider */}
-                      <div style={{ ...(isVip ? S.dividerVip : S.dividerLight), position: 'relative', zIndex: 2 }} />
-
-                      {/* Features */}
-                      <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 28px', flex: 1, display: 'flex', flexDirection: 'column', gap: 11, position: 'relative', zIndex: 2 }}>
-                        {feat.included.map((f) => (
-                          <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 11 }}>
-                            <Check size={13} strokeWidth={2} style={{ flexShrink: 0, marginTop: 2, color: '#C5A059' }} />
-                            <span style={{ fontSize: 13, lineHeight: 1.6, fontWeight: 300, color: isVip ? 'rgba(255,255,255,0.82)' : '#8C7B6B', fontFamily: 'Inter,system-ui,sans-serif' }}>
-                              {f}
-                            </span>
-                          </li>
-                        ))}
-                        {feat.locked.map((f) => (
-                          <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 11 }}>
-                            <Lock size={12} strokeWidth={1.5} style={{ flexShrink: 0, marginTop: 2, color: isVip ? 'rgba(255,255,255,0.18)' : 'rgba(140,123,107,0.28)' }} />
-                            <span style={{ fontSize: 13, lineHeight: 1.6, fontWeight: 300, textDecoration: 'line-through', color: isVip ? 'rgba(255,255,255,0.2)' : 'rgba(140,123,107,0.32)', fontFamily: 'Inter,system-ui,sans-serif' }}>
-                              {f}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-
-                      {/* Shimmer Button */}
-                      <div style={{ position: 'relative', zIndex: 2 }}>
-                        <ShimmerButton
-                          onClick={() => onSelect(pkgId)}
-                          variant={isVip ? 'gold' : 'outline'}
-                          style={{ width: '100%', minHeight: 48, padding: '12px 0' }}
-                        >
-                          {ui.btn}
-                        </ShimmerButton>
-                      </div>
-
-                    </CardSpotlight>
-                  </ThreeDCard>
-                </GlowingCard>
+                <PackageCard
+                  pkgId={pkgId}
+                  label={labels[pkgId]}
+                  price={def.price}
+                  isVip={def.popular}
+                  feat={feat}
+                  popular={ui.popular}
+                  btn={ui.btn}
+                  onSelect={() => onSelect(pkgId)}
+                />
               </BlurFade>
             )
           })}
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 980px) { .digitoy-pkg-grid { grid-template-columns: 1fr !important; } }
+        @keyframes digitoy-premium-spin { to { transform: rotate(360deg); } }
+        @keyframes digitoy-beam         { to { transform: rotate(360deg); } }
+        @keyframes digitoy-shimmer-bg   { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+      `}</style>
+    </section>
+  )
+}
+
+function PackageCard({ pkgId, label, price, isVip, feat, popular, btn, onSelect }) {
+  const [hovered, setHovered] = useState(false)
+  const isPremium = pkgId === 'PREMIUM'
+
+  const cardBase = 'relative flex flex-col overflow-hidden transition-all duration-[450ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]'
+
+  const cardVariant = isVip
+    ? 'glass-dark border-gold/[0.52] -translate-y-2.5'
+    : isPremium
+    ? 'glass border-gold/30'
+    : 'glass border-beige-dark/50'
+
+  const cardShadow = isVip
+    ? (hovered ? '0 32px 80px rgba(197,160,89,0.30), 0 0 80px rgba(197,160,89,0.25), inset 0 1px 0 rgba(197,160,89,0.18)' : '0 24px 64px rgba(0,0,0,0.30), 0 0 60px rgba(197,160,89,0.18), inset 0 1px 0 rgba(197,160,89,0.16)')
+    : (hovered ? '0 28px 70px rgba(44,26,14,0.18), inset 0 1px 0 rgba(255,255,255,0.7)' : '0 12px 36px rgba(44,26,14,0.08), inset 0 1px 0 rgba(255,255,255,0.55)')
+
+  return (
+    <div className="relative h-full">
+      <motion.div
+        onHoverStart={() => setHovered(true)}
+        onHoverEnd={() => setHovered(false)}
+        whileHover={{ y: isVip ? -10 : -8 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        className={`${cardBase} ${cardVariant} p-10 rounded-[26px] h-full`}
+        style={{ boxShadow: cardShadow, zIndex: 1 }}
+      >
+        {/* PREMIUM shimmer border */}
+        {isPremium && (
+          <span aria-hidden="true" style={{
+            position: 'absolute', inset: -1, borderRadius: 26, padding: 1,
+            background: 'conic-gradient(from 0deg, rgba(197,160,89,0.3), rgba(224,210,170,0.6), rgba(197,160,89,0.3), rgba(224,210,170,0.6), rgba(197,160,89,0.3))',
+            WebkitMask: 'linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)',
+            WebkitMaskComposite: 'xor', maskComposite: 'exclude',
+            opacity: hovered ? 1 : 0,
+            animation: 'digitoy-premium-spin 6s linear infinite',
+            transition: 'opacity 400ms ease', pointerEvents: 'none',
+          }} />
+        )}
+
+        {/* VIP BorderBeam */}
+        {isVip && (
+          <span aria-hidden="true" style={{
+            position: 'absolute', inset: -1, borderRadius: 26, padding: 1,
+            background: 'conic-gradient(from 0deg, transparent 0%, rgba(197,160,89,0.7) 12%, transparent 25%, transparent 60%, rgba(245,235,211,0.45) 72%, transparent 85%)',
+            WebkitMask: 'linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)',
+            WebkitMaskComposite: 'xor', maskComposite: 'exclude',
+            animation: 'digitoy-beam 6s linear infinite', pointerEvents: 'none',
+          }} />
+        )}
+
+        {/* "Most Popular" badge */}
+        {isVip && (
+          <div className="absolute -top-4 left-1/2 -translate-x-1/2 whitespace-nowrap z-[2] px-5 py-2 rounded-full font-mono text-[10px] tracking-[0.32em] font-semibold text-espresso"
+            style={{
+              background: 'linear-gradient(135deg, #E8D5A3 0%, #C5A059 50%, #E8D5A3 100%)',
+              backgroundSize: '200% 100%',
+              boxShadow: '0 10px 24px rgba(197,160,89,0.4), inset 0 1px 0 rgba(255,255,255,0.4)',
+              animation: 'digitoy-shimmer-bg 3s linear infinite',
+            }}
+          >{popular}</div>
+        )}
+
+        {/* Package name */}
+        <div className={`font-mono text-[11px] tracking-[0.42em] uppercase mb-4 ${isVip ? 'text-gold-light' : 'text-gold-dark'}`}>
+          {label}
+        </div>
+
+        {/* Price */}
+        <div className="font-serif font-normal text-[80px] leading-none flex items-baseline gap-1">
+          <span className={isVip ? 'text-gold-light' : 'text-gold-gradient'}>{price}</span>
+          <span className={`text-[26px] ${isVip ? 'text-gold-light' : 'text-gold-dark'}`}>₼</span>
+        </div>
+
+        {/* Divider */}
+        <hr className="border-none h-px my-6 gold-divider" />
+
+        {/* Included features */}
+        <ul className="list-none m-0 mb-6 p-0 grid gap-3 flex-1">
+          {feat.included.map((f, i) => (
+            <li key={`inc-${i}`} className={`flex gap-3 items-start text-sm leading-[1.5] ${isVip ? 'text-[rgba(245,235,211,0.88)]' : 'text-espresso'}`}>
+              <span className="flex-[0_0_18px] w-[18px] h-[18px] rounded-full grid place-items-center text-[10px] font-bold mt-px"
+                style={{ background: 'linear-gradient(135deg, #C5A059, #A8843E)', color: '#fff', boxShadow: '0 0 12px rgba(197,160,89,0.4)' }}
+              >✓</span>
+              <span>{f}</span>
+            </li>
+          ))}
+          {feat.locked.map((f, i) => (
+            <li key={`lck-${i}`} className={`flex gap-3 items-start text-sm leading-[1.5] ${isVip ? 'text-[rgba(245,235,211,0.4)]' : 'text-brown-muted'}`}>
+              <span className="flex-[0_0_18px] w-[18px] h-[18px] rounded-full grid place-items-center text-[10px] font-bold mt-px"
+                style={{ background: 'rgba(139,111,94,0.18)', color: '#8B6F5E' }}
+              >–</span>
+              <span>{f}</span>
+            </li>
+          ))}
+        </ul>
+
+        {/* CTA */}
+        <motion.button
+          onClick={onSelect}
+          className={`w-full min-h-[52px] ${isVip ? 'btn-gold' : 'btn-outline-gold'}`}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.96 }}
+        >
+          {btn}
+        </motion.button>
+      </motion.div>
     </div>
   )
 }

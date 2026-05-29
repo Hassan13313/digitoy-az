@@ -44,15 +44,14 @@ export default function TubelightNavbar({ lang, tabs, onTabClick, activeTab, log
   return (
     <motion.header
       ref={menuRef}
+      className="fixed top-0 left-0 right-0 border-b border-beige-dark/35"
       style={{
-        position: 'fixed', top: 0, left: 0, right: 0,
-        zIndex: 50,
+        zIndex: 'var(--z-nav)',
+        background: 'rgba(253,251,247,0.92)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(221,213,200,0.35)',
-        background: 'rgba(253,251,247,0.92)',
-        transition: 'box-shadow 0.4s ease',
         boxShadow: scrolled ? '0 4px 32px rgba(0,0,0,0.07)' : 'none',
+        transition: 'box-shadow 0.4s ease',
       }}
       animate={{ height: scrolled ? 52 : 64 }}
       transition={{ duration: 0.3, ease: [0.32, 0, 0, 1] }}
@@ -88,7 +87,7 @@ export default function TubelightNavbar({ lang, tabs, onTabClick, activeTab, log
                   textTransform: 'uppercase',
                   fontFamily: 'Inter, system-ui, sans-serif',
                   fontWeight: 500,
-                  color: isActive ? '#C5A059' : '#8C7B6B',
+                  color: isActive ? 'var(--gold, #C5A059)' : 'var(--brown-muted, #8C7B6B)',
                   background: 'transparent',
                   border: 'none',
                   cursor: 'pointer',
@@ -110,7 +109,7 @@ export default function TubelightNavbar({ lang, tabs, onTabClick, activeTab, log
                       position: 'absolute',
                       bottom: -1, left: '10%', right: '10%',
                       height: 2,
-                      background: 'linear-gradient(90deg, transparent, #C5A059 30%, #E8D5A3 50%, #C5A059 70%, transparent)',
+                      background: 'linear-gradient(90deg, transparent, rgba(197,160,89,1) 30%, rgba(232,213,163,1) 50%, rgba(197,160,89,1) 70%, transparent)',
                       borderRadius: 1,
                     }}
                     transition={{ type: 'spring', stiffness: 380, damping: 38 }}
@@ -219,7 +218,7 @@ export default function TubelightNavbar({ lang, tabs, onTabClick, activeTab, log
                     <span style={{
                       fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase',
                       fontFamily: 'Inter, system-ui, sans-serif', fontWeight: 500,
-                      color: isActive ? '#C5A059' : '#8C7B6B',
+                      color: isActive ? 'var(--gold, #C5A059)' : 'var(--brown-muted, #8C7B6B)',
                     }}>
                       {tab.label}
                     </span>

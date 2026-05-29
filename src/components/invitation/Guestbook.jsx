@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Send, Heart } from 'lucide-react'
+import { Send } from 'lucide-react'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
 import { getGuestResponses, submitGuestResponse } from '../../utils/api'
 
@@ -29,6 +29,12 @@ const LABELS = {
     btn: 'Отправить',
     sending: 'Отправка...',
   },
+}
+
+function formatDate(iso) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  return `${String(d.getDate()).padStart(2, '0')} · ${String(d.getMonth() + 1).padStart(2, '0')} · ${d.getFullYear()}`
 }
 
 function getSlug() {
@@ -82,7 +88,7 @@ export default function Guestbook({ lang, initialMessages }) {
     <section className="py-28 px-6 bg-beige">
       <div
         ref={ref}
-        className={`max-w-lg mx-auto reveal-hidden ${visible ? 'reveal-visible' : ''}`}
+        className={`max-w-[680px] mx-auto px-6 reveal-hidden ${visible ? 'reveal-visible' : ''}`}
       >
         <div className="text-center mb-12">
           <p className="text-[9px] tracking-[0.38em] uppercase text-gold mb-5 font-medium font-sans">
@@ -94,56 +100,62 @@ export default function Guestbook({ lang, initialMessages }) {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleAdd} className="mb-10 space-y-6">
-          <div className="bg-cream border border-beige-dark/50 px-8 py-8 space-y-6">
-            <div>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={L.namePh}
-                className="luxury-input font-sans"
-              />
-            </div>
-            <div>
-              <textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder={L.msgPh}
-                rows={3}
-                className="w-full border-0 border-b border-beige-dark bg-transparent text-ink text-sm px-0 py-3 focus:outline-none focus:border-gold transition-colors duration-300 placeholder:text-brown-muted/40 resize-none rounded-none font-sans font-light"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={!name.trim() || !text.trim() || sending}
-              className="w-full flex items-center justify-center gap-2.5 btn-gold disabled:opacity-30"
-            >
-              <Send size={12} strokeWidth={1.5} />
-              {sending ? L.sending : L.btn}
-            </button>
-          </div>
+        <form onSubmit={handleAdd} className="grid gap-3.5 mb-10">
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={L.namePh}
+            className="luxury-input border-b"
+          />
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder={L.msgPh}
+            rows={4}
+            className="luxury-input border-b resize-none"
+          />
+          <button
+            type="submit"
+            disabled={!name.trim() || !text.trim() || sending}
+            className="btn-gold w-full min-h-[52px] flex items-center justify-center gap-2.5 disabled:opacity-30"
+          >
+            <Send size={12} strokeWidth={1.5} />
+            {sending ? L.sending : L.btn}
+          </button>
         </form>
 
         {/* Messages */}
-        <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+        <div className="grid gap-3.5">
           <AnimatePresence initial={false}>
-            {messages.map((msg, i) => (
+            {messages.map((msg, idx) => (
               <motion.div
-                key={(msg.name || msg.guest_name) + i}
-                initial={{ opacity: 0, y: -12 }}
+                key={(msg.name || msg.guest_name) + idx}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35 }}
-                className="bg-cream border border-beige-dark/50 px-6 py-5 flex gap-4"
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.35, delay: idx * 0.04 }}
               >
-                <div className="flex-shrink-0 mt-0.5">
-                  <Heart size={11} className="text-gold/60" strokeWidth={1.5} />
-                </div>
-                <div>
-                  <p className="text-[10px] tracking-[0.18em] uppercase text-ink font-medium font-sans mb-1.5">
-                    {msg.name || msg.guest_name}
-                  </p>
-                  <p className="text-[13px] text-brown-muted font-light font-serif italic leading-relaxed">
+                <div className="glass rounded-xl p-5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div
+                      className="w-9 h-9 rounded-full flex-shrink-0 grid place-items-center text-white font-serif text-base shadow-[0_4px_12px_rgba(197,160,89,0.35)]"
+                      style={{ background: 'linear-gradient(135deg, #E8D5A3, #A8843E)' }}
+                    >
+                      {(msg.name || msg.guest_name)?.[0]?.toUpperCase() || '·'}
+                    </div>
+                    <div>
+                      <div className="text-[13px] font-semibold text-espresso">
+                        {msg.name || msg.guest_name}
+                      </div>
+                      {msg.created_at || msg.createdAt ? (
+                        <div className="font-mono text-[10px] tracking-[0.18em] text-brown-muted">
+                          {formatDate(msg.created_at || msg.createdAt)}
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                  <p className="m-0 font-serif italic text-[17px] leading-[1.5] text-espresso">
                     "{msg.text || msg.message}"
                   </p>
                 </div>

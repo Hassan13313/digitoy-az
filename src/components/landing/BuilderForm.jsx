@@ -238,19 +238,19 @@ function IconPickerBtn({ value, onSelect }) {
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className="w-10 h-10 flex items-center justify-center border border-amber-600/30 bg-white hover:bg-neutral-50 text-xl rounded transition-all"
+        className="w-10 h-10 flex items-center justify-center border border-gold/25 bg-cream hover:border-gold/50 hover:bg-gold/5 transition-colors rounded-lg text-xl"
         title="İkon seç"
       >
         {value || '✨'}
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 z-[120] bg-white border border-neutral-200 rounded-lg shadow-xl w-48 p-2 grid grid-cols-4 gap-2">
+        <div className="absolute right-0 top-full mt-1 z-[120] bg-cream border border-beige-dark/60 shadow-xl rounded-lg w-52 p-2.5 grid grid-cols-5 gap-1.5">
           {PROGRAM_ICONS.map((ic) => (
             <button
               key={ic}
               type="button"
               onClick={() => { onSelect(ic); setOpen(false) }}
-              className={`flex items-center justify-center text-2xl rounded p-1 hover:bg-neutral-100 transition-colors ${value === ic ? 'bg-amber-100' : ''}`}
+              className={`w-9 h-9 flex items-center justify-center text-xl rounded-lg transition-colors ${value === ic ? 'bg-gold/10 border border-gold/40' : 'hover:bg-beige border border-transparent'}`}
             >
               {ic}
             </button>
@@ -278,7 +278,7 @@ function ProgramStepEditor({ rows, onChange, tr }) {
     <div className="space-y-4">
       <div className="space-y-3">
         {rows.map((row, i) => (
-          <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-neutral-50 border border-neutral-100 rounded-lg p-3 sm:p-2.5">
+          <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-beige/50 border border-beige-dark/50 rounded-lg p-3 sm:p-2.5">
             {/* Mobil: saat + (sağda) ikon+sil düymələri */}
             <div className="flex items-center gap-2">
               <TimeInput
@@ -286,12 +286,12 @@ function ProgramStepEditor({ rows, onChange, tr }) {
                 onChange={(v) => update(i, 'time', v)}
                 onComplete={() => activityRefs.current[i]?.focus()}
                 placeholder="19:00"
-                className="w-[84px] sm:w-[90px] flex-shrink-0 text-center p-2.5 border border-neutral-300 rounded bg-white font-mono text-sm focus:outline-none focus:border-gold/60 transition-colors"
+                className="w-[84px] sm:w-[90px] flex-shrink-0 text-center p-2.5 border border-beige-dark/60 rounded bg-cream font-mono text-sm focus:outline-none focus:border-gold/60 transition-colors"
               />
               {/* Mobil-da sağa keç */}
               <div className="flex items-center gap-1 ml-auto sm:hidden">
                 <IconPickerBtn value={row.icon} onSelect={(ic) => update(i, 'icon', ic)} />
-                <button type="button" onClick={() => removeRow(i)} className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-neutral-400 hover:text-red-500 transition-colors rounded touch-manipulation" aria-label="Sil">
+                <button type="button" onClick={() => removeRow(i)} className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-brown-muted/40 hover:text-red-400 transition-colors rounded touch-manipulation" aria-label="Sil">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
                 </button>
               </div>
@@ -303,12 +303,12 @@ function ProgramStepEditor({ rows, onChange, tr }) {
               value={row.activity}
               onChange={(e) => update(i, 'activity', e.target.value)}
               placeholder={tr.program_step_activity_placeholder}
-              className="w-full sm:flex-1 sm:min-w-0 p-2.5 border border-neutral-300 rounded bg-white text-sm focus:outline-none focus:border-gold/60 transition-colors"
+              className="w-full sm:flex-1 sm:min-w-0 p-2.5 border border-beige-dark/50 rounded bg-cream text-sm focus:outline-none focus:border-gold/60 transition-colors"
             />
             {/* Desktop-da ikon+sil */}
             <div className="hidden sm:flex items-center gap-1 flex-shrink-0">
               <IconPickerBtn value={row.icon} onSelect={(ic) => update(i, 'icon', ic)} />
-              <button type="button" onClick={() => removeRow(i)} className="flex-shrink-0 p-2 text-neutral-400 hover:text-red-500 transition-colors rounded" aria-label="Sil">
+              <button type="button" onClick={() => removeRow(i)} className="flex-shrink-0 p-2 text-brown-muted/40 hover:text-red-400 transition-colors rounded" aria-label="Sil">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
               </button>
             </div>
@@ -1284,7 +1284,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
         <span className="text-[9px] tracking-[0.28em] uppercase text-gold font-medium font-sans">
           {step} / {VISIBLE_TOTAL}
         </span>
-        <span className="text-[9px] tracking-[0.14em] uppercase text-brown-muted/60 font-sans truncate ml-3 max-w-[60%] text-right">
+        <span className="text-[9px] tracking-[0.14em] uppercase text-brown-muted/60 font-sans truncate ml-3 max-w-[55%] text-right">
           {steps[actualStep - 1]}
         </span>
       </div>
@@ -1302,20 +1302,20 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
                 <div
                   className={`w-7 h-7 flex items-center justify-center text-[10px] font-medium transition-all duration-300 ${
                     done
-                      ? 'bg-gold text-white'
+                      ? 'bg-gold text-white shadow-[0_2px_12px_rgba(197,160,89,0.4)]'
                       : active
-                      ? 'border border-gold text-gold bg-transparent'
-                      : 'border border-beige-dark text-brown-muted/40 bg-transparent'
+                      ? 'border border-gold text-gold bg-cream shadow-[0_0_0_3px_rgba(197,160,89,0.1)]'
+                      : 'border border-beige-dark/60 text-brown-muted/35 bg-transparent'
                   }`}
                 >
                   {done ? <Check size={11} strokeWidth={2} /> : n}
                 </div>
-                <span className={`hidden sm:block text-[9px] tracking-[0.12em] uppercase text-center max-w-[56px] leading-tight ${active ? 'text-gold' : 'text-brown-muted/50'}`}>
+                <span className={`hidden sm:block text-[9px] tracking-[0.12em] uppercase text-center max-w-[56px] leading-tight ${done ? 'text-brown-muted/55' : active ? 'text-gold font-semibold' : 'text-brown-muted/28'}`}>
                   {title}
                 </span>
               </div>
               {i < visibleSteps.length - 1 && (
-                <div className={`flex-1 h-px mx-1 sm:mx-2 transition-all duration-500 ${done ? 'step-line-active' : 'bg-beige-dark/60'}`} />
+                <div className={`flex-1 h-px mx-1 sm:mx-2 transition-all duration-500 ${done ? 'step-line-active' : 'bg-beige-dark/40'}`} />
               )}
             </div>
           )

@@ -107,14 +107,29 @@ function WaxSeal({ eventType, brideName, groomName, pulse = true }) {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         position: 'relative', overflow: 'hidden', flexShrink: 0,
       }}>
-        {/* Wax texture — spoke lines */}
-        <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.12 }} viewBox="0 0 58 58">
-          {[0, 25, 50, 75, 100, 125, 150, 175].map(a => (
-            <line key={a} x1="29" y1="29"
-              x2={29 + 32 * Math.cos(a * Math.PI / 180)}
-              y2={29 + 32 * Math.sin(a * Math.PI / 180)}
-              stroke="white" strokeWidth="0.7" />
-          ))}
+        {/* Wax texture — spoke lines + specular light filter */}
+        <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} viewBox="0 0 58 58">
+          <defs>
+            <filter id="wax-emboss" x="-10%" y="-10%" width="120%" height="120%">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" result="blur" />
+              <feSpecularLighting in="blur" surfaceScale="4" specularConstant="1.2" specularExponent="18" result="specular" lightingColor="rgba(255,240,200,0.7)">
+                <fePointLight x="20" y="12" z="40" />
+              </feSpecularLighting>
+              <feComposite in="specular" in2="SourceAlpha" operator="in" result="clip" />
+              <feComposite in="SourceGraphic" in2="clip" operator="arithmetic" k1="0" k2="1" k3="0.55" k4="0" />
+            </filter>
+          </defs>
+          {/* Spoke lines */}
+          <g opacity="0.13">
+            {[0, 25, 50, 75, 100, 125, 150, 175].map(a => (
+              <line key={a} x1="29" y1="29"
+                x2={29 + 32 * Math.cos(a * Math.PI / 180)}
+                y2={29 + 32 * Math.sin(a * Math.PI / 180)}
+                stroke="white" strokeWidth="0.7" />
+            ))}
+          </g>
+          {/* Specular highlight overlay */}
+          <circle cx="29" cy="29" r="28" fill="url(#wax-emboss)" opacity="0.6" />
         </svg>
         {/* Inner rim circle */}
         <div style={{
@@ -146,13 +161,14 @@ function WaxSeal({ eventType, brideName, groomName, pulse = true }) {
           ) : initials ? (
             <span style={{
               fontFamily: '"Cormorant Garamond", "Playfair Display", Georgia, serif',
-              fontSize: initials.length === 1 ? 22 : 14,
-              fontWeight: 500,
+              fontSize: initials.length === 1 ? 24 : 15,
+              fontWeight: 600,
               fontStyle: 'italic',
-              color: 'rgba(255,248,225,0.94)',
-              textShadow: '0 1px 4px rgba(0,0,0,0.6), 0 0 8px rgba(0,0,0,0.3)',
-              letterSpacing: initials.length > 1 ? '3px' : '0',
+              color: 'rgba(255,245,200,1)',
+              textShadow: '0 1px 0 rgba(255,255,255,0.25), 0 2px 6px rgba(0,0,0,0.7), 0 0 12px rgba(0,0,0,0.4)',
+              letterSpacing: initials.length > 1 ? '4px' : '0.5px',
               userSelect: 'none',
+              filter: 'drop-shadow(0 0 4px rgba(255,220,120,0.4))',
             }}>
               {initials}
             </span>
@@ -183,10 +199,10 @@ export default function EnvelopeOpening({
     if (phase !== 'idle') return
     setPhase('flap-open')
     setTimeout(() => setShowParticles(true),        650)
-    setTimeout(() => setPhase('card-rising'),       1100)
-    setTimeout(() => setShowParticles(false),       1800)
-    setTimeout(() => setPhase('card-fullscreen'),   2200)
-    setTimeout(() => setIsDone(true),               2900)
+    setTimeout(() => setPhase('card-rising'),       1000)
+    setTimeout(() => setShowParticles(false),       1700)
+    setTimeout(() => setPhase('card-fullscreen'),   2100)
+    setTimeout(() => setIsDone(true),               2800)
     setTimeout(() => onComplete(),                  3200)
   }, [phase, onComplete])
 
@@ -297,6 +313,8 @@ export default function EnvelopeOpening({
               position: 'relative',
               width: '100%',
               paddingBottom: '63%',
+              maxHeight: 'calc(100svh - 120px)',
+              overflow: cardRising ? 'visible' : 'hidden',
               background: ENV.body,
               boxShadow: `
                 0 32px 80px rgba(0,0,0,0.16),
@@ -343,11 +361,11 @@ export default function EnvelopeOpening({
                   padding: '0 24px',
                   overflow: 'hidden',
                 }}
-                initial={{ y: 0, opacity: 0 }}
-                animate={cardRising ? { y: '-54%', opacity: 1 } : { y: 0, opacity: 0 }}
+                initial={{ y: 0, opacity: 0, scale: 0.97 }}
+                animate={cardRising ? { y: '-54%', opacity: 1, scale: 1 } : { y: 0, opacity: 0, scale: 0.97 }}
                 transition={
                   cardRising
-                    ? { type: 'spring', stiffness: 60, damping: 15, mass: 1.1, delay: 0.08 }
+                    ? { duration: 1.4, ease: [0.16, 1, 0.3, 1] }
                     : { duration: 0.15 }
                 }
               >
@@ -445,13 +463,15 @@ export default function EnvelopeOpening({
                 position: 'absolute', bottom: 0, left: 0, zIndex: 3,
                 width: 0, height: 0, borderStyle: 'solid',
                 borderWidth: '0 0 92px 182px',
-                borderColor: 'transparent transparent rgba(196,184,164,0.58) transparent',
+                borderColor: 'transparent transparent rgba(196,184,164,0.62) transparent',
+                filter: 'drop-shadow(0 -8px 16px rgba(0,0,0,0.07))',
               }} />
               <div style={{
                 position: 'absolute', bottom: 0, right: 0, zIndex: 3,
                 width: 0, height: 0, borderStyle: 'solid',
                 borderWidth: '0 182px 92px 0',
-                borderColor: 'transparent rgba(196,184,164,0.58) transparent transparent',
+                borderColor: 'transparent rgba(196,184,164,0.62) transparent transparent',
+                filter: 'drop-shadow(0 -8px 16px rgba(0,0,0,0.07))',
               }} />
               {/* Bottom center shadow fold */}
               <div style={{
@@ -479,7 +499,7 @@ export default function EnvelopeOpening({
                   zIndex: 4,
                 }}
                 animate={flapOpen ? { rotateX: -180 } : { rotateX: 0 }}
-                transition={{ type: 'spring', stiffness: 60, damping: 15, mass: 1.2 }}
+                transition={{ type: 'tween', duration: 0.85, ease: [0.25, 0.46, 0.45, 0.94] }}
               >
                 {/* Flap front */}
                 <div style={{
@@ -493,7 +513,15 @@ export default function EnvelopeOpening({
                   position: 'absolute', inset: 0,
                   backfaceVisibility: 'hidden',
                   clipPath: 'polygon(0 0, 100% 0, 50% 89%)',
-                  background: 'linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, transparent 40%, rgba(0,0,0,0.04) 100%)',
+                  background: 'linear-gradient(to bottom, rgba(255,255,255,0.22) 0%, transparent 38%, rgba(0,0,0,0.06) 100%)',
+                }} />
+                {/* Fold-edge ambient occlusion along triangle sides */}
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  backfaceVisibility: 'hidden',
+                  clipPath: 'polygon(0 0, 100% 0, 50% 89%)',
+                  background: 'linear-gradient(135deg, rgba(0,0,0,0.04) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.05) 100%)',
+                  pointerEvents: 'none',
                 }} />
                 {/* Flap back (inner lining) */}
                 <div style={{
@@ -513,8 +541,8 @@ export default function EnvelopeOpening({
                   zIndex: 5,
                 }}>
                   <motion.div
-                    animate={flapOpen ? { scale: 0, opacity: 0 } : { scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.25, ease: 'easeIn' }}
+                    animate={flapOpen ? { scale: 1.18, opacity: 0, rotate: 14 } : { scale: 1, opacity: 1, rotate: 0 }}
+                    transition={{ type: 'spring', stiffness: 280, damping: 18 }}
                   >
                     <WaxSeal
                       eventType={eventType}
