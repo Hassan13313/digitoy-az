@@ -177,7 +177,7 @@ function VenueSearchInput({ value, onSelect, lang, tr }) {
           type="text"
           defaultValue={value || ''}
           placeholder={tr.venue_search_placeholder}
-          className="w-full pl-9 pr-4 py-3 bg-[#1a1a1a]/60 border border-gold/20 text-white/90 text-sm placeholder-white/25 rounded-none focus:outline-none focus:border-gold/50 transition-colors"
+          className="w-full pl-9 pr-4 py-3 bg-[#1a1a1a]/60 border border-gold/20 text-white/90 text-sm placeholder-white/25 rounded-full focus:outline-none focus:border-gold/50 transition-colors"
         />
       </div>
       {success && (

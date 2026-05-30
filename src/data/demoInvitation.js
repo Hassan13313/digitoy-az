@@ -14,7 +14,6 @@ export const demoInvitation = {
 
   googleMapsUrl: 'https://www.google.com/maps/search/Buta+Palace+Baku/@40.3975,49.8537',
   wazeUrl:       'https://waze.com/ul?q=Buta+Palace+Baku&navigate=yes',
-  appleMapsUrl:  'https://maps.apple.com/?q=Buta+Palace+Baku',
 
   dressCodePalette: 'blacktie',
   dressCodeDescription:

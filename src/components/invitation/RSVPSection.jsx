@@ -165,7 +165,7 @@ export default function RSVPSection({ lang, weddingData }) {
     az: {
       title: 'İştirak edəcəksinizmi?',
       subtitle: deadline ? `Zəhmət olmasa ${deadline}-a qədər cavablandırın` : 'Cavabınızı bildirin',
-      yes: 'Bəli, Gəlirəm', no: 'Gəlmirəm',
+      yes: 'İştirak edəcəyəm', no: 'İştirak edə bilməyəcəyəm',
       plusq: 'Əlavə qonaq gətirəcəksiniz?', send: 'Göndər',
       thanks_yes: 'Görüşmək üçün səbirsizlənir', thanks_no: 'Anlayışla qarşıladıq',
       thanks_sub: 'Cavabınız qeydə alındı',
@@ -173,7 +173,7 @@ export default function RSVPSection({ lang, weddingData }) {
     en: {
       title: 'Will you attend?',
       subtitle: deadline ? `Please reply by ${deadline}` : 'Let us know',
-      yes: "Yes, I'll be there", no: "Sorry, can't make it",
+      yes: 'I will attend', no: 'I will not be able to attend',
       plusq: 'Will you bring a guest?', send: 'Send Reply',
       thanks_yes: 'We look forward to seeing you', thanks_no: 'We understand',
       thanks_sub: 'Your response has been recorded',
@@ -181,7 +181,7 @@ export default function RSVPSection({ lang, weddingData }) {
     ru: {
       title: 'Вы придёте?',
       subtitle: deadline ? `Пожалуйста, ответьте до ${deadline}` : 'Дайте нам знать',
-      yes: 'Да, приду', no: 'К сожалению, не смогу',
+      yes: 'Я посещу', no: 'Я не смогу прийти',
       plusq: 'Возьмёте гостя с собой?', send: 'Отправить',
       thanks_yes: 'С нетерпением вас ждём', thanks_no: 'Мы понимаем',
       thanks_sub: 'Ваш ответ записан',

@@ -54,35 +54,36 @@
   }
 
   .btn-gold {
-    @apply bg-gold text-white font-sans font-medium tracking-[0.18em] px-9 py-3.5 rounded-none transition-all duration-300 uppercase text-xs;
+    @apply bg-gold text-white font-sans font-medium tracking-[0.18em] px-9 py-3.5 rounded-full transition-all duration-300 uppercase text-xs;
   }
   .btn-gold:hover {
     @apply bg-gold-dark;
-    transform: scale(1.015);
-    box-shadow: 0 4px 20px rgba(197, 160, 89, 0.14);
+    transform: scale(1.02);
+    box-shadow: 0 6px 24px rgba(197, 160, 89, 0.22);
   }
   .btn-gold:active { transform: scale(0.95); }
 
   .btn-outline-gold {
-    @apply border border-gold text-gold font-sans font-medium tracking-[0.18em] px-9 py-3.5 rounded-none transition-all duration-300 bg-transparent uppercase text-xs;
+    @apply border border-gold text-gold font-sans font-medium tracking-[0.18em] px-9 py-3.5 rounded-full transition-all duration-300 bg-transparent uppercase text-xs;
   }
   .btn-outline-gold:hover {
     @apply bg-gold text-white;
-    transform: scale(1.015);
+    transform: scale(1.02);
   }
   .btn-outline-gold:active { transform: scale(0.95); }
 
   .btn-ghost-gold {
-    @apply font-sans font-medium tracking-[0.18em] px-9 py-3.5 rounded-none transition-all duration-300 uppercase text-xs;
+    @apply font-sans font-medium tracking-[0.18em] px-9 py-3.5 rounded-full transition-all duration-300 uppercase text-xs;
     background: rgba(255, 255, 255, 0.55);
-    border: 1px solid rgba(44, 26, 14, 0.18);
+    border: 1px solid rgba(212, 175, 55, 0.2);
     color: #2C1A0E;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
   .btn-ghost-gold:hover {
-    background: rgba(255, 255, 255, 0.72);
-    transform: scale(1.015);
+    background: rgba(255, 255, 255, 0.75);
+    border-color: rgba(212, 175, 55, 0.38);
+    transform: scale(1.02);
   }
   .btn-ghost-gold:active { transform: scale(0.95); }
 
@@ -91,7 +92,8 @@
   }
 
   .card-premium {
-    @apply bg-cream border border-beige-dark/70;
+    @apply bg-white/40 backdrop-blur-md border border-white/30 rounded-2xl;
+    box-shadow: 0 8px 32px 0 rgba(212, 175, 55, 0.08);
   }
 }
 

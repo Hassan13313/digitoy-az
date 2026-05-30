@@ -1,5 +1,26 @@
 import { useState, useEffect, useRef } from 'react'
-import { ChevronDown, Sparkles, Timer, MapPin, Shirt, Users, Camera, Music, Crown, ChevronLeft, ChevronRight, UserCheck, Clock, BookOpen, User } from 'lucide-react'
+import { ChevronDown, Timer, MapPin, Shirt, Users, Camera, Music, Crown, ChevronLeft, ChevronRight, UserCheck, Clock, BookOpen } from 'lucide-react'
+
+const MaleSuitIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M7,4 C6,6 5,9 5,20 L19,20 C19,9 18,6 17,4" />
+    <path d="M7,4 C8,7 10,9 11,11 L12,10" />
+    <path d="M17,4 C16,7 14,9 13,11 L12,10" />
+    <path d="M10,4 L11,8 L12,7 L13,8 L14,4" />
+    <circle cx="12" cy="13" r="0.4" fill="currentColor" stroke="none" />
+    <circle cx="12" cy="15.5" r="0.4" fill="currentColor" stroke="none" />
+    <circle cx="12" cy="18" r="0.4" fill="currentColor" stroke="none" />
+  </svg>
+)
+
+const FemaleGownIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M8,5 C8,3 10,2 12,2 C14,2 16,3 16,5 L15,10 L9,10 Z" />
+    <path d="M8,5 C9,4 11,5 12,6 C13,5 15,4 16,5" />
+    <path d="M9,10 C6,14 4,18 4,22 L20,22 C20,18 18,14 15,10 Z" />
+    <path d="M9,10 Q12,9 15,10" />
+  </svg>
+)
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import t from '../../data/translations'
 import BlurFade from '../ui/BlurFade'
@@ -13,10 +34,10 @@ const featureIcons = { countdown: Timer, maps: MapPin, dresscode: Shirt, seating
 
 function getDressStyles(tr) {
   return [
-    { id: 'blacktie',    label: 'Black Tie',    sub: tr.dresscode_blacktie_sub,    male: { icon: User, text: tr.dress_blacktie_male },    female: { icon: Sparkles, text: tr.dress_blacktie_female } },
-    { id: 'cocktail',    label: 'Cocktail',     sub: tr.dresscode_cocktail_sub,    male: { icon: User, text: tr.dress_cocktail_male },    female: { icon: Sparkles, text: tr.dress_cocktail_female } },
-    { id: 'smartcasual', label: 'Smart Casual', sub: tr.dresscode_smartcasual_sub, male: { icon: User, text: tr.dress_smartcasual_male }, female: { icon: Sparkles, text: tr.dress_smartcasual_female } },
-    { id: 'creative',    label: 'Creative',     sub: tr.dresscode_creative_sub,    male: { icon: User, text: tr.dress_creative_male },    female: { icon: Sparkles, text: tr.dress_creative_female } },
+    { id: 'blacktie',    label: 'Black Tie',    sub: tr.dresscode_blacktie_sub,    male: { icon: MaleSuitIcon, text: tr.dress_blacktie_male },    female: { icon: FemaleGownIcon, text: tr.dress_blacktie_female } },
+    { id: 'cocktail',    label: 'Cocktail',     sub: tr.dresscode_cocktail_sub,    male: { icon: MaleSuitIcon, text: tr.dress_cocktail_male },    female: { icon: FemaleGownIcon, text: tr.dress_cocktail_female } },
+    { id: 'smartcasual', label: 'Smart Casual', sub: tr.dresscode_smartcasual_sub, male: { icon: MaleSuitIcon, text: tr.dress_smartcasual_male }, female: { icon: FemaleGownIcon, text: tr.dress_smartcasual_female } },
+    { id: 'creative',    label: 'Creative',     sub: tr.dresscode_creative_sub,    male: { icon: MaleSuitIcon, text: tr.dress_creative_male },    female: { icon: FemaleGownIcon, text: tr.dress_creative_female } },
   ]
 }
 
@@ -97,39 +118,36 @@ function GallerySlider({ tr }) {
 }
 
 function RSVPPanel({ tr }) {
-  const [name, setName] = useState('')
-  const [status, setStatus] = useState(null)
+  const [status,    setStatus]    = useState(null)
   const [submitted, setSubmitted] = useState(false)
-  const submit = (s) => { if (!name.trim()) return; setStatus(s); setSubmitted(true) }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="text-center">
         <p className="text-[10px] tracking-[0.28em] uppercase text-gold font-medium">{tr.rsvp_panel_title}</p>
         <p className="text-brown-muted text-sm font-light mt-1">{tr.rsvp_panel_sub}</p>
       </div>
       {!submitted ? (
-        <>
-          <div className="relative z-20 pointer-events-auto">
-            <p className="text-[10px] tracking-[0.18em] uppercase text-brown-muted/60 mb-2">{tr.rsvp_name}</p>
-            <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Məs: Əli Məmmədov"
-              className="w-full text-xs px-4 py-2.5 bg-white/40 border border-white/50 rounded-xl outline-none text-ink placeholder-brown-muted/40 focus:border-gold/50 transition-colors backdrop-blur-sm" />
-          </div>
-          <div className="flex gap-3 relative z-20 pointer-events-auto">
-            <button onClick={() => submit('yes')} className="flex-1 flex items-center justify-center gap-2 py-3 bg-gold/10 border border-gold/40 rounded-xl text-xs text-gold font-medium hover:bg-gold/20 transition-all duration-300">
-              <UserCheck size={13} strokeWidth={1.5} />{tr.rsvp_yes_btn}
-            </button>
-            <button onClick={() => submit('no')} className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/30 border border-white/50 rounded-xl text-xs text-brown-muted font-medium hover:bg-white/50 transition-all duration-300">
-              {tr.rsvp_no_btn}
-            </button>
-          </div>
-        </>
+        <div className="flex flex-col gap-3 relative z-20 pointer-events-auto">
+          <button
+            onClick={() => { setStatus('yes'); setSubmitted(true) }}
+            className="w-full flex items-center justify-center gap-2 py-3.5 bg-gold/10 border border-gold/40 rounded-full text-xs text-gold font-medium hover:bg-gold/20 transition-all duration-300"
+          >
+            <UserCheck size={13} strokeWidth={1.5} />{tr.rsvp_yes_btn}
+          </button>
+          <button
+            onClick={() => { setStatus('no'); setSubmitted(true) }}
+            className="w-full flex items-center justify-center gap-2 py-3.5 bg-white/30 border border-white/50 rounded-full text-xs text-brown-muted font-medium hover:bg-white/50 transition-all duration-300"
+          >
+            {tr.rsvp_no_btn}
+          </button>
+        </div>
       ) : (
-        <div className="text-center py-4 px-5 bg-gold/[0.06] border border-gold/30 rounded-xl">
+        <div className="text-center py-5 px-5 bg-gold/[0.06] border border-gold/30 rounded-2xl">
           <UserCheck size={24} className="text-gold mx-auto mb-2" strokeWidth={1.4} />
-          <p className="font-serif text-base text-ink font-light">{tr.rsvp_thanks_msg}, <span className="text-gold">{name}</span>!</p>
+          <p className="font-serif text-base text-ink font-light">{status === 'yes' ? tr.rsvp_thanks_msg : tr.rsvp_thanks_msg}</p>
           <p className="text-[11px] text-brown-muted font-light mt-1">{status === 'yes' ? tr.rsvp_yes_sub : tr.rsvp_no_sub}</p>
-          <button onClick={() => { setSubmitted(false); setName(''); setStatus(null) }} className="mt-3 text-[10px] text-gold/60 hover:text-gold transition-colors underline underline-offset-2">{tr.rsvp_change}</button>
+          <button onClick={() => { setSubmitted(false); setStatus(null) }} className="mt-3 text-[10px] text-gold/60 hover:text-gold transition-colors underline underline-offset-2">{tr.rsvp_change}</button>
         </div>
       )}
     </div>
@@ -675,28 +693,28 @@ export function HeroFooter({ lang = 'az' }) {
             </div>
             <p className="text-white/40 text-[11px] font-light tracking-wide max-w-[220px] leading-relaxed">{tr.footer_tagline}</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center gap-6 mt-4 md:mt-0">
             {/* WhatsApp */}
             <a href="https://wa.me/994557133696" aria-label="WhatsApp" target="_blank" rel="noopener noreferrer"
-              className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center hover:border-gold/50 hover:bg-gold/10 hover:scale-105 transition-all duration-300">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                <path d="M20.52 3.48A11.93 11.93 0 0 0 12 0C5.37 0 0 5.37 0 12c0 2.11.55 4.16 1.6 5.97L0 24l6.18-1.62A11.94 11.94 0 0 0 12 24c6.63 0 12-5.37 12-12 0-3.2-1.25-6.21-3.48-8.52zM12 22c-1.85 0-3.67-.5-5.25-1.44l-.38-.22-3.67.96.98-3.58-.25-.38A9.94 9.94 0 0 1 2 12C2 6.48 6.48 2 12 2c2.67 0 5.18 1.04 7.07 2.93A9.94 9.94 0 0 1 22 12c0 5.52-4.48 10-10 10z" fill="rgba(197,160,89,0.75)"/>
-                <path d="M17.5 14.4c-.3-.15-1.75-.86-2.02-.96s-.47-.15-.67.15-.77.96-.94 1.16-.35.22-.64.07a8.08 8.08 0 0 1-2.38-1.47 8.93 8.93 0 0 1-1.64-2.05c-.17-.3 0-.46.13-.6l.44-.52c.14-.17.18-.3.27-.5s.05-.37-.02-.52-.67-1.6-.91-2.2c-.24-.57-.49-.5-.67-.5h-.57c-.2 0-.52.07-.79.37s-1.04 1.02-1.04 2.48 1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.7.62.71.23 1.36.2 1.87.12.57-.09 1.75-.72 2-1.41s.25-1.29.17-1.41-.27-.2-.57-.35z" fill="rgba(197,160,89,0.75)"/>
+              className="w-11 h-11 rounded-full border border-white/15 flex items-center justify-center hover:border-gold/50 hover:bg-gold/10 hover:opacity-80 hover:scale-105 transition-all duration-200">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M20.52 3.48A11.93 11.93 0 0 0 12 0C5.37 0 0 5.37 0 12c0 2.11.55 4.16 1.6 5.97L0 24l6.18-1.62A11.94 11.94 0 0 0 12 24c6.63 0 12-5.37 12-12 0-3.2-1.25-6.21-3.48-8.52zM12 22c-1.85 0-3.67-.5-5.25-1.44l-.38-.22-3.67.96.98-3.58-.25-.38A9.94 9.94 0 0 1 2 12C2 6.48 6.48 2 12 2c2.67 0 5.18 1.04 7.07 2.93A9.94 9.94 0 0 1 22 12c0 5.52-4.48 10-10 10z" fill="rgba(197,160,89,0.8)"/>
+                <path d="M17.5 14.4c-.3-.15-1.75-.86-2.02-.96s-.47-.15-.67.15-.77.96-.94 1.16-.35.22-.64.07a8.08 8.08 0 0 1-2.38-1.47 8.93 8.93 0 0 1-1.64-2.05c-.17-.3 0-.46.13-.6l.44-.52c.14-.17.18-.3.27-.5s.05-.37-.02-.52-.67-1.6-.91-2.2c-.24-.57-.49-.5-.67-.5h-.57c-.2 0-.52.07-.79.37s-1.04 1.02-1.04 2.48 1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.7.62.71.23 1.36.2 1.87.12.57-.09 1.75-.72 2-1.41s.25-1.29.17-1.41-.27-.2-.57-.35z" fill="rgba(197,160,89,0.8)"/>
               </svg>
             </a>
             {/* Instagram */}
             <a href="https://www.instagram.com/digitoy.az/" aria-label="Instagram" target="_blank" rel="noopener noreferrer"
-              className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center hover:border-gold/50 hover:bg-gold/10 hover:scale-105 transition-all duration-300">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(197,160,89,0.75)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              className="w-11 h-11 rounded-full border border-white/15 flex items-center justify-center hover:border-gold/50 hover:bg-gold/10 hover:opacity-80 hover:scale-105 transition-all duration-200">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(197,160,89,0.8)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="2" width="20" height="20" rx="5"/>
                 <circle cx="12" cy="12" r="5"/>
-                <circle cx="17.5" cy="6.5" r="1" fill="rgba(197,160,89,0.75)" stroke="none"/>
+                <circle cx="17.5" cy="6.5" r="1.2" fill="rgba(197,160,89,0.8)" stroke="none"/>
               </svg>
             </a>
             {/* TikTok */}
             <a href="https://www.tiktok.com/@digitoy.az" aria-label="TikTok" target="_blank" rel="noopener noreferrer"
-              className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center hover:border-gold/50 hover:bg-gold/10 hover:scale-105 transition-all duration-300">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="rgba(197,160,89,0.75)">
+              className="w-11 h-11 rounded-full border border-white/15 flex items-center justify-center hover:border-gold/50 hover:bg-gold/10 hover:opacity-80 hover:scale-105 transition-all duration-200">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="rgba(197,160,89,0.8)">
                 <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/>
               </svg>
             </a>

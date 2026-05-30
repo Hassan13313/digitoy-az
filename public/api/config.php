@@ -64,8 +64,6 @@ function ensureTables(): void {
             INDEX idx_slug (slug)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     ");
-}
-
     $db->exec("
         CREATE TABLE IF NOT EXISTS guest_responses (
             id                INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -79,5 +77,3 @@ function ensureTables(): void {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     ");
 }
-
-// ensureTables() yalnız invitations üçün lazımdır — foto skriptlər çağırmır

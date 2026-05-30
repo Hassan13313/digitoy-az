@@ -10,8 +10,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $body = json_decode(file_get_contents('php://input'), true);
 
 $invId  = trim($body['invitation_id'] ?? '');
-$name   = trim($body['guest_name']    ?? '');
-$msg    = trim($body['message']       ?? '');
+$name   = strip_tags(trim($body['guest_name'] ?? ''));
+$msg    = strip_tags(trim($body['message']    ?? ''));
 $status = $body['attendance_status']  ?? null;
 $extra  = max(0, min(10, (int)($body['extra_guests'] ?? 0)));
 

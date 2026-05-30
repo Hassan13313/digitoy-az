@@ -323,7 +323,7 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
 
                 {/* Luxury dress code showcase */}
                 <div className="mb-8">
-                  <ThreeDDressCode color={fabricColor} palette={palette} lang={lang} />
+                  <ThreeDDressCode color={fabricColor} palette={palette} paletteId={weddingData.dressCodePalette} lang={lang} />
                 </div>
 
                 <p className="text-sm text-brown-muted leading-[1.9] max-w-xs mx-auto font-light tracking-wide">

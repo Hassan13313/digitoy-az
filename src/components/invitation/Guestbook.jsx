@@ -8,7 +8,7 @@ const LABELS = {
   az: {
     title: 'Təbrik Kitabı',
     sub: 'Xoş arzularınızı bizimlə bölüşün',
-    namePh: 'Adınız, Soyadınız',
+    namePh: 'Adınız',
     msgPh: 'Ürək sözləriniz...',
     btn: 'Paylaş',
     sending: 'Göndərilir...',

@@ -4,9 +4,9 @@ export const DRESS_CODE_PALETTES = [
     label: { az: 'Pastel', en: 'Pastel', ru: 'Пастель' },
     colors: ['#F8C8D4', '#D4C8F8', '#C8F8E8', '#F8ECC8'],
     description: {
-      az: 'Açıq çəhrayı, lavanda, mint, krem tonları',
-      en: 'Soft pink, lavender, mint, cream tones',
-      ru: 'Нежно-розовый, лаванда, мята, кремовый',
+      az: 'Tədbirin konseptinə uyğun geyim üslubu',
+      en: 'Dress code tailored to the event concept',
+      ru: 'Дресс-код, соответствующий концепции мероприятия',
     },
   },
   {
@@ -14,9 +14,9 @@ export const DRESS_CODE_PALETTES = [
     label: { az: 'Torpaq Tonları', en: 'Earth Tones', ru: 'Земляные тона' },
     colors: ['#C4956A', '#8B6347', '#D4B896', '#A0785A'],
     description: {
-      az: 'Terrakota, krem bej, qəhvəyi tonları',
-      en: 'Terracotta, cream beige, warm brown tones',
-      ru: 'Терракота, кремовый бежевый, тёплый коричневый',
+      az: 'Tədbirin konseptinə uyğun geyim üslubu',
+      en: 'Dress code tailored to the event concept',
+      ru: 'Дресс-код, соответствующий концепции мероприятия',
     },
   },
   {
@@ -24,9 +24,9 @@ export const DRESS_CODE_PALETTES = [
     label: { az: 'Black Tie', en: 'Black Tie', ru: 'Чёрный галстук' },
     colors: ['#1A1A1A', '#F5F5F5', '#C9A84C', '#8C8C8C'],
     description: {
-      az: 'Klassik qara, ağ, qızılı aksent',
-      en: 'Classic black, white, gold accent',
-      ru: 'Классический чёрный, белый, золотой акцент',
+      az: 'Tədbirin konseptinə uyğun geyim üslubu',
+      en: 'Dress code tailored to the event concept',
+      ru: 'Дресс-код, соответствующий концепции мероприятия',
     },
   },
   {
@@ -34,9 +34,9 @@ export const DRESS_CODE_PALETTES = [
     label: { az: 'Çiçəkli Bağ', en: 'Floral Garden', ru: 'Цветочный сад' },
     colors: ['#8FAF8F', '#D4A5A5', '#F5F0E8', '#B5C9A8'],
     description: {
-      az: 'Adaçayı yaşılı, toz gülü, krem tonları',
-      en: 'Sage green, dusty rose, cream tones',
-      ru: 'Шалфей, пыльная роза, кремовый',
+      az: 'Tədbirin konseptinə uyğun geyim üslubu',
+      en: 'Dress code tailored to the event concept',
+      ru: 'Дресс-код, соответствующий концепции мероприятия',
     },
   },
 ]

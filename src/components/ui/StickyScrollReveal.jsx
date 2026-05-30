@@ -82,19 +82,19 @@ function StepCard({ step, index, progress, total }) {
 
 const STEPS = {
   az: [
-    { title: 'Paket Seçin',         desc: 'SADE, VİP və ya PREMİUM paketlərdən birini seçin. Hər paket fərqli imkanlar təklif edir.',  tag: '1 dəqiqə' },
+    { title: 'Paket Seçin',         desc: 'İndi başla düyməsinə basaraq, istəyinizə və zövqünüzə tam uyğun paketi seçib dəvətnamənizi dərhal hazırlamağa başlayın.',  tag: '1 dəqiqə' },
     { title: 'Formu Doldurun',      desc: 'Ad-soyadlar, tarix, məkan, dress code, foto qalereya — hamısı addım-addım asancasına.',       tag: '5 dəqiqə' },
     { title: 'WhatsApp-a Göndərin', desc: 'Hazır link avtomatik yaranır. Biryolluğa kopyalayıb qonaqlarınıza paylaşın.',                tag: 'Anında' },
     { title: 'Linki Alın',          desc: 'Qonaqlar linki açanda zərif dəvətnaməni görür — geri sayım, naviqasiya, proqram, hamısı.',   tag: 'Qurulmadan hazır' },
   ],
   en: [
-    { title: 'Choose a Package',    desc: 'Pick from BASIC, VIP or PREMIUM. Each tier unlocks more features for your special day.',    tag: '1 minute' },
+    { title: 'Choose a Package',    desc: 'Click \'Start Now\', choose the perfect package that fits your desires, and begin crafting your custom invitation instantly.',    tag: '1 minute' },
     { title: 'Fill the Form',       desc: 'Names, date, venue, dress code, photo gallery — every step is quick and intuitive.',         tag: '5 minutes' },
     { title: 'Send via WhatsApp',   desc: 'Your unique link is ready instantly. Copy and share it with all your guests.',               tag: 'Instant' },
     { title: 'Get Your Link',       desc: 'Guests tap the link and see your invitation — countdown, navigation, program and more.',     tag: 'Zero setup' },
   ],
   ru: [
-    { title: 'Выберите пакет',      desc: 'БАЗОВЫЙ, VIP или PREMIUM — каждый предлагает разные возможности для вашего торжества.',      tag: '1 минута' },
+    { title: 'Выберите пакет',      desc: 'Нажмите «Начать сейчас», выберите подходящий пакет и мгновенно начните создавать свое персональное приглашение.',      tag: '1 минута' },
     { title: 'Заполните форму',     desc: 'Имена, дата, место, дресс-код, галерея — всё пошагово и легко.',                            tag: '5 минут' },
     { title: 'Отправьте в WhatsApp', desc: 'Ссылка генерируется мгновенно. Скопируйте и поделитесь с гостями.',                        tag: 'Мгновенно' },
     { title: 'Получите ссылку',     desc: 'Гости открывают ссылку и видят приглашение с обратным отсчётом, навигацией и программой.',  tag: 'Без настройки' },
