@@ -3,7 +3,8 @@ import { motion } from 'framer-motion'
 import { Eye, MessageCircle, Edit2, Calendar, MapPin, Shirt, Users, Image, ListOrdered, ShieldCheck, Copy, Check } from 'lucide-react'
 import { DRESS_CODE_PALETTES } from '../../data/constants'
 import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
-import { buildWhatsAppUrl, buildLiveLink } from '../../utils/whatsappOrder'
+import { buildWhatsAppUrl, buildShortLiveLink } from '../../utils/whatsappOrder'
+import { saveInvitation } from '../../utils/api'
 import t from '../../data/translations'
 
 const ADMIN_WA = '994557133696'
@@ -49,13 +50,25 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
   const [liveLink,      setLiveLink]      = useState('')
   const [linkCopied,    setLinkCopied]    = useState(false)
   const [linkGenerated, setLinkGenerated] = useState(false)
+  const [saving,        setSaving]        = useState(false)
+  const [saveError,     setSaveError]     = useState(false)
 
-  const handleApprove = useCallback(() => {
-    const link = buildLiveLink(slug, data)
-    setLiveLink(link)
-    setLinkGenerated(true)
-    navigator.clipboard.writeText(link).catch(() => {})
-  }, [data])
+  const handleApprove = useCallback(async () => {
+    if (saving) return
+    setSaving(true)
+    setSaveError(false)
+    try {
+      await saveInvitation(slug, data)
+      const link = buildShortLiveLink(slug)
+      setLiveLink(link)
+      setLinkGenerated(true)
+      navigator.clipboard.writeText(link).catch(() => {})
+    } catch {
+      setSaveError(true)
+    } finally {
+      setSaving(false)
+    }
+  }, [slug, data, saving])
 
   const handleCopyLink = useCallback(() => {
     navigator.clipboard.writeText(liveLink).then(() => {
@@ -268,20 +281,28 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
             </p>
 
             {!linkGenerated ? (
-              <motion.button
-                type="button"
-                onClick={handleApprove}
-                className="inline-flex items-center gap-2.5 px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] tracking-[0.2em] uppercase font-semibold transition-colors duration-200 shadow-md rounded-xl"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.97 }}
-              >
-                <Check size={13} strokeWidth={2.5} />
-                Sifarişi Təsdiqlə
-              </motion.button>
+              <div className="space-y-2">
+                <motion.button
+                  type="button"
+                  onClick={handleApprove}
+                  disabled={saving}
+                  className="inline-flex items-center gap-2.5 px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed text-white text-[11px] tracking-[0.2em] uppercase font-semibold transition-colors duration-200 shadow-md rounded-xl"
+                  whileHover={saving ? {} : { scale: 1.02 }}
+                  whileTap={saving ? {} : { scale: 0.97 }}
+                >
+                  <Check size={13} strokeWidth={2.5} />
+                  {saving ? 'Saxlanılır...' : 'Sifarişi Təsdiqlə'}
+                </motion.button>
+                {saveError && (
+                  <p className="text-[10px] text-red-500 font-medium">
+                    Xəta baş verdi. Yenidən cəhd edin.
+                  </p>
+                )}
+              </div>
             ) : (
               <div className="space-y-3">
                 <p className="text-[10px] tracking-[0.2em] uppercase text-emerald-700 font-semibold">
-                  ✓ Link hazırlandı — müştəriyə göndər
+                  ✓ Saxlandı — müştəriyə göndər
                 </p>
                 <div className="bg-cream border border-beige-dark/70 rounded-xl px-4 py-3 text-left">
                   <p className="text-xs text-espresso font-mono break-all leading-relaxed">{liveLink}</p>

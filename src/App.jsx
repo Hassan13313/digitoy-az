@@ -6,6 +6,7 @@ import GalleryPage from './components/invitation/GalleryPage'
 import DigitoyOrijinalUI from './components/DigitoyOrijinalUI'
 import { defaultWedding } from './data/defaultWedding'
 import { demoInvitation, demoGuestbook } from './data/demoInvitation'
+import { getInvitation } from './utils/api'
 import ScrollProgress from './components/ui/ScrollProgress'
 import './App.css'
 
@@ -93,11 +94,17 @@ export default function App() {
         }
       }
 
-      /* ── Heç bir data yoxdur — ana səhifəyə yönləndir ── */
-      window.history.replaceState({}, '', '/')
-      try { localStorage.removeItem('isAdmin') } catch {}
-      setIsAdmin(false)
-      setView('landing')
+      /* ── Slug var amma data yoxdur → DB-dən yüklə (qısa link) ── */
+      getInvitation(slug)
+        .then(decoded => {
+          if (decoded) {
+            setWeddingData({ ...defaultWedding, ...decoded })
+            setView('invite')
+          } else {
+            setView('invite-not-found')
+          }
+        })
+        .catch(() => setView('invite-not-found'))
       return
     }
 
@@ -181,6 +188,20 @@ export default function App() {
           isAdmin={true}
           initialShowPreview={false}
         />
+      </div>
+    )
+  }
+
+  if (view === 'invite-not-found') {
+    return (
+      <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 text-center">
+        <div style={{ width: 48, height: 1, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.6), transparent)', marginBottom: 28 }} />
+        <p className="font-mono text-[10px] tracking-[0.38em] uppercase text-gold mb-4">Digitoy.az</p>
+        <h1 className="font-serif text-2xl text-ink font-light tracking-tight mb-3">Bu dəvətnamə tapılmadı</h1>
+        <p className="text-brown-muted text-sm font-light leading-relaxed max-w-xs">
+          Link köhnəlmiş və ya yanlış ola bilər. Dəvətnamə sahibindən yeni link tələb edin.
+        </p>
+        <div style={{ width: 48, height: 1, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.4), transparent)', marginTop: 28 }} />
       </div>
     )
   }

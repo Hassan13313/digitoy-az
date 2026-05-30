@@ -31,6 +31,11 @@ export function buildLiveLink(slug, data) {
   return `${getBasePlatformUrl()}/invite/${slug}?view=live&d=${encoded}`
 }
 
+/* ── DB-backed qısa link — iOS-safe, 40 char max ── */
+export function buildShortLiveLink(slug) {
+  return `${getBasePlatformUrl()}/invite/${slug}`
+}
+
 const PACKAGE_LABELS = {
   SADE:    'Sadə (59₼)',
   VIP:     'VİP (89₼)',
