@@ -1,13 +1,43 @@
 <?php
 /* ══════════════════════════════════════════════════
-   DIGITOY.AZ — Mərkəzi DB konfiqurasiyası
+   DIGITOY.AZ — Mərkəzi DB + Auth konfiqurasiyası
    Azhosting DirectAdmin / cPanel MySQL
 ══════════════════════════════════════════════════ */
 
 /* ── Content-Type ── */
 header('Content-Type: application/json; charset=utf-8');
 
-/* ── CORS .htaccess-dən gəlir (mod_headers) — burada duplikat yoxdur ── */
+/* ── Admin key (server tərəfindən saxlanılır) ──
+   Bu dəyəri cPanel-də server env var kimi təyin edin:
+   SetEnv DIGITOY_ADMIN_KEY "your-strong-secret-here"
+   YA DA bu faylı birbaşa redaktə edin (git-ə commit etməyin!) */
+define('ADMIN_KEY', getenv('DIGITOY_ADMIN_KEY') ?: 'digitoyadmin2026');
+
+/* ── CORS — yalnız icazə verilən originlər ──
+   Wildcard (*) yoxdur — hər origin ayrıca yoxlanılır */
+$_CORS_ALLOWED = [
+    'https://digitoy.az',
+    'https://www.digitoy.az',
+    'http://localhost:5175',
+    'http://localhost:5174',
+    'http://localhost:3000',
+];
+
+$_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+
+if ($_origin !== '') {
+    if (in_array($_origin, $_CORS_ALLOWED, true)) {
+        header('Access-Control-Allow-Origin: ' . $_origin);
+        header('Vary: Origin');
+        header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type, X-Admin-Token, Authorization');
+    } else {
+        http_response_code(403);
+        echo json_encode(['error' => 'Origin not allowed']);
+        exit;
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
     exit;

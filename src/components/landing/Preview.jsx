@@ -53,6 +53,20 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
   const [saving,        setSaving]        = useState(false)
   const [saveError,     setSaveError]     = useState(false)
 
+  /* slug — useCallback-dan əvvəl declare edilməlidir (TDZ) */
+  function toSlug(str = '') {
+    return str.toLowerCase()
+      .replace(/ç/g,'c').replace(/ğ/g,'g').replace(/[ışı]/g,'i')
+      .replace(/ö/g,'o').replace(/ş/g,'s').replace(/ü/g,'u')
+      .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'davetname'
+  }
+  const isCouple2 = ['toy', 'nishan'].includes(data.eventType)
+  const isCorp2   = ['corporate', 'other'].includes(data.eventType)
+  const slug = isCouple2
+    ? `${toSlug(data.brideName || '')}-ve-${toSlug(data.groomName || '')}`
+    : isCorp2 ? toSlug(data.eventName || 'tedbir')
+    : toSlug(data.brideName || 'davetname')
+
   const handleApprove = useCallback(async () => {
     if (saving) return
     setSaving(true)
@@ -86,20 +100,6 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
   const { formattedDate, dayName } = formatAzDate(data.date, lang)
   const timeStr    = formatTime24(data.time)
   const dateDisplay = dayName ? `${formattedDate} — ${dayName}` : formattedDate
-
-  /* Slug hesabla */
-  function toSlug(str = '') {
-    return str.toLowerCase()
-      .replace(/ç/g,'c').replace(/ğ/g,'g').replace(/[ışı]/g,'i')
-      .replace(/ö/g,'o').replace(/ş/g,'s').replace(/ü/g,'u')
-      .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'davetname'
-  }
-  const isCouple2 = ['toy', 'nishan'].includes(data.eventType)
-  const isCorp2   = ['corporate', 'other'].includes(data.eventType)
-  const slug = isCouple2
-    ? `${toSlug(data.brideName || '')}-ve-${toSlug(data.groomName || '')}`
-    : isCorp2 ? toSlug(data.eventName || 'tedbir')
-    : toSlug(data.brideName || 'davetname')
 
   /* WhatsApp link — adminin nömrəsinə gedir, slug ilə qısa admin link */
   const waLink = buildWhatsAppUrl(data, lang, ADMIN_WA, slug)

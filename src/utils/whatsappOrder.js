@@ -19,7 +19,8 @@ function getBasePlatformUrl() {
 
 /* ── Admin idarəetmə linki — bütün formData URL-ə kodlanmış ── */
 export function buildAdminLink(slug, data = null) {
-  const base = `${getBasePlatformUrl()}/invite/${slug}?admin=digitoyadmin2026`
+  const adminKey = import.meta.env.VITE_ADMIN_KEY || ''
+  const base = `${getBasePlatformUrl()}/invite/${slug}?admin=${adminKey}`
   if (!data) return base
   const token = encodeData(data)
   return token ? `${base}&data=${token}` : base
@@ -64,9 +65,10 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '') {
 
   const programCount = (data.programSteps || []).filter(r => r.time || r.activity).length
 
+  const adminKey  = import.meta.env.VITE_ADMIN_KEY || ''
   const adminLink = slug
     ? buildAdminLink(slug, data)
-    : `${getBasePlatformUrl()}/?admin=digitoyadmin2026&data=${encodeData(data)}`
+    : `${getBasePlatformUrl()}/?admin=${adminKey}&data=${encodeData(data)}`
 
   let nameLines = ''
   if (isCouple) {

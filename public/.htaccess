@@ -1,27 +1,36 @@
-<IfModule mod_rewrite.c>
-  Options -MultiViews
-  RewriteEngine On
-  RewriteBase /
+Options -Indexes +FollowSymLinks
 
-  # /api/* və /uploads/* — PHP / static fayllara real keçid (React-a yönləndirilməsin)
-  RewriteCond %{REQUEST_URI} ^/api/ [OR]
-  RewriteCond %{REQUEST_URI} ^/uploads/
-  RewriteRule ^ - [L]
+RewriteEngine On
 
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule ^ index.html [L]
-</IfModule>
+# /api/ ve /uploads/ SPA routing-den qoru
+RewriteCond %{REQUEST_URI} ^/api/ [OR]
+RewriteCond %{REQUEST_URI} ^/uploads/
+RewriteRule ^ - [L]
 
-<IfModule !mod_rewrite.c>
-  ErrorDocument 404 /index.html
-</IfModule>
+# Movcud fayllar/qovluqlar birbaxa xidmet edilir
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
 
-# PHP faylları üçün CORS (mod_headers) — tək mənbə
+# SPA fallback - butun diger route-lar -> index.html
+RewriteRule ^ index.html [L]
+
+# -- Security Headers --
 <IfModule mod_headers.c>
-  <FilesMatch "\.(php)$">
-    Header always set Access-Control-Allow-Origin "*"
-    Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS"
-    Header always set Access-Control-Allow-Headers "Content-Type, Authorization"
-  </FilesMatch>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  # CORS artiq PHP terefi nden idare olunur - burada wildcard yoxdur
+</IfModule>
+
+# -- Static asset cache --
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css                  "access plus 1 year"
+  ExpiresByType application/javascript    "access plus 1 year"
+  ExpiresByType image/jpeg                "access plus 1 year"
+  ExpiresByType image/png                 "access plus 1 year"
+  ExpiresByType image/webp                "access plus 1 year"
+  ExpiresByType image/svg+xml             "access plus 1 year"
+  ExpiresByType font/woff2                "access plus 1 year"
 </IfModule>

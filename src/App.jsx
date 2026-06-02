@@ -6,20 +6,31 @@ import GalleryPage from './components/invitation/GalleryPage'
 import DigitoyOrijinalUI from './components/DigitoyOrijinalUI'
 import { defaultWedding } from './data/defaultWedding'
 import { demoInvitation, demoGuestbook } from './data/demoInvitation'
-import { getInvitation } from './utils/api'
+import { getInvitation, adminLogin } from './utils/api'
 import ScrollProgress from './components/ui/ScrollProgress'
 import './App.css'
 
 const ACTIVE_UI = 'v3'
-const ADMIN_KEY = 'digitoyadmin2026'
 
-function decodeData(token) {
+/* ── sessionStorage-dakı admin tokenini oxu, müddəti yoxla ── */
+function getStoredAdminToken() {
   try {
-    const base64 = token.replace(/-/g, '+').replace(/_/g, '/') +
-      '=='.slice(0, (4 - (token.length % 4)) % 4)
-    const binaryString = atob(base64)
-    const bytes = new Uint8Array(binaryString.length)
-    for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i)
+    const stored = sessionStorage.getItem('adminToken')
+    const storedExp = parseInt(sessionStorage.getItem('adminTokenExp') || '0', 10)
+    if (stored && storedExp && Date.now() < storedExp * 1000) return stored
+    sessionStorage.removeItem('adminToken')
+    sessionStorage.removeItem('adminTokenExp')
+  } catch {}
+  return null
+}
+
+function decodeData(encoded) {
+  try {
+    const b64 = encoded.replace(/-/g, '+').replace(/_/g, '/') +
+      '=='.slice(0, (4 - (encoded.length % 4)) % 4)
+    const bin = atob(b64)
+    const bytes = new Uint8Array(bin.length)
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
     return JSON.parse(new TextDecoder().decode(bytes))
   } catch { return null }
 }
@@ -28,6 +39,77 @@ function parseInviteSlug() {
   const match = window.location.pathname.match(/^\/invite\/([^/?#]+)(?:\/([^/?#]*))?/)
   if (!match) return { slug: null, sub: null }
   return { slug: match[1], sub: match[2] || null }
+}
+
+/* ── Routing məntiqi (admin flag alındıqdan sonra çağırılır) ── */
+function routeAfterAuth(
+  { slug, sub, params, hasAdminAccess, adminAttempted = false },
+  { setView, setWeddingData, setAdminSlug, setIsAdmin }
+) {
+  if (slug) {
+    if (sub === 'foto')           { setView('photo');        return }
+    if (sub === 'qalereya-idare') { setView('gallery-page'); return }
+
+    const viewParam  = params.get('view')
+    const dParam     = params.get('d')
+    const dataParam  = params.get('data')
+
+    /* Yekun müştəri dəvətnaməsi: ?view=live&d=TOKEN */
+    if (viewParam === 'live' && dParam) {
+      const decoded = decodeData(dParam)
+      if (decoded) setWeddingData({ ...defaultWedding, ...decoded })
+      setView('invite')
+      return
+    }
+
+    /* Admin modu */
+    if (hasAdminAccess) {
+      if (dataParam) {
+        const decoded = decodeData(dataParam)
+        if (decoded) setWeddingData({ ...defaultWedding, ...decoded })
+      }
+      setAdminSlug(slug)
+      setView('admin-review')
+      return
+    }
+
+    /* Köhnə format: ?data= (geriyə uyğunluq)
+       ?admin= olan URL-lərdə skip edilir — admin cəhdi var idi */
+    if (dataParam && !adminAttempted) {
+      const decoded = decodeData(dataParam)
+      if (decoded) {
+        setWeddingData({ ...defaultWedding, ...decoded })
+        setView('invite')
+        return
+      }
+    }
+
+    /* Slug var, data yoxdur → DB-dən yüklə */
+    getInvitation(slug)
+      .then(function(result) {
+        if (result) {
+          setWeddingData({ ...defaultWedding, ...result })
+          setView('invite')
+        } else {
+          setView('invite-not-found')
+        }
+      })
+      .catch(function() { setView('invite-not-found') })
+    return
+  }
+
+  /* Kök URL-də admin+data */
+  const rootDataParam = params.get('data')
+  if (hasAdminAccess && rootDataParam) {
+    const decoded = decodeData(rootDataParam)
+    if (decoded) {
+      setWeddingData({ ...defaultWedding, ...decoded })
+      setView('admin-review')
+      return
+    }
+  }
+
+  setView('landing')
 }
 
 export default function App() {
@@ -45,91 +127,34 @@ export default function App() {
 
     const { slug, sub } = parseInviteSlug()
     const params = new URLSearchParams(window.location.search)
+    const adminKeyParam = params.get('admin')
+    const routeCtx = { slug, sub, params }
+    const setters = { setView, setWeddingData, setAdminSlug, setIsAdmin }
 
-    /* ── Admin səlahiyyət yoxlaması ── */
-    const isAdminParam = params.get('admin') === ADMIN_KEY
-    const isAdminLocal = localStorage.getItem('isAdmin') === 'true'
-    if (isAdminParam) {
-      localStorage.setItem('isAdmin', 'true')
-      setIsAdmin(true)
-    } else if (isAdminLocal) {
-      setIsAdmin(true)
-    }
-    const hasAdminAccess = isAdminParam || isAdminLocal
-
-    if (slug) {
-      if (sub === 'foto')           { setView('photo');        return }
-      if (sub === 'qalereya-idare') { setView('gallery-page'); return }
-
-      const viewParam = params.get('view')
-      const dParam    = params.get('d')
-      const dataParam = params.get('data')
-
-      /* ── Yekun müştəri dəvətnaməsi: ?view=live&d=TOKEN ── */
-      if (viewParam === 'live' && dParam) {
-        const decoded = decodeData(dParam)
-        if (decoded) setWeddingData({ ...defaultWedding, ...decoded })
-        setView('invite')
-        return
-      }
-
-      /* ── Admin modu: ?admin=KEY&data=TOKEN ── */
-      if (hasAdminAccess) {
-        if (dataParam) {
-          const decoded = decodeData(dataParam)
-          if (decoded) setWeddingData({ ...defaultWedding, ...decoded })
-        }
-        setAdminSlug(slug)
-        setView('admin-review')
-        return
-      }
-
-      /* ── Köhnə format: birbaşa ?data= parametrli link (geriyə uyğunluq) ── */
-      if (dataParam) {
-        const decoded = decodeData(dataParam)
-        if (decoded) {
-          setWeddingData({ ...defaultWedding, ...decoded })
-          setView('invite')
-          return
-        }
-      }
-
-      /* ── Slug var amma data yoxdur → DB-dən yüklə (qısa link) ── */
-      getInvitation(slug)
-        .then(decoded => {
-          if (decoded) {
-            setWeddingData({ ...defaultWedding, ...decoded })
-            setView('invite')
-          } else {
-            setView('invite-not-found')
-          }
+    if (adminKeyParam) {
+      /* Admin key var → backend-də yoxla, token al */
+      adminLogin(adminKeyParam)
+        .then(function(loginResult) {
+          sessionStorage.setItem('adminToken', loginResult.token)
+          sessionStorage.setItem('adminTokenExp', String(loginResult.exp))
+          setIsAdmin(true)
+          routeAfterAuth({ ...routeCtx, hasAdminAccess: true }, setters)
         })
-        .catch(() => setView('invite-not-found'))
+        .catch(function() {
+          /* Yanlış key/server xətası — ?data= legacy path-ı skip et */
+          routeAfterAuth({ ...routeCtx, hasAdminAccess: false, adminAttempted: true }, setters)
+        })
       return
     }
 
-    /* ── Slug yoxdur: köklü URL-də admin+data parametrləri yoxla ── */
-    const token = params.get('data')
-    if (hasAdminAccess && token) {
-      const decoded = decodeData(token)
-      if (decoded) {
-        setWeddingData({ ...defaultWedding, ...decoded })
-        setView('admin-review')
-        return
-      }
-    }
-
-    /* ── Admin sessiyası bu URL-də aktiv deyil — localStorage temizlə ── */
-    if (!isAdminParam) {
-      try { localStorage.removeItem('isAdmin') } catch {}
-      setIsAdmin(false)
-    }
-    setView('landing')
+    /* Admin key yoxdur — sessionStorage-dakı token-ı yoxla */
+    const existingToken = getStoredAdminToken()
+    if (existingToken) setIsAdmin(true)
+    routeAfterAuth({ ...routeCtx, hasAdminAccess: !!existingToken }, setters)
   }, [])
 
   if (ACTIVE_UI === 'new') return <DigitoyOrijinalUI />
 
-  /* URL ayrıştırılana qədər minimal yükləmə ekranı */
   if (view === 'loading') {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">
@@ -149,44 +174,31 @@ export default function App() {
     return (
       <div className="min-h-screen bg-cream">
         <InvitationPage
-          lang={lang}
-          setLang={setLang}
+          lang={lang} setLang={setLang}
           weddingData={demoInvitation}
           isDemoMode={true}
           initialGuestbook={demoGuestbook}
-          onBack={() => {
-            window.history.pushState({}, '', '/')
-            setView('landing')
-          }}
+          onBack={() => { window.history.pushState({}, '', '/'); setView('landing') }}
         />
       </div>
     )
   }
 
-  if (view === 'photo') {
-    return <PhotoShare />
-  }
+  if (view === 'photo')        return <PhotoShare />
+  if (view === 'gallery-page') return <GalleryPage />
 
-  if (view === 'gallery-page') {
-    return <GalleryPage />
-  }
-
-  /* ── Admin Builder Modu: data dolu Builder açılır, admin redaktə edib təsdiqlər ── */
   if (view === 'admin-review') {
     return (
       <div className="min-h-screen bg-cream">
         <LandingPage
-          lang={lang}
-          setLang={setLang}
-          weddingData={weddingData}
-          setWeddingData={setWeddingData}
+          lang={lang} setLang={setLang}
+          weddingData={weddingData} setWeddingData={setWeddingData}
           onViewInvitation={() => {
             if (adminSlug) window.history.pushState({}, '', `/invite/${adminSlug}`)
             setView('invite')
           }}
           onDemo={() => { window.history.pushState({}, '', '/demo'); setView('demo') }}
-          isAdmin={true}
-          initialShowPreview={false}
+          isAdmin={true} initialShowPreview={false}
         />
       </div>
     )
@@ -210,14 +222,9 @@ export default function App() {
     return (
       <div className="min-h-screen bg-cream">
         <InvitationPage
-          lang={lang}
-          setLang={setLang}
-          weddingData={weddingData}
-          isAdmin={isAdmin}
-          onBack={() => {
-            window.history.pushState({}, '', '/')
-            setView('landing')
-          }}
+          lang={lang} setLang={setLang}
+          weddingData={weddingData} isAdmin={isAdmin}
+          onBack={() => { window.history.pushState({}, '', '/'); setView('landing') }}
         />
       </div>
     )
@@ -226,14 +233,10 @@ export default function App() {
   return (
     <>
       <ScrollProgress />
-
-      {/* LandingPage həmişə mounted qalır — form data qorunur */}
       <div className="min-h-screen bg-cream" style={view === 'invitation' ? { display: 'none' } : {}}>
         <LandingPage
-          lang={lang}
-          setLang={setLang}
-          weddingData={weddingData}
-          setWeddingData={setWeddingData}
+          lang={lang} setLang={setLang}
+          weddingData={weddingData} setWeddingData={setWeddingData}
           onViewInvitation={() => setView('invitation')}
           onDemo={() => { window.history.pushState({}, '', '/demo'); setView('demo') }}
           isAdmin={isAdmin}
@@ -242,8 +245,7 @@ export default function App() {
       {view === 'invitation' && (
         <div className="min-h-screen bg-cream">
           <InvitationPage
-            lang={lang}
-            setLang={setLang}
+            lang={lang} setLang={setLang}
             weddingData={weddingData}
             onBack={() => {
               setView('landing')

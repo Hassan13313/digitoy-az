@@ -1092,9 +1092,14 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     const adminToken  = urlParams.get('admin')
     const encodedData = urlParams.get('data')
 
-    if (adminToken === 'digitoyadmin2026') {
-      setAdminMode(true)
-      localStorage.setItem('isAdmin', 'true')
+    /* Admin statusu App.jsx tərəfindən isAdmin prop ilə ötürülür.
+       sessionStorage tokeni varsa əlavə təsdiq kimi qəbul et. */
+    if (adminToken) {
+      const storedToken = sessionStorage.getItem('adminToken')
+      const storedExp   = parseInt(sessionStorage.getItem('adminTokenExp') || '0', 10)
+      if (storedToken && storedExp && Date.now() < storedExp * 1000) {
+        setAdminMode(true)
+      }
     }
 
     if (encodedData) {
