@@ -103,6 +103,63 @@ export async function submitGuestResponse({ invitationId, guestName, message, at
   return res.json()
 }
 
+/* ── Draft-ı approve et (status = 'approved') ── */
+export async function approveDraft(draftCode) {
+  const res = await fetch(`${BASE}/approve_draft.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminHeaders() },
+    body: JSON.stringify({ draft_code: draftCode }),
+  })
+  if (!res.ok) throw new Error(`approve_draft: ${res.status}`)
+  return res.json()
+}
+
+/* ── Admin: sifariş siyahısı ── */
+export async function getOrdersList(status = 'submitted', limit = 50, offset = 0) {
+  const url = `${BASE}/get_orders_list.php?status=${encodeURIComponent(status)}&limit=${limit}&offset=${offset}`
+  const res = await fetch(url, { headers: adminHeaders() })
+  if (!res.ok) throw new Error(`get_orders_list: ${res.status}`)
+  return res.json()
+}
+
+/* ── Draft: autosave (session_id üzrə upsert) ── */
+export async function saveDraft(sessionId, formData, pkg, currentStep) {
+  const res = await fetch(`${BASE}/save_draft.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_id: sessionId, form_data: formData, package: pkg, current_step: currentStep }),
+  })
+  if (!res.ok) throw new Error(`save_draft: ${res.status}`)
+  return res.json()
+}
+
+/* ── Draft: session_id üzrə yüklə (autosave restore) ── */
+export async function getDraft(sessionId) {
+  const res = await fetch(`${BASE}/get_draft.php?session_id=${encodeURIComponent(sessionId)}`)
+  if (res.status === 404) return null
+  if (!res.ok) throw new Error(`get_draft: ${res.status}`)
+  return res.json()
+}
+
+/* ── Draft: draft_code üzrə yüklə (admin axını) ── */
+export async function getDraftByCode(draftCode) {
+  const res = await fetch(`${BASE}/get_draft.php?draft_code=${encodeURIComponent(draftCode)}`)
+  if (res.status === 404) return null
+  if (!res.ok) throw new Error(`get_draft_by_code: ${res.status}`)
+  return res.json()
+}
+
+/* ── Draft: submit et (WhatsApp sifariş öncəsi) ── */
+export async function submitDraft(sessionId, formData, pkg, customerPhone = '') {
+  const res = await fetch(`${BASE}/submit_draft.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_id: sessionId, form_data: formData, package: pkg, customer_phone: customerPhone }),
+  })
+  if (!res.ok) throw new Error(`submit_draft: ${res.status}`)
+  return res.json()
+}
+
 /* ── Şəkili sil — admin tələb olunur ── */
 export async function deletePhoto(slug, id) {
   const res = await fetch(`${BASE}/delete_photo.php`, {

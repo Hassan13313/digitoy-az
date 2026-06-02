@@ -24,3 +24,9 @@ dist-ssr
 *.sw?
 ruvector.db
 build.zip
+
+# Environment config files — git-ə commit edilməsin
+public/api/config.local.php
+public/api/config.production.php
+PRODUCT.md
+DIGITOY_AUDIT.md

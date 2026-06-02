@@ -17,13 +17,19 @@ function getBasePlatformUrl() {
   return isLocalhost ? window.location.origin : 'https://digitoy.az'
 }
 
-/* ── Admin idarəetmə linki — bütün formData URL-ə kodlanmış ── */
+/* ── Admin idarəetmə linki — bütün formData URL-ə kodlanmış (legacy) ── */
 export function buildAdminLink(slug, data = null) {
   const adminKey = import.meta.env.VITE_ADMIN_KEY || ''
   const base = `${getBasePlatformUrl()}/invite/${slug}?admin=${adminKey}`
   if (!data) return base
   const token = encodeData(data)
   return token ? `${base}&data=${token}` : base
+}
+
+/* ── Admin idarəetmə linki — draft_code ilə (Sprint 1B) ── */
+export function buildAdminLinkByDraft(slug, draftCode) {
+  const adminKey = import.meta.env.VITE_ADMIN_KEY || ''
+  return `${getBasePlatformUrl()}/invite/${slug}?admin=${adminKey}&draft=${draftCode}`
 }
 
 /* ── Yekun müştəri dəvətnamə linki (admin təsdiqindən sonra) ── */
@@ -44,7 +50,7 @@ const PACKAGE_LABELS = {
 }
 
 /* ── Mərkəzi WhatsApp mesaj generatoru ── */
-export function buildWhatsAppMessage(data, lang = 'az', slug = '') {
+export function buildWhatsAppMessage(data, lang = 'az', slug = '', draftCode = '') {
   const isCouple = ['toy', 'nishan'].includes(data.eventType)
   const isCorp   = ['corporate', 'other'].includes(data.eventType)
 
@@ -66,9 +72,11 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '') {
   const programCount = (data.programSteps || []).filter(r => r.time || r.activity).length
 
   const adminKey  = import.meta.env.VITE_ADMIN_KEY || ''
-  const adminLink = slug
-    ? buildAdminLink(slug, data)
-    : `${getBasePlatformUrl()}/?admin=${adminKey}&data=${encodeData(data)}`
+  const adminLink = slug && draftCode
+    ? buildAdminLinkByDraft(slug, draftCode)
+    : slug
+      ? buildAdminLink(slug, data)
+      : `${getBasePlatformUrl()}/?admin=${adminKey}&data=${encodeData(data)}`
 
   let nameLines = ''
   if (isCouple) {
@@ -102,6 +110,6 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '') {
 }
 
 /* ── WhatsApp URL ── */
-export function buildWhatsAppUrl(data, lang = 'az', waNumber = '994557133696', slug = '') {
-  return `https://wa.me/${waNumber}?text=${buildWhatsAppMessage(data, lang, slug)}`
+export function buildWhatsAppUrl(data, lang = 'az', waNumber = '994557133696', slug = '', draftCode = '') {
+  return `https://wa.me/${waNumber}?text=${buildWhatsAppMessage(data, lang, slug, draftCode)}`
 }

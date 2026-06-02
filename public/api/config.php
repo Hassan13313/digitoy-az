@@ -1,32 +1,35 @@
 <?php
 /* ══════════════════════════════════════════════════
-   DIGITOY.AZ — Mərkəzi DB + Auth konfiqurasiyası
-   Azhosting DirectAdmin / cPanel MySQL
+   DIGITOY.AZ — Config Loader
+   Avtomatik env aşkar edir: local | production
+   Credentials bu faylda deyil — config.{env}.php-dədir
 ══════════════════════════════════════════════════ */
 
-/* ── Content-Type ── */
 header('Content-Type: application/json; charset=utf-8');
 
-/* ── Admin key (server tərəfindən saxlanılır) ──
-   Bu dəyəri cPanel-də server env var kimi təyin edin:
-   SetEnv DIGITOY_ADMIN_KEY "your-strong-secret-here"
-   YA DA bu faylı birbaşa redaktə edin (git-ə commit etməyin!) */
-define('ADMIN_KEY', getenv('DIGITOY_ADMIN_KEY') ?: 'digitoyadmin2026');
+/* ── Environment detection ── */
+$_host   = strtolower($_SERVER['HTTP_HOST'] ?? '');
+$_isLocal = (strpos($_host, 'localhost') !== false || strpos($_host, '127.0.0.1') !== false);
+define('APP_ENV', $_isLocal ? 'local' : 'production');
 
-/* ── CORS — yalnız icazə verilən originlər ──
-   Wildcard (*) yoxdur — hər origin ayrıca yoxlanılır */
-$_CORS_ALLOWED = [
-    'https://digitoy.az',
-    'https://www.digitoy.az',
-    'http://localhost:5175',
-    'http://localhost:5174',
-    'http://localhost:3000',
-];
+/* ── Env faylını yüklə ── */
+$_envFile = __DIR__ . '/config.' . APP_ENV . '.php';
+if (!file_exists($_envFile)) {
+    http_response_code(503);
+    echo json_encode([
+        'error' => 'Config file not found',
+        'file'  => 'config.' . APP_ENV . '.php',
+        'hint'  => 'config.example.php-ı şablon olaraq istifadə edin',
+    ]);
+    exit;
+}
+require_once $_envFile;
 
+/* ── CORS — env faylındakı CORS_ALLOWED sabitindən oxunur ── */
 $_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-
 if ($_origin !== '') {
-    if (in_array($_origin, $_CORS_ALLOWED, true)) {
+    $__allowed = defined('CORS_ALLOWED') ? CORS_ALLOWED : [];
+    if (in_array($_origin, $__allowed, true)) {
         header('Access-Control-Allow-Origin: ' . $_origin);
         header('Vary: Origin');
         header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
@@ -43,14 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-/* ── MySQL bağlantı parametrləri ── */
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'digitoy_db');
-define('DB_USER', 'digitoy_user');
-define('DB_PASS', 'CHANGE_ME_STRONG_PASSWORD');
-define('DB_CHAR', 'utf8mb4');
-
-/* ── PDO bağlantısı ── */
+/* ── PDO bağlantısı (DB_* sabitləri env faylından gəlir) ── */
 function getDB(): PDO {
     static $pdo = null;
     if ($pdo) return $pdo;
@@ -69,7 +65,7 @@ function getDB(): PDO {
     return $pdo;
 }
 
-/* ── Cədvəlləri avtomatik yarat (ilk açılışda) ── */
+/* ── Cədvəlləri avtomatik yarat ── */
 function ensureTables(): void {
     $db = getDB();
     $db->exec("
@@ -105,5 +101,29 @@ function ensureTables(): void {
             created_at        DATETIME DEFAULT CURRENT_TIMESTAMP,
             INDEX idx_inv (invitation_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ");
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS draft_invitations (
+            id              BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
+            draft_code      VARCHAR(20)      DEFAULT NULL,
+            session_id      VARCHAR(64)      NOT NULL,
+            package         VARCHAR(50)      NOT NULL DEFAULT 'SADE',
+            current_step    TINYINT UNSIGNED NOT NULL DEFAULT 1,
+            status          ENUM('draft','submitted','approved','rejected')
+                                             NOT NULL DEFAULT 'draft',
+            customer_phone  VARCHAR(50)      DEFAULT NULL,
+            form_data       MEDIUMTEXT       DEFAULT NULL,
+            created_at      DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at      DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP
+                                                      ON UPDATE CURRENT_TIMESTAMP,
+            submitted_at    DATETIME         DEFAULT NULL,
+            approved_at     DATETIME         DEFAULT NULL,
+            expires_at      DATETIME         NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY  uq_draft_code  (draft_code),
+            INDEX idx_session_id  (session_id),
+            INDEX idx_status      (status),
+            INDEX idx_expires_at  (expires_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
 }

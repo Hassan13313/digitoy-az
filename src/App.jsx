@@ -4,9 +4,11 @@ import InvitationPage from './components/invitation/InvitationPage'
 import PhotoShare from './components/invitation/PhotoShare'
 import GalleryPage from './components/invitation/GalleryPage'
 import DigitoyOrijinalUI from './components/DigitoyOrijinalUI'
+import AdminApp from './components/admin/AdminApp'
+import AdminLoginGate from './components/admin/AdminLoginGate'
 import { defaultWedding } from './data/defaultWedding'
 import { demoInvitation, demoGuestbook } from './data/demoInvitation'
-import { getInvitation, adminLogin } from './utils/api'
+import { getInvitation, adminLogin, getDraftByCode } from './utils/api'
 import ScrollProgress from './components/ui/ScrollProgress'
 import './App.css'
 
@@ -98,15 +100,15 @@ function routeAfterAuth(
     return
   }
 
-  /* Kök URL-də admin+data */
-  const rootDataParam = params.get('data')
-  if (hasAdminAccess && rootDataParam) {
-    const decoded = decodeData(rootDataParam)
-    if (decoded) {
-      setWeddingData({ ...defaultWedding, ...decoded })
-      setView('admin-review')
-      return
+  /* Kök URL-də admin ── data varsa decode, admin-review hər halda açılır */
+  if (hasAdminAccess) {
+    const rootDataParam = params.get('data')
+    if (rootDataParam) {
+      const decoded = decodeData(rootDataParam)
+      if (decoded) setWeddingData({ ...defaultWedding, ...decoded })
     }
+    setView('admin-review')
+    return
   }
 
   setView('landing')
@@ -120,6 +122,18 @@ export default function App() {
   const [adminSlug,   setAdminSlug]   = useState('')
 
   useEffect(() => {
+    /* Admin Panel — /admin/* route-ları */
+    if (window.location.pathname.startsWith('/admin')) {
+      const stored = getStoredAdminToken()
+      if (stored) {
+        setIsAdmin(true)
+        setView('admin-panel')
+      } else {
+        setView('admin-login')   /* Token yoxdur → login gate */
+      }
+      return
+    }
+
     if (window.location.pathname === '/demo') {
       setView('demo')
       return
@@ -128,8 +142,29 @@ export default function App() {
     const { slug, sub } = parseInviteSlug()
     const params = new URLSearchParams(window.location.search)
     const adminKeyParam = params.get('admin')
+    const draftParam    = params.get('draft')
     const routeCtx = { slug, sub, params }
     const setters = { setView, setWeddingData, setAdminSlug, setIsAdmin }
+
+    /* ?draft=DT-XXXXXX olan URL-lərdə DB-dən form data yüklə, sonra admin-review aç
+       slug olmasa da işləyir — admin paneldən /?admin=KEY&draft=DT- axını üçün */
+    function routeWithDraft(hasAccess) {
+      if (draftParam && hasAccess) {
+        getDraftByCode(draftParam)
+          .then(function(draft) {
+            if (draft?.found && draft.form_data) {
+              setWeddingData(function(prev) { return { ...prev, ...draft.form_data } })
+            }
+            if (slug) setAdminSlug(slug)
+            setView('admin-review')
+          })
+          .catch(function() {
+            routeAfterAuth({ ...routeCtx, hasAdminAccess: true }, setters)
+          })
+      } else {
+        routeAfterAuth({ ...routeCtx, hasAdminAccess: hasAccess }, setters)
+      }
+    }
 
     if (adminKeyParam) {
       /* Admin key var → backend-də yoxla, token al */
@@ -138,7 +173,7 @@ export default function App() {
           sessionStorage.setItem('adminToken', loginResult.token)
           sessionStorage.setItem('adminTokenExp', String(loginResult.exp))
           setIsAdmin(true)
-          routeAfterAuth({ ...routeCtx, hasAdminAccess: true }, setters)
+          routeWithDraft(true)
         })
         .catch(function() {
           /* Yanlış key/server xətası — ?data= legacy path-ı skip et */
@@ -150,7 +185,7 @@ export default function App() {
     /* Admin key yoxdur — sessionStorage-dakı token-ı yoxla */
     const existingToken = getStoredAdminToken()
     if (existingToken) setIsAdmin(true)
-    routeAfterAuth({ ...routeCtx, hasAdminAccess: !!existingToken }, setters)
+    routeWithDraft(!!existingToken)
   }, [])
 
   if (ACTIVE_UI === 'new') return <DigitoyOrijinalUI />
@@ -186,6 +221,10 @@ export default function App() {
 
   if (view === 'photo')        return <PhotoShare />
   if (view === 'gallery-page') return <GalleryPage />
+  if (view === 'admin-panel')  return <AdminApp lang={lang} setLang={setLang} />
+  if (view === 'admin-login')  return (
+    <AdminLoginGate onSuccess={() => { setIsAdmin(true); setView('admin-panel') }} />
+  )
 
   if (view === 'admin-review') {
     return (

@@ -16,6 +16,7 @@ import ThreeDDressCode from './ThreeDDressCode'
 import { DRESS_CODE_PALETTES, WHATSAPP_NUMBER } from '../../data/constants'
 import { getPackageGates } from '../../data/packages'
 import { buildWhatsAppUrl } from '../../utils/whatsappOrder'
+import { submitDraft } from '../../utils/api'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
 import { formatAzDate, formatFullDateByLang, formatTime24 } from '../../utils/dateFormat'
 import t from '../../data/translations'
@@ -136,10 +137,25 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
     URL.revokeObjectURL(url)
   }, [weddingData, effectiveSlug, photoShareUrl, isCouple])
 
-  /* ── WhatsApp sifariş — URL-driven, DB yazma yoxdur ── */
-  const handleWhatsAppOrder = useCallback(() => {
-    window.open(buildWhatsAppUrl(weddingData, lang, WHATSAPP_NUMBER, effectiveSlug), '_blank')
-  }, [weddingData, lang, effectiveSlug])
+  /* ── WhatsApp sifariş — submit_draft → draft_code → admin link ── */
+  const [waLoading, setWaLoading] = useState(false)
+
+  const handleWhatsAppOrder = useCallback(async () => {
+    if (waLoading) return
+    const sid = localStorage.getItem('digitoy_session_id') || ''
+    const pkg = weddingData.package || weddingData.selectedPackage || 'SADE'
+    setWaLoading(true)
+    try {
+      const result    = await submitDraft(sid, weddingData, pkg)
+      const draftCode = result?.draft_code
+      if (!draftCode) throw new Error('draft_code alınmadı')
+      window.open(buildWhatsAppUrl(weddingData, lang, WHATSAPP_NUMBER, effectiveSlug, draftCode), '_blank')
+    } catch {
+      /* draft_code gəlmədən WhatsApp açılmır */
+    } finally {
+      setWaLoading(false)
+    }
+  }, [weddingData, lang, effectiveSlug, waLoading])
 
   return (
     <div className="relative min-h-screen bg-cream overflow-x-hidden">

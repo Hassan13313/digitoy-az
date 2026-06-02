@@ -4,7 +4,7 @@ import { Eye, MessageCircle, Edit2, Calendar, MapPin, Shirt, Users, Image, ListO
 import { DRESS_CODE_PALETTES } from '../../data/constants'
 import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
 import { buildWhatsAppUrl, buildShortLiveLink } from '../../utils/whatsappOrder'
-import { saveInvitation } from '../../utils/api'
+import { saveInvitation, submitDraft } from '../../utils/api'
 import t from '../../data/translations'
 
 const ADMIN_WA = '994557133696'
@@ -101,10 +101,26 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
   const timeStr    = formatTime24(data.time)
   const dateDisplay = dayName ? `${formattedDate} — ${dayName}` : formattedDate
 
-  /* WhatsApp link — adminin nömrəsinə gedir, slug ilə qısa admin link */
-  const waLink = buildWhatsAppUrl(data, lang, ADMIN_WA, slug)
+  const [waLoading, setWaLoading] = useState(false)
+  const [waError,   setWaError]   = useState('')
 
-  const handleWaClick = useCallback(() => {}, []) /* URL-driven: DB yazma yoxdur */
+  const handleWaClick = useCallback(async () => {
+    if (waLoading) return
+    const sid = localStorage.getItem('digitoy_session_id') || ''
+    const pkg = data.package || data.selectedPackage || 'SADE'
+    setWaLoading(true)
+    setWaError('')
+    try {
+      const result    = await submitDraft(sid, data, pkg)
+      const draftCode = result?.draft_code
+      if (!draftCode) throw new Error('draft_code alınmadı')
+      window.open(buildWhatsAppUrl(data, lang, ADMIN_WA, slug, draftCode), '_blank')
+    } catch {
+      setWaError('Sifariş göndərilə bilmədi. Yenidən cəhd edin.')
+    } finally {
+      setWaLoading(false)
+    }
+  }, [data, lang, slug, waLoading])
 
   /* Xülasə sətirləri */
   const rows = [
@@ -225,18 +241,20 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
 
       {/* CTA buttons */}
       <div className="flex flex-col sm:flex-row gap-3 mb-3">
-        <motion.a
-          href={waLink}
-          target="_blank"
-          rel="noopener noreferrer"
+        <motion.button
+          type="button"
           onClick={handleWaClick}
-          className="flex-1 flex items-center justify-center gap-2.5 btn-gold min-h-[52px]"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.97 }}
+          disabled={waLoading}
+          className="flex-1 flex items-center justify-center gap-2.5 btn-gold min-h-[52px] disabled:opacity-60 disabled:cursor-not-allowed"
+          whileHover={{ scale: waLoading ? 1 : 1.02 }}
+          whileTap={{ scale: waLoading ? 1 : 0.97 }}
         >
           <MessageCircle size={14} strokeWidth={1.5} />
-          {tr.preview_whatsapp}
-        </motion.a>
+          {waLoading ? '...' : tr.preview_whatsapp}
+        </motion.button>
+        {waError && (
+          <p className="text-[10px] text-red-500 text-center mt-1">{waError}</p>
+        )}
         <motion.button
           onClick={onView}
           className="flex-1 flex items-center justify-center gap-2.5 btn-outline-gold min-h-[52px]"
@@ -260,8 +278,8 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
         </span>
       </button>
 
-      {/* ── Admin Paneli ── */}
-      {isAdmin && (
+      {/* ── Admin Paneli — approve BuilderForm-dan edilir; burada gizlədilir ── */}
+      {isAdmin && false && (
         <div
           className="mt-8 rounded-2xl overflow-hidden"
           style={{

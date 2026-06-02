@@ -23,8 +23,10 @@ function loadGoogleMaps(apiKey) {
 }
 import { DRESS_CODE_PALETTES, EVENT_TYPES, WHATSAPP_NUMBER } from '../../data/constants'
 import { PACKAGE_DEFS, getLockedSteps } from '../../data/packages'
-import { buildWhatsAppUrl, buildLiveLink, encodeData } from '../../utils/whatsappOrder'
+import { defaultWedding } from '../../data/defaultWedding'
+import { buildWhatsAppUrl, buildLiveLink, buildShortLiveLink, encodeData } from '../../utils/whatsappOrder'
 import { formatFullDateByLang } from '../../utils/dateFormat'
+import { saveDraft, getDraft, submitDraft, saveInvitation, approveDraft } from '../../utils/api'
 import t from '../../data/translations'
 
 const EVENT_ICONS = { toy: Heart, nishan: Diamond, birthday: Cake, corporate: Briefcase, other: Sparkles }
@@ -1083,8 +1085,17 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
   const [linkCopied,        setLinkCopied]        = useState(false)
   const [showApproveModal,  setShowApproveModal]  = useState(false)
   const [adminMode,         setAdminMode]         = useState(isAdmin)
-  const [isHydrated,  setIsHydrated]  = useState(false)
+  const [isHydrated,    setIsHydrated]    = useState(false)
   const [submitLoading, setSubmitLoading] = useState(false)
+  const [approving,       setApproving]       = useState(false)
+  const [approveError,    setApproveError]    = useState('')
+  const [waLoading,       setWaLoading]       = useState(false)
+  const [waOrderError,    setWaOrderError]    = useState('')
+  const [draftRestored,   setDraftRestored]   = useState(false)
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
+
+  const sessionIdRef   = useRef(null)
+  const autosaveTimer  = useRef(null)
 
   /* ── URL-dən data hydration (admin idarəetmə linki) ── */
   useEffect(() => {
@@ -1117,6 +1128,43 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     /* Hydration tamamlandı — digər effektlər artıq işə düşə bilər */
     setIsHydrated(true)
   }, [])
+
+  /* ── Draft init: session_id yarat/oxu, admin modda keç ── */
+  useEffect(() => {
+    if (isAdmin) return
+    let sid = localStorage.getItem('digitoy_session_id')
+    if (!sid) {
+      sid = (typeof crypto !== 'undefined' && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : Math.random().toString(36).slice(2) + Date.now().toString(36)
+      localStorage.setItem('digitoy_session_id', sid)
+    }
+    sessionIdRef.current = sid
+
+    /* Admin URL-dən gəlmirsə draft-ı restore et */
+    const hasUrlData = new URLSearchParams(window.location.search).get('data')
+    if (!hasUrlData) {
+      getDraft(sid)
+        .then(function(draft) {
+          if (!draft?.found || !draft.form_data) return
+          setData(function(prev) { return { ...prev, ...draft.form_data } })
+          if (draft.current_step > 1) setStep(draft.current_step)
+          setDraftRestored(true) /* banner göstər */
+        })
+        .catch(function() {}) /* draft restore non-critical */
+    }
+  }, [isAdmin])
+
+  /* ── Autosave: data/step dəyişəndə 800ms debounce ilə saxla ── */
+  useEffect(() => {
+    if (!isHydrated || !sessionIdRef.current || isAdmin) return
+    clearTimeout(autosaveTimer.current)
+    autosaveTimer.current = setTimeout(function() {
+      const pkg = data.package || data.selectedPackage || pkgId || 'SADE'
+      saveDraft(sessionIdRef.current, data, pkg, step).catch(function() {})
+    }, 800)
+    return function() { clearTimeout(autosaveTimer.current) }
+  }, [data, step, isHydrated, isAdmin])
 
   const set = (key, val) => {
     setData((d) => ({ ...d, [key]: val }))
@@ -1192,19 +1240,74 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     return toSlug(data.brideName || 'davetname')
   }
 
-  /* ── WhatsApp sifariş — admin linki bütün formData ilə kodlanır ── */
-  const handleWhatsAppOrder = () => {
-    const slug = computeSlug()
-    window.open(buildWhatsAppUrl(data, lang, WHATSAPP_NUMBER, slug), '_blank')
+  /* ── Draft sıfırlama: yeni session_id + boş form ── */
+  const handleNewDraft = function() {
+    const newSid = (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : Math.random().toString(36).slice(2) + Date.now().toString(36)
+    localStorage.setItem('digitoy_session_id', newSid)
+    sessionIdRef.current = newSid
+    setData({ ...defaultWedding, package: pkgId })
+    setStep(1)
+    setErrors({})
+    setDraftRestored(false)
+    setShowResetConfirm(false)
   }
 
-  /* ── Admin Təsdiqi: yekun link URL-ə kodlanır, modal açılır ── */
-  const handleApproveAndGenerateLink = () => {
+  /* ── WhatsApp sifariş — submit_draft uğurlu olduqda açılır ── */
+  const handleWhatsAppOrder = async function() {
+    if (waLoading) return
     const slug = computeSlug()
-    const link = buildLiveLink(slug, data)
-    setGeneratedLiveLink(link)
-    setLinkCopied(false)
-    setShowApproveModal(true)
+    const sid  = sessionIdRef.current
+    const pkg  = data.package || data.selectedPackage || pkgId || 'SADE'
+    setWaLoading(true)
+    setWaOrderError('')
+    try {
+      const result    = await submitDraft(sid || '', data, pkg)
+      const draftCode = result?.draft_code
+      if (!draftCode) throw new Error('draft_code alınmadı')
+      const waUrl = buildWhatsAppUrl(data, lang, WHATSAPP_NUMBER, slug, draftCode)
+      window.open(waUrl, '_blank')
+    } catch {
+      setWaOrderError('Sifariş göndərilə bilmədi. Yenidən cəhd edin.')
+    } finally {
+      setWaLoading(false)
+    }
+  }
+
+  /* ── Admin Təsdiqi: DB-yə yaz, draft approve et, sonra modal aç ── */
+  const handleApproveAndGenerateLink = async () => {
+    if (approving) return
+    const slug = computeSlug()
+    setApproving(true)
+    setApproveError('')
+    try {
+      await saveInvitation(slug, data)
+
+      /* draft_code URL-dən oxu, varsa approve et */
+      const draftCode = new URLSearchParams(window.location.search).get('draft')
+      if (draftCode) {
+        try {
+          await approveDraft(draftCode)
+        } catch (approveErr) {
+          console.error('approve_draft uğursuz:', approveErr)
+          /* saveInvitation rollback edilmir — dəvətnamə saxlanıldı */
+        }
+      }
+
+      const link = buildShortLiveLink(slug)
+      setGeneratedLiveLink(link)
+      setLinkCopied(false)
+      setShowApproveModal(true)
+    } catch (err) {
+      const status = err?.message?.match(/\d+/)?.[0] || ''
+      setApproveError(status === '401'
+        ? 'Sessiya bitib. Səhifəni yeniləyib yenidən giriş edin.'
+        : 'Saxlama uğursuz oldu. Yenidən cəhd edin.'
+      )
+    } finally {
+      setApproving(false)
+    }
   }
 
   const handleCopyLink = () => {
@@ -1216,6 +1319,110 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
 
   return (
     <div id="builder-top" className="max-w-2xl mx-auto">
+
+      {/* ── Draft Restore Banner ── */}
+      {draftRestored && !isAdmin && (
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '10px 16px', marginBottom: 16,
+          background: 'linear-gradient(135deg, oklch(97% 0.02 85) 0%, oklch(95% 0.035 80) 100%)',
+          border: '1px solid oklch(82% 0.07 80)',
+          borderRadius: 4,
+          gap: 12,
+        }}>
+          <span style={{
+            fontSize: 11, letterSpacing: '0.04em',
+            color: 'oklch(35% 0.04 60)', fontFamily: '"Inter",system-ui,sans-serif',
+            display: 'flex', alignItems: 'center', gap: 6,
+          }}>
+            <span style={{ fontSize: 13 }}>↩</span>
+            Əvvəlki dəvətnaməniz yükləndi
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            <button
+              type="button"
+              onClick={() => setShowResetConfirm(true)}
+              style={{
+                fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase',
+                color: 'oklch(55% 0.09 60)', fontFamily: '"Inter",system-ui,sans-serif',
+                fontWeight: 600, background: 'none', border: 'none',
+                cursor: 'pointer', padding: '2px 6px',
+                borderBottom: '1px solid oklch(72% 0.07 80)',
+                transition: 'color 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'oklch(35% 0.08 60)' }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'oklch(55% 0.09 60)' }}
+            >
+              Yeni Başlat
+            </button>
+            <button
+              type="button"
+              onClick={() => setDraftRestored(false)}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: 'oklch(65% 0.04 60)', lineHeight: 1, padding: '2px 4px',
+                fontSize: 14, display: 'flex', alignItems: 'center',
+              }}
+              aria-label="Bağla"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Sıfırlama Təsdiq Modalı ── */}
+      {showResetConfirm && (
+        <div
+          className="fixed inset-0 flex items-center justify-center z-[200] px-4"
+          style={{ background: 'rgba(15,10,5,0.6)', backdropFilter: 'blur(6px)' }}
+          onClick={e => { if (e.target === e.currentTarget) setShowResetConfirm(false) }}
+        >
+          <div
+            className="bg-cream shadow-2xl max-w-sm w-full"
+            style={{
+              border: '1px solid rgba(197,160,89,0.35)',
+              position: 'relative',
+            }}
+          >
+            <div style={{ height: 1, background: 'linear-gradient(to right,transparent,rgba(197,160,89,0.9) 30%,rgba(197,160,89,1) 50%,rgba(197,160,89,0.9) 70%,transparent)' }} />
+            <div className="px-8 py-8 text-center">
+              <button
+                onClick={() => setShowResetConfirm(false)}
+                className="absolute top-4 right-4 text-brown-muted/40 hover:text-gold transition-colors"
+              >
+                <X size={14} strokeWidth={1.5} />
+              </button>
+              <p className="font-mono text-[9px] tracking-[0.32em] uppercase text-gold mb-4">
+                Yeni Dəvətnamə
+              </p>
+              <p className="font-serif text-lg text-ink font-light tracking-tight mb-2">
+                Əminsiniz?
+              </p>
+              <p className="text-brown-muted text-sm font-light leading-relaxed mb-7 max-w-xs mx-auto">
+                Cari qaralama silinəcək. Yeni dəvətnaməyə başlamaq istəyirsiniz?
+              </p>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={handleNewDraft}
+                  className="flex-1 btn-gold text-xs py-3"
+                >
+                  Bəli, başla
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowResetConfirm(false)}
+                  className="flex-1 btn-outline-gold text-xs py-3"
+                >
+                  Ləğv et
+                </button>
+              </div>
+            </div>
+            <div style={{ height: 1, background: 'linear-gradient(to right,transparent,rgba(197,160,89,0.6) 40%,rgba(197,160,89,0.8) 50%,rgba(197,160,89,0.6) 60%,transparent)' }} />
+          </div>
+        </div>
+      )}
 
       {/* ── Təsdiq Modalı ── */}
       {showApproveModal && (
@@ -1608,24 +1815,33 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
           <button
             type="button"
             onClick={handleWhatsAppOrder}
+            disabled={waLoading}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 10,
               padding: '14px 32px',
-              background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)',
-              border: 'none', cursor: 'pointer',
+              background: waLoading
+                ? 'linear-gradient(135deg, #6ee7a0 0%, #5abfb0 100%)'
+                : 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)',
+              border: 'none', cursor: waLoading ? 'not-allowed' : 'pointer',
               fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase',
               color: 'white', fontFamily: '"Inter",system-ui,sans-serif', fontWeight: 700,
               boxShadow: '0 8px 32px rgba(37,211,102,0.35)',
               transition: 'transform 0.18s, box-shadow 0.18s',
+              opacity: waLoading ? 0.7 : 1,
             }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(37,211,102,0.45)' }}
+            onMouseEnter={e => { if (!waLoading) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(37,211,102,0.45)' } }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(37,211,102,0.35)' }}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
             </svg>
-            Dəvətnaməni Sifariş Ver
+            {waLoading ? 'Hazırlanır...' : 'Dəvətnaməni Sifariş Ver'}
           </button>
+          {waOrderError && (
+            <p style={{ fontSize: 11, color: '#ef4444', marginTop: 10, textAlign: 'center' }}>
+              {waOrderError}
+            </p>
+          )}
         </div>
       )}
 
@@ -1646,11 +1862,17 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
             <button
               type="button"
               onClick={handleApproveAndGenerateLink}
-              className="inline-flex items-center gap-2.5 px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] tracking-[0.2em] uppercase font-semibold transition-colors duration-200 shadow-md"
+              disabled={approving}
+              className="inline-flex items-center gap-2.5 px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed text-white text-[11px] tracking-[0.2em] uppercase font-semibold transition-colors duration-200 shadow-md"
             >
               <Check size={13} strokeWidth={2.5} />
-              Sifarişi Təsdiqlə
+              {approving ? 'Saxlanılır...' : 'Sifarişi Təsdiqlə'}
             </button>
+            {approveError && (
+              <p className="text-[11px] text-red-500 font-medium mt-3">
+                {approveError}
+              </p>
+            )}
           </div>
           <div style={{ height: 1, background: 'linear-gradient(to right,transparent,rgba(16,185,129,0.6) 40%,rgba(16,185,129,0.8) 50%,rgba(16,185,129,0.6) 60%,transparent)' }} />
         </div>
