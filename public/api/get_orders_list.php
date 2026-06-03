@@ -14,14 +14,34 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 $status = trim($_GET['status'] ?? 'submitted');
 $limit  = min((int)($_GET['limit']  ?? 50), 100);
 $offset = max((int)($_GET['offset'] ?? 0),  0);
+$search = trim($_GET['search'] ?? '');
 
-$validStatuses = ['submitted', 'approved', 'rejected', 'draft', 'all'];
+$validStatuses = ['submitted', 'approved', 'rejected', 'draft', 'deleted', 'all'];
 if (!in_array($status, $validStatuses, true)) $status = 'submitted';
 
 $db = getDB();
 
-$where  = $status === 'all' ? "WHERE status != 'draft'" : "WHERE status = :status";
-$params = $status === 'all' ? [] : [':status' => $status];
+/* WHERE hissəsini dinamik qur */
+$conditions = [];
+$params     = [];
+
+if ($status === 'all') {
+    /* "Hamısı" tabı: draft + deleted xaric */
+    $conditions[] = "status NOT IN ('draft', 'deleted')";
+} else {
+    $conditions[] = "status = :status";
+    $params[':status'] = $status;
+}
+
+if ($search !== '') {
+    $like = '%' . $search . '%';
+    $conditions[] = "(draft_code LIKE :s1 OR customer_phone LIKE :s2 OR form_data LIKE :s3)";
+    $params[':s1'] = $like;
+    $params[':s2'] = $like;
+    $params[':s3'] = $like;
+}
+
+$where = 'WHERE ' . implode(' AND ', $conditions);
 
 /* Total sayı */
 $cntStmt = $db->prepare("SELECT COUNT(*) FROM draft_invitations $where");
@@ -34,7 +54,7 @@ $sql  = "SELECT id, draft_code, package, status, customer_phone, submitted_at, f
          ORDER BY submitted_at DESC
          LIMIT :lim OFFSET :off";
 $stmt = $db->prepare($sql);
-if ($status !== 'all') $stmt->bindValue(':status', $status);
+foreach ($params as $k => $v) $stmt->bindValue($k, $v);
 $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
 $stmt->bindValue(':off', $offset, PDO::PARAM_INT);
 $stmt->execute();

@@ -71,13 +71,6 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '', draftCode = '
 
   const programCount = (data.programSteps || []).filter(r => r.time || r.activity).length
 
-  const adminKey  = import.meta.env.VITE_ADMIN_KEY || ''
-  const adminLink = slug && draftCode
-    ? buildAdminLinkByDraft(slug, draftCode)
-    : slug
-      ? buildAdminLink(slug, data)
-      : `${getBasePlatformUrl()}/?admin=${adminKey}&data=${encodeData(data)}`
-
   let nameLines = ''
   if (isCouple) {
     nameLines = `👰 Gəlin: *${data.brideName || '—'}*\n🤵 Bəy: *${data.groomName || '—'}*`
@@ -102,8 +95,7 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '', draftCode = '
     `👗 Geyim: ${dressLabel}`,
     ...(programCount > 0 ? [`📋 Proqram: ${programCount} addım`] : []),
     `━━━━━━━━━━━━━━━━━━`,
-    `🔐 *Admin İdarəetmə Linki:*`,
-    adminLink,
+    ...(draftCode ? [`📋 Sifariş Kodu: *${draftCode}*`] : []),
   ]
 
   return encodeURIComponent(lines.join('\n'))

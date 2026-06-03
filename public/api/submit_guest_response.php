@@ -21,9 +21,9 @@ if (!$invId || !$name) {
     exit;
 }
 
-if ($status !== null && !in_array($status, ['yes', 'no'], true)) {
+if ($status !== null && !in_array($status, ['yes', 'maybe', 'no'], true)) {
     http_response_code(422);
-    echo json_encode(['error' => 'attendance_status must be yes or no']);
+    echo json_encode(['error' => 'attendance_status must be yes, maybe or no']);
     exit;
 }
 

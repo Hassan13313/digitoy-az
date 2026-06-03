@@ -1284,11 +1284,11 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     try {
       await saveInvitation(slug, data)
 
-      /* draft_code URL-dən oxu, varsa approve et */
+      /* draft_code URL-dən oxu, varsa approve et (slug ötür ki, admin paneldə link görsənsin) */
       const draftCode = new URLSearchParams(window.location.search).get('draft')
       if (draftCode) {
         try {
-          await approveDraft(draftCode)
+          await approveDraft(draftCode, slug)
         } catch (approveErr) {
           console.error('approve_draft uğursuz:', approveErr)
           /* saveInvitation rollback edilmir — dəvətnamə saxlanıldı */

@@ -104,20 +104,21 @@ export async function submitGuestResponse({ invitationId, guestName, message, at
 }
 
 /* ── Draft-ı approve et (status = 'approved') ── */
-export async function approveDraft(draftCode) {
+export async function approveDraft(draftCode, slug = '') {
   const res = await fetch(`${BASE}/approve_draft.php`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...adminHeaders() },
-    body: JSON.stringify({ draft_code: draftCode }),
+    body: JSON.stringify({ draft_code: draftCode, ...(slug ? { slug } : {}) }),
   })
   if (!res.ok) throw new Error(`approve_draft: ${res.status}`)
   return res.json()
 }
 
 /* ── Admin: sifariş siyahısı ── */
-export async function getOrdersList(status = 'submitted', limit = 50, offset = 0) {
-  const url = `${BASE}/get_orders_list.php?status=${encodeURIComponent(status)}&limit=${limit}&offset=${offset}`
-  const res = await fetch(url, { headers: adminHeaders() })
+export async function getOrdersList(status = 'submitted', limit = 50, offset = 0, search = '') {
+  const params = new URLSearchParams({ status, limit, offset })
+  if (search) params.set('search', search)
+  const res = await fetch(`${BASE}/get_orders_list.php?${params}`, { headers: adminHeaders() })
   if (!res.ok) throw new Error(`get_orders_list: ${res.status}`)
   return res.json()
 }
@@ -157,6 +158,44 @@ export async function submitDraft(sessionId, formData, pkg, customerPhone = '') 
     body: JSON.stringify({ session_id: sessionId, form_data: formData, package: pkg, customer_phone: customerPhone }),
   })
   if (!res.ok) throw new Error(`submit_draft: ${res.status}`)
+  return res.json()
+}
+
+/* ── Admin: slug üzrə RSVP cavabları ── */
+export async function getRsvpResponses(slug) {
+  const res = await fetch(`${BASE}/get_rsvp_responses.php?slug=${encodeURIComponent(slug)}`, {
+    headers: adminHeaders(),
+  })
+  if (!res.ok) throw new Error(`get_rsvp_responses: ${res.status}`)
+  return res.json()
+}
+
+/* ── Admin: dashboard statistikaları ── */
+export async function getDashboardStats() {
+  const res = await fetch(`${BASE}/get_dashboard_stats.php`, { headers: adminHeaders() })
+  if (!res.ok) throw new Error(`get_dashboard_stats: ${res.status}`)
+  return res.json()
+}
+
+/* ── Draft-ı sil — soft delete (status = 'deleted') ── */
+export async function deleteDraft(draftCode) {
+  const res = await fetch(`${BASE}/delete_draft.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminHeaders() },
+    body: JSON.stringify({ draft_code: draftCode }),
+  })
+  if (!res.ok) throw new Error(`delete_draft: ${res.status}`)
+  return res.json()
+}
+
+/* ── Draft-ı rədd et (status = 'rejected') ── */
+export async function rejectDraft(draftCode, reason = '') {
+  const res = await fetch(`${BASE}/reject_draft.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminHeaders() },
+    body: JSON.stringify({ draft_code: draftCode, reason }),
+  })
+  if (!res.ok) throw new Error(`reject_draft: ${res.status}`)
   return res.json()
 }
 

@@ -27,7 +27,9 @@ if ($draftCode) {
         echo json_encode(['error' => 'Invalid draft_code format']);
         exit;
     }
-    $stmt = $db->prepare("SELECT id, draft_code, package, current_step, status, form_data
+    $stmt = $db->prepare("
+        SELECT id, draft_code, package, current_step, status, form_data,
+               customer_phone, submitted_at, approved_slug
         FROM draft_invitations
         WHERE draft_code = :code
           AND expires_at > NOW()
@@ -40,7 +42,9 @@ if ($draftCode) {
         echo json_encode(['error' => 'Valid session_id required']);
         exit;
     }
-    $stmt = $db->prepare("SELECT id, draft_code, package, current_step, status, form_data
+    $stmt = $db->prepare("
+        SELECT id, draft_code, package, current_step, status, form_data,
+               customer_phone, submitted_at, approved_slug
         FROM draft_invitations
         WHERE session_id = :sid
           AND expires_at > NOW()
@@ -57,11 +61,29 @@ if (!$row) {
     exit;
 }
 
+/* approved_slug NULL + status approved → invitations cədvəlindən əldə etməyə çalış */
+$approvedSlug = $row['approved_slug'] ?? null;
+if (!$approvedSlug && $row['status'] === 'approved' && !empty($row['form_data'])) {
+    $fd        = json_decode($row['form_data'], true);
+    $searchKey = $fd['brideName'] ?? ($fd['groomName'] ?? ($fd['eventName'] ?? ''));
+    if ($searchKey !== '') {
+        $lu = $db->prepare(
+            "SELECT slug FROM invitations WHERE form_data LIKE :q ORDER BY created_at DESC LIMIT 1"
+        );
+        $lu->execute([':q' => '%"' . $searchKey . '"%']);
+        $found = $lu->fetchColumn();
+        if ($found) $approvedSlug = $found;
+    }
+}
+
 echo json_encode([
-    'found'        => true,
-    'draft_code'   => $row['draft_code'],
-    'package'      => $row['package'],
-    'current_step' => (int) $row['current_step'],
-    'status'       => $row['status'],
-    'form_data'    => $row['form_data'] ? json_decode($row['form_data'], true) : null,
+    'found'          => true,
+    'draft_code'     => $row['draft_code'],
+    'package'        => $row['package'],
+    'current_step'   => (int) $row['current_step'],
+    'status'         => $row['status'],
+    'form_data'      => $row['form_data'] ? json_decode($row['form_data'], true) : null,
+    'customer_phone' => $row['customer_phone'] ?? null,
+    'submitted_at'   => $row['submitted_at']   ?? null,
+    'approved_slug'  => $approvedSlug,
 ]);

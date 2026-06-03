@@ -1,153 +1,32 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, X, Minus, Plus, Send } from 'lucide-react'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
 import { formatFullDateByLang } from '../../utils/dateFormat'
 import t from '../../data/translations'
-import { getGuestResponses, submitGuestResponse } from '../../utils/api'
-
-function RSVPStats({ stats, lang }) {
-  const total = stats.yes + stats.no
-  const pct   = total > 0 ? Math.round((stats.yes / total) * 100) : 0
-  const LABELS = {
-    az: { attending: 'İştirak edəcək', declined: 'Gəlməyəcək', guests: 'Əlavə Qonaq', total: 'Cəmi Cavab' },
-    en: { attending: 'Attending',      declined: 'Not coming',  guests: 'Extra Guests', total: 'Total Replies' },
-    ru: { attending: 'Придут',         declined: 'Не придут',   guests: 'Доп. Гости',   total: 'Всего ответов' },
-  }
-  const L = LABELS[lang] || LABELS.az
-
-  if (total === 0) return null
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3, duration: 0.6 }}
-      style={{
-        marginTop: 32,
-        border: '1px solid rgba(197,160,89,0.18)',
-        background: 'linear-gradient(160deg, #FDFAF4 0%, #F8F3E8 100%)',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Header */}
-      <div style={{
-        padding: '12px 24px',
-        borderBottom: '1px solid rgba(197,160,89,0.12)',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      }}>
-        <span style={{
-          fontSize: 9, letterSpacing: '0.28em', textTransform: 'uppercase',
-          color: 'rgba(197,160,89,0.9)', fontFamily: '"Inter",system-ui,sans-serif', fontWeight: 500,
-        }}>
-          {L.total}
-        </span>
-        <span style={{
-          fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase',
-          color: 'rgba(140,123,107,0.7)', fontFamily: '"Inter",system-ui,sans-serif',
-        }}>
-          {total}
-        </span>
-      </div>
-
-      {/* Attendance bar */}
-      <div style={{ padding: '18px 24px 0' }}>
-        <div style={{
-          height: 2, background: 'rgba(221,213,200,0.5)', position: 'relative', overflow: 'hidden',
-        }}>
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${pct}%` }}
-            transition={{ duration: 0.9, ease: 'easeOut', delay: 0.5 }}
-            style={{
-              position: 'absolute', top: 0, left: 0, height: '100%',
-              background: 'linear-gradient(to right, rgba(197,160,89,0.6), rgba(197,160,89,1))',
-            }}
-          />
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
-          <span style={{ fontSize: 8, letterSpacing: '0.15em', color: 'rgba(197,160,89,0.8)', fontFamily: '"Inter",system-ui,sans-serif', textTransform: 'uppercase' }}>
-            {pct}%
-          </span>
-          <span style={{ fontSize: 8, letterSpacing: '0.15em', color: 'rgba(140,123,107,0.6)', fontFamily: '"Inter",system-ui,sans-serif', textTransform: 'uppercase' }}>
-            {100 - pct}%
-          </span>
-        </div>
-      </div>
-
-      {/* Stats rows */}
-      <div style={{ padding: '8px 0 4px' }}>
-        {[
-          { label: L.attending, value: stats.yes,   accent: 'rgba(197,160,89,0.85)' },
-          { label: L.declined,  value: stats.no,    accent: 'rgba(140,123,107,0.65)' },
-          { label: L.guests,    value: stats.guests, accent: 'rgba(197,160,89,0.55)' },
-        ].map((row, i) => (
-          <div key={i} style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '9px 24px',
-            borderBottom: i < 2 ? '1px solid rgba(221,213,200,0.35)' : 'none',
-          }}>
-            <span style={{
-              fontSize: 10, color: 'rgba(80,68,58,0.75)',
-              fontFamily: '"Inter",system-ui,sans-serif',
-              letterSpacing: '0.04em',
-            }}>
-              {row.label}
-            </span>
-            <span style={{
-              fontFamily: '"Cormorant Garamond","Playfair Display",Georgia,serif',
-              fontSize: 22, fontWeight: 300, color: row.accent,
-              lineHeight: 1,
-            }}>
-              {row.value}
-            </span>
-          </div>
-        ))}
-      </div>
-    </motion.div>
-  )
-}
+import { submitGuestResponse } from '../../utils/api'
 
 export default function RSVPSection({ lang, weddingData }) {
-  const tr = t[lang]
   const [status,    setStatus]    = useState(null)
+  const [guestName, setGuestName] = useState('')
   const [plusOne,   setPlusOne]   = useState(0)
   const [submitted, setSubmitted] = useState(false)
   const [sending,   setSending]   = useState(false)
-  const [stats,     setStats]     = useState(null)
   const [ref, visible] = useScrollReveal()
 
   const slug = (window.location.pathname.match(/\/invite\/([^/?#]+)/) || [])[1] || null
 
-  /* Serverdən cari statistikanı çək */
-  useEffect(() => {
-    if (!slug) return
-    getGuestResponses(slug)
-      .then(data => setStats(data.rsvp ?? { yes: 0, no: 0, guests: 0 }))
-      .catch(() => {})
-  }, [slug])
-
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (sending || !status) return
+    if (sending || !status || !guestName.trim()) return
     setSending(true)
-
-    /* Optimistic update */
-    setStats(prev => {
-      const base = prev ?? { yes: 0, no: 0, guests: 0 }
-      return {
-        yes:    base.yes    + (status === 'yes' ? 1 : 0),
-        no:     base.no     + (status === 'no'  ? 1 : 0),
-        guests: base.guests + (status === 'yes' ? plusOne : 0),
-      }
-    })
     setSubmitted(true)
 
     try {
       if (slug) {
         await submitGuestResponse({
           invitationId:     slug,
-          guestName:        '—',
+          guestName:        guestName.trim(),
           attendanceStatus: status,
           extraGuests:      status === 'yes' ? plusOne : 0,
         })
@@ -165,29 +44,40 @@ export default function RSVPSection({ lang, weddingData }) {
     az: {
       title: 'İştirak edəcəksinizmi?',
       subtitle: deadline ? `Zəhmət olmasa ${deadline}-a qədər cavablandırın` : 'Cavabınızı bildirin',
-      yes: 'İştirak edəcəyəm', no: 'İştirak edə bilməyəcəyəm',
+      namePh: 'Adınız',
+      yes: 'Gələcəyəm', maybe: 'Hələ dəqiq deyil', no: 'Gəlməyəcəyəm',
       plusq: 'Əlavə qonaq gətirəcəksiniz?', send: 'Göndər',
-      thanks_yes: 'Görüşmək üçün səbirsizlənir', thanks_no: 'Anlayışla qarşıladıq',
+      thanks_yes: 'Görüşmək üçün səbirsizlənir',
+      thanks_maybe: 'Bildirdiniz, əlavə məlumat göndərəcəyik',
+      thanks_no: 'Anlayışla qarşıladıq',
       thanks_sub: 'Cavabınız qeydə alındı',
     },
     en: {
       title: 'Will you attend?',
       subtitle: deadline ? `Please reply by ${deadline}` : 'Let us know',
-      yes: 'I will attend', no: 'I will not be able to attend',
+      namePh: 'Your name',
+      yes: 'I will attend', maybe: 'Not sure yet', no: 'I cannot attend',
       plusq: 'Will you bring a guest?', send: 'Send Reply',
-      thanks_yes: 'We look forward to seeing you', thanks_no: 'We understand',
+      thanks_yes: 'We look forward to seeing you',
+      thanks_maybe: 'We noted your response and will follow up',
+      thanks_no: 'We understand and appreciate you letting us know',
       thanks_sub: 'Your response has been recorded',
     },
     ru: {
       title: 'Вы придёте?',
       subtitle: deadline ? `Пожалуйста, ответьте до ${deadline}` : 'Дайте нам знать',
-      yes: 'Я посещу', no: 'Я не смогу прийти',
+      namePh: 'Ваше имя',
+      yes: 'Приду', maybe: 'Пока не уверен', no: 'Не смогу прийти',
       plusq: 'Возьмёте гостя с собой?', send: 'Отправить',
-      thanks_yes: 'С нетерпением вас ждём', thanks_no: 'Мы понимаем',
+      thanks_yes: 'С нетерпением вас ждём',
+      thanks_maybe: 'Мы приняли ваш ответ к сведению',
+      thanks_no: 'Мы понимаем и благодарим за ответ',
       thanks_sub: 'Ваш ответ записан',
     },
   }
   const L = labels[lang] || labels.az
+
+  const thanksMsg = status === 'yes' ? L.thanks_yes : status === 'maybe' ? L.thanks_maybe : L.thanks_no
 
   return (
     <section className="py-28 px-6 bg-cream">
@@ -218,16 +108,13 @@ export default function RSVPSection({ lang, weddingData }) {
             >
               <div
                 className="w-12 h-12 mx-auto mb-6 flex items-center justify-center border"
-                style={{ borderColor: status === 'yes' ? '#C5A059' : '#DDD5C8' }}
+                style={{ borderColor: status === 'yes' ? '#C5A059' : status === 'maybe' ? '#C5A059' : '#DDD5C8' }}
               >
-                {status === 'yes'
-                  ? <Check size={20} className="text-gold" strokeWidth={1.5} />
-                  : <X size={20} className="text-brown-muted" strokeWidth={1.5} />
-                }
+                {status === 'yes'   && <Check size={20} className="text-gold" strokeWidth={1.5} />}
+                {status === 'maybe' && <Minus size={20} style={{ color: '#C5A059' }} strokeWidth={1.5} />}
+                {status === 'no'    && <X size={20} className="text-brown-muted" strokeWidth={1.5} />}
               </div>
-              <h3 className="font-serif text-xl text-ink font-light mb-2">
-                {status === 'yes' ? L.thanks_yes : L.thanks_no}
-              </h3>
+              <h3 className="font-serif text-xl text-ink font-light mb-2">{thanksMsg}</h3>
               <p className="text-[11px] tracking-[0.18em] uppercase text-brown-muted font-sans font-medium">
                 {L.thanks_sub}
               </p>
@@ -236,35 +123,41 @@ export default function RSVPSection({ lang, weddingData }) {
             <motion.form
               key="form"
               onSubmit={handleSubmit}
-              className="space-y-8"
+              className="space-y-6"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
-              <div className="flex gap-3 justify-center flex-wrap mb-5">
-                <button
-                  type="button"
-                  onClick={() => setStatus('yes')}
-                  className={`min-h-[52px] px-7 rounded-full font-semibold text-[13px] tracking-[0.18em] uppercase transition-all duration-200 ${
-                    status === 'yes'
-                      ? 'bg-gradient-to-br from-gold to-gold-dark text-white border border-transparent'
-                      : 'bg-gold/[0.12] border border-gold/50 text-gold-dark'
-                  }`}
-                >
-                  {L.yes}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setStatus('no'); setPlusOne(0) }}
-                  className={`min-h-[52px] px-7 rounded-full font-semibold text-[13px] tracking-[0.18em] uppercase transition-all duration-200 ${
-                    status === 'no'
-                      ? 'bg-espresso/85 text-white border border-transparent'
-                      : 'bg-white/40 border border-gold/25 text-espresso'
-                  }`}
-                >
-                  {L.no}
-                </button>
+              {/* Ad sahəsi */}
+              <input
+                type="text"
+                value={guestName}
+                onChange={e => setGuestName(e.target.value)}
+                placeholder={L.namePh}
+                required
+                className="luxury-input border-b w-full text-center"
+              />
+
+              {/* 3 status düyməsi */}
+              <div className="flex flex-col gap-2.5">
+                {[
+                  { val: 'yes',   label: L.yes,   activeClass: 'bg-gradient-to-br from-gold to-gold-dark text-white border-transparent', inactiveClass: 'bg-gold/[0.12] border-gold/50 text-gold-dark' },
+                  { val: 'maybe', label: L.maybe, activeClass: 'bg-[#C5A059]/30 border-[#C5A059] text-[#8A6A20]',                        inactiveClass: 'bg-white/40 border-gold/25 text-espresso/70' },
+                  { val: 'no',    label: L.no,    activeClass: 'bg-espresso/85 text-white border-transparent',                            inactiveClass: 'bg-white/40 border-gold/25 text-espresso' },
+                ].map(({ val, label, activeClass, inactiveClass }) => (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => { setStatus(val); if (val !== 'yes') setPlusOne(0) }}
+                    className={`min-h-[52px] px-7 font-semibold text-[13px] tracking-[0.18em] uppercase transition-all duration-200 border ${
+                      status === val ? activeClass : inactiveClass
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
 
+              {/* Əlavə qonaq — yalnız 'yes' üçün */}
               <AnimatePresence>
                 {status === 'yes' && (
                   <motion.div
@@ -305,7 +198,7 @@ export default function RSVPSection({ lang, weddingData }) {
 
               <button
                 type="submit"
-                disabled={!status || sending}
+                disabled={!status || !guestName.trim() || sending}
                 className="btn-gold w-full min-h-[52px] flex items-center justify-center gap-2.5 disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <Send size={12} strokeWidth={1.5} />
@@ -315,8 +208,6 @@ export default function RSVPSection({ lang, weddingData }) {
           )}
         </AnimatePresence>
 
-        {/* ── İştirak Statistikası ── */}
-        {stats && <RSVPStats stats={stats} lang={lang} />}
       </div>
     </section>
   )

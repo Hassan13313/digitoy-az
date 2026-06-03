@@ -24,8 +24,9 @@ $messages = $st->fetchAll();
 /* RSVP stats */
 $st2 = $db->prepare("
     SELECT
-        SUM(attendance_status = 'yes') AS yes_count,
-        SUM(attendance_status = 'no')  AS no_count,
+        SUM(attendance_status = 'yes')   AS yes_count,
+        SUM(attendance_status = 'maybe') AS maybe_count,
+        SUM(attendance_status = 'no')    AS no_count,
         SUM(CASE WHEN attendance_status = 'yes' THEN extra_guests ELSE 0 END) AS guests_count
     FROM guest_responses
     WHERE invitation_id = :inv AND attendance_status IS NOT NULL
@@ -41,6 +42,7 @@ echo json_encode([
     ], $messages),
     'rsvp' => [
         'yes'    => (int)($row['yes_count']    ?? 0),
+        'maybe'  => (int)($row['maybe_count']  ?? 0),
         'no'     => (int)($row['no_count']     ?? 0),
         'guests' => (int)($row['guests_count'] ?? 0),
     ],

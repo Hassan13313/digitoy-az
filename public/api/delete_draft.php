@@ -1,5 +1,5 @@
 <?php
-/* ── approve_draft.php — draft_invitations.status = 'approved' ── */
+/* ── delete_draft.php — draft_invitations.status = 'deleted' (soft delete) ── */
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/auth.php';
 
@@ -13,7 +13,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $body      = json_decode(file_get_contents('php://input'), true);
 $draftCode = trim($body['draft_code'] ?? '');
-$slug      = trim($body['slug']       ?? '');
 
 if (!$draftCode || !preg_match('/^DT-[A-Z0-9]{6}$/', $draftCode)) {
     http_response_code(400);
@@ -21,21 +20,15 @@ if (!$draftCode || !preg_match('/^DT-[A-Z0-9]{6}$/', $draftCode)) {
     exit;
 }
 
-/* Slug validation — ixtiyari, amma formatı yoxla */
-if ($slug !== '' && !preg_match('/^[a-z0-9\-]{2,120}$/', $slug)) {
-    $slug = '';
-}
-
 $db = getDB();
 
 $stmt = $db->prepare("
     UPDATE draft_invitations
-    SET status         = 'approved',
-        approved_at    = NOW(),
-        approved_slug  = CASE WHEN :slug != '' THEN :slug2 ELSE approved_slug END
+    SET status     = 'deleted',
+        deleted_at = NOW()
     WHERE draft_code = :code
 ");
-$stmt->execute([':code' => $draftCode, ':slug' => $slug, ':slug2' => $slug]);
+$stmt->execute([':code' => $draftCode]);
 
 if ($stmt->rowCount() === 0) {
     http_response_code(404);
@@ -43,4 +36,4 @@ if ($stmt->rowCount() === 0) {
     exit;
 }
 
-echo json_encode(['ok' => true, 'draft_code' => $draftCode, 'status' => 'approved', 'approved_slug' => $slug ?: null]);
+echo json_encode(['ok' => true, 'draft_code' => $draftCode, 'status' => 'deleted']);

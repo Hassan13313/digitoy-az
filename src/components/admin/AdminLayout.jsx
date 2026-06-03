@@ -1,6 +1,7 @@
 import { ShoppingBag, FileText, Image, LayoutDashboard, LogOut } from 'lucide-react'
 
 const NAV = [
+  { key: 'dashboard',   label: 'Dashboard',     icon: LayoutDashboard },
   { key: 'orders',      label: 'Sifarişlər',    icon: ShoppingBag },
   { key: 'invitations', label: 'Dəvətnamələr',  icon: FileText },
   { key: 'photos',      label: 'Fotolar',       icon: Image },
