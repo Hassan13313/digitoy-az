@@ -853,7 +853,7 @@ export function FeaturesSection({ lang = 'az' }) {
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
             >
-              {lang === 'en' ? 'See Reviews' : lang === 'ru' ? 'Отзывы клиентов' : 'Müştəri rəylərini gör'}
+              {tr.features_reviews_cta}
               <ChevronRight size={13} strokeWidth={2.2} />
             </motion.button>
           </div>

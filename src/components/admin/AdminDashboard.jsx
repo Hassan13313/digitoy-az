@@ -148,7 +148,7 @@ export default function AdminDashboard() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 28 }}>
-        <StatCard icon={XCircle}  label="Rədd edilmiş"  value={stats?.orders.rejected}  color="oklch(40% 0.12 25)" />
+        <StatCard icon={XCircle}  label="Rədd edildi"  value={stats?.orders.rejected}  color="oklch(40% 0.12 25)" />
         <StatCard icon={FileText} label="Dəvətnamələr"  value={stats?.invitations}      color="oklch(45% 0.08 210)" />
         <StatCard icon={Image}    label="Fotolar"        value={stats?.photos}           color="oklch(45% 0.08 300)" />
       </div>

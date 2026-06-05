@@ -5,7 +5,7 @@ import { RefreshCw, ChevronRight, Search, X } from 'lucide-react'
 const STATUS_STYLES = {
   submitted: { bg: 'oklch(94% 0.06 80)',  color: 'oklch(45% 0.08 70)',  label: 'Yeni' },
   approved:  { bg: 'oklch(93% 0.05 145)', color: 'oklch(38% 0.1 145)',  label: 'Təsdiqləndi' },
-  rejected:  { bg: 'oklch(94% 0.05 25)',  color: 'oklch(40% 0.12 25)',  label: 'İnkar edildi' },
+  rejected:  { bg: 'oklch(94% 0.05 25)',  color: 'oklch(40% 0.12 25)',  label: 'Rədd edildi' },
   deleted:   { bg: 'oklch(92% 0.01 0)',   color: 'oklch(45% 0.02 0)',   label: 'Silinmiş' },
   draft:     { bg: 'oklch(93% 0.02 60)',  color: 'oklch(50% 0.03 60)',  label: 'Qaralama' },
 }
@@ -135,7 +135,7 @@ export default function AdminOrdersList({ onSelectOrder }) {
 
       {/* Status tabs */}
       <div style={{ display: 'flex', gap: 2, marginBottom: 20, borderBottom: '1px solid oklch(88% 0.02 60)' }}>
-        {[['submitted', 'Yeni'], ['approved', 'Təsdiqlənmiş'], ['rejected', 'İnkar'], ['all', 'Hamısı'], ['deleted', 'Silinmiş']].map(([key, label]) => (
+        {[['submitted', 'Yeni'], ['approved', 'Təsdiqlənmiş'], ['rejected', 'Rədd'], ['all', 'Hamısı'], ['deleted', 'Silinmiş']].map(([key, label]) => (
           <button
             key={key}
             type="button"

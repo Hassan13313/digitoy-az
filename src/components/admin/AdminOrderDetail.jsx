@@ -10,7 +10,7 @@ const STATUS_COLOR = {
 }
 
 const STATUS_LABELS = {
-  submitted: 'Yeni', approved: 'Təsdiqləndi', rejected: 'İnkar edildi',
+  submitted: 'Yeni', approved: 'Təsdiqləndi', rejected: 'Rədd edildi',
   deleted: 'Silinmiş', draft: 'Qaralama',
 }
 

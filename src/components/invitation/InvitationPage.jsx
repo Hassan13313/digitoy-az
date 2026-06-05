@@ -356,7 +356,7 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
             {/* ── GALLERY ── */}
             {canShowGallery && <section className="py-28 px-6 bg-cream">
               <SectionWrapper className="max-w-lg mx-auto text-center">
-                <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">Gallery</p>
+                <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">{tr.f_gallery}</p>
                 <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-5">{tr.inv_gallery}</h2>
                 <GoldDividerOrnament />
 
