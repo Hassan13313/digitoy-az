@@ -5,32 +5,32 @@ import AnimatedNumber from '../ui/AnimatedNumber'
 
 const TESTIMONIALS = {
   az: [
-    { name: 'Aytən & Rauf', role: 'Toy — Bakı, 2025', text: 'Dəvətnamənin açılışındakı zərf animasiyası qonaqlarımızı heyran etdi. Hamı soruşdu necə etdik!', avatar: 'A' },
-    { name: 'Günel & Elçin', role: 'Nişan — Sumqayıt, 2025', text: 'Geri sayım, proqram, oturma düzümü — hamısı bir yerdə. Qonaqlar çox rahat tapdılar. Tövsiyyə edirəm.', avatar: 'G' },
+    { name: 'Aytən & Rauf', role: 'Toy — Bakı, 2026', text: 'Dəvətnamənin açılışındakı zərf animasiyası qonaqlarımızı heyran etdi. Hamı soruşdu necə etdik!', avatar: 'A' },
+    { name: 'Günel & Elçin', role: 'Nişan — Sumqayıt, 2026', text: 'Geri sayım, proqram, oturma düzümü — hamısı bir yerdə. Qonaqlar çox rahat tapdılar. Tövsiyyə edirəm.', avatar: 'G' },
     { name: 'Lətifə & Nicat', role: 'Toy — Gəncə, 2024', text: 'VİP paket tam dəyərdi. Foto qalereyası, musiqi, QR kod — professional görünüş yaratdı.', avatar: 'L' },
-    { name: 'Sevinc & Tural', role: 'Toy — Bakı, 2025', text: 'WhatsApp-a link göndərmək çox asan oldu. Planlaşdırma prosesini çox rahatlaşdırdı.', avatar: 'S' },
-    { name: 'Rəna & Əli', role: 'Nişan — Bakı, 2025', text: '3 dildə hazırlamaq imkanı əla idi, xarici qonaqlarımız üçün çox əlverişli oldu.', avatar: 'R' },
+    { name: 'Sevinc & Tural', role: 'Toy — Bakı, 2026', text: 'WhatsApp-a link göndərmək çox asan oldu. Planlaşdırma prosesini çox rahatlaşdırdı.', avatar: 'S' },
+    { name: 'Rəna & Əli', role: 'Nişan — Bakı, 2026', text: '3 dildə hazırlamaq imkanı əla idi, xarici qonaqlarımız üçün çox əlverişli oldu.', avatar: 'R' },
   ],
   en: [
-    { name: 'Ayten & Rauf', role: 'Wedding — Baku, 2025', text: 'The envelope opening animation amazed our guests. Everyone asked how we did it!', avatar: 'A' },
-    { name: 'Gunel & Elchin', role: 'Engagement — Sumgait, 2025', text: 'Countdown, program, seating chart — all in one place. Guests found it very easy to use.', avatar: 'G' },
+    { name: 'Ayten & Rauf', role: 'Wedding — Baku, 2026', text: 'The envelope opening animation amazed our guests. Everyone asked how we did it!', avatar: 'A' },
+    { name: 'Gunel & Elchin', role: 'Engagement — Sumgait, 2026', text: 'Countdown, program, seating chart — all in one place. Guests found it very easy to use.', avatar: 'G' },
     { name: 'Latifa & Nijat', role: 'Wedding — Ganja, 2024', text: 'VIP package was totally worth it. Photo gallery, music, QR code — created a professional look.', avatar: 'L' },
-    { name: 'Sevinj & Tural', role: 'Wedding — Baku, 2025', text: 'Sending a link via WhatsApp was very easy. Made the whole planning process much smoother.', avatar: 'S' },
-    { name: 'Rena & Ali', role: 'Engagement — Baku, 2025', text: 'The ability to prepare in 3 languages was great, very convenient for our foreign guests.', avatar: 'R' },
+    { name: 'Sevinj & Tural', role: 'Wedding — Baku, 2026', text: 'Sending a link via WhatsApp was very easy. Made the whole planning process much smoother.', avatar: 'S' },
+    { name: 'Rena & Ali', role: 'Engagement — Baku, 2026', text: 'The ability to prepare in 3 languages was great, very convenient for our foreign guests.', avatar: 'R' },
   ],
   ru: [
-    { name: 'Айтен & Рауф', role: 'Свадьба — Баку, 2025', text: 'Анимация открытия конверта восхитила наших гостей. Все спрашивали, как мы это сделали!', avatar: 'A' },
-    { name: 'Гюнель & Эльчин', role: 'Помолвка — Сумгайыт, 2025', text: 'Обратный отсчёт, программа, план рассадки — всё в одном месте. Очень удобно для гостей.', avatar: 'G' },
+    { name: 'Айтен & Рауф', role: 'Свадьба — Баку, 2026', text: 'Анимация открытия конверта восхитила наших гостей. Все спрашивали, как мы это сделали!', avatar: 'A' },
+    { name: 'Гюнель & Эльчин', role: 'Помолвка — Сумгайыт, 2026', text: 'Обратный отсчёт, программа, план рассадки — всё в одном месте. Очень удобно для гостей.', avatar: 'G' },
     { name: 'Латифа & Ниджат', role: 'Свадьба — Гянджа, 2024', text: 'Пакет VIP стоит своих денег. Галерея, музыка, QR-код — профессиональный вид.', avatar: 'L' },
-    { name: 'Севиндж & Турал', role: 'Свадьба — Баку, 2025', text: 'Отправить ссылку через WhatsApp очень легко. Процесс планирования стал намного проще.', avatar: 'S' },
-    { name: 'Рена & Али', role: 'Помолвка — Баку, 2025', text: 'Возможность подготовить на 3 языках была отличной, очень удобно для иностранных гостей.', avatar: 'R' },
+    { name: 'Севиндж & Турал', role: 'Свадьба — Баку, 2026', text: 'Отправить ссылку через WhatsApp очень легко. Процесс планирования стал намного проще.', avatar: 'S' },
+    { name: 'Рена & Али', role: 'Помолвка — Баку, 2026', text: 'Возможность подготовить на 3 языках была отличной, очень удобно для иностранных гостей.', avatar: 'R' },
   ],
 }
 
 const UI = {
-  az: { badge: 'Müştəri Rəyləri', title: 'Onlar Artıq Seçdi', subtitle: 'Digitoy.az-dan istifadə edən cütlüklərin fikirləri' },
-  en: { badge: 'Testimonials', title: 'They Already Chose', subtitle: 'Thoughts from couples who used Digitoy.az' },
-  ru: { badge: 'Отзывы', title: 'Они уже выбрали', subtitle: 'Мнения пар, воспользовавшихся Digitoy.az' },
+  az: { badge: 'Müştəri Rəyləri', title: 'Onlar Artıq Seçdi', subtitle: 'Digitoy.az-dan istifadə edən cütlüklərin fikirləri', cta: 'Paketlərə keç', ctaDemo: 'Nümunə dəvətnaməyə bax' },
+  en: { badge: 'Testimonials', title: 'They Already Chose', subtitle: 'Thoughts from couples who used Digitoy.az', cta: 'Choose Package', ctaDemo: 'View sample invitation' },
+  ru: { badge: 'Отзывы', title: 'Они уже выбрали', subtitle: 'Мнения пар, воспользовавшихся Digitoy.az', cta: 'Выбрать пакет', ctaDemo: 'Смотреть пример приглашения' },
 }
 
 /* Particle that floats in background */
@@ -126,7 +126,7 @@ function TestimonialCard({ testimonial, isActive, direction }) {
   )
 }
 
-export default function TestimonialsSection({ lang = 'az' }) {
+export default function TestimonialsSection({ lang = 'az', onDemo }) {
   const ui    = UI[lang]    || UI.az
   const items = TESTIMONIALS[lang] || TESTIMONIALS.az
   const [current, setCurrent] = useState(0)
@@ -224,6 +224,83 @@ export default function TestimonialsSection({ lang = 'az' }) {
             color: '#C5A059', transition: 'all 0.2s',
           }}>›</button>
         </div>
+
+        {/* ── Conversion CTAs ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, marginTop: 52 }}>
+
+          {/* Primary: Paketlərə keç — solid gold shimmer */}
+          <motion.button
+            onClick={() => {
+              if (window.innerWidth < 768) {
+                const el = document.getElementById('paketler') || document.getElementById('builder-section')
+                if (!el) return
+                const headings = [...el.querySelectorAll('h2, h3')]
+                const heading = headings.find(h => h.offsetParent !== null) || el
+                const top = heading.getBoundingClientRect().top + window.scrollY - 80
+                window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+              } else {
+                const firstCard = document.getElementById('first-pricing-card')
+                const fallback  = document.getElementById('paketler')
+                const el = firstCard || fallback
+                if (!el) return
+                const yOffset = firstCard ? -240 : -120
+                const top = el.getBoundingClientRect().top + window.scrollY + yOffset
+                window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+              }
+            }}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 10,
+              padding: '14px 44px',
+              background: 'linear-gradient(135deg, #C5A059 0%, #B8903A 100%)',
+              border: 'none', borderRadius: 999,
+              cursor: 'pointer',
+              fontFamily: 'Inter,system-ui,sans-serif',
+              fontSize: 11, letterSpacing: '0.22em',
+              textTransform: 'uppercase', fontWeight: 600,
+              color: '#fff',
+              position: 'relative', overflow: 'hidden',
+              boxShadow: '0 8px 28px rgba(197,160,89,0.35)',
+            }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            <span style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.22) 50%, transparent 70%)',
+              animation: 'shimmer-sweep 2.4s ease-in-out infinite',
+              pointerEvents: 'none',
+            }} />
+            <span style={{ position: 'relative', zIndex: 1, display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+              {ui.cta}
+              <span style={{ fontSize: 14, letterSpacing: 0, fontWeight: 400 }}>→</span>
+            </span>
+          </motion.button>
+
+          {/* Secondary: Nümunə dəvətnaməyə bax — outline */}
+          {onDemo && (
+            <motion.button
+              onClick={onDemo}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 10,
+                padding: '12px 36px',
+                background: 'transparent',
+                border: '1px solid rgba(197,160,89,0.55)',
+                borderRadius: 999,
+                cursor: 'pointer',
+                fontFamily: 'Inter,system-ui,sans-serif',
+                fontSize: 11, letterSpacing: '0.22em',
+                textTransform: 'uppercase', fontWeight: 600,
+                color: '#C5A059',
+              }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              {ui.ctaDemo}
+              <span style={{ fontSize: 14, letterSpacing: 0, fontWeight: 400 }}>→</span>
+            </motion.button>
+          )}
+        </div>
+
       </div>
     </section>
   )

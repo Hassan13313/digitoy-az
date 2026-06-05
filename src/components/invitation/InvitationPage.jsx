@@ -507,6 +507,63 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
               </SectionWrapper>
             )}
 
+            {/* ── DEMO CTA — yalnız demo modunda göstərilir ── */}
+            {isDemoMode && (() => {
+              const DEMO_CTA = {
+                az: { badge: 'Öz dəvətnamənizi hazırlayın', title: 'Sizə xüsusi hazırlansın', desc: 'Bu nümunəni bəyəndinizsə, paketinizi seçib öz dəvətnamənizi dəqiqələr ərzində hazırlaya bilərsiniz.', btn: 'Paketlərə keç' },
+                en: { badge: 'Create your invitation', title: 'Make it yours', desc: 'If you liked this example, choose your package and create your invitation in minutes.', btn: 'Choose Package' },
+                ru: { badge: 'Создайте своё приглашение', title: 'Сделайте своё', desc: 'Если вам понравился этот пример, выберите пакет и создайте своё приглашение за несколько минут.', btn: 'Выбрать пакет' },
+              }
+              const dc = DEMO_CTA[lang] || DEMO_CTA.az
+              return (
+                <div style={{ padding: '56px 24px 72px', background: 'linear-gradient(170deg, #FDFBF7 0%, #F4F1EA 100%)', textAlign: 'center' }}>
+                  <p style={{ fontSize: 10, letterSpacing: '0.32em', textTransform: 'uppercase', color: '#C5A059', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 500, marginBottom: 16 }}>
+                    {dc.badge}
+                  </p>
+                  <p style={{ fontFamily: '"Cormorant Garamond",Georgia,serif', fontSize: 'clamp(22px,5vw,30px)', fontWeight: 300, color: '#1A1A1A', marginBottom: 12, letterSpacing: '-0.02em' }}>
+                    {dc.title}
+                  </p>
+                  <p style={{ fontSize: 14, color: '#8C7B6B', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 300, maxWidth: 380, margin: '0 auto 36px', lineHeight: 1.7 }}>
+                    {dc.desc}
+                  </p>
+                  <motion.button
+                    onClick={() => {
+                      onBack?.()
+                      setTimeout(() => {
+                        const firstCard = document.getElementById('first-pricing-card')
+                        const fallback  = document.getElementById('paketler')
+                        const el = firstCard || fallback
+                        if (!el) return
+                        const yOffset = firstCard ? -240 : -120
+                        const top = el.getBoundingClientRect().top + window.scrollY + yOffset
+                        window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+                      }, 500)
+                    }}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 10,
+                      padding: '14px 44px',
+                      background: 'linear-gradient(135deg, #C5A059 0%, #B8903A 100%)',
+                      border: 'none', borderRadius: 999,
+                      cursor: 'pointer',
+                      fontFamily: 'Inter,system-ui,sans-serif',
+                      fontSize: 11, letterSpacing: '0.22em',
+                      textTransform: 'uppercase', fontWeight: 600,
+                      color: '#fff', position: 'relative', overflow: 'hidden',
+                      boxShadow: '0 8px 28px rgba(197,160,89,0.35)',
+                    }}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    <span style={{ position: 'absolute', inset: 0, background: 'linear-gradient(105deg,transparent 30%,rgba(255,255,255,0.22) 50%,transparent 70%)', animation: 'shimmer-sweep 2.4s ease-in-out infinite', pointerEvents: 'none' }} />
+                    <span style={{ position: 'relative', zIndex: 1, display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+                      {dc.btn}
+                      <span style={{ fontSize: 14, letterSpacing: 0, fontWeight: 400 }}>→</span>
+                    </span>
+                  </motion.button>
+                </div>
+              )
+            })()}
+
             {/* ── FOOTER ── */}
             <footer className="py-16 px-6 bg-espresso text-center">
               <div className="font-serif text-base mb-3 tracking-wider">

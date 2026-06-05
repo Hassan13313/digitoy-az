@@ -293,7 +293,7 @@ function ProgramStepEditor({ rows, onChange, tr }) {
               {/* Mobil-da sağa keç */}
               <div className="flex items-center gap-1 ml-auto sm:hidden">
                 <IconPickerBtn value={row.icon} onSelect={(ic) => update(i, 'icon', ic)} />
-                <button type="button" onClick={() => removeRow(i)} className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-brown-muted/40 hover:text-red-400 transition-colors rounded touch-manipulation" aria-label="Sil">
+                <button type="button" onClick={() => removeRow(i)} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-brown-muted/40 hover:text-red-400 transition-colors rounded touch-manipulation" aria-label="Sil">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
                 </button>
               </div>
@@ -310,7 +310,7 @@ function ProgramStepEditor({ rows, onChange, tr }) {
             {/* Desktop-da ikon+sil */}
             <div className="hidden sm:flex items-center gap-1 flex-shrink-0">
               <IconPickerBtn value={row.icon} onSelect={(ic) => update(i, 'icon', ic)} />
-              <button type="button" onClick={() => removeRow(i)} className="flex-shrink-0 p-2 text-brown-muted/40 hover:text-red-400 transition-colors rounded" aria-label="Sil">
+              <button type="button" onClick={() => removeRow(i)} className="flex-shrink-0 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-brown-muted/40 hover:text-red-400 transition-colors rounded" aria-label="Sil">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
               </button>
             </div>
@@ -320,7 +320,7 @@ function ProgramStepEditor({ rows, onChange, tr }) {
       <button
         type="button"
         onClick={addRow}
-        className="text-[11px] tracking-[0.16em] uppercase text-gold/80 hover:text-gold border border-gold/25 hover:border-gold/50 px-4 py-2.5 transition-all duration-200 flex items-center gap-2"
+        className="text-[11px] tracking-[0.16em] uppercase text-gold/80 hover:text-gold border border-gold/25 hover:border-gold/50 px-4 py-3 min-h-[44px] transition-all duration-200 flex items-center gap-2 touch-manipulation"
       >
         {tr.program_add_row}
       </button>
@@ -422,7 +422,7 @@ function ProgramStepWithTemplates({ rows, onChange, tr, lang }) {
         <button
           type="button"
           onClick={() => setShowSelector(true)}
-          className="text-[10px] tracking-[0.16em] uppercase text-gold/60 hover:text-gold border border-gold/20 hover:border-gold/40 px-3 py-1.5 rounded transition-all duration-200"
+          className="text-[10px] tracking-[0.16em] uppercase text-gold/60 hover:text-gold border border-gold/20 hover:border-gold/40 px-4 py-2.5 min-h-[44px] rounded transition-all duration-200 touch-manipulation flex items-center gap-1.5"
         >
           ↺ {ui.change}
         </button>
@@ -1616,7 +1616,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
               <button
                 type="button"
                 onClick={() => setStep(n)}
-                className="flex flex-col items-center gap-2 cursor-pointer focus:outline-none group"
+                className="flex flex-col items-center gap-2 cursor-pointer focus:outline-none group min-w-[44px] min-h-[44px] justify-center touch-manipulation"
               >
                 <div
                   className={`w-7 h-7 flex items-center justify-center text-[10px] font-medium transition-all duration-300 ${

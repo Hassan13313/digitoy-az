@@ -14,8 +14,15 @@ import t from '../../data/translations'
 function scrollToSection(id) {
   const el = document.getElementById(id)
   if (!el) return
-  const top = el.getBoundingClientRect().top + window.pageYOffset - 72
-  window.scrollTo({ top, behavior: 'smooth' })
+  if (window.innerWidth < 768) {
+    const headings = [...el.querySelectorAll('h2, h3')]
+    const heading = headings.find(h => h.offsetParent !== null) || el
+    const top = heading.getBoundingClientRect().top + window.pageYOffset - 80
+    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+  } else {
+    const top = el.getBoundingClientRect().top + window.pageYOffset - 72
+    window.scrollTo({ top, behavior: 'smooth' })
+  }
 }
 
 const NAV_TABS = {
@@ -164,18 +171,23 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
       />
 
       {/* ── 1. Hero ── */}
-      <Hero lang={lang} onStart={scrollToBuilder} onDemo={onDemo} />
+      <Hero lang={lang} onStart={() => scrollToSection('how-it-works')} onDemo={onDemo} />
 
-      {/* ── 2. Features ── */}
+      {/* ── 2. Necə İşləyir ── */}
+      <StickyScrollReveal lang={lang} />
+
+      {/* ── 3. Funksiyalar ── */}
       <FeaturesSection lang={lang} />
 
-      {/* ── 3. How It Works (Sticky Scroll Reveal) ── */}
-      <StickyScrollReveal lang={lang} />
+      {/* ── 4. Nümunə ── */}
+      <div id="sample-section">
+        <TestimonialsSection lang={lang} onDemo={onDemo} />
+      </div>
 
       {/* Naviqasiya anchor — packages tab hədəfi */}
       <div id="pricing-section" />
 
-      {/* ── 4. Builder / PackageSelect bölməsi ── */}
+      {/* ── 5. Paketlər / Builder bölməsi ── */}
       <section id="builder-section" className="py-12 md:py-24 px-4 sm:px-6 bg-beige/80 backdrop-blur-sm relative z-10">
         <div className="max-w-6xl mx-auto">
 
@@ -229,13 +241,10 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
         </div>
       </section>
 
-      {/* ── 4. Testimonials ── */}
-      <TestimonialsSection lang={lang} />
-
-      {/* ── 5. FAQ ── */}
+      {/* ── 6. FAQ ── */}
       <FAQSection lang={lang} />
 
-      {/* ── 5. Footer ── */}
+      {/* ── 7. Footer ── */}
       <HeroFooter lang={lang} />
     </div>
   )

@@ -102,9 +102,9 @@ const STEPS = {
 }
 
 const UI = {
-  az: { badge: 'Addım-addım', title: 'Necə İşləyir?', sub: '4 sadə addımda zərif dəvətnaməniz hazırdır' },
-  en: { badge: 'Step by step', title: 'How It Works', sub: 'Your elegant invitation in 4 simple steps' },
-  ru: { badge: 'Шаг за шагом', title: 'Как это работает', sub: 'Ваше элегантное приглашение за 4 шага' },
+  az: { badge: 'Addım-addım', title: 'Necə İşləyir?', sub: '4 sadə addımda zərif dəvətnaməniz hazırdır', cta: 'Funksiyalara bax' },
+  en: { badge: 'Step by step', title: 'How It Works', sub: 'Your elegant invitation in 4 simple steps', cta: 'View Features' },
+  ru: { badge: 'Шаг за шагом', title: 'Как это работает', sub: 'Ваше элегантное приглашение за 4 шага', cta: 'Посмотреть функции' },
 }
 
 export default function StickyScrollReveal({ lang = 'az' }) {
@@ -273,6 +273,42 @@ export default function StickyScrollReveal({ lang = 'az' }) {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* ── Conversion CTA ── */}
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0 56px' }}>
+          <motion.button
+            onClick={() => {
+              const el = document.getElementById('features')
+              if (!el) return
+              if (window.innerWidth < 768) {
+                const headings = [...el.querySelectorAll('h2, h3')]
+                const heading = headings.find(h => h.offsetParent !== null) || el
+                const top = heading.getBoundingClientRect().top + window.scrollY - 80
+                window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+              } else {
+                const top = el.getBoundingClientRect().top + window.scrollY - 72
+                window.scrollTo({ top, behavior: 'smooth' })
+              }
+            }}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 10,
+              padding: '14px 36px',
+              border: '1px solid rgba(197,160,89,0.55)',
+              borderRadius: 999,
+              background: 'transparent',
+              cursor: 'pointer',
+              fontFamily: 'Inter,system-ui,sans-serif',
+              fontSize: 11, letterSpacing: '0.22em',
+              textTransform: 'uppercase', fontWeight: 600,
+              color: '#C5A059',
+            }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            {ui.cta}
+            <span style={{ fontSize: 14, letterSpacing: 0, fontWeight: 400 }}>→</span>
+          </motion.button>
         </div>
 
       </div>

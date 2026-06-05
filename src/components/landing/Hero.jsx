@@ -264,7 +264,7 @@ function MusicPlayer({ tr }) {
 
 function FeatureContent({ featureKey, tr }) {
   const [seatingName, setSeatingName] = useState('')
-  const WEDDING_DATE = new Date('2025-09-20T18:00:00')
+  const WEDDING_DATE = new Date('2027-09-20T18:00:00')
   const calcTime = () => {
     const diff = WEDDING_DATE - Date.now()
     if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 }
@@ -423,7 +423,7 @@ function SilkBackground() {
 
 export default function Hero({ lang, onStart, onDemo }) {
   const tr = t[lang]
-  const [activeFeature, setActiveFeature] = useState('countdown')
+  const [activeFeature, setActiveFeature] = useState('gallery')
   const features = featureKeys.map(k => ({ key: k, label: tr[`f_${k}`] }))
 
   return (
@@ -500,9 +500,6 @@ export default function Hero({ lang, onStart, onDemo }) {
           >
             <motion.button onClick={onStart} className="btn-gold min-h-[52px]" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}>
               {tr.hero_cta}
-            </motion.button>
-            <motion.button onClick={onDemo} className="btn-ghost-gold min-h-[52px]" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}>
-              {tr.hero_demo}
             </motion.button>
           </motion.div>
         </div>
@@ -841,8 +838,15 @@ export function FeaturesSection({ lang = 'az' }) {
               onClick={() => {
                 const el = document.getElementById('sample-section')
                 if (!el) return
-                const top = el.getBoundingClientRect().top + window.scrollY - 72
-                window.scrollTo({ top, behavior: 'smooth' })
+                if (window.innerWidth < 768) {
+                  const headings = [...el.querySelectorAll('h2, h3')]
+                  const heading = headings.find(h => h.offsetParent !== null) || el
+                  const top = heading.getBoundingClientRect().top + window.scrollY - 80
+                  window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+                } else {
+                  const top = el.getBoundingClientRect().top + window.scrollY - 72
+                  window.scrollTo({ top, behavior: 'smooth' })
+                }
               }}
               className="inline-flex items-center gap-2.5 px-9 py-3.5 rounded-full text-[11px] tracking-[0.22em] uppercase font-semibold transition-colors duration-300"
               style={{ color: '#C5A059', border: '1px solid rgba(197,160,89,0.55)', background: 'transparent' }}
