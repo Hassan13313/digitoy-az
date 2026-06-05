@@ -17,7 +17,7 @@ const DRESS_COLORS = {
   creative:    ['#9B6B9B', '#F0C4D4', '#6B9B6B'],
 }
 
-const DRESS_LABELS = {
+const DRESS_LABELS_FALLBACK = {
   blacktie: 'Black Tie', cocktail: 'Cocktail', smartcasual: 'Smart Casual', creative: 'Creative',
 }
 
@@ -152,7 +152,7 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
       icon: Shirt, label: tr.dresscode_summary,
       value: (() => {
         const id     = data.dressCodePalette
-        const label  = palette?.label?.[lang] || DRESS_LABELS[id] || id
+        const label  = palette?.label?.[lang] || t[lang]?.[`dresscode_${id}_label`] || DRESS_LABELS_FALLBACK[id] || id
         const colors = palette?.colors || DRESS_COLORS[id] || []
         return (
           <span className="flex items-center gap-1.5">

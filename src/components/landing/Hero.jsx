@@ -34,10 +34,10 @@ const featureIcons = { countdown: Timer, maps: MapPin, dresscode: Shirt, seating
 
 function getDressStyles(tr) {
   return [
-    { id: 'blacktie',    label: 'Black Tie',    sub: tr.dresscode_blacktie_sub,    male: { icon: MaleSuitIcon, text: tr.dress_blacktie_male },    female: { icon: FemaleGownIcon, text: tr.dress_blacktie_female } },
-    { id: 'cocktail',    label: 'Cocktail',     sub: tr.dresscode_cocktail_sub,    male: { icon: MaleSuitIcon, text: tr.dress_cocktail_male },    female: { icon: FemaleGownIcon, text: tr.dress_cocktail_female } },
-    { id: 'smartcasual', label: 'Smart Casual', sub: tr.dresscode_smartcasual_sub, male: { icon: MaleSuitIcon, text: tr.dress_smartcasual_male }, female: { icon: FemaleGownIcon, text: tr.dress_smartcasual_female } },
-    { id: 'creative',    label: 'Creative',     sub: tr.dresscode_creative_sub,    male: { icon: MaleSuitIcon, text: tr.dress_creative_male },    female: { icon: FemaleGownIcon, text: tr.dress_creative_female } },
+    { id: 'blacktie',    label: tr.dresscode_blacktie_label    || 'Black Tie',    sub: tr.dresscode_blacktie_sub,    male: { icon: MaleSuitIcon, text: tr.dress_blacktie_male },    female: { icon: FemaleGownIcon, text: tr.dress_blacktie_female } },
+    { id: 'cocktail',    label: tr.dresscode_cocktail_label    || 'Cocktail',     sub: tr.dresscode_cocktail_sub,    male: { icon: MaleSuitIcon, text: tr.dress_cocktail_male },    female: { icon: FemaleGownIcon, text: tr.dress_cocktail_female } },
+    { id: 'smartcasual', label: tr.dresscode_smartcasual_label || 'Smart Casual', sub: tr.dresscode_smartcasual_sub, male: { icon: MaleSuitIcon, text: tr.dress_smartcasual_male }, female: { icon: FemaleGownIcon, text: tr.dress_smartcasual_female } },
+    { id: 'creative',    label: tr.dresscode_creative_label    || 'Creative',     sub: tr.dresscode_creative_sub,    male: { icon: MaleSuitIcon, text: tr.dress_creative_male },    female: { icon: FemaleGownIcon, text: tr.dress_creative_female } },
   ]
 }
 
@@ -288,9 +288,9 @@ function FeatureContent({ featureKey, tr }) {
       <div className="text-center space-y-4">
         <p className="text-[10px] tracking-[0.28em] uppercase text-gold font-medium">{tr.f_countdown}</p>
         <p className="text-brown-muted text-sm font-light">{tr.f_countdown_desc}</p>
-        <div className="flex justify-center gap-3 mt-4">
+        <div className="grid grid-cols-2 gap-3 sm:flex sm:justify-center mt-4">
           {units.map(({ v, l }) => (
-            <div key={l} className="flex flex-col items-center bg-white/20 border border-white/30 rounded-xl p-4 w-20 text-center">
+            <div key={l} className="flex flex-col items-center bg-white/20 border border-white/30 rounded-xl p-4 sm:w-20 text-center">
               <span className="font-serif text-3xl text-ink font-light leading-none">{v}</span>
               <span className="text-xs tracking-widest text-amber-700/80 mt-2 uppercase">{l}</span>
             </div>
@@ -730,23 +730,16 @@ export function HeroFooter({ lang = 'az' }) {
 
 export function FeaturesSection({ lang = 'az' }) {
   const tr = t[lang]
-  const cards = [
-    { Icon: Timer,     titleKey: 'f_countdown', descKey: 'fg_countdown_desc' },
-    { Icon: MapPin,    titleKey: 'f_maps',       descKey: 'fg_maps_desc'      },
-    { Icon: Shirt,     titleKey: 'f_dresscode',  descKey: 'fg_dresscode_desc' },
-    { Icon: Users,     titleKey: 'f_seating',    descKey: 'fg_seating_desc'   },
-    { Icon: Camera,    titleKey: 'f_gallery',    descKey: 'fg_gallery_desc'   },
-    { Icon: Music,     titleKey: 'f_music',      descKey: 'fg_music_desc'     },
-    { Icon: UserCheck, titleKey: 'f_rsvp',       descKey: 'fg_rsvp_desc'      },
-    { Icon: Clock,     titleKey: 'f_timeline',   descKey: 'fg_timeline_desc'  },
-    { Icon: BookOpen,  titleKey: 'f_guestbook',  descKey: 'fg_guestbook_desc' },
-  ]
+  const [activeFeature, setActiveFeature] = useState('gallery')
+  const features = featureKeys.map(k => ({ key: k, label: tr[`f_${k}`] }))
 
   return (
     <section id="features" className="py-12 md:py-24 px-6 relative z-10 bg-beige/80 backdrop-blur-sm">
       <div className="max-w-5xl mx-auto">
+
+        {/* Header */}
         <BlurFade>
-          <div className="text-center mb-12">
+          <div className="text-center mb-8">
             <p className="text-[10px] tracking-[0.38em] uppercase text-gold font-medium mb-4">{tr.features_badge}</p>
             <h3 className="font-serif text-2xl md:text-4xl text-ink font-light tracking-tight">{tr.features_section_heading}</h3>
             <div className="flex items-center justify-center gap-3 mt-5 max-w-[180px] mx-auto">
@@ -759,21 +752,108 @@ export function FeaturesSection({ lang = 'az' }) {
           </div>
         </BlurFade>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {cards.map(({ Icon, titleKey, descKey }, i) => (
-            <BlurFade key={titleKey} delay={i * 0.06}>
-              <div className="group bg-white/30 backdrop-blur-sm border border-amber-500/10 rounded-xl p-5 flex flex-col gap-4 hover:-translate-y-1 hover:shadow-2xl hover:bg-white/50 hover:border-amber-500/30 transition-all duration-500 h-full">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-amber-500/10 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-amber-500/20 transition-colors duration-300">
-                    <Icon size={16} className="text-gold" strokeWidth={1.5} />
-                  </div>
-                  <p className="text-[11px] tracking-[0.18em] uppercase text-ink font-semibold">{tr[titleKey]}</p>
-                </div>
-                <p className="text-[11px] text-brown-muted font-light leading-[1.9]">{tr[descKey]}</p>
-              </div>
-            </BlurFade>
-          ))}
+        {/* ── Feature tab strip — flex-wrap, hamısı görünür ── */}
+        <div className="flex flex-wrap gap-x-1.5 gap-y-2 justify-center mb-6">
+          {features.map(({ key, label }) => {
+            const Icon = featureIcons[key]
+            const isActive = activeFeature === key
+            return (
+              <motion.button
+                key={key}
+                onClick={() => setActiveFeature(key)}
+                className={`relative flex items-center gap-1.5 px-3 py-2 rounded-full text-[10px] tracking-[0.14em] font-medium uppercase whitespace-nowrap transition-colors duration-200 touch-manipulation ${
+                  isActive ? 'text-white' : 'text-brown-muted hover:text-gold'
+                }`}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="features-section-tab-bg"
+                    className="absolute inset-0 rounded-full bg-gold"
+                    transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-1.5">
+                  <Icon size={10} strokeWidth={isActive ? 2 : 1.5} />
+                  {label}
+                </span>
+              </motion.button>
+            )
+          })}
         </div>
+
+        {/* ── Active feature content panel ── */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeFeature}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.28, ease: [0.32, 0, 0.68, 1] }}
+          >
+            <div
+              className="rounded-2xl p-5 sm:p-7"
+              style={{
+                background: 'rgba(255,255,255,0.38)',
+                backdropFilter: 'blur(24px) saturate(160%)',
+                WebkitBackdropFilter: 'blur(24px) saturate(160%)',
+                border: '1px solid rgba(255,255,255,0.55)',
+                boxShadow: '0 24px 64px rgba(44,26,14,0.08), inset 0 1px 0 rgba(255,255,255,0.7)',
+              }}
+            >
+              {/* Desktop: 2-col / Mobile: stacked */}
+              <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 lg:items-start">
+
+                {/* Left — title + description */}
+                <div className="lg:w-2/5">
+                  <div className="flex items-center gap-2 mb-3">
+                    {(() => { const Icon = featureIcons[activeFeature]; return <Icon size={15} className="text-gold" strokeWidth={1.5} /> })()}
+                    <p className="text-[11px] tracking-[0.18em] uppercase text-ink font-semibold">
+                      {tr[`f_${activeFeature}`]}
+                    </p>
+                  </div>
+                  <p className="text-sm text-brown-dark font-light leading-[1.85]">
+                    {tr[`fg_${activeFeature}_desc`]}
+                  </p>
+                </div>
+
+                {/* Right — interactive preview */}
+                <div className="lg:w-3/5">
+                  <div
+                    className="rounded-xl p-5 min-h-[260px] flex items-center"
+                    style={{
+                      background: 'rgba(255,255,255,0.45)',
+                      border: '1px solid rgba(255,255,255,0.6)',
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.8)',
+                    }}
+                  >
+                    <FeatureContent featureKey={activeFeature} tr={tr} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* ── Conversion CTA ── */}
+        <BlurFade delay={0.4}>
+          <div className="flex justify-center mt-10">
+            <motion.button
+              onClick={() => {
+                const el = document.getElementById('sample-section')
+                if (!el) return
+                const top = el.getBoundingClientRect().top + window.scrollY - 72
+                window.scrollTo({ top, behavior: 'smooth' })
+              }}
+              className="inline-flex items-center gap-2.5 px-9 py-3.5 rounded-full text-[11px] tracking-[0.22em] uppercase font-semibold transition-colors duration-300"
+              style={{ color: '#C5A059', border: '1px solid rgba(197,160,89,0.55)', background: 'transparent' }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              {lang === 'en' ? 'See Reviews' : lang === 'ru' ? 'Отзывы клиентов' : 'Müştəri rəylərini gör'}
+              <ChevronRight size={13} strokeWidth={2.2} />
+            </motion.button>
+          </div>
+        </BlurFade>
       </div>
     </section>
   )

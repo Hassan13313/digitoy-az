@@ -3,6 +3,7 @@
    Bədən/baş yox — yalnız geyim xətləri (stroke only)
 ══════════════════════════════════════════════════ */
 import { motion, AnimatePresence } from 'framer-motion'
+import t from '../../data/translations'
 
 /* ─── Dress code image paths ─── */
 const IMG = {
@@ -12,44 +13,37 @@ const IMG = {
   CASUAL_F: '/assets/dresscode/casual-qadin.gif',
 }
 
-/* ─── Outfit map (blacktie → toy assets, others → casual) ─── */
-const OUTFITS = {
-  blacktie: {
-    male: IMG.TOY_M, female: IMG.TOY_F,
-    label: 'Black Tie',
-    subtitle: 'Zərif / Rəsmi geyimlər (Smokin və rəsmi ziyafət libasları)',
-  },
-  cocktail: {
-    male: IMG.CASUAL_M, female: IMG.CASUAL_F,
-    label: 'Cocktail',
-    subtitle: 'Yarı-rəsmi / Modern (Dəbə uyğun kostyum və kokteyl donları)',
-  },
-  smartcasual: {
-    male: IMG.CASUAL_M, female: IMG.CASUAL_F,
-    label: 'Smart Casual',
-    subtitle: 'Şık / Rahat (Yüngül pencək, kətan şalvar və zərif gündəlik geyimlər)',
-  },
-  creative: {
-    male: IMG.CASUAL_M, female: IMG.CASUAL_F,
-    label: 'Creative',
-    subtitle: 'Tematik / Yaradıcı (Məclisə uyğun xüsusi tonlar və sərbəst lüks üslub)',
-  },
+/* ─── Yalnız asset-lər — mətn translations.js-dən gəlir ─── */
+const OUTFIT_ASSETS = {
+  blacktie:    { male: IMG.TOY_M,    female: IMG.TOY_F    },
+  cocktail:    { male: IMG.CASUAL_M, female: IMG.CASUAL_F },
+  smartcasual: { male: IMG.CASUAL_M, female: IMG.CASUAL_F },
+  creative:    { male: IMG.CASUAL_M, female: IMG.CASUAL_F },
 }
 
-/* Palette ID → outfit tier mapping */
+/* Palette ID → outfit tier */
 const PALETTE_TO_OUTFIT = {
   pastel:      'cocktail',
   earth:       'smartcasual',
   blacktie:    'blacktie',
   garden:      'creative',
-  /* direct keys also pass through */
   cocktail:    'cocktail',
   smartcasual: 'smartcasual',
   creative:    'creative',
 }
 
-const getOutfit = (paletteId) =>
-  OUTFITS[PALETTE_TO_OUTFIT[paletteId] ?? paletteId] ?? OUTFITS.smartcasual
+function buildOutfit(paletteId, lang) {
+  const id     = PALETTE_TO_OUTFIT[paletteId] ?? paletteId
+  const assets = OUTFIT_ASSETS[id] ?? OUTFIT_ASSETS.smartcasual
+  const tr     = t[lang] || t.az
+  return {
+    ...assets,
+    label:      tr[`dresscode_${id}_label`]  || id,
+    maleDesc:   tr[`dresscode_${id}_male`]   || null,
+    femaleDesc: tr[`dresscode_${id}_female`] || null,
+    subtitle:   tr[`dresscode_${id}_desc`]   || null,
+  }
+}
 
 function FigureCard({ imgSrc, figureLabel }) {
   return (
@@ -95,17 +89,17 @@ function FigureCard({ imgSrc, figureLabel }) {
 
 const FIGURE_LABELS = {
   az: { male: 'Kişi', female: 'Xanım' },
-  en: { male: 'Groom', female: 'Bride' },
+  en: { male: 'Gentleman', female: 'Lady' },
   ru: { male: 'Мужчина', female: 'Женщина' },
 }
 
 export default function ThreeDDressCode({ palette, paletteId: rawId, lang = 'az' }) {
-  /* rawId = weddingData.dressCodePalette (builder-dən gələn xam ID: 'blacktie','cocktail','smartcasual','creative')
-     palette?.id = DRESS_CODE_PALETTES-dən gələn ID ('pastel','earth','blacktie','garden')
-     rawId prioritetlidir çünki builder 4 düzgün ID-dən birini saxlayır */
   const paletteId = rawId || palette?.id || 'smartcasual'
-  const outfit    = getOutfit(paletteId)
+  const outfit    = buildOutfit(paletteId, lang)
   const figures   = FIGURE_LABELS[lang] || FIGURE_LABELS.az
+  const tr        = t[lang] || t.az
+  const maleLabel   = tr.dresscode_male_label   || 'Kişilər'
+  const femaleLabel = tr.dresscode_female_label || 'Xanımlar'
 
   return (
     <div style={{
@@ -143,7 +137,7 @@ export default function ThreeDDressCode({ palette, paletteId: rawId, lang = 'az'
         </p>
       </div>
 
-      {/* Animate edilən hissə: etiket + ikonlar */}
+      {/* Animate edilən hissə */}
       <AnimatePresence mode="wait">
         <motion.div
           key={paletteId}
@@ -152,7 +146,7 @@ export default function ThreeDDressCode({ palette, paletteId: rawId, lang = 'az'
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.32, ease: 'easeInOut' }}
         >
-          {/* Outfit adı + subtitle */}
+          {/* Outfit adı + məzmun */}
           <div style={{ textAlign: 'center', marginBottom: 20 }}>
             <p style={{
               fontFamily: '"Cormorant Garamond","Playfair Display",Georgia,serif',
@@ -165,15 +159,52 @@ export default function ThreeDDressCode({ palette, paletteId: rawId, lang = 'az'
               height: 1, marginTop: 12,
               background: 'linear-gradient(to right, transparent, rgba(212,175,55,0.4) 30%, rgba(212,175,55,0.55) 50%, rgba(212,175,55,0.4) 70%, transparent)',
             }} />
-            <p style={{
-              marginTop: 10,
-              fontSize: 11, fontWeight: 300, lineHeight: 1.6,
-              color: 'rgba(80,68,58,0.7)',
-              fontFamily: '"Inter",system-ui,sans-serif',
-              letterSpacing: '0.01em',
-            }}>
-              {outfit.subtitle}
-            </p>
+
+            {outfit.maleDesc ? (
+              /* Kişilər / Xanımlar — ayrı bloklar, hava ilə */
+              <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <p style={{
+                    fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase',
+                    color: 'rgba(212,175,55,0.85)', fontFamily: '"Inter",system-ui,sans-serif',
+                    fontWeight: 600,
+                  }}>
+                    {maleLabel}
+                  </p>
+                  <p style={{
+                    fontSize: 12, fontWeight: 300, lineHeight: 1.55,
+                    color: 'rgba(60,50,40,0.82)', fontFamily: '"Inter",system-ui,sans-serif',
+                  }}>
+                    {outfit.maleDesc}
+                  </p>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <p style={{
+                    fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase',
+                    color: 'rgba(212,175,55,0.85)', fontFamily: '"Inter",system-ui,sans-serif',
+                    fontWeight: 600,
+                  }}>
+                    {femaleLabel}
+                  </p>
+                  <p style={{
+                    fontSize: 12, fontWeight: 300, lineHeight: 1.55,
+                    color: 'rgba(60,50,40,0.82)', fontFamily: '"Inter",system-ui,sans-serif',
+                  }}>
+                    {outfit.femaleDesc}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <p style={{
+                marginTop: 12,
+                fontSize: 11, fontWeight: 300, lineHeight: 1.65,
+                color: 'rgba(80,68,58,0.7)',
+                fontFamily: '"Inter",system-ui,sans-serif',
+                letterSpacing: '0.01em',
+              }}>
+                {outfit.subtitle}
+              </p>
+            )}
           </div>
 
           {/* Geyim ikonları */}

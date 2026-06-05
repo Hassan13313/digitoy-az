@@ -329,6 +329,109 @@ function ProgramStepEditor({ rows, onChange, tr }) {
   )
 }
 
+/* ── Proqram şablonları ── */
+const TPL_UI = {
+  az: { title: 'Hazır şablon seçin', sub: 'Şablonu seçin — sonra istədiyiniz kimi dəyişə bilərsiniz', own: 'Özüm yazacam', change: 'Şablonu dəyiş',
+        labels: { toy:'Toy', nishan:'Nişan', nikah:'Nikah', xinayaxdi:'Xınayaxdı', birthday:'Ad günü', other:'Digər' } },
+  en: { title: 'Choose a template', sub: 'Select a template — you can edit it anytime', own: 'Write my own', change: 'Change template',
+        labels: { toy:'Wedding', nishan:'Engagement', nikah:'Ceremony', xinayaxdi:'Henna Night', birthday:'Birthday', other:'Other' } },
+  ru: { title: 'Выберите шаблон', sub: 'Выберите шаблон — вы сможете его изменить позже', own: 'Напишу сам', change: 'Изменить шаблон',
+        labels: { toy:'Свадьба', nishan:'Помолвка', nikah:'Никях', xinayaxdi:'Вечер хны', birthday:'День рождения', other:'Другое' } },
+}
+const TPL_ICONS = { toy:'💒', nishan:'💍', nikah:'🤲', xinayaxdi:'🌿', birthday:'🎂', other:'✨' }
+const TPL_KEYS  = ['toy','nishan','nikah','xinayaxdi','birthday','other']
+
+const PROGRAM_TEMPLATES = {
+  toy: {
+    az: [{ time:'17:30',icon:'🥂',activity:'Qonaqların qarşılanması' },{ time:'18:00',icon:'💒',activity:'Bəy və gəlinin gəlişi' },{ time:'18:30',icon:'📸',activity:'Ailə fotoşəkilləri' },{ time:'19:00',icon:'🎤',activity:'Açılış sözü' },{ time:'19:30',icon:'🍽️',activity:'Ziyafət' },{ time:'20:30',icon:'💃',activity:'İlk rəqs' },{ time:'21:00',icon:'🎉',activity:'Əyləncə proqramı' },{ time:'22:00',icon:'🎂',activity:'Tort kəsimi' },{ time:'23:00',icon:'🌙',activity:'Gecənin sonu' }],
+    en: [{ time:'17:30',icon:'🥂',activity:'Guest Welcome' },{ time:'18:00',icon:'💒',activity:"Bride & Groom's Entrance" },{ time:'18:30',icon:'📸',activity:'Family Photos' },{ time:'19:00',icon:'🎤',activity:'Opening Speech' },{ time:'19:30',icon:'🍽️',activity:'Dinner' },{ time:'20:30',icon:'💃',activity:'First Dance' },{ time:'21:00',icon:'🎉',activity:'Entertainment' },{ time:'22:00',icon:'🎂',activity:'Cake Cutting' },{ time:'23:00',icon:'🌙',activity:"Evening's End" }],
+    ru: [{ time:'17:30',icon:'🥂',activity:'Встреча гостей' },{ time:'18:00',icon:'💒',activity:'Выход жениха и невесты' },{ time:'18:30',icon:'📸',activity:'Семейные фото' },{ time:'19:00',icon:'🎤',activity:'Вступительное слово' },{ time:'19:30',icon:'🍽️',activity:'Ужин' },{ time:'20:30',icon:'💃',activity:'Первый танец' },{ time:'21:00',icon:'🎉',activity:'Развлекательная программа' },{ time:'22:00',icon:'🎂',activity:'Разрезание торта' },{ time:'23:00',icon:'🌙',activity:'Завершение вечера' }],
+  },
+  nishan: {
+    az: [{ time:'18:00',icon:'🥂',activity:'Qonaqların qarşılanması' },{ time:'18:30',icon:'🌸',activity:'Ailə sözü' },{ time:'19:00',icon:'💍',activity:'Nişan mərasimi' },{ time:'19:30',icon:'📸',activity:'Fotoşəkil' },{ time:'20:00',icon:'🍽️',activity:'Şam yeməyi' },{ time:'21:00',icon:'💃',activity:'Rəqs və əyləncə' },{ time:'22:00',icon:'🎂',activity:'Tort kəsimi' },{ time:'22:30',icon:'🌙',activity:'Gecənin sonu' }],
+    en: [{ time:'18:00',icon:'🥂',activity:'Guest Welcome' },{ time:'18:30',icon:'🌸',activity:'Family Speech' },{ time:'19:00',icon:'💍',activity:'Engagement Ceremony' },{ time:'19:30',icon:'📸',activity:'Photos' },{ time:'20:00',icon:'🍽️',activity:'Dinner' },{ time:'21:00',icon:'💃',activity:'Dancing & Entertainment' },{ time:'22:00',icon:'🎂',activity:'Cake Cutting' },{ time:'22:30',icon:'🌙',activity:"Evening's End" }],
+    ru: [{ time:'18:00',icon:'🥂',activity:'Встреча гостей' },{ time:'18:30',icon:'🌸',activity:'Слово родителей' },{ time:'19:00',icon:'💍',activity:'Церемония помолвки' },{ time:'19:30',icon:'📸',activity:'Фотосъёмка' },{ time:'20:00',icon:'🍽️',activity:'Ужин' },{ time:'21:00',icon:'💃',activity:'Танцы и развлечения' },{ time:'22:00',icon:'🎂',activity:'Торт' },{ time:'22:30',icon:'🌙',activity:'Завершение вечера' }],
+  },
+  nikah: {
+    az: [{ time:'11:00',icon:'✨',activity:'Hazırlıq' },{ time:'12:00',icon:'💒',activity:'Nikah mərasimi' },{ time:'12:30',icon:'🥂',activity:'Təbrik və fotoşəkillər' },{ time:'13:00',icon:'🤲',activity:'Dua' },{ time:'13:30',icon:'🍽️',activity:'Nahar' },{ time:'14:30',icon:'🌙',activity:'Tədbirin sonu' }],
+    en: [{ time:'11:00',icon:'✨',activity:'Preparation' },{ time:'12:00',icon:'💒',activity:'Nikah Ceremony' },{ time:'12:30',icon:'🥂',activity:'Congratulations & Photos' },{ time:'13:00',icon:'🤲',activity:'Prayer' },{ time:'13:30',icon:'🍽️',activity:'Lunch' },{ time:'14:30',icon:'🌙',activity:'End of Event' }],
+    ru: [{ time:'11:00',icon:'✨',activity:'Подготовка' },{ time:'12:00',icon:'💒',activity:'Никях' },{ time:'12:30',icon:'🥂',activity:'Поздравления и фото' },{ time:'13:00',icon:'🤲',activity:'Молитва' },{ time:'13:30',icon:'🍽️',activity:'Обед' },{ time:'14:30',icon:'🌙',activity:'Завершение' }],
+  },
+  xinayaxdi: {
+    az: [{ time:'17:00',icon:'🥂',activity:'Qonaqların qarşılanması' },{ time:'17:30',icon:'🎵',activity:'Musiqi proqramı' },{ time:'18:00',icon:'🌿',activity:'Xına mərasimi' },{ time:'19:00',icon:'📸',activity:'Fotoşəkillər' },{ time:'20:00',icon:'🍽️',activity:'Şam yeməyi' },{ time:'21:00',icon:'💃',activity:'Rəqs və əyləncə' },{ time:'22:00',icon:'🌙',activity:'Gecənin sonu' }],
+    en: [{ time:'17:00',icon:'🥂',activity:'Guest Welcome' },{ time:'17:30',icon:'🎵',activity:'Music Program' },{ time:'18:00',icon:'🌿',activity:'Henna Ceremony' },{ time:'19:00',icon:'📸',activity:'Photos' },{ time:'20:00',icon:'🍽️',activity:'Dinner' },{ time:'21:00',icon:'💃',activity:'Dancing & Entertainment' },{ time:'22:00',icon:'🌙',activity:"Evening's End" }],
+    ru: [{ time:'17:00',icon:'🥂',activity:'Встреча гостей' },{ time:'17:30',icon:'🎵',activity:'Музыкальная программа' },{ time:'18:00',icon:'🌿',activity:'Церемония хны' },{ time:'19:00',icon:'📸',activity:'Фотосъёмка' },{ time:'20:00',icon:'🍽️',activity:'Ужин' },{ time:'21:00',icon:'💃',activity:'Танцы и развлечения' },{ time:'22:00',icon:'🌙',activity:'Завершение вечера' }],
+  },
+  birthday: {
+    az: [{ time:'18:00',icon:'🥂',activity:'Qonaqların qarşılanması' },{ time:'18:30',icon:'🎤',activity:'Açılış sözü' },{ time:'19:00',icon:'🎁',activity:'Hədiyyə mərasimi' },{ time:'19:30',icon:'🍽️',activity:'Şam yeməyi' },{ time:'20:30',icon:'🎂',activity:'Tort kəsimi' },{ time:'21:00',icon:'🎉',activity:'Əyləncə' },{ time:'22:30',icon:'🌙',activity:'Tədbirin sonu' }],
+    en: [{ time:'18:00',icon:'🥂',activity:'Guest Welcome' },{ time:'18:30',icon:'🎤',activity:'Opening Speech' },{ time:'19:00',icon:'🎁',activity:'Gift Ceremony' },{ time:'19:30',icon:'🍽️',activity:'Dinner' },{ time:'20:30',icon:'🎂',activity:'Cake Cutting' },{ time:'21:00',icon:'🎉',activity:'Entertainment' },{ time:'22:30',icon:'🌙',activity:'End of Event' }],
+    ru: [{ time:'18:00',icon:'🥂',activity:'Встреча гостей' },{ time:'18:30',icon:'🎤',activity:'Вступительное слово' },{ time:'19:00',icon:'🎁',activity:'Вручение подарков' },{ time:'19:30',icon:'🍽️',activity:'Ужин' },{ time:'20:30',icon:'🎂',activity:'Торт' },{ time:'21:00',icon:'🎉',activity:'Развлечения' },{ time:'22:30',icon:'🌙',activity:'Завершение' }],
+  },
+  other: {
+    az: [{ time:'18:00',icon:'🥂',activity:'Qonaqların qarşılanması' },{ time:'18:30',icon:'✨',activity:'Açılış' },{ time:'19:00',icon:'🎤',activity:'Əsas mərasim' },{ time:'20:00',icon:'🍽️',activity:'Yemək' },{ time:'21:00',icon:'🎉',activity:'Əyləncə' },{ time:'22:00',icon:'🌙',activity:'Tədbirin sonu' }],
+    en: [{ time:'18:00',icon:'🥂',activity:'Guest Welcome' },{ time:'18:30',icon:'✨',activity:'Opening' },{ time:'19:00',icon:'🎤',activity:'Main Ceremony' },{ time:'20:00',icon:'🍽️',activity:'Dinner' },{ time:'21:00',icon:'🎉',activity:'Entertainment' },{ time:'22:00',icon:'🌙',activity:'End of Event' }],
+    ru: [{ time:'18:00',icon:'🥂',activity:'Встреча гостей' },{ time:'18:30',icon:'✨',activity:'Открытие' },{ time:'19:00',icon:'🎤',activity:'Основная церемония' },{ time:'20:00',icon:'🍽️',activity:'Ужин' },{ time:'21:00',icon:'🎉',activity:'Развлечения' },{ time:'22:00',icon:'🌙',activity:'Завершение' }],
+  },
+}
+
+function ProgramStepWithTemplates({ rows, onChange, tr, lang }) {
+  const [showSelector, setShowSelector] = useState(rows.length === 0)
+  const ui = TPL_UI[lang] || TPL_UI.az
+
+  const applyTemplate = (key) => {
+    const tpl = PROGRAM_TEMPLATES[key]
+    const items = tpl[lang] || tpl.az
+    onChange(items.map(r => ({ ...r })))
+    setShowSelector(false)
+  }
+
+  if (showSelector) {
+    return (
+      <div className="space-y-4">
+        <div className="text-center mb-2">
+          <p className="text-[10px] tracking-[0.28em] uppercase text-gold font-medium mb-1">{ui.title}</p>
+          <p className="text-xs text-brown-muted/70 font-light">{ui.sub}</p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {TPL_KEYS.map(key => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => applyTemplate(key)}
+              className="flex flex-col items-center gap-2 py-4 px-3 rounded-xl border border-gold/20 bg-cream hover:border-gold/50 hover:bg-gold/5 transition-all duration-200 touch-manipulation"
+            >
+              <span className="text-2xl leading-none">{TPL_ICONS[key]}</span>
+              <span className="text-[11px] font-medium text-ink tracking-wide">{ui.labels[key]}</span>
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => { onChange([{ time:'', icon:'', activity:'' }]); setShowSelector(false) }}
+          className="w-full py-3 text-[11px] tracking-[0.18em] uppercase text-brown-muted/55 hover:text-gold border border-dashed border-beige-dark/50 hover:border-gold/30 rounded-lg transition-all duration-200"
+        >
+          ✏️ {ui.own}
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <div className="flex justify-end mb-3">
+        <button
+          type="button"
+          onClick={() => setShowSelector(true)}
+          className="text-[10px] tracking-[0.16em] uppercase text-gold/60 hover:text-gold border border-gold/20 hover:border-gold/40 px-3 py-1.5 rounded transition-all duration-200"
+        >
+          ↺ {ui.change}
+        </button>
+      </div>
+      <ProgramStepEditor rows={rows} onChange={onChange} tr={tr} />
+    </div>
+  )
+}
+
 /* ── Köməkçi: YYYY-MM-DD → { year, month(0-based), day } ── */
 function parseIso(iso) {
   if (!iso) return null
@@ -1510,14 +1613,18 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
           const title = steps[actualN - 1]
           return (
             <div key={actualN} className="flex items-center flex-1 last:flex-none">
-              <div className="flex flex-col items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setStep(n)}
+                className="flex flex-col items-center gap-2 cursor-pointer focus:outline-none group"
+              >
                 <div
                   className={`w-7 h-7 flex items-center justify-center text-[10px] font-medium transition-all duration-300 ${
                     done
-                      ? 'bg-gold text-white shadow-[0_2px_12px_rgba(197,160,89,0.4)]'
+                      ? 'bg-gold text-white shadow-[0_2px_12px_rgba(197,160,89,0.4)] group-hover:opacity-80'
                       : active
                       ? 'border border-gold text-gold bg-cream shadow-[0_0_0_3px_rgba(197,160,89,0.1)]'
-                      : 'border border-beige-dark/60 text-brown-muted/35 bg-transparent'
+                      : 'border border-beige-dark/60 text-brown-muted/35 bg-transparent group-hover:border-gold/40 group-hover:text-brown-muted/60 transition-colors'
                   }`}
                 >
                   {done ? <Check size={11} strokeWidth={2} /> : n}
@@ -1525,7 +1632,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
                 <span className={`hidden sm:block text-[9px] tracking-[0.12em] uppercase text-center max-w-[56px] leading-tight ${done ? 'text-brown-muted/55' : active ? 'text-gold font-semibold' : 'text-brown-muted/28'}`}>
                   {title}
                 </span>
-              </div>
+              </button>
               {i < visibleSteps.length - 1 && (
                 <div className={`flex-1 h-px mx-1 sm:mx-2 transition-all duration-500 ${done ? 'step-line-active' : 'bg-beige-dark/40'}`} />
               )}
@@ -1669,10 +1776,11 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
 
         {/* STEP 3 — Tədbir Proqramı */}
         {actualStep === 3 && (
-          <ProgramStepEditor
+          <ProgramStepWithTemplates
             rows={data.programSteps || []}
             onChange={(rows) => set('programSteps', rows)}
             tr={tr}
+            lang={lang}
           />
         )}
 
@@ -1683,10 +1791,10 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
               <Label>{tr.dresscode_type_label}</Label>
               <div className="grid grid-cols-2 gap-3 mt-1">
                 {[
-                  { id: 'blacktie',    label: 'Black Tie',    subKey: 'dresscode_blacktie_sub',    colors: ['#1A1A1A', '#F5F5F5', '#C9A84C'] },
-                  { id: 'cocktail',    label: 'Cocktail',     subKey: 'dresscode_cocktail_sub',    colors: ['#C4956A', '#E8D5C4', '#8B6347'] },
-                  { id: 'smartcasual', label: 'Smart Casual', subKey: 'dresscode_smartcasual_sub', colors: ['#6B8CAE', '#D4E4F0', '#4A6B8A'] },
-                  { id: 'creative',    label: 'Creative',     subKey: 'dresscode_creative_sub',    colors: ['#9B6B9B', '#F0C4D4', '#6B9B6B'] },
+                  { id: 'blacktie',    label: tr.dresscode_blacktie_label    || 'Black Tie',    subKey: 'dresscode_blacktie_sub',    colors: ['#1A1A1A', '#F5F5F5', '#C9A84C'] },
+                  { id: 'cocktail',    label: tr.dresscode_cocktail_label    || 'Cocktail',     subKey: 'dresscode_cocktail_sub',    colors: ['#C4956A', '#E8D5C4', '#8B6347'] },
+                  { id: 'smartcasual', label: tr.dresscode_smartcasual_label || 'Smart Casual', subKey: 'dresscode_smartcasual_sub', colors: ['#6B8CAE', '#D4E4F0', '#4A6B8A'] },
+                  { id: 'creative',    label: tr.dresscode_creative_label    || 'Creative',     subKey: 'dresscode_creative_sub',    colors: ['#9B6B9B', '#F0C4D4', '#6B9B6B'] },
                 ].map(({ id, label, subKey, colors }) => {
                   const sub = tr[subKey] || subKey
                   const isActive = data.dressCodePalette === id

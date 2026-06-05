@@ -21,7 +21,7 @@ export const DRESS_CODE_PALETTES = [
   },
   {
     id: 'blacktie',
-    label: { az: 'Black Tie', en: 'Black Tie', ru: 'Чёрный галстук' },
+    label: { az: 'Rəsmi', en: 'Black Tie', ru: 'Официальный' },
     colors: ['#1A1A1A', '#F5F5F5', '#C9A84C', '#8C8C8C'],
     description: {
       az: 'Tədbirin konseptinə uyğun geyim üslubu',
