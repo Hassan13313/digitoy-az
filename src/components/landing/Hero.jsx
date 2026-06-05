@@ -455,7 +455,7 @@ export default function Hero({ lang, onStart, onDemo }) {
             className="inline-flex items-center gap-2.5 px-[18px] py-2 rounded-full glass-gold text-[11px] font-semibold tracking-[0.32em] text-gold-dark uppercase mb-8"
           >
             <span className="text-gold">✦</span>
-            <span>Premium Digital Invitation</span>
+            <span>{tr.hero_badge}</span>
             <span className="text-gold">✦</span>
           </motion.div>
 
