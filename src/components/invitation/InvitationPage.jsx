@@ -7,7 +7,7 @@ import CountdownTimer from './CountdownTimer'
 import SeatingSearch from './SeatingSearch'
 import MusicToggle from './MusicToggle'
 import LanguageSwitcher from '../LanguageSwitcher'
-import EnvelopeOpening from './EnvelopeOpening'
+import OpeningVideo from './OpeningVideo'
 import RSVPSection from './RSVPSection'
 import Guestbook from './Guestbook'
 import EventTimeline from './EventTimeline'
@@ -159,28 +159,28 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
 
   return (
     <div className="relative min-h-screen bg-cream overflow-x-hidden">
-      {/* Envelope opening screen */}
-      <EnvelopeOpening
-        brideName={isCorp ? (weddingData.eventName || eventLabels[weddingData.eventType]) : weddingData.brideName}
-        groomName={isCouple ? weddingData.groomName : null}
-        eventLabel={eventLabels[weddingData.eventType] || tr.event_other}
-        eventType={weddingData.eventType || 'toy'}
+      {/* Opening video — manages its own lifecycle, fades into invitation */}
+      <OpeningVideo
         onComplete={() => {
           setEnvelopeOpened(true)
           setTimeout(() => musicRef.current?.play(), 1800)
         }}
       />
 
-      {/* Main invitation — fades in after envelope */}
+      {/* Music control — root level so position:fixed is viewport-relative, not transform-relative */}
+      {envelopeOpened && (
+        <MusicToggle ref={musicRef} lang={lang} videoId={audioVideoId} />
+      )}
+
+      {/* Main invitation — fades in after video */}
       <AnimatePresence>
         {envelopeOpened && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.9 }}
+            initial={{ opacity: 0, scale: 1.06, filter: 'blur(12px)' }}
+            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+            transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
           >
             <FloralBackground />
-            <MusicToggle ref={musicRef} lang={lang} videoId={audioVideoId} />
 
             {/* Sticky minimal header */}
             <header className="fixed top-0 left-0 right-0 z-40 bg-cream/88 backdrop-blur-md border-b border-beige-dark/30">

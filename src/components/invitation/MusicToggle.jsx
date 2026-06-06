@@ -75,8 +75,12 @@ const MusicToggle = forwardRef(function MusicToggle({ lang, videoId = DEFAULT_VI
         onClick={toggle}
         title={playing ? tr.inv_music_off : tr.inv_music_on}
         aria-label={playing ? tr.inv_music_off : tr.inv_music_on}
-        className="fixed bottom-8 right-8 w-14 h-14 rounded-full flex items-center justify-center glass glow-gold transition-all duration-base group"
-        style={{ zIndex: 'var(--z-toast)' }}
+        className="fixed w-14 h-14 rounded-full flex items-center justify-center glass glow-gold transition-all duration-base group"
+        style={{
+          bottom: 'max(20px, env(safe-area-inset-bottom, 20px))',
+          right: '20px',
+          zIndex: 55,
+        }}
       >
         {playing && (
           <span

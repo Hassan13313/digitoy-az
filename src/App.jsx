@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { motion } from 'framer-motion'
 import LandingPage from './components/landing/LandingPage'
 import InvitationPage from './components/invitation/InvitationPage'
 import PhotoShare from './components/invitation/PhotoShare'
@@ -120,6 +121,16 @@ export default function App() {
   const [weddingData, setWeddingData] = useState(defaultWedding)
   const [isAdmin,     setIsAdmin]     = useState(false)
   const [adminSlug,   setAdminSlug]   = useState('')
+  const [entering,    setEntering]    = useState(false)
+
+  /* Cream fade overlay before route switch — gives a luxury page-transition feel */
+  const navigateTo = useCallback((fn) => {
+    setEntering(true)
+    setTimeout(() => {
+      fn()
+      setTimeout(() => setEntering(false), 80)
+    }, 800)
+  }, [])
 
   useEffect(() => {
     /* Admin Panel — /admin/* route-ları */
@@ -228,18 +239,28 @@ export default function App() {
 
   if (view === 'admin-review') {
     return (
-      <div className="min-h-screen bg-cream">
-        <LandingPage
-          lang={lang} setLang={setLang}
-          weddingData={weddingData} setWeddingData={setWeddingData}
-          onViewInvitation={() => {
-            if (adminSlug) window.history.pushState({}, '', `/invite/${adminSlug}`)
-            setView('invite')
-          }}
-          onDemo={() => { window.history.pushState({}, '', '/demo'); setView('demo') }}
-          isAdmin={true} initialShowPreview={false}
-        />
-      </div>
+      <>
+        {entering && (
+          <motion.div
+            style={{ position: 'fixed', inset: 0, zIndex: 200, background: '#FDFAF4', pointerEvents: 'none' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          />
+        )}
+        <div className="min-h-screen bg-cream">
+          <LandingPage
+            lang={lang} setLang={setLang}
+            weddingData={weddingData} setWeddingData={setWeddingData}
+            onViewInvitation={() => navigateTo(() => {
+              if (adminSlug) window.history.pushState({}, '', `/invite/${adminSlug}`)
+              setView('invite')
+            })}
+            onDemo={() => navigateTo(() => { window.history.pushState({}, '', '/demo'); setView('demo') })}
+            isAdmin={true} initialShowPreview={false}
+          />
+        </div>
+      </>
     )
   }
 
@@ -271,13 +292,21 @@ export default function App() {
 
   return (
     <>
+      {entering && (
+        <motion.div
+          style={{ position: 'fixed', inset: 0, zIndex: 200, background: '#FDFAF4', pointerEvents: 'none' }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.48, ease: 'easeInOut' }}
+        />
+      )}
       <ScrollProgress />
       <div className="min-h-screen bg-cream" style={view === 'invitation' ? { display: 'none' } : {}}>
         <LandingPage
           lang={lang} setLang={setLang}
           weddingData={weddingData} setWeddingData={setWeddingData}
-          onViewInvitation={() => setView('invitation')}
-          onDemo={() => { window.history.pushState({}, '', '/demo'); setView('demo') }}
+          onViewInvitation={() => navigateTo(() => setView('invitation'))}
+          onDemo={() => navigateTo(() => { window.history.pushState({}, '', '/demo'); setView('demo') })}
           isAdmin={isAdmin}
         />
       </div>
