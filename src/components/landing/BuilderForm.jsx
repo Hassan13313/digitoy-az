@@ -889,9 +889,18 @@ function GalleryAdminStep({ data, isCouple, isCorp, isAdmin = false }) {
 
           {/* Mətn */}
           <div style={{ flex: 1 }}>
-            <p style={{ fontSize: 11, color: 'rgba(60,50,40,0.75)', fontFamily: '"Inter",system-ui,sans-serif', lineHeight: 1.7, marginBottom: 10 }}>
+            <p style={{ fontSize: 11, color: 'rgba(60,50,40,0.75)', fontFamily: '"Inter",system-ui,sans-serif', lineHeight: 1.7, marginBottom: 12 }}>
               Masa kartlarına bu QR kodu yapışdırın. Qonaqlar skan edərək toy şəkillərini birbaşa sistemə yükləyəcəklər.
             </p>
+            {/* Benefits grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 14px', marginBottom: 12 }}>
+              {['QR paylaşım', 'Şəxsi qalereya', 'HD yükləmə', 'ZIP export'].map(b => (
+                <div key={b} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Check size={10} strokeWidth={2.5} style={{ color: 'rgba(197,160,89,0.85)', flexShrink: 0 }} />
+                  <span style={{ fontSize: 10, color: 'rgba(60,50,40,0.7)', fontFamily: '"Inter",system-ui,sans-serif', letterSpacing: '0.03em' }}>{b}</span>
+                </div>
+              ))}
+            </div>
             <p style={{
               fontSize: 9, letterSpacing: '0.04em', color: 'rgba(197,160,89,0.8)',
               fontFamily: '"Inter",system-ui,sans-serif', wordBreak: 'break-all',
@@ -1029,14 +1038,10 @@ function decodeDataLocal(token) {
   } catch { return null }
 }
 
-/* ── Oturma Planı Editor ── */
-const SEATING_UI = {
-  az: { addTable: 'Masa əlavə et', addGuest: '+ Qonaq', tableName: 'Masa adı', guestName: 'Qonaq adı', noTables: 'Masa əlavə etmək üçün düyməyə basın' },
-  en: { addTable: 'Add Table', addGuest: '+ Guest', tableName: 'Table name', guestName: 'Guest name', noTables: 'Press the button to add a table' },
-  ru: { addTable: 'Добавить стол', addGuest: '+ Гость', tableName: 'Название стола', guestName: 'Имя гостя', noTables: 'Нажмите кнопку чтобы добавить стол' },
-}
-
-function parseTables(str) {
+/* ══════════════════════════════════════════════════
+   Oturma Planı — Phase 8.1 (SeatingMethodSelector)
+   ══════════════════════════════════════════════════ */
+function parseTableTexts(str) {
   if (!str?.trim()) return []
   return str.split(';').map((chunk, i) => {
     const colonIdx = chunk.indexOf(':')
@@ -1044,125 +1049,209 @@ function parseTables(str) {
     const guests = colonIdx >= 0
       ? chunk.slice(colonIdx + 1).split(',').map(g => g.trim()).filter(Boolean)
       : []
-    return { id: `t${i}_${Date.now()}`, name: name || `Masa ${i + 1}`, guests }
+    return { id: `t${i}_${Date.now()}`, name: name || `Masa ${i + 1}`, text: guests.join('\n') }
   }).filter(t => t.name)
 }
 
-function serializeTables(tables) {
+function serializeTableTexts(tables) {
   return tables.map(t => {
-    const validGuests = t.guests.filter(Boolean)
-    return validGuests.length ? `${t.name}: ${validGuests.join(', ')}` : t.name
+    const guests = t.text.split('\n').map(g => g.trim()).filter(Boolean)
+    return guests.length ? `${t.name}: ${guests.join(', ')}` : t.name
   }).join('; ')
 }
 
-function SeatingPlanEditor({ value, onChange, lang }) {
-  const L = SEATING_UI[lang] || SEATING_UI.az
-  const [tables, setTables] = useState(() => parseTables(value))
+const DIGITORY_FORMATS = ['Excel', 'PDF', 'Word', 'Screenshot', 'Şəkil']
 
-  const commit = (next) => { setTables(next); onChange(serializeTables(next)) }
+function SeatingMethodSelector({ seatingPlan, seatingMethod, onPlanChange, onMethodChange }) {
+  const [tables, setTables] = useState(() => parseTableTexts(seatingPlan))
+  const [tableCount, setTableCount] = useState('')
 
-  const addTable = () => commit([...tables, { id: `t${Date.now()}`, name: `Masa ${tables.length + 1}`, guests: [] }])
-  const removeTable = (id) => commit(tables.filter(t => t.id !== id))
-  const renameTable = (id, name) => commit(tables.map(t => t.id === id ? { ...t, name } : t))
-  const addGuest = (id) => commit(tables.map(t => t.id === id ? { ...t, guests: [...t.guests, ''] } : t))
-  const removeGuest = (id, gi) => commit(tables.map(t => t.id === id ? { ...t, guests: t.guests.filter((_, i) => i !== gi) } : t))
-  const editGuest = (id, gi, val) => commit(tables.map(t => t.id === id ? { ...t, guests: t.guests.map((g, i) => i === gi ? val : g) } : t))
+  const commit = (next) => { setTables(next); onPlanChange(serializeTableTexts(next)) }
 
-  const cardStyle = {
-    border: '1px solid rgba(197,160,89,0.28)',
-    background: 'rgba(253,250,244,0.9)',
-    padding: '16px 16px 12px',
-    marginBottom: 0,
-  }
-  const inputBase = {
-    background: 'transparent',
-    border: 'none',
-    borderBottom: '1px solid rgba(197,160,89,0.35)',
-    outline: 'none',
-    fontFamily: 'inherit',
-    color: '#1a1a1a',
-    width: '100%',
-    padding: '6px 0',
-  }
-  const iconBtn = {
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    border: '1px solid rgba(197,160,89,0.25)', background: 'transparent',
-    color: 'rgba(140,123,107,0.65)', cursor: 'pointer', flexShrink: 0,
+  const generateTables = () => {
+    const n = Math.min(parseInt(tableCount, 10) || 0, 200)
+    if (n < 1) return
+    const cur = tables.length
+    if (n <= cur) { commit(tables.slice(0, n)); return }
+    const extra = Array.from({ length: n - cur }, (_, i) => ({
+      id: `t${cur + i}_${Date.now()}`, name: `Masa ${cur + i + 1}`, text: '',
+    }))
+    commit([...tables, ...extra])
   }
 
+  const s = {
+    changeBtn: {
+      background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+      fontSize: 10, color: 'rgba(197,160,89,0.85)', letterSpacing: '0.1em',
+      textDecoration: 'underline', textUnderlineOffset: 3, flexShrink: 0,
+    },
+    addBtn: {
+      minHeight: 44, border: '1px dashed rgba(197,160,89,0.4)', background: 'transparent',
+      color: 'rgba(197,160,89,0.85)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase',
+      fontFamily: 'inherit', cursor: 'pointer',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+    },
+  }
+
+  /* ── Method not chosen ── */
+  if (!seatingMethod) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <button type="button" onClick={() => onMethodChange('self')}
+          style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '18px 20px', textAlign: 'left', border: '1px solid rgba(197,160,89,0.35)', background: 'rgba(253,250,244,0.85)', cursor: 'pointer', transition: 'border-color 0.2s' }}
+          onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(197,160,89,0.7)'}
+          onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(197,160,89,0.35)'}
+        >
+          <div style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid rgba(197,160,89,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <User size={15} strokeWidth={1.5} style={{ color: 'rgba(197,160,89,0.85)' }} />
+          </div>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#1a1a1a', marginBottom: 3 }}>Özüm dolduracağam</div>
+            <div style={{ fontSize: 11, color: 'rgba(140,123,107,0.7)', lineHeight: 1.5 }}>Masa sayını bildirin, qonaqları özünüz daxil edin</div>
+          </div>
+        </button>
+
+        <button type="button" onClick={() => onMethodChange('digitory')}
+          style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '18px 20px', textAlign: 'left', border: '1.5px solid rgba(197,160,89,0.65)', background: 'linear-gradient(135deg, rgba(253,250,244,0.95) 0%, rgba(250,243,220,0.95) 100%)', cursor: 'pointer', transition: 'border-color 0.2s, box-shadow 0.2s' }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(197,160,89,1)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(197,160,89,0.15)' }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(197,160,89,0.65)'; e.currentTarget.style.boxShadow = 'none' }}
+        >
+          <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(197,160,89,0.15)', border: '1px solid rgba(197,160,89,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Sparkles size={15} strokeWidth={1.5} style={{ color: 'rgba(197,160,89,1)' }} />
+          </div>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+              <span style={{ fontSize: 13, fontWeight: 500, color: '#1a1a1a' }}>DigiToy doldursun</span>
+              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', background: 'rgba(197,160,89,0.18)', border: '1px solid rgba(197,160,89,0.55)', color: 'rgba(160,118,30,1)', padding: '2px 7px' }}>+15 AZN</span>
+            </div>
+            <div style={{ fontSize: 11, color: 'rgba(140,123,107,0.7)', lineHeight: 1.5 }}>Qonaq siyahısını göndərin, biz sisteme yerləşdirərik</div>
+          </div>
+        </button>
+      </div>
+    )
+  }
+
+  /* ── DigiToy service card ── */
+  if (seatingMethod === 'digitory') {
+    return (
+      <div style={{ border: '1.5px solid rgba(197,160,89,0.65)', background: 'linear-gradient(135deg, rgba(253,250,244,0.95) 0%, rgba(250,243,220,0.95) 100%)', padding: '22px 20px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 8 }}>
+              <Sparkles size={14} strokeWidth={1.5} style={{ color: 'rgba(197,160,89,1)' }} />
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(197,160,89,1)' }}>DigiToy Xidməti</span>
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', background: 'rgba(197,160,89,0.18)', border: '1px solid rgba(197,160,89,0.55)', color: 'rgba(160,118,30,1)', padding: '2px 9px' }}>+15 AZN</span>
+            </div>
+            <p style={{ fontSize: 12, color: 'rgba(60,50,40,0.8)', lineHeight: 1.7, margin: 0, maxWidth: 380 }}>
+              Qonaq siyahısını Excel, PDF, Word, screenshot və ya şəkil kimi göndərin. Oturma planını sizin üçün sistemə yerləşdirəcəyik.
+            </p>
+          </div>
+          <button type="button" onClick={() => onMethodChange(null)} style={s.changeBtn}>Dəyiş</button>
+        </div>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 16 }}>
+          {DIGITORY_FORMATS.map(fmt => (
+            <span key={fmt} style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.08em', border: '1px solid rgba(197,160,89,0.4)', color: 'rgba(140,100,30,0.9)', padding: '5px 12px', background: 'rgba(253,250,244,0.9)' }}>
+              {fmt}
+            </span>
+          ))}
+        </div>
+        <p style={{ fontSize: 10, color: 'rgba(140,123,107,0.65)', lineHeight: 1.6, margin: '14px 0 0' }}>
+          Sifariş tamamlandıqdan sonra qonaq siyahınızı WhatsApp vasitəsilə bizə göndərin.
+        </p>
+      </div>
+    )
+  }
+
+  /* ── Self mode ── */
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {tables.length === 0 && (
-        <p style={{ color: 'rgba(140,123,107,0.45)', fontSize: 12, fontFamily: 'serif', fontStyle: 'italic', textAlign: 'center', padding: '20px 0' }}>
-          {L.noTables}
-        </p>
-      )}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'rgba(253,250,244,0.7)', border: '1px solid rgba(197,160,89,0.22)' }}>
+        <span style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(140,123,107,0.65)' }}>Özüm dolduracağam</span>
+        <button type="button" onClick={() => onMethodChange(null)} style={s.changeBtn}>Dəyiş</button>
+      </div>
 
+      {/* Table count generator */}
+      <div style={{ display: 'flex', gap: 8 }}>
+        <input
+          type="number" min="1" max="200"
+          value={tableCount}
+          onChange={e => setTableCount(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && generateTables()}
+          placeholder="Masa sayı (məs: 15)"
+          style={{ flex: 1, minHeight: 44, padding: '0 14px', border: '1px solid rgba(197,160,89,0.35)', background: 'rgba(253,250,244,0.85)', outline: 'none', fontFamily: 'inherit', fontSize: 13, color: '#1a1a1a' }}
+        />
+        <button type="button" onClick={generateTables}
+          style={{ minHeight: 44, padding: '0 18px', border: '1px solid rgba(197,160,89,0.55)', background: 'rgba(197,160,89,0.08)', color: 'rgba(160,118,30,1)', fontSize: 10, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'inherit', cursor: 'pointer', flexShrink: 0, transition: 'background 0.2s' }}
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(197,160,89,0.18)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'rgba(197,160,89,0.08)'}
+        >
+          Yarat
+        </button>
+      </div>
+
+      {/* Table cards */}
       {tables.map((table) => (
-        <div key={table.id} style={cardStyle}>
-          {/* Masa başlığı */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+        <div key={table.id} style={{ border: '1px solid rgba(197,160,89,0.25)', background: 'rgba(253,250,244,0.9)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderBottom: '1px solid rgba(197,160,89,0.18)' }}>
             <input
-              type="text"
-              value={table.name}
-              onChange={(e) => renameTable(table.id, e.target.value)}
-              placeholder={L.tableName}
-              style={{ ...inputBase, minHeight: 44, fontSize: 13, fontWeight: 500, letterSpacing: '0.06em', flex: 1 }}
+              type="text" value={table.name}
+              onChange={e => commit(tables.map(t => t.id === table.id ? { ...t, name: e.target.value } : t))}
+              style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontFamily: 'inherit', fontSize: 12, fontWeight: 600, letterSpacing: '0.06em', color: '#1a1a1a', minHeight: 36 }}
             />
-            <button type="button" onClick={() => removeTable(table.id)}
-              style={{ ...iconBtn, minWidth: 36, minHeight: 36 }}>
+            <button type="button" onClick={() => commit(tables.filter(t => t.id !== table.id))}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 28, minHeight: 28, border: 'none', background: 'transparent', cursor: 'pointer', color: 'rgba(140,123,107,0.5)' }}>
               <X size={13} strokeWidth={1.5} />
             </button>
           </div>
-
-          {/* Qonaqlar */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {table.guests.map((guest, gi) => (
-              <div key={gi} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <input
-                  type="text"
-                  value={guest}
-                  onChange={(e) => editGuest(table.id, gi, e.target.value)}
-                  placeholder={L.guestName}
-                  style={{ ...inputBase, minHeight: 40, fontSize: 12, fontWeight: 300, flex: 1 }}
-                />
-                <button type="button" onClick={() => removeGuest(table.id, gi)}
-                  style={{ ...iconBtn, border: 'none', minWidth: 28, minHeight: 28 }}>
-                  <Minus size={11} strokeWidth={1.5} />
-                </button>
-              </div>
-            ))}
-            <button type="button" onClick={() => addGuest(table.id)}
-              style={{
-                alignSelf: 'flex-start', marginTop: 6, minHeight: 36, padding: '0 10px',
-                border: '1px solid rgba(197,160,89,0.3)', background: 'transparent',
-                color: 'rgba(197,160,89,0.85)', fontSize: 10, letterSpacing: '0.14em',
-                fontFamily: 'inherit', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: 4,
-              }}>
-              <Plus size={10} strokeWidth={1.5} />
-              {L.addGuest}
-            </button>
+          <textarea
+            value={table.text}
+            onChange={e => commit(tables.map(t => t.id === table.id ? { ...t, text: e.target.value } : t))}
+            placeholder={'Murad Əliyev\nLeyla Məmmədova\nNicat Həsənov'}
+            rows={4}
+            style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', background: 'transparent', border: 'none', outline: 'none', resize: 'vertical', fontFamily: 'inherit', fontSize: 12, fontWeight: 300, color: '#1a1a1a', lineHeight: 1.7 }}
+          />
+          <div style={{ padding: '4px 14px 8px', fontSize: 9, color: 'rgba(140,123,107,0.45)', letterSpacing: '0.06em' }}>
+            {table.text.split('\n').filter(g => g.trim()).length} qonaq
           </div>
         </div>
       ))}
 
-      {/* Masa əlavə et */}
-      <button type="button" onClick={addTable}
-        style={{
-          minHeight: 44,
-          border: '1px dashed rgba(197,160,89,0.4)',
-          background: 'transparent',
-          color: 'rgba(197,160,89,0.85)',
-          fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase',
-          fontFamily: 'inherit', cursor: 'pointer',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-        }}>
+      <button type="button" onClick={() => commit([...tables, { id: `t${Date.now()}`, name: `Masa ${tables.length + 1}`, text: '' }])} style={s.addBtn}
+        onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(197,160,89,0.7)'}
+        onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(197,160,89,0.4)'}
+      >
         <Plus size={11} strokeWidth={1.5} />
-        {L.addTable}
+        Masa əlavə et
       </button>
     </div>
   )
+}
+
+const STEP_DESCRIPTIONS = {
+  az: [
+    'Toyunuz haqqında əsas məlumatları daxil edin.',
+    'Tədbirinizin keçiriləcəyi məkanı xəritədə tapın.',
+    'Günün əsas anları üçün proqram cədvəli yaradın.',
+    'Qonaqlar üçün geyim tərzi seçin.',
+    'Qonaqların öz masalarını asanlıqla tapması üçün.',
+    'QR kod vasitəsilə xatirə şəkillərini toplayın.',
+  ],
+  en: [
+    'Enter the key details about your event.',
+    'Find and pin your event venue on the map.',
+    'Create a schedule for the key moments of the day.',
+    'Choose a dress code recommendation for your guests.',
+    'Help guests find their table quickly and easily.',
+    'Collect memories via QR photo sharing.',
+  ],
+  ru: [
+    'Введите основную информацию о мероприятии.',
+    'Найдите и отметьте место проведения на карте.',
+    'Создайте программу на весь день.',
+    'Выберите дресс-код для ваших гостей.',
+    'Помогите гостям быстро найти свой стол.',
+    'Собирайте воспоминания через QR-фотообмен.',
+  ],
 }
 
 export default function BuilderForm({ lang, initialData, initialStep = null, onSubmit, isAdmin = false }) {
@@ -1605,36 +1694,39 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
       </div>
 
       {/* Step indicator */}
-      <div className="flex items-center mb-6 sm:mb-14">
+      <div className="flex items-center mb-8 sm:mb-12">
         {visibleSteps.map((actualN, i) => {
           const n = i + 1
           const done = n < step
           const active = n === step
           const title = steps[actualN - 1]
           return (
-            <div key={actualN} className="flex items-center flex-1 last:flex-none">
+            <div key={actualN} className="flex items-center flex-1 last:flex-none last:flex-initial">
               <button
                 type="button"
                 onClick={() => setStep(n)}
-                className="flex flex-col items-center gap-2 cursor-pointer focus:outline-none group min-w-[44px] min-h-[44px] justify-center touch-manipulation"
+                className="flex flex-col items-center gap-2.5 focus:outline-none group min-w-[48px] min-h-[48px] justify-center touch-manipulation"
               >
-                <div
-                  className={`w-7 h-7 flex items-center justify-center text-[10px] font-medium transition-all duration-300 ${
-                    done
-                      ? 'bg-gold text-white shadow-[0_2px_12px_rgba(197,160,89,0.4)] group-hover:opacity-80'
-                      : active
-                      ? 'border border-gold text-gold bg-cream shadow-[0_0_0_3px_rgba(197,160,89,0.1)]'
-                      : 'border border-beige-dark/60 text-brown-muted/35 bg-transparent group-hover:border-gold/40 group-hover:text-brown-muted/60 transition-colors'
-                  }`}
-                >
-                  {done ? <Check size={11} strokeWidth={2} /> : n}
+                <div className={`w-8 h-8 flex items-center justify-center transition-all duration-250 ${
+                  done
+                    ? 'bg-gold shadow-[0_2px_10px_rgba(197,160,89,0.35)] group-hover:opacity-80'
+                    : active
+                    ? 'border-2 border-gold bg-cream shadow-[0_0_0_4px_rgba(197,160,89,0.08)]'
+                    : 'border border-beige-dark/50 bg-transparent group-hover:border-gold/40'
+                }`}>
+                  {done
+                    ? <Check size={12} strokeWidth={2.5} className="text-white" />
+                    : <span className={`text-[11px] font-medium font-sans ${active ? 'text-gold' : 'text-brown-muted/38 group-hover:text-brown-muted/60'}`}>{n}</span>
+                  }
                 </div>
-                <span className={`hidden sm:block text-[9px] tracking-[0.12em] uppercase text-center max-w-[56px] leading-tight ${done ? 'text-brown-muted/55' : active ? 'text-gold font-semibold' : 'text-brown-muted/28'}`}>
+                <span className={`hidden sm:block text-[8.5px] tracking-[0.14em] uppercase text-center max-w-[60px] leading-tight font-sans font-medium transition-colors duration-200 ${
+                  done ? 'text-brown-muted/45' : active ? 'text-gold' : 'text-brown-muted/28 group-hover:text-brown-muted/45'
+                }`}>
                   {title}
                 </span>
               </button>
               {i < visibleSteps.length - 1 && (
-                <div className={`flex-1 h-px mx-1 sm:mx-2 transition-all duration-500 ${done ? 'step-line-active' : 'bg-beige-dark/40'}`} />
+                <div className={`flex-1 h-px mx-2 sm:mx-3 transition-colors duration-500 ${done ? 'step-line-active' : 'bg-beige-dark/35'}`} />
               )}
             </div>
           )
@@ -1642,32 +1734,38 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
       </div>
 
       {/* Step content */}
-      <div className="bg-cream border border-beige-dark/60 px-4 sm:px-10 py-8 sm:py-12 overflow-visible min-h-[420px] sm:min-h-[520px]">
-        <h3 className="font-serif text-xl text-ink mb-10 font-light tracking-tight">{steps[actualStep - 1]}</h3>
+      <div className="bg-cream border border-beige-dark/40 shadow-[0_1px_4px_rgba(0,0,0,0.04),0_8px_32px_rgba(197,160,89,0.04)] px-6 sm:px-12 py-10 sm:py-14 overflow-visible">
+        <div className="mb-8 pb-6 border-b border-beige-dark/25">
+          <h3 className="font-serif text-2xl text-ink font-light tracking-tight mb-2">{steps[actualStep - 1]}</h3>
+          <p className="text-[11.5px] text-brown-muted/60 font-sans font-light leading-relaxed">{(STEP_DESCRIPTIONS[lang] || STEP_DESCRIPTIONS.az)[actualStep - 1]}</p>
+        </div>
 
         {/* STEP 1 */}
         {actualStep === 1 && (
-          <div className="space-y-8 pb-10 sm:pb-64">
+          <div className="space-y-8 pb-10">
             {/* Tədbir növü */}
             <div>
               <Label>{tr.event_type || 'Tədbir növü'}</Label>
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mt-1">
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mt-2">
                 {EVENT_TYPES.map(({ id }) => {
                   const Icon = EVENT_ICONS[id]
                   const label = tr[`event_${id}`]
+                  const selected = data.eventType === id
                   return (
                     <button
                       key={id}
                       type="button"
                       onClick={() => set('eventType', id)}
-                      className={`flex flex-col items-center gap-2.5 py-5 border transition-all duration-200 ${
-                        data.eventType === id
-                          ? 'border-gold bg-gold/[0.04] text-gold'
-                          : 'border-beige-dark/70 text-brown-muted/70 hover:border-gold/40 hover:text-brown-muted'
+                      className={`flex flex-col items-center gap-3 py-7 border transition-all duration-200 group touch-manipulation ${
+                        selected
+                          ? 'border-gold bg-gold/[0.05] text-gold shadow-[0_4px_20px_rgba(197,160,89,0.12)]'
+                          : 'border-beige-dark/55 text-brown-muted/55 hover:border-gold/45 hover:text-gold/80 hover:bg-gold/[0.02] hover:shadow-[0_2px_12px_rgba(197,160,89,0.07)]'
                       }`}
                     >
-                      <Icon size={16} strokeWidth={1.5} />
-                      <span className="text-[10px] tracking-[0.12em] uppercase">{label}</span>
+                      <div className={`transition-transform duration-200 ${selected ? '' : 'group-hover:scale-110'}`}>
+                        <Icon size={22} strokeWidth={1.4} />
+                      </div>
+                      <span className="text-[9.5px] tracking-[0.16em] uppercase font-sans font-medium">{label}</span>
                     </button>
                   )
                 })}
@@ -1855,9 +1953,11 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
           <div className="space-y-6">
             <div>
               <Label>{tr.seating_label}</Label>
-              <SeatingPlanEditor
-                value={data.seatingPlan}
-                onChange={(val) => set('seatingPlan', val)}
+              <SeatingMethodSelector
+                seatingPlan={data.seatingPlan}
+                seatingMethod={data.seatingMethod}
+                onPlanChange={(val) => set('seatingPlan', val)}
+                onMethodChange={(val) => set('seatingMethod', val)}
                 lang={lang}
               />
             </div>
@@ -1871,24 +1971,24 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
       </div>
 
       {/* Navigation */}
-      <div className="flex justify-between mt-6 sm:mt-8">
+      <div className="flex justify-between mt-8 sm:mt-10">
         <button
           type="button"
           onClick={prev}
           disabled={step === 1}
-          className="flex items-center gap-2 px-4 sm:px-7 py-3 sm:py-3.5 min-h-[44px] border border-beige-dark/70 text-brown-muted text-[10px] tracking-[0.22em] uppercase hover:border-gold/50 hover:text-gold transition-all duration-200 active:scale-95 disabled:opacity-25 disabled:cursor-not-allowed touch-manipulation"
+          className="flex items-center gap-2 px-5 sm:px-8 py-3 sm:py-3.5 min-h-[46px] border border-beige-dark/55 text-brown-muted/70 text-[10px] tracking-[0.22em] uppercase font-sans font-medium hover:border-gold/55 hover:text-gold hover:bg-gold/[0.02] transition-all duration-200 active:scale-[0.97] disabled:opacity-20 disabled:cursor-not-allowed touch-manipulation"
         >
-          <ChevronLeft size={13} strokeWidth={1.5} />
+          <ChevronLeft size={12} strokeWidth={2} />
           {tr.btn_prev}
         </button>
 
         {step < VISIBLE_TOTAL ? (
-          <button type="button" onClick={next} className="flex items-center gap-2 btn-gold min-h-[44px] touch-manipulation">
+          <button type="button" onClick={next} className="flex items-center gap-2.5 btn-gold min-h-[46px] shadow-[0_4px_18px_rgba(197,160,89,0.2)] touch-manipulation">
             {tr.btn_next}
-            <ChevronRight size={13} strokeWidth={1.5} />
+            <ChevronRight size={12} strokeWidth={2} />
           </button>
         ) : (
-          <button type="button" onClick={handleSubmit} disabled={submitLoading} className="btn-gold min-h-[44px] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed">
+          <button type="button" onClick={handleSubmit} disabled={submitLoading} className="btn-gold min-h-[46px] shadow-[0_4px_18px_rgba(197,160,89,0.2)] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed">
             {submitLoading ? '…' : tr.btn_create}
           </button>
         )}

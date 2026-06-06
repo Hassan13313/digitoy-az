@@ -94,6 +94,7 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '', draftCode = '
     `📍 Məkan: ${data.venueName || '—'}`,
     `👗 Geyim: ${dressLabel}`,
     ...(programCount > 0 ? [`📋 Proqram: ${programCount} addım`] : []),
+    ...(data.seatingMethod === 'digitory' ? [`🪑 Oturma planı: *DigiToy dolduracaq* (+15 AZN)`] : []),
     `━━━━━━━━━━━━━━━━━━`,
     ...(draftCode ? [`📋 Sifariş Kodu: *${draftCode}*`] : []),
   ]

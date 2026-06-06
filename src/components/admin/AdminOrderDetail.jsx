@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Package, User, Calendar, MapPin, Shirt, ExternalLink, MessageCircle, CheckCircle, XCircle, Trash2, Copy, Link2 } from 'lucide-react'
+import { ArrowLeft, Package, User, Users, Calendar, MapPin, Shirt, ExternalLink, MessageCircle, CheckCircle, XCircle, Trash2, Copy, Link2 } from 'lucide-react'
 import { getDraftByCode, approveDraft, rejectDraft, deleteDraft } from '../../utils/api'
 import AdminRSVPBlock from './AdminRSVPBlock'
 
@@ -532,6 +532,12 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
         <InfoRow icon={Calendar} label="Tarix"  value={[dateStr, timeStr].filter(Boolean).join(', ')} />
         <InfoRow icon={MapPin}   label="Məkan"  value={fd.venueName} />
         <InfoRow icon={Shirt}    label="Dress Code" value={fd.dressCodePalette} />
+        {fd.seatingMethod === 'digitory' && (
+          <InfoRow icon={Users} label="Oturma Planı" value="DigiToy dolduracaq (+15 AZN)" />
+        )}
+        {fd.seatingMethod === 'self' && fd.seatingPlan && (
+          <InfoRow icon={Users} label="Oturma Planı" value="Müştəri doldurdu" />
+        )}
         {draft.customer_phone && (
           <InfoRow icon={User} label="Telefon" value={draft.customer_phone} />
         )}

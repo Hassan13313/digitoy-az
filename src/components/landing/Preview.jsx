@@ -164,7 +164,10 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
         )
       })(),
     },
-    { icon: Users, label: tr.seating_label,  value: data.seatingPlan ? tr.seating_yes : tr.seating_no },
+    { icon: Users, label: tr.seating_label,
+      value: data.seatingMethod === 'digitory'
+        ? 'DigiToy (+15 AZN)'
+        : data.seatingPlan ? tr.seating_yes : tr.seating_no },
     { icon: Image, label: tr.gallery_label,   value: data.galleryLink ? tr.gallery_yes : tr.gallery_no },
   ]
 

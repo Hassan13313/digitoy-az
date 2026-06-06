@@ -12,6 +12,7 @@ export const defaultWedding = {
   dressCodePalette: 'pastel',
   dressCodeDescription: '',
   seatingPlan: '',
+  seatingMethod: null,
   galleryLink: '',
   programSteps: [],
   package: 'SADE',
