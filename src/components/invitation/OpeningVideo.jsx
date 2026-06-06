@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import t from '../../data/translations'
 
 /* ─────────────────────────────────────────────────────────
-   OpeningVideo — Phase 7.6
+   OpeningVideo — Phase 7.7
    Purely visual cinematic intro. Always silent.
    Audio belongs exclusively to the invitation music system.
 
@@ -11,14 +11,11 @@ import t from '../../data/translations'
      mount        → 200ms grace timer starts; video loads silently
      <200ms ready → video plays immediately, poster never shown
      >200ms ready → poster appears; fades when video becomes ready
-     near-end     → zoom + dissolve into invitation
+     near-end     → dissolve into invitation (opacity only, no zoom)
      error/block  → poster held briefly, then dissolve into invitation
 ───────────────────────────────────────────────────────── */
-const ZOOM_DUR     = 500
-const FADE_DUR     = 1300
-const INV_DELAY    = 350
-const TOTAL_DUR    = FADE_DUR + INV_DELAY + 80
-const FADE_LEAD    = (TOTAL_DUR / 1000) - 0.1
+const FADE_DUR     = 1100
+const FADE_LEAD    = FADE_DUR / 1000 + 0.3
 const CROSSFADE_MS = 700
 
 export default function OpeningVideo({ onComplete, weddingData, lang = 'az' }) {
@@ -27,7 +24,6 @@ export default function OpeningVideo({ onComplete, weddingData, lang = 'az' }) {
   const triggeredRef   = useRef(false)
   const posterTimerRef = useRef(null)
 
-  const [zooming,    setZooming]    = useState(false)
   const [fading,     setFading]     = useState(false)
   const [gone,       setGone]       = useState(false)
   const [crossfaded, setCrossfaded] = useState(false)
@@ -39,12 +35,9 @@ export default function OpeningVideo({ onComplete, weddingData, lang = 'az' }) {
   const startFade = useCallback(() => {
     if (triggeredRef.current) return
     triggeredRef.current = true
-    setZooming(true)
-    setTimeout(() => {
-      setFading(true)
-      onCompleteRef.current()
-    }, INV_DELAY)
-    setTimeout(() => setGone(true), TOTAL_DUR)
+    setFading(true)
+    onCompleteRef.current()
+    setTimeout(() => setGone(true), FADE_DUR + 100)
   }, [])
 
   useEffect(() => {
@@ -113,14 +106,10 @@ export default function OpeningVideo({ onComplete, weddingData, lang = 'az' }) {
         background: '#FDFAF4',
         overflow: 'hidden',
       }}
-      initial={{ opacity: 1, scale: 1 }}
-      animate={{
-        scale:   zooming ? 1.18 : 1,
-        opacity: fading  ? 0    : 1,
-      }}
+      initial={{ opacity: 1 }}
+      animate={{ opacity: fading ? 0 : 1 }}
       transition={{
-        scale:   { duration: ZOOM_DUR / 1000, ease: [0.22, 1, 0.36, 1] },
-        opacity: { duration: FADE_DUR / 1000, ease: 'easeInOut' },
+        opacity: { duration: FADE_DUR / 1000, ease: [0.22, 1, 0.36, 1] },
       }}
     >
       {/* Video — hidden behind poster until crossfade */}
