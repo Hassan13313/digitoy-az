@@ -214,6 +214,7 @@ const t = {
     venue_search_success: 'Məkan seçildi — naviqasiya hazırdır ✓',
     venue_search_no_results: 'Nəticə tapılmadı. Fərqli ad cəhd edin.',
     venue_search_searching: 'Axtarılır...',
+    opening_tagline: 'DƏVƏTNAMƏDƏN DAHA ARTIĞI',
   },
   en: {
     app_name: 'Digitoy.az',
@@ -430,6 +431,7 @@ const t = {
     venue_search_success: 'Venue selected and maps synchronized!',
     venue_search_no_results: 'No results found. Try a different name.',
     venue_search_searching: 'Searching...',
+    opening_tagline: 'MORE THAN AN INVITATION',
   },
   ru: {
     app_name: 'Digitoy.az',
@@ -646,6 +648,7 @@ const t = {
     venue_search_success: 'Место выбрано и карты синхронизированы!',
     venue_search_no_results: 'Ничего не найдено. Попробуйте другое название.',
     venue_search_searching: 'Поиск...',
+    opening_tagline: 'БОЛЬШЕ, ЧЕМ ПРИГЛАШЕНИЕ',
   },
 }
 

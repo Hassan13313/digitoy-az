@@ -165,6 +165,8 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
           setEnvelopeOpened(true)
           setTimeout(() => musicRef.current?.play(), 1800)
         }}
+        weddingData={weddingData}
+        lang={lang}
       />
 
       {/* Music control — root level so position:fixed is viewport-relative, not transform-relative */}
