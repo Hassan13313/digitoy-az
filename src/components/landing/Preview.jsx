@@ -106,7 +106,16 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
 
   const handleWaClick = useCallback(async () => {
     if (waLoading) return
-    const sid = localStorage.getItem('digitoy_session_id') || ''
+    // Open popup synchronously inside the click gesture.
+    // After any await, iOS Safari and many Android browsers block window.open().
+    const popup = window.open('', '_blank')
+    let sid = localStorage.getItem('digitoy_session_id') || ''
+    if (!sid) {
+      sid = (typeof crypto !== 'undefined' && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : Math.random().toString(36).slice(2) + Date.now().toString(36)
+      localStorage.setItem('digitoy_session_id', sid)
+    }
     const pkg = data.package || data.selectedPackage || 'SADE'
     setWaLoading(true)
     setWaError('')
@@ -114,8 +123,11 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
       const result    = await submitDraft(sid, data, pkg)
       const draftCode = result?.draft_code
       if (!draftCode) throw new Error('draft_code alınmadı')
-      window.open(buildWhatsAppUrl(data, lang, ADMIN_WA, slug, draftCode), '_blank')
+      const waUrl = buildWhatsAppUrl(data, lang, ADMIN_WA, slug, draftCode)
+      if (popup) popup.location.href = waUrl
+      else window.open(waUrl, '_blank')
     } catch {
+      if (popup) popup.close()
       setWaError('Sifariş göndərilə bilmədi. Yenidən cəhd edin.')
     } finally {
       setWaLoading(false)

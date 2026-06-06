@@ -1449,6 +1449,9 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
   /* ── WhatsApp sifariş — submit_draft uğurlu olduqda açılır ── */
   const handleWhatsAppOrder = async function() {
     if (waLoading) return
+    // Open popup synchronously inside the click gesture.
+    // After any await, iOS Safari and many Android browsers block window.open().
+    const popup = window.open('', '_blank')
     const slug = computeSlug()
     const sid  = sessionIdRef.current
     const pkg  = data.package || data.selectedPackage || pkgId || 'SADE'
@@ -1459,8 +1462,10 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
       const draftCode = result?.draft_code
       if (!draftCode) throw new Error('draft_code alınmadı')
       const waUrl = buildWhatsAppUrl(data, lang, WHATSAPP_NUMBER, slug, draftCode)
-      window.open(waUrl, '_blank')
+      if (popup) popup.location.href = waUrl
+      else window.open(waUrl, '_blank')
     } catch {
+      if (popup) popup.close()
       setWaOrderError('Sifariş göndərilə bilmədi. Yenidən cəhd edin.')
     } finally {
       setWaLoading(false)
