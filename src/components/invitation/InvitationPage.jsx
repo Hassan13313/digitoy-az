@@ -178,9 +178,9 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
       <AnimatePresence>
         {envelopeOpened && (
           <motion.div
-            initial={{ opacity: 0, scale: 1.06, filter: 'blur(12px)' }}
+            initial={{ opacity: 0, scale: 1.015, filter: 'blur(16px)' }}
             animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-            transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
           >
             <FloralBackground />
 

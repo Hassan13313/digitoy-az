@@ -14,8 +14,8 @@ import t from '../../data/translations'
      near-end     → dissolve into invitation (opacity only, no zoom)
      error/block  → poster held briefly, then dissolve into invitation
 ───────────────────────────────────────────────────────── */
-const FADE_DUR     = 1100
-const FADE_LEAD    = FADE_DUR / 1000 + 0.3
+const FADE_DUR     = 1700
+const FADE_LEAD    = 1.9
 const CROSSFADE_MS = 700
 
 export default function OpeningVideo({ onComplete, weddingData, lang = 'az' }) {
@@ -37,7 +37,7 @@ export default function OpeningVideo({ onComplete, weddingData, lang = 'az' }) {
     triggeredRef.current = true
     setFading(true)
     onCompleteRef.current()
-    setTimeout(() => setGone(true), FADE_DUR + 100)
+    setTimeout(() => setGone(true), FADE_DUR + 200)
   }, [])
 
   useEffect(() => {
