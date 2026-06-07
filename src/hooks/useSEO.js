@@ -34,7 +34,7 @@ export function useSEO({ title, description, path = '/', image, type = 'website'
     if (title) document.title = title
 
     setMeta('name', 'description', description)
-    setMeta('name', 'robots', noindex ? 'noindex, nofollow' : 'index, follow')
+    setMeta('name', 'robots', noindex ? 'noindex, follow' : 'index, follow')
 
     const url = `${SITE_URL}${path}`
     const ogImage = image || DEFAULT_OG_IMAGE

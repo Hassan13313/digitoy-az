@@ -44,7 +44,11 @@ function getSEOConfig(view, { weddingData, slug } = {}) {
       const description = names
         ? `${names} sizi toy mərasiminə dəvət edir.${venue} Rəqəmsal dəvətnaməyə baxın, İştirak Təsdiqi göndərin.`
         : HOME_DESC
-      return { title, description, path: slug ? `/invite/${slug}` : '/', type: 'profile' }
+      /* Müştəri tarixi/məkan/ad kimi şəxsi məlumatlar daşıyır — axtarış
+         nəticələrində görünməsin (noindex), amma WhatsApp/Telegram
+         paylaşım önbaxışları üçün OG/Twitter meta-ları aktiv qalsın
+         və link əlçatan olsun (follow). */
+      return { title, description, path: slug ? `/invite/${slug}` : '/', type: 'profile', noindex: true }
     }
 
     case 'invite-not-found':
