@@ -29,6 +29,21 @@ require_once $_envFile;
 $_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if ($_origin !== '') {
     $__allowed = defined('CORS_ALLOWED') ? CORS_ALLOWED : [];
+
+    /* Lokal development originləri — Vite dev server portları.
+       Server HTTP_HOST üzrə APP_ENV-i deyil, sorğunun öz originini
+       yoxlayır: digitoy.az-a deploy olunmuş API-yə localhost-dan edilən
+       fetch-lər də CORS-u keçə bilsin deyə bu siyahı production
+       originlərinə ƏLAVƏ olunur (əvəz etmir). Wildcard yoxdur — yalnız
+       developer-in öz maşınında çalışan dəqiq portlar icazəlidir,
+       production originlərinin yoxlanması olduğu kimi qalır. */
+    $__devOrigins = [
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'http://localhost:5175',
+    ];
+    $__allowed = array_merge($__allowed, $__devOrigins);
+
     if (in_array($_origin, $__allowed, true)) {
         header('Access-Control-Allow-Origin: ' . $_origin);
         header('Vary: Origin');
