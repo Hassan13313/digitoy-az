@@ -73,7 +73,7 @@ function handlePrint(data, names, slug) {
 <html lang="az">
 <head>
   <meta charset="utf-8">
-  <title>RSVP — ${slug}</title>
+  <title>İştirak Təsdiqi — ${slug}</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: Georgia, "Times New Roman", serif; color: #2a2a2a; padding: 36px 48px; font-size: 13px; }
@@ -99,7 +99,7 @@ function handlePrint(data, names, slug) {
 </head>
 <body>
   <div class="header">
-    <h1>Digitoy RSVP Report</h1>
+    <h1>Digitoy İştirak Təsdiqi Hesabatı</h1>
     <h2>${names || slug}</h2>
     <p>Tarix: ${today}</p>
   </div>
@@ -173,7 +173,7 @@ export default function AdminRSVPBlock({ slug, names }) {
     setError('')
     getRsvpResponses(slug)
       .then(d => { setData(d); setLoading(false) })
-      .catch(() => { setError('RSVP məlumatları yüklənmədi.'); setLoading(false) })
+      .catch(() => { setError('İştirak Təsdiqi məlumatları yüklənmədi.'); setLoading(false) })
   }
 
   useEffect(() => { load() }, [slug])
@@ -199,7 +199,7 @@ export default function AdminRSVPBlock({ slug, names }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
           <Users size={13} strokeWidth={1.5} style={{ color: 'oklch(55% 0.06 75)' }} />
           <span style={{ fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'oklch(45% 0.03 60)', fontWeight: 600 }}>
-            RSVP Cavabları
+            İştirak Təsdiqi Cavabları
           </span>
         </div>
         <div style={{ display: 'flex', gap: 6 }}>

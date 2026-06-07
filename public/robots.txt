@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Allow: /demo
+Allow: /invite/
+
+Disallow: /admin
+Disallow: /admin/
+Disallow: /api/
+Disallow: /*?admin=
+Disallow: /*?draft=
+Disallow: /*?data=
+Disallow: /*/foto
+Disallow: /*/qalereya-idare
+
+Sitemap: https://digitoy.az/sitemap.xml

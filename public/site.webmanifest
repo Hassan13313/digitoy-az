@@ -1,0 +1,17 @@
+{
+  "name": "DigiToy — Rəqəmsal Toy Dəvətnaməsi",
+  "short_name": "DigiToy",
+  "description": "Bir Dəvətnamədən Daha Artığı. İştirak Təsdiqi, oturma planı, QR foto paylaşımı və premium rəqəmsal toy dəvətnamələri.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FDFAF4",
+  "theme_color": "#FDFAF4",
+  "lang": "az",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

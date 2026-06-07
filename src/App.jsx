@@ -12,9 +12,57 @@ import { demoInvitation, demoGuestbook } from './data/demoInvitation'
 import { getInvitation, adminLogin, getDraftByCode } from './utils/api'
 import { unlockAudio } from './utils/audioUnlock'
 import ScrollProgress from './components/ui/ScrollProgress'
+import { useSEO } from './hooks/useSEO'
 import './App.css'
 
 const ACTIVE_UI = 'v3'
+
+const HOME_TITLE = 'DigiToy — Rəqəmsal Toy Dəvətnaməsi, İştirak Təsdiqi və QR Foto Paylaşımı'
+const HOME_DESC  = 'Bir Dəvətnamədən Daha Artığı. İştirak Təsdiqi (RSVP), oturma planı, QR foto paylaşımı və premium rəqəmsal toy dəvətnamələri.'
+
+/* ── view → SEO konfiqurasiyası (title/description/canonical/OG/Twitter) ── */
+function getSEOConfig(view, { weddingData, slug } = {}) {
+  switch (view) {
+    case 'landing':
+    case 'invitation':
+      return { title: HOME_TITLE, description: HOME_DESC, path: '/', type: 'website' }
+
+    case 'demo':
+      return {
+        title: 'Nümunə Dəvətnamə — DigiToy Rəqəmsal Toy Dəvətnaməsi',
+        description: 'DigiToy rəqəmsal toy dəvətnaməsinin canlı nümunəsinə baxın: İştirak Təsdiqi, oturma planı, QR foto paylaşımı və premium dizayn bir arada.',
+        path: '/demo',
+        type: 'website',
+      }
+
+    case 'invite': {
+      const bride = weddingData?.brideName || ''
+      const groom = weddingData?.groomName || ''
+      const names = [bride, groom].filter(Boolean).join(' & ')
+      const title = names ? `${names} — Toy Dəvətnaməsi | DigiToy` : 'Toy Dəvətnaməsi | DigiToy'
+      const venue = weddingData?.venueName ? ` ${weddingData.venueName} məkanında` : ''
+      const description = names
+        ? `${names} sizi toy mərasiminə dəvət edir.${venue} Rəqəmsal dəvətnaməyə baxın, İştirak Təsdiqi göndərin.`
+        : HOME_DESC
+      return { title, description, path: slug ? `/invite/${slug}` : '/', type: 'profile' }
+    }
+
+    case 'invite-not-found':
+      return { title: 'Dəvətnamə tapılmadı | DigiToy', description: 'Axtardığınız dəvətnamə mövcud deyil və ya köhnəlmiş linkdir.', path: '/', noindex: true }
+
+    case 'photo':
+    case 'gallery-page':
+      return { title: 'Foto Paylaşımı | DigiToy', description: 'Toy qonaqlarının foto paylaşım səhifəsi.', noindex: true }
+
+    case 'admin-panel':
+    case 'admin-login':
+    case 'admin-review':
+      return { title: 'Admin Panel | DigiToy', description: 'DigiToy idarəetmə paneli.', noindex: true }
+
+    default:
+      return { title: HOME_TITLE, description: HOME_DESC, path: '/', type: 'website' }
+  }
+}
 
 /* ── sessionStorage-dakı admin tokenini oxu, müddəti yoxla ── */
 function getStoredAdminToken() {
@@ -123,6 +171,9 @@ export default function App() {
   const [isAdmin,     setIsAdmin]     = useState(false)
   const [adminSlug,   setAdminSlug]   = useState('')
   const [entering,    setEntering]    = useState(false)
+
+  /* Hər view dəyişəndə <head> meta-larını yenilə (title, description, OG, Twitter, canonical) */
+  useSEO(getSEOConfig(view, { weddingData, slug: adminSlug || parseInviteSlug().slug }))
 
   /* Cream fade overlay before route switch — gives a luxury page-transition feel */
   const navigateTo = useCallback((fn) => {

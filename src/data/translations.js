@@ -5,7 +5,7 @@ const t = {
     nav_create: 'Özün Yarat',
     hero_line1: 'Rəqəmsal Dəvətnamənizi',
     hero_line2: 'Özünüz Yaradın',
-    hero_subtitle: 'Sadəcə dəvətnamə deyil — RSVP, oturma planı, foto paylaşımı və xatirələrin toplandığı tam bir toy təcrübəsi. Hamısı bir zərif linkdə.',
+    hero_subtitle: 'Sadəcə dəvətnamə deyil — İştirak Təsdiqi, oturma planı, foto paylaşımı və xatirələrin toplandığı tam bir toy təcrübəsi. Hamısı bir zərif linkdə.',
     hero_badge: 'Bir Dəvətnamədən Daha Artığı',
     hero_cta: 'İndi Başla',
     hero_demo: 'Nümunəyə Bax',

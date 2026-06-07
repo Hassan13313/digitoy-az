@@ -96,7 +96,7 @@ export default function RSVPSection({ lang, weddingData }) {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-3 font-mono text-[10px] tracking-[0.42em] text-gold-dark uppercase">
             <span className="w-[22px] h-px bg-gold opacity-60" />
-            RSVP
+            İştirak Təsdiqi
             <span className="w-[22px] h-px bg-gold opacity-60" />
           </div>
           <h2 className="font-serif font-normal text-espresso mt-3 mb-2.5" style={{ fontSize: 'clamp(32px, 4vw, 48px)' }}>{L.title}</h2>

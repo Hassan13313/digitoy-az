@@ -3,12 +3,74 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#FDFAF4" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Digitoy.az — Premium rəqəmsal dəvətnamə platforması" />
-    <title>Digitoy.az — Premium Rəqəmsal Dəvətnamə</title>
+
+    <!-- ── Primary SEO ── -->
+    <title>DigiToy — Rəqəmsal Toy Dəvətnaməsi, İştirak Təsdiqi və QR Foto Paylaşımı</title>
+    <meta name="description" content="Bir Dəvətnamədən Daha Artığı. İştirak Təsdiqi (RSVP), oturma planı, QR foto paylaşımı və premium rəqəmsal toy dəvətnamələri." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://digitoy.az/" />
+
+    <!-- ── Open Graph ── -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="DigiToy" />
+    <meta property="og:locale" content="az_AZ" />
+    <meta property="og:title" content="DigiToy — Rəqəmsal Toy Dəvətnaməsi, İştirak Təsdiqi və QR Foto Paylaşımı" />
+    <meta property="og:description" content="Bir Dəvətnamədən Daha Artığı. İştirak Təsdiqi (RSVP), oturma planı, QR foto paylaşımı və premium rəqəmsal toy dəvətnamələri." />
+    <meta property="og:image" content="https://digitoy.az/og-image.jpg" />
+    <meta property="og:url" content="https://digitoy.az/" />
+
+    <!-- ── Twitter / X Card ── -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="DigiToy — Rəqəmsal Toy Dəvətnaməsi, İştirak Təsdiqi və QR Foto Paylaşımı" />
+    <meta name="twitter:description" content="Bir Dəvətnamədən Daha Artığı. İştirak Təsdiqi (RSVP), oturma planı, QR foto paylaşımı və premium rəqəmsal toy dəvətnamələri." />
+    <meta name="twitter:image" content="https://digitoy.az/og-image.jpg" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap&subset=latin,latin-ext" rel="stylesheet" />
+
+    <!-- ── Structured Data (schema.org / JSON-LD) ──
+         Statik olaraq saxlanılır ki, JS icra etməyən crawler-lər də görsün.
+         Route-spesifik title/description/OG/Twitter src/hooks/useSEO.js
+         vasitəsilə client-side yenilənir. ── -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "DigiToy",
+      "url": "https://digitoy.az",
+      "logo": "https://digitoy.az/favicon.svg",
+      "sameAs": []
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "DigiToy",
+      "url": "https://digitoy.az",
+      "inLanguage": "az"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "DigiToy Rəqəmsal Toy Dəvətnaməsi",
+      "serviceType": "Rəqəmsal toy dəvətnaməsi platforması",
+      "description": "Bir Dəvətnamədən Daha Artığı: İştirak Təsdiqi (RSVP), QR Foto Paylaşımı, Oturma Planı və premium Rəqəmsal Toy Dəvətnamələri bir arada.",
+      "provider": {
+        "@type": "Organization",
+        "name": "DigiToy",
+        "url": "https://digitoy.az"
+      },
+      "areaServed": "AZ",
+      "url": "https://digitoy.az"
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
