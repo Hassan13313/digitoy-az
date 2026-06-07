@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { ArrowLeft, MapPin, Navigation, Download, ExternalLink, ChevronDown, Camera, Music } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -57,6 +57,22 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
   const [envelopeOpened,   setEnvelopeOpened]   = useState(false)
   const [showMusicPrompt, setShowMusicPrompt] = useState(false)
   const musicRef = useRef(null)
+
+  // Capture the very first user gesture on this page — whether the user
+  // arrived via the landing page or a direct invite link — and unlock audio.
+  useEffect(() => {
+    const unlock = () => {
+      unlockAudio()
+      document.removeEventListener('touchstart', unlock, { capture: true })
+      document.removeEventListener('click',      unlock, { capture: true })
+    }
+    document.addEventListener('touchstart', unlock, { capture: true, passive: true })
+    document.addEventListener('click',      unlock, { capture: true })
+    return () => {
+      document.removeEventListener('touchstart', unlock, { capture: true })
+      document.removeEventListener('click',      unlock, { capture: true })
+    }
+  }, [])
   const audioVideoId = getEventAudioId(weddingData?.eventType)
   const palette = DRESS_CODE_PALETTES.find((p) => p.id === weddingData.dressCodePalette) || DRESS_CODE_PALETTES[0]
 
