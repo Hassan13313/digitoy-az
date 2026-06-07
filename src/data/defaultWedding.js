@@ -6,7 +6,6 @@ export const defaultWedding = {
   groomName: '',
   date: new Date().toISOString().split('T')[0],
   time: '18:00',
-  rsvpDeadline: null,
   venueName: '',
   googleMapsUrl: '',
   wazeUrl: '',

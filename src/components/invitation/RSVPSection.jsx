@@ -19,8 +19,8 @@ export default function RSVPSection({ lang, weddingData }) {
   const tr = t[lang] || t.az
 
   const rsvpClosed = (() => {
-    if (!weddingData?.rsvpDeadline) return false
-    const dl = new Date(`${weddingData.rsvpDeadline}T23:59:59`)
+    if (!weddingData?.date) return false
+    const dl = new Date(`${weddingData.date}T23:59:59`)
     return !isNaN(dl.getTime()) && dl.getTime() < Date.now()
   })()
 

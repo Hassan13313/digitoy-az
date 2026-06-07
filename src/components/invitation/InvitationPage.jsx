@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { ArrowLeft, MapPin, Navigation, Download, ExternalLink, ChevronDown, Camera, Music, Search, CheckCircle2, MessageCircle } from 'lucide-react'
+import { ArrowLeft, MapPin, Navigation, Download, ExternalLink, ChevronDown, Camera, Music } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { motion, AnimatePresence } from 'framer-motion'
 import FloralBackground from './FloralBackground'
@@ -291,42 +291,6 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
               <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.5), transparent)' }} />
 
               <div className="animate-fade-in w-full">
-                {/* Demo-only: surfaces the platform's key features so guests notice them within seconds */}
-                {isDemoMode && (
-                  <div className="flex flex-wrap items-center justify-center gap-2 mb-7 max-w-xs mx-auto">
-                    {[
-                      { id: 'rsvp', label: tr.f_rsvp, Icon: CheckCircle2 },
-                      { id: 'seating-search', label: tr.f_seating, Icon: Search },
-                      { id: 'photo-gallery', label: tr.f_gallery, Icon: Camera },
-                      { id: 'guestbook', label: tr.f_guestbook, Icon: MessageCircle },
-                    ].map(({ id, label, Icon }) => (
-                      <button
-                        key={id}
-                        onClick={() => {
-                          const el = document.getElementById(id)
-                          if (!el) return
-                          const top = el.getBoundingClientRect().top + window.scrollY - 72
-                          window.scrollTo({ top, behavior: 'smooth' })
-                        }}
-                        style={{
-                          display: 'inline-flex', alignItems: 'center', gap: 5,
-                          padding: '6px 12px',
-                          background: 'rgba(197,160,89,0.08)',
-                          border: '1px solid rgba(197,160,89,0.25)',
-                          borderRadius: 999,
-                          fontFamily: '"Inter", system-ui, sans-serif',
-                          fontSize: 10, letterSpacing: '0.05em',
-                          color: 'rgba(120,95,60,0.85)', fontWeight: 500,
-                          cursor: 'pointer', whiteSpace: 'nowrap',
-                        }}
-                      >
-                        <Icon size={11} strokeWidth={1.5} style={{ color: 'rgba(197,160,89,0.85)' }} />
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
                 <p className="text-[9px] tracking-[0.45em] uppercase text-gold mb-8 font-medium">
                   {eventLabels[weddingData.eventType] || tr.event_toy}
                 </p>
@@ -472,13 +436,11 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
 
             {/* ── SEATING — lüks axtarış UI ── */}
             {weddingData.seatingPlan && canShowSeating && (
-              <div id="seating-search">
-                <SeatingSearch seatingPlan={weddingData.seatingPlan} lang={lang} />
-              </div>
+              <SeatingSearch seatingPlan={weddingData.seatingPlan} lang={lang} />
             )}
 
             {/* ── GALLERY ── */}
-            {canShowGallery && <section id="photo-gallery" className="py-28 px-6 bg-cream">
+            {canShowGallery && <section className="py-28 px-6 bg-cream">
               <SectionWrapper className="max-w-lg mx-auto text-center">
                 <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">{tr.f_gallery}</p>
                 <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-5">{tr.inv_gallery}</h2>
@@ -539,14 +501,10 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
             </section>}
 
             {/* ── RSVP ── */}
-            <div id="rsvp">
-              <RSVPSection lang={lang} weddingData={weddingData} />
-            </div>
+            <RSVPSection lang={lang} weddingData={weddingData} />
 
             {/* ── GUESTBOOK ── */}
-            <div id="guestbook">
-              <Guestbook lang={lang} initialMessages={initialGuestbook} />
-            </div>
+            <Guestbook lang={lang} initialMessages={initialGuestbook} />
 
             {/* ── SİFARİŞ EKRANI — yalnız preview modunda görünür, demo-da gizli ── */}
             {!pageSlug && !isDemoMode && (
