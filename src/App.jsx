@@ -10,6 +10,7 @@ import AdminLoginGate from './components/admin/AdminLoginGate'
 import { defaultWedding } from './data/defaultWedding'
 import { demoInvitation, demoGuestbook } from './data/demoInvitation'
 import { getInvitation, adminLogin, getDraftByCode } from './utils/api'
+import { unlockAudio } from './utils/audioUnlock'
 import ScrollProgress from './components/ui/ScrollProgress'
 import './App.css'
 
@@ -125,6 +126,7 @@ export default function App() {
 
   /* Cream fade overlay before route switch — gives a luxury page-transition feel */
   const navigateTo = useCallback((fn) => {
+    unlockAudio()   // unlock audio context on first user gesture (Demo Gör, Nümunə, etc.)
     setEntering(true)
     setTimeout(() => {
       fn()

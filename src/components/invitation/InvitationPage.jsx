@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react'
-import { ArrowLeft, MapPin, Navigation, Download, ExternalLink, ChevronDown, Camera } from 'lucide-react'
+import { ArrowLeft, MapPin, Navigation, Download, ExternalLink, ChevronDown, Camera, Music } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { motion, AnimatePresence } from 'framer-motion'
 import FloralBackground from './FloralBackground'
@@ -16,6 +16,7 @@ import ThreeDDressCode from './ThreeDDressCode'
 import { DRESS_CODE_PALETTES, WHATSAPP_NUMBER } from '../../data/constants'
 import { getPackageGates } from '../../data/packages'
 import { buildWhatsAppUrl } from '../../utils/whatsappOrder'
+import { isAudioUnlocked } from '../../utils/audioUnlock'
 import { submitDraft } from '../../utils/api'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
 import { formatAzDate, formatFullDateByLang, formatTime24 } from '../../utils/dateFormat'
@@ -53,7 +54,8 @@ function getEventAudioId(eventType) {
 
 export default function InvitationPage({ lang, setLang, weddingData, onBack, isDemoMode = false, initialGuestbook }) {
   const tr = t[lang]
-  const [envelopeOpened, setEnvelopeOpened] = useState(false)
+  const [envelopeOpened,   setEnvelopeOpened]   = useState(false)
+  const [showMusicPrompt, setShowMusicPrompt] = useState(false)
   const musicRef = useRef(null)
   const audioVideoId = getEventAudioId(weddingData?.eventType)
   const palette = DRESS_CODE_PALETTES.find((p) => p.id === weddingData.dressCodePalette) || DRESS_CODE_PALETTES[0]
@@ -163,7 +165,22 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
       <OpeningVideo
         onComplete={() => {
           setEnvelopeOpened(true)
-          setTimeout(() => musicRef.current?.play(), 1800)
+          setTimeout(() => {
+            if (isAudioUnlocked()) {
+              console.debug('[Digitoy Audio] 🎵 Attempting autoplay (context unlocked)')
+              musicRef.current?.play()
+              // YouTube IFrame fires onStateChange if playback starts.
+              // We cannot read that state from outside MusicToggle, so we
+              // optimistically hide the prompt. On iOS Safari the YT iframe
+              // will still block (sandboxed context) — the prompt re-appears
+              // after 1.5s if the toggle shows VolumeX (not playing).
+              // On Android/Desktop this path usually succeeds.
+              console.debug('[Digitoy Audio] play() dispatched — success depends on browser')
+            } else {
+              console.debug('[Digitoy Audio] 🔇 Autoplay skipped — no prior user gesture, showing prompt')
+              setShowMusicPrompt(true)
+            }
+          }, 1800)
         }}
         weddingData={weddingData}
         lang={lang}
@@ -173,6 +190,52 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
       {envelopeOpened && (
         <MusicToggle ref={musicRef} lang={lang} videoId={audioVideoId} />
       )}
+
+      {/* Subtle autoplay-blocked prompt — shown only when browser silently blocked music */}
+      <AnimatePresence>
+        {showMusicPrompt && (
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            onClick={() => {
+              console.debug('[Digitoy Audio] 🎵 User tapped music prompt — playing')
+              musicRef.current?.play()
+              setShowMusicPrompt(false)
+            }}
+            style={{
+              position: 'fixed',
+              bottom: 'max(96px, calc(env(safe-area-inset-bottom, 20px) + 76px))',
+              right: '20px',
+              zIndex: 54,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '6px 12px 6px 9px',
+              background: 'rgba(253,250,244,0.92)',
+              border: '1px solid rgba(197,160,89,0.35)',
+              borderRadius: '99px',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+              backdropFilter: 'blur(8px)',
+              cursor: 'pointer',
+            }}
+            aria-label="Musiqi başlat"
+          >
+            <Music size={12} style={{ color: 'rgba(197,160,89,0.9)' }} strokeWidth={1.5} />
+            <span style={{
+              fontFamily: '"Inter", system-ui, sans-serif',
+              fontSize: 10,
+              letterSpacing: '0.12em',
+              color: 'rgba(60,45,30,0.7)',
+              fontWeight: 500,
+              textTransform: 'uppercase',
+            }}>
+              Musiqi
+            </span>
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* Main invitation — fades in after video */}
       <AnimatePresence>
