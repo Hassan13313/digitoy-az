@@ -182,19 +182,17 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
         onComplete={() => {
           setEnvelopeOpened(true)
           setTimeout(() => {
-            if (isAudioUnlocked()) {
+            const unlocked = isAudioUnlocked()
+            if (unlocked) {
               console.debug('[Digitoy Audio] 🎵 Attempting autoplay (context unlocked)')
               musicRef.current?.play()
-              // YouTube IFrame fires onStateChange if playback starts.
-              // We cannot read that state from outside MusicToggle, so we
-              // optimistically hide the prompt. On iOS Safari the YT iframe
-              // will still block (sandboxed context) — the prompt re-appears
-              // after 1.5s if the toggle shows VolumeX (not playing).
-              // On Android/Desktop this path usually succeeds.
               console.debug('[Digitoy Audio] play() dispatched — success depends on browser')
             } else {
               console.debug('[Digitoy Audio] 🔇 Autoplay skipped — no prior user gesture, showing prompt')
-              setShowMusicPrompt(true)
+            }
+            setShowMusicPrompt(true)
+            if (unlocked) {
+              setTimeout(() => setShowMusicPrompt(false), 5500)
             }
           }, 1800)
         }}
@@ -207,14 +205,14 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
         <MusicToggle ref={musicRef} lang={lang} videoId={audioVideoId} />
       )}
 
-      {/* Subtle autoplay-blocked prompt — shown only when browser silently blocked music */}
+      {/* Music-start pill — appears after the envelope opens, invites the guest to start the soundtrack */}
       <AnimatePresence>
         {showMusicPrompt && (
           <motion.button
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 6 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, y: 14, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.97 }}
+            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
             onClick={() => {
               console.debug('[Digitoy Audio] 🎵 User tapped music prompt — playing')
               musicRef.current?.play()
@@ -227,27 +225,34 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
               zIndex: 54,
               display: 'flex',
               alignItems: 'center',
-              gap: 6,
-              padding: '6px 12px 6px 9px',
-              background: 'rgba(253,250,244,0.92)',
-              border: '1px solid rgba(197,160,89,0.35)',
+              gap: 8,
+              padding: '10px 18px 10px 14px',
+              background: 'rgba(253,250,244,0.94)',
+              border: '1px solid rgba(197,160,89,0.4)',
               borderRadius: '99px',
-              boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-              backdropFilter: 'blur(8px)',
+              boxShadow: '0 8px 28px rgba(26,20,12,0.12), 0 1px 3px rgba(26,20,12,0.06)',
+              backdropFilter: 'blur(10px)',
               cursor: 'pointer',
             }}
-            aria-label="Musiqi başlat"
+            aria-label="Musiqini başlat"
           >
-            <Music size={12} style={{ color: 'rgba(197,160,89,0.9)' }} strokeWidth={1.5} />
+            <span style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: 26, height: 26, borderRadius: '50%',
+              background: 'rgba(197,160,89,0.14)',
+              flexShrink: 0,
+            }}>
+              <Music size={13} style={{ color: 'rgba(197,160,89,0.95)' }} strokeWidth={1.5} />
+            </span>
             <span style={{
               fontFamily: '"Inter", system-ui, sans-serif',
-              fontSize: 10,
-              letterSpacing: '0.12em',
-              color: 'rgba(60,45,30,0.7)',
+              fontSize: 12,
+              letterSpacing: '0.04em',
+              color: 'rgba(60,45,30,0.82)',
               fontWeight: 500,
-              textTransform: 'uppercase',
+              whiteSpace: 'nowrap',
             }}>
-              Musiqi
+              Musiqini Başlat
             </span>
           </motion.button>
         )}
