@@ -4,46 +4,48 @@ export const PACKAGE_DEFS = {
   PREMIUM: { id: 'PREMIUM', price: '129', lockedSteps: [], popular: false },
 }
 
+/* Phase 18 — dəyər əsaslı mövqeləndirmə: hər paket "VIP-dəkilərin hamısı + ..."
+   kumulyativ çərçivəsi ilə təqdim olunur, ayrı-ayrı funksiya siyahısı kimi yox. */
 export const PKG_FEATURES = {
   az: {
-    SADE:    {
-      included: ['Geri sayım saatı', 'Google Maps naviqasiya', 'Dress code bölməsi', 'Toy proqramı', 'Paylaşıla bilən link'],
-      locked:   ['Oturma planı', 'Foto paylaşım QR'],
+    SADE: {
+      included: ['Açılış animasiyası', 'Geri sayım saatı', 'Google Maps naviqasiya', 'Dress code', 'Toy proqramı', 'Paylaşıla bilən link'],
+      locked:   ['İştirak Təsdiqi (RSVP)', 'Oturma Planı', 'QR Foto Paylaşım', 'Qalereya idarəetməsi'],
     },
     VIP: {
-      included: ['Geri sayım saatı', 'Google Maps naviqasiya', 'Dress code bölməsi', 'Toy proqramı', 'Oturma planı', 'Paylaşıla bilən link'],
-      locked:   ['Foto paylaşım QR'],
+      included: ['Sadə paketdəki hər şey', 'İştirak Təsdiqi (RSVP)', 'Oturma Planı', 'Qonaq siyahısının idarə olunması'],
+      locked:   ['QR Foto Paylaşım', 'Qalereya idarəetməsi'],
     },
     PREMIUM: {
-      included: ['Geri sayım saatı', 'Google Maps naviqasiya', 'Dress code bölməsi', 'Toy proqramı', 'Oturma planı', 'Foto paylaşım QR', 'Paylaşıla bilən link'],
+      included: ['VIP paketdəki hər şey', 'QR Foto Paylaşım Sistemi', 'Qonaq Qalereyası', 'Qalereya İdarəetməsi', 'Bütün şəkilləri ZIP endirmə', 'HD çap üçün QR kart faylı', 'Prioritet hazırlama'],
       locked:   [],
     },
   },
   en: {
-    SADE:    {
-      included: ['Countdown timer', 'Google Maps navigation', 'Dress code section', 'Event program', 'Shareable link'],
-      locked:   ['Seating plan', 'Photo share QR'],
+    SADE: {
+      included: ['Opening animation', 'Countdown timer', 'Google Maps navigation', 'Dress code', 'Event program', 'Shareable link'],
+      locked:   ['RSVP (guest confirmation)', 'Seating plan', 'QR photo sharing', 'Gallery management'],
     },
     VIP: {
-      included: ['Countdown timer', 'Google Maps navigation', 'Dress code section', 'Event program', 'Seating plan', 'Shareable link'],
-      locked:   ['Photo share QR'],
+      included: ['Everything in Basic', 'RSVP (guest confirmation)', 'Seating plan', 'Guest list management'],
+      locked:   ['QR photo sharing', 'Gallery management'],
     },
     PREMIUM: {
-      included: ['Countdown timer', 'Google Maps navigation', 'Dress code section', 'Event program', 'Seating plan', 'Photo share QR', 'Shareable link'],
+      included: ['Everything in VIP', 'QR photo sharing system', 'Guest gallery', 'Gallery management', 'Download all photos as ZIP', 'HD print-ready QR card file', 'Priority preparation'],
       locked:   [],
     },
   },
   ru: {
-    SADE:    {
-      included: ['Таймер обратного отсчёта', 'Навигация Google Maps', 'Раздел дресс-кода', 'Программа мероприятия', 'Ссылка для отправки'],
-      locked:   ['План рассадки', 'QR-код для фото'],
+    SADE: {
+      included: ['Анимация открытия', 'Таймер обратного отсчёта', 'Навигация Google Maps', 'Дресс-код', 'Программа мероприятия', 'Ссылка для отправки'],
+      locked:   ['Подтверждение участия (RSVP)', 'План рассадки', 'QR обмен фото', 'Управление галереей'],
     },
     VIP: {
-      included: ['Таймер обратного отсчёта', 'Навигация Google Maps', 'Раздел дресс-кода', 'Программа мероприятия', 'План рассадки', 'Ссылка для отправки'],
-      locked:   ['QR-код для фото'],
+      included: ['Всё из пакета Базовый', 'Подтверждение участия (RSVP)', 'План рассадки', 'Управление списком гостей'],
+      locked:   ['QR обмен фото', 'Управление галереей'],
     },
     PREMIUM: {
-      included: ['Таймер обратного отсчёта', 'Навигация Google Maps', 'Раздел дресс-кода', 'Программа мероприятия', 'План рассадки', 'QR-код для фото', 'Ссылка для отправки'],
+      included: ['Всё из пакета VIP', 'Система QR обмена фото', 'Галерея гостей', 'Управление галереей', 'Скачивание всех фото в ZIP', 'HD файл QR-карты для печати', 'Приоритетная подготовка'],
       locked:   [],
     },
   },
@@ -53,10 +55,14 @@ export function getLockedSteps(pkgId) {
   return PACKAGE_DEFS[pkgId]?.lockedSteps ?? []
 }
 
-/* Paket ID-dən feature gates qaytarır — bütün komponentlər bu funksiyanı istifadə edir */
+/* Paket ID-dən feature gates qaytarır — bütün komponentlər bu funksiyanı istifadə edir.
+   RSVP builder addımı kimi mövcud olmadığı üçün (avtomatik render olunur),
+   onun gate-i birbaşa paket ID-sindən təyin olunur: yalnız SADE-də bağlıdır. */
 export function getPackageGates(pkgId) {
-  const locked = getLockedSteps(pkgId || 'SADE')
+  const id     = pkgId || 'SADE'
+  const locked = getLockedSteps(id)
   return {
+    allowRsvp:    id !== 'SADE',
     allowSeating: !locked.includes(5),
     allowGallery: !locked.includes(6),
   }

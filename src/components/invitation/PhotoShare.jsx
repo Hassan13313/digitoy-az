@@ -1,15 +1,44 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Upload, ImageIcon, Check, X, Film } from 'lucide-react'
 import { uploadPhoto } from '../../utils/api'
 import { trackEvent } from '../../utils/analytics'
+
+/* Paralel yükləmə işçiləri — sıra ilə (1-bir) yükləmək 50-100 fotoluq
+   partiyalarda son dərəcə yavaş idi. 3 paralel iş mobil şəbəkələrdə
+   sürəti nəzərəçarpacaq dərəcədə artırır, server tərəfdə isə hələ də
+   "sorğu başına 1 fayl" qaydasına tabe olur (upload_photo.php). */
+const MAX_CONCURRENT = 3
+const MAX_RETRIES    = 2
+
+async function uploadWithRetry(file, slug) {
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      await uploadPhoto(file, slug)
+      return true
+    } catch {
+      if (attempt < MAX_RETRIES) await new Promise(r => setTimeout(r, 500 * (attempt + 1)))
+    }
+  }
+  return false
+}
 
 export default function PhotoShare() {
   const [queue,     setQueue]     = useState([])   // { file, preview, id, status }
   const [dragging,  setDragging]  = useState(false)
   const [uploading, setUploading] = useState(false)
   const [done,      setDone]      = useState(false)
-  const inputRef = useRef()
+  const inputRef       = useRef()
+  const queueRef       = useRef(queue)
+  const successCountRef = useRef(0)
+
+  useEffect(() => { queueRef.current = queue }, [queue])
+
+  /* Komponent unmount olarkən qalan bütün blob preview URL-ləri azad et —
+     istifadəçi yükləmə yarımçıq ikən səhifədən çıxsa belə sızma olmur. */
+  useEffect(() => () => {
+    queueRef.current.forEach(q => { if (q.preview) URL.revokeObjectURL(q.preview) })
+  }, [])
 
   const slug = (window.location.pathname.match(/\/invite\/([^/?#]+)/) || [])[1] || 'preview'
 
@@ -36,29 +65,44 @@ export default function PhotoShare() {
     })
   }, [])
 
+  /* Növbə-hovuz: 2-3 paralel yükləmə işçisi (sıralı 1-1 yükləmə 50-100
+     fotoluq partiyalarda dəqiqələrlə sürünürdü). Hər işçi paylaşılan
+     kursordan növbəti faylı götürür; uğursuz fayllar avtomatik 2 dəfəyə
+     qədər yenidən cəhd olunur (uploadWithRetry). 'pending' VƏ 'error'
+     statuslu elementlər hədəf siyahısına düşür — eyni "Göndər" düyməsi
+     uğursuz qalanlar üçün təbii "yenidən cəhd et" düyməsinə çevrilir. */
   const handleUpload = async () => {
-    if (!queue.length || uploading) return
+    const targets = queue.filter(q => q.status === 'pending' || q.status === 'error')
+    if (!targets.length || uploading) return
     setUploading(true)
+    successCountRef.current = 0
 
-    let successCount = 0
-    for (const item of queue) {
-      setQueue(prev => prev.map(q => q.id === item.id ? { ...q, status: 'uploading' } : q))
-      try {
-        await uploadPhoto(item.file, slug)
-        setQueue(prev => prev.map(q => q.id === item.id ? { ...q, status: 'done' } : q))
-        successCount++
-      } catch {
-        setQueue(prev => prev.map(q => q.id === item.id ? { ...q, status: 'error' } : q))
+    let cursor = 0
+    const runWorker = async () => {
+      while (cursor < targets.length) {
+        const item = targets[cursor++]
+        setQueue(prev => prev.map(q => q.id === item.id ? { ...q, status: 'uploading' } : q))
+        const ok = await uploadWithRetry(item.file, slug)
+        setQueue(prev => prev.map(q => q.id === item.id ? { ...q, status: ok ? 'done' : 'error' } : q))
+        if (ok) successCountRef.current++
       }
     }
 
+    const workerCount = Math.min(MAX_CONCURRENT, targets.length)
+    await Promise.all(Array.from({ length: workerCount }, runWorker))
+
     setUploading(false)
-    setDone(true)
-    if (successCount > 0) trackEvent('gallery_upload', { count: successCount })
+    setQueue(prev => {
+      if (prev.every(q => q.status === 'done')) setDone(true)
+      return prev
+    })
+    if (successCountRef.current > 0) trackEvent('gallery_upload', { count: successCountRef.current })
   }
 
   const pendingCount = queue.filter(q => q.status === 'pending').length
+  const errorCount   = queue.filter(q => q.status === 'error').length
   const doneCount    = queue.filter(q => q.status === 'done').length
+  const toSendCount  = pendingCount + errorCount
 
   return (
     <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-4 py-16">
@@ -111,7 +155,11 @@ export default function PhotoShare() {
                 #{slug}
               </p>
               <button
-                onClick={() => { setDone(false); setQueue([]) }}
+                onClick={() => {
+                  queueRef.current.forEach(q => { if (q.preview) URL.revokeObjectURL(q.preview) })
+                  setDone(false)
+                  setQueue([])
+                }}
                 className="mt-8 inline-flex items-center gap-2 btn-gold"
               >
                 <Upload size={12} strokeWidth={1.5} />
@@ -248,10 +296,11 @@ export default function PhotoShare() {
                 </div>
               )}
 
-              {/* Upload button */}
+              {/* Upload button — toSendCount = pending + error, ona görə
+                  uğursuz qalanlar eyni düymə ilə yenidən göndərilə bilir */}
               <button
                 onClick={handleUpload}
-                disabled={pendingCount === 0 || uploading}
+                disabled={toSendCount === 0 || uploading}
                 className="w-full btn-gold disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2.5"
               >
                 {uploading ? (
@@ -259,9 +308,11 @@ export default function PhotoShare() {
                 ) : (
                   <>
                     <Upload size={12} strokeWidth={1.5} />
-                    {pendingCount > 0
-                      ? `${pendingCount} Faylı Göndər`
-                      : 'Fayl Seç'
+                    {errorCount > 0
+                      ? `${toSendCount} Faylı Yenidən Göndər`
+                      : toSendCount > 0
+                        ? `${toSendCount} Faylı Göndər`
+                        : 'Fayl Seç'
                     }
                   </>
                 )}

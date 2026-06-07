@@ -105,7 +105,7 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
 
   /* Feature gating — həmişə weddingData.package-dən oxunur, rol/URL fərqi yoxdur */
   const activePkgId = isDemoMode ? 'PREMIUM' : (weddingData.package || 'SADE')
-  const { allowSeating: canShowSeating, allowGallery: canShowGallery } = getPackageGates(activePkgId)
+  const { allowRsvp: canShowRsvp, allowSeating: canShowSeating, allowGallery: canShowGallery } = getPackageGates(activePkgId)
 
   const effectiveSlug = pageSlug || (
     isCouple
@@ -506,8 +506,8 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
               </SectionWrapper>
             </section>}
 
-            {/* ── RSVP ── */}
-            <RSVPSection lang={lang} weddingData={weddingData} />
+            {/* ── RSVP — yalnız VIP/PREMIUM paketlərdə ── */}
+            {canShowRsvp && <RSVPSection lang={lang} weddingData={weddingData} />}
 
             {/* ── GUESTBOOK ── */}
             <Guestbook lang={lang} initialMessages={initialGuestbook} />

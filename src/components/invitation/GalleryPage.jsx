@@ -66,9 +66,11 @@ function LazyMedia({ item, selected, onToggle, onDelete, onPreview }) {
         />
       ))}
 
-      {/* Hover overlay */}
+      {/* Hover overlay — toxunuş cihazlarında onMouseEnter/Leave heç vaxt
+          tetiklənmir, ona görə seçilmiş element üçün də göstəririk
+          (sil/yüklə düymələri toxunuşla əlçatan olsun) */}
       <AnimatePresence>
-        {hov && (
+        {(hov || selected) && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             transition={{ duration: 0.13 }}
@@ -104,12 +106,14 @@ function LazyMedia({ item, selected, onToggle, onDelete, onPreview }) {
         )}
       </AnimatePresence>
 
-      {/* Checkbox */}
+      {/* Checkbox — hover-dən asılı olmadan həmişə görünür, çünki toxunuş
+          cihazlarında hover vəziyyəti heç vaxt baş vermir (seçim mexanizmi
+          mobil/tablette əlçatan olmalıdır) */}
       <div
         onClick={e => { e.stopPropagation(); onToggle(item.id) }}
         style={{
           position: 'absolute', top: 6, left: 6,
-          opacity: selected || hov ? 1 : 0,
+          opacity: selected ? 1 : 0.85,
           transition: 'opacity 0.14s',
         }}
       >

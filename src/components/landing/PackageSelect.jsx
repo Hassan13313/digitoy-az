@@ -15,12 +15,44 @@ const UI = {
   ru: { title: 'Выберите пакет', subtitle: 'Выберите лучший пакет для вашего мероприятия.', popular: '★ САМЫЙ ПОПУЛЯРНЫЙ', btn: 'НАЧАТЬ', pricing: 'PRICING' },
 }
 
+/* Phase 18 — paket adı altında dəyər mesajı (funksiya siyahısı yox, nəticə) */
+const PKG_SUBTITLES = {
+  az: {
+    SADE:    'Toyunuz üçün zərif və premium rəqəmsal dəvətnamə.',
+    VIP:     'Qonaqların iştirakını və oturma planını rahat idarə edin.',
+    PREMIUM: 'Toy gününüzün bütün xatirələrini bir yerdə toplayın.',
+  },
+  en: {
+    SADE:    'An elegant, premium digital invitation for your wedding.',
+    VIP:     'Manage guest attendance and seating with ease.',
+    PREMIUM: 'Bring every memory of your wedding day together in one place.',
+  },
+  ru: {
+    SADE:    'Элегантное премиальное цифровое приглашение для вашей свадьбы.',
+    VIP:     'Удобно управляйте подтверждением гостей и планом рассадки.',
+    PREMIUM: 'Соберите все воспоминания свадебного дня в одном месте.',
+  },
+}
+
+/* PREMIUM nişanı — VIP "Ən Çox Seçilən" ilə eyni vizual dildə, fərqli ton */
+const PKG_BADGES = {
+  az: { PREMIUM: 'ƏN TAM PAKET' },
+  en: { PREMIUM: 'THE COMPLETE PACKAGE' },
+  ru: { PREMIUM: 'ПОЛНЫЙ ПАКЕТ' },
+}
+
+/* QR Foto Paylaşım + Qalereya — Premium-un əsas fərqləndiricisi.
+   Bu açar sözləri ehtiva edən sətirlər kartda vurğulanır (3 dildə). */
+const isDifferentiator = (text) => /qr|qalereya|gallery|галере|zip/i.test(text)
+
 
 export default function PackageSelect({ lang, onSelect }) {
-  const ui     = UI[lang]         || UI.az
-  const labels = PKG_LABELS[lang] || PKG_LABELS.az
-  const feats  = PKG_FEATURES[lang] || PKG_FEATURES.az
-  const pkgIds = ['SADE', 'VIP', 'PREMIUM']
+  const ui        = UI[lang]            || UI.az
+  const labels    = PKG_LABELS[lang]     || PKG_LABELS.az
+  const feats     = PKG_FEATURES[lang]   || PKG_FEATURES.az
+  const subtitles = PKG_SUBTITLES[lang]  || PKG_SUBTITLES.az
+  const badges    = PKG_BADGES[lang]     || PKG_BADGES.az
+  const pkgIds    = ['SADE', 'VIP', 'PREMIUM']
 
   return (
     <section id="paketler" className="relative bg-transparent py-[120px] scroll-mt-20">
@@ -61,7 +93,9 @@ export default function PackageSelect({ lang, onSelect }) {
                   price={def.price}
                   isVip={def.popular}
                   feat={feat}
+                  subtitle={subtitles[pkgId]}
                   popular={ui.popular}
+                  premiumBadge={badges.PREMIUM}
                   btn={ui.btn}
                   onSelect={() => onSelect(pkgId)}
                 />
@@ -82,7 +116,7 @@ export default function PackageSelect({ lang, onSelect }) {
   )
 }
 
-function PackageCard({ pkgId, label, price, isVip, feat, popular, btn, onSelect }) {
+function PackageCard({ pkgId, label, price, isVip, feat, subtitle, popular, premiumBadge, btn, onSelect }) {
   const [hovered, setHovered] = useState(false)
   const isPremium = pkgId === 'PREMIUM'
 
@@ -110,6 +144,18 @@ function PackageCard({ pkgId, label, price, isVip, feat, popular, btn, onSelect 
             animation: 'digitoy-shimmer-bg 3s linear infinite',
           }}
         >{popular}</div>
+      )}
+
+      {/* "Most Complete" badge — PREMIUM only, distinct cooler-gold tone from VIP */}
+      {isPremium && (
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 whitespace-nowrap z-40 px-5 py-2 rounded-full font-mono text-[10px] tracking-[0.32em] font-semibold text-espresso"
+          style={{
+            background: 'linear-gradient(135deg, #F5EBD3 0%, #D9C594 50%, #F5EBD3 100%)',
+            backgroundSize: '200% 100%',
+            boxShadow: '0 10px 24px rgba(197,160,89,0.28), inset 0 1px 0 rgba(255,255,255,0.5)',
+            animation: 'digitoy-shimmer-bg 4s linear infinite',
+          }}
+        >{premiumBadge}</div>
       )}
 
       <motion.div
@@ -154,19 +200,31 @@ function PackageCard({ pkgId, label, price, isVip, feat, popular, btn, onSelect 
           <span className={`text-[26px] ${isVip ? 'text-gold-light' : 'text-gold-dark'}`}>₼</span>
         </div>
 
+        {/* Subtitle — dəyər mesajı, funksiya siyahısı yox */}
+        {subtitle && (
+          <p className={`text-sm leading-[1.55] mt-3 font-light tracking-wide ${isVip ? 'text-[rgba(245,235,211,0.7)]' : 'text-brown-muted'}`}>
+            {subtitle}
+          </p>
+        )}
+
         {/* Divider */}
         <hr className="border-none h-px my-6 gold-divider" />
 
         {/* Included features */}
         <ul className="list-none m-0 mb-6 p-0 grid gap-3 flex-1">
-          {feat.included.map((f, i) => (
-            <li key={`inc-${i}`} className={`flex gap-3 items-start text-sm leading-[1.5] ${isVip ? 'text-[rgba(245,235,211,0.88)]' : 'text-espresso'}`}>
-              <span className="flex-[0_0_18px] w-[18px] h-[18px] rounded-full grid place-items-center text-[10px] font-bold mt-px"
-                style={{ background: 'linear-gradient(135deg, #C5A059, #A8843E)', color: '#fff', boxShadow: '0 0 12px rgba(197,160,89,0.4)' }}
-              >✓</span>
-              <span>{f}</span>
-            </li>
-          ))}
+          {feat.included.map((f, i) => {
+            const isHighlight = isPremium && isDifferentiator(f)
+            return (
+              <li key={`inc-${i}`} className={`flex gap-3 items-start text-sm leading-[1.5] ${isHighlight ? 'font-medium text-espresso' : isVip ? 'text-[rgba(245,235,211,0.88)]' : 'text-espresso'}`}>
+                <span className="flex-[0_0_18px] w-[18px] h-[18px] rounded-full grid place-items-center text-[10px] font-bold mt-px"
+                  style={isHighlight
+                    ? { background: 'linear-gradient(135deg, #F5EBD3, #C5A059)', color: '#5C3A1E', boxShadow: '0 0 16px rgba(197,160,89,0.6)' }
+                    : { background: 'linear-gradient(135deg, #C5A059, #A8843E)', color: '#fff', boxShadow: '0 0 12px rgba(197,160,89,0.4)' }}
+                >{isHighlight ? '✦' : '✓'}</span>
+                <span>{f}</span>
+              </li>
+            )
+          })}
           {feat.locked.map((f, i) => (
             <li key={`lck-${i}`} className={`flex gap-3 items-start text-sm leading-[1.5] ${isVip ? 'text-[rgba(245,235,211,0.4)]' : 'text-brown-muted'}`}>
               <span className="flex-[0_0_18px] w-[18px] h-[18px] rounded-full grid place-items-center text-[10px] font-bold mt-px"

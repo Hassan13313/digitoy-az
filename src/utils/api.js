@@ -71,12 +71,37 @@ export async function uploadPhoto(file, slug) {
   return res.json()
 }
 
-/* ── Şəkilləri çək (public) ── */
+/* ── Şəkilləri çək (public) ──
+   Şərti GET (ETag/Last-Modified): qalereya 30 saniyədə bir bu funksiyanı
+   çağırır (auto-refresh). Slug üzrə son ETag-i yaddaşda saxlayıb
+   If-None-Match kimi göndəririk — server qovluq dəyişməyibsə 304 qaytarır
+   və biz əvvəlki nəticəni geri veririk (eyni array referansı ilə — React
+   setState bu halda re-render-i atlayır). cache:'no-store' brauzerin öz
+   HTTP keşinin bu əl ilə idarə olunan məntiqlə qarışmasının qarşısını alır. */
+const _photoCache = new Map() // slug -> { etag, lastModified, photos }
+
 export async function getPhotos(slug) {
-  const res = await fetch(`${BASE}/get_photos.php?slug=${encodeURIComponent(slug)}`)
+  const cached = _photoCache.get(slug)
+  const headers = {}
+  if (cached?.etag)         headers['If-None-Match']     = cached.etag
+  if (cached?.lastModified) headers['If-Modified-Since'] = cached.lastModified
+
+  const res = await fetch(`${BASE}/get_photos.php?slug=${encodeURIComponent(slug)}`, {
+    headers,
+    cache: 'no-store',
+  })
+
+  if (res.status === 304 && cached) return cached.photos
   if (!res.ok) throw new Error(`get_photos: ${res.status}`)
-  const json = await res.json()
-  return json.photos ?? []
+
+  const json   = await res.json()
+  const photos = json.photos ?? []
+  _photoCache.set(slug, {
+    etag:         res.headers.get('ETag') || null,
+    lastModified: res.headers.get('Last-Modified') || null,
+    photos,
+  })
+  return photos
 }
 
 /* ── Qonaq cavablarını çək (public) ── */
