@@ -18,6 +18,7 @@ import { getPackageGates } from '../../data/packages'
 import { buildWhatsAppUrl } from '../../utils/whatsappOrder'
 import { isAudioUnlocked, unlockAudio } from '../../utils/audioUnlock'
 import { submitDraft } from '../../utils/api'
+import { trackEvent } from '../../utils/analytics'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
 import { formatAzDate, formatFullDateByLang, formatTime24 } from '../../utils/dateFormat'
 import t from '../../data/translations'
@@ -57,6 +58,11 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
   const [envelopeOpened,   setEnvelopeOpened]   = useState(false)
   const [showMusicPrompt, setShowMusicPrompt] = useState(false)
   const musicRef = useRef(null)
+
+  /* Dəvətnamə açıldı — demo rejimi nəzərə alınmır (yalnız real qonaq baxışları) */
+  useEffect(() => {
+    if (!isDemoMode) trackEvent('invitation_opened', { lang, event_type: weddingData?.eventType })
+  }, [])
 
   // Capture the very first user gesture on this page — whether the user
   // arrived via the landing page or a direct invite link — and unlock audio.

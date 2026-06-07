@@ -5,6 +5,7 @@ import { DRESS_CODE_PALETTES } from '../../data/constants'
 import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
 import { buildWhatsAppUrl, buildShortLiveLink } from '../../utils/whatsappOrder'
 import { saveInvitation, submitDraft } from '../../utils/api'
+import { trackEvent } from '../../utils/analytics'
 import t from '../../data/translations'
 
 const ADMIN_WA = '994557133696'
@@ -115,6 +116,7 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
       localStorage.setItem('digitoy_session_id', sid)
     }
     const pkg = data.package || data.selectedPackage || 'SADE'
+    trackEvent('whatsapp_order_clicked', { lang, package: pkg })
     setWaLoading(true)
     setWaError('')
     setWaFallbackUrl('')
@@ -122,6 +124,7 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
       const result    = await submitDraft(sid, data, pkg)
       const draftCode = result?.draft_code
       if (!draftCode) throw new Error('draft_code alınmadı')
+      trackEvent('order_submitted', { lang, package: pkg })
       const waUrl = buildWhatsAppUrl(data, lang, ADMIN_WA, slug, draftCode)
       // Open with the final URL directly — pre-opening a blank popup and
       // redirecting it later (popup.location.href = waUrl) is silently ignored

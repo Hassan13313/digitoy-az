@@ -5,6 +5,7 @@ import { useScrollReveal } from '../../hooks/useScrollReveal'
 import { formatFullDateByLang } from '../../utils/dateFormat'
 import t from '../../data/translations'
 import { submitGuestResponse } from '../../utils/api'
+import { trackEvent } from '../../utils/analytics'
 
 export default function RSVPSection({ lang, weddingData }) {
   const [status,    setStatus]    = useState(null)
@@ -38,6 +39,7 @@ export default function RSVPSection({ lang, weddingData }) {
           attendanceStatus: status,
           extraGuests:      status === 'yes' ? plusOne : 0,
         })
+        trackEvent('participation_confirmed', { lang, status })
       }
     } catch {
       /* Şəbəkə xətasında optimistic state qalır */

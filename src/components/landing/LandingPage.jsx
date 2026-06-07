@@ -9,6 +9,7 @@ import TestimonialsSection from './TestimonialsSection'
 import TubelightNavbar from '../ui/TubelightNavbar'
 import StickyScrollReveal from '../ui/StickyScrollReveal'
 import t from '../../data/translations'
+import { trackEvent } from '../../utils/analytics'
 
 /* Navbar yüksəkliyi 72px — scroll hesablamada çıxılır */
 function scrollToSection(id) {
@@ -66,6 +67,11 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
     try { localStorage.removeItem('selected_package') } catch {}
   }, [])
 
+  /* Açılış səhifəsi göstərildi — bir dəfə (admin "review" rejimi xaric) */
+  useEffect(() => {
+    if (!isAdmin) trackEvent('landing_view', { lang })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   /* Preview göstərildikdə builder bölməsinə scroll et */
   useEffect(() => {
     if (showPreview) {
@@ -94,6 +100,7 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
     setWeddingData(enriched)
     setReturnToStep(null)
     setShowPreview(true)
+    trackEvent('preview_opened', { lang, package: enriched.package })
     setTimeout(() => scrollToSection('builder-content'), 100)
   }
 
@@ -145,6 +152,7 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
     setFormData(d => ({ ...d, package: pkgId }))   // initialData.package-i sinxronlaşdır
     setReturnToStep(null)
     setShowPreview(false)
+    trackEvent('builder_started', { lang, package: pkgId })
     setTimeout(() => scrollToSection('builder-content'), 80)
   }
 

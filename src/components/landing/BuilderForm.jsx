@@ -28,6 +28,7 @@ import { buildWhatsAppUrl, buildLiveLink, buildShortLiveLink, encodeData } from 
 import { formatFullDateByLang } from '../../utils/dateFormat'
 import { saveDraft, getDraft, submitDraft, saveInvitation, approveDraft } from '../../utils/api'
 import t from '../../data/translations'
+import { trackEvent } from '../../utils/analytics'
 
 const EVENT_ICONS = { toy: Heart, nishan: Diamond, birthday: Cake, corporate: Briefcase, other: Sparkles }
 const COUPLE_TYPES = ['toy', 'nishan']
@@ -1416,6 +1417,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     setSubmitLoading(true)
     try {
       await onSubmit(data)
+      trackEvent('builder_completed', { lang, package: pkgId, step: VISIBLE_TOTAL })
     } catch {
       /* üst komponent xətaları idarə edir */
     } finally {

@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Upload, ImageIcon, Check, X, Film } from 'lucide-react'
 import { uploadPhoto } from '../../utils/api'
+import { trackEvent } from '../../utils/analytics'
 
 export default function PhotoShare() {
   const [queue,     setQueue]     = useState([])   // { file, preview, id, status }
@@ -53,6 +54,7 @@ export default function PhotoShare() {
 
     setUploading(false)
     setDone(true)
+    if (successCount > 0) trackEvent('gallery_upload', { count: successCount })
   }
 
   const pendingCount = queue.filter(q => q.status === 'pending').length

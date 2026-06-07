@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Send } from 'lucide-react'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
 import { getGuestResponses, submitGuestResponse } from '../../utils/api'
+import { trackEvent } from '../../utils/analytics'
 
 const LABELS = {
   az: {
@@ -76,6 +77,7 @@ export default function Guestbook({ lang, initialMessages }) {
           guestName:    optimistic.name,
           message:      optimistic.text,
         })
+        trackEvent('guestbook_message_sent')
       }
     } catch {
       /* Şəbəkə xətasında optimistic mesaj qalır — istifadəçini narahat etmirik */

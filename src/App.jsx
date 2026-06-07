@@ -13,6 +13,7 @@ import { getInvitation, adminLogin, getDraftByCode } from './utils/api'
 import { unlockAudio } from './utils/audioUnlock'
 import ScrollProgress from './components/ui/ScrollProgress'
 import { useSEO } from './hooks/useSEO'
+import { initAnalytics, trackPageView, trackEvent } from './utils/analytics'
 import './App.css'
 
 const ACTIVE_UI = 'v3'
@@ -65,6 +66,19 @@ function getSEOConfig(view, { weddingData, slug } = {}) {
 
     default:
       return { title: HOME_TITLE, description: HOME_DESC, path: '/', type: 'website' }
+  }
+}
+
+/* ── view → GA4 page_view path-ı (yalnız ictimai 5 marşrut izlənir) ── */
+function getAnalyticsPath(view, slug) {
+  switch (view) {
+    case 'landing':
+    case 'invitation': return '/'
+    case 'demo':       return '/demo'
+    case 'invite':     return slug ? `/invite/${slug}` : null
+    case 'photo':      return slug ? `/invite/${slug}/foto` : null
+    case 'gallery-page': return slug ? `/invite/${slug}/qalereya-idare` : null
+    default: return null
   }
 }
 
@@ -178,6 +192,15 @@ export default function App() {
 
   /* Hər view dəyişəndə <head> meta-larını yenilə (title, description, OG, Twitter, canonical) */
   useSEO(getSEOConfig(view, { weddingData, slug: adminSlug || parseInviteSlug().slug }))
+
+  /* Analitika: GA4/PostHog-u bir dəfə işə sal (yalnız production + env dəyişənləri varsa) */
+  useEffect(() => { initAnalytics() }, [])
+
+  /* Spesifikasiyada göstərilən 5 marşrut üçün SPA page_view izləməsi */
+  useEffect(() => {
+    const path = getAnalyticsPath(view, adminSlug || parseInviteSlug().slug)
+    if (path) trackPageView(path)
+  }, [view, adminSlug])
 
   /* Cream fade overlay before route switch — gives a luxury page-transition feel */
   const navigateTo = useCallback((fn) => {
@@ -313,7 +336,7 @@ export default function App() {
               if (adminSlug) window.history.pushState({}, '', `/invite/${adminSlug}`)
               setView('invite')
             })}
-            onDemo={() => navigateTo(() => { window.history.pushState({}, '', '/demo'); setView('demo') })}
+            onDemo={() => { trackEvent('demo_opened', { lang }); navigateTo(() => { window.history.pushState({}, '', '/demo'); setView('demo') }) }}
             isAdmin={true} initialShowPreview={false}
           />
         </div>
@@ -363,7 +386,7 @@ export default function App() {
           lang={lang} setLang={setLang}
           weddingData={weddingData} setWeddingData={setWeddingData}
           onViewInvitation={() => navigateTo(() => setView('invitation'))}
-          onDemo={() => navigateTo(() => { window.history.pushState({}, '', '/demo'); setView('demo') })}
+          onDemo={() => { trackEvent('demo_opened', { lang }); navigateTo(() => { window.history.pushState({}, '', '/demo'); setView('demo') }) }}
           isAdmin={isAdmin}
         />
       </div>

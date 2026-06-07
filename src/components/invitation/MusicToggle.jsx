@@ -1,6 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { Music, VolumeX } from 'lucide-react'
 import t from '../../data/translations'
+import { trackEvent } from '../../utils/analytics'
 
 function loadYTScript() {
   return new Promise(resolve => {
@@ -22,6 +23,7 @@ const MusicToggle = forwardRef(function MusicToggle({ lang, videoId = DEFAULT_VI
   const tr           = t[lang]
   const containerRef = useRef(null)
   const playerRef    = useRef(null)
+  const startedRef   = useRef(false)
   const [playing, setPlaying] = useState(false)
 
   useEffect(() => {
@@ -40,8 +42,13 @@ const MusicToggle = forwardRef(function MusicToggle({ lang, videoId = DEFAULT_VI
         },
         events: {
           onStateChange: (e) => {
-            if (!cancelled)
-              setPlaying(e.data === window.YT.PlayerState.PLAYING)
+            if (cancelled) return
+            const isPlaying = e.data === window.YT.PlayerState.PLAYING
+            setPlaying(isPlaying)
+            if (isPlaying && !startedRef.current) {
+              startedRef.current = true
+              trackEvent('music_started', { lang })
+            }
           },
         },
       })

@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import { getPhotos, deletePhoto } from '../../utils/api'
 import { downloadAllAsZip, downloadItem } from '../../utils/photoGallery'
+import { trackEvent } from '../../utils/analytics'
 
 const PAGE_SIZE = 30
 
@@ -260,6 +261,9 @@ export default function GalleryPage() {
   }, [slug])
 
   useEffect(() => { fetchItems() }, [fetchItems])
+
+  /* Qalereya idarəetmə səhifəsi açıldı — bir dəfə */
+  useEffect(() => { trackEvent('gallery_opened') }, [])
 
   /* 30 saniyədə bir avtomatik yeniləmə — real-time sinxronizasiya */
   useEffect(() => {

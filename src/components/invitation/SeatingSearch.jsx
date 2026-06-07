@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Users, X } from 'lucide-react'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
 import t from '../../data/translations'
+import { trackEvent } from '../../utils/analytics'
 
 function parseSeating(text) {
   if (!text) return []
@@ -31,6 +32,18 @@ export default function SeatingSearch({ seatingPlan, lang }) {
   const [ref, visible] = useScrollReveal()
   const tables = parseSeating(seatingPlan)
   const result = query.length > 1 ? findGuest(tables, query) : null
+
+  /* Hər axtarış "sessiyası" üçün bir dəfə hadisə göndər — yenidən boşaltsa, yenidən izlənir.
+     Qonaq adı GÖNDƏRİLMİR — yalnız nəticənin tapılıb-tapılmadığı. */
+  const searchFiredRef = useRef(false)
+  useEffect(() => {
+    if (query.length > 1 && !searchFiredRef.current) {
+      searchFiredRef.current = true
+      trackEvent('seating_search_used', { has_results: result !== null && result !== undefined })
+    } else if (query.length <= 1) {
+      searchFiredRef.current = false
+    }
+  }, [query, result])
 
   const LABELS = {
     az: { title: 'Masa Axtarışı', sub: 'Adınızı yazın, masanızı tapın', hint: 'Məsələn: Araz Hüseynov' },
