@@ -95,7 +95,7 @@ export default function OpeningVideo({ onComplete, weddingData, lang = 'az' }) {
   const groomName  = weddingData?.groomName  || ''
   const eventName  = weddingData?.eventName  || ''
   const displayAnd = tr.inv_and || '&'
-  const tagline    = tr.opening_tagline || 'DƏVƏTNAMƏDƏN DAHA ARTIĞI'
+  const tagline    = tr.opening_tagline || 'Bir Dəvətnamədən Daha Artığı'
 
   if (gone) return null
 

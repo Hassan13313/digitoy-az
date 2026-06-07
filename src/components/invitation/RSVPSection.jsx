@@ -16,9 +16,17 @@ export default function RSVPSection({ lang, weddingData }) {
 
   const slug = (window.location.pathname.match(/\/invite\/([^/?#]+)/) || [])[1] || null
 
+  const tr = t[lang] || t.az
+
+  const rsvpClosed = (() => {
+    if (!weddingData?.rsvpDeadline) return false
+    const dl = new Date(`${weddingData.rsvpDeadline}T23:59:59`)
+    return !isNaN(dl.getTime()) && dl.getTime() < Date.now()
+  })()
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (sending || !status || !guestName.trim()) return
+    if (sending || !status || !guestName.trim() || rsvpClosed) return
     setSending(true)
     setSubmitted(true)
 
@@ -99,7 +107,25 @@ export default function RSVPSection({ lang, weddingData }) {
         </div>
 
         <AnimatePresence mode="wait">
-          {submitted ? (
+          {rsvpClosed && !submitted ? (
+            <motion.div
+              key="closed"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center py-10 border border-beige-dark/50 bg-beige/40"
+            >
+              <div
+                className="w-12 h-12 mx-auto mb-6 flex items-center justify-center border"
+                style={{ borderColor: '#DDD5C8' }}
+              >
+                <X size={20} className="text-brown-muted" strokeWidth={1.5} />
+              </div>
+              <h3 className="font-serif text-xl text-ink font-light mb-2">{tr.rsvp_closed_title}</h3>
+              <p className="text-[11px] tracking-[0.18em] uppercase text-brown-muted font-sans font-medium">
+                {tr.rsvp_closed_desc}
+              </p>
+            </motion.div>
+          ) : submitted ? (
             <motion.div
               key="thanks"
               initial={{ opacity: 0, y: 16 }}

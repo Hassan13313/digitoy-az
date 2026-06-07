@@ -33,9 +33,9 @@ export default function SeatingSearch({ seatingPlan, lang }) {
   const result = query.length > 1 ? findGuest(tables, query) : null
 
   const LABELS = {
-    az: { title: 'Masa Axtarışı', sub: 'Adınızı yazın, masanızı tapın', hint: 'Ad daxil edin…' },
-    en: { title: 'Find Your Seat', sub: 'Type your name to find your table', hint: 'Enter your name…' },
-    ru: { title: 'Поиск столика', sub: 'Введите имя, чтобы найти стол', hint: 'Введите имя…' },
+    az: { title: 'Masa Axtarışı', sub: 'Adınızı yazın, masanızı tapın', hint: 'Məsələn: Araz Hüseynov' },
+    en: { title: 'Find Your Seat', sub: 'Type your name to find your table', hint: 'E.g: Araz Huseynov' },
+    ru: { title: 'Поиск столика', sub: 'Введите имя, чтобы найти стол', hint: 'Например: Араз Гусейнов' },
   }
   const L = LABELS[lang] || LABELS.az
 

@@ -286,6 +286,7 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
 
   const dateStr = fd.date ? new Date(fd.date).toLocaleDateString('az-AZ', { day: '2-digit', month: 'long', year: 'numeric' }) : ''
   const timeStr = fd.time || ''
+  const rsvpDeadlineStr = fd.rsvpDeadline ? new Date(fd.rsvpDeadline).toLocaleDateString('az-AZ', { day: '2-digit', month: 'long', year: 'numeric' }) : ''
 
   return (
     <div style={{ padding: '32px 36px', maxWidth: 640 }}>
@@ -530,6 +531,9 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
         <InfoRow icon={Package}  label="Paket"  value={PKG_LABEL[draft.package] || draft.package} />
         <InfoRow icon={User}     label="Hadisə" value={fd.eventType} />
         <InfoRow icon={Calendar} label="Tarix"  value={[dateStr, timeStr].filter(Boolean).join(', ')} />
+        {rsvpDeadlineStr && (
+          <InfoRow icon={Calendar} label="RSVP Son Tarix" value={rsvpDeadlineStr} />
+        )}
         <InfoRow icon={MapPin}   label="Məkan"  value={fd.venueName} />
         <InfoRow icon={Shirt}    label="Dress Code" value={fd.dressCodePalette} />
         {fd.seatingMethod === 'digitory' && (

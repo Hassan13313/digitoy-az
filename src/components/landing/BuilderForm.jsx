@@ -1852,6 +1852,30 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
                 />
               </div>
             </div>
+
+            {/* RSVP Son Tarix — ixtiyari */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <label className="block text-[10px] tracking-[0.22em] uppercase text-brown-muted font-medium">
+                  {tr.rsvp_deadline_label}
+                </label>
+                {data.rsvpDeadline && (
+                  <button
+                    type="button"
+                    onClick={() => set('rsvpDeadline', null)}
+                    className="text-[9px] tracking-[0.18em] uppercase text-brown-muted/45 hover:text-gold transition-colors"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+              <AzCalendar
+                value={data.rsvpDeadline || ''}
+                onChange={(iso) => set('rsvpDeadline', iso)}
+                lang={lang}
+              />
+              <p className="mt-2.5 text-[11px] text-brown-muted/55 font-light leading-relaxed">{tr.rsvp_deadline_hint}</p>
+            </div>
           </div>
         )}
 
