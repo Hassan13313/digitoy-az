@@ -103,12 +103,10 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
 
   const [waLoading, setWaLoading] = useState(false)
   const [waError,   setWaError]   = useState('')
+  const [waFallbackUrl, setWaFallbackUrl] = useState('')
 
   const handleWaClick = useCallback(async () => {
     if (waLoading) return
-    // Open popup synchronously inside the click gesture.
-    // After any await, iOS Safari and many Android browsers block window.open().
-    const popup = window.open('', '_blank')
     let sid = localStorage.getItem('digitoy_session_id') || ''
     if (!sid) {
       sid = (typeof crypto !== 'undefined' && crypto.randomUUID)
@@ -119,15 +117,22 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
     const pkg = data.package || data.selectedPackage || 'SADE'
     setWaLoading(true)
     setWaError('')
+    setWaFallbackUrl('')
     try {
       const result    = await submitDraft(sid, data, pkg)
       const draftCode = result?.draft_code
       if (!draftCode) throw new Error('draft_code alınmadı')
       const waUrl = buildWhatsAppUrl(data, lang, ADMIN_WA, slug, draftCode)
-      if (popup) popup.location.href = waUrl
-      else window.open(waUrl, '_blank')
+      // Open with the final URL directly — pre-opening a blank popup and
+      // redirecting it later (popup.location.href = waUrl) is silently ignored
+      // by Chromium-based browsers once the click's transient activation has
+      // expired during the await, leaving an empty about:blank tab behind.
+      const win = window.open(waUrl, '_blank')
+      if (!win || win.closed) {
+        // Popup blocked (mainly older Safari/iOS) — give the user a direct link.
+        setWaFallbackUrl(waUrl)
+      }
     } catch {
-      if (popup) popup.close()
       setWaError('Sifariş göndərilə bilmədi. Yenidən cəhd edin.')
     } finally {
       setWaLoading(false)
@@ -269,6 +274,16 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
         </motion.button>
         {waError && (
           <p className="text-[10px] text-red-500 text-center mt-1">{waError}</p>
+        )}
+        {waFallbackUrl && (
+          <a
+            href={waFallbackUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[11px] text-gold-dark underline text-center mt-1"
+          >
+            WhatsApp açılmadı — buraya klikləyin
+          </a>
         )}
         <motion.button
           onClick={onView}
