@@ -64,6 +64,20 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
     if (!isDemoMode) trackEvent('invitation_opened', { lang, event_type: weddingData?.eventType })
   }, [])
 
+  /* Foto-paylaşım səhifəsindən #gallery ilə qayıdan qonağı birbaşa
+     qalereya bölməsinə aparır — zərf animasiyası bitənə qədər gözləyir */
+  useEffect(() => {
+    if (!envelopeOpened || window.location.hash !== '#gallery') return
+    const timer = setTimeout(() => {
+      const el = document.getElementById('gallery-section')
+      if (el) {
+        window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 72, behavior: 'smooth' })
+        history.replaceState(null, '', window.location.pathname + window.location.search)
+      }
+    }, 1100)
+    return () => clearTimeout(timer)
+  }, [envelopeOpened])
+
   // Capture the very first user gesture on this page — whether the user
   // arrived via the landing page or a direct invite link — and unlock audio.
   useEffect(() => {
@@ -204,6 +218,7 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
         }}
         weddingData={weddingData}
         lang={lang}
+        isDemoMode={isDemoMode}
       />
 
       {/* Music control — root level so position:fixed is viewport-relative, not transform-relative */}
@@ -446,7 +461,7 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
             )}
 
             {/* ── GALLERY ── */}
-            {canShowGallery && <section className="py-28 px-6 bg-cream">
+            {canShowGallery && <section id="gallery-section" className="py-28 px-6 bg-cream">
               <SectionWrapper className="max-w-lg mx-auto text-center">
                 <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">{tr.f_gallery}</p>
                 <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-5">{tr.inv_gallery}</h2>

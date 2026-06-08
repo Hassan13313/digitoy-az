@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Upload, ImageIcon, Check, X, Film } from 'lucide-react'
+import { Upload, ImageIcon, Check, X, Film, ArrowLeft } from 'lucide-react'
 import { uploadPhoto } from '../../utils/api'
 import { trackEvent } from '../../utils/analytics'
 
@@ -40,7 +40,11 @@ export default function PhotoShare() {
     queueRef.current.forEach(q => { if (q.preview) URL.revokeObjectURL(q.preview) })
   }, [])
 
-  const slug = (window.location.pathname.match(/\/invite\/([^/?#]+)/) || [])[1] || 'preview'
+  const slugMatch = window.location.pathname.match(/\/invite\/([^/?#]+)/)
+  const slug = slugMatch?.[1] || 'preview'
+  // Returns to the gallery section of the same invitation — #gallery lets
+  // InvitationPage scroll the guest back to where the QR/share link was found
+  const backHref = slugMatch ? `/invite/${slugMatch[1]}#gallery` : null
 
   const addFiles = useCallback((incoming) => {
     const valid = Array.from(incoming).filter(f =>
@@ -105,11 +109,25 @@ export default function PhotoShare() {
   const toSendCount  = pendingCount + errorCount
 
   return (
-    <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-4 py-16">
+    <div className={`min-h-screen bg-cream flex flex-col items-center justify-center px-4 pb-16 ${backHref ? 'pt-24' : 'pt-16'}`}>
       <div style={{
         position: 'fixed', inset: 0, pointerEvents: 'none',
         background: 'radial-gradient(ellipse 60% 40% at 50% 40%, rgba(197,160,89,0.08) 0%, transparent 70%)',
       }} />
+
+      {backHref && (
+        <header className="fixed top-0 left-0 right-0 z-40 bg-cream/88 backdrop-blur-md border-b border-beige-dark/30">
+          <div className="max-w-md mx-auto px-4 h-14 flex items-center">
+            <a
+              href={backHref}
+              className="flex items-center gap-2 text-[10px] tracking-[0.18em] uppercase text-brown-muted hover:text-gold transition-colors duration-300 font-medium"
+            >
+              <ArrowLeft size={13} strokeWidth={1.5} />
+              Dəvətnaməyə qayıt
+            </a>
+          </div>
+        </header>
+      )}
 
       <div className="w-full max-w-md relative">
         {/* Header */}

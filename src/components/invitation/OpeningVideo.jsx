@@ -14,15 +14,17 @@ import t from '../../data/translations'
      near-end     → dissolve into invitation (opacity only, no zoom)
      error/block  → poster held briefly, then dissolve into invitation
 ───────────────────────────────────────────────────────── */
-const FADE_DUR     = 1700
-const FADE_LEAD    = 1.9
-const CROSSFADE_MS = 700
+const FADE_DUR       = 1700
+const FADE_LEAD      = 1.9
+const CROSSFADE_MS   = 700
+const DEMO_FALLBACK_MS = 3000
 
-export default function OpeningVideo({ onComplete, weddingData, lang = 'az' }) {
-  const videoRef       = useRef(null)
-  const onCompleteRef  = useRef(onComplete)
-  const triggeredRef   = useRef(false)
-  const posterTimerRef = useRef(null)
+export default function OpeningVideo({ onComplete, weddingData, lang = 'az', isDemoMode = false }) {
+  const videoRef        = useRef(null)
+  const onCompleteRef   = useRef(onComplete)
+  const triggeredRef    = useRef(false)
+  const posterTimerRef  = useRef(null)
+  const fallbackTimerRef = useRef(null)
 
   const [fading,     setFading]     = useState(false)
   const [gone,       setGone]       = useState(false)
@@ -50,10 +52,20 @@ export default function OpeningVideo({ onComplete, weddingData, lang = 'az' }) {
     // Show poster only if video isn't ready within 200ms
     posterTimerRef.current = setTimeout(() => setShowPoster(true), 200)
 
+    // Demo fail-safe — Instagram in-app browser sometimes blocks/delays
+    // autoplay, leaving demo visitors stuck on the poster. Force entry
+    // into the invitation after a fixed grace period regardless of video
+    // state. Customer invitations keep the original (video-driven) flow.
+    if (isDemoMode) {
+      fallbackTimerRef.current = setTimeout(startFade, DEMO_FALLBACK_MS)
+    }
+
     const handleCanPlay = () => {
       clearTimeout(posterTimerRef.current)
       video.play()
         .then(() => {
+          // Playback confirmed — normal flow takes over, fail-safe no longer needed
+          clearTimeout(fallbackTimerRef.current)
           setCrossfaded(true)
           setTimeout(() => setPosterDone(true), CROSSFADE_MS + 50)
         })
@@ -80,12 +92,13 @@ export default function OpeningVideo({ onComplete, weddingData, lang = 'az' }) {
 
     return () => {
       clearTimeout(posterTimerRef.current)
+      clearTimeout(fallbackTimerRef.current)
       video.removeEventListener('canplay',    handleCanPlay)
       video.removeEventListener('timeupdate', handleTimeUpdate)
       video.removeEventListener('ended',      startFade)
       video.removeEventListener('error',      handleError)
     }
-  }, [startFade])
+  }, [startFade, isDemoMode])
 
   const tr         = t[lang] || t.az
   const eventType  = weddingData?.eventType

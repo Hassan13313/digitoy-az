@@ -208,6 +208,7 @@ export default function App() {
     setEntering(true)
     setTimeout(() => {
       fn()
+      window.scrollTo(0, 0)   // new view always starts from the top, regardless of prior scroll position
       setTimeout(() => setEntering(false), 80)
     }, 800)
   }, [])
