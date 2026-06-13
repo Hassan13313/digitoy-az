@@ -17,14 +17,23 @@ import t from '../../data/translations'
 const FADE_DUR       = 1700
 const FADE_LEAD      = 1.9
 const CROSSFADE_MS   = 700
-const DEMO_FALLBACK_MS = 3000
+/* UNIVERSAL fail-safe — applies to EVERY invitation (demo + real customer).
+   If real playback has not begun within this window (canplay/loadeddata never
+   fire, play() promise hangs, low-memory or in-app browser blocks decode), we
+   enter the invitation anyway. No guest must ever be stranded on the poster. */
+const OPEN_FALLBACK_MS = 3000
+/* If a playing video stops advancing (mid-stream stall/buffer), enter anyway. */
+const STALL_CHECK_MS   = 2500
 
-export default function OpeningVideo({ onComplete, weddingData, lang = 'az', isDemoMode = false }) {
+export default function OpeningVideo({ onComplete, weddingData, lang = 'az' }) {
   const videoRef        = useRef(null)
   const onCompleteRef   = useRef(onComplete)
   const triggeredRef    = useRef(false)
+  const playStartedRef  = useRef(false)
   const posterTimerRef  = useRef(null)
   const fallbackTimerRef = useRef(null)
+  const stallTimerRef   = useRef(null)
+  const lastTimeRef     = useRef(0)
 
   const [fading,     setFading]     = useState(false)
   const [gone,       setGone]       = useState(false)
@@ -34,9 +43,13 @@ export default function OpeningVideo({ onComplete, weddingData, lang = 'az', isD
 
   onCompleteRef.current = onComplete
 
+  /* Idempotent entry into the invitation — runs at most once. */
   const startFade = useCallback(() => {
     if (triggeredRef.current) return
     triggeredRef.current = true
+    clearTimeout(posterTimerRef.current)
+    clearTimeout(fallbackTimerRef.current)
+    clearInterval(stallTimerRef.current)
     setFading(true)
     onCompleteRef.current()
     setTimeout(() => setGone(true), FADE_DUR + 200)
@@ -49,30 +62,36 @@ export default function OpeningVideo({ onComplete, weddingData, lang = 'az', isD
     video.muted  = true
     video.volume = 0
 
-    // Show poster only if video isn't ready within 200ms
+    // Show poster only if the video isn't ready within 200ms
     posterTimerRef.current = setTimeout(() => setShowPoster(true), 200)
 
-    // Demo fail-safe — Instagram in-app browser sometimes blocks/delays
-    // autoplay, leaving demo visitors stuck on the poster. Force entry
-    // into the invitation after a fixed grace period regardless of video
-    // state. Customer invitations keep the original (video-driven) flow.
-    if (isDemoMode) {
-      fallbackTimerRef.current = setTimeout(startFade, DEMO_FALLBACK_MS)
+    // Universal safety net (see OPEN_FALLBACK_MS) — guarantees entry.
+    fallbackTimerRef.current = setTimeout(startFade, OPEN_FALLBACK_MS)
+
+    // Attempt playback; tolerate environments where the promise hangs/rejects.
+    const tryPlay = () => {
+      if (playStartedRef.current || triggeredRef.current) return
+      const p = video.play()
+      if (p && typeof p.then === 'function') {
+        p.catch(() => startFade())   // autoplay blocked / decode refused → enter
+      }
     }
 
-    const handleCanPlay = () => {
+    // Real playback confirmed — the premium flow takes over for capable devices.
+    const handlePlaying = () => {
+      if (playStartedRef.current || triggeredRef.current) return
+      playStartedRef.current = true
       clearTimeout(posterTimerRef.current)
-      video.play()
-        .then(() => {
-          // Playback confirmed — normal flow takes over, fail-safe no longer needed
-          clearTimeout(fallbackTimerRef.current)
-          setCrossfaded(true)
-          setTimeout(() => setPosterDone(true), CROSSFADE_MS + 50)
-        })
-        .catch(() => {
-          // Autoplay blocked — show poster briefly then continue
-          startFade()
-        })
+      clearTimeout(fallbackTimerRef.current)   // capable device → no time cap
+      setCrossfaded(true)
+      setTimeout(() => setPosterDone(true), CROSSFADE_MS + 50)
+      // Mid-stream stall watchdog: if currentTime stops advancing, enter anyway.
+      lastTimeRef.current = video.currentTime
+      stallTimerRef.current = setInterval(() => {
+        if (triggeredRef.current) { clearInterval(stallTimerRef.current); return }
+        if (!video.paused && video.currentTime === lastTimeRef.current) startFade()
+        lastTimeRef.current = video.currentTime
+      }, STALL_CHECK_MS)
     }
 
     const handleTimeUpdate = () => {
@@ -80,25 +99,37 @@ export default function OpeningVideo({ onComplete, weddingData, lang = 'az', isD
       if (video.duration - video.currentTime <= FADE_LEAD) startFade()
     }
 
-    const handleError = () => {
-      // Keep poster visible, then continue to invitation
-      setTimeout(startFade, 1200)
-    }
+    // canplay never firing is the core bug — also attempt on loadeddata, and
+    // immediately, so capable devices still start instantly.
+    const handleReady = () => { clearTimeout(posterTimerRef.current); tryPlay() }
+    const handleError = () => startFade()
 
-    video.addEventListener('canplay',    handleCanPlay)
+    // Note: transient `stalled`/buffering is intentionally NOT a hard bail —
+    // it is covered gracefully by the 3s pre-play fallback and the mid-play
+    // stall watchdog, so a brief network hiccup won't cut a capable device's
+    // video short. Only terminal failures (error/abort) bail immediately.
+    video.addEventListener('loadeddata', handleReady)
+    video.addEventListener('canplay',    handleReady)
+    video.addEventListener('playing',    handlePlaying)
     video.addEventListener('timeupdate', handleTimeUpdate)
     video.addEventListener('ended',      startFade)
     video.addEventListener('error',      handleError)
+    video.addEventListener('abort',      handleError)
+    tryPlay()   // some browsers are ready before listeners attach
 
     return () => {
       clearTimeout(posterTimerRef.current)
       clearTimeout(fallbackTimerRef.current)
-      video.removeEventListener('canplay',    handleCanPlay)
+      clearInterval(stallTimerRef.current)
+      video.removeEventListener('loadeddata', handleReady)
+      video.removeEventListener('canplay',    handleReady)
+      video.removeEventListener('playing',    handlePlaying)
       video.removeEventListener('timeupdate', handleTimeUpdate)
       video.removeEventListener('ended',      startFade)
       video.removeEventListener('error',      handleError)
+      video.removeEventListener('abort',      handleError)
     }
-  }, [startFade, isDemoMode])
+  }, [startFade])
 
   const tr         = t[lang] || t.az
   const eventType  = weddingData?.eventType

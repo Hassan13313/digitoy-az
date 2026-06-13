@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react'
 import { ArrowLeft, MapPin, Navigation, Download, ExternalLink, ChevronDown, Camera, Music } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -11,7 +11,10 @@ import OpeningVideo from './OpeningVideo'
 import RSVPSection from './RSVPSection'
 import Guestbook from './Guestbook'
 import EventTimeline from './EventTimeline'
-import DynamicHeroAnimation from './DynamicHeroAnimation'
+/* three.js hero rings — lazy so the heavy 3D bundle loads only with the
+   invitation hero, never on the landing/initial path. Visual enhancement;
+   fades in when ready (fallback renders nothing, no layout shift). */
+const DynamicHeroAnimation = lazy(() => import('./DynamicHeroAnimation'))
 import ThreeDDressCode from './ThreeDDressCode'
 import { DRESS_CODE_PALETTES, WHATSAPP_NUMBER, SOCIAL_LINKS } from '../../data/constants'
 import { getPackageGates } from '../../data/packages'
@@ -58,6 +61,21 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
   const [envelopeOpened,   setEnvelopeOpened]   = useState(false)
   const [showMusicPrompt, setShowMusicPrompt] = useState(false)
   const musicRef = useRef(null)
+  const musicHintDismissedRef = useRef(false)
+
+  /* Musiqi ipucu — qonaq ilk dəfə scroll edəndə 300ms sonra yumşaq itir
+     (yalnız bir dəfə, demo + real). Musiqi toggle-ı qalır, yalnız ipucu gizlənir. */
+  useEffect(() => {
+    if (!envelopeOpened) return
+    const onFirstScroll = () => {
+      if (musicHintDismissedRef.current) return
+      musicHintDismissedRef.current = true
+      window.removeEventListener('scroll', onFirstScroll)
+      setTimeout(() => setShowMusicPrompt(false), 300)
+    }
+    window.addEventListener('scroll', onFirstScroll, { passive: true, once: true })
+    return () => window.removeEventListener('scroll', onFirstScroll)
+  }, [envelopeOpened])
 
   /* Dəvətnamə açıldı — demo rejimi nəzərə alınmır (yalnız real qonaq baxışları) */
   useEffect(() => {
@@ -218,7 +236,6 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
         }}
         weddingData={weddingData}
         lang={lang}
-        isDemoMode={isDemoMode}
       />
 
       {/* Music control — root level so position:fixed is viewport-relative, not transform-relative */}
@@ -370,11 +387,15 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
                 {/* Dynamic animation by event type */}
                 {isCorp ? (
                   <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
-                    <DynamicHeroAnimation eventType={weddingData.eventType || 'toy'} />
+                    <Suspense fallback={null}>
+                      <DynamicHeroAnimation eventType={weddingData.eventType || 'toy'} />
+                    </Suspense>
                   </div>
                 ) : (
                   <div className="mt-10 max-w-xs mx-auto">
-                    <DynamicHeroAnimation eventType={weddingData.eventType || 'toy'} />
+                    <Suspense fallback={null}>
+                      <DynamicHeroAnimation eventType={weddingData.eventType || 'toy'} />
+                    </Suspense>
                   </div>
                 )}
               </div>

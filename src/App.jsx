@@ -1,12 +1,15 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import LandingPage from './components/landing/LandingPage'
 import InvitationPage from './components/invitation/InvitationPage'
-import PhotoShare from './components/invitation/PhotoShare'
-import GalleryPage from './components/invitation/GalleryPage'
-import DigitoyOrijinalUI from './components/DigitoyOrijinalUI'
-import AdminApp from './components/admin/AdminApp'
-import AdminLoginGate from './components/admin/AdminLoginGate'
+/* Route-level code splitting — isolated, non-landing routes load on demand,
+   shrinking the initial bundle for the home/invite paths. SEO unaffected
+   (these routes are all noindex). */
+const PhotoShare       = lazy(() => import('./components/invitation/PhotoShare'))
+const GalleryPage      = lazy(() => import('./components/invitation/GalleryPage'))
+const DigitoyOrijinalUI = lazy(() => import('./components/DigitoyOrijinalUI'))
+const AdminApp         = lazy(() => import('./components/admin/AdminApp'))
+const AdminLoginGate   = lazy(() => import('./components/admin/AdminLoginGate'))
 import { defaultWedding } from './data/defaultWedding'
 import { demoInvitation, demoGuestbook } from './data/demoInvitation'
 import { getInvitation, adminLogin, getDraftByCode } from './utils/api'
@@ -182,6 +185,22 @@ function routeAfterAuth(
   setView('landing')
 }
 
+/* Shared cream loading spinner — initial route + lazy-route Suspense fallback */
+function RouteLoader() {
+  return (
+    <div className="min-h-screen bg-cream flex items-center justify-center">
+      <div style={{
+        width: 40, height: 40,
+        border: '1px solid rgba(197,160,89,0.25)',
+        borderTop: '1px solid rgba(197,160,89,0.8)',
+        borderRadius: '50%',
+        animation: 'spin 0.9s linear infinite',
+      }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  )
+}
+
 export default function App() {
   const [view,        setView]        = useState('loading')
   const [lang,        setLang]        = useState('az')
@@ -280,22 +299,9 @@ export default function App() {
     routeWithDraft(!!existingToken)
   }, [])
 
-  if (ACTIVE_UI === 'new') return <DigitoyOrijinalUI />
+  if (ACTIVE_UI === 'new') return <Suspense fallback={<RouteLoader />}><DigitoyOrijinalUI /></Suspense>
 
-  if (view === 'loading') {
-    return (
-      <div className="min-h-screen bg-cream flex items-center justify-center">
-        <div style={{
-          width: 40, height: 40,
-          border: '1px solid rgba(197,160,89,0.25)',
-          borderTop: '1px solid rgba(197,160,89,0.8)',
-          borderRadius: '50%',
-          animation: 'spin 0.9s linear infinite',
-        }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
-    )
-  }
+  if (view === 'loading') return <RouteLoader />
 
   if (view === 'demo') {
     return (
@@ -311,11 +317,13 @@ export default function App() {
     )
   }
 
-  if (view === 'photo')        return <PhotoShare />
-  if (view === 'gallery-page') return <GalleryPage />
-  if (view === 'admin-panel')  return <AdminApp lang={lang} setLang={setLang} />
+  if (view === 'photo')        return <Suspense fallback={<RouteLoader />}><PhotoShare /></Suspense>
+  if (view === 'gallery-page') return <Suspense fallback={<RouteLoader />}><GalleryPage /></Suspense>
+  if (view === 'admin-panel')  return <Suspense fallback={<RouteLoader />}><AdminApp lang={lang} setLang={setLang} /></Suspense>
   if (view === 'admin-login')  return (
-    <AdminLoginGate onSuccess={() => { setIsAdmin(true); setView('admin-panel') }} />
+    <Suspense fallback={<RouteLoader />}>
+      <AdminLoginGate onSuccess={() => { setIsAdmin(true); setView('admin-panel') }} />
+    </Suspense>
   )
 
   if (view === 'admin-review') {
@@ -346,15 +354,32 @@ export default function App() {
   }
 
   if (view === 'invite-not-found') {
+    const goHome = () => { window.history.pushState({}, '', '/'); setView('landing') }
     return (
-      <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 text-center">
-        <div style={{ width: 48, height: 1, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.6), transparent)', marginBottom: 28 }} />
-        <p className="font-mono text-[10px] tracking-[0.38em] uppercase text-gold mb-4">Digitoy.az</p>
-        <h1 className="font-serif text-2xl text-ink font-light tracking-tight mb-3">Bu dəvətnamə tapılmadı</h1>
-        <p className="text-brown-muted text-sm font-light leading-relaxed max-w-xs">
-          Link köhnəlmiş və ya yanlış ola bilər. Dəvətnamə sahibindən yeni link tələb edin.
-        </p>
-        <div style={{ width: 48, height: 1, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.4), transparent)', marginTop: 28 }} />
+      <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 text-center relative overflow-hidden">
+        {/* Ambient gold glow */}
+        <div style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none',
+          background: 'radial-gradient(ellipse 55% 35% at 50% 38%, rgba(197,160,89,0.08) 0%, transparent 65%)',
+        }} />
+        <div className="relative">
+          <div style={{ width: 48, height: 1, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.6), transparent)', margin: '0 auto 28px' }} />
+          <p className="font-mono text-[10px] tracking-[0.38em] uppercase text-gold mb-6">Digitoy.az</p>
+          <p className="font-serif text-gold/35 font-light leading-none mb-4" style={{ fontSize: 'clamp(56px, 16vw, 96px)' }}>404</p>
+          <h1 className="font-serif text-2xl sm:text-3xl text-ink font-light tracking-tight mb-4">Bu dəvətnamə tapılmadı.</h1>
+          <p className="text-brown-muted text-sm font-light leading-relaxed max-w-xs mx-auto mb-10">
+            Link köhnəlmiş və ya yanlış ola bilər. Zəhmət olmasa dəvətnamə sahibindən yeni link tələb edin.
+          </p>
+          <button
+            onClick={goHome}
+            className="inline-flex items-center gap-2.5 btn-gold"
+            style={{ textDecoration: 'none' }}
+          >
+            Ana səhifəyə qayıt
+            <span style={{ fontSize: 14 }}>→</span>
+          </button>
+          <div style={{ width: 48, height: 1, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.4), transparent)', margin: '40px auto 0' }} />
+        </div>
       </div>
     )
   }
