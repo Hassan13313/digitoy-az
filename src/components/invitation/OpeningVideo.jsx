@@ -232,6 +232,32 @@ export default function OpeningVideo({ onComplete, weddingData, lang = 'az', isD
           </p>
         </div>
       )}
+
+      {/* Skip — həm demo, həm real dəvətnamədə. startFade ikili icranı bloklayır. */}
+      {!fading && (
+        <button
+          type="button"
+          onClick={startFade}
+          aria-label={tr.opening_skip || 'Animasiyanı keç'}
+          style={{
+            position: 'absolute',
+            bottom: 'max(22px, env(safe-area-inset-bottom, 22px))',
+            right: 20, zIndex: 60,
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '9px 18px',
+            background: 'rgba(26,20,12,0.32)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            border: '1px solid rgba(253,250,244,0.35)',
+            borderRadius: 999, cursor: 'pointer',
+            fontFamily: '"Inter", system-ui, sans-serif',
+            fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase',
+            color: 'rgba(253,250,244,0.92)', fontWeight: 500,
+          }}
+        >
+          {tr.opening_skip || 'Keç →'}
+        </button>
+      )}
     </motion.div>
   )
 }

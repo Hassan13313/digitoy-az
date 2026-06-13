@@ -13,7 +13,7 @@ import Guestbook from './Guestbook'
 import EventTimeline from './EventTimeline'
 import DynamicHeroAnimation from './DynamicHeroAnimation'
 import ThreeDDressCode from './ThreeDDressCode'
-import { DRESS_CODE_PALETTES, WHATSAPP_NUMBER } from '../../data/constants'
+import { DRESS_CODE_PALETTES, WHATSAPP_NUMBER, SOCIAL_LINKS } from '../../data/constants'
 import { getPackageGates } from '../../data/packages'
 import { buildWhatsAppUrl } from '../../utils/whatsappOrder'
 import { isAudioUnlocked, unlockAudio } from '../../utils/audioUnlock'
@@ -316,7 +316,7 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
                   {eventLabels[weddingData.eventType] || tr.event_toy}
                 </p>
 
-                <p className="font-serif italic text-[15px] sm:text-base text-brown-muted/80 mb-6 font-light tracking-wide leading-relaxed max-w-xs mx-auto">
+                <p className="font-serif italic text-[15px] sm:text-base text-brown-dark/90 mb-6 font-normal tracking-wide leading-relaxed max-w-xs mx-auto">
                   {tr.inv_join}
                 </p>
 
@@ -444,14 +444,16 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
                 <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">Style</p>
                 <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-10">{tr.inv_dresscode}</h2>
 
-                {/* Luxury dress code showcase */}
+                {/* Luxury dress code showcase — qeyd kartın daxilindədir */}
                 <div className="mb-8">
-                  <ThreeDDressCode color={fabricColor} palette={palette} paletteId={weddingData.dressCodePalette} lang={lang} />
+                  <ThreeDDressCode
+                    color={fabricColor}
+                    palette={palette}
+                    paletteId={weddingData.dressCodePalette}
+                    lang={lang}
+                    note={weddingData.dressCodeDescription || palette.description[lang]}
+                  />
                 </div>
-
-                <p className="text-sm text-brown-muted leading-[1.9] max-w-xs mx-auto font-light tracking-wide">
-                  {weddingData.dressCodeDescription || palette.description[lang]}
-                </p>
               </SectionWrapper>
             </section>
 
@@ -692,7 +694,37 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
                 {formatFullDateByLang(weddingData.date, lang)}
               </p>
               <div className="gold-divider mb-8 max-w-[120px] mx-auto opacity-25" />
-              <p className="text-white/15 text-[10px] tracking-widest">{tr.footer_made}</p>
+
+              {/* ── DigiToy referral ── */}
+              <p className="text-white/30 text-[10px] tracking-[0.28em] uppercase font-light mb-5">
+                {tr.footer_referral}
+              </p>
+              <div className="flex items-center justify-center gap-4">
+                {/* Instagram */}
+                <a href={SOCIAL_LINKS.instagram} aria-label="Instagram" target="_blank" rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full border border-white/15 flex items-center justify-center hover:border-gold/50 hover:bg-gold/10 hover:scale-105 transition-all duration-200">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(197,160,89,0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5"/>
+                    <circle cx="12" cy="12" r="5"/>
+                    <circle cx="17.5" cy="6.5" r="1.2" fill="rgba(197,160,89,0.85)" stroke="none"/>
+                  </svg>
+                </a>
+                {/* TikTok */}
+                <a href={SOCIAL_LINKS.tiktok} aria-label="TikTok" target="_blank" rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full border border-white/15 flex items-center justify-center hover:border-gold/50 hover:bg-gold/10 hover:scale-105 transition-all duration-200">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="rgba(197,160,89,0.85)">
+                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/>
+                  </svg>
+                </a>
+                {/* WhatsApp */}
+                <a href={SOCIAL_LINKS.whatsapp} aria-label="WhatsApp" target="_blank" rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full border border-white/15 flex items-center justify-center hover:border-gold/50 hover:bg-gold/10 hover:scale-105 transition-all duration-200">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M20.52 3.48A11.93 11.93 0 0 0 12 0C5.37 0 0 5.37 0 12c0 2.11.55 4.16 1.6 5.97L0 24l6.18-1.62A11.94 11.94 0 0 0 12 24c6.63 0 12-5.37 12-12 0-3.2-1.25-6.21-3.48-8.52zM12 22c-1.85 0-3.67-.5-5.25-1.44l-.38-.22-3.67.96.98-3.58-.25-.38A9.94 9.94 0 0 1 2 12C2 6.48 6.48 2 12 2c2.67 0 5.18 1.04 7.07 2.93A9.94 9.94 0 0 1 22 12c0 5.52-4.48 10-10 10z" fill="rgba(197,160,89,0.85)"/>
+                    <path d="M17.5 14.4c-.3-.15-1.75-.86-2.02-.96s-.47-.15-.67.15-.77.96-.94 1.16-.35.22-.64.07a8.08 8.08 0 0 1-2.38-1.47 8.93 8.93 0 0 1-1.64-2.05c-.17-.3 0-.46.13-.6l.44-.52c.14-.17.18-.3.27-.5s.05-.37-.02-.52-.67-1.6-.91-2.2c-.24-.57-.49-.5-.67-.5h-.57c-.2 0-.52.07-.79.37s-1.04 1.02-1.04 2.48 1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.7.62.71.23 1.36.2 1.87.12.57-.09 1.75-.72 2-1.41s.25-1.29.17-1.41-.27-.2-.57-.35z" fill="rgba(197,160,89,0.85)"/>
+                  </svg>
+                </a>
+              </div>
             </footer>
           </motion.div>
         )}

@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Trash2, CheckSquare, Square, Download, Archive,
+  Trash2, CheckSquare, Square, Download,
   ImagePlus, X, Check, RotateCcw, Film, ArrowLeft,
 } from 'lucide-react'
 import { getPhotos, deletePhoto } from '../../utils/api'
-import { downloadAllAsZip, downloadItem } from '../../utils/photoGallery'
+import { downloadItemsHD, downloadItem } from '../../utils/photoGallery'
 import { trackEvent } from '../../utils/analytics'
 
 const PAGE_SIZE = 30
@@ -84,6 +84,7 @@ function LazyMedia({ item, selected, onToggle, onDelete, onPreview }) {
           >
             <button
               onClick={() => onDelete(item.id)}
+              aria-label="Şəkli sil"
               style={{
                 width: 30, height: 30, borderRadius: 2,
                 background: 'rgba(170,35,35,0.88)', border: 'none', cursor: 'pointer',
@@ -94,6 +95,7 @@ function LazyMedia({ item, selected, onToggle, onDelete, onPreview }) {
             </button>
             <button
               onClick={() => downloadItem(item)}
+              aria-label="Şəkli HD endir"
               style={{
                 width: 30, height: 30, borderRadius: 2,
                 background: 'rgba(197,160,89,0.9)', border: 'none', cursor: 'pointer',
@@ -177,6 +179,7 @@ function Lightbox({ item, onClose }) {
         {/* Premium close button */}
         <button
           onClick={onClose}
+          aria-label="Bağla"
           style={{
             position: 'absolute', top: -18, right: -18,
             width: 36, height: 36,
@@ -314,12 +317,17 @@ export default function GalleryPage() {
     setDelConfirm(false)
   }
 
-  const handleZip = async () => {
+  const HD_WARN_THRESHOLD = 15
+  const handleHD = async () => {
     const targets = selected.size > 0 ? items.filter(i => selected.has(i.id)) : items
     if (!targets.length) return
+    if (targets.length > HD_WARN_THRESHOLD &&
+        !window.confirm(`${targets.length} şəkil bir-bir endiriləcək. Brauzer bir neçə endirməyə icazə istəyə bilər. Davam edək?`)) {
+      return
+    }
     setZipState('loading')
     try {
-      await downloadAllAsZip(targets, slug)
+      await downloadItemsHD(targets)
       setZipState('done')
       setTimeout(() => setZipState('idle'), 3500)
     } catch {
@@ -452,15 +460,15 @@ export default function GalleryPage() {
 
             {items.length > 0 && (
               <Btn
-                onClick={handleZip}
+                onClick={handleHD}
                 disabled={zipState === 'loading'}
                 style={{ minWidth: 190 }}
               >
                 {zipState === 'done'   ? <><Check size={11} strokeWidth={2} /> Endirildi!</> :
                  zipState === 'error'  ? <><X size={11} strokeWidth={2} /> Xəta baş verdi</> :
-                 zipState === 'loading' ? <><Archive size={11} strokeWidth={1.5} /> ZIP Hazırlanır…</> :
-                 <><Archive size={11} strokeWidth={1.5} />
-                   {selected.size > 0 ? `${selected.size} Faylı .ZIP Endir` : 'Bütün Şəkilləri .ZIP Endir'}
+                 zipState === 'loading' ? <><Download size={11} strokeWidth={1.5} /> Endirilir…</> :
+                 <><Download size={11} strokeWidth={1.5} />
+                   {selected.size > 0 ? `${selected.size} şəkli HD formatda endir` : 'HD formatda endir'}
                  </>}
               </Btn>
             )}

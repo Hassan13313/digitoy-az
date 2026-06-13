@@ -135,3 +135,10 @@ export const PRICING = [
 ]
 
 export const WHATSAPP_NUMBER = '994557133696'
+
+/* ── DigiToy brand social links (centralized) ── */
+export const SOCIAL_LINKS = {
+  instagram: 'https://www.instagram.com/digitoy.az/',
+  tiktok:    'https://www.tiktok.com/@digitoy.az',
+  whatsapp:  `https://wa.me/${WHATSAPP_NUMBER}`,
+}

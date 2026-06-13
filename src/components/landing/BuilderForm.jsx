@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { Reorder, useDragControls } from 'framer-motion'
 import {
   Heart, Diamond, Cake, Briefcase, Sparkles,
   ChevronRight, ChevronLeft, Check, Crown, Shirt, Calendar, User, MapPin, Search,
-  Download, QrCode, Archive, Minus, Plus, X,
+  Download, QrCode, Archive, Minus, Plus, X, GripVertical,
 } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 /* Google Maps JS API — singleton promise, script injected once */
@@ -264,60 +265,110 @@ function IconPickerBtn({ value, onSelect }) {
   )
 }
 
+/* Stabil id generatoru — şablon və əl ilə yaradılan addımlar eyni davranış üçün */
+let _programRowSeq = 0
+const genProgramRowId = () => `p_${Date.now().toString(36)}_${(_programRowSeq++).toString(36)}`
+
+const DeleteIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+)
+
+function DragHandle({ controls }) {
+  return (
+    <button
+      type="button"
+      aria-label="Sıralamaq üçün sürüklə"
+      onPointerDown={(e) => controls.start(e)}
+      className="flex-shrink-0 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-brown-muted/40 hover:text-gold transition-colors rounded cursor-grab active:cursor-grabbing"
+      style={{ touchAction: 'none' }}
+    >
+      <GripVertical size={16} strokeWidth={1.5} />
+    </button>
+  )
+}
+
+/* Tək program sətri — sağda sürükləmə tutacağı ilə yenidən sıralana bilir */
+function ProgramRow({ row, update, removeRow, activityRefs, tr }) {
+  const controls = useDragControls()
+  return (
+    <Reorder.Item
+      value={row}
+      dragListener={false}
+      dragControls={controls}
+      as="div"
+      className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-beige/50 border border-beige-dark/50 rounded-lg p-3 sm:p-2.5"
+      style={{ position: 'relative' }}
+      whileDrag={{ scale: 1.015, boxShadow: '0 10px 28px rgba(0,0,0,0.14)', zIndex: 5 }}
+    >
+      {/* Mobil: saat + (sağda) ikon+sil+tutacaq */}
+      <div className="flex items-center gap-2">
+        <TimeInput
+          value={row.time}
+          onChange={(v) => update(row.id, 'time', v)}
+          onComplete={() => activityRefs.current[row.id]?.focus()}
+          placeholder="19:00"
+          className="w-[84px] sm:w-[90px] flex-shrink-0 text-center p-2.5 border border-beige-dark/60 rounded bg-cream font-mono text-sm focus:outline-none focus:border-gold/60 transition-colors"
+        />
+        <div className="flex items-center gap-1 ml-auto sm:hidden">
+          <IconPickerBtn value={row.icon} onSelect={(ic) => update(row.id, 'icon', ic)} />
+          <button type="button" onClick={() => removeRow(row.id)} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-brown-muted/40 hover:text-red-400 transition-colors rounded touch-manipulation" aria-label="Sil">
+            <DeleteIcon />
+          </button>
+          <DragHandle controls={controls} />
+        </div>
+      </div>
+      {/* Fəaliyyət input — mobil-da tam en */}
+      <input
+        ref={(el) => { activityRefs.current[row.id] = el }}
+        type="text"
+        value={row.activity}
+        onChange={(e) => update(row.id, 'activity', e.target.value)}
+        placeholder={tr.program_step_activity_placeholder}
+        className="w-full sm:flex-1 sm:min-w-0 p-2.5 border border-beige-dark/50 rounded bg-cream text-sm focus:outline-none focus:border-gold/60 transition-colors"
+      />
+      {/* Desktop-da ikon+sil+tutacaq */}
+      <div className="hidden sm:flex items-center gap-1 flex-shrink-0">
+        <IconPickerBtn value={row.icon} onSelect={(ic) => update(row.id, 'icon', ic)} />
+        <button type="button" onClick={() => removeRow(row.id)} className="flex-shrink-0 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-brown-muted/40 hover:text-red-400 transition-colors rounded" aria-label="Sil">
+          <DeleteIcon />
+        </button>
+        <DragHandle controls={controls} />
+      </div>
+    </Reorder.Item>
+  )
+}
+
 function ProgramStepEditor({ rows, onChange, tr }) {
-  const activityRefs = useRef([])
+  const activityRefs = useRef({})
 
-  const update = (i, field, val) => {
-    const updated = [...rows]
-    updated[i] = { ...updated[i], [field]: val }
-    onChange(updated)
-  }
+  /* Hər sətrə stabil id təmin et — şablon və əl ilə yaradılanlar eyni davranır */
+  useEffect(() => {
+    if (rows.some(r => !r.id)) {
+      onChange(rows.map(r => r.id ? r : { ...r, id: genProgramRowId() }))
+    }
+  }, [rows, onChange])
 
-  const addRow = () => onChange([...rows, { time: '', icon: '', activity: '' }])
+  const update = (id, field, val) =>
+    onChange(rows.map(r => r.id === id ? { ...r, [field]: val } : r))
 
-  const removeRow = (i) => onChange(rows.filter((_, idx) => idx !== i))
+  const addRow = () => onChange([...rows, { id: genProgramRowId(), time: '', icon: '', activity: '' }])
+
+  const removeRow = (id) => onChange(rows.filter(r => r.id !== id))
 
   return (
     <div className="space-y-4">
-      <div className="space-y-3">
-        {rows.map((row, i) => (
-          <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-beige/50 border border-beige-dark/50 rounded-lg p-3 sm:p-2.5">
-            {/* Mobil: saat + (sağda) ikon+sil düymələri */}
-            <div className="flex items-center gap-2">
-              <TimeInput
-                value={row.time}
-                onChange={(v) => update(i, 'time', v)}
-                onComplete={() => activityRefs.current[i]?.focus()}
-                placeholder="19:00"
-                className="w-[84px] sm:w-[90px] flex-shrink-0 text-center p-2.5 border border-beige-dark/60 rounded bg-cream font-mono text-sm focus:outline-none focus:border-gold/60 transition-colors"
-              />
-              {/* Mobil-da sağa keç */}
-              <div className="flex items-center gap-1 ml-auto sm:hidden">
-                <IconPickerBtn value={row.icon} onSelect={(ic) => update(i, 'icon', ic)} />
-                <button type="button" onClick={() => removeRow(i)} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-brown-muted/40 hover:text-red-400 transition-colors rounded touch-manipulation" aria-label="Sil">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-                </button>
-              </div>
-            </div>
-            {/* Fəaliyyət input — mobil-da tam en */}
-            <input
-              ref={(el) => (activityRefs.current[i] = el)}
-              type="text"
-              value={row.activity}
-              onChange={(e) => update(i, 'activity', e.target.value)}
-              placeholder={tr.program_step_activity_placeholder}
-              className="w-full sm:flex-1 sm:min-w-0 p-2.5 border border-beige-dark/50 rounded bg-cream text-sm focus:outline-none focus:border-gold/60 transition-colors"
-            />
-            {/* Desktop-da ikon+sil */}
-            <div className="hidden sm:flex items-center gap-1 flex-shrink-0">
-              <IconPickerBtn value={row.icon} onSelect={(ic) => update(i, 'icon', ic)} />
-              <button type="button" onClick={() => removeRow(i)} className="flex-shrink-0 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-brown-muted/40 hover:text-red-400 transition-colors rounded" aria-label="Sil">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-              </button>
-            </div>
-          </div>
+      <Reorder.Group axis="y" values={rows} onReorder={onChange} as="div" className="space-y-3">
+        {rows.map((row) => (
+          <ProgramRow
+            key={row.id || row.activity + row.time}
+            row={row}
+            update={update}
+            removeRow={removeRow}
+            activityRefs={activityRefs}
+            tr={tr}
+          />
         ))}
-      </div>
+      </Reorder.Group>
       <button
         type="button"
         onClick={addRow}

@@ -285,6 +285,7 @@ export default function PhotoShare() {
                       {item.status === 'pending' && (
                         <button
                           onClick={() => removeItem(item.id)}
+                          aria-label="Şəkli çıxar"
                           style={{
                             position: 'absolute', top: 4, right: 4,
                             width: 22, height: 22,
@@ -302,6 +303,7 @@ export default function PhotoShare() {
                   {/* Add more */}
                   <button
                     onClick={() => inputRef.current?.click()}
+                    aria-label="Daha çox şəkil əlavə et"
                     style={{
                       aspectRatio: '1',
                       border: '1px dashed rgba(197,160,89,0.28)',

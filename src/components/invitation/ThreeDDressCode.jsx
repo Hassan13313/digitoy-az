@@ -93,7 +93,7 @@ const FIGURE_LABELS = {
   ru: { male: 'Мужчина', female: 'Женщина' },
 }
 
-export default function ThreeDDressCode({ palette, paletteId: rawId, lang = 'az' }) {
+export default function ThreeDDressCode({ palette, paletteId: rawId, lang = 'az', note }) {
   const paletteId = rawId || palette?.id || 'smartcasual'
   const outfit    = buildOutfit(paletteId, lang)
   const figures   = FIGURE_LABELS[lang] || FIGURE_LABELS.az
@@ -217,6 +217,26 @@ export default function ThreeDDressCode({ palette, paletteId: rawId, lang = 'az'
           </div>
         </motion.div>
       </AnimatePresence>
+
+      {/* Qeyd — kartın daxilində (rənglər + stil + qeyd eyni vizual kartda) */}
+      {note && (
+        <>
+          <div style={{
+            height: 1, margin: '22px 0 16px',
+            background: 'linear-gradient(to right, transparent, rgba(212,175,55,0.35) 30%, rgba(212,175,55,0.5) 50%, rgba(212,175,55,0.35) 70%, transparent)',
+          }} />
+          <p style={{
+            textAlign: 'center', position: 'relative',
+            fontSize: 12, fontWeight: 300, lineHeight: 1.7,
+            color: 'rgba(60,50,40,0.82)',
+            fontFamily: '"Inter",system-ui,sans-serif',
+            letterSpacing: '0.01em',
+            maxWidth: 320, margin: '0 auto',
+          }}>
+            {note}
+          </p>
+        </>
+      )}
     </div>
   )
 }

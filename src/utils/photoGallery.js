@@ -151,6 +151,18 @@ export function downloadItem(item) {
   a.click()
 }
 
+/* ── Download items individually in original (HD) quality ──
+   No ZIP, no re-compression — each file is fetched/triggered as-is.
+   A small delay between downloads keeps browsers from blocking the batch. */
+export async function downloadItemsHD(items, onProgress) {
+  if (!items?.length) return
+  for (let i = 0; i < items.length; i++) {
+    downloadItem(items[i])
+    onProgress?.(i + 1, items.length)
+    if (i < items.length - 1) await new Promise(r => setTimeout(r, 350))
+  }
+}
+
 /* ── Download all items as a real ZIP archive via JSZip ── */
 export async function downloadAllAsZip(items, slug) {
   if (!items.length) return

@@ -8,11 +8,11 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Trash2, CheckSquare, Square, Download, Archive,
+  Trash2, CheckSquare, Square, Download,
   ImagePlus, X, Check, RotateCcw, Film,
 } from 'lucide-react'
 import { getPhotos, deletePhoto } from '../../utils/api'
-import { downloadAllAsZip, downloadItem } from '../../utils/photoGallery'
+import { downloadItemsHD, downloadItem } from '../../utils/photoGallery'
 
 /* ── Lazy image — loads only when in viewport ── */
 function LazyMedia({ item, selected, onToggle, onDelete, onPreview }) {
@@ -96,6 +96,7 @@ function LazyMedia({ item, selected, onToggle, onDelete, onPreview }) {
           >
             <button
               onClick={(e) => { e.stopPropagation(); onDelete(item.id) }}
+              aria-label="Şəkli sil"
               style={{
                 width: 28, height: 28, borderRadius: 2,
                 background: 'rgba(180,40,40,0.85)', border: 'none', cursor: 'pointer',
@@ -107,6 +108,7 @@ function LazyMedia({ item, selected, onToggle, onDelete, onPreview }) {
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); downloadItem(item) }}
+              aria-label="Şəkli HD endir"
               style={{
                 width: 28, height: 28, borderRadius: 2,
                 background: 'rgba(197,160,89,0.85)', border: 'none', cursor: 'pointer',
@@ -196,6 +198,7 @@ function Lightbox({ item, onClose }) {
         {/* Premium close button */}
         <button
           onClick={onClose}
+          aria-label="Bağla"
           style={{
             position: 'absolute', top: -18, right: -18,
             width: 36, height: 36,
@@ -332,13 +335,18 @@ export default function GalleryManager({ slug, onRefresh }) {
     setSelected(new Set())
   }
 
-  const handleZipDownload = async () => {
+  const HD_WARN_THRESHOLD = 15
+  const handleHDDownload = async () => {
     const targets = selected.size > 0
       ? items.filter(i => selected.has(i.id))
       : items
     if (!targets.length) return
+    if (targets.length > HD_WARN_THRESHOLD &&
+        !window.confirm(`${targets.length} şəkil bir-bir endiriləcək. Brauzer bir neçə endirməyə icazə istəyə bilər. Davam edək?`)) {
+      return
+    }
     setZipState('loading')
-    await downloadAllAsZip(targets, slug)
+    await downloadItemsHD(targets)
     setZipState('done')
     setTimeout(() => setZipState('idle'), 3000)
   }
@@ -409,12 +417,12 @@ export default function GalleryManager({ slug, onRefresh }) {
               <Trash2 size={11} strokeWidth={1.5} />
               Seçilənləri Sil ({selected.size})
             </BTN>
-            <BTN onClick={handleZipDownload} disabled={zipState === 'loading'}>
+            <BTN onClick={handleHDDownload} disabled={zipState === 'loading'}>
               {zipState === 'done'
                 ? <><Check size={11} strokeWidth={2} /> Tamamlandı</>
                 : zipState === 'loading'
-                ? <><Archive size={11} strokeWidth={1.5} /> Hazırlanır…</>
-                : <><Archive size={11} strokeWidth={1.5} /> {selected.size} Faylı Endir</>
+                ? <><Download size={11} strokeWidth={1.5} /> Endirilir…</>
+                : <><Download size={11} strokeWidth={1.5} /> HD formatda endir ({selected.size})</>
               }
             </BTN>
           </div>
