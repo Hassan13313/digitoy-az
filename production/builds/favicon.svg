@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+  <!-- Digitoy sparkle mark — gold, transparent background, recognizable at 16px -->
+  <path d="M16 1 Q18.3 13.7 31 16 Q18.3 18.3 16 31 Q13.7 18.3 1 16 Q13.7 13.7 16 1 Z" fill="#C5A059"/>
+  <!-- small accent sparkle (top-right) -->
+  <path d="M26 3 Q26.7 5.3 29 6 Q26.7 6.7 26 9 Q25.3 6.7 23 6 Q25.3 5.3 26 3 Z" fill="#C5A059" opacity="0.85"/>
+</svg>

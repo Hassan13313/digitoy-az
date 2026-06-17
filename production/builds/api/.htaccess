@@ -1,0 +1,10 @@
+# config*.php fayllarini birbaxa veb erisimden qoru
+# PHP include()-lar hala isleyir, yalniz birbaxa HTTP sorgusu blok edilir
+
+<Files "config*.php">
+    Require all denied
+</Files>
+
+<Files "auth.php">
+    Require all denied
+</Files>

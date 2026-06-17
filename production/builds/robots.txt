@@ -1,0 +1,19 @@
+# Qeyd: /invite/* səhifələri burda crawl ucun Allow edilib (paylaşım
+# önbaxışları işləsin deyə), lakin <meta name="robots" content="noindex,
+# follow"> ilə işarələnib — müştəri adı/tarix/məkan kimi şəxsi məlumatlar
+# axtarış nəticələrində görünmür, link isə paylaşıla bilən qalır.
+User-agent: *
+Allow: /
+Allow: /demo
+Allow: /invite/
+
+Disallow: /admin
+Disallow: /admin/
+Disallow: /api/
+Disallow: /*?admin=
+Disallow: /*?draft=
+Disallow: /*?data=
+Disallow: /*/foto
+Disallow: /*/qalereya-idare
+
+Sitemap: https://digitoy.az/sitemap.xml
