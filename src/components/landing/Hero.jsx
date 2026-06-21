@@ -692,7 +692,7 @@ export function HeroFooter({ lang = 'az' }) {
           </div>
           <div className="flex items-center justify-center gap-6 mt-4 md:mt-0">
             {/* WhatsApp */}
-            <a href="https://wa.me/994557133696" aria-label="WhatsApp" target="_blank" rel="noopener noreferrer"
+            <a href="https://wa.me/994992133696" aria-label="WhatsApp" target="_blank" rel="noopener noreferrer"
               className="w-11 h-11 rounded-full border border-white/15 flex items-center justify-center hover:border-gold/50 hover:bg-gold/10 hover:opacity-80 hover:scale-105 transition-all duration-200">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                 <path d="M20.52 3.48A11.93 11.93 0 0 0 12 0C5.37 0 0 5.37 0 12c0 2.11.55 4.16 1.6 5.97L0 24l6.18-1.62A11.94 11.94 0 0 0 12 24c6.63 0 12-5.37 12-12 0-3.2-1.25-6.21-3.48-8.52zM12 22c-1.85 0-3.67-.5-5.25-1.44l-.38-.22-3.67.96.98-3.58-.25-.38A9.94 9.94 0 0 1 2 12C2 6.48 6.48 2 12 2c2.67 0 5.18 1.04 7.07 2.93A9.94 9.94 0 0 1 22 12c0 5.52-4.48 10-10 10z" fill="rgba(197,160,89,0.8)"/>

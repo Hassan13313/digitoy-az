@@ -134,7 +134,7 @@ export const PRICING = [
   },
 ]
 
-export const WHATSAPP_NUMBER = '994557133696'
+export const WHATSAPP_NUMBER = '994992133696'
 
 /* ── DigiToy brand social links (centralized) ── */
 export const SOCIAL_LINKS = {

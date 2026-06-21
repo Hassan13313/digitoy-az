@@ -103,6 +103,6 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '', draftCode = '
 }
 
 /* ── WhatsApp URL ── */
-export function buildWhatsAppUrl(data, lang = 'az', waNumber = '994557133696', slug = '', draftCode = '') {
+export function buildWhatsAppUrl(data, lang = 'az', waNumber = '994992133696', slug = '', draftCode = '') {
   return `https://wa.me/${waNumber}?text=${buildWhatsAppMessage(data, lang, slug, draftCode)}`
 }

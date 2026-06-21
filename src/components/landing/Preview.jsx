@@ -8,7 +8,7 @@ import { saveInvitation, submitDraft } from '../../utils/api'
 import { trackEvent } from '../../utils/analytics'
 import t from '../../data/translations'
 
-const ADMIN_WA = '994557133696'
+const ADMIN_WA = '994992133696'
 
 /* ── Dress code colors (lokal, yalnız vizual üçün) ── */
 const DRESS_COLORS = {
