@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { ArrowLeft, Package, User, Users, Calendar, MapPin, Shirt, ExternalLink, MessageCircle, CheckCircle, XCircle, Trash2, Copy, Link2 } from 'lucide-react'
 import { getDraftByCode, approveDraft, rejectDraft, deleteDraft } from '../../utils/api'
-import AdminRSVPBlock from './AdminRSVPBlock'
+import AdminSeatingPlan from './AdminSeatingPlan'
+import AdminGuestReports from './AdminGuestReports'
 
 const PKG_LABEL = { SADE: 'Sadə (59₼)', VIP: 'VİP (89₼)', PREMIUM: 'Premium (129₼)' }
 const STATUS_COLOR = {
@@ -582,10 +583,50 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
       {/* ── Sifariş Kodu + Dəvətnamə Linki bloku ── */}
       <InviteLinkBlock draftCode={draftCode} approvedSlug={draft.approved_slug} status={draft.status} onEdit={handleEdit} />
 
-      {/* ── RSVP Cavabları — yalnız approved + slug varsa ── */}
+      {/* ── Qonaq Məlumatları — yalnız approved + slug varsa ── */}
       {draft.status === 'approved' && draft.approved_slug && (
-        <AdminRSVPBlock slug={draft.approved_slug} names={names} />
+        <GuestDataTabs slug={draft.approved_slug} names={names} seatingPlan={fd.seatingPlan || ''} dateStr={dateStr} />
       )}
+    </div>
+  )
+}
+
+/* ── Tab switcher for guest data sections ── */
+function GuestDataTabs({ slug, names, seatingPlan, dateStr }) {
+  const [activeTab, setActiveTab] = useState('seating')
+
+  const TABS = [
+    { key: 'seating',  label: '🪑 Oturma Planı' },
+    { key: 'reports',  label: '📊 Qonaq Hesabatı' },
+  ]
+
+  return (
+    <div style={{ marginTop: 28 }}>
+      {/* Tab header */}
+      <div style={{ display: 'flex', gap: 0, borderBottom: '2px solid oklch(88% 0.02 60)', marginBottom: 0 }}>
+        {TABS.map(({ key, label }) => {
+          const active = activeTab === key
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setActiveTab(key)}
+              style={{
+                padding: '9px 18px', background: 'none', border: 'none', cursor: 'pointer',
+                fontSize: 12, fontWeight: active ? 700 : 400,
+                color: active ? 'oklch(30% 0.04 70)' : 'oklch(55% 0.03 60)',
+                borderBottom: active ? '2px solid oklch(60% 0.12 75)' : '2px solid transparent',
+                marginBottom: -2, letterSpacing: '0.02em', transition: 'color 0.12s',
+              }}
+            >
+              {label}
+            </button>
+          )
+        })}
+      </div>
+
+      {activeTab === 'seating' && <AdminSeatingPlan slug={slug} seatingPlan={seatingPlan} />}
+      {activeTab === 'reports' && <AdminGuestReports slug={slug} names={names} dateStr={dateStr} />}
     </div>
   )
 }

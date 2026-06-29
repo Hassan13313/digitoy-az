@@ -1,12 +1,10 @@
 /* ══════════════════════════════════════════════════
    DIGITOY.AZ — Mərkəzi API Client
-   Lokal dev: birbaşa https://digitoy.az/api (cross-origin)
+   VITE_API_URL set edilibsə — onu istifadə et (local dev)
    Production: /api (same-origin)
 ══════════════════════════════════════════════════ */
 
-const isLocalhost = typeof window !== 'undefined' &&
-  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-const BASE = isLocalhost ? 'https://digitoy.az/api' : '/api'
+const BASE = import.meta.env.VITE_API_URL || '/api'
 
 /* ── Admin HMAC tokeni sessionStorage-dan oxu ── */
 function getAdminToken() {
@@ -233,4 +231,72 @@ export async function deletePhoto(slug, id) {
   })
   if (!res.ok) throw new Error(`delete_photo: ${res.status}`)
   return res.json()
+}
+
+/* ══════════════════════════════════════════════════
+   Phase 22 — Guest Management API
+══════════════════════════════════════════════════ */
+
+/* ── Qonaqları + iştirak statusunu + statistikanı gətir (public) ── */
+export async function getGuests(invitationId) {
+  const res = await fetch(`${BASE}/get_guests.php?invitation_id=${encodeURIComponent(invitationId)}`)
+  if (!res.ok) throw new Error(`get_guests: ${res.status}`)
+  return res.json()
+}
+
+/* ── Qonaq idarəetməsi: add | update | delete | move (admin) ── */
+export async function manageGuest(action, data) {
+  const res = await fetch(`${BASE}/manage_guest.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminHeaders() },
+    body: JSON.stringify({ action, ...data }),
+  })
+  if (!res.ok) throw new Error(`manage_guest/${action}: ${res.status}`)
+  return res.json()
+}
+
+/* ── İştirak cavabı göndər (public) ── */
+export async function submitAttendance({ guestId, status, optionalMessage, extraGuests = 0 }) {
+  const res = await fetch(`${BASE}/submit_attendance.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      guest_id:         guestId,
+      status,
+      optional_message: optionalMessage || null,
+      extra_guests:     Math.max(0, Math.min(10, parseInt(extraGuests) || 0)),
+    }),
+  })
+  const json = await res.json()
+  if (res.status === 409) return { ...json, alreadySubmitted: true }
+  if (!res.ok) throw new Error(`submit_attendance: ${res.status}`)
+  return json
+}
+
+/* ── Oturma planı mətnini guests cədvəlinə köçür (admin) ── */
+export async function migrateGuests(invitationId, migrateAll = false) {
+  const res = await fetch(`${BASE}/migrate_guests.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminHeaders() },
+    body: JSON.stringify(migrateAll ? { all: true } : { invitation_id: invitationId }),
+  })
+  if (!res.ok) throw new Error(`migrate_guests: ${res.status}`)
+  return res.json()
+}
+
+/* ── Qonaqları CSV olaraq ixrac et (admin) ── */
+export async function exportGuestsCsv(invitationId, mode = 'tables') {
+  const res = await fetch(
+    `${BASE}/export_guests.php?invitation_id=${encodeURIComponent(invitationId)}&mode=${mode}`,
+    { headers: adminHeaders() }
+  )
+  if (!res.ok) throw new Error(`export_guests: ${res.status}`)
+  const blob = await res.blob()
+  const url  = URL.createObjectURL(blob)
+  const a    = document.createElement('a')
+  const today = new Date().toISOString().slice(0, 10)
+  a.href     = url
+  a.download = `qonaqlar-${invitationId}-${mode}-${today}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
 }

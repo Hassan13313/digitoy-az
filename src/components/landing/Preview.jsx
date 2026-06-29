@@ -102,45 +102,16 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
   const timeStr    = formatTime24(data.time)
   const dateDisplay = dayName ? `${formattedDate} — ${dayName}` : formattedDate
 
-  const [waLoading, setWaLoading] = useState(false)
-  const [waError,   setWaError]   = useState('')
-  const [waFallbackUrl, setWaFallbackUrl] = useState('')
+  const waUrl = buildWhatsAppUrl(data, lang, ADMIN_WA, slug, '')
 
-  const handleWaClick = useCallback(async () => {
-    if (waLoading) return
-    let sid = localStorage.getItem('digitoy_session_id') || ''
-    if (!sid) {
-      sid = (typeof crypto !== 'undefined' && crypto.randomUUID)
-        ? crypto.randomUUID()
-        : Math.random().toString(36).slice(2) + Date.now().toString(36)
-      localStorage.setItem('digitoy_session_id', sid)
-    }
+  const handleWaClick = useCallback(() => {
+    const sid = localStorage.getItem('digitoy_session_id') || ''
     const pkg = data.package || data.selectedPackage || 'SADE'
     trackEvent('whatsapp_order_clicked', { lang, package: pkg })
-    setWaLoading(true)
-    setWaError('')
-    setWaFallbackUrl('')
-    try {
-      const result    = await submitDraft(sid, data, pkg)
-      const draftCode = result?.draft_code
-      if (!draftCode) throw new Error('draft_code alınmadı')
-      trackEvent('order_submitted', { lang, package: pkg })
-      const waUrl = buildWhatsAppUrl(data, lang, ADMIN_WA, slug, draftCode)
-      // Open with the final URL directly — pre-opening a blank popup and
-      // redirecting it later (popup.location.href = waUrl) is silently ignored
-      // by Chromium-based browsers once the click's transient activation has
-      // expired during the await, leaving an empty about:blank tab behind.
-      const win = window.open(waUrl, '_blank')
-      if (!win || win.closed) {
-        // Popup blocked (mainly older Safari/iOS) — give the user a direct link.
-        setWaFallbackUrl(waUrl)
-      }
-    } catch {
-      setWaError('Sifariş göndərilə bilmədi. Yenidən cəhd edin.')
-    } finally {
-      setWaLoading(false)
-    }
-  }, [data, lang, slug, waLoading])
+    submitDraft(sid, data, pkg).then(r => {
+      if (r?.draft_code) trackEvent('order_submitted', { lang, package: pkg })
+    }).catch(() => {})
+  }, [data, lang])
 
   /* Xülasə sətirləri */
   const rows = [
@@ -264,30 +235,16 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
 
       {/* CTA buttons */}
       <div className="flex flex-col sm:flex-row gap-3 mb-3">
-        <motion.button
-          type="button"
+        <a
+          href={waUrl}
+          target="_blank"
+          rel="noopener noreferrer"
           onClick={handleWaClick}
-          disabled={waLoading}
-          className="flex-1 flex items-center justify-center gap-2.5 btn-gold min-h-[52px] disabled:opacity-60 disabled:cursor-not-allowed"
-          whileHover={{ scale: waLoading ? 1 : 1.02 }}
-          whileTap={{ scale: waLoading ? 1 : 0.97 }}
+          className="flex-1 flex items-center justify-center gap-2.5 btn-gold min-h-[52px]"
         >
           <MessageCircle size={14} strokeWidth={1.5} />
-          {waLoading ? '...' : tr.preview_whatsapp}
-        </motion.button>
-        {waError && (
-          <p className="text-[10px] text-red-500 text-center mt-1">{waError}</p>
-        )}
-        {waFallbackUrl && (
-          <a
-            href={waFallbackUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[11px] text-gold-dark underline text-center mt-1"
-          >
-            WhatsApp açılmadı — buraya klikləyin
-          </a>
-        )}
+          {tr.preview_whatsapp}
+        </a>
         <motion.button
           onClick={onView}
           className="flex-1 flex items-center justify-center gap-2.5 btn-outline-gold min-h-[52px]"

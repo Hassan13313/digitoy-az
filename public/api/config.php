@@ -111,7 +111,7 @@ function ensureTables(): void {
             invitation_id     VARCHAR(120) NOT NULL,
             guest_name        VARCHAR(255) NOT NULL,
             message           TEXT,
-            attendance_status ENUM('yes','no') DEFAULT NULL,
+            attendance_status ENUM('yes','no','maybe') DEFAULT NULL,
             extra_guests      TINYINT UNSIGNED NOT NULL DEFAULT 0,
             created_at        DATETIME DEFAULT CURRENT_TIMESTAMP,
             INDEX idx_inv (invitation_id)
@@ -141,4 +141,46 @@ function ensureTables(): void {
             INDEX idx_expires_at  (expires_at)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
+
+    /* ── Phase 22: Qonaqlar cədvəli — oturma planının yeganə mənbəyi ── */
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS guests (
+            id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            invitation_id VARCHAR(120) NOT NULL,
+            table_id      VARCHAR(80)  NOT NULL,
+            full_name     VARCHAR(255) NOT NULL,
+            seat_number   TINYINT UNSIGNED DEFAULT NULL,
+            notes         TEXT         DEFAULT NULL,
+            created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at    DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX idx_invitation (invitation_id),
+            INDEX idx_table (invitation_id, table_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
+    /* ── draft_invitations.approved_slug — köhnə sxemlərə əlavə et ── */
+    $cols = $db->query("SHOW COLUMNS FROM draft_invitations LIKE 'approved_slug'")->fetchAll();
+    if (empty($cols)) {
+        $db->exec("ALTER TABLE draft_invitations ADD COLUMN approved_slug VARCHAR(120) DEFAULT NULL");
+    }
+
+    /* ── Phase 22: İştirak Cavabları — guest_id ilə əlaqəli ── */
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS attendance (
+            id               INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            guest_id         INT UNSIGNED NOT NULL,
+            status           ENUM('GOING','NOT_GOING','MAYBE','NO_RESPONSE') NOT NULL DEFAULT 'NO_RESPONSE',
+            submitted_at     DATETIME DEFAULT NULL,
+            optional_message TEXT     DEFAULT NULL,
+            extra_guests     TINYINT UNSIGNED NOT NULL DEFAULT 0,
+            UNIQUE KEY uq_guest (guest_id),
+            INDEX idx_guest_id (guest_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
+    /* ── Phase 22 Polish: attendance.extra_guests — köhnə sxemlərə əlavə et ── */
+    $aCols = $db->query("SHOW COLUMNS FROM attendance LIKE 'extra_guests'")->fetchAll();
+    if (empty($aCols)) {
+        $db->exec("ALTER TABLE attendance ADD COLUMN extra_guests TINYINT UNSIGNED NOT NULL DEFAULT 0");
+    }
 }

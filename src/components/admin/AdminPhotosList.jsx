@@ -1,9 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { RefreshCw, Search, X, Camera, HardDrive, Images, Upload } from 'lucide-react'
 
-const BASE = (typeof window !== 'undefined' &&
-  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
-  ? 'https://digitoy.az/api' : '/api'
+const BASE = import.meta.env.VITE_API_URL || '/api'
 
 function getAdminToken() {
   try {
