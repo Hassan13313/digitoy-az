@@ -73,30 +73,30 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '', draftCode = '
 
   let nameLines = ''
   if (isCouple) {
-    nameLines = `👰 Gəlin: *${data.brideName || '—'}*\n🤵 Bəy: *${data.groomName || '—'}*`
+    nameLines = `👰 Gəlin: ${data.brideName || '—'}\n🤵 Bəy: ${data.groomName || '—'}`
   } else if (isCorp) {
-    nameLines = `🏢 Tədbir: *${data.eventName || '—'}*`
+    nameLines = `🏢 Şirkət: ${data.eventName || '—'}`
     if (data.organizer?.trim()) nameLines += `\n👤 Təşkilatçı: ${data.organizer}`
   } else {
-    nameLines = `👤 Ad: *${data.brideName || '—'}*`
+    nameLines = `👤 Ad: ${data.brideName || '—'}`
   }
 
   const pkgLabel = PACKAGE_LABELS[data.package] || PACKAGE_LABELS[data.selectedPackage] || '—'
 
   const lines = [
-    `🌟 *YENİ SİFARİŞ — Digitoy.az*`,
+    `💍 YENİ SİFARİŞ — Digitoy.az`,
     `━━━━━━━━━━━━━━━━━━`,
-    `📦 Paket: *${pkgLabel}*`,
-    `✨ Tədbir: *${eventLabels[data.eventType] || data.eventType}*`,
+    `📦 Paket: ${pkgLabel}`,
+    `🎉 Tədbir: ${eventLabels[data.eventType] || data.eventType}`,
     nameLines,
     `📅 Tarix: ${dateStr}`,
     `🕒 Saat: ${timeStr}`,
     `📍 Məkan: ${data.venueName || '—'}`,
-    `👗 Geyim: ${dressLabel}`,
+    `👔 Geyim: ${dressLabel}`,
     ...(programCount > 0 ? [`📋 Proqram: ${programCount} addım`] : []),
-    ...(data.seatingMethod === 'digitory' ? [`🪑 Oturma planı: *DigiToy dolduracaq* (+15 AZN)`] : []),
+    ...(data.seatingMethod === 'digitory' ? [`🪑 Oturma planı: DigiToy dolduracaq (+15 AZN)`] : []),
     `━━━━━━━━━━━━━━━━━━`,
-    ...(draftCode ? [`📋 Sifariş Kodu: *${draftCode}*`] : []),
+    ...(draftCode ? [`📋 Sifariş Kodu: ${draftCode}`] : []),
   ]
 
   return encodeURIComponent(lines.join('\n'))

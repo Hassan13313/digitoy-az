@@ -21,20 +21,20 @@ if (!$draftCode || !preg_match('/^DT-[A-Z0-9]{6}$/', $draftCode)) {
     exit;
 }
 
-/* Slug validation — ixtiyari, amma formatı yoxla */
-if ($slug !== '' && !preg_match('/^[a-z0-9\-]{2,120}$/', $slug)) {
+/* Slug validation — böyük hərflərə icazə ver (köhnə uppercase sluglar üçün) */
+if ($slug !== '' && !preg_match('/^[a-zA-Z0-9\-]{2,120}$/', $slug)) {
     $slug = '';
 }
 
 $db = getDB();
 
-/* Əsl slug-u tap: köhnə format (azer-nermin) ya da yeni (azer-nermin-AB12CD) */
+/* Əsl slug-u tap: köhnə format (azer-nermin) ya da yeni (azer-nermin-ab12cd) */
 $actualSlug = $slug;
 if ($slug) {
     $checkExact = $db->prepare("SELECT slug FROM invitations WHERE slug = :slug LIMIT 1");
     $checkExact->execute([':slug' => $slug]);
     if (!$checkExact->fetchColumn()) {
-        $code = strtoupper(substr(md5($slug . 'digitoy'), 0, 6));
+        $code = substr(md5($slug . 'digitoy'), 0, 6);
         $uniqueSlug = $slug . '-' . $code;
         $checkUniq = $db->prepare("SELECT slug FROM invitations WHERE slug = :slug LIMIT 1");
         $checkUniq->execute([':slug' => $uniqueSlug]);

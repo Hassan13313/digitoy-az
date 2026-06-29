@@ -1,5 +1,7 @@
 Options -Indexes +FollowSymLinks
 
+AddDefaultCharset UTF-8
+
 RewriteEngine On
 
 # /api/ ve /uploads/ SPA routing-den qoru

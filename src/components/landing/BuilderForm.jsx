@@ -1504,20 +1504,22 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     setApproving(true)
     setApproveError('')
     try {
-      await saveInvitation(slug, data)
+      /* Server unikal kod əlavə edir: azer-nermin → azer-nermin-AB12CD */
+      const saveResult = await saveInvitation(slug, data)
+      const finalSlug = saveResult?.slug || slug
 
-      /* draft_code URL-dən oxu, varsa approve et (slug ötür ki, admin paneldə link görsənsin) */
+      /* draft_code URL-dən oxu, varsa approve et (unikal slug ötür ki, admin paneldə link görsənsin) */
       const draftCode = new URLSearchParams(window.location.search).get('draft')
       if (draftCode) {
         try {
-          await approveDraft(draftCode, slug)
+          await approveDraft(draftCode, finalSlug)
         } catch (approveErr) {
           console.error('approve_draft uğursuz:', approveErr)
           /* saveInvitation rollback edilmir — dəvətnamə saxlanıldı */
         }
       }
 
-      const link = buildShortLiveLink(slug)
+      const link = buildShortLiveLink(finalSlug)
       setGeneratedLiveLink(link)
       setLinkCopied(false)
       setShowApproveModal(true)

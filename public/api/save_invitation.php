@@ -48,8 +48,8 @@ if ($checkOld->fetchColumn()) {
     exit;
 }
 
-/* Yeni slug: deterministik 6-simvollu kod əlavə et */
-$code = strtoupper(substr(md5($slug . 'digitoy'), 0, 6));
+/* Yeni slug: deterministik 6-simvollu kod əlavə et (md5 lowercase verir) */
+$code = substr(md5($slug . 'digitoy'), 0, 6);
 $uniqueSlug = $slug . '-' . $code;
 
 $ins = $db->prepare("
