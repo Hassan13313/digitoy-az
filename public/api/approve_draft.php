@@ -28,6 +28,22 @@ if ($slug !== '' && !preg_match('/^[a-z0-9\-]{2,120}$/', $slug)) {
 
 $db = getDB();
 
+/* Əsl slug-u tap: köhnə format (azer-nermin) ya da yeni (azer-nermin-AB12CD) */
+$actualSlug = $slug;
+if ($slug) {
+    $checkExact = $db->prepare("SELECT slug FROM invitations WHERE slug = :slug LIMIT 1");
+    $checkExact->execute([':slug' => $slug]);
+    if (!$checkExact->fetchColumn()) {
+        $code = strtoupper(substr(md5($slug . 'digitoy'), 0, 6));
+        $uniqueSlug = $slug . '-' . $code;
+        $checkUniq = $db->prepare("SELECT slug FROM invitations WHERE slug = :slug LIMIT 1");
+        $checkUniq->execute([':slug' => $uniqueSlug]);
+        if ($checkUniq->fetchColumn()) {
+            $actualSlug = $uniqueSlug;
+        }
+    }
+}
+
 $stmt = $db->prepare("
     UPDATE draft_invitations
     SET status         = 'approved',
@@ -35,7 +51,7 @@ $stmt = $db->prepare("
         approved_slug  = CASE WHEN :slug != '' THEN :slug2 ELSE approved_slug END
     WHERE draft_code = :code
 ");
-$stmt->execute([':code' => $draftCode, ':slug' => $slug, ':slug2' => $slug]);
+$stmt->execute([':code' => $draftCode, ':slug' => $actualSlug, ':slug2' => $actualSlug]);
 
 if ($stmt->rowCount() === 0) {
     http_response_code(404);
@@ -43,4 +59,4 @@ if ($stmt->rowCount() === 0) {
     exit;
 }
 
-echo json_encode(['ok' => true, 'draft_code' => $draftCode, 'status' => 'approved', 'approved_slug' => $slug ?: null]);
+echo json_encode(['ok' => true, 'draft_code' => $draftCode, 'status' => 'approved', 'approved_slug' => $actualSlug ?: null]);

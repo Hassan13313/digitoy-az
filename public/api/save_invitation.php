@@ -10,9 +10,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$body = json_decode(file_get_contents('php://input'), true);
-$slug     = trim($body['slug']     ?? '');
-$formData = $body['formData']      ?? null;
+$body     = json_decode(file_get_contents('php://input'), true);
+$slug     = trim($body['slug']    ?? '');
+$formData = $body['formData']     ?? null;
 
 if (!$slug || !$formData) {
     http_response_code(400);
@@ -34,16 +34,29 @@ if (!$json) {
     exit;
 }
 
-$db  = getDB();
-$sql = "INSERT INTO invitations (slug, form_data)
-        VALUES (:slug, :data)
-        ON DUPLICATE KEY UPDATE form_data = :data2, updated_at = NOW()";
+$db = getDB();
+ensureTables();
 
-$stmt = $db->prepare($sql);
-$stmt->execute([
-    ':slug'  => $slug,
-    ':data'  => $json,
-    ':data2' => $json,
-]);
+/* Köhnə format slug artıq mövcuddursa → yenilə (backward compat) */
+$checkOld = $db->prepare("SELECT 1 FROM invitations WHERE slug = :slug LIMIT 1");
+$checkOld->execute([':slug' => $slug]);
 
-echo json_encode(['ok' => true, 'slug' => $slug]);
+if ($checkOld->fetchColumn()) {
+    $upd = $db->prepare("UPDATE invitations SET form_data = :data, updated_at = NOW() WHERE slug = :slug");
+    $upd->execute([':data' => $json, ':slug' => $slug]);
+    echo json_encode(['ok' => true, 'slug' => $slug]);
+    exit;
+}
+
+/* Yeni slug: deterministik 6-simvollu kod əlavə et */
+$code = strtoupper(substr(md5($slug . 'digitoy'), 0, 6));
+$uniqueSlug = $slug . '-' . $code;
+
+$ins = $db->prepare("
+    INSERT INTO invitations (slug, form_data)
+    VALUES (:slug, :data)
+    ON DUPLICATE KEY UPDATE form_data = :data2, updated_at = NOW()
+");
+$ins->execute([':slug' => $uniqueSlug, ':data' => $json, ':data2' => $json]);
+
+echo json_encode(['ok' => true, 'slug' => $uniqueSlug]);
