@@ -184,7 +184,7 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
   }, [draftCode])
 
   const handleEdit = () => {
-    window.location.href = `/?admin=1&draft=${draftCode}`
+    window.location.href = `/?draft=${draftCode}`
   }
 
   const handleApprove = async () => {
