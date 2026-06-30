@@ -1359,7 +1359,6 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
       try {
         const parsedData = decodeDataLocal(encodedData)
         if (!parsedData) throw new Error('null result')
-        console.log('Deşifrə olunan data:', parsedData)
         setData(prev => ({ ...prev, ...parsedData }))
         window.history.replaceState({}, '', window.location.pathname)
       } catch (err) {

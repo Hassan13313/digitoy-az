@@ -184,8 +184,7 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
   }, [draftCode])
 
   const handleEdit = () => {
-    const adminKey = import.meta.env.VITE_ADMIN_KEY || ''
-    window.location.href = `/?admin=${adminKey}&draft=${draftCode}`
+    window.location.href = `/?admin=1&draft=${draftCode}`
   }
 
   const handleApprove = async () => {

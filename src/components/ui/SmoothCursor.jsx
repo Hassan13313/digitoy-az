@@ -2,6 +2,9 @@ import { useEffect, useRef } from 'react'
 import { motion, useMotionValue, useSpring } from 'framer-motion'
 
 export default function SmoothCursor() {
+  const prefersReduced = typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
   const cursorX = useMotionValue(-100)
   const cursorY = useMotionValue(-100)
 
@@ -14,6 +17,7 @@ export default function SmoothCursor() {
   const springScale = useSpring(scaleValue, { damping: 20, stiffness: 300 })
 
   useEffect(() => {
+    if (prefersReduced) return undefined
     const move = (e) => {
       cursorX.set(e.clientX - 12)
       cursorY.set(e.clientY - 12)
@@ -39,7 +43,9 @@ export default function SmoothCursor() {
       window.removeEventListener('mousemove', move)
       observer.disconnect()
     }
-  }, [cursorX, cursorY, scaleValue])
+  }, [cursorX, cursorY, scaleValue, prefersReduced])
+
+  if (prefersReduced) return null
 
   return (
     <>

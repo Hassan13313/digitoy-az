@@ -45,13 +45,13 @@ export function unlockAudio() {
       ctx.resume().then(() => {
         unlocked = true
         window[FLAG] = true
-        console.debug('[Digitoy Audio] ✅ AudioContext unlocked (Web Audio API)')
+        // console.debug('[Digitoy Audio] ✅ AudioContext unlocked (Web Audio API)')
       }).catch(err => {
-        console.debug('[Digitoy Audio] ⚠️  AudioContext resume failed:', err.message)
+        // console.debug('[Digitoy Audio] ⚠️  AudioContext resume failed:', err.message)
       })
     }
   } catch (err) {
-    console.debug('[Digitoy Audio] ⚠️  AudioContext error:', err.message)
+    // console.debug('[Digitoy Audio] ⚠️  AudioContext error:', err.message)
   }
 
   // 2 — HTML5 Audio element: audio.play() / pause() / currentTime = 0
@@ -65,12 +65,12 @@ export function unlockAudio() {
       a.currentTime = 0
       unlocked = true
       window[FLAG] = true
-      console.debug('[Digitoy Audio] ✅ Audio context unlocked (HTML5 Audio)')
+      // console.debug('[Digitoy Audio] ✅ Audio context unlocked (HTML5 Audio)')
     }).catch(err => {
-      console.debug('[Digitoy Audio] ⚠️  HTML5 Audio unlock failed:', err.message)
+      // console.debug('[Digitoy Audio] ⚠️  HTML5 Audio unlock failed:', err.message)
     })
   } catch (err) {
-    console.debug('[Digitoy Audio] ⚠️  HTML5 Audio error:', err.message)
+    // console.debug('[Digitoy Audio] ⚠️  HTML5 Audio error:', err.message)
   }
 }
 

@@ -67,10 +67,11 @@ if (!$approvedSlug && $row['status'] === 'approved' && !empty($row['form_data'])
     $fd        = json_decode($row['form_data'], true);
     $searchKey = $fd['brideName'] ?? ($fd['groomName'] ?? ($fd['eventName'] ?? ''));
     if ($searchKey !== '') {
+        $safeKey = addcslashes($searchKey, '%_\\');
         $lu = $db->prepare(
             "SELECT slug FROM invitations WHERE form_data LIKE :q ORDER BY created_at DESC LIMIT 1"
         );
-        $lu->execute([':q' => '%"' . $searchKey . '"%']);
+        $lu->execute([':q' => '%"' . $safeKey . '"%']);
         $found = $lu->fetchColumn();
         if ($found) $approvedSlug = $found;
     }

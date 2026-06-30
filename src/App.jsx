@@ -7,7 +7,6 @@ import InvitationPage from './components/invitation/InvitationPage'
    (these routes are all noindex). */
 const PhotoShare       = lazy(() => import('./components/invitation/PhotoShare'))
 const GalleryPage      = lazy(() => import('./components/invitation/GalleryPage'))
-const DigitoyOrijinalUI = lazy(() => import('./components/DigitoyOrijinalUI'))
 const AdminApp         = lazy(() => import('./components/admin/AdminApp'))
 const AdminLoginGate   = lazy(() => import('./components/admin/AdminLoginGate'))
 import { defaultWedding } from './data/defaultWedding'
@@ -298,8 +297,6 @@ export default function App() {
     if (existingToken) setIsAdmin(true)
     routeWithDraft(!!existingToken)
   }, [])
-
-  if (ACTIVE_UI === 'new') return <Suspense fallback={<RouteLoader />}><DigitoyOrijinalUI /></Suspense>
 
   if (view === 'loading') return <RouteLoader />
 

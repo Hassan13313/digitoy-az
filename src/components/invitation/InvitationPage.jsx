@@ -211,11 +211,7 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
           setTimeout(() => {
             const unlocked = isAudioUnlocked()
             if (unlocked) {
-              console.debug('[Digitoy Audio] 🎵 Attempting autoplay (context unlocked)')
               musicRef.current?.play()
-              console.debug('[Digitoy Audio] play() dispatched — success depends on browser')
-            } else {
-              console.debug('[Digitoy Audio] 🔇 Autoplay skipped — no prior user gesture, showing prompt')
             }
             setShowMusicPrompt(true)
             if (unlocked) {
@@ -241,7 +237,6 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
             exit={{ opacity: 0, y: 8, scale: 0.97 }}
             transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
             onClick={() => {
-              console.debug('[Digitoy Audio] 🎵 User tapped music prompt — playing')
               musicRef.current?.play()
               setShowMusicPrompt(false)
             }}

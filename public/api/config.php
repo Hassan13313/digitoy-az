@@ -37,12 +37,15 @@ if ($_origin !== '') {
        originlərinə ƏLAVƏ olunur (əvəz etmir). Wildcard yoxdur — yalnız
        developer-in öz maşınında çalışan dəqiq portlar icazəlidir,
        production originlərinin yoxlanması olduğu kimi qalır. */
-    $__devOrigins = [
-        'http://localhost:5173',
-        'http://localhost:5174',
-        'http://localhost:5175',
-    ];
-    $__allowed = array_merge($__allowed, $__devOrigins);
+    /* Dev originlər yalnız lokal mühitdə əlavə edilir (C10) */
+    if (APP_ENV === 'local') {
+        $__devOrigins = [
+            'http://localhost:5173',
+            'http://localhost:5174',
+            'http://localhost:5175',
+        ];
+        $__allowed = array_merge($__allowed, $__devOrigins);
+    }
 
     if (in_array($_origin, $__allowed, true)) {
         header('Access-Control-Allow-Origin: ' . $_origin);
@@ -89,8 +92,7 @@ function ensureTables(): void {
             slug       VARCHAR(120) NOT NULL UNIQUE,
             form_data  MEDIUMTEXT   NOT NULL,
             created_at DATETIME     DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            INDEX idx_slug (slug)
+            updated_at DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     ");
     $db->exec("
@@ -173,8 +175,7 @@ function ensureTables(): void {
             submitted_at     DATETIME DEFAULT NULL,
             optional_message TEXT     DEFAULT NULL,
             extra_guests     TINYINT UNSIGNED NOT NULL DEFAULT 0,
-            UNIQUE KEY uq_guest (guest_id),
-            INDEX idx_guest_id (guest_id)
+            UNIQUE KEY uq_guest (guest_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
 
@@ -182,5 +183,12 @@ function ensureTables(): void {
     $aCols = $db->query("SHOW COLUMNS FROM attendance LIKE 'extra_guests'")->fetchAll();
     if (empty($aCols)) {
         $db->exec("ALTER TABLE attendance ADD COLUMN extra_guests TINYINT UNSIGNED NOT NULL DEFAULT 0");
+    }
+
+    /* ── reject_draft.php üçün: rejected_at + reject_reason sütunları ── */
+    $rjCols = $db->query("SHOW COLUMNS FROM draft_invitations LIKE 'rejected_at'")->fetchAll();
+    if (empty($rjCols)) {
+        $db->exec("ALTER TABLE draft_invitations ADD COLUMN rejected_at DATETIME DEFAULT NULL");
+        $db->exec("ALTER TABLE draft_invitations ADD COLUMN reject_reason TEXT DEFAULT NULL");
     }
 }

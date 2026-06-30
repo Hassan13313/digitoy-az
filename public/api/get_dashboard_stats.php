@@ -44,8 +44,21 @@ foreach ($pkgRows as $r) {
 /* Dəvətnamə sayı */
 $invCount = (int)$db->query("SELECT COUNT(*) FROM invitations")->fetchColumn();
 
-/* Foto sayı */
-$photoCount = (int)$db->query("SELECT COUNT(*) FROM photos")->fetchColumn();
+/* Foto sayı — filesystem-dən (photos cədvəli istifadə edilmir) */
+$uploadBase = __DIR__ . '/../uploads/';
+$photoCount = 0;
+if (is_dir($uploadBase)) {
+    $mediaExts = ['jpg','jpeg','png','gif','webp','heic','mp4','mov'];
+    foreach ((array) glob($uploadBase . '*', GLOB_ONLYDIR) as $albumDir) {
+        foreach ((array) glob($albumDir . '/*') as $file) {
+            $ext  = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+            $base = pathinfo($file, PATHINFO_BASENAME);
+            if (in_array($ext, $mediaExts) && substr($base, -10) !== '_thumb.jpg') {
+                $photoCount++;
+            }
+        }
+    }
+}
 
 /* Son 7 günün gündəlik sifarişləri — bütün günlər doldurulur */
 $dailyRows = $db->query("

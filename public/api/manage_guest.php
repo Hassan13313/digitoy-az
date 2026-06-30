@@ -80,9 +80,17 @@ if ($action === 'delete') {
     $id = (int)($body['id'] ?? 0);
     if (!$id) { http_response_code(422); echo json_encode(['error' => 'id required']); exit; }
 
-    /* Cascade: attendance silinməlidir */
-    $db->prepare("DELETE FROM attendance WHERE guest_id = :id")->execute([':id' => $id]);
-    $db->prepare("DELETE FROM guests WHERE id = :id")->execute([':id' => $id]);
+    $db->beginTransaction();
+    try {
+        $db->prepare("DELETE FROM attendance WHERE guest_id = :id")->execute([':id' => $id]);
+        $db->prepare("DELETE FROM guests WHERE id = :id")->execute([':id' => $id]);
+        $db->commit();
+    } catch (Exception $e) {
+        $db->rollBack();
+        http_response_code(500);
+        echo json_encode(['error' => 'Silmə əməliyyatı uğursuz oldu']);
+        exit;
+    }
     echo json_encode(['ok' => true]);
     exit;
 }

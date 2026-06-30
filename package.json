@@ -15,7 +15,6 @@
     "@react-three/fiber": "^9.6.1",
     "framer-motion": "^12.38.0",
     "jszip": "^3.10.1",
-    "leaflet": "^1.9.4",
     "lucide-react": "^1.16.0",
     "posthog-js": "^1.382.0",
     "qrcode.react": "^4.2.0",

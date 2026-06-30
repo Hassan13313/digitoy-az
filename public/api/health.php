@@ -25,13 +25,16 @@ try {
     $db->query('SELECT 1');
     $result['db'] = 'connected';
 
-    /* Cədvəl mövcudluğu yoxlaması */
+    /* Cədvəl mövcudluğu yoxlaması — INFORMATION_SCHEMA ilə (C6) */
     $expected = ['invitations', 'photos', 'guest_responses', 'draft_invitations'];
     $found    = [];
+    $chk      = $db->prepare(
+        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :tbl"
+    );
     foreach ($expected as $tbl) {
-        $safe = addslashes($tbl);
-        $stmt = $db->query("SHOW TABLES LIKE '$safe'");
-        if ($stmt->rowCount() > 0) $found[] = $tbl;
+        $chk->execute([':tbl' => $tbl]);
+        if ((int)$chk->fetchColumn() > 0) $found[] = $tbl;
     }
     $result['tables'] = $found;
 
@@ -42,10 +45,8 @@ try {
     }
 
 } catch (Exception $e) {
-    $result['status']     = 'error';
-    $result['db']         = 'failed';
-    $result['db_error']   = $e->getMessage();   /* TEMP: diaqnostika */
-    $result['db_code']    = $e->getCode();      /* TEMP: diaqnostika */
+    $result['status'] = 'error';
+    $result['db']     = 'failed';
 }
 
 $httpCode = match($result['status']) {

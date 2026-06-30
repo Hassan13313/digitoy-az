@@ -17,27 +17,6 @@ function getBasePlatformUrl() {
   return isLocalhost ? window.location.origin : 'https://digitoy.az'
 }
 
-/* ── Admin idarəetmə linki — bütün formData URL-ə kodlanmış (legacy) ── */
-export function buildAdminLink(slug, data = null) {
-  const adminKey = import.meta.env.VITE_ADMIN_KEY || ''
-  const base = `${getBasePlatformUrl()}/invite/${slug}?admin=${adminKey}`
-  if (!data) return base
-  const token = encodeData(data)
-  return token ? `${base}&data=${token}` : base
-}
-
-/* ── Admin idarəetmə linki — draft_code ilə (Sprint 1B) ── */
-export function buildAdminLinkByDraft(slug, draftCode) {
-  const adminKey = import.meta.env.VITE_ADMIN_KEY || ''
-  return `${getBasePlatformUrl()}/invite/${slug}?admin=${adminKey}&draft=${draftCode}`
-}
-
-/* ── Yekun müştəri dəvətnamə linki (admin təsdiqindən sonra) ── */
-export function buildLiveLink(slug, data) {
-  const encoded = encodeData(data)
-  return `${getBasePlatformUrl()}/invite/${slug}?view=live&d=${encoded}`
-}
-
 /* ── DB-backed qısa link — iOS-safe, 40 char max ── */
 export function buildShortLiveLink(slug) {
   return `${getBasePlatformUrl()}/invite/${slug}`

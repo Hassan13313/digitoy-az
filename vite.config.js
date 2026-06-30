@@ -9,9 +9,9 @@ export default defineConfig({
        Production-da həmin URL-lər cPanel-in real PHP fayllarına gedir */
     proxy: {
       '/api': {
-        target: 'https://digitoy.az',
+        target: process.env.DEV_API_TARGET || 'http://localhost',
         changeOrigin: true,
-        secure: true,
+        secure: false,
       },
     },
   },
