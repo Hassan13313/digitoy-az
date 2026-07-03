@@ -36,14 +36,14 @@ const PKG_SUBTITLES = {
 
 /* Phase 25.1 — Vagzali.az tərəfdaş endirimi: hər kartın siyahısının sonunda bir sətir */
 const VAGZALI_LINE = {
-  az: (pct) => `Vagzali.az tərəfdaş endirimi — ${pct}-dək`,
-  en: (pct) => `Vagzali.az partner discount — up to ${pct}`,
-  ru: (pct) => `Партнёрская скидка Vagzali.az — до ${pct}`,
+  az: (pct) => `Vagzali.az-da ${pct}-dək xüsusi endirim`,
+  en: (pct) => `Up to ${pct} special discount on Vagzali.az`,
+  ru: (pct) => `Специальная скидка до ${pct} на Vagzali.az`,
 }
 const VAGZALI_NOTE = {
-  az: 'Endirim Vagzali.az-da seçilmiş məhsul və xidmətlər üçün keçərlidir.',
-  en: 'The discount applies to selected products and services on Vagzali.az.',
-  ru: 'Скидка действует на выбранные товары и услуги на Vagzali.az.',
+  az: 'Digitoy müştəriləri Vagzali.az tərəfdaş üstünlüklərindən yararlana bilərlər.',
+  en: 'Digitoy customers can enjoy Vagzali.az partner benefits.',
+  ru: 'Клиенты Digitoy могут воспользоваться партнёрскими преимуществами Vagzali.az.',
 }
 
 /* PREMIUM nişanı — VIP "Ən Çox Seçilən" ilə eyni vizual dildə, fərqli ton */

@@ -79,13 +79,17 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '', draftCode = '
     ...(draftCode ? [`📋 Sifariş Kodu: ${draftCode}`] : []),
   ]
 
-  /* Phase 25.1 — Vagzali.az tərəfdaş endirimi (yalnız admin üçün informativ blok) */
-  const vagzaliPct = VAGZALI_DISCOUNTS[data.package] || VAGZALI_DISCOUNTS[data.selectedPackage]
+  /* Phase 25.1 — Vagzali.az tərəfdaş bonusu (yalnız admin üçün informativ blok) */
+  const vagzaliPkg = VAGZALI_DISCOUNTS[data.package] ? data.package : data.selectedPackage
+  const vagzaliPct = VAGZALI_DISCOUNTS[vagzaliPkg]
   if (vagzaliPct) {
+    const pkgNames = { SADE: 'Sadə', VIP: 'VIP', PREMIUM: 'Premium' }
     lines.push(
       `━━━━━━━━━━━━━━━━━━`,
-      `🎁 Vagzali.az Endirimi`,
-      `Paketə uyğun endirim:`,
+      `🎁 Vagzali.az Bonusu`,
+      `Paket:`,
+      pkgNames[vagzaliPkg],
+      `Endirim:`,
       `${vagzaliPct}-dək`,
     )
   }
