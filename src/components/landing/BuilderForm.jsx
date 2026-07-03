@@ -3,7 +3,7 @@ import { Reorder, useDragControls } from 'framer-motion'
 import {
   Heart, Diamond, Cake, Briefcase, Sparkles,
   ChevronRight, ChevronLeft, Check, Crown, Shirt, Calendar, User, MapPin, Search,
-  Download, QrCode, Archive, Minus, Plus, X, GripVertical,
+  Download, QrCode, Archive, Minus, Plus, X, GripVertical, MessageCircle,
 } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 /* Google Maps JS API — singleton promise, script injected once */
@@ -23,7 +23,7 @@ function loadGoogleMaps(apiKey) {
   return _mapsPromise
 }
 import { DRESS_CODE_PALETTES, EVENT_TYPES } from '../../data/constants'
-import { PACKAGE_DEFS, getLockedSteps } from '../../data/packages'
+import { PACKAGE_DEFS, getLockedSteps, VAGZALI_DISCOUNTS } from '../../data/packages'
 import { defaultWedding } from '../../data/defaultWedding'
 import { buildShortLiveLink } from '../../utils/whatsappOrder'
 import { formatFullDateByLang } from '../../utils/dateFormat'
@@ -1306,6 +1306,94 @@ const STEP_DESCRIPTIONS = {
   ],
 }
 
+/* ── Phase 25.1 — Vagzali.az tərəfdaş endirimi kartı (yalnız Builder-in son addımında,
+   sırf informativ — dəvətnamə datasına, draft-a və sifariş axınına toxunmur) ── */
+const VAGZALI_UI = {
+  az: {
+    title: '🎉 Təbriklər!',
+    body: 'Digitoy müştərisi olduğunuz üçün siz Vagzali.az tərəfdaş endirimindən yararlana bilərsiniz.',
+    tiersLabel: 'Paketinizə uyğun olaraq:',
+    tier: (name, pct) => `${name} → ${pct}-dək`,
+    badge: (pct) => `Siz ${pct}-dək endirim qazandınız.`,
+    note: 'Digitoy müştərisi olduğunuzu bildirdikdə paketinizə uyğun endirim tətbiq olunur.',
+  },
+  en: {
+    title: '🎉 Congratulations!',
+    body: 'As a Digitoy customer, you can benefit from the Vagzali.az partner discount.',
+    tiersLabel: 'Based on your package:',
+    tier: (name, pct) => `${name} → up to ${pct}`,
+    badge: (pct) => `You've earned a discount of up to ${pct}.`,
+    note: 'The discount is applied when you mention that you are a Digitoy customer.',
+  },
+  ru: {
+    title: '🎉 Поздравляем!',
+    body: 'Как клиент Digitoy, вы можете воспользоваться партнёрской скидкой Vagzali.az.',
+    tiersLabel: 'В зависимости от вашего пакета:',
+    tier: (name, pct) => `${name} → до ${pct}`,
+    badge: (pct) => `Вы получили скидку до ${pct}.`,
+    note: 'Скидка применяется, если вы сообщите, что являетесь клиентом Digitoy.',
+  },
+}
+const VAGZALI_TIER_NAMES = { SADE: 'Sadə', VIP: 'VIP', PREMIUM: 'Premium' }
+const VAGZALI_LINKS = {
+  instagram: 'https://www.instagram.com/vagzali.azerbaijan/',
+  whatsapp:  'https://wa.me/994774471030',
+}
+
+/* lucide-react v1-də brend ikonları yoxdur — Instagram glifi lucide üslubunda inline SVG */
+function InstagramIcon({ size = 13, strokeWidth = 1.6 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+  )
+}
+
+function VagzaliBenefitCard({ lang, pkgId }) {
+  const ui  = VAGZALI_UI[lang] || VAGZALI_UI.az
+  const pct = VAGZALI_DISCOUNTS[pkgId] || VAGZALI_DISCOUNTS.SADE
+  return (
+    <div className="mt-8 bg-cream border border-beige-dark/40 shadow-[0_1px_4px_rgba(0,0,0,0.04),0_8px_32px_rgba(197,160,89,0.04)] px-6 sm:px-12 py-9 sm:py-10">
+      <h3 className="font-serif text-2xl text-ink font-light tracking-tight mb-2">{ui.title}</h3>
+      <p className="text-[13px] text-brown-dark font-light leading-relaxed mb-5">{ui.body}</p>
+
+      <p className="text-[11.5px] text-brown-muted/70 font-sans font-light mb-2">{ui.tiersLabel}</p>
+      <ul className="list-none m-0 p-0 mb-6 space-y-1.5">
+        {['SADE', 'VIP', 'PREMIUM'].map(id => (
+          <li key={id} className={`text-[12.5px] font-light ${id === pkgId ? 'text-espresso font-normal' : 'text-brown-muted/65'}`}>
+            {ui.tier(VAGZALI_TIER_NAMES[id], VAGZALI_DISCOUNTS[id])}
+          </li>
+        ))}
+      </ul>
+
+      {/* Müştərinin öz paketinə uyğun endirim — vurğulanmış badge */}
+      <div className="inline-flex items-center gap-2.5 border border-gold/45 bg-gold/[0.06] px-5 py-3 mb-4">
+        <span className="w-[18px] h-[18px] rounded-full grid place-items-center text-[10px] font-bold"
+          style={{ background: 'linear-gradient(135deg, #C5A059, #A8843E)', color: '#fff' }}>✓</span>
+        <span className="text-[13px] text-espresso font-medium tracking-wide">{ui.badge(pct)}</span>
+      </div>
+
+      <p className="text-[11px] text-brown-muted/60 font-light leading-relaxed mb-6">{ui.note}</p>
+
+      <div className="flex flex-col sm:flex-row gap-3">
+        <a href={VAGZALI_LINKS.instagram} target="_blank" rel="noopener noreferrer"
+          className="flex-1 flex items-center justify-center gap-2 btn-outline-gold min-h-[46px] text-[10px] tracking-[0.22em] uppercase touch-manipulation">
+          <InstagramIcon size={13} strokeWidth={1.6} />
+          Instagram
+        </a>
+        <a href={VAGZALI_LINKS.whatsapp} target="_blank" rel="noopener noreferrer"
+          className="flex-1 flex items-center justify-center gap-2 btn-outline-gold min-h-[46px] text-[10px] tracking-[0.22em] uppercase touch-manipulation">
+          <MessageCircle size={13} strokeWidth={1.6} />
+          WhatsApp
+        </a>
+      </div>
+    </div>
+  )
+}
+
 export default function BuilderForm({ lang, initialData, initialStep = null, onSubmit, isAdmin = false }) {
   const tr = t[lang]
 
@@ -2000,6 +2088,9 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
           <GalleryAdminStep data={data} isCouple={isCouple} isCorp={isCorp} isAdmin={isAdmin || adminMode} />
         )}
       </div>
+
+      {/* Vagzali.az tərəfdaş endirimi — yalnız son addımda, yekun düymələrdən əvvəl */}
+      {step === VISIBLE_TOTAL && <VagzaliBenefitCard lang={lang} pkgId={pkgId} />}
 
       {/* Navigation */}
       <div className="flex justify-between mt-8 sm:mt-10">

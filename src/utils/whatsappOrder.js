@@ -1,4 +1,5 @@
 import { DRESS_CODE_PALETTES } from '../data/constants'
+import { VAGZALI_DISCOUNTS } from '../data/packages'
 import { formatAzDate, formatTime24 } from './dateFormat'
 import t from '../data/translations'
 
@@ -77,6 +78,17 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '', draftCode = '
     `━━━━━━━━━━━━━━━━━━`,
     ...(draftCode ? [`📋 Sifariş Kodu: ${draftCode}`] : []),
   ]
+
+  /* Phase 25.1 — Vagzali.az tərəfdaş endirimi (yalnız admin üçün informativ blok) */
+  const vagzaliPct = VAGZALI_DISCOUNTS[data.package] || VAGZALI_DISCOUNTS[data.selectedPackage]
+  if (vagzaliPct) {
+    lines.push(
+      `━━━━━━━━━━━━━━━━━━`,
+      `🎁 Vagzali.az Endirimi`,
+      `Paketə uyğun endirim:`,
+      `${vagzaliPct}-dək`,
+    )
+  }
 
   return encodeURIComponent(lines.join('\n'))
 }

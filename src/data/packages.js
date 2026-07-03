@@ -4,6 +4,10 @@ export const PACKAGE_DEFS = {
   PREMIUM: { id: 'PREMIUM', price: '129', lockedSteps: [], popular: false },
 }
 
+/* Phase 25.1 — Vagzali.az tərəfdaş endirimi (yalnız sifariş axınında göstərilir,
+   dəvətnamənin özündə heç vaxt görünmür). */
+export const VAGZALI_DISCOUNTS = { SADE: '5%', VIP: '10%', PREMIUM: '15%' }
+
 /* Phase 18 — dəyər əsaslı mövqeləndirmə: hər paket "VIP-dəkilərin hamısı + ..."
    kumulyativ çərçivəsi ilə təqdim olunur, ayrı-ayrı funksiya siyahısı kimi yox. */
 export const PKG_FEATURES = {

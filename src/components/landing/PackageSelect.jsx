@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { PACKAGE_DEFS, PKG_FEATURES } from '../../data/packages'
+import { PACKAGE_DEFS, PKG_FEATURES, VAGZALI_DISCOUNTS } from '../../data/packages'
 import BlurFade from '../ui/BlurFade'
 
 const PKG_LABELS = {
@@ -32,6 +32,18 @@ const PKG_SUBTITLES = {
     VIP:     'Удобно управляйте подтверждением гостей и планом рассадки.',
     PREMIUM: 'Соберите все воспоминания свадебного дня в одном месте.',
   },
+}
+
+/* Phase 25.1 — Vagzali.az tərəfdaş endirimi: hər kartın siyahısının sonunda bir sətir */
+const VAGZALI_LINE = {
+  az: (pct) => `Vagzali.az tərəfdaş endirimi — ${pct}-dək`,
+  en: (pct) => `Vagzali.az partner discount — up to ${pct}`,
+  ru: (pct) => `Партнёрская скидка Vagzali.az — до ${pct}`,
+}
+const VAGZALI_NOTE = {
+  az: 'Endirim Vagzali.az-da seçilmiş məhsul və xidmətlər üçün keçərlidir.',
+  en: 'The discount applies to selected products and services on Vagzali.az.',
+  ru: 'Скидка действует на выбранные товары и услуги на Vagzali.az.',
 }
 
 /* PREMIUM nişanı — VIP "Ən Çox Seçilən" ilə eyni vizual dildə, fərqli ton */
@@ -94,6 +106,7 @@ export default function PackageSelect({ lang, onSelect }) {
                   isVip={def.popular}
                   feat={feat}
                   subtitle={subtitles[pkgId]}
+                  partnerLine={(VAGZALI_LINE[lang] || VAGZALI_LINE.az)(VAGZALI_DISCOUNTS[pkgId])}
                   popular={ui.popular}
                   premiumBadge={badges.PREMIUM}
                   btn={ui.btn}
@@ -104,6 +117,11 @@ export default function PackageSelect({ lang, onSelect }) {
             )
           })}
         </div>
+
+        {/* Vagzali.az endirim qeydi — kartlardan sakit, kiçik */}
+        <p className="text-center text-[11px] text-brown-muted/60 font-light mt-8">
+          {VAGZALI_NOTE[lang] || VAGZALI_NOTE.az}
+        </p>
       </div>
 
       <style>{`
@@ -116,7 +134,7 @@ export default function PackageSelect({ lang, onSelect }) {
   )
 }
 
-function PackageCard({ pkgId, label, price, isVip, feat, subtitle, popular, premiumBadge, btn, onSelect }) {
+function PackageCard({ pkgId, label, price, isVip, feat, subtitle, partnerLine, popular, premiumBadge, btn, onSelect }) {
   const [hovered, setHovered] = useState(false)
   const isPremium = pkgId === 'PREMIUM'
 
@@ -233,6 +251,11 @@ function PackageCard({ pkgId, label, price, isVip, feat, subtitle, popular, prem
               <span>{f}</span>
             </li>
           ))}
+          {/* Vagzali.az tərəfdaş endirimi — siyahının son sətri */}
+          <li className={`flex gap-3 items-start text-sm leading-[1.5] ${isVip ? 'text-[rgba(245,235,211,0.88)]' : 'text-espresso'}`}>
+            <span className="flex-[0_0_18px] w-[18px] h-[18px] grid place-items-center text-[13px] mt-px">🎁</span>
+            <span>{partnerLine}</span>
+          </li>
         </ul>
 
         {/* CTA */}
