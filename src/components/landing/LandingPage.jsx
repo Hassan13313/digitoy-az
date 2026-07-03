@@ -105,8 +105,9 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
   }
 
   const handleEditFromPreview = () => {
-    /* Admin review modunda addım 1-dən başla; müştəridə son addıma qayıt */
-    setReturnToStep(isAdmin ? 1 : 6)
+    /* Admin review modunda addım 1-dən başla; müştəridə son addıma qayıt
+       (7 = Foto Qalereya; paketdə bağlıdırsa BuilderForm son görünən addıma yuvarlaqlaşdırır) */
+    setReturnToStep(isAdmin ? 1 : 7)
     setShowPreview(false)
     setTimeout(() => scrollToSection('builder-content'), 100)
   }

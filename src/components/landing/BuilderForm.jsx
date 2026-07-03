@@ -4,6 +4,7 @@ import {
   Heart, Diamond, Cake, Briefcase, Sparkles,
   ChevronRight, ChevronLeft, Check, Crown, Shirt, Calendar, User, MapPin, Search,
   Download, QrCode, Archive, Minus, Plus, X, GripVertical, MessageCircle,
+  Martini, Palette,
 } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 /* Google Maps JS API — singleton promise, script injected once */
@@ -25,6 +26,7 @@ function loadGoogleMaps(apiKey) {
 import { DRESS_CODE_PALETTES, EVENT_TYPES } from '../../data/constants'
 import { PACKAGE_DEFS, getLockedSteps } from '../../data/packages'
 import { ACTIVE_PARTNERS } from '../../data/partners'
+import MusicStep from './MusicStep'
 import { defaultWedding } from '../../data/defaultWedding'
 import { buildShortLiveLink } from '../../utils/whatsappOrder'
 import { formatFullDateByLang } from '../../utils/dateFormat'
@@ -35,6 +37,15 @@ import { trackEvent } from '../../utils/analytics'
 const EVENT_ICONS = { toy: Heart, nishan: Diamond, birthday: Cake, corporate: Briefcase, other: Sparkles }
 const COUPLE_TYPES = ['toy', 'nishan']
 const CORP_TYPES   = ['corporate', 'other']
+
+/* Phase 25.3 — Dress Code premium kartları: ikon + başlıq + açıqlama.
+   Mətnlər translations.js-dəki dresscode_*_label / _sub açarlarından gəlir. */
+const DRESS_CODE_OPTIONS = [
+  { id: 'blacktie',    icon: Crown,   colors: ['#1A1A1A', '#F5F5F5', '#C9A84C'] },
+  { id: 'cocktail',    icon: Martini, colors: ['#C4956A', '#E8D5C4', '#8B6347'] },
+  { id: 'smartcasual', icon: Shirt,   colors: ['#6B8CAE', '#D4E4F0', '#4A6B8A'] },
+  { id: 'creative',    icon: Palette, colors: ['#9B6B9B', '#F0C4D4', '#6B9B6B'] },
+]
 
 /* ── Çoxdilli təqvim massivləri ── */
 const calendarTranslations = {
@@ -1286,6 +1297,7 @@ const STEP_DESCRIPTIONS = {
     'Tədbirinizin keçiriləcəyi məkanı xəritədə tapın.',
     'Günün əsas anları üçün proqram cədvəli yaradın.',
     'Qonaqlar üçün geyim tərzi seçin.',
+    'Dəvətnamənizin fon musiqisini şəxsi zövqünüzə uyğun seçin.',
     'Qonaqların öz masalarını asanlıqla tapması üçün.',
     'QR kod vasitəsilə xatirə şəkillərini toplayın.',
     'Digitoy tərəfdaşları vasitəsilə xüsusi endirim və üstünlüklərdən yararlana bilərsiniz.',
@@ -1295,6 +1307,7 @@ const STEP_DESCRIPTIONS = {
     'Find and pin your event venue on the map.',
     'Create a schedule for the key moments of the day.',
     'Choose a dress code recommendation for your guests.',
+    'Choose the background music of your invitation to match your taste.',
     'Help guests find their table quickly and easily.',
     'Collect memories via QR photo sharing.',
     'Through Digitoy partners you can enjoy special discounts and benefits.',
@@ -1304,6 +1317,7 @@ const STEP_DESCRIPTIONS = {
     'Найдите и отметьте место проведения на карте.',
     'Создайте программу на весь день.',
     'Выберите дресс-код для ваших гостей.',
+    'Выберите фоновую музыку приглашения по своему вкусу.',
     'Помогите гостям быстро найти свой стол.',
     'Собирайте воспоминания через QR-фотообмен.',
     'Через партнёров Digitoy вы можете получить специальные скидки и преимущества.',
@@ -1438,8 +1452,9 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
   /* ── Paket kilidləmə — həmişə initialData.package oxunur, rol fərqi yoxdur ── */
   const pkgId = initialData?.package || localStorage.getItem('selected_package') || 'SADE'
   const lockedSteps = getLockedSteps(pkgId)
-  /* Addım 7 — Partnyorlar: bütün paketlərdə görünən son addım (heç vaxt kilidlənmir) */
-  const visibleSteps = [1, 2, 3, 4, 5, 6, 7].filter(n => !lockedSteps.includes(n))
+  /* Phase 25.3 axını: 1 Tədbir · 2 Məkan · 3 Proqram · 4 Geyim · 5 Musiqi (YENİ)
+     · 6 Oturma · 7 Qalereya · 8 Partnyorlar (həmişə SON, heç vaxt kilidlənmir) */
+  const visibleSteps = [1, 2, 3, 4, 5, 6, 7, 8].filter(n => !lockedSteps.includes(n))
   const VISIBLE_TOTAL = visibleSteps.length
 
   /* initialStep-i görünən addımlara uyğunlaşdır */
@@ -1546,7 +1561,8 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
 
   const steps = [
     tr.step1_title, tr.step2_title, tr.step3_title,
-    tr.step4_title, tr.step5_title, tr.step6_title,
+    tr.step4_title, tr.step_music_title,
+    tr.step5_title, tr.step6_title,
     partnerUi.stepLabel,
   ]
 
@@ -1897,7 +1913,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
       {/* Step content */}
       <div className="bg-cream border border-beige-dark/40 shadow-[0_1px_4px_rgba(0,0,0,0.04),0_8px_32px_rgba(197,160,89,0.04)] px-6 sm:px-12 py-10 sm:py-14 overflow-visible">
         <div className="mb-8 pb-6 border-b border-beige-dark/25">
-          <h3 className="font-serif text-2xl text-ink font-light tracking-tight mb-2">{actualStep === 7 ? partnerUi.title : steps[actualStep - 1]}</h3>
+          <h3 className="font-serif text-2xl text-ink font-light tracking-tight mb-2">{actualStep === 8 ? partnerUi.title : actualStep === 5 ? `🎵 ${steps[4]}` : steps[actualStep - 1]}</h3>
           <p className="text-[11.5px] text-brown-muted/60 font-sans font-light leading-relaxed">{(STEP_DESCRIPTIONS[lang] || STEP_DESCRIPTIONS.az)[actualStep - 1]}</p>
         </div>
 
@@ -2043,53 +2059,76 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
           />
         )}
 
-        {/* STEP 4 — Dress Code */}
+        {/* STEP 4 — Dress Code (Phase 25.3 — premium kart dizaynı) */}
         {actualStep === 4 && (
           <div className="space-y-8">
             <div>
               <Label>{tr.dresscode_type_label}</Label>
-              <div className="grid grid-cols-2 gap-3 mt-1">
-                {[
-                  { id: 'blacktie',    label: tr.dresscode_blacktie_label    || 'Black Tie',    subKey: 'dresscode_blacktie_sub',    colors: ['#1A1A1A', '#F5F5F5', '#C9A84C'] },
-                  { id: 'cocktail',    label: tr.dresscode_cocktail_label    || 'Cocktail',     subKey: 'dresscode_cocktail_sub',    colors: ['#C4956A', '#E8D5C4', '#8B6347'] },
-                  { id: 'smartcasual', label: tr.dresscode_smartcasual_label || 'Smart Casual', subKey: 'dresscode_smartcasual_sub', colors: ['#6B8CAE', '#D4E4F0', '#4A6B8A'] },
-                  { id: 'creative',    label: tr.dresscode_creative_label    || 'Creative',     subKey: 'dresscode_creative_sub',    colors: ['#9B6B9B', '#F0C4D4', '#6B9B6B'] },
-                ].map(({ id, label, subKey, colors }) => {
-                  const sub = tr[subKey] || subKey
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
+                {DRESS_CODE_OPTIONS.map(({ id, icon: DressIcon, colors }) => {
+                  const label = tr[`dresscode_${id}_label`] || id
+                  const sub   = tr[`dresscode_${id}_sub`]   || ''
                   const isActive = data.dressCodePalette === id
                   return (
                     <button
                       key={id}
                       type="button"
                       onClick={() => set('dressCodePalette', id)}
-                      className={`text-left p-5 border transition-all duration-200 ${
+                      aria-pressed={isActive}
+                      className={`group relative text-left p-5 min-h-[88px] rounded-xl border transition-all duration-250 touch-manipulation ${
                         isActive
-                          ? 'border-gold bg-gold/[0.04]'
-                          : 'border-beige-dark/60 hover:border-gold/35'
+                          ? 'border-gold shadow-[0_8px_28px_rgba(197,160,89,0.18)]'
+                          : 'border-beige-dark/55 hover:border-gold/50 hover:-translate-y-[2px] hover:shadow-[0_6px_22px_rgba(197,160,89,0.12)]'
                       }`}
+                      style={{
+                        background: isActive
+                          ? 'linear-gradient(150deg, rgba(255,255,255,0.72) 0%, rgba(197,160,89,0.08) 100%)'
+                          : 'linear-gradient(150deg, rgba(255,255,255,0.55) 0%, rgba(253,250,244,0.35) 100%)',
+                        backdropFilter: 'blur(10px)',
+                        WebkitBackdropFilter: 'blur(10px)',
+                      }}
                     >
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <div className="flex items-center gap-1">
-                          {colors.map((c) => (
-                            <span
-                              key={c}
-                              className="w-3 h-3 rounded-full border border-black/10 inline-block flex-shrink-0"
-                              style={{ backgroundColor: c }}
-                            />
-                          ))}
-                        </div>
-                        <p className={`text-xs font-medium tracking-wide ${isActive ? 'text-gold' : 'text-ink'}`}>{label}</p>
-                      </div>
-                      <p className="text-[10px] text-brown-muted/70 font-light mb-4">{sub}</p>
+                      {/* Seçilmiş nişan */}
                       {isActive && (
-                        <div className="flex gap-4">
-                          <div className="flex flex-col items-center gap-1.5">
-                            <User size={18} className="text-amber-700/80" strokeWidth={1.4} />
-                            <span className="text-[9px] text-brown-muted">{tr.dresscode_groom_icon}</span>
+                        <span className="absolute top-3 right-3 w-5 h-5 rounded-full bg-gold flex items-center justify-center shadow-[0_2px_8px_rgba(197,160,89,0.4)]">
+                          <Check size={10} strokeWidth={3} className="text-white" />
+                        </span>
+                      )}
+                      <div className="flex items-start gap-3.5">
+                        {/* İkon */}
+                        <div className={`w-11 h-11 min-w-[44px] rounded-full flex items-center justify-center border transition-all duration-250 ${
+                          isActive
+                            ? 'border-gold/55 bg-gold/[0.12]'
+                            : 'border-beige-dark/55 bg-cream group-hover:border-gold/40 group-hover:scale-105'
+                        }`}>
+                          <DressIcon size={17} strokeWidth={1.4} className={isActive ? 'text-gold' : 'text-brown-muted/60 group-hover:text-gold/80'} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          {/* Başlıq */}
+                          <p className={`text-[13px] font-medium tracking-wide mb-0.5 ${isActive ? 'text-gold-dark' : 'text-ink'}`}>{label}</p>
+                          {/* Qısa açıqlama */}
+                          <p className="text-[10.5px] text-brown-muted/65 font-light leading-relaxed mb-2.5">{sub}</p>
+                          {/* Rəng palitrası */}
+                          <div className="flex items-center gap-1.5">
+                            {colors.map((c) => (
+                              <span
+                                key={c}
+                                className="w-3.5 h-3.5 rounded-full border border-black/10 shadow-sm inline-block flex-shrink-0"
+                                style={{ backgroundColor: c }}
+                              />
+                            ))}
                           </div>
-                          <div className="flex flex-col items-center gap-1.5">
-                            <Sparkles size={18} className="text-amber-700/80" strokeWidth={1.4} />
-                            <span className="text-[9px] text-brown-muted">{tr.dresscode_bride_icon}</span>
+                        </div>
+                      </div>
+                      {isActive && (
+                        <div className="flex gap-5 mt-4 pt-3.5 border-t border-gold/20">
+                          <div className="flex items-center gap-2">
+                            <User size={14} className="text-amber-700/80" strokeWidth={1.4} />
+                            <span className="text-[9.5px] text-brown-muted">{tr.dresscode_groom_icon}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Sparkles size={14} className="text-amber-700/80" strokeWidth={1.4} />
+                            <span className="text-[9.5px] text-brown-muted">{tr.dresscode_bride_icon}</span>
                           </div>
                         </div>
                       )}
@@ -2109,8 +2148,18 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
           </div>
         )}
 
-        {/* STEP 5 — Oturma Planı */}
+        {/* STEP 5 — 🎵 Musiqi (Phase 25.3 — bütün paketlərdə) */}
         {actualStep === 5 && (
+          <MusicStep
+            music={data.music || null}
+            onChange={(m) => set('music', m)}
+            lang={lang}
+            uploadSlug={computeSlug()}
+          />
+        )}
+
+        {/* STEP 6 — Oturma Planı */}
+        {actualStep === 6 && (
           <div className="space-y-6">
             <div>
               <Label>{tr.seating_label}</Label>
@@ -2125,13 +2174,13 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
           </div>
         )}
 
-        {/* STEP 6 — Foto Qalereya & QR İdarəetmə */}
-        {actualStep === 6 && (
+        {/* STEP 7 — Foto Qalereya & QR İdarəetmə */}
+        {actualStep === 7 && (
           <GalleryAdminStep data={data} isCouple={isCouple} isCorp={isCorp} isAdmin={isAdmin || adminMode} />
         )}
 
-        {/* STEP 7 — Partnyorlar (bütün paketlərdə son addım) */}
-        {actualStep === 7 && (
+        {/* STEP 8 — Partnyorlar (bütün paketlərdə son addım) */}
+        {actualStep === 8 && (
           <PartnersStep lang={lang} pkgId={pkgId} />
         )}
       </div>

@@ -112,6 +112,11 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
     }
   }, [])
   const audioVideoId = getEventAudioId(weddingData?.eventType)
+
+  /* Phase 25.3 — istifadəçinin seçdiyi musiqi (preset/mp3). Yoxdursa legacy
+     davranış: tədbir növünə görə standart melodiya + mövcud autoplay cəhdi. */
+  const invMusic  = weddingData?.music || null
+  const autoStart = invMusic ? invMusic.playMode === 'auto' : true
   const palette = DRESS_CODE_PALETTES.find((p) => p.id === weddingData.dressCodePalette) || DRESS_CODE_PALETTES[0]
 
   const isCouple = ['toy', 'nishan'].includes(weddingData.eventType)
@@ -210,11 +215,12 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
           setEnvelopeOpened(true)
           setTimeout(() => {
             const unlocked = isAudioUnlocked()
-            if (unlocked) {
+            const started  = unlocked && autoStart
+            if (started) {
               musicRef.current?.play()
             }
             setShowMusicPrompt(true)
-            if (unlocked) {
+            if (started) {
               setTimeout(() => setShowMusicPrompt(false), 5500)
             }
           }, 1800)
@@ -225,7 +231,7 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
 
       {/* Music control — root level so position:fixed is viewport-relative, not transform-relative */}
       {envelopeOpened && (
-        <MusicToggle ref={musicRef} lang={lang} videoId={audioVideoId} />
+        <MusicToggle ref={musicRef} lang={lang} videoId={audioVideoId} music={invMusic} />
       )}
 
       {/* Music-start pill — appears after the envelope opens, invites the guest to start the soundtrack */}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { ChevronDown, Timer, MapPin, Shirt, Users, Camera, Music, Crown, ChevronLeft, ChevronRight, UserCheck, Clock, BookOpen } from 'lucide-react'
+import { ChevronDown, Timer, MapPin, Shirt, Users, Camera, Music, Crown, ChevronLeft, ChevronRight, UserCheck, Clock, BookOpen, Eye } from 'lucide-react'
 
 const MaleSuitIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
@@ -496,10 +496,19 @@ export default function Hero({ lang, onStart, onDemo }) {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2, ease: [0.32, 0, 0.68, 1] }}
-            className="flex flex-col sm:flex-row gap-3"
+            className="flex flex-col sm:flex-row sm:flex-wrap gap-3 w-full max-w-full"
           >
-            <motion.button onClick={onStart} className="btn-gold min-h-[52px]" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}>
+            <motion.button onClick={onStart} className="btn-gold min-h-[52px] w-full sm:w-auto whitespace-nowrap inline-flex items-center justify-center" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}>
               {tr.hero_cta}
+            </motion.button>
+            <motion.button
+              onClick={onDemo}
+              className="btn-outline-gold min-h-[52px] w-full sm:w-auto whitespace-nowrap inline-flex items-center justify-center gap-2.5"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.96 }}
+            >
+              <Eye size={13} strokeWidth={1.6} className="flex-shrink-0" />
+              {tr.hero_demo_btn}
             </motion.button>
           </motion.div>
         </div>

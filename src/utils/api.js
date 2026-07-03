@@ -69,6 +69,19 @@ export async function uploadPhoto(file, slug) {
   return res.json()
 }
 
+/* ── Phase 25.3 — Musiqi (MP3) yüklə — public, rate-limitli ── */
+export async function uploadMusic(file, slug) {
+  const fd = new FormData()
+  fd.append('music', file)
+  fd.append('slug', slug)
+  const res = await fetch(`${BASE}/upload_music.php`, {
+    method: 'POST',
+    body: fd,
+  })
+  if (!res.ok) throw new Error(`upload_music: ${res.status}`)
+  return res.json() /* { ok, url, filename, mime } */
+}
+
 /* ── Şəkilləri çək (public) ──
    Şərti GET (ETag/Last-Modified): qalereya 30 saniyədə bir bu funksiyanı
    çağırır (auto-refresh). Slug üzrə son ETag-i yaddaşda saxlayıb

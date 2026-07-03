@@ -15,5 +15,7 @@ export const defaultWedding = {
   seatingMethod: null,
   galleryLink: '',
   programSteps: [],
+  /* Phase 25.3 — musiqi seçimi (bax: src/data/music.js). null = standart melodiya */
+  music: null,
   package: 'SADE',
 }

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { Eye, MessageCircle, Edit2, Calendar, MapPin, Shirt, Users, Image, ListOrdered, ShieldCheck, Copy, Check } from 'lucide-react'
+import { Eye, MessageCircle, Edit2, Calendar, MapPin, Shirt, Users, Image, ListOrdered, ShieldCheck, Copy, Check, Crown, Martini, Palette, Music } from 'lucide-react'
 import { DRESS_CODE_PALETTES } from '../../data/constants'
 import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
 import { buildWhatsAppUrl, buildShortLiveLink } from '../../utils/whatsappOrder'
@@ -20,6 +20,20 @@ const DRESS_COLORS = {
 
 const DRESS_LABELS_FALLBACK = {
   blacktie: 'Black Tie', cocktail: 'Cocktail', smartcasual: 'Smart Casual', creative: 'Creative',
+}
+
+/* Phase 25.3 — dress code premium kart ikonları (BuilderForm ilə eyni xəritə) */
+const DRESS_ICONS = { blacktie: Crown, cocktail: Martini, smartcasual: Shirt, creative: Palette }
+
+const MUSIC_MODE_LABELS = {
+  az: { auto: 'Açılan kimi', button: 'Düymə ilə', start: 'Başlanğıc' },
+  en: { auto: 'On open', button: 'By button', start: 'Start' },
+  ru: { auto: 'При открытии', button: 'По кнопке', start: 'Начало' },
+}
+
+function fmtSec(sec) {
+  const s = Math.max(0, Math.floor(Number(sec) || 0))
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
 }
 
 /* ── Admin paneli: linki kopyala düyməsi ── */
@@ -142,19 +156,63 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
     {
       icon: Shirt, label: tr.dresscode_summary,
       value: (() => {
-        const id     = data.dressCodePalette
-        const label  = palette?.label?.[lang] || t[lang]?.[`dresscode_${id}_label`] || DRESS_LABELS_FALLBACK[id] || id
-        const colors = palette?.colors || DRESS_COLORS[id] || []
+        /* Phase 25.3 — premium mini-kart: ikon + başlıq + açıqlama + palitra */
+        const id      = data.dressCodePalette
+        const label   = palette?.label?.[lang] || t[lang]?.[`dresscode_${id}_label`] || DRESS_LABELS_FALLBACK[id] || id
+        const sub     = t[lang]?.[`dresscode_${id}_sub`] || palette?.description?.[lang] || ''
+        const colors  = palette?.colors || DRESS_COLORS[id] || []
+        const DCIcon  = DRESS_ICONS[id] || Shirt
         return (
-          <span className="flex items-center gap-1.5">
-            {colors.map(c => (
-              <span key={c} className="w-3.5 h-3.5 rounded-full border border-beige-dark/40 shadow-sm inline-block flex-shrink-0" style={{ backgroundColor: c }} />
-            ))}
-            <span className="ml-1 font-light">{label}</span>
-          </span>
+          <div
+            className="flex items-start gap-3 rounded-xl px-3.5 py-3 -ml-1"
+            style={{
+              background: 'linear-gradient(150deg, rgba(255,255,255,0.6) 0%, rgba(197,160,89,0.06) 100%)',
+              border: '1px solid rgba(197,160,89,0.32)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              boxShadow: '0 4px 16px rgba(197,160,89,0.08)',
+            }}
+          >
+            <span className="w-9 h-9 min-w-[36px] rounded-full flex items-center justify-center border border-gold/40 bg-gold/[0.08] mt-0.5">
+              <DCIcon size={14} strokeWidth={1.5} className="text-gold" />
+            </span>
+            <span className="flex flex-col gap-1 min-w-0">
+              <span className="text-[13px] font-medium text-espresso tracking-wide">{label}</span>
+              {sub && <span className="text-[10.5px] text-brown-muted/65 font-light leading-relaxed">{sub}</span>}
+              <span className="flex items-center gap-1.5 mt-0.5">
+                {colors.map(c => (
+                  <span key={c} className="w-3 h-3 rounded-full border border-beige-dark/40 shadow-sm inline-block flex-shrink-0" style={{ backgroundColor: c }} />
+                ))}
+              </span>
+            </span>
+          </div>
         )
       })(),
     },
+    ...(data.music ? [{
+      icon: Music, label: tr.music_summary || 'Musiqi',
+      value: (() => {
+        const m  = data.music
+        const ml = MUSIC_MODE_LABELS[lang] || MUSIC_MODE_LABELS.az
+        return (
+          <span className="flex flex-col gap-1">
+            <span className="font-light">
+              {m.title}{m.artist ? <span className="text-brown-muted/60"> — {m.artist}</span> : null}
+            </span>
+            <span className="flex items-center gap-1.5 flex-wrap">
+              {m.startTime > 0 && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9.5px] font-mono text-gold-dark bg-gold/[0.08] border border-gold/25">
+                  {ml.start}: {fmtSec(m.startTime)}
+                </span>
+              )}
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9.5px] text-brown-muted/70 bg-beige border border-beige-dark/40">
+                {m.playMode === 'auto' ? ml.auto : ml.button}
+              </span>
+            </span>
+          </span>
+        )
+      })(),
+    }] : []),
     { icon: Users, label: tr.seating_label,
       value: data.seatingMethod === 'digitory'
         ? 'DigiToy (+15 AZN)'
