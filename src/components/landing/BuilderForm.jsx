@@ -1288,6 +1288,7 @@ const STEP_DESCRIPTIONS = {
     'Qonaqlar üçün geyim tərzi seçin.',
     'Qonaqların öz masalarını asanlıqla tapması üçün.',
     'QR kod vasitəsilə xatirə şəkillərini toplayın.',
+    'Digitoy tərəfdaşları vasitəsilə xüsusi endirim və üstünlüklərdən yararlana bilərsiniz.',
   ],
   en: [
     'Enter the key details about your event.',
@@ -1296,6 +1297,7 @@ const STEP_DESCRIPTIONS = {
     'Choose a dress code recommendation for your guests.',
     'Help guests find their table quickly and easily.',
     'Collect memories via QR photo sharing.',
+    'Through Digitoy partners you can enjoy special discounts and benefits.',
   ],
   ru: [
     'Введите основную информацию о мероприятии.',
@@ -1304,38 +1306,42 @@ const STEP_DESCRIPTIONS = {
     'Выберите дресс-код для ваших гостей.',
     'Помогите гостям быстро найти свой стол.',
     'Собирайте воспоминания через QR-фотообмен.',
+    'Через партнёров Digitoy вы можете получить специальные скидки и преимущества.',
   ],
 }
 
-/* ── Phase 25.2 — Partnyor Endirimləri bölməsi (yalnız Builder-in son addımında,
-   sırf informativ — dəvətnamə datasına, draft-a və sifariş axınına toxunmur).
+/* ── Phase 25.3 — Partnyorlar: Builder-in ayrıca SON addımı (bütün paketlərdə).
+   Sırf informativ — dəvətnamə datasına, draft-a və sifariş axınına toxunmur.
    Partnyorlar src/data/partners.js-dən gəlir — yeni partnyor = massivə yeni obyekt. ── */
 const PARTNER_UI = {
   az: {
-    sectionLabel: '🤝 Partnyor Endirimləri',
-    heading: '🎁 Digitoy müştərilərinə xüsusi üstünlüklər',
-    sub: 'Digitoy tərəfdaşları vasitəsilə seçilmiş xidmətlərdə xüsusi endirimlər əldə edə bilərsiniz.',
+    stepLabel: 'Partnyorlar',
+    title: '🤝 Partnyor Endirimləri',
+    sub: 'Digitoy tərəfdaşları vasitəsilə xüsusi endirim və üstünlüklərdən yararlana bilərsiniz.',
     badgeLabel: 'Sizin paketiniz:',
     badgeValue: (pct) => `${pct}-dək`,
-    claim: 'Digitoy müştərisi olduğunuzu bildirməklə paketinizə uyğun endirimdən yararlana bilərsiniz.',
+    claim: 'Digitoy müştərisi olduğunuzu bildirərək paketinizə uyğun xüsusi endirimdən yararlana bilərsiniz.',
+    cta: '📌 Əlaqə saxlayarkən "Digitoy müştərisiyəm" deməyiniz kifayətdir. Paketinizə uyğun endirim avtomatik tətbiq olunacaq.',
     footNote: (name) => `Bu endirim yalnız ${name} tərəfindən təqdim olunur və Digitoy tərəfdaş üstünlüyüdür.`,
   },
   en: {
-    sectionLabel: '🤝 Partner Discounts',
-    heading: '🎁 Exclusive benefits for Digitoy customers',
-    sub: 'Through Digitoy partners you can get special discounts on selected services.',
+    stepLabel: 'Partners',
+    title: '🤝 Partner Discounts',
+    sub: 'Through Digitoy partners you can enjoy special discounts and benefits.',
     badgeLabel: 'Your package:',
     badgeValue: (pct) => `up to ${pct}`,
-    claim: 'Simply mention that you are a Digitoy customer to enjoy the discount for your package.',
+    claim: 'Simply mention that you are a Digitoy customer to enjoy the special discount for your package.',
+    cta: '📌 When getting in touch, simply say "I am a Digitoy customer" — the discount for your package will be applied automatically.',
     footNote: (name) => `This discount is provided solely by ${name} and is a Digitoy partner benefit.`,
   },
   ru: {
-    sectionLabel: '🤝 Партнёрские скидки',
-    heading: '🎁 Особые преимущества для клиентов Digitoy',
-    sub: 'Через партнёров Digitoy вы можете получить специальные скидки на выбранные услуги.',
+    stepLabel: 'Партнёры',
+    title: '🤝 Партнёрские скидки',
+    sub: 'Через партнёров Digitoy вы можете получить специальные скидки и преимущества.',
     badgeLabel: 'Ваш пакет:',
     badgeValue: (pct) => `до ${pct}`,
-    claim: 'Сообщите, что вы клиент Digitoy, чтобы воспользоваться скидкой по вашему пакету.',
+    claim: 'Сообщите, что вы клиент Digitoy, чтобы воспользоваться специальной скидкой по вашему пакету.',
+    cta: '📌 При обращении достаточно сказать «Я клиент Digitoy» — скидка по вашему пакету будет применена автоматически.',
     footNote: (name) => `Эта скидка предоставляется только ${name} и является партнёрским преимуществом Digitoy.`,
   },
 }
@@ -1361,8 +1367,19 @@ function PartnerCard({ partner, lang, pkgId, ui }) {
       className="glass border border-gold/30 rounded-[26px] px-6 sm:px-10 py-8 sm:py-9"
       style={{ boxShadow: '0 12px 36px rgba(44,26,14,0.08), inset 0 1px 0 rgba(255,255,255,0.55)' }}
     >
-      {/* Partnyor adı + açıqlama */}
-      <p className="font-serif text-xl text-espresso font-light tracking-tight mb-1.5">{partner.name}</p>
+      {/* Logo (gələcək) + partnyor adı */}
+      <div className="flex items-center gap-3.5 mb-1.5">
+        {partner.logo ? (
+          <img src={partner.logo} alt={partner.name} className="w-11 h-11 rounded-full object-cover border border-gold/30 flex-shrink-0" />
+        ) : (
+          /* Logo placeholder — partnyor loqosu əlavə olunana qədər baş hərf */
+          <div className="w-11 h-11 rounded-full grid place-items-center flex-shrink-0 border border-gold/35"
+            style={{ background: 'linear-gradient(135deg, rgba(197,160,89,0.14), rgba(197,160,89,0.05))' }}>
+            <span className="font-serif text-lg text-gold-dark font-light">{partner.name.charAt(0)}</span>
+          </div>
+        )}
+        <p className="font-serif text-xl text-espresso font-light tracking-tight">{partner.name}</p>
+      </div>
       <p className="text-[12.5px] text-brown-muted/75 font-light leading-relaxed mb-5">{desc}</p>
 
       {/* Paketə uyğun endirim — badge */}
@@ -1371,7 +1388,12 @@ function PartnerCard({ partner, lang, pkgId, ui }) {
         <span className="text-[13px] text-espresso font-medium">{ui.badgeValue(pct)}</span>
       </div>
 
-      <p className="text-[11.5px] text-brown-muted/65 font-light leading-relaxed mb-6">{ui.claim}</p>
+      <p className="text-[11.5px] text-brown-muted/65 font-light leading-relaxed mb-5">{ui.claim}</p>
+
+      {/* CTA — istifadəçiyə nə edəcəyini aydın göstərən vurğulanmış məlumat qutusu */}
+      <div className="border border-gold/30 bg-gold/[0.05] rounded-xl px-4 sm:px-5 py-3.5 mb-6">
+        <p className="text-[12px] text-espresso font-light leading-relaxed">{ui.cta}</p>
+      </div>
 
       {/* Əlaqə düymələri */}
       <div className="flex flex-col sm:flex-row gap-3 mb-5">
@@ -1397,24 +1419,15 @@ function PartnerCard({ partner, lang, pkgId, ui }) {
   )
 }
 
-/* Partnyor Endirimləri bölməsi — bütün aktiv partnyorları render edir */
-function PartnerBenefitsSection({ lang, pkgId }) {
+/* Partnyorlar addımının məzmunu — bütün aktiv partnyorları dinamik render edir */
+function PartnersStep({ lang, pkgId }) {
   const ui = PARTNER_UI[lang] || PARTNER_UI.az
   if (ACTIVE_PARTNERS.length === 0) return null
   return (
-    <div className="mt-10">
-      {/* Bölmə başlığı — builder-in mono section-label dilində */}
-      <div className="mb-5">
-        <p className="font-mono text-[10px] tracking-[0.38em] uppercase text-gold-dark mb-3">{ui.sectionLabel}</p>
-        <h3 className="font-serif text-2xl text-ink font-light tracking-tight mb-2">{ui.heading}</h3>
-        <p className="text-[12.5px] text-brown-muted/70 font-light leading-relaxed">{ui.sub}</p>
-      </div>
-
-      <div className="space-y-4">
-        {ACTIVE_PARTNERS.map(p => (
-          <PartnerCard key={p.id} partner={p} lang={lang} pkgId={pkgId} ui={ui} />
-        ))}
-      </div>
+    <div className="space-y-4">
+      {ACTIVE_PARTNERS.map(p => (
+        <PartnerCard key={p.id} partner={p} lang={lang} pkgId={pkgId} ui={ui} />
+      ))}
     </div>
   )
 }
@@ -1425,7 +1438,8 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
   /* ── Paket kilidləmə — həmişə initialData.package oxunur, rol fərqi yoxdur ── */
   const pkgId = initialData?.package || localStorage.getItem('selected_package') || 'SADE'
   const lockedSteps = getLockedSteps(pkgId)
-  const visibleSteps = [1, 2, 3, 4, 5, 6].filter(n => !lockedSteps.includes(n))
+  /* Addım 7 — Partnyorlar: bütün paketlərdə görünən son addım (heç vaxt kilidlənmir) */
+  const visibleSteps = [1, 2, 3, 4, 5, 6, 7].filter(n => !lockedSteps.includes(n))
   const VISIBLE_TOTAL = visibleSteps.length
 
   /* initialStep-i görünən addımlara uyğunlaşdır */
@@ -1528,9 +1542,12 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
   const isCouple = COUPLE_TYPES.includes(data.eventType)
   const isCorp   = CORP_TYPES.includes(data.eventType)
 
+  const partnerUi = PARTNER_UI[lang] || PARTNER_UI.az
+
   const steps = [
     tr.step1_title, tr.step2_title, tr.step3_title,
     tr.step4_title, tr.step5_title, tr.step6_title,
+    partnerUi.stepLabel,
   ]
 
   /* Görünən addımlar içərisindəki mövqedən həqiqi addım nömrəsi */
@@ -1880,7 +1897,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
       {/* Step content */}
       <div className="bg-cream border border-beige-dark/40 shadow-[0_1px_4px_rgba(0,0,0,0.04),0_8px_32px_rgba(197,160,89,0.04)] px-6 sm:px-12 py-10 sm:py-14 overflow-visible">
         <div className="mb-8 pb-6 border-b border-beige-dark/25">
-          <h3 className="font-serif text-2xl text-ink font-light tracking-tight mb-2">{steps[actualStep - 1]}</h3>
+          <h3 className="font-serif text-2xl text-ink font-light tracking-tight mb-2">{actualStep === 7 ? partnerUi.title : steps[actualStep - 1]}</h3>
           <p className="text-[11.5px] text-brown-muted/60 font-sans font-light leading-relaxed">{(STEP_DESCRIPTIONS[lang] || STEP_DESCRIPTIONS.az)[actualStep - 1]}</p>
         </div>
 
@@ -2112,10 +2129,12 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
         {actualStep === 6 && (
           <GalleryAdminStep data={data} isCouple={isCouple} isCorp={isCorp} isAdmin={isAdmin || adminMode} />
         )}
-      </div>
 
-      {/* Partnyor Endirimləri — yalnız son addımda, yekun düymələrdən əvvəl, ayrıca bölmə */}
-      {step === VISIBLE_TOTAL && <PartnerBenefitsSection lang={lang} pkgId={pkgId} />}
+        {/* STEP 7 — Partnyorlar (bütün paketlərdə son addım) */}
+        {actualStep === 7 && (
+          <PartnersStep lang={lang} pkgId={pkgId} />
+        )}
+      </div>
 
       {/* Navigation */}
       <div className="flex justify-between mt-8 sm:mt-10">
