@@ -1,5 +1,5 @@
 import { DRESS_CODE_PALETTES } from '../data/constants'
-import { VAGZALI_DISCOUNTS } from '../data/packages'
+import { ACTIVE_PARTNERS } from '../data/partners'
 import { formatAzDate, formatTime24 } from './dateFormat'
 import t from '../data/translations'
 
@@ -79,19 +79,26 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '', draftCode = '
     ...(draftCode ? [`📋 Sifariş Kodu: ${draftCode}`] : []),
   ]
 
-  /* Phase 25.1 — Vagzali.az tərəfdaş bonusu (yalnız admin üçün informativ blok) */
-  const vagzaliPkg = VAGZALI_DISCOUNTS[data.package] ? data.package : data.selectedPackage
-  const vagzaliPct = VAGZALI_DISCOUNTS[vagzaliPkg]
-  if (vagzaliPct) {
-    const pkgNames = { SADE: 'Sadə', VIP: 'VIP', PREMIUM: 'Premium' }
-    lines.push(
-      `━━━━━━━━━━━━━━━━━━`,
-      `🎁 Vagzali.az Bonusu`,
-      `Paket:`,
-      pkgNames[vagzaliPkg],
-      `Endirim:`,
-      `${vagzaliPct}-dək`,
-    )
+  /* Phase 25.2 — Partnyor bonusları (yalnız admin üçün informativ blok).
+     Bütün aktiv partnyorlar üçün render olunur — yeni partnyor avtomatik daxil olur. */
+  const bonusPkg = ['SADE', 'VIP', 'PREMIUM'].includes(data.package) ? data.package
+    : ['SADE', 'VIP', 'PREMIUM'].includes(data.selectedPackage) ? data.selectedPackage
+    : null
+  if (bonusPkg) {
+    for (const partner of ACTIVE_PARTNERS) {
+      const pct = partner.discounts[bonusPkg]
+      if (!pct) continue
+      lines.push(
+        `━━━━━━━━━━━━━━━━━━`,
+        ``,
+        `🎁 ${partner.name} Bonusu`,
+        ``,
+        `Paketə uyğun endirim:`,
+        `${pct}-dək`,
+        ``,
+        `━━━━━━━━━━━━━━━━━━`,
+      )
+    }
   }
 
   return encodeURIComponent(lines.join('\n'))

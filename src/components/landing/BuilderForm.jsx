@@ -23,7 +23,8 @@ function loadGoogleMaps(apiKey) {
   return _mapsPromise
 }
 import { DRESS_CODE_PALETTES, EVENT_TYPES } from '../../data/constants'
-import { PACKAGE_DEFS, getLockedSteps, VAGZALI_DISCOUNTS } from '../../data/packages'
+import { PACKAGE_DEFS, getLockedSteps } from '../../data/packages'
+import { ACTIVE_PARTNERS } from '../../data/partners'
 import { defaultWedding } from '../../data/defaultWedding'
 import { buildShortLiveLink } from '../../utils/whatsappOrder'
 import { formatFullDateByLang } from '../../utils/dateFormat'
@@ -1306,28 +1307,37 @@ const STEP_DESCRIPTIONS = {
   ],
 }
 
-/* ── Phase 25.1 — Vagzali.az tərəfdaş endirimi kartı (yalnız Builder-in son addımında,
-   sırf informativ — dəvətnamə datasına, draft-a və sifariş axınına toxunmur) ── */
-const VAGZALI_UI = {
+/* ── Phase 25.2 — Partnyor Endirimləri bölməsi (yalnız Builder-in son addımında,
+   sırf informativ — dəvətnamə datasına, draft-a və sifariş axınına toxunmur).
+   Partnyorlar src/data/partners.js-dən gəlir — yeni partnyor = massivə yeni obyekt. ── */
+const PARTNER_UI = {
   az: {
-    title: '🎁 Digitoy Tərəfdaş Bonusu',
-    body: (pct) => `Seçdiyiniz paketə uyğun olaraq Vagzali.az-da ${pct}-dək xüsusi endirim qazanmısınız.`,
-    note: 'Endirimdən yararlanmaq üçün Vagzali.az ilə əlaqə saxlayarkən Digitoy müştərisi olduğunuzu bildirməyiniz kifayətdir.',
+    sectionLabel: '🤝 Partnyor Endirimləri',
+    heading: '🎁 Digitoy müştərilərinə xüsusi üstünlüklər',
+    sub: 'Digitoy tərəfdaşları vasitəsilə seçilmiş xidmətlərdə xüsusi endirimlər əldə edə bilərsiniz.',
+    badgeLabel: 'Sizin paketiniz:',
+    badgeValue: (pct) => `${pct}-dək`,
+    claim: 'Digitoy müştərisi olduğunuzu bildirməklə paketinizə uyğun endirimdən yararlana bilərsiniz.',
+    footNote: (name) => `Bu endirim yalnız ${name} tərəfindən təqdim olunur və Digitoy tərəfdaş üstünlüyüdür.`,
   },
   en: {
-    title: '🎁 Digitoy Partner Bonus',
-    body: (pct) => `Based on your chosen package, you've earned a special discount of up to ${pct} on Vagzali.az.`,
-    note: 'To use the discount, simply mention that you are a Digitoy customer when contacting Vagzali.az.',
+    sectionLabel: '🤝 Partner Discounts',
+    heading: '🎁 Exclusive benefits for Digitoy customers',
+    sub: 'Through Digitoy partners you can get special discounts on selected services.',
+    badgeLabel: 'Your package:',
+    badgeValue: (pct) => `up to ${pct}`,
+    claim: 'Simply mention that you are a Digitoy customer to enjoy the discount for your package.',
+    footNote: (name) => `This discount is provided solely by ${name} and is a Digitoy partner benefit.`,
   },
   ru: {
-    title: '🎁 Партнёрский бонус Digitoy',
-    body: (pct) => `В соответствии с выбранным пакетом вы получили специальную скидку до ${pct} на Vagzali.az.`,
-    note: 'Чтобы воспользоваться скидкой, достаточно сообщить, что вы клиент Digitoy, при обращении в Vagzali.az.',
+    sectionLabel: '🤝 Партнёрские скидки',
+    heading: '🎁 Особые преимущества для клиентов Digitoy',
+    sub: 'Через партнёров Digitoy вы можете получить специальные скидки на выбранные услуги.',
+    badgeLabel: 'Ваш пакет:',
+    badgeValue: (pct) => `до ${pct}`,
+    claim: 'Сообщите, что вы клиент Digitoy, чтобы воспользоваться скидкой по вашему пакету.',
+    footNote: (name) => `Эта скидка предоставляется только ${name} и является партнёрским преимуществом Digitoy.`,
   },
-}
-const VAGZALI_LINKS = {
-  instagram: 'https://www.instagram.com/vagzali.azerbaijan/',
-  whatsapp:  'https://wa.me/994774471030',
 }
 
 /* lucide-react v1-də brend ikonları yoxdur — Instagram glifi lucide üslubunda inline SVG */
@@ -1342,26 +1352,68 @@ function InstagramIcon({ size = 13, strokeWidth = 1.6 }) {
   )
 }
 
-function VagzaliBenefitCard({ lang, pkgId }) {
-  const ui  = VAGZALI_UI[lang] || VAGZALI_UI.az
-  const pct = VAGZALI_DISCOUNTS[pkgId] || VAGZALI_DISCOUNTS.SADE
+/* Bir partnyor kartı — glass + gold border, mövcud design system sinifləri */
+function PartnerCard({ partner, lang, pkgId, ui }) {
+  const pct = partner.discounts[pkgId] || partner.discounts.SADE
+  const desc = partner.description[lang] || partner.description.az
   return (
-    <div className="mt-8 bg-cream border border-beige-dark/40 shadow-[0_1px_4px_rgba(0,0,0,0.04),0_8px_32px_rgba(197,160,89,0.04)] px-6 sm:px-12 py-9 sm:py-10">
-      <h3 className="font-serif text-2xl text-ink font-light tracking-tight mb-3">{ui.title}</h3>
-      <p className="text-[13.5px] text-espresso font-light leading-relaxed mb-4">{ui.body(pct)}</p>
-      <p className="text-[11.5px] text-brown-muted/65 font-light leading-relaxed mb-6">{ui.note}</p>
+    <div
+      className="glass border border-gold/30 rounded-[26px] px-6 sm:px-10 py-8 sm:py-9"
+      style={{ boxShadow: '0 12px 36px rgba(44,26,14,0.08), inset 0 1px 0 rgba(255,255,255,0.55)' }}
+    >
+      {/* Partnyor adı + açıqlama */}
+      <p className="font-serif text-xl text-espresso font-light tracking-tight mb-1.5">{partner.name}</p>
+      <p className="text-[12.5px] text-brown-muted/75 font-light leading-relaxed mb-5">{desc}</p>
 
-      <div className="flex flex-col sm:flex-row gap-3">
-        <a href={VAGZALI_LINKS.instagram} target="_blank" rel="noopener noreferrer"
-          className="flex-1 flex items-center justify-center gap-2 btn-outline-gold min-h-[46px] text-[10px] tracking-[0.22em] uppercase touch-manipulation">
-          <InstagramIcon size={13} strokeWidth={1.6} />
-          Instagram
-        </a>
-        <a href={VAGZALI_LINKS.whatsapp} target="_blank" rel="noopener noreferrer"
-          className="flex-1 flex items-center justify-center gap-2 btn-outline-gold min-h-[46px] text-[10px] tracking-[0.22em] uppercase touch-manipulation">
-          <MessageCircle size={13} strokeWidth={1.6} />
-          WhatsApp
-        </a>
+      {/* Paketə uyğun endirim — badge */}
+      <div className="inline-flex items-center gap-2.5 border border-gold/45 bg-gold/[0.06] rounded-full px-5 py-2.5 mb-4">
+        <span className="font-mono text-[9px] tracking-[0.24em] uppercase text-gold-dark font-semibold">{ui.badgeLabel}</span>
+        <span className="text-[13px] text-espresso font-medium">{ui.badgeValue(pct)}</span>
+      </div>
+
+      <p className="text-[11.5px] text-brown-muted/65 font-light leading-relaxed mb-6">{ui.claim}</p>
+
+      {/* Əlaqə düymələri */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-5">
+        {partner.instagram && (
+          <a href={partner.instagram} target="_blank" rel="noopener noreferrer"
+            className="flex-1 flex items-center justify-center gap-2 btn-outline-gold min-h-[46px] text-[10px] tracking-[0.22em] uppercase touch-manipulation">
+            <InstagramIcon size={13} strokeWidth={1.6} />
+            Instagram
+          </a>
+        )}
+        {partner.whatsapp && (
+          <a href={partner.whatsapp} target="_blank" rel="noopener noreferrer"
+            className="flex-1 flex items-center justify-center gap-2 btn-outline-gold min-h-[46px] text-[10px] tracking-[0.22em] uppercase touch-manipulation">
+            <MessageCircle size={13} strokeWidth={1.6} />
+            WhatsApp
+          </a>
+        )}
+      </div>
+
+      {/* Kartın sonunda kiçik qeyd */}
+      <p className="text-[10.5px] text-brown-muted/55 font-light leading-relaxed">{ui.footNote(partner.name)}</p>
+    </div>
+  )
+}
+
+/* Partnyor Endirimləri bölməsi — bütün aktiv partnyorları render edir */
+function PartnerBenefitsSection({ lang, pkgId }) {
+  const ui = PARTNER_UI[lang] || PARTNER_UI.az
+  if (ACTIVE_PARTNERS.length === 0) return null
+  return (
+    <div className="mt-10">
+      {/* Bölmə başlığı — builder-in mono section-label dilində */}
+      <div className="mb-5">
+        <p className="font-mono text-[10px] tracking-[0.38em] uppercase text-gold-dark mb-3">{ui.sectionLabel}</p>
+        <h3 className="font-serif text-2xl text-ink font-light tracking-tight mb-2">{ui.heading}</h3>
+        <p className="text-[12.5px] text-brown-muted/70 font-light leading-relaxed">{ui.sub}</p>
+      </div>
+
+      <div className="space-y-4">
+        {ACTIVE_PARTNERS.map(p => (
+          <PartnerCard key={p.id} partner={p} lang={lang} pkgId={pkgId} ui={ui} />
+        ))}
       </div>
     </div>
   )
@@ -2062,8 +2114,8 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
         )}
       </div>
 
-      {/* Vagzali.az tərəfdaş endirimi — yalnız son addımda, yekun düymələrdən əvvəl */}
-      {step === VISIBLE_TOTAL && <VagzaliBenefitCard lang={lang} pkgId={pkgId} />}
+      {/* Partnyor Endirimləri — yalnız son addımda, yekun düymələrdən əvvəl, ayrıca bölmə */}
+      {step === VISIBLE_TOTAL && <PartnerBenefitsSection lang={lang} pkgId={pkgId} />}
 
       {/* Navigation */}
       <div className="flex justify-between mt-8 sm:mt-10">

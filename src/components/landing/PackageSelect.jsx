@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { PACKAGE_DEFS, PKG_FEATURES, VAGZALI_DISCOUNTS } from '../../data/packages'
+import { PACKAGE_DEFS, PKG_FEATURES } from '../../data/packages'
+import { getPartner } from '../../data/partners'
 import BlurFade from '../ui/BlurFade'
 
 const PKG_LABELS = {
@@ -34,11 +35,11 @@ const PKG_SUBTITLES = {
   },
 }
 
-/* Phase 25.1 — Vagzali.az tərəfdaş endirimi: hər kartın siyahısının sonunda bir sətir */
+/* Phase 25.2 — Vagzali.az tərəfdaş endirimi: hər kartın siyahısının sonunda bir sətir */
 const VAGZALI_LINE = {
-  az: (pct) => `Vagzali.az-da ${pct}-dək xüsusi endirim`,
-  en: (pct) => `Up to ${pct} special discount on Vagzali.az`,
-  ru: (pct) => `Специальная скидка до ${pct} на Vagzali.az`,
+  az: (pct) => `Vagzali.az-da gəlinlik və digər xidmətlər üçün ${pct}-dək xüsusi endirim`,
+  en: (pct) => `Up to ${pct} special discount on bridal and other services at Vagzali.az`,
+  ru: (pct) => `Специальная скидка до ${pct} на свадебные платья и другие услуги на Vagzali.az`,
 }
 const VAGZALI_NOTE = {
   az: 'Digitoy müştəriləri Vagzali.az tərəfdaş üstünlüklərindən yararlana bilərlər.',
@@ -106,7 +107,7 @@ export default function PackageSelect({ lang, onSelect }) {
                   isVip={def.popular}
                   feat={feat}
                   subtitle={subtitles[pkgId]}
-                  partnerLine={(VAGZALI_LINE[lang] || VAGZALI_LINE.az)(VAGZALI_DISCOUNTS[pkgId])}
+                  partnerLine={(VAGZALI_LINE[lang] || VAGZALI_LINE.az)(getPartner('vagzali').discounts[pkgId])}
                   popular={ui.popular}
                   premiumBadge={badges.PREMIUM}
                   btn={ui.btn}
