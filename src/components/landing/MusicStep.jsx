@@ -1,36 +1,21 @@
 /* ══════════════════════════════════════════════════
    Phase 25.3 — 🎵 Musiqi addımı (Builder Step 5)
 
-   • Hazır musiqilər — YouTube əsaslı preset kartları
+   • Hazır musiqilər — LOKAL MP3 preset kartları (public/music/)
    • Öz MP3 faylı — drag & drop / fayl seç (maks 20 MB)
-   • Audio preview — play/pause/progress/vaxt
+   • Audio preview — play/pause/progress/vaxt (HTML5 Audio, YouTube YOXDUR)
    • Başlanğıc nöqtəsi — "Bu hissədən başlat" + manual d:ss
    • Başlama rejimi — açılan kimi / düymə ilə (default)
 
    Provider arxitekturası genişlənə biləndir — bax: src/data/music.js
 ══════════════════════════════════════════════════ */
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { Music, Play, Pause, Upload, Check, X, ChevronRight } from 'lucide-react'
 import {
   PRESET_TRACKS, MUSIC_PROVIDERS, MUSIC_PLAY_MODES, DEFAULT_PLAY_MODE,
   MP3_MAX_BYTES, buildPresetMusic, buildMp3Music, formatSeconds, parseTimeInput,
 } from '../../data/music'
 import { uploadMusic } from '../../utils/api'
-
-/* ── YouTube IFrame API — MusicToggle ilə eyni singleton yanaşma ── */
-function loadYTScript() {
-  return new Promise(resolve => {
-    if (window.YT?.Player) { resolve(); return }
-    if (!document.getElementById('yt-iframe-api')) {
-      const s = document.createElement('script')
-      s.id  = 'yt-iframe-api'
-      s.src = 'https://www.youtube.com/iframe_api'
-      document.head.appendChild(s)
-    }
-    const prev = window.onYouTubeIframeAPIReady
-    window.onYouTubeIframeAPIReady = () => { prev?.(); resolve() }
-  })
-}
 
 const MUSIC_UI = {
   az: {
@@ -125,80 +110,26 @@ const MUSIC_UI = {
   },
 }
 
-/* ══ Unified preview player — mp3 (HTML5 Audio) və preset (YouTube) ══ */
-function PreviewPlayer({ provider, file, startTime, onSetStartTime, ui, autoPlay = false }) {
+/* ══ Preview player — bütün provider-lər üçün HTML5 Audio (lokal MP3) ══ */
+function PreviewPlayer({ file, startTime, onSetStartTime, ui, autoPlay = false }) {
   const [playing,  setPlaying]  = useState(false)
   const [current,  setCurrent]  = useState(0)
   const [duration, setDuration] = useState(0)
   const [manual,   setManual]   = useState('')
-  const audioRef  = useRef(null)
-  const ytDivRef  = useRef(null)
-  const ytRef     = useRef(null)
-  const pollRef   = useRef(null)
-  const isMp3 = provider === MUSIC_PROVIDERS.MP3
-
-  /* ── YouTube engine ── */
-  useEffect(() => {
-    if (isMp3) return
-    let cancelled = false
-    loadYTScript().then(() => {
-      if (cancelled || !ytDivRef.current) return
-      ytRef.current = new window.YT.Player(ytDivRef.current, {
-        videoId: file,
-        playerVars: { autoplay: autoPlay ? 1 : 0, controls: 0, rel: 0, iv_load_policy: 3 },
-        events: {
-          onReady: (e) => { if (!cancelled) setDuration(e.target.getDuration() || 0) },
-          onStateChange: (e) => {
-            if (cancelled) return
-            const st = window.YT.PlayerState
-            setPlaying(e.data === st.PLAYING)
-            if (e.data === st.PLAYING) setDuration(e.target.getDuration() || 0)
-            if (e.data === st.ENDED) setCurrent(0)
-          },
-        },
-      })
-    })
-    return () => {
-      cancelled = true
-      clearInterval(pollRef.current)
-      try { ytRef.current?.destroy?.() } catch { /* iframe artıq silinib */ }
-      ytRef.current = null
-    }
-  }, [isMp3, file])
-
-  /* YT mövqe sorğusu — yalnız oxudulan zaman */
-  useEffect(() => {
-    if (isMp3) return
-    clearInterval(pollRef.current)
-    if (playing) {
-      pollRef.current = setInterval(() => {
-        const t = ytRef.current?.getCurrentTime?.()
-        if (typeof t === 'number') setCurrent(t)
-      }, 300)
-    }
-    return () => clearInterval(pollRef.current)
-  }, [playing, isMp3])
+  const audioRef = useRef(null)
 
   const toggle = useCallback(() => {
-    if (isMp3) {
-      const a = audioRef.current
-      if (!a) return
-      if (a.paused) a.play().catch(() => {})
-      else a.pause()
-    } else {
-      const p = ytRef.current
-      if (!p?.getPlayerState) return
-      const st = window.YT?.PlayerState
-      p.getPlayerState() === st?.PLAYING ? p.pauseVideo() : p.playVideo()
-    }
-  }, [isMp3])
+    const a = audioRef.current
+    if (!a) return
+    if (a.paused) a.play().catch(() => {})
+    else a.pause()
+  }, [])
 
   const seek = useCallback((sec) => {
     const s = Math.max(0, Math.min(sec, duration || sec))
     setCurrent(s)
-    if (isMp3) { if (audioRef.current) audioRef.current.currentTime = s }
-    else ytRef.current?.seekTo?.(s, true)
-  }, [isMp3, duration])
+    if (audioRef.current) audioRef.current.currentTime = s
+  }, [duration])
 
   const handleBarClick = (e) => {
     if (!duration) return
@@ -222,22 +153,20 @@ function PreviewPlayer({ provider, file, startTime, onSetStartTime, ui, autoPlay
       style={{ boxShadow: '0 6px 24px rgba(197,160,89,0.08)' }}>
       <div style={{ height: 1, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.55) 40%, rgba(197,160,89,0.7) 50%, rgba(197,160,89,0.55) 60%, transparent)' }} />
 
-      {/* Gizli media elementləri */}
-      {isMp3
-        ? <audio
-            ref={audioRef}
-            src={file}
-            preload="metadata"
-            onLoadedMetadata={(e) => setDuration(e.target.duration || 0)}
-            onTimeUpdate={(e) => setCurrent(e.target.currentTime || 0)}
-            onPlay={() => setPlaying(true)}
-            onPause={() => setPlaying(false)}
-            onEnded={() => { setPlaying(false); setCurrent(0) }}
-          />
-        : <div style={{ position: 'fixed', top: -9999, left: -9999, width: 1, height: 1, pointerEvents: 'none' }}>
-            <div ref={ytDivRef} />
-          </div>
-      }
+      {/* Gizli audio elementi */}
+      <audio
+        ref={audioRef}
+        src={file}
+        preload="metadata"
+        onLoadedMetadata={(e) => {
+          setDuration(e.target.duration || 0)
+          if (autoPlay) e.target.play().catch(() => {})
+        }}
+        onTimeUpdate={(e) => setCurrent(e.target.currentTime || 0)}
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        onEnded={() => { setPlaying(false); setCurrent(0) }}
+      />
 
       <div className="px-5 sm:px-6 py-5">
         <p className="text-[9px] tracking-[0.3em] uppercase text-gold font-semibold mb-4">{ui.playerTitle}</p>
@@ -553,7 +482,6 @@ export default function MusicStep({ music, onChange, lang = 'az', uploadSlug = '
       {activePreview && (
         <PreviewPlayer
           key={activePreview.key}
-          provider={activePreview.provider}
           file={activePreview.file}
           autoPlay={!!previewTrack}
           startTime={previewTrack ? 0 : startTime}

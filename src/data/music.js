@@ -8,7 +8,7 @@
      id:         unikal identifikator (preset id və ya null),
      title:      mahnı adı,
      artist:     ifaçı,
-     file:       preset → YouTube video ID; mp3 → fayl URL-i,
+     file:       audio fayl URL-i (preset → /music/*.mp3; mp3 → upload URL/blob),
      duration:   saniyə (məlum olduqda),
      startTime:  başlanğıc saniyəsi (default 0),
      coverImage: örtük şəkli URL (hazırda placeholder render olunur),
@@ -41,8 +41,9 @@ export const DEFAULT_PLAY_MODE = MUSIC_PLAY_MODES.BUTTON
 export const MP3_MAX_BYTES = 20 * 1024 * 1024 /* 20 MB */
 export const MP3_MIME_TYPES = ['audio/mpeg', 'audio/mp3']
 
-/* ── Hazır musiqilər — YouTube əsaslı (mövcud MusicToggle infrastrukturu) ──
-   Video ID-lər oEmbed ilə yoxlanılıb. Yeni preset = massivə yeni obyekt. */
+/* ── Hazır musiqilər — LOKAL MP3 faylları (public/music/) ──
+   YouTube istifadə olunmur; preset = birbaşa audio fayl URL-i.
+   Yeni preset = faylı public/music/-ə qoy + massivə yeni obyekt. */
 export const PRESET_TRACKS = [
   {
     id: 'a-thousand-years',
@@ -50,8 +51,8 @@ export const PRESET_TRACKS = [
     provider: MUSIC_PROVIDERS.PRESET,
     title: 'A Thousand Years',
     artist: 'Christina Perri',
-    file: 'rtOvBOTyX00',
-    duration: 285,
+    file: '/music/a-thousand-years.mp3',
+    duration: 286,
     coverImage: null,
     accent: '#B76E79', /* kart örtüyünün placeholder tonu */
   },
@@ -61,8 +62,8 @@ export const PRESET_TRACKS = [
     provider: MUSIC_PROVIDERS.PRESET,
     title: 'Perfect',
     artist: 'Ed Sheeran',
-    file: '2Vv-BfVoq4g',
-    duration: 263,
+    file: '/music/perfect.mp3',
+    duration: 264,
     coverImage: null,
     accent: '#5B7C99',
   },
@@ -71,9 +72,9 @@ export const PRESET_TRACKS = [
     type: 'track',
     provider: MUSIC_PROVIDERS.PRESET,
     title: 'Canon in D',
-    artist: 'Pachelbel — Brooklyn Duo',
-    file: 'Ptk_1Dc2iPY',
-    duration: 305,
+    artist: 'Pachelbel',
+    file: '/music/canon-in-d.mp3',
+    duration: 302,
     coverImage: null,
     accent: '#8C7B4F',
   },
@@ -83,8 +84,8 @@ export const PRESET_TRACKS = [
     provider: MUSIC_PROVIDERS.PRESET,
     title: 'River Flows in You',
     artist: 'Yiruma',
-    file: '7maJOI3QMu0',
-    duration: 190,
+    file: '/music/river-flows-in-you.mp3',
+    duration: 210,
     coverImage: null,
     accent: '#6B8E7B',
   },
@@ -94,8 +95,8 @@ export const PRESET_TRACKS = [
     provider: MUSIC_PROVIDERS.PRESET,
     title: 'All of Me',
     artist: 'John Legend',
-    file: '450p7goxZqg',
-    duration: 269,
+    file: '/music/all-of-me.mp3',
+    duration: 270,
     coverImage: null,
     accent: '#7B6B8E',
   },

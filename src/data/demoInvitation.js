@@ -29,15 +29,15 @@ export const demoInvitation = {
 
   galleryLink: '',
 
-  /* Phase 25.3 — demo musiqi: preset provider nümayişi (düymə ilə başlama) */
+  /* Phase 25.3 — demo musiqi: lokal MP3 preset nümayişi (düymə ilə başlama) */
   music: {
     type: 'track',
     provider: 'preset',
     id: 'a-thousand-years',
     title: 'A Thousand Years',
     artist: 'Christina Perri',
-    file: 'rtOvBOTyX00',
-    duration: 285,
+    file: '/music/a-thousand-years.mp3',
+    duration: 286,
     startTime: 0,
     coverImage: null,
     isDefault: false,

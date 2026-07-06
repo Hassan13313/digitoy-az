@@ -17,6 +17,7 @@ import EventTimeline from './EventTimeline'
 const DynamicHeroAnimation = lazy(() => import('./DynamicHeroAnimation'))
 import ThreeDDressCode from './ThreeDDressCode'
 import { DRESS_CODE_PALETTES, WHATSAPP_NUMBER, SOCIAL_LINKS } from '../../data/constants'
+import { buildPresetMusic, PRESET_TRACKS, MUSIC_PLAY_MODES } from '../../data/music'
 import { getPackageGates } from '../../data/packages'
 import { buildWhatsAppUrl } from '../../utils/whatsappOrder'
 import { isAudioUnlocked, unlockAudio } from '../../utils/audioUnlock'
@@ -48,13 +49,9 @@ function GoldDividerOrnament() {
 }
 
 
-function getEventAudioId(eventType) {
-  const t = String(eventType ?? '').toLowerCase().trim()
-  if (t === 'birthday' || t === 'ad_gunu' || t === 'corporate' || t === 'korporativ') {
-    return 'WCce-3XMdJs' // Rauf — ad günü / korporativ
-  }
-  return '7maJOI3QMu0' // Orxan Qarabasma — toy / xına / default
-}
+/* Musiqi seçilməyən (legacy) dəvətnamələr üçün standart lokal preset melodiya.
+   YouTube YOXDUR — həmişə lokal /music/*.mp3 çalınır. */
+const DEFAULT_INV_MUSIC = buildPresetMusic(PRESET_TRACKS[0], { playMode: MUSIC_PLAY_MODES.AUTO })
 
 export default function InvitationPage({ lang, setLang, weddingData, onBack, isDemoMode = false, initialGuestbook }) {
   const tr = t[lang]
@@ -111,12 +108,10 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
       document.removeEventListener('click',      unlock, { capture: true })
     }
   }, [])
-  const audioVideoId = getEventAudioId(weddingData?.eventType)
-
-  /* Phase 25.3 — istifadəçinin seçdiyi musiqi (preset/mp3). Yoxdursa legacy
-     davranış: tədbir növünə görə standart melodiya + mövcud autoplay cəhdi. */
-  const invMusic  = weddingData?.music || null
-  const autoStart = invMusic ? invMusic.playMode === 'auto' : true
+  /* Phase 25.3 — istifadəçinin seçdiyi musiqi (preset/mp3). Yoxdursa standart
+     lokal preset melodiya (YouTube YOXDUR) + mövcud autoplay cəhdi. */
+  const invMusic  = weddingData?.music || DEFAULT_INV_MUSIC
+  const autoStart = weddingData?.music ? invMusic.playMode === 'auto' : true
   const palette = DRESS_CODE_PALETTES.find((p) => p.id === weddingData.dressCodePalette) || DRESS_CODE_PALETTES[0]
 
   const isCouple = ['toy', 'nishan'].includes(weddingData.eventType)
@@ -231,7 +226,7 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
 
       {/* Music control — root level so position:fixed is viewport-relative, not transform-relative */}
       {envelopeOpened && (
-        <MusicToggle ref={musicRef} lang={lang} videoId={audioVideoId} music={invMusic} />
+        <MusicToggle ref={musicRef} lang={lang} music={invMusic} />
       )}
 
       {/* Music-start pill — appears after the envelope opens, invites the guest to start the soundtrack */}
