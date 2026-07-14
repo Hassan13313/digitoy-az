@@ -281,15 +281,22 @@ export default function InvitationPage({ lang, setLang, weddingData, onBack, isD
         )}
       </AnimatePresence>
 
-      {/* Main invitation — fades in after video */}
+      {/* Ambient premium background — Phase 25.4. Kept OUTSIDE the animated
+          content wrapper below: a transform/filter ancestor would turn its
+          position:fixed layers into page-relative ones, so it lives here where
+          the outer container has no transform, keeping the glow/dust/sweep
+          truly viewport-fixed as the guest scrolls. */}
+      {envelopeOpened && <FloralBackground />}
+
+      {/* Main invitation — the card settles into place: a soft scale-up from
+          0.96, gentle blur clearing, over ~0.7s (Phase 25.4 envelope transition). */}
       <AnimatePresence>
         {envelopeOpened && (
           <motion.div
-            initial={{ opacity: 0, scale: 1.015, filter: 'blur(16px)' }}
+            initial={{ opacity: 0, scale: 0.96, filter: 'blur(8px)' }}
             animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-            transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
           >
-            <FloralBackground />
 
             {/* Sticky minimal header */}
             <header className="fixed top-0 left-0 right-0 z-40 bg-cream/88 backdrop-blur-md border-b border-beige-dark/30">

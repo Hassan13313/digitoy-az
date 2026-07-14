@@ -4,6 +4,17 @@
 @tailwind utilities;
 
 @layer base {
+  /* Ambient design tokens (Phase 25.4.2) — RGB triplets so any layer can
+     apply its own alpha via rgba(var(--token), a). Central place to retune
+     the whole ambient palette later. NOT a dark-mode system. */
+  :root {
+    --ambient-ivory:     255, 252, 246;
+    --ambient-champagne: 243, 231, 206;
+    --ambient-gold:      206, 172, 104;
+    --ambient-bloom:     255, 253, 248;
+    --ambient-vignette:   58,  46,  32;
+  }
+
   * { box-sizing: border-box; }
   html {
     /* scroll-behavior intentionally omitted — handled per-call in JS */

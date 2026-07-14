@@ -925,10 +925,10 @@ function GalleryAdminStep({ data, isCouple, isCorp, isAdmin = false }) {
           </div>
         </div>
 
-        {/* QR + izah */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+        {/* QR + izah — mobildə şaquli yığılır (QR yuxarıda sol, mətn altda tam en) */}
+        <div className="flex flex-col items-stretch sm:flex-row sm:items-center" style={{ gap: 24 }}>
           {/* QR preview */}
-          <div style={{
+          <div className="self-start sm:self-auto" style={{
             padding: 12,
             border: '1px solid rgba(197,160,89,0.22)',
             background: 'white',
@@ -1882,9 +1882,9 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
               <button
                 type="button"
                 onClick={() => setStep(n)}
-                className="flex flex-col items-center gap-2.5 focus:outline-none group min-w-[48px] min-h-[48px] justify-center touch-manipulation"
+                className="flex flex-col items-center gap-2.5 focus:outline-none group min-w-[28px] sm:min-w-[48px] min-h-[44px] sm:min-h-[48px] justify-center touch-manipulation"
               >
-                <div className={`w-8 h-8 flex items-center justify-center transition-all duration-250 ${
+                <div className={`w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center transition-all duration-250 ${
                   done
                     ? 'bg-gold shadow-[0_2px_10px_rgba(197,160,89,0.35)] group-hover:opacity-80'
                     : active
@@ -1903,7 +1903,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
                 </span>
               </button>
               {i < visibleSteps.length - 1 && (
-                <div className={`flex-1 h-px mx-2 sm:mx-3 transition-colors duration-500 ${done ? 'step-line-active' : 'bg-beige-dark/35'}`} />
+                <div className={`flex-1 min-w-0 h-px mx-0.5 sm:mx-3 transition-colors duration-500 ${done ? 'step-line-active' : 'bg-beige-dark/35'}`} />
               )}
             </div>
           )
