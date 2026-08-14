@@ -27,6 +27,8 @@ if (!preg_match('/^[a-z0-9\-]{2,120}$/', $slug)) {
     exit;
 }
 
+$templateId = normalizeTemplateId($formData['templateId'] ?? null);
+
 $json = json_encode($formData, JSON_UNESCAPED_UNICODE);
 if (!$json) {
     http_response_code(400);
@@ -42,8 +44,8 @@ $checkOld = $db->prepare("SELECT 1 FROM invitations WHERE slug = :slug LIMIT 1")
 $checkOld->execute([':slug' => $slug]);
 
 if ($checkOld->fetchColumn()) {
-    $upd = $db->prepare("UPDATE invitations SET form_data = :data, updated_at = NOW() WHERE slug = :slug");
-    $upd->execute([':data' => $json, ':slug' => $slug]);
+    $upd = $db->prepare("UPDATE invitations SET form_data = :data, template_id = :tpl, updated_at = NOW() WHERE slug = :slug");
+    $upd->execute([':data' => $json, ':tpl' => $templateId, ':slug' => $slug]);
     echo json_encode(['ok' => true, 'slug' => $slug]);
     exit;
 }
@@ -53,10 +55,10 @@ $code = substr(md5($slug . 'digitoy'), 0, 6);
 $uniqueSlug = $slug . '-' . $code;
 
 $ins = $db->prepare("
-    INSERT INTO invitations (slug, form_data)
-    VALUES (:slug, :data)
-    ON DUPLICATE KEY UPDATE form_data = :data2, updated_at = NOW()
+    INSERT INTO invitations (slug, form_data, template_id)
+    VALUES (:slug, :data, :tpl)
+    ON DUPLICATE KEY UPDATE form_data = :data2, template_id = :tpl2, updated_at = NOW()
 ");
-$ins->execute([':slug' => $uniqueSlug, ':data' => $json, ':data2' => $json]);
+$ins->execute([':slug' => $uniqueSlug, ':data' => $json, ':tpl' => $templateId, ':data2' => $json, ':tpl2' => $templateId]);
 
 echo json_encode(['ok' => true, 'slug' => $uniqueSlug]);

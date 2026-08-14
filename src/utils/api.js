@@ -151,9 +151,10 @@ export async function approveDraft(draftCode, slug = '') {
 }
 
 /* ── Admin: sifariş siyahısı ── */
-export async function getOrdersList(status = 'submitted', limit = 50, offset = 0, search = '') {
+export async function getOrdersList(status = 'submitted', limit = 50, offset = 0, search = '', template = '') {
   const params = new URLSearchParams({ status, limit, offset })
   if (search) params.set('search', search)
+  if (template) params.set('template', template)   /* Phase 4 — şablon filtri */
   const res = await fetch(`${BASE}/get_orders_list.php?${params}`, { headers: adminHeaders() })
   if (!res.ok) throw new Error(`get_orders_list: ${res.status}`)
   return res.json()

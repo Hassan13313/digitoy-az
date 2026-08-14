@@ -1,159 +1,25 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, X, Minus, Plus, Send, Search, AlertCircle } from 'lucide-react'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
-import { formatFullDateByLang } from '../../utils/dateFormat'
+import { useRsvp } from '../../hooks/useRsvp'
 import t from '../../data/translations'
-import { getGuests, submitAttendance, submitGuestResponse } from '../../utils/api'
-import { trackEvent } from '../../utils/analytics'
 
-/* Azərbaycan hərfi normalizasiyası — yalnız axtarış üçün */
-const AZ_MAP = { ş: 's', ə: 'e', ö: 'o', ü: 'u', ğ: 'g', ç: 'c', ı: 'i' }
-function normalizeAz(str) {
-  return (str || '').toLocaleLowerCase('az').replace(/[şəöüğçı]/g, ch => AZ_MAP[ch] || ch).trim()
-}
+/* Qonaq siyahısı, autocomplete və göndərmə məntiqi artıq
+   `hooks/useRsvp.js`-dədir — bu fayl yalnız simple-luxury UI qatıdır. */
 
 export default function RSVPSection({ lang, weddingData }) {
-  const [guestList,    setGuestList]    = useState(null)   // null = yüklənir
-  const [query,        setQuery]        = useState('')
-  const [selected,     setSelected]     = useState(null)   // { id, full_name, table_id }
-  const [activeIdx,    setActiveIdx]    = useState(-1)
-  const [status,       setStatus]       = useState(null)   // GOING | NOT_GOING | MAYBE
-  const [plusOne,      setPlusOne]      = useState(0)
-  const [submitted,    setSubmitted]    = useState(false)
-  const [alreadyDone,  setAlreadyDone]  = useState(false)
-  const [sending,      setSending]      = useState(false)
+  const {
+    suggestions, selected, useGuestMode,
+    query, setQuery, setActiveIdx, activeIdx, setSelected,
+    status, plusOne, submitted, alreadyDone, sending,
+    rsvpClosed, showNotFound, canSubmit, thanksMsg,
+    chooseStatus, incPlusOne, decPlusOne,
+    pick, resetGuest, onKeyDown, handleSubmit, inputRef,
+    labels: L, maxExtraGuests,
+  } = useRsvp({ lang, weddingData })
+
+  const tr = t[lang] || t.az
   const [ref, visible] = useScrollReveal()
-  const inputRef = useRef(null)
-
-  const slug = (window.location.pathname.match(/\/invite\/([^/?#]+)/) || [])[1] || null
-  const tr   = t[lang] || t.az
-
-  /* ── Qonaq siyahısını yüklə ── */
-  useEffect(() => {
-    if (!slug) { setGuestList([]); return }
-    getGuests(slug)
-      .then(d => setGuestList(d.guests ?? []))
-      .catch(() => setGuestList([]))
-  }, [slug])
-
-  const useGuestMode = Array.isArray(guestList) && guestList.length > 0
-
-  /* ── Autocomplete filtri ── */
-  const suggestions = useMemo(() => {
-    if (!useGuestMode || selected || query.trim().length < 2) return []
-    const nq = normalizeAz(query)
-    return guestList
-      .filter(g => normalizeAz(g.full_name).includes(nq))
-      .slice(0, 8)
-  }, [query, guestList, selected, useGuestMode])
-
-  const rsvpClosed = (() => {
-    if (!weddingData?.date) return false
-    const dl = new Date(`${weddingData.date}T23:59:59`)
-    return !isNaN(dl.getTime()) && dl.getTime() < Date.now()
-  })()
-
-  const labels = {
-    az: {
-      title: 'İştirak edəcəksinizmi?',
-      subtitle: weddingData?.date ? `Zəhmət olmasa ${formatFullDateByLang(weddingData.date, 'az')}-a qədər cavablandırın` : 'Cavabınızı bildirin',
-      namePh: 'Adınızı yazın…',
-      yes: 'Gələcəyəm', maybe: 'Hələ dəqiq deyil', no: 'Gəlməyəcəyəm',
-      plusq: 'Əlavə qonaq gətirəcəksiniz?', send: 'Göndər',
-      thanks_yes: 'Görüşmək üçün səbirsizlənir',
-      thanks_maybe: 'Bildirdiniz, əlavə məlumat göndərəcəyik',
-      thanks_no: 'Anlayışla qarşıladıq',
-      thanks_sub: 'Cavabınız qeydə alındı',
-      already_done: 'Cavabınız artıq qeydə alınıb',
-      select_guest: 'Siyahıdan adınızı seçin',
-      not_in_list: 'Adınız siyahıda tapılmadı — tam adınızı yazın',
-    },
-    en: {
-      title: 'Will you attend?',
-      subtitle: weddingData?.date ? `Please reply by ${formatFullDateByLang(weddingData.date, 'en')}` : 'Let us know',
-      namePh: 'Type your name…',
-      yes: 'I will attend', maybe: 'Not sure yet', no: 'I cannot attend',
-      plusq: 'Will you bring a guest?', send: 'Send Reply',
-      thanks_yes: 'We look forward to seeing you',
-      thanks_maybe: 'We noted your response and will follow up',
-      thanks_no: 'We understand and appreciate you letting us know',
-      thanks_sub: 'Your response has been recorded',
-      already_done: 'Your response has already been recorded',
-      select_guest: 'Please select your name from the list',
-      not_in_list: 'Name not found — try your full name',
-    },
-    ru: {
-      title: 'Вы придёте?',
-      subtitle: weddingData?.date ? `Пожалуйста, ответьте до ${formatFullDateByLang(weddingData.date, 'ru')}` : 'Дайте нам знать',
-      namePh: 'Введите имя…',
-      yes: 'Приду', maybe: 'Пока не уверен', no: 'Не смогу прийти',
-      plusq: 'Возьмёте гостя с собой?', send: 'Отправить',
-      thanks_yes: 'С нетерпением вас ждём',
-      thanks_maybe: 'Мы приняли ваш ответ к сведению',
-      thanks_no: 'Мы понимаем и благодарим за ответ',
-      thanks_sub: 'Ваш ответ записан',
-      already_done: 'Ваш ответ уже записан',
-      select_guest: 'Выберите своё имя из списка',
-      not_in_list: 'Имя не найдено — напишите полное имя',
-    },
-  }
-  const L = labels[lang] || labels.az
-
-  const pick = (g) => { setSelected(g); setQuery(g.full_name); setActiveIdx(-1) }
-  const resetGuest = () => { setSelected(null); setQuery(''); setActiveIdx(-1); inputRef.current?.focus() }
-
-  const onKeyDown = (e) => {
-    if (!suggestions.length) return
-    if (e.key === 'ArrowDown') { e.preventDefault(); setActiveIdx(i => Math.min(i + 1, suggestions.length - 1)) }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); setActiveIdx(i => Math.max(i - 1, 0)) }
-    else if (e.key === 'Enter') { e.preventDefault(); if (activeIdx >= 0) pick(suggestions[activeIdx]); else if (suggestions.length === 1) pick(suggestions[0]) }
-    else if (e.key === 'Escape') resetGuest()
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (sending || !status || rsvpClosed) return
-    if (useGuestMode && !selected) return
-
-    setSending(true)
-    setSubmitted(true)
-
-    try {
-      if (slug) {
-        if (useGuestMode && selected) {
-          const result = await submitAttendance({
-            guestId: selected.id,
-            status: status === 'yes' ? 'GOING' : status === 'no' ? 'NOT_GOING' : 'MAYBE',
-            optionalMessage: null,
-            extraGuests: status === 'yes' ? plusOne : 0,
-          })
-          if (result.alreadySubmitted) {
-            setAlreadyDone(true)
-            setSubmitted(false)
-            setSending(false)
-            return
-          }
-        } else {
-          /* Fallback: qonaq siyahısı yoxdursa köhnə üsul */
-          await submitGuestResponse({
-            invitationId: slug,
-            guestName: query.trim() || '—',
-            attendanceStatus: status,
-            extraGuests: status === 'yes' ? plusOne : 0,
-          })
-        }
-        trackEvent('participation_confirmed', { lang, status })
-      }
-    } catch {
-      /* Şəbəkə xətasında optimistic state qalır */
-    } finally {
-      setSending(false)
-    }
-  }
-
-  const thanksMsg = status === 'yes' ? L.thanks_yes : status === 'maybe' ? L.thanks_maybe : L.thanks_no
-  const showNotFound = useGuestMode && !selected && query.trim().length >= 2 && suggestions.length === 0
 
   return (
     <section className="py-28 px-6 bg-cream">
@@ -309,7 +175,7 @@ export default function RSVPSection({ lang, weddingData }) {
                   <button
                     key={val}
                     type="button"
-                    onClick={() => { setStatus(val); if (val !== 'yes') setPlusOne(0) }}
+                    onClick={() => chooseStatus(val)}
                     className={`min-h-[52px] px-7 font-semibold text-[13px] tracking-[0.18em] uppercase transition-all duration-200 border ${status === val ? activeClass : inactiveClass}`}
                   >
                     {label}
@@ -324,12 +190,12 @@ export default function RSVPSection({ lang, weddingData }) {
                     <div className="border border-beige-dark/50 bg-beige/40 p-7">
                       <p className="text-[10px] tracking-[0.22em] uppercase text-brown-muted mb-6 font-sans font-medium text-center">{L.plusq}</p>
                       <div className="flex items-center justify-center gap-8">
-                        <button type="button" disabled={plusOne === 0} onClick={() => setPlusOne(p => p - 1)}
+                        <button type="button" disabled={plusOne === 0} onClick={decPlusOne}
                           className="w-10 h-10 border border-beige-dark flex items-center justify-center text-brown-muted hover:border-gold hover:text-gold transition-all disabled:opacity-25">
                           <Minus size={13} strokeWidth={1.5} />
                         </button>
                         <span className="font-serif text-4xl text-ink font-light w-12 text-center tabular-nums">{plusOne}</span>
-                        <button type="button" disabled={plusOne === 3} onClick={() => setPlusOne(p => p + 1)}
+                        <button type="button" disabled={plusOne === maxExtraGuests} onClick={incPlusOne}
                           className="w-10 h-10 border border-beige-dark flex items-center justify-center text-brown-muted hover:border-gold hover:text-gold transition-all disabled:opacity-25">
                           <Plus size={13} strokeWidth={1.5} />
                         </button>
@@ -341,7 +207,7 @@ export default function RSVPSection({ lang, weddingData }) {
 
               <button
                 type="submit"
-                disabled={!status || (useGuestMode && !selected) || sending}
+                disabled={!canSubmit}
                 className="btn-gold w-full min-h-[52px] flex items-center justify-center gap-2.5 disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <Send size={12} strokeWidth={1.5} />

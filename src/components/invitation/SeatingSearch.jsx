@@ -1,109 +1,23 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, X } from 'lucide-react'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
+import { useSeating } from '../../hooks/useSeating'
 import t from '../../data/translations'
-import { trackEvent } from '../../utils/analytics'
-import { getGuests } from '../../utils/api'
 
-/* Azərbaycan hərfi normalizasiyası */
-const AZ_MAP = { ş: 's', ə: 'e', ö: 'o', ü: 'u', ğ: 'g', ç: 'c', ı: 'i' }
-function normalizeAz(str) {
-  return (str || '').toLocaleLowerCase('az').replace(/[şəöüğçı]/g, ch => AZ_MAP[ch] || ch).replace(/\s+/g, ' ').trim()
-}
-
-/* İştirak statusu vizualizasiyası */
-const STATUS_DOT = {
-  GOING:       { dot: '🟢', color: 'rgba(60,140,60,0.85)',  label: { az: 'Gələcək',      en: 'Going',      ru: 'Придёт' } },
-  NOT_GOING:   { dot: '🔴', color: 'rgba(180,50,40,0.8)',   label: { az: 'Gəlməyəcək',  en: 'Not going',  ru: 'Не придёт' } },
-  MAYBE:       { dot: '🟡', color: 'rgba(180,140,20,0.85)', label: { az: 'Bəlkə',        en: 'Maybe',      ru: 'Возможно' } },
-  NO_RESPONSE: { dot: '⚪', color: 'rgba(160,140,120,0.6)', label: { az: 'Cavab yoxdur', en: 'No response', ru: 'Нет ответа' } },
-}
-
-/* Köhnə format: "Masa 1: A, B; Masa 2: C" → qonaq massivi */
-function parseSeatingText(text) {
-  if (!text) return []
-  return text.split(';').map(e => e.trim()).filter(Boolean).flatMap(entry => {
-    const ci = entry.indexOf(':')
-    if (ci === -1) return []
-    const tableId = entry.slice(0, ci).trim()
-    const guests  = entry.slice(ci + 1).split(',').map(g => g.trim()).filter(Boolean)
-    return guests.map(name => ({
-      id: null, full_name: name, table_id: tableId, status: 'NO_RESPONSE', submitted_at: null,
-    }))
-  })
-}
+/* Axtarış/normalizasiya/masa yoldaşı məntiqi artıq `hooks/useSeating.js`-dədir —
+   bu fayl yalnız simple-luxury UI qatıdır. */
 
 export default function SeatingSearch({ seatingPlan, lang }) {
-  const tr  = t[lang] || t.az
-  const [apiGuests,  setApiGuests]  = useState(null)   // null = yüklənir
-  const [query,      setQuery]      = useState('')
-  const [selected,   setSelected]   = useState(null)
-  const [activeIdx,  setActiveIdx]  = useState(-1)
+  const tr = t[lang] || t.az
+  const {
+    suggestions, selected, tablemates,
+    query, setQuery, activeIdx, setActiveIdx, setSelected,
+    isEmpty, showNotFound, pick, reset, onKeyDown, inputRef,
+    labels: L, statusMap: STATUS_DOT,
+  } = useSeating({ seatingPlan, lang })
   const [ref, visible] = useScrollReveal()
-  const inputRef = useRef(null)
 
-  const slug = (window.location.pathname.match(/\/invite\/([^/?#]+)/) || [])[1] || null
-
-  /* ── API-dən qonaqları yüklə; uğursuzsa köhnə formata keç ── */
-  useEffect(() => {
-    if (!slug) { setApiGuests([]); return }
-    getGuests(slug)
-      .then(d => setApiGuests(d.guests ?? []))
-      .catch(() => setApiGuests([]))
-  }, [slug])
-
-  /* ── Qonaq siyahısı: API > seatingPlan mətni ── */
-  const allGuests = useMemo(() => {
-    if (apiGuests === null) return []                      // hələ yüklənir
-    if (apiGuests.length > 0) return apiGuests             // API məlumatı
-    return parseSeatingText(seatingPlan)                   // fallback
-  }, [apiGuests, seatingPlan])
-
-  const suggestions = useMemo(() => {
-    if (selected || query.trim().length < 2) return []
-    const nq = normalizeAz(query)
-    return allGuests.filter(g => normalizeAz(g.full_name).includes(nq)).slice(0, 8)
-  }, [query, allGuests, selected])
-
-  const showNotFound = !selected && query.trim().length >= 2 && suggestions.length === 0
-
-  /* Analytics — hər axtarış sessiyası üçün bir dəfə */
-  const searchFiredRef = useRef(false)
-  useEffect(() => {
-    if (query.trim().length >= 2 && !searchFiredRef.current) {
-      searchFiredRef.current = true
-      trackEvent('seating_search_used', { has_results: suggestions.length > 0 })
-    } else if (query.trim().length < 2) {
-      searchFiredRef.current = false
-    }
-  }, [query, suggestions.length])
-
-  const LABELS = {
-    az: { title: 'Masa Axtarışı', sub: 'Adınızı yazın, masanızı tapın', hint: 'Məsələn: Araz Hüseynov' },
-    en: { title: 'Find Your Seat', sub: 'Type your name to find your table', hint: 'E.g: Araz Huseynov' },
-    ru: { title: 'Поиск столика', sub: 'Введите имя, чтобы найти стол', hint: 'Например: Араз Гусейнов' },
-  }
-  const L = LABELS[lang] || LABELS.az
-
-  /* Masa yoldaşları: selected ilə eyni masadakı qonaqlar */
-  const tablemates = useMemo(() => {
-    if (!selected) return []
-    return allGuests.filter(g => g.table_id === selected.table_id)
-  }, [selected, allGuests])
-
-  if (!allGuests.length && apiGuests !== null) return null
-
-  const pick  = (g) => { setSelected(g); setQuery(g.full_name); setActiveIdx(-1) }
-  const reset = () => { setSelected(null); setQuery(''); setActiveIdx(-1); inputRef.current?.focus() }
-
-  const onKeyDown = (e) => {
-    if (!suggestions.length) return
-    if (e.key === 'ArrowDown')  { e.preventDefault(); setActiveIdx(i => Math.min(i + 1, suggestions.length - 1)) }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); setActiveIdx(i => Math.max(i - 1, 0)) }
-    else if (e.key === 'Enter') { e.preventDefault(); if (activeIdx >= 0) pick(suggestions[activeIdx]); else if (suggestions.length === 1) pick(suggestions[0]) }
-    else if (e.key === 'Escape') reset()
-  }
+  if (isEmpty) return null
 
   return (
     <section className="py-28 px-6 bg-beige">

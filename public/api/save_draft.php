@@ -25,6 +25,7 @@ if (!in_array($package, $validPkgs, true)) $package = 'SADE';
 $currentStep = max(1, min(6, $currentStep));
 
 $json      = $formData ? json_encode($formData, JSON_UNESCAPED_UNICODE) : null;
+$templateId = normalizeTemplateId($formData['templateId'] ?? null);
 $expiresAt = date('Y-m-d H:i:s', strtotime('+7 days'));
 
 ensureTables();
@@ -38,24 +39,27 @@ $existing = $stmt->fetch();
 
 if ($existing) {
     $stmt = $db->prepare("UPDATE draft_invitations
-        SET package = :pkg, current_step = :step, form_data = :data, expires_at = :exp
+        SET package = :pkg, current_step = :step, form_data = :data,
+            template_id = :tpl, expires_at = :exp
         WHERE id = :id");
     $stmt->execute([
         ':pkg'  => $package,
         ':step' => $currentStep,
         ':data' => $json,
+        ':tpl'  => $templateId,
         ':exp'  => $expiresAt,
         ':id'   => $existing['id'],
     ]);
 } else {
     $stmt = $db->prepare("INSERT INTO draft_invitations
-        (session_id, package, current_step, form_data, expires_at)
-        VALUES (:sid, :pkg, :step, :data, :exp)");
+        (session_id, package, current_step, form_data, template_id, expires_at)
+        VALUES (:sid, :pkg, :step, :data, :tpl, :exp)");
     $stmt->execute([
         ':sid'  => $sessionId,
         ':pkg'  => $package,
         ':step' => $currentStep,
         ':data' => $json,
+        ':tpl'  => $templateId,
         ':exp'  => $expiresAt,
     ]);
 }

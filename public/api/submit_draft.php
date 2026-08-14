@@ -39,6 +39,8 @@ function generateDraftCode(PDO $db): string {
     throw new RuntimeException('Cannot generate unique draft_code');
 }
 
+$templateId = normalizeTemplateId($formData['templateId'] ?? null);
+
 ensureTables();
 $db = getDB();
 
@@ -54,6 +56,7 @@ if ($existing) {
         SET draft_code     = :code,
             package        = :pkg,
             form_data      = :data,
+            template_id    = :tpl,
             customer_phone = :phone,
             status         = 'submitted',
             submitted_at   = IF(submitted_at IS NULL, NOW(), submitted_at),
@@ -63,19 +66,21 @@ if ($existing) {
         ':code'  => $draftCode,
         ':pkg'   => $package,
         ':data'  => $json,
+        ':tpl'   => $templateId,
         ':phone' => $customerPhone ?: null,
         ':id'    => $existing['id'],
     ]);
 } else {
     $draftCode = generateDraftCode($db);
     $stmt = $db->prepare("INSERT INTO draft_invitations
-        (session_id, draft_code, package, form_data, customer_phone, status, submitted_at, expires_at)
-        VALUES (:sid, :code, :pkg, :data, :phone, 'submitted', NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY))");
+        (session_id, draft_code, package, form_data, template_id, customer_phone, status, submitted_at, expires_at)
+        VALUES (:sid, :code, :pkg, :data, :tpl, :phone, 'submitted', NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY))");
     $stmt->execute([
         ':sid'   => $sessionId,
         ':code'  => $draftCode,
         ':pkg'   => $package,
         ':data'  => $json,
+        ':tpl'   => $templateId,
         ':phone' => $customerPhone ?: null,
     ]);
 }

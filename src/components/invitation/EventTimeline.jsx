@@ -1,45 +1,12 @@
 import { motion } from 'framer-motion'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
+import { useTimeline } from '../../hooks/useTimeline'
 
-const PROGRAMS = {
-  toy: [
-    { time: '18:00', icon: '🥂', az: 'Qonaqların Qarşılanması', en: 'Guest Reception', ru: 'Приём гостей' },
-    { time: '19:00', icon: '💍', az: 'Nikah Mərasimi', en: 'Wedding Ceremony', ru: 'Свадебная церемония' },
-    { time: '20:00', icon: '🎵', az: 'Ziyafətin Başlanması', en: 'Dinner Begins', ru: 'Начало банкета' },
-    { time: '22:00', icon: '💃', az: 'Rəqs Proqramı', en: 'Dance Program', ru: 'Танцевальная программа' },
-    { time: '23:30', icon: '🎂', az: 'Tortun Kəsilməsi', en: 'Cake Cutting', ru: 'Разрезание торта' },
-  ],
-  nishan: [
-    { time: '18:00', icon: '🥂', az: 'Qonaqların Qarşılanması', en: 'Guest Reception', ru: 'Приём гостей' },
-    { time: '19:00', icon: '💍', az: 'Nişan Mərasimi', en: 'Engagement Ceremony', ru: 'Церемония помолвки' },
-    { time: '20:00', icon: '🎵', az: 'Ziyafət', en: 'Dinner', ru: 'Банкет' },
-    { time: '22:00', icon: '🎂', az: 'Tort Kəsilməsi', en: 'Cake Cutting', ru: 'Разрезание торта' },
-  ],
-  birthday: [
-    { time: '18:00', icon: '🎈', az: 'Qonaqların Qarşılanması', en: 'Guest Arrival', ru: 'Приём гостей' },
-    { time: '19:00', icon: '🎁', az: 'Hədiyyə Təqdimatı', en: 'Gift Presentation', ru: 'Вручение подарков' },
-    { time: '20:00', icon: '🎂', az: 'Tortun Kəsilməsi', en: 'Cake Cutting', ru: 'Разрезание торта' },
-    { time: '21:00', icon: '🎵', az: 'Əyləncə Proqramı', en: 'Entertainment', ru: 'Развлечения' },
-  ],
-  corporate: [
-    { time: '18:00', icon: '🤝', az: 'Qeydiyyat', en: 'Registration', ru: 'Регистрация' },
-    { time: '19:00', icon: '🎤', az: 'Açılış Nitqi', en: 'Opening Speech', ru: 'Открытие' },
-    { time: '20:00', icon: '🍽️', az: 'Ziyafət', en: 'Dinner', ru: 'Ужин' },
-    { time: '22:00', icon: '🎵', az: 'Proqram', en: 'Program', ru: 'Программа' },
-  ],
-}
-
-const SECTION_LABELS = {
-  az: 'Proqram', en: 'Program', ru: 'Программа',
-}
+/* Proqram məntiqi (standart şablonlar + istifadəçi addımları) artıq
+   `hooks/useTimeline.js`-dədir — bu fayl yalnız simple-luxury UI qatıdır. */
 
 export default function EventTimeline({ lang, eventType, programSteps }) {
-  const defaultEvents = PROGRAMS[eventType] || PROGRAMS.toy
-  const events = (programSteps && programSteps.length > 0)
-    ? programSteps
-        .filter(r => r.time || r.activity)
-        .map(r => ({ time: r.time, icon: r.icon || '✦', az: r.activity, en: r.activity, ru: r.activity }))
-    : defaultEvents
+  const { events, sectionLabel } = useTimeline({ lang, eventType, programSteps })
   const [ref, visible] = useScrollReveal()
 
   return (
@@ -51,7 +18,7 @@ export default function EventTimeline({ lang, eventType, programSteps }) {
         <div className="text-center mb-16">
           <p className="text-[9px] tracking-[0.38em] uppercase text-gold mb-5 font-medium font-sans">Schedule</p>
           <h2 className="font-serif text-3xl text-ink font-light tracking-tight">
-            {SECTION_LABELS[lang] || SECTION_LABELS.az}
+            {sectionLabel}
           </h2>
           <div className="gold-divider mt-8 max-w-[100px] mx-auto" />
         </div>
@@ -91,7 +58,7 @@ export default function EventTimeline({ lang, eventType, programSteps }) {
 
                 {/* Title */}
                 <div className="pt-2">
-                  <p className="font-serif text-base text-ink font-light">{event[lang] || event.az}</p>
+                  <p className="font-serif text-base text-ink font-light">{event.label}</p>
                 </div>
               </motion.div>
             ))}

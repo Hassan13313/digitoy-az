@@ -1,64 +1,23 @@
-import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
+import { forwardRef, useImperativeHandle } from 'react'
 import { Music, VolumeX } from 'lucide-react'
 import t from '../../data/translations'
-import { trackEvent } from '../../utils/analytics'
+import { useMusicPlayer } from '../../hooks/useMusicPlayer'
 
-/* Phase 25.3 — tam lokal audio engine (YouTube YOXDUR).
-   `music` obyekti (bax: src/data/music.js) həmişə verilir:
-   • preset → lokal /music/*.mp3
-   • mp3    → yüklənmiş fayl URL / blob
-   music.file birbaşa HTML5 <audio> mənbəyidir; startTime ilk oxutmada tətbiq olunur. */
+/* Audio engine artıq `hooks/useMusicPlayer.js`-dədir — bu fayl yalnız
+   simple-luxury-nin üzən qızıl düyməsidir (UI qatı). */
 const MusicToggle = forwardRef(function MusicToggle({ lang, music = null }, ref) {
-  const tr         = t[lang]
-  const audioRef   = useRef(null)
-  const startedRef = useRef(false)
-  const seekedRef  = useRef(false)
-  const [playing, setPlaying] = useState(false)
+  const tr = t[lang]
+  const { audioProps, playing, play, pause, toggle, hasMusic } = useMusicPlayer({ lang, music })
 
-  const src       = music?.file || null
-  const startTime = Math.max(0, Math.floor(music?.startTime || 0))
-
-  const playMedia = () => {
-    const a = audioRef.current
-    if (!a) return
-    if (!seekedRef.current && startTime > 0) {
-      try { a.currentTime = startTime } catch { /* metadata hələ yüklənməyib */ }
-      seekedRef.current = true
-    }
-    a.play().then(() => {
-      if (!startedRef.current) {
-        startedRef.current = true
-        trackEvent('music_started', { lang, provider: music?.provider || 'preset' })
-      }
-    }).catch(() => {}) /* autoplay bloklanıbsa — istifadəçi düymə ilə başladacaq */
-  }
-
-  const pauseMedia = () => { audioRef.current?.pause() }
-
-  useImperativeHandle(ref, () => ({ play: playMedia, pause: pauseMedia }))
-
-  const toggle = () => { playing ? pauseMedia() : playMedia() }
+  useImperativeHandle(ref, () => ({ play, pause }))
 
   /* musiqi mənbəyi yoxdursa heç nə render etmə (müdafiə) */
-  if (!src) return null
+  if (!hasMusic) return null
 
   return (
     <>
       {/* Lokal MP3 audio engine */}
-      <audio
-        ref={audioRef}
-        src={src}
-        loop
-        preload="metadata"
-        onLoadedMetadata={(e) => {
-          /* startTime-ı metadata gələn kimi tətbiq et — ilk play ani başlasın */
-          if (!seekedRef.current && startTime > 0) {
-            try { e.target.currentTime = startTime; seekedRef.current = true } catch {}
-          }
-        }}
-        onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
-      />
+      <audio {...audioProps} />
 
       {/* Floating toggle button */}
       <button

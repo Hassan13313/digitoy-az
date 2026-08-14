@@ -27,6 +27,8 @@ import { DRESS_CODE_PALETTES, EVENT_TYPES } from '../../data/constants'
 import { PACKAGE_DEFS, getLockedSteps } from '../../data/packages'
 import { ACTIVE_PARTNERS } from '../../data/partners'
 import MusicStep from './MusicStep'
+import TemplateSelect from './TemplateSelect'
+import { DEFAULT_TEMPLATE_ID } from '../../templates/templateConfig'
 import { defaultWedding } from '../../data/defaultWedding'
 import { buildShortLiveLink } from '../../utils/whatsappOrder'
 import { formatFullDateByLang } from '../../utils/dateFormat'
@@ -1477,6 +1479,12 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
   const [approveError,    setApproveError]    = useState('')
   const [draftRestored,   setDraftRestored]   = useState(false)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
+  /* ── Şablon seçimi (Phase 4 — DB inteqrasiyası) ──
+     Artıq `data.templateId` sahəsindədir: autosave → draft → submit → approve
+     → invitations.form_data zəncirinin hamısından keçir və reload-dan sonra
+     bərpa olunur. Dəyər yoxdursa default şablon (simple-luxury). */
+  const selectedTemplate = data.templateId || DEFAULT_TEMPLATE_ID
+  const setSelectedTemplate = (id) => set('templateId', id)
 
   const sessionIdRef   = useRef(null)
   const autosaveTimer  = useRef(null)
@@ -2023,6 +2031,15 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
                   onChange={(val) => set('time', val)}
                 />
               </div>
+            </div>
+
+            {/* ── DİZAYN SEÇ — Template Engine (data.templateId → DB) ── */}
+            <div className="pt-2 border-t border-beige-dark/25">
+              <TemplateSelect
+                value={selectedTemplate}
+                onChange={setSelectedTemplate}
+                lang={lang}
+              />
             </div>
           </div>
         )}

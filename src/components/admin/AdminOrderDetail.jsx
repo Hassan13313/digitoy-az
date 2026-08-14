@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Package, User, Users, Calendar, MapPin, Shirt, ExternalLink, MessageCircle, CheckCircle, XCircle, Trash2, Copy, Link2 } from 'lucide-react'
+import { ArrowLeft, Package, User, Users, Calendar, MapPin, Shirt, ExternalLink, MessageCircle, CheckCircle, XCircle, Trash2, Copy, Link2, LayoutTemplate } from 'lucide-react'
+import { getTemplateName, DEFAULT_TEMPLATE_ID } from '../../templates/templateConfig'
 import { getDraftByCode, approveDraft, rejectDraft, deleteDraft } from '../../utils/api'
 import AdminSeatingPlan from './AdminSeatingPlan'
 import AdminGuestReports from './AdminGuestReports'
@@ -528,6 +529,8 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
         display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 32px',
       }}>
         <InfoRow icon={Package}  label="Paket"  value={PKG_LABEL[draft.package] || draft.package} />
+        {/* Phase 4 — şablon adı metadata-dan (hardcode yox) */}
+        <InfoRow icon={LayoutTemplate} label="Şablon" value={getTemplateName(fd.templateId || draft.template_id || DEFAULT_TEMPLATE_ID)} />
         <InfoRow icon={User}     label="Hadisə" value={fd.eventType} />
         <InfoRow icon={Calendar} label="Tarix"  value={[dateStr, timeStr].filter(Boolean).join(', ')} />
         <InfoRow icon={MapPin}   label="Məkan"  value={fd.venueName} />

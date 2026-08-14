@@ -18,4 +18,8 @@ export const defaultWedding = {
   /* Phase 25.3 — musiqi seçimi (bax: src/data/music.js). null = standart melodiya */
   music: null,
   package: 'SADE',
+
+  /* Phase 4 — seçilmiş dizayn şablonu. Boş/naməlum dəyər avtomatik
+     `simple-luxury`-yə düşür (bax: templates/templateConfig.resolveTemplateId) */
+  templateId: '',
 }

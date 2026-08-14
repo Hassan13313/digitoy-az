@@ -19,6 +19,8 @@ $search = trim($_GET['search'] ?? '');
 $validStatuses = ['submitted', 'approved', 'rejected', 'draft', 'deleted', 'all'];
 if (!in_array($status, $validStatuses, true)) $status = 'submitted';
 
+/* Phase 4 — template_id sutunu SELECT-de istifade olunur; sxem hazir olsun */
+ensureTables();
 $db = getDB();
 
 /* WHERE hissəsini dinamik qur */
@@ -31,6 +33,13 @@ if ($status === 'all') {
 } else {
     $conditions[] = "status = :status";
     $params[':status'] = $status;
+}
+
+/* Phase 4 — şablon üzrə filtr (?template=royal-gold) */
+$templateFilter = trim($_GET['template'] ?? '');
+if ($templateFilter !== '' && preg_match('/^[a-z0-9-]{2,50}$/', $templateFilter)) {
+    $conditions[] = 'template_id = :tplf';
+    $params[':tplf'] = $templateFilter;
 }
 
 if ($search !== '') {
@@ -49,7 +58,7 @@ $cntStmt->execute($params);
 $total = (int)$cntStmt->fetchColumn();
 
 /* Siyahı */
-$sql  = "SELECT id, draft_code, package, status, customer_phone, submitted_at, form_data
+$sql  = "SELECT id, draft_code, package, status, customer_phone, submitted_at, form_data, template_id
          FROM draft_invitations $where
          ORDER BY submitted_at DESC
          LIMIT :lim OFFSET :off";
@@ -87,6 +96,7 @@ foreach ($rows as $row) {
         'submitted_at'   => $row['submitted_at'],
         'event_type'     => $eventType,
         'names'          => $names ?: '—',
+        'template_id'    => !empty($fd['templateId']) ? $fd['templateId'] : ($row['template_id'] ?? DEFAULT_TEMPLATE_ID),
     ];
 }
 

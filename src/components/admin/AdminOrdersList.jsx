@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
+import TemplateCell from './TemplateCell'
+import { listTemplates } from '../../templates/templateConfig'
 import { getOrdersList } from '../../utils/api'
 import { RefreshCw, ChevronRight, Search, X } from 'lucide-react'
 
@@ -37,12 +39,14 @@ export default function AdminOrdersList({ onSelectOrder }) {
   const [statusTab, setStatusTab] = useState('submitted')
   const [search,    setSearch]    = useState('')
   const [searchVal, setSearchVal] = useState('')
+  /* Phase 4 — şablon filtri ('' = hamısı) */
+  const [templateFilter, setTemplateFilter] = useState('')
   const debounceRef = useRef(null)
 
-  const fetchOrders = (status, q = '') => {
+  const fetchOrders = (status, q = '', tpl = templateFilter) => {
     setLoading(true)
     setError('')
-    getOrdersList(status, 50, 0, q)
+    getOrdersList(status, 50, 0, q, tpl)
       .then(data => {
         setOrders(data.orders || [])
         setTotal(data.total || 0)
@@ -51,7 +55,7 @@ export default function AdminOrdersList({ onSelectOrder }) {
       .finally(() => setLoading(false))
   }
 
-  useEffect(() => { fetchOrders(statusTab, search) }, [statusTab])
+  useEffect(() => { fetchOrders(statusTab, search, templateFilter) }, [statusTab, templateFilter])
 
   /* Axtarış — 400ms debounce */
   const handleSearchChange = (val) => {
@@ -116,9 +120,26 @@ export default function AdminOrdersList({ onSelectOrder }) {
               </button>
             )}
           </div>
+          {/* Phase 4 — şablon filtri; seçimlər metadata-dan gəlir, hardcode yox */}
+          <select
+            value={templateFilter}
+            onChange={(e) => setTemplateFilter(e.target.value)}
+            title="Şablon üzrə filtr"
+            style={{
+              padding: '8px 10px', fontSize: 11, borderRadius: 4,
+              border: '1px solid oklch(85% 0.02 60)', background: 'white',
+              color: 'oklch(45% 0.03 60)', cursor: 'pointer', outline: 'none',
+            }}
+          >
+            <option value="">Bütün şablonlar</option>
+            {listTemplates().map((t) => (
+              <option key={t.id} value={t.id}>{t.name}</option>
+            ))}
+          </select>
+
           <button
             type="button"
-            onClick={() => fetchOrders(statusTab, search)}
+            onClick={() => fetchOrders(statusTab, search, templateFilter)}
             style={{
               display: 'flex', alignItems: 'center', gap: 6,
               padding: '8px 14px', background: 'white',
@@ -172,12 +193,12 @@ export default function AdminOrdersList({ onSelectOrder }) {
           {/* Table header — Tarix | Bəy/Gəlin | Paket | Draft Code | Status */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: '110px 1fr 110px 120px 90px 32px',
-            gap: 16, padding: '10px 20px',
+            gridTemplateColumns: '100px 1fr 100px 110px 110px 86px 30px',
+            gap: 12, padding: '10px 20px',
             background: 'oklch(95% 0.01 75)',
             borderBottom: '1px solid oklch(88% 0.02 60)',
           }}>
-            {['Tarix', 'Bəy / Gəlin', 'Paket', 'Sifariş Kodu', 'Status', ''].map((h, i) => (
+            {['Tarix', 'Bəy / Gəlin', 'Paket', 'Şablon', 'Sifariş Kodu', 'Status', ''].map((h, i) => (
               <span key={i} style={{
                 fontSize: 10, fontWeight: 600, letterSpacing: '0.1em',
                 textTransform: 'uppercase', color: 'oklch(50% 0.03 60)',
@@ -194,8 +215,8 @@ export default function AdminOrdersList({ onSelectOrder }) {
               onClick={() => onSelectOrder(order.draft_code)}
               style={{
                 display: 'grid',
-                gridTemplateColumns: '110px 1fr 110px 120px 90px 32px',
-                gap: 16, padding: '14px 20px',
+                gridTemplateColumns: '100px 1fr 100px 110px 110px 86px 30px',
+                gap: 12, padding: '14px 20px',
                 borderBottom: i < orders.length - 1 ? '1px solid oklch(93% 0.01 75)' : 'none',
                 cursor: 'pointer', transition: 'background 0.12s',
                 alignItems: 'center',
@@ -212,6 +233,7 @@ export default function AdminOrdersList({ onSelectOrder }) {
               <span style={{ fontSize: 11, color: 'oklch(50% 0.04 75)' }}>
                 {order.package_label}
               </span>
+              <TemplateCell templateId={order.template_id} />
               <span style={{
                 fontFamily: 'monospace', fontSize: 11, fontWeight: 600,
                 color: 'oklch(45% 0.06 75)', letterSpacing: '0.04em',

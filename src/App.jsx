@@ -9,8 +9,12 @@ const PhotoShare       = lazy(() => import('./components/invitation/PhotoShare')
 const GalleryPage      = lazy(() => import('./components/invitation/GalleryPage'))
 const AdminApp         = lazy(() => import('./components/admin/AdminApp'))
 const AdminLoginGate   = lazy(() => import('./components/admin/AdminLoginGate'))
+/* Template Engine — InvitationPage onsuz da statik import edir,
+   preview marşrutu üçün ayrıca chunk yaratmağa ehtiyac yoxdur. */
+import TemplateRenderer from './templates/TemplateRenderer'
 import { defaultWedding } from './data/defaultWedding'
 import { demoInvitation, demoGuestbook } from './data/demoInvitation'
+import { DEFAULT_TEMPLATE_ID, getTemplateConfig, resolveTemplateId } from './templates/templateConfig'
 import { getInvitation, adminLogin, getDraftByCode } from './utils/api'
 import { unlockAudio } from './utils/audioUnlock'
 import ScrollProgress from './components/ui/ScrollProgress'
@@ -36,6 +40,14 @@ function getSEOConfig(view, { weddingData, slug } = {}) {
         description: 'DigiToy rəqəmsal toy dəvətnaməsinin canlı nümunəsinə baxın: İştirak Təsdiqi, oturma planı, QR foto paylaşımı və premium dizayn bir arada.',
         path: '/demo',
         type: 'website',
+      }
+
+    /* Şablon önbaxışı — yalnız daxili test marşrutu, indekslənmir */
+    case 'template-preview':
+      return {
+        title: 'Şablon Önbaxışı | DigiToy',
+        description: 'DigiToy dəvətnamə şablonlarının daxili önbaxış səhifəsi.',
+        noindex: true,
       }
 
     case 'invite': {
@@ -105,6 +117,12 @@ function decodeData(encoded) {
     for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
     return JSON.parse(new TextDecoder().decode(bytes))
   } catch { return null }
+}
+
+/* ── /demo/template/:id — daxili şablon önbaxışı (production linklərinə toxunmur) ── */
+function parseTemplatePreviewId() {
+  const match = window.location.pathname.match(/^\/demo\/template\/([^/?#]+)\/?$/)
+  return match ? decodeURIComponent(match[1]) : null
 }
 
 function parseInviteSlug() {
@@ -207,6 +225,8 @@ export default function App() {
   const [isAdmin,     setIsAdmin]     = useState(false)
   const [adminSlug,   setAdminSlug]   = useState('')
   const [entering,    setEntering]    = useState(false)
+  /* Şablon önbaxışı (/demo/template/:id) — yalnız daxili test */
+  const [previewTemplateId, setPreviewTemplateId] = useState(DEFAULT_TEMPLATE_ID)
 
   /* Hər view dəyişəndə <head> meta-larını yenilə (title, description, OG, Twitter, canonical) */
   useSEO(getSEOConfig(view, { weddingData, slug: adminSlug || parseInviteSlug().slug }))
@@ -241,6 +261,16 @@ export default function App() {
       } else {
         setView('admin-login')   /* Token yoxdur → login gate */
       }
+      return
+    }
+
+    /* Şablon önbaxışı — /demo/template/:id
+       Naməlum id → simple-luxury fallback (resolveTemplateId).
+       ⚠ /demo-dan ƏVVƏL yoxlanılır ki, alt-marşrut tutulsun. */
+    const previewId = parseTemplatePreviewId()
+    if (previewId) {
+      setPreviewTemplateId(resolveTemplateId(previewId, { allowDisabled: true }))
+      setView('template-preview')
       return
     }
 
@@ -299,6 +329,38 @@ export default function App() {
   }, [])
 
   if (view === 'loading') return <RouteLoader />
+
+  /* ── ŞABLON ÖNBAXIŞI — /demo/template/:id ──
+     Yalnız daxili test üçün. Demo datası ilə işləyir, DB-yə toxunmur,
+     builder/admin/production invite marşrutlarından tam təcrid olunub.
+     isPreview={true} → hazırlanmaqda olan (enabled=false) şablonlar da açılır. */
+  if (view === 'template-preview') {
+    const previewConfig = getTemplateConfig(previewTemplateId)
+    return (
+      <div className="min-h-screen bg-cream">
+        {/* Daxili test lenti — canlı müştəri bu marşruta düşmür */}
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 220,
+          padding: '5px 12px', textAlign: 'center',
+          background: 'rgba(26,20,12,0.86)', color: 'rgba(255,255,255,0.82)',
+          fontFamily: 'Inter, system-ui, sans-serif',
+          fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase',
+          pointerEvents: 'none', backdropFilter: 'blur(6px)',
+        }}>
+          Önbaxış · {previewConfig?.name || previewTemplateId} · {previewTemplateId}
+        </div>
+        <TemplateRenderer
+          template={previewTemplateId}
+          isPreview={true}
+          lang={lang} setLang={setLang}
+          weddingData={demoInvitation}
+          isDemoMode={true}
+          initialGuestbook={demoGuestbook}
+          onBack={() => { window.history.pushState({}, '', '/'); setView('landing') }}
+        />
+      </div>
+    )
+  }
 
   if (view === 'demo') {
     return (

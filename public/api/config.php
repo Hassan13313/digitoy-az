@@ -7,6 +7,18 @@
 
 header('Content-Type: application/json; charset=utf-8');
 
+/* ── Phase 4: Dizayn şablonu ──
+   Frontend-dəki `templates/templateConfig.js → DEFAULT_TEMPLATE_ID` ilə
+   EYNİ olmalıdır. Bütün köhnə/naməlum dəyərlər buna düşür. */
+define('DEFAULT_TEMPLATE_ID', 'simple-luxury');
+
+/** template_id-ni təhlükəsiz normallaşdır (yalnız a-z, 0-9, tire; max 50) */
+function normalizeTemplateId($id): string {
+    $id = is_string($id) ? strtolower(trim($id)) : '';
+    if ($id === '' || !preg_match('/^[a-z0-9\-]{2,50}$/', $id)) return DEFAULT_TEMPLATE_ID;
+    return $id;
+}
+
 /* ── Environment detection ── */
 $_host   = strtolower($_SERVER['HTTP_HOST'] ?? '');
 $_isLocal = (strpos($_host, 'localhost') !== false || strpos($_host, '127.0.0.1') !== false);
@@ -190,5 +202,18 @@ function ensureTables(): void {
     if (empty($rjCols)) {
         $db->exec("ALTER TABLE draft_invitations ADD COLUMN rejected_at DATETIME DEFAULT NULL");
         $db->exec("ALTER TABLE draft_invitations ADD COLUMN reject_reason TEXT DEFAULT NULL");
+    }
+
+    /* ── Phase 4: template_id — dizayn şablonu ──
+       Mövcud bütün sətirlər DEFAULT_TEMPLATE_ID alır, yəni köhnə müştərilərin
+       dəvətnaməsi dəyişmir. Sütun admin siyahısı/filtri və analitika üçündür;
+       render mənbəyi həm bu sütun, həm də form_data.templateId-dir. */
+    foreach (['invitations', 'draft_invitations'] as $tbl) {
+        $tCols = $db->query("SHOW COLUMNS FROM `$tbl` LIKE 'template_id'")->fetchAll();
+        if (empty($tCols)) {
+            $db->exec("ALTER TABLE `$tbl`
+                ADD COLUMN template_id VARCHAR(50) NOT NULL DEFAULT '" . DEFAULT_TEMPLATE_ID . "'");
+            $db->exec("ALTER TABLE `$tbl` ADD INDEX idx_template_id (template_id)");
+        }
     }
 }

@@ -1,20 +1,7 @@
-import { useEffect, useState } from 'react'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
-import t from '../../data/translations'
+import { useCountdown } from '../../hooks/useCountdown'
 
-function getTimeLeft(targetDate, targetTime) {
-  const target = new Date(`${targetDate}T${targetTime || '00:00'}`)
-  const now = new Date()
-  const diff = target - now
-  if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0, past: true }
-  return {
-    days:    Math.floor(diff / (1000 * 60 * 60 * 24)),
-    hours:   Math.floor((diff / (1000 * 60 * 60)) % 24),
-    minutes: Math.floor((diff / (1000 * 60)) % 60),
-    seconds: Math.floor((diff / 1000) % 60),
-    past: false,
-  }
-}
+/* Məntiq `hooks/useCountdown.js`-dədir — bu fayl yalnız simple-luxury UI qatıdır. */
 
 function TimeBox({ value, label }) {
   return (
@@ -36,30 +23,10 @@ function TimeBox({ value, label }) {
   )
 }
 
-/* ── Dinamik countdown başlığı ── */
-function countdownTitle(tr, eventType, eventName) {
-  if (eventType === 'nishan')  return tr.inv_countdown_nishan
-  if (eventType === 'birthday') return tr.inv_countdown_birthday
-  if (eventType === 'corporate' || eventType === 'other') {
-    const name = (eventName || '').trim()
-    return name
-      ? `${name} ${tr.inv_countdown_event}`
-      : tr.inv_countdown
-  }
-  return tr.inv_countdown // toy default
-}
-
 export default function CountdownTimer({ date, time, lang, eventType = 'toy', eventName = '' }) {
-  const tr = t[lang]
-  const [timeLeft, setTimeLeft] = useState(() => getTimeLeft(date, time))
+  const timeLeft = useCountdown({ date, time, lang, eventType, eventName })
+  const { title, labels: tl } = timeLeft
   const [ref, visible] = useScrollReveal()
-
-  useEffect(() => {
-    const id = setInterval(() => setTimeLeft(getTimeLeft(date, time)), 1000)
-    return () => clearInterval(id)
-  }, [date, time])
-
-  const title = countdownTitle(tr, eventType, eventName)
 
   return (
     <section className="py-24 px-6 bg-beige">
@@ -73,13 +40,13 @@ export default function CountdownTimer({ date, time, lang, eventType = 'toy', ev
         <div className="gold-divider mb-12 max-w-[120px] mx-auto" />
 
         <div className="flex items-start justify-center gap-4 sm:gap-6">
-          <TimeBox value={timeLeft.days}    label={tr.inv_days} />
+          <TimeBox value={timeLeft.days}    label={tl.days} />
           <span className="font-serif text-2xl text-gold/30 mt-5 font-light">·</span>
-          <TimeBox value={timeLeft.hours}   label={tr.inv_hours} />
+          <TimeBox value={timeLeft.hours}   label={tl.hours} />
           <span className="font-serif text-2xl text-gold/30 mt-5 font-light">·</span>
-          <TimeBox value={timeLeft.minutes} label={tr.inv_minutes} />
+          <TimeBox value={timeLeft.minutes} label={tl.minutes} />
           <span className="font-serif text-2xl text-gold/30 mt-5 font-light">·</span>
-          <TimeBox value={timeLeft.seconds} label={tr.inv_seconds} />
+          <TimeBox value={timeLeft.seconds} label={tl.seconds} />
         </div>
 
         <div className="gold-divider mt-12 max-w-[120px] mx-auto" />

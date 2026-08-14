@@ -1,90 +1,17 @@
-import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Send } from 'lucide-react'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
-import { getGuestResponses, submitGuestResponse } from '../../utils/api'
-import { trackEvent } from '../../utils/analytics'
+import { useGuestbook } from '../../hooks/useGuestbook'
 
-const LABELS = {
-  az: {
-    title: 'Təbrik Kitabı',
-    sub: 'Xoş arzularınızı bizimlə bölüşün',
-    namePh: 'Adınız',
-    msgPh: 'Ürək sözləriniz...',
-    btn: 'Paylaş',
-    sending: 'Göndərilir...',
-  },
-  en: {
-    title: 'Guestbook',
-    sub: 'Share your warm wishes with us',
-    namePh: 'Your name',
-    msgPh: 'Your message...',
-    btn: 'Share',
-    sending: 'Sending...',
-  },
-  ru: {
-    title: 'Книга пожеланий',
-    sub: 'Поделитесь тёплыми словами',
-    namePh: 'Ваше имя',
-    msgPh: 'Ваше пожелание...',
-    btn: 'Отправить',
-    sending: 'Отправка...',
-  },
-}
-
-function formatDate(iso) {
-  if (!iso) return ''
-  const d = new Date(iso)
-  return `${String(d.getDate()).padStart(2, '0')} · ${String(d.getMonth() + 1).padStart(2, '0')} · ${d.getFullYear()}`
-}
-
-function getSlug() {
-  return (window.location.pathname.match(/\/invite\/([^/?#]+)/) || [])[1] || null
-}
+/* Mesaj yükləmə/göndərmə məntiqi artıq `hooks/useGuestbook.js`-dədir —
+   bu fayl yalnız simple-luxury UI qatıdır. */
 
 export default function Guestbook({ lang, initialMessages }) {
-  const L = LABELS[lang] || LABELS.az
-  const slug = getSlug()
-
-  const [messages, setMessages] = useState(initialMessages || [])
-  const [name,     setName]     = useState('')
-  const [text,     setText]     = useState('')
-  const [sending,  setSending]  = useState(false)
+  const {
+    messages, name, setName, text, setText, sending,
+    handleAdd, canSubmit, labels: L, formatDate,
+  } = useGuestbook({ lang, initialMessages })
   const [ref, visible] = useScrollReveal()
-
-  /* Serverdən mövcud mesajları çək */
-  useEffect(() => {
-    if (!slug) return
-    getGuestResponses(slug)
-      .then(data => { if (data.messages?.length) setMessages(data.messages) })
-      .catch(() => {})
-  }, [slug])
-
-  const handleAdd = async (e) => {
-    e.preventDefault()
-    if (!name.trim() || !text.trim() || sending) return
-
-    const optimistic = { name: name.trim(), text: text.trim() }
-    setMessages(prev => [optimistic, ...prev])
-    setName('')
-    setText('')
-    setSending(true)
-
-    try {
-      if (slug) {
-        await submitGuestResponse({
-          invitationId: slug,
-          guestName:    optimistic.name,
-          message:      optimistic.text,
-        })
-        trackEvent('guestbook_message_sent')
-      }
-    } catch {
-      /* Şəbəkə xətasında optimistic mesaj qalır — istifadəçini narahat etmirik */
-    } finally {
-      setSending(false)
-    }
-  }
 
   return (
     <section className="py-28 px-6 bg-beige">
@@ -119,7 +46,7 @@ export default function Guestbook({ lang, initialMessages }) {
           />
           <button
             type="submit"
-            disabled={!name.trim() || !text.trim() || sending}
+            disabled={!canSubmit}
             className="btn-gold w-full min-h-[52px] flex items-center justify-center gap-2.5 disabled:opacity-30"
           >
             <Send size={12} strokeWidth={1.5} />

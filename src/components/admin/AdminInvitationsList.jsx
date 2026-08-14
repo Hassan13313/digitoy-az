@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import TemplateCell from './TemplateCell'
 import { RefreshCw, Search, X, ExternalLink, Calendar, MapPin } from 'lucide-react'
 
 const BASE = import.meta.env.VITE_API_URL || '/api'
@@ -109,20 +110,21 @@ export default function AdminInvitationsList() {
       ) : (
         <div style={{ background: 'white', border: '1px solid oklch(88% 0.02 60)', borderRadius: 6, overflow: 'hidden' }}>
           {/* Header */}
-          <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr 90px 120px 110px 32px', gap: 16, padding: '10px 20px', background: 'oklch(95% 0.01 75)', borderBottom: '1px solid oklch(88% 0.02 60)' }}>
-            {['Slug', 'Ad', 'Növ', 'Məkan', 'Yaradılma', ''].map((h, i) => (
+          <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr 110px 84px 110px 100px 30px', gap: 12, padding: '10px 20px', background: 'oklch(95% 0.01 75)', borderBottom: '1px solid oklch(88% 0.02 60)' }}>
+            {['Slug', 'Ad', 'Şablon', 'Növ', 'Məkan', 'Yaradılma', ''].map((h, i) => (
               <span key={i} style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'oklch(50% 0.03 60)' }}>{h}</span>
             ))}
           </div>
 
           {items.map((inv, i) => (
-            <div key={inv.slug} style={{ display: 'grid', gridTemplateColumns: '140px 1fr 90px 120px 110px 32px', gap: 16, padding: '13px 20px', borderBottom: i < items.length - 1 ? '1px solid oklch(93% 0.01 75)' : 'none', alignItems: 'center' }}>
+            <div key={inv.slug} style={{ display: 'grid', gridTemplateColumns: '130px 1fr 110px 84px 110px 100px 30px', gap: 12, padding: '13px 20px', borderBottom: i < items.length - 1 ? '1px solid oklch(93% 0.01 75)' : 'none', alignItems: 'center' }}>
               <span style={{ fontFamily: 'monospace', fontSize: 11, fontWeight: 600, color: 'oklch(45% 0.07 75)', letterSpacing: '0.04em' }}>
                 {inv.slug}
               </span>
               <span style={{ fontSize: 13, color: 'oklch(25% 0.02 60)', fontWeight: 500 }}>
                 {inv.names}
               </span>
+              <TemplateCell templateId={inv.template_id} />
               <span style={{ fontSize: 11, color: 'oklch(50% 0.04 75)' }}>
                 {EVENT_LABELS[inv.event_type] || inv.event_type || '—'}
               </span>
