@@ -38,7 +38,7 @@ function GirihPattern({ theme, opacity = 0.22 }) {
 function Opening(props) {
   const { theme, weddingData, isCouple, lang } = props
   const initials = isCouple
-    ? `${(weddingData.brideName || '?')[0]}&${(weddingData.groomName || '?')[0]}`.toUpperCase()
+    ? `${(weddingData.groomName || '?')[0]}&${(weddingData.brideName || '?')[0]}`.toUpperCase()
     : ((weddingData.eventName || weddingData.brideName || '·')[0] || '·').toUpperCase()
 
   return (
@@ -46,7 +46,7 @@ function Opening(props) {
       <GirihPattern theme={theme} />
 
       <div style={{ position: 'relative', animation: 'ol-iris .9s ease-out' }}>
-        <div style={{ fontSize: 'clamp(9px, 2.6vw, 10px)', letterSpacing: '.3em', textTransform: 'uppercase', color: alpha(theme.accent, 0.8), marginBottom: 'clamp(20px, 6vw, 28px)' }}>
+        <div style={{ fontSize: 'clamp(10px, 2.6vw, 10px)', letterSpacing: '.2em', textTransform: 'uppercase', color: alpha(theme.accent, 0.8), marginBottom: 'clamp(20px, 6vw, 28px)' }}>
           Toy mərasiminə dəvət
         </div>
 
@@ -84,10 +84,12 @@ export default function OrientalLuxeTemplate(props) {
         buttonRadius: 0,
         align: 'center',
         headingTransform: 'none',
-        kicker: '.3em',
+        kicker: '.2em',
         dark: true,
         alternate: true,
         motion: 'rise',
+        /* Location — OSM tile mozaikasının şablona məxsus emalı */
+        map: { opacity: 0.45, filter: 'grayscale(1) brightness(.45) contrast(1.2)', tintOpacity: 0.55 },
         headingColor: TH.text,
         accentColor: TH.accent,
         ctaBg: TH.accent,

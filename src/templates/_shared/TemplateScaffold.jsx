@@ -27,7 +27,7 @@ export default function TemplateScaffold({ onBack }) {
     >
       <div style={{ maxWidth: 440, width: '100%' }}>
         <p style={{
-          fontSize: 9, letterSpacing: '.42em', textTransform: 'uppercase',
+          fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase',
           color: th.accent, fontWeight: 600, marginBottom: 22,
         }}>
           Digitoy · Şablon Önbaxışı
@@ -47,7 +47,7 @@ export default function TemplateScaffold({ onBack }) {
         </h1>
 
         <p style={{
-          fontSize: 10, letterSpacing: '.26em', textTransform: 'uppercase',
+          fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase',
           color: th.muted, marginBottom: 18,
         }}>
           {config?.tagline}
@@ -72,7 +72,7 @@ export default function TemplateScaffold({ onBack }) {
         </div>
 
         <p style={{
-          fontSize: 10, letterSpacing: '.24em', textTransform: 'uppercase',
+          fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase',
           color: th.muted, marginBottom: 34,
         }}>
           Dizayn kodlaşdırılır · yalnız daxili test
@@ -87,7 +87,7 @@ export default function TemplateScaffold({ onBack }) {
               border: `1px solid ${th.accent}`,
               color: th.accent,
               padding: '12px 32px', borderRadius: 999,
-              fontSize: 10, letterSpacing: '.24em', textTransform: 'uppercase', fontWeight: 600,
+              fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', fontWeight: 600,
               fontFamily: 'inherit',
             }}
           >

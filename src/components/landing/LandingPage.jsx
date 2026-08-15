@@ -10,6 +10,7 @@ import TubelightNavbar from '../ui/TubelightNavbar'
 import StickyScrollReveal from '../ui/StickyScrollReveal'
 import t from '../../data/translations'
 import { trackEvent } from '../../utils/analytics'
+import { readBuilderSnapshot, clearBuilderSnapshot } from '../../utils/builderSession'
 
 /* Navbar yüksəkliyi 72px — scroll hesablamada çıxılır */
 function scrollToSection(id) {
@@ -26,31 +27,47 @@ function scrollToSection(id) {
   }
 }
 
+/* Paketlər bölməsi altındakı şablon vitrini CTA-sı (Phase 27.1) */
+const TEMPLATES_CTA = {
+  az: 'Bütün şablonlara bax',
+  en: 'Browse all templates',
+  ru: 'Смотреть все шаблоны',
+}
+
 const NAV_TABS = {
   az: [
     { id: 'why',      label: 'Necə işləyir?' },
     { id: 'features', label: 'Funksiyalar' },
+    { id: 'templates', label: 'Şablonlar' },
     { id: 'packages', label: 'Paketlər' },
     { id: 'faq',      label: 'Suallar' },
   ],
   en: [
     { id: 'why',      label: 'How It Works' },
     { id: 'features', label: 'Features' },
+    { id: 'templates', label: 'Templates' },
     { id: 'packages', label: 'Packages' },
     { id: 'faq',      label: 'FAQ' },
   ],
   ru: [
     { id: 'why',      label: 'Как это работает' },
     { id: 'features', label: 'Функции' },
+    { id: 'templates', label: 'Шаблоны' },
     { id: 'packages', label: 'Пакеты' },
     { id: 'faq',      label: 'Вопросы' },
   ],
 }
 
-export default function LandingPage({ lang, setLang, weddingData, setWeddingData, onViewInvitation, onDemo, isAdmin = false, initialShowPreview = false }) {
+export default function LandingPage({ lang, setLang, weddingData, setWeddingData, onViewInvitation, onDemo, isAdmin = false, initialShowPreview = false, initialPackage = null, showPackages = false }) {
   const tr = t[lang]
   const [showPreview,     setShowPreview]     = useState(initialShowPreview)
-  const [formData,        setFormData]        = useState(weddingData)
+  /* Forma məlumatları: eyni tabda snapshot varsa ondan bərpa olunur
+     (önbaxış → geri ssenarisi), yoxsa App-dən gələn `weddingData`. */
+  const [formData, setFormData] = useState(() => {
+    const snap = isAdmin ? null : readBuilderSnapshot()
+    const base = snap?.data ? { ...weddingData, ...snap.data } : weddingData
+    return initialPackage ? { ...base, package: initialPackage } : base
+  })
   const [returnToStep,    setReturnToStep]    = useState(null)
   const [activeTab,       setActiveTab]       = useState('packages')
 
@@ -58,14 +75,44 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
    * selectedPackage — normalda null başlayır (PackageSelect məcburi).
    * Admin modunda weddingData.package oxunur — paketi bypass etmir.
    */
-  const [selectedPackage, setSelectedPackage] = useState(
-    isAdmin ? (weddingData?.package || 'SADE') : null
-  )
+  /* `initialPackage` — şablon önbaxışından qayıdanda paket bərpa olunur,
+     yəni istifadəçidən yenidən paket seçmək istənmir.
+     `showPackages` — «Paketlərə keç» ilə gəliblərsə paket kartları göstərilir
+     (paket müvəqqəti seçilməmiş sayılır), amma forma məlumatları
+     sessionStorage snapshot-ında qalır → paketi seçən kimi hər şey yerindədir. */
+  const [selectedPackage, setSelectedPackage] = useState(() => {
+    if (isAdmin) return weddingData?.package || 'SADE'
+    if (showPackages) return null
+    /* Snapshot-dakı paket də sayılır — beləliklə HƏR qayıdış yolu
+       (geri düyməsi, brauzerin geri düyməsi, önbaxış linki) builder-i açır,
+       paket seçimi ekranına düşmür. */
+    const snap = readBuilderSnapshot()
+    return initialPackage || snap?.data?.package || null
+  })
 
-  /* Köhnə localStorage keşini təmizlə — hər sessiyada təmiz başla */
+  /* Köhnə localStorage keşini təmizlə — hər sessiyada təmiz başla.
+     ⚠ Önbaxışdan qayıdış halında (initialPackage) təmizləmirik, əks halda
+     paket dərhal itər və istifadəçi yenidən paket seçimində qalar. */
   useEffect(() => {
+    if (initialPackage || showPackages) return
     try { localStorage.removeItem('selected_package') } catch {}
-  }, [])
+  }, [initialPackage, showPackages])
+
+  /* «Paketlərə keç» — paket kartlarına hamar scroll (SPA, reload yoxdur) */
+  useEffect(() => {
+    if (!showPackages) return
+    let tries = 0
+    const tick = () => {
+      tries += 1
+      const first = document.getElementById('first-pricing-card')
+      const el = first || document.getElementById('paketler')
+      if (!el) { if (tries < 12) setTimeout(tick, 120); return }
+      const top = el.getBoundingClientRect().top + window.pageYOffset + (first ? -240 : -120)
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+    }
+    const id = setTimeout(tick, 160)
+    return () => clearTimeout(id)
+  }, [showPackages])
 
   /* Açılış səhifəsi göstərildi — bir dəfə (admin "review" rejimi xaric) */
   useEffect(() => {
@@ -113,6 +160,8 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
   }
 
   const handleLogoClick = () => {
+    /* Açıq "yenidən başla" — builder snapshot-u da təmizlənir */
+    clearBuilderSnapshot()
     setReturnToStep(null)
     setShowPreview(false)
     setSelectedPackage(null)
@@ -143,6 +192,8 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
     if (tab.id === 'packages') { scrollToBuilder(); return }
     if (tab.id === 'why')      { scrollToSection('how-it-works'); return }
     if (tab.id === 'features') { scrollToSection('features'); return }
+    /* Şablonlar — ayrıca ictimai səhifə (Phase 27.1) */
+    if (tab.id === 'templates') { window.location.assign('/templates'); return }
     if (tab.id === 'faq')      { scrollToSection('faq'); return }
   }
 
@@ -282,6 +333,16 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
             ) : !selectedPackage ? (
               <motion.div key="packages" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.35, ease: [0.32, 0, 0.68, 1] }}>
                 <PackageSelect lang={lang} onSelect={handlePackageSelect} />
+
+                {/* Şablonlar vitrininə keçid — paket seçmədən baxmaq üçün (Phase 27.1) */}
+                <div className="mt-10 text-center">
+                  <a
+                    href="/templates"
+                    className="inline-flex items-center justify-center gap-2 min-h-[48px] px-7 rounded-full border border-gold/45 text-gold text-[11px] tracking-[0.16em] uppercase font-sans font-semibold no-underline hover:bg-gold/8 transition-colors"
+                  >
+                    {TEMPLATES_CTA[lang] || TEMPLATES_CTA.az}
+                  </a>
+                </div>
               </motion.div>
             ) : (
               <motion.div key="builder" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.4, ease: [0.32, 0, 0.68, 1] }}>

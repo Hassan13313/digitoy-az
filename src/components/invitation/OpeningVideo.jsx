@@ -213,7 +213,7 @@ export default function OpeningVideo({ onComplete, weddingData, lang = 'az' }) {
                 fontWeight: 300, letterSpacing: '-0.02em',
                 color: '#1A140C', lineHeight: 1.05, margin: 0,
               }}>
-                {brideName}
+                {groomName}
               </p>
               <p style={{
                 fontFamily: '"Cormorant Garamond", Georgia, serif',
@@ -230,7 +230,7 @@ export default function OpeningVideo({ onComplete, weddingData, lang = 'az' }) {
                 fontWeight: 300, letterSpacing: '-0.02em',
                 color: '#1A140C', lineHeight: 1.05, margin: 0,
               }}>
-                {groomName}
+                {brideName}
               </p>
             </div>
           ) : (

@@ -33,6 +33,7 @@ import { defaultWedding } from '../../data/defaultWedding'
 import { buildShortLiveLink } from '../../utils/whatsappOrder'
 import { formatFullDateByLang } from '../../utils/dateFormat'
 import { saveDraft, getDraft, submitDraft, saveInvitation, approveDraft } from '../../utils/api'
+import { saveBuilderSnapshot, readBuilderSnapshot } from '../../utils/builderSession'
 import t from '../../data/translations'
 import { trackEvent } from '../../utils/analytics'
 
@@ -410,7 +411,7 @@ const TPL_KEYS  = ['toy','nishan','nikah','xinayaxdi','birthday','other']
 const PROGRAM_TEMPLATES = {
   toy: {
     az: [{ time:'17:30',icon:'🥂',activity:'Qonaqların qarşılanması' },{ time:'18:00',icon:'💒',activity:'Bəy və gəlinin gəlişi' },{ time:'18:30',icon:'📸',activity:'Ailə fotoşəkilləri' },{ time:'19:00',icon:'🎤',activity:'Açılış sözü' },{ time:'19:30',icon:'🍽️',activity:'Ziyafət' },{ time:'20:30',icon:'💃',activity:'İlk rəqs' },{ time:'21:00',icon:'🎉',activity:'Əyləncə proqramı' },{ time:'22:00',icon:'🎂',activity:'Tort kəsimi' },{ time:'23:00',icon:'🌙',activity:'Gecənin sonu' }],
-    en: [{ time:'17:30',icon:'🥂',activity:'Guest Welcome' },{ time:'18:00',icon:'💒',activity:"Bride & Groom's Entrance" },{ time:'18:30',icon:'📸',activity:'Family Photos' },{ time:'19:00',icon:'🎤',activity:'Opening Speech' },{ time:'19:30',icon:'🍽️',activity:'Dinner' },{ time:'20:30',icon:'💃',activity:'First Dance' },{ time:'21:00',icon:'🎉',activity:'Entertainment' },{ time:'22:00',icon:'🎂',activity:'Cake Cutting' },{ time:'23:00',icon:'🌙',activity:"Evening's End" }],
+    en: [{ time:'17:30',icon:'🥂',activity:'Guest Welcome' },{ time:'18:00',icon:'💒',activity:"Groom & Bride's Entrance" },{ time:'18:30',icon:'📸',activity:'Family Photos' },{ time:'19:00',icon:'🎤',activity:'Opening Speech' },{ time:'19:30',icon:'🍽️',activity:'Dinner' },{ time:'20:30',icon:'💃',activity:'First Dance' },{ time:'21:00',icon:'🎉',activity:'Entertainment' },{ time:'22:00',icon:'🎂',activity:'Cake Cutting' },{ time:'23:00',icon:'🌙',activity:"Evening's End" }],
     ru: [{ time:'17:30',icon:'🥂',activity:'Встреча гостей' },{ time:'18:00',icon:'💒',activity:'Выход жениха и невесты' },{ time:'18:30',icon:'📸',activity:'Семейные фото' },{ time:'19:00',icon:'🎤',activity:'Вступительное слово' },{ time:'19:30',icon:'🍽️',activity:'Ужин' },{ time:'20:30',icon:'💃',activity:'Первый танец' },{ time:'21:00',icon:'🎉',activity:'Развлекательная программа' },{ time:'22:00',icon:'🎂',activity:'Разрезание торта' },{ time:'23:00',icon:'🌙',activity:'Завершение вечера' }],
   },
   nishan: {
@@ -798,7 +799,7 @@ function GalleryAdminStep({ data, isCouple, isCorp, isAdmin = false }) {
       .replace(/'/g, '&apos;')
 
     const names = isCouple
-      ? xmlEsc(`${data.brideName || ''} & ${data.groomName || ''}`)
+      ? xmlEsc(`${data.groomName || ''} & ${data.brideName || ''}`)
       : xmlEsc(data.brideName || data.eventName || 'Digitoy')
 
     const safeDate = xmlEsc(data.date || '')
@@ -1466,8 +1467,18 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     return idx >= 0 ? idx + 1 : visibleSteps.length
   })()
 
-  const [step, setStep] = useState(safeInitialStep)
-  const [data, setData] = useState(initialData)
+  /* ⚠ Önbaxışdan qayıdış: builder vəziyyəti sessionStorage-dan SİNXRON bərpa
+     olunur (bax utils/builderSession.js). Bu, ilk render-də tətbiq olunur —
+     boş forma "flash"-ı olmur və server draft-ını gözləmək lazım gəlmir.
+     Admin rejimində snapshot oxunmur: admin URL-dən gələn data prioritetlidir. */
+  const [snapshot] = useState(() => (isAdmin ? null : readBuilderSnapshot()))
+
+  const [step, setStep] = useState(() => (
+    snapshot?.step && snapshot.step > 0 ? snapshot.step : safeInitialStep
+  ))
+  const [data, setData] = useState(() => (
+    snapshot?.data ? { ...initialData, ...snapshot.data } : initialData
+  ))
   const [errors, setErrors] = useState({})
   const [generatedLiveLink, setGeneratedLiveLink] = useState('')
   const [linkCopied,        setLinkCopied]        = useState(false)
@@ -1533,8 +1544,10 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     sessionIdRef.current = sid
 
     /* Admin URL-dən gəlmirsə draft-ı restore et */
+    /* Snapshot varsa (eyni tabda önbaxışdan qayıdış) server draft-ı tətbiq
+       etmirik — daha təzə vəziyyət onsuz da yüklənib. */
     const hasUrlData = new URLSearchParams(window.location.search).get('data')
-    if (!hasUrlData) {
+    if (!hasUrlData && !snapshot) {
       getDraft(sid)
         .then(function(draft) {
           if (!draft?.found || !draft.form_data) return
@@ -1547,6 +1560,13 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
   }, [isAdmin])
 
   /* ── Autosave: data/step dəyişəndə 800ms debounce ilə saxla ── */
+  useEffect(() => {
+    if (isAdmin) return
+    /* sessionStorage sinxrondur — debounce-a ehtiyac yoxdur, hər dəyişiklikdə
+       dərhal yazılır ki, istifadəçi dərhal önbaxışa keçsə belə itki olmasın. */
+    saveBuilderSnapshot({ data, step })
+  }, [data, step, isAdmin])
+
   useEffect(() => {
     if (!isHydrated || !sessionIdRef.current || isAdmin) return
     clearTimeout(autosaveTimer.current)
@@ -1581,8 +1601,9 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     const e = {}
     if (actualStep === 1) {
       if (isCorp && !data.eventName?.trim()) e.eventName = true
-      if (!isCorp && !data.brideName.trim()) e.brideName = true
+      /* Yoxlama sırası formadakı sıra ilə eynidir: əvvəl Bəy, sonra Gəlin */
       if (isCouple && !data.groomName.trim()) e.groomName = true
+      if (!isCorp && !data.brideName.trim()) e.brideName = true
       if (!data.date) e.date = true
       if (!data.time) e.time = true
     }
@@ -1979,17 +2000,10 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
                 </div>
               </>
             ) : isCouple ? (
-              /* Toy / Nişan — cütlük adları */
+              /* Toy / Nişan — cütlük adları.
+                 ⚠ Phase 27: sıra BƏY → GƏLİN. Yalnız göstərim sırası dəyişdi;
+                 `brideName`/`groomName` data açarları OLDUĞU KİMİ qalır. */
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                <div>
-                  <Label required>{tr.bride_label}</Label>
-                  <Input
-                    value={data.brideName}
-                    onChange={(e) => set('brideName', e.target.value)}
-                    placeholder="Məs: Leyla"
-                    className={errors.brideName ? 'border-b-red-300' : ''}
-                  />
-                </div>
                 <div>
                   <Label required>{tr.groom_label}</Label>
                   <Input
@@ -1997,6 +2011,15 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
                     onChange={(e) => set('groomName', e.target.value)}
                     placeholder="Məs: Murad"
                     className={errors.groomName ? 'border-b-red-300' : ''}
+                  />
+                </div>
+                <div>
+                  <Label required>{tr.bride_label}</Label>
+                  <Input
+                    value={data.brideName}
+                    onChange={(e) => set('brideName', e.target.value)}
+                    placeholder="Məs: Leyla"
+                    className={errors.brideName ? 'border-b-red-300' : ''}
                   />
                 </div>
               </div>

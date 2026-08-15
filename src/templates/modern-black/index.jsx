@@ -23,15 +23,15 @@ const KEYFRAMES = `
 
 function Opening(props) {
   const { theme, weddingData, isCouple } = props
-  const nameA = isCouple ? weddingData.brideName : (weddingData.eventName || weddingData.brideName)
-  const nameB = isCouple ? weddingData.groomName : ''
+  const nameA = isCouple ? weddingData.groomName : (weddingData.eventName || weddingData.brideName)
+  const nameB = isCouple ? weddingData.brideName : ''
   const dateStr = (weddingData.date || '').split('-').reverse().join('.')
 
   return (
     <OpeningFrame {...props} exit="up" duration={800} hint="sürüşdürüb açın" ariaLabel="Dəvətnaməni aç">
       {/* Sol-alt hizalanmış tipoqrafik kompozisiya (design t3) */}
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: 'clamp(22px, 7vw, 34px)', textAlign: 'left' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, letterSpacing: '.3em', textTransform: 'uppercase', color: theme.muted }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: theme.muted }}>
           <span>Dəvətnamə</span><span>№ 012</span>
         </div>
 
@@ -43,10 +43,10 @@ function Opening(props) {
           }}>
             {nameA}{nameB ? <><br />{nameB}</> : null}
           </div>
-          <div style={{ fontSize: 'clamp(10px, 3vw, 11px)', letterSpacing: '.18em', color: theme.muted, marginTop: 'clamp(14px, 4vw, 20px)' }}>
+          <div style={{ fontSize: 'clamp(10px, 3vw, 11px)', letterSpacing: '.14em', color: theme.muted, marginTop: 'clamp(14px, 4vw, 20px)' }}>
             bir axşam, bir söz
           </div>
-          <div style={{ fontSize: 9, letterSpacing: '.3em', textTransform: 'uppercase', color: theme.secondary, marginTop: 8 }}>
+          <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: theme.secondary, marginTop: 8 }}>
             {dateStr}{weddingData.venueName ? ` — ${String(weddingData.venueName).split(',').pop().trim().toUpperCase()}` : ''}
           </div>
 
@@ -54,7 +54,7 @@ function Opening(props) {
           <div style={{
             marginTop: 'clamp(22px, 6vw, 30px)', height: 56, border: `1px solid ${alpha(theme.accent, 0.3)}`,
             display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 18px',
-            fontSize: 10, letterSpacing: '.24em', textTransform: 'uppercase', color: theme.accent,
+            fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: theme.accent,
           }}>
             Aç
             <span style={{ animation: 'mb-slide 1.8s ease-in-out infinite' }}>→</span>
@@ -78,10 +78,12 @@ export default function ModernBlackTemplate(props) {
         buttonRadius: 0,
         align: 'left',
         headingTransform: 'uppercase',
-        kicker: '.3em',
+        kicker: '.2em',
         dark: true,
         alternate: false,
         motion: 'clip',
+        /* Location — OSM tile mozaikasının şablona məxsus emalı */
+        map: { opacity: 0.28, filter: 'grayscale(1) brightness(.4) contrast(1.5) invert(1)', blend: 'multiply', tintOpacity: 0.25 },
         accentColor: TH.secondary,
         ctaBg: TH.accent,
         ctaText: TH.primary,

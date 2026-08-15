@@ -35,7 +35,7 @@ export function useGallery({ weddingData, isCouple, isCorp }) {
   /* ── Masa kartı SVG — qonaqların skan edəcəyi çap kartı ── */
   const downloadTableCard = useCallback(() => {
     const names = isCouple
-      ? `${weddingData?.brideName || ''} & ${weddingData?.groomName || ''}`
+      ? `${weddingData?.groomName || ''} & ${weddingData?.brideName || ''}`
       : weddingData?.brideName || weddingData?.eventName || 'Digitoy'
     const dateStr = weddingData?.date || ''
     const qrUrl = photoShareUrl

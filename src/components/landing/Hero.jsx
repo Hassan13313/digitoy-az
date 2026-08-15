@@ -34,7 +34,7 @@ const featureIcons = { countdown: Timer, maps: MapPin, dresscode: Shirt, seating
 
 function getDressStyles(tr) {
   return [
-    { id: 'blacktie',    label: tr.dresscode_blacktie_label    || 'Black Tie',    sub: tr.dresscode_blacktie_sub,    male: { icon: MaleSuitIcon, text: tr.dress_blacktie_male },    female: { icon: FemaleGownIcon, text: tr.dress_blacktie_female } },
+    { id: 'blacktie',    label: tr.dresscode_blacktie_label    || 'Rəsmi',    sub: tr.dresscode_blacktie_sub,    male: { icon: MaleSuitIcon, text: tr.dress_blacktie_male },    female: { icon: FemaleGownIcon, text: tr.dress_blacktie_female } },
     { id: 'cocktail',    label: tr.dresscode_cocktail_label    || 'Cocktail',     sub: tr.dresscode_cocktail_sub,    male: { icon: MaleSuitIcon, text: tr.dress_cocktail_male },    female: { icon: FemaleGownIcon, text: tr.dress_cocktail_female } },
     { id: 'smartcasual', label: tr.dresscode_smartcasual_label || 'Smart Casual', sub: tr.dresscode_smartcasual_sub, male: { icon: MaleSuitIcon, text: tr.dress_smartcasual_male }, female: { icon: FemaleGownIcon, text: tr.dress_smartcasual_female } },
     { id: 'creative',    label: tr.dresscode_creative_label    || 'Creative',     sub: tr.dresscode_creative_sub,    male: { icon: MaleSuitIcon, text: tr.dress_creative_male },    female: { icon: FemaleGownIcon, text: tr.dress_creative_female } },

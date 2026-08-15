@@ -25,7 +25,7 @@ export default function SeatingSearch({ seatingPlan, lang }) {
 
         {/* Header */}
         <div className="text-center mb-12">
-          <p className="text-[9px] tracking-[0.38em] uppercase text-gold mb-5 font-medium font-sans">Seating</p>
+          <p className="text-[9px] tracking-[0.38em] uppercase text-gold mb-5 font-medium font-sans">SEATING</p>
           <h2 className="font-serif text-3xl text-ink font-light tracking-tight">{L.title}</h2>
           <p className="text-brown-muted text-xs mt-3 tracking-wide font-light font-sans">{L.sub}</p>
           <div className="gold-divider mt-8 max-w-[100px] mx-auto" />

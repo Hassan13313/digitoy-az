@@ -47,7 +47,7 @@ function Opening(props) {
       <LinenTexture theme={theme} />
 
       <div style={{ position: 'relative' }}>
-        <div style={{ fontSize: 'clamp(9px, 2.6vw, 10px)', letterSpacing: '.3em', textTransform: 'uppercase', color: theme.muted }}>
+        <div style={{ fontSize: 'clamp(10px, 2.6vw, 10px)', letterSpacing: '.2em', textTransform: 'uppercase', color: theme.muted }}>
           Açıq havada toy
         </div>
 
@@ -61,7 +61,7 @@ function Opening(props) {
         <OpeningNames theme={theme} weddingData={weddingData} isCouple={isCouple} lang={lang} />
 
         {place && (
-          <div style={{ fontSize: 9, letterSpacing: '.26em', textTransform: 'uppercase', color: theme.accent, marginTop: 10 }}>
+          <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: theme.accent, marginTop: 10 }}>
             {place}
           </div>
         )}
@@ -88,10 +88,12 @@ export default function NatureTouchTemplate(props) {
         buttonRadius: 100,
         align: 'center',
         headingTransform: 'none',
-        kicker: '.3em',
+        kicker: '.2em',
         dark: false,
         alternate: true,
         motion: 'settle',
+        /* Location — OSM tile mozaikasının şablona məxsus emalı */
+        map: { opacity: 0.5, filter: 'grayscale(1) brightness(1.05) contrast(.95)', tintOpacity: 0.45 },
         headingColor: TH.text,
       }}
     />

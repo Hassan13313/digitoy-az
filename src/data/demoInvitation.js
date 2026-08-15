@@ -17,7 +17,7 @@ export const demoInvitation = {
 
   dressCodePalette: 'blacktie',
   dressCodeDescription:
-    'Bəylər üçün: Black Tie / Tünd Kostyum. Xanımlar üçün: Zərif pastel tonlarında axşam libası.',
+    'Zəhmət olmasa ağ və açıq bej rənglərdən çəkinin — bu, gəlinin rəngidir.',
 
   seatingPlan: [
     'Masa 1: Nicat Əliyev, Rauf Babayev, Günel İsmayılova, Elnar Hüseynov',
@@ -52,7 +52,7 @@ export const demoInvitation = {
 
   programSteps: [
     { time: '18:00', icon: '🥂', activity: 'Qonaqların Möhtəşəm Qarşılanması' },
-    { time: '19:00', icon: '💍', activity: 'Gəlin və Bəyin Möhtəşəm Girişi' },
+    { time: '19:00', icon: '💍', activity: 'Bəy və Gəlinin Möhtəşəm Girişi' },
     { time: '20:00', icon: '🍽️', activity: 'Şah Süfrəsi — Gala Ziyafəti' },
     { time: '21:00', icon: '💃', activity: 'Şah Naxış Rəqsi' },
     { time: '22:30', icon: '🎂', activity: 'Tort Kəsilməsi' },

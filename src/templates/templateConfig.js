@@ -15,7 +15,6 @@
      name      — istifadəçiyə görünən ad
      tagline   — builder kartının alt sətri
      enabled   — true → real müştəri dəvətnaməsində istifadə oluna bilər
-     premium   — true → yalnız VIP/PREMIUM paketlərdə (hələ tətbiq edilmir)
      status    — 'live' | 'scaffold' | 'planned'
      theme     — dizayn tokenləri (rəng + şrift), şablon komponentləri oxuyur
      preview   — builder thumbnail-ı üçün vizual reseptlər
@@ -32,6 +31,7 @@ export const TEMPLATE_STATUS = {
   LIVE:        'live',         /* production-a tam hazır                       */
   BETA:        'beta',         /* seçilə bilər, amma hələ cilalanır            */
   COMING_SOON: 'coming_soon',  /* qalereyada görünür, seçilə BİLMƏZ            */
+  CONCEPT:     'concept',      /* yalnız dizayn konsepti — hələ qurulmayıb     */
   DISABLED:    'disabled',     /* tamamilə gizli (nasaz/təqaüdə çıxmış şablon) */
 }
 
@@ -44,7 +44,66 @@ export const STATUS_META = {
   live:        { az: 'Canlı',    en: 'Live',        ru: 'Актив',   tone: 'positive' },
   beta:        { az: 'Beta',     en: 'Beta',        ru: 'Бета',    tone: 'info'     },
   coming_soon: { az: 'Tezliklə', en: 'Soon',        ru: 'Скоро',   tone: 'muted'    },
+  concept:     { az: 'Konsept',  en: 'Concept',     ru: 'Концепт', tone: 'muted'    },
   disabled:    { az: 'Bağlı',    en: 'Disabled',    ru: 'Отключён',tone: 'muted'    },
+}
+
+/* ── Kateqoriya metası (şablon vitrinindəki filtr üçün) ─────────────────────
+   ⚠ TƏK MƏNBƏ: `/templates` səhifəsi və builder filtrləri bu obyektdən oxuyur.
+   Yeni kateqoriyalı şablon əlavə ediləndə YALNIZ bura bir sətir yazılır —
+   filtr çipləri, sayğaclar və tərcümələr avtomatik gəlir.
+   Naməlum kateqoriya üçün `getCategoryMeta` id-nin özünü qaytarır, yəni
+   bura yazmaq unudulsa da səhifə sınmır. */
+export const CATEGORY_META = {
+  classic:   { az: 'Klassik',  en: 'Classic',   ru: 'Классика'  },
+  luxury:    { az: 'Lüks',     en: 'Luxury',    ru: 'Люкс'      },
+  floral:    { az: 'Çiçəkli',  en: 'Floral',    ru: 'Цветочный' },
+  modern:    { az: 'Modern',   en: 'Modern',    ru: 'Модерн'    },
+  minimal:   { az: 'Minimal',  en: 'Minimal',   ru: 'Минимализм'},
+  celestial: { az: 'Səma',     en: 'Celestial', ru: 'Небесный'  },
+  oriental:  { az: 'Şərq',     en: 'Oriental',  ru: 'Восточный' },
+  nature:    { az: 'Təbiət',   en: 'Nature',    ru: 'Природа'   },
+  crystal:   { az: 'Kristal',  en: 'Crystal',   ru: 'Кристалл'  },
+}
+
+/** Kateqoriya id → görünən ad (naməlum id-də id-nin özü) */
+export function getCategoryLabel(category, lang = 'az') {
+  const m = CATEGORY_META[category]
+  return m ? (m[lang] || m.az) : (category || '')
+}
+
+/**
+ * Vitrində göstəriləcək filtr qrupları — YALNIZ mövcud şablonlardan hesablanır,
+ * ona görə boş çip heç vaxt çıxmır (20+ şablonda da özü uyğunlaşır).
+ * @returns {{ statuses: Array, categories: Array }} hər element { id, label, count }
+ */
+export function listTemplateFacets(lang = 'az') {
+  const list = listTemplates()
+  const tally = (key) => {
+    const map = new Map()
+    list.forEach((tpl) => {
+      const v = tpl[key]
+      if (!v) return
+      map.set(v, (map.get(v) || 0) + 1)
+    })
+    return map
+  }
+
+  const sMap = tally('status')
+  /* Status sırası məntiqi ardıcıllıqla sabitdir (əlifba sırası deyil) */
+  const statuses = [
+    TEMPLATE_STATUS.LIVE, TEMPLATE_STATUS.BETA,
+    TEMPLATE_STATUS.COMING_SOON, TEMPLATE_STATUS.CONCEPT,
+  ]
+    .filter((s) => sMap.has(s))
+    .map((s) => ({ id: s, label: getStatusMeta(s, lang).label, tone: STATUS_META[s]?.tone, count: sMap.get(s) }))
+
+  const cMap = tally('category')
+  const categories = [...cMap.entries()]
+    .map(([id, count]) => ({ id, label: getCategoryLabel(id, lang), count }))
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, 'az'))
+
+  return { statuses, categories }
 }
 
 /** Status badge metası (naməlum statusda coming_soon) */
@@ -79,7 +138,6 @@ export const TEMPLATES = [
     category: 'classic',
     version: 1,
     previewRoute: '/demo/template/simple-luxury',
-    premium: false,
     theme: {
       primary:   '#C5A059',
       accent:    '#E8D5A3',
@@ -104,11 +162,10 @@ export const TEMPLATES = [
     tagline: 'Qızıl · Zərf möhürü · Gecə',
     description: 'Klassik Bakı toyunun rəqəmsal versiyası — möhürlənmiş zərf, tünd fon, qızıl folqa.',
     shortDescription: { az: 'Klassik lüks toy üslubu', en: 'Classic luxury wedding style' },
-    status: TEMPLATE_STATUS.BETA,
+    status: TEMPLATE_STATUS.LIVE,
     category: 'luxury',
     version: 1,
     previewRoute: '/demo/template/royal-gold',
-    premium: true,
     theme: {
       primary:   '#C5A059',
       accent:    '#E8D5A3',
@@ -116,7 +173,8 @@ export const TEMPLATES = [
       background: '#0B0906',
       surface:   '#16110A',
       text:      '#F3EADA',
-      muted:     '#8C7B6B',
+      muted:     '#C6B59C',
+      mapTint:  '#C5A059',
       footerBg:  '#14100B',
       footerText: '#C5A059',
       fonts: { heading: FONT_STACKS.cormorant, body: FONT_STACKS.dmsans },
@@ -133,11 +191,10 @@ export const TEMPLATES = [
     tagline: 'Adaçayı · Tozlu qızılgül · Botanik',
     description: 'Gündüz, açıq havada, ot üzərində keçən toy. Qızıl yox — işıq və bitki.',
     shortDescription: { az: 'Botanik bağ mərasimi üslubu', en: 'Botanical garden ceremony style' },
-    status: TEMPLATE_STATUS.BETA,
+    status: TEMPLATE_STATUS.LIVE,
     category: 'floral',
     version: 1,
     previewRoute: '/demo/template/floral-garden',
-    premium: false,
     theme: {
       primary:   '#7E8C6E',
       accent:    '#C98F84',
@@ -145,7 +202,8 @@ export const TEMPLATES = [
       background: '#FBF7F2',
       surface:   '#F3EFE8',
       text:      '#3E3730',
-      muted:     '#8A8175',
+      muted:     '#6F6960',
+      mapTint:  '#7E8C6E',
       footerBg:  '#3E4A3A',
       footerText: '#E7CFC8',
       fonts: { heading: FONT_STACKS.cormorant, body: FONT_STACKS.jost },
@@ -166,7 +224,6 @@ export const TEMPLATES = [
     category: 'modern',
     version: 0,
     previewRoute: '/demo/template/modern-black',
-    premium: true,
     theme: {
       primary:   '#0A0A0A',
       accent:    '#FFFFFF',
@@ -174,7 +231,8 @@ export const TEMPLATES = [
       background: '#050505',
       surface:   '#111111',
       text:      '#FFFFFF',
-      muted:     '#6C6C6C',
+      muted:     '#7A7A7A',
+      mapTint:  '#000000',
       footerBg:  '#000000',
       footerText: '#D6D3CD',
       fonts: { heading: FONT_STACKS.archivo, body: FONT_STACKS.archivo, accentFont: FONT_STACKS.instrument },
@@ -195,21 +253,21 @@ export const TEMPLATES = [
     category: 'minimal',
     version: 0,
     previewRoute: '/demo/template/white-elegance',
-    premium: false,
     theme: {
       primary:   '#FFFFFF',
-      accent:    '#A79C90',
+      accent:    '#8B8175',
       secondary: '#DDD8D0',
       background: '#F2EFEA',
       surface:   '#FAF8F5',
       text:      '#2B2723',
-      muted:     '#A79C90',
+      muted:     '#8B8175',
+      mapTint:  '#8B8175',
       footerBg:  '#2B2723',
       footerText: '#DDD8D0',
       fonts: { heading: FONT_STACKS.marcellus, body: FONT_STACKS.jost },
     },
     preview: {
-      accent: '#A79C90',
+      accent: '#8B8175',
       background: '#FFFFFF',
       swatches: ['#FFFFFF', '#A79C90', '#2B2723'],
     },
@@ -224,7 +282,6 @@ export const TEMPLATES = [
     category: 'celestial',
     version: 0,
     previewRoute: '/demo/template/night-sky',
-    premium: true,
     theme: {
       primary:   '#1B2340',
       accent:    '#C8CEE0',
@@ -232,7 +289,8 @@ export const TEMPLATES = [
       background: '#070B18',
       surface:   '#0F1526',
       text:      '#E4E9F5',
-      muted:     '#8F98B0',
+      muted:     '#8A90A4',
+      mapTint:  '#2C3A5C',
       footerBg:  '#04060F',
       footerText: '#C8CEE0',
       fonts: { heading: FONT_STACKS.cormorant, body: FONT_STACKS.jost },
@@ -253,7 +311,6 @@ export const TEMPLATES = [
     category: 'oriental',
     version: 0,
     previewRoute: '/demo/template/oriental-luxe',
-    premium: true,
     theme: {
       primary:   '#4A0F1C',
       accent:    '#D9B36C',
@@ -261,7 +318,8 @@ export const TEMPLATES = [
       background: '#38080F',
       surface:   '#3E0C17',
       text:      '#F1DDB4',
-      muted:     '#B98F72',
+      muted:     '#C79E86',
+      mapTint:  '#7C2233',
       footerBg:  '#2A050B',
       footerText: '#E9CE96',
       fonts: { heading: FONT_STACKS.amiri, body: FONT_STACKS.jost },
@@ -282,7 +340,6 @@ export const TEMPLATES = [
     category: 'nature',
     version: 0,
     previewRoute: '/demo/template/nature-touch',
-    premium: false,
     theme: {
       primary:   '#3E4A3A',
       accent:    '#B4693E',
@@ -290,7 +347,8 @@ export const TEMPLATES = [
       background: '#EDE8DE',
       surface:   '#E3DED1',
       text:      '#2F3A2C',
-      muted:     '#7A7566',
+      muted:     '#7E7869',
+      mapTint:  '#5E6B4E',
       footerBg:  '#2F3A2C',
       footerText: '#EDE8DE',
       fonts: { heading: FONT_STACKS.newsreader, body: FONT_STACKS.jost },
@@ -311,7 +369,6 @@ export const TEMPLATES = [
     category: 'crystal',
     version: 0,
     previewRoute: '/demo/template/crystal-glass',
-    premium: true,
     theme: {
       primary:   '#2E3A44',
       accent:    '#7E8D99',
@@ -319,7 +376,8 @@ export const TEMPLATES = [
       background: '#F4F7FA',
       surface:   '#EAF0F4',
       text:      '#2E3A44',
-      muted:     '#93A1AC',
+      muted:     '#66727D',
+      mapTint:  '#7E8D99',
       footerBg:  '#2E3A44',
       footerText: '#DCE6EE',
       fonts: { heading: FONT_STACKS.italiana, body: FONT_STACKS.jost },

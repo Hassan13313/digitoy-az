@@ -1,12 +1,15 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { QRCodeSVG } from 'qrcode.react'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
-import DressCodeCard from './DressCodeCard'
+import DressCodeSection from './DressCodeSection'
+import MapMosaic, { MapRings } from './MapMosaic'
+import { parseLatLon } from './geo'
+import { OrderCta, MusicStartBubble } from './TemplateActions'
+import TemplateOutro from './TemplateOutro'
 import { buildPresetMusic, PRESET_TRACKS, MUSIC_PLAY_MODES } from '../../data/music'
 import { getPackageGates } from '../../data/packages'
-import { formatAzDate, formatFullDateByLang, formatTime24 } from '../../utils/dateFormat'
-import { isAudioUnlocked } from '../../utils/audioUnlock'
+import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
 import { trackEvent } from '../../utils/analytics'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
 import { useCountdown } from '../../hooks/useCountdown'
@@ -71,7 +74,7 @@ function Reveal({ children, style, motionStyle = 'fade' }) {
 function SectionHead({ kicker, title, sub, theme, design, serif }) {
   return (
     <div style={{ marginBottom: 18, textAlign: design.align }}>
-      <div style={{ fontSize: 9, letterSpacing: design.kicker, textTransform: 'uppercase', color: design.accentColor || theme.primary }}>{kicker}</div>
+      <div style={{ fontSize: 10, letterSpacing: design.kicker, textTransform: 'uppercase', color: design.accentColor || theme.primary }}>{kicker}</div>
       <div style={{
         fontFamily: serif, fontStyle: design.headingStyle, fontWeight: 300,
         fontSize: 'clamp(21px, 6vw, 26px)', color: design.headingColor || theme.accent, marginTop: 6, lineHeight: 1.25,
@@ -91,14 +94,14 @@ export default function TemplateShell({
 }) {
   const tr = t[lang] || t.az
   const [opened, setOpened] = useState(false)
-  const musicRef = useRef(null)
+  const [showMusicPrompt, setShowMusicPrompt] = useState(false)
 
   const D = {
     radius: 16,
     align: 'center',
     headingTransform: 'none',
     headingStyle: 'normal',
-    kicker: '.32em',
+    kicker: '.2em',
     dark: false,
     alternate: true,
     motion: 'fade',
@@ -117,6 +120,9 @@ export default function TemplateShell({
   const serif = theme.fonts?.heading
   const sans  = theme.fonts?.body
 
+  /* Location: koordinat varsa real xəritə, yoxsa köhnə abstrakt kart */
+  const hasCoords = !!parseLatLon(weddingData)
+
   const isCouple = ['toy', 'nishan'].includes(weddingData.eventType)
   const isCorp   = ['corporate', 'other'].includes(weddingData.eventType)
 
@@ -128,7 +134,6 @@ export default function TemplateShell({
   const eventLabel = eventLabels[weddingData.eventType] || tr.event_toy
 
   const invMusic  = weddingData?.music || DEFAULT_MUSIC
-  const autoStart = weddingData?.music ? invMusic.playMode === 'auto' : true
 
   const activePkgId = isDemoMode ? 'PREMIUM' : (weddingData.package || 'SADE')
   const { allowRsvp: canShowRsvp, allowSeating: canShowSeating, allowGallery: canShowGallery } = getPackageGates(activePkgId)
@@ -142,17 +147,17 @@ export default function TemplateShell({
   const gallery  = useGallery({ weddingData, isCouple, isCorp })
   const music    = useMusicPlayer({ lang, music: invMusic })
 
-  useEffect(() => { musicRef.current = { play: music.play, pause: music.pause } })
-
   useEffect(() => {
     if (!isDemoMode) trackEvent('invitation_opened', { lang, event_type: weddingData?.eventType })
   }, [])
 
+  /* ⚠ Phase 27: AUTOPLAY SİLİNDİ. Zərf açılandan sonra yalnız "Musiqini
+     Başlat" bubble-ı göstərilir — səs YALNIZ qonaq ona toxunanda başlayır. */
   useEffect(() => {
-    if (!opened) return
-    const id = setTimeout(() => { if (isAudioUnlocked() && autoStart) musicRef.current?.play() }, 900)
+    if (!opened || !music.hasMusic) return
+    const id = setTimeout(() => setShowMusicPrompt(true), 900)
     return () => clearTimeout(id)
-  }, [opened, autoStart])
+  }, [opened, music.hasMusic])
 
   const { formattedDate, dayName } = formatAzDate(weddingData.date, lang)
 
@@ -172,7 +177,7 @@ export default function TemplateShell({
   const btn = (filled) => ({
     flex: 1, minWidth: 88, textAlign: 'center', display: 'block',
     padding: 'clamp(11px, 3vw, 13px) 6px', borderRadius: D.buttonRadius,
-    fontSize: 'clamp(9px, 2.4vw, 9.5px)', letterSpacing: '.14em', textTransform: 'uppercase',
+    fontSize: 'clamp(10px, 2.4vw, 9.5px)', letterSpacing: '.14em', textTransform: 'uppercase',
     fontFamily: sans, cursor: 'pointer', textDecoration: 'none',
     background: filled ? CTA_BG : 'transparent',
     color: filled ? CTA_TXT : theme.accent,
@@ -186,7 +191,7 @@ export default function TemplateShell({
   }
 
   const names = isCouple
-    ? `${weddingData.brideName || ''}\n${weddingData.groomName || ''}`
+    ? `${weddingData.groomName || ''}\n${weddingData.brideName || ''}`
     : (weddingData.eventName || weddingData.brideName || '')
 
   return (
@@ -234,6 +239,13 @@ export default function TemplateShell({
               }} />
             ))}
           </button>
+
+          {/* Musiqini başlat bubble — YALNIZ start helper-idir:
+              musiqi artıq çalırsa klik heç nə etmir (pause/stop YOX). */}
+          <MusicStartBubble
+            theme={theme} lang={lang} visible={showMusicPrompt} playing={music.playing}
+            onStart={() => { if (!music.playing) music.play(); setShowMusicPrompt(false) }}
+          />
         </>
       )}
 
@@ -253,7 +265,7 @@ export default function TemplateShell({
             }}>
               <button onClick={onBack} style={{
                 display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none',
-                fontSize: 9, letterSpacing: '.18em', textTransform: 'uppercase', color: theme.muted,
+                fontSize: 10, letterSpacing: '.14em', textTransform: 'uppercase', color: theme.muted,
                 cursor: 'pointer', fontFamily: sans, minHeight: 44, padding: '0 8px 0 0',
               }}>
                 <span>←</span>{tr.btn_back}
@@ -268,10 +280,10 @@ export default function TemplateShell({
             {/* 04 — HERO */}
             <section style={{ ...sectionStyle(0), padding: 'clamp(40px, 10vw, 56px) clamp(18px, 6vw, 28px) clamp(34px, 8vw, 48px)' }}>
               <div style={inner}>
-                <div style={{ fontSize: 9, letterSpacing: '.45em', textTransform: 'uppercase', color: ACC, marginBottom: 12 }}>
+                <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: ACC, marginBottom: 12 }}>
                   {eventLabel}
                 </div>
-                <div style={{ fontFamily: serif, fontSize: 11, letterSpacing: '.3em', textTransform: 'uppercase', color: theme.muted }}>
+                <div style={{ fontFamily: serif, fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', color: theme.muted }}>
                   {tr.inv_join}
                 </div>
                 <h1 style={{
@@ -283,15 +295,15 @@ export default function TemplateShell({
                 }}>
                   {isCouple ? (
                     <>
-                      {weddingData.brideName}
-                      <span style={{ display: 'block', fontSize: '.5em', color: ACC, margin: '2px 0', fontStyle: 'italic' }}>{tr.inv_and}</span>
                       {weddingData.groomName}
+                      <span style={{ display: 'block', fontSize: '.5em', color: ACC, margin: '2px 0', fontStyle: 'italic' }}>{tr.inv_and}</span>
+                      {weddingData.brideName}
                     </>
                   ) : names}
                 </h1>
 
                 {isCorp && weddingData.organizer?.trim() && (
-                  <div style={{ fontSize: 10, letterSpacing: '.24em', textTransform: 'uppercase', color: ACC, marginTop: 10 }}>
+                  <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: ACC, marginTop: 10 }}>
                     {tr.organizer_display}: {weddingData.organizer}
                   </div>
                 )}
@@ -309,7 +321,7 @@ export default function TemplateShell({
                   {[dayName, weddingData.time ? formatTime24(weddingData.time) : ''].filter(Boolean).join(' · ')}
                 </div>
                 {weddingData.venueName && (
-                  <div style={{ fontSize: 10, letterSpacing: '.26em', textTransform: 'uppercase', color: theme.muted, marginTop: 14 }}>
+                  <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: theme.muted, marginTop: 14 }}>
                     {weddingData.venueName}
                   </div>
                 )}
@@ -341,7 +353,7 @@ export default function TemplateShell({
                       <div style={{ fontFamily: serif, fontSize: 'clamp(20px, 6vw, 26px)', color: HEAD, fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
                         {String(v).padStart(2, '0')}
                       </div>
-                      <div style={{ fontSize: 7.5, letterSpacing: '.16em', textTransform: 'uppercase', color: theme.muted, marginTop: 5 }}>{l}</div>
+                      <div style={{ fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase', color: theme.muted, marginTop: 5 }}>{l}</div>
                     </div>
                   ))}
                 </div>
@@ -351,19 +363,35 @@ export default function TemplateShell({
             {/* 06 — LOCATION */}
             <section style={sectionStyle(2)}>
               <Reveal style={inner} motionStyle={D.motion}>
-                <SectionHead kicker="Location" title={tr.inv_location} theme={theme} design={D} serif={serif} />
+                <SectionHead kicker="LOCATION" title={tr.inv_location} theme={theme} design={D} serif={serif} />
                 <div style={{ borderRadius: D.radius, overflow: 'hidden', border: `1px solid ${line}` }}>
+                  {/* Hibrid xəritə — məkanın koordinatı varsa real OSM tile mozaikası,
+                      yoxdursa köhnə abstrakt şəbəkə kartı (heç vaxt boş blok olmur). */}
                   <div style={{
-                    height: 'clamp(110px, 26vw, 136px)', position: 'relative', overflow: 'hidden',
-                    background: `linear-gradient(140deg, ${alpha(theme.primary, 0.28)}, ${alpha(theme.secondary || theme.primary, 0.16)})`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    position: 'relative', overflow: 'hidden',
+                    background: `radial-gradient(120% 120% at 50% 50%, ${alpha(theme.primary, 0.22)}, ${alpha(theme.background, 0.9)})`,
+                    borderBottom: `1px solid ${alpha(theme.primary, 0.22)}`,
                   }}>
-                    <span style={{
-                      position: 'absolute', inset: 0, opacity: 0.2,
-                      backgroundImage: `linear-gradient(${alpha(theme.accent, 0.35)} 1px, transparent 1px), linear-gradient(90deg, ${alpha(theme.accent, 0.35)} 1px, transparent 1px)`,
-                      backgroundSize: '26px 26px',
-                    }} />
-                    <span style={{ width: 12, height: 12, borderRadius: '50%', background: ACC, boxShadow: `0 0 0 8px ${alpha(theme.primary, 0.16)}` }} />
+                    <MapMosaic
+                      weddingData={weddingData}
+                      theme={theme}
+                      map={D.map}
+                      frame={<MapRings accent={ACC} />}
+                    />
+                    {!hasCoords && (
+                      <div style={{
+                        height: 'clamp(148px, 42vw, 168px)', position: 'relative', overflow: 'hidden',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <span style={{
+                          position: 'absolute', inset: 0, opacity: 0.2,
+                          backgroundImage: `linear-gradient(${alpha(theme.accent, 0.35)} 1px, transparent 1px), linear-gradient(90deg, ${alpha(theme.accent, 0.35)} 1px, transparent 1px)`,
+                          backgroundSize: '26px 26px',
+                        }} />
+                        <MapRings accent={ACC} />
+                        <span style={{ width: 12, height: 12, borderRadius: '50%', background: ACC, boxShadow: `0 0 0 8px ${alpha(theme.primary, 0.16)}` }} />
+                      </div>
+                    )}
                   </div>
                   <div style={{ padding: 'clamp(14px, 4vw, 18px)', background: card }}>
                     <div style={{ fontFamily: serif, fontSize: 'clamp(17px, 5vw, 20px)', color: theme.text }}>
@@ -408,17 +436,16 @@ export default function TemplateShell({
             {/* 08 — DRESS CODE (ortaq komponent) */}
             <section style={sectionStyle(4)}>
               <Reveal style={inner} motionStyle={D.motion}>
-                <SectionHead kicker="Style" title={tr.inv_dresscode} theme={theme} design={D} serif={serif} />
-                <div style={{ textAlign: 'left' }}>
-                  <DressCodeCard
-                    theme={theme}
-                    paletteId={weddingData.dressCodePalette}
-                    note={weddingData.dressCodeDescription}
-                    lang={lang}
-                    isCouple={isCouple}
-                    onDark={D.dark}
-                  />
-                </div>
+                <SectionHead kicker="STYLE" title={tr.inv_dresscode} theme={theme} design={D} serif={serif} />
+                <DressCodeSection
+                  theme={theme}
+                  paletteId={weddingData.dressCodePalette}
+                  note={weddingData.dressCodeDescription}
+                  lang={lang}
+                  serif={serif}
+                  align={D.align}
+                  onDark={D.dark}
+                />
               </Reveal>
             </section>
 
@@ -426,7 +453,7 @@ export default function TemplateShell({
             {canShowSeating && !seating.isEmpty && (
               <section style={sectionStyle(5)}>
                 <Reveal style={inner} motionStyle={D.motion}>
-                  <SectionHead kicker="Seating" title={seating.labels.title} sub={seating.labels.sub} theme={theme} design={D} serif={serif} />
+                  <SectionHead kicker="SEATING" title={seating.labels.title} sub={seating.labels.sub} theme={theme} design={D} serif={serif} />
                   {/* ⚠ Təkliflər siyahısı normal document flow-da — overlap olmur */}
                   <div style={{ textAlign: 'left' }}>
                     <input
@@ -465,7 +492,7 @@ export default function TemplateShell({
                             <span style={{ fontSize: 13, color: theme.text, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{g.full_name}</span>
                             <span style={{
                               background: CTA_BG, color: CTA_TXT,
-                              fontSize: 9, letterSpacing: '.1em', padding: '4px 9px',
+                              fontSize: 10, letterSpacing: '.1em', padding: '4px 9px',
                               borderRadius: D.buttonRadius === 0 ? 0 : 100, whiteSpace: 'nowrap', flexShrink: 0,
                             }}>{g.table_id}</span>
                           </li>
@@ -474,7 +501,7 @@ export default function TemplateShell({
                     )}
 
                     {seating.showNotFound && (
-                      <div style={{ marginTop: 12, fontSize: 12, color: theme.muted }}>{tr.inv_seat_fullname}</div>
+                      <div style={{ marginTop: 12, fontSize: 12.5, color: theme.muted }}>{tr.inv_seat_fullname}</div>
                     )}
 
                     {seating.selected && (
@@ -482,7 +509,7 @@ export default function TemplateShell({
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
                           <span style={{ fontSize: 13, color: theme.text }}>{seating.selected.full_name}</span>
                           <span style={{
-                            background: CTA_BG, color: CTA_TXT, fontSize: 9,
+                            background: CTA_BG, color: CTA_TXT, fontSize: 10,
                             letterSpacing: '.1em', padding: '4px 10px', borderRadius: D.buttonRadius === 0 ? 0 : 100,
                             textTransform: 'uppercase', whiteSpace: 'nowrap',
                           }}>{seating.selected.table_id}</span>
@@ -492,7 +519,7 @@ export default function TemplateShell({
                         </div>
                         <button onClick={seating.reset} style={{
                           marginTop: 6, background: 'none', border: 'none', cursor: 'pointer',
-                          fontSize: 10, letterSpacing: '.16em', textTransform: 'uppercase',
+                          fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase',
                           color: ACC, fontFamily: sans, minHeight: 44, padding: '0 8px 0 0',
                         }}>Yenidən axtar</button>
                       </div>
@@ -526,16 +553,14 @@ export default function TemplateShell({
                     }}>
                       <QRCodeSVG value={gallery.photoShareUrl} size={104} bgColor="#FFFFFF" fgColor="#1A1A1A" level="M" />
                     </div>
-                    <div style={{ fontSize: 8, letterSpacing: '.28em', textTransform: 'uppercase', color: theme.muted, marginTop: 12 }}>
-                      Scan to upload
+                    <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: theme.muted, marginTop: 12 }}>
+                      {tr.inv_scan_upload}
                     </div>
 
-                    <a href={gallery.photoShareUrl} style={{ ...btn(true), marginTop: 14, padding: 13 }}>📷 Şəkilləri Paylaş</a>
-                    <button onClick={gallery.downloadTableCard} style={{ ...btn(false), marginTop: 8, padding: 13, width: '100%' }}>
-                      ⤓ Masa kartını yüklə
-                    </button>
+                    <a href={gallery.photoShareUrl} style={{ ...btn(true), marginTop: 14, padding: 13 }}>📷 {tr.inv_gallery_btn}</a>
+                    {/* ⚠ Phase 27: "Masa kartını yüklə" tamamilə silindi (QR + foto paylaşımı qalır) */}
 
-                    <div style={{ fontSize: 12, color: theme.muted, marginTop: 14, lineHeight: 1.8 }}>{tr.inv_gallery_desc}</div>
+                    <div style={{ fontSize: 12.5, color: theme.muted, marginTop: 14, lineHeight: 1.8 }}>{tr.inv_gallery_desc}</div>
                   </div>
                 </Reveal>
               </section>
@@ -545,14 +570,14 @@ export default function TemplateShell({
             {canShowRsvp && (
               <section style={sectionStyle(7)}>
                 <Reveal style={inner} motionStyle={D.motion}>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 9, letterSpacing: '.42em', textTransform: 'uppercase', color: ACC }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: ACC }}>
                     <span style={{ width: 22, height: 1, background: alpha(ACC, 0.6) }} />RSVP
                     <span style={{ width: 22, height: 1, background: alpha(ACC, 0.6) }} />
                   </div>
                   <div style={{ fontFamily: serif, fontStyle: D.headingStyle, fontSize: 'clamp(22px, 6.5vw, 28px)', color: HEAD, marginTop: 12, lineHeight: 1.3 }}>
                     {rsvp.labels.title}
                   </div>
-                  <div style={{ fontSize: 12, color: theme.muted, margin: '10px 0 20px' }}>{rsvp.labels.subtitle}</div>
+                  <div style={{ fontSize: 12.5, color: theme.muted, margin: '10px 0 20px' }}>{rsvp.labels.subtitle}</div>
 
                   {rsvp.rsvpClosed && !rsvp.submitted ? (
                     <div style={{ background: card, border: `1px solid ${line}`, borderRadius: D.radius, padding: 22 }}>
@@ -603,7 +628,7 @@ export default function TemplateShell({
                                 }}
                               >
                                 <span style={{ fontSize: 13, color: theme.text }}>{g.full_name}</span>
-                                <span style={{ fontSize: 9, letterSpacing: '.1em', color: ACC }}>{g.table_id}</span>
+                                <span style={{ fontSize: 10, letterSpacing: '.1em', color: ACC }}>{g.table_id}</span>
                               </li>
                             ))}
                           </ul>
@@ -626,7 +651,7 @@ export default function TemplateShell({
                               style={{
                                 flex: '1 1 40%', minWidth: 110, minHeight: 48, cursor: 'pointer',
                                 borderRadius: D.buttonRadius, padding: '13px 8px',
-                                fontSize: 'clamp(9.5px, 2.6vw, 10.5px)', letterSpacing: '.16em',
+                                fontSize: 'clamp(10px, 2.6vw, 10.5px)', letterSpacing: '.12em',
                                 textTransform: 'uppercase', fontFamily: sans,
                                 background: active ? CTA_BG : 'transparent',
                                 color: active ? CTA_TXT : theme.accent,
@@ -655,37 +680,15 @@ export default function TemplateShell({
                         marginTop: 12, width: '100%', minHeight: 50, border: 'none', borderRadius: D.buttonRadius,
                         background: CTA_BG, color: CTA_TXT,
                         cursor: rsvp.canSubmit ? 'pointer' : 'not-allowed',
-                        fontSize: 11, letterSpacing: '.18em', textTransform: 'uppercase', fontFamily: sans,
+                        fontSize: 11, letterSpacing: '.14em', textTransform: 'uppercase', fontFamily: sans,
                         opacity: rsvp.canSubmit ? 1 : 0.35,
                       }}>{rsvp.sending ? '…' : rsvp.labels.send}</button>
                     </form>
                   )}
 
-                  {rsvp.stats && (
-                    <div style={{ marginTop: 22, background: card, border: `1px solid ${line}`, borderRadius: D.radius, overflow: 'hidden', textAlign: 'left' }}>
-                      <div style={{ padding: '12px 16px', borderBottom: `1px solid ${alpha(theme.accent, 0.15)}`, display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: 9, letterSpacing: '.26em', textTransform: 'uppercase', color: ACC }}>Cəmi cavab</span>
-                        <span style={{ fontSize: 9, color: theme.muted }}>{rsvp.stats.responded}/{rsvp.stats.total}</span>
-                      </div>
-                      <div style={{ padding: '14px 16px 0' }}>
-                        <div style={{ height: 2, background: alpha(theme.muted, 0.25) }}>
-                          <div style={{ width: `${rsvp.stats.total ? Math.round((rsvp.stats.responded / rsvp.stats.total) * 100) : 0}%`, height: '100%', background: ACC }} />
-                        </div>
-                      </div>
-                      <div style={{ padding: '8px 0 4px' }}>
-                        {[
-                          { l: 'İştirak edəcək', v: rsvp.stats.going,    c: HEAD },
-                          { l: 'Gəlməyəcək',     v: rsvp.stats.notGoing, c: theme.muted },
-                          { l: 'Əlavə qonaq',    v: rsvp.stats.extra,    c: ACC },
-                        ].map(({ l, v, c }) => (
-                          <div key={l} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 16px' }}>
-                            <span style={{ fontSize: 10, color: theme.muted }}>{l}</span>
-                            <span style={{ fontFamily: serif, fontSize: 22, color: c }}>{v}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  {/* ⚠ Phase 27: RSVP statistika paneli SİLİNDİ — qonaq digər
+                      qonaqların cavablarını görməməlidir. `rsvp.stats` hook-da
+                      qalır (API dəyişmir), sadəcə render olunmur. */}
                 </Reveal>
               </section>
             )}
@@ -701,7 +704,7 @@ export default function TemplateShell({
                   <button type="submit" disabled={!gbook.canSubmit} style={{
                     minHeight: 46, border: 'none', borderRadius: D.buttonRadius, background: CTA_BG,
                     color: CTA_TXT, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed',
-                    fontSize: 10.5, letterSpacing: '.18em', textTransform: 'uppercase', fontFamily: sans,
+                    fontSize: 10.5, letterSpacing: '.14em', textTransform: 'uppercase', fontFamily: sans,
                     opacity: gbook.canSubmit ? 1 : 0.35,
                   }}>{gbook.sending ? gbook.labels.sending : gbook.labels.btn}</button>
                 </form>
@@ -727,24 +730,19 @@ export default function TemplateShell({
               </Reveal>
             </section>
 
-            {/* 13 — FOOTER */}
-            <footer style={{
-              padding: 'clamp(34px, 9vw, 44px) clamp(18px, 6vw, 26px) clamp(44px, 11vw, 56px)',
-              textAlign: 'center', background: theme.footerBg, borderTop: `1px solid ${alpha(theme.accent, 0.18)}`,
-            }}>
-              <div style={{ fontFamily: serif, fontStyle: D.headingStyle, fontSize: 'clamp(17px, 5vw, 19px)', color: theme.footerText, letterSpacing: '.04em' }}>
-                {isCouple ? (
-                  <>{weddingData.brideName}<span style={{ opacity: 0.4, margin: '0 10px' }}>&</span>{weddingData.groomName}</>
-                ) : (weddingData.eventName || weddingData.brideName)}
-              </div>
-              <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: alpha(theme.footerText, 0.5), marginTop: 10 }}>
-                {formatFullDateByLang(weddingData.date, lang)}
-              </div>
-              <div style={{ width: 100, height: 1, background: alpha(theme.footerText, 0.25), margin: '20px auto' }} />
-              <div style={{ fontSize: 9, letterSpacing: '.22em', textTransform: 'uppercase', color: alpha(theme.footerText, 0.4) }}>
-                Digitoy.az ilə hazırlanıb
-              </div>
-            </footer>
+            {/* 12.5 — SİFARİŞ CTA (yalnız builder önbaxışında; şərt komponentin içindədir) */}
+            <OrderCta
+              theme={theme} weddingData={weddingData} lang={lang}
+              pageSlug={gallery.pageSlug} isDemoMode={isDemoMode}
+              effectiveSlug={gallery.effectiveSlug} serif={serif}
+            />
+
+            {/* 13 — SON HİSSƏ: demo CTA + footer (9 şablonun ortağı) */}
+            <TemplateOutro
+              theme={theme} weddingData={weddingData} lang={lang}
+              isDemoMode={isDemoMode} isCouple={isCouple} isCorp={isCorp}
+              eventLabel={eventLabel} serif={serif}
+            />
           </motion.div>
         )}
       </AnimatePresence>

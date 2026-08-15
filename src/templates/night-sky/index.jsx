@@ -68,11 +68,11 @@ function Opening(props) {
       }} />
 
       <div style={{ position: 'relative' }}>
-        <div style={{ fontSize: 'clamp(9px, 2.6vw, 10px)', letterSpacing: '.3em', textTransform: 'uppercase', color: theme.muted, marginBottom: 'clamp(18px, 5vw, 24px)' }}>
+        <div style={{ fontSize: 'clamp(10px, 2.6vw, 10px)', letterSpacing: '.2em', textTransform: 'uppercase', color: theme.muted, marginBottom: 'clamp(18px, 5vw, 24px)' }}>
           O gecə göy belə görünürdü
         </div>
         <OpeningNames theme={theme} weddingData={weddingData} isCouple={isCouple} lang={lang} />
-        <div style={{ fontSize: 9, letterSpacing: '.24em', textTransform: 'uppercase', color: alpha(theme.accent, 0.7), marginTop: 10 }}>
+        <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: alpha(theme.accent, 0.7), marginTop: 10 }}>
           40°23′N · 49°52′E
         </div>
       </div>
@@ -98,10 +98,12 @@ export default function NightSkyTemplate(props) {
         buttonRadius: 100,
         align: 'center',
         headingTransform: 'none',
-        kicker: '.32em',
+        kicker: '.2em',
         dark: true,
         alternate: true,
         motion: 'rise',
+        /* Location — OSM tile mozaikasının şablona məxsus emalı */
+        map: { opacity: 0.5, filter: 'grayscale(1) brightness(.38) contrast(1.2)', tintOpacity: 0.5 },
         headingColor: TH.text,
         accentColor: TH.accent,
         ctaBg: TH.accent,

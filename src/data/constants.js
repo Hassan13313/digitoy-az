@@ -4,9 +4,9 @@ export const DRESS_CODE_PALETTES = [
     label: { az: 'Pastel', en: 'Pastel', ru: 'Пастель' },
     colors: ['#F8C8D4', '#D4C8F8', '#C8F8E8', '#F8ECC8'],
     description: {
-      az: 'Tədbirin konseptinə uyğun geyim üslubu',
-      en: 'Dress code tailored to the event concept',
-      ru: 'Дресс-код, соответствующий концепции мероприятия',
+      az: 'Kişilər üçün klassik kostyum, qadınlar üçün Rəsmi geyim',
+      en: 'Classic suit for men, formal attire for women',
+      ru: 'Классический костюм для мужчин, официальный наряд для женщин',
     },
   },
   {
@@ -14,19 +14,19 @@ export const DRESS_CODE_PALETTES = [
     label: { az: 'Torpaq Tonları', en: 'Earth Tones', ru: 'Земляные тона' },
     colors: ['#C4956A', '#8B6347', '#D4B896', '#A0785A'],
     description: {
-      az: 'Tədbirin konseptinə uyğun geyim üslubu',
-      en: 'Dress code tailored to the event concept',
-      ru: 'Дресс-код, соответствующий концепции мероприятия',
+      az: 'Kişilər üçün klassik kostyum, qadınlar üçün Rəsmi geyim',
+      en: 'Classic suit for men, formal attire for women',
+      ru: 'Классический костюм для мужчин, официальный наряд для женщин',
     },
   },
   {
     id: 'blacktie',
-    label: { az: 'Rəsmi', en: 'Black Tie', ru: 'Официальный' },
+    label: { az: 'Rəsmi', en: 'Formal', ru: 'Официальный' },
     colors: ['#1A1A1A', '#F5F5F5', '#C9A84C', '#8C8C8C'],
     description: {
-      az: 'Tədbirin konseptinə uyğun geyim üslubu',
-      en: 'Dress code tailored to the event concept',
-      ru: 'Дресс-код, соответствующий концепции мероприятия',
+      az: 'Kişilər üçün klassik kostyum, qadınlar üçün Rəsmi geyim',
+      en: 'Classic suit for men, formal attire for women',
+      ru: 'Классический костюм для мужчин, официальный наряд для женщин',
     },
   },
   {
@@ -34,9 +34,9 @@ export const DRESS_CODE_PALETTES = [
     label: { az: 'Çiçəkli Bağ', en: 'Floral Garden', ru: 'Цветочный сад' },
     colors: ['#8FAF8F', '#D4A5A5', '#F5F0E8', '#B5C9A8'],
     description: {
-      az: 'Tədbirin konseptinə uyğun geyim üslubu',
-      en: 'Dress code tailored to the event concept',
-      ru: 'Дресс-код, соответствующий концепции мероприятия',
+      az: 'Kişilər üçün klassik kostyum, qadınlar üçün Rəsmi geyim',
+      en: 'Classic suit for men, formal attire for women',
+      ru: 'Классический костюм для мужчин, официальный наряд для женщин',
     },
   },
 ]

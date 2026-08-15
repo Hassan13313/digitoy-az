@@ -53,7 +53,8 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '', draftCode = '
 
   let nameLines = ''
   if (isCouple) {
-    nameLines = `👰 Gəlin: ${data.brideName || '—'}\n🤵 Bəy: ${data.groomName || '—'}`
+    /* ⚠ Phase 27: sıra BƏY → GƏLİN (builder formasındakı sıra ilə eyni) */
+    nameLines = `🤵 Bəy: ${data.groomName || '—'}\n👰 Gəlin: ${data.brideName || '—'}`
   } else if (isCorp) {
     nameLines = `🏢 Şirkət: ${data.eventName || '—'}`
     if (data.organizer?.trim()) nameLines += `\n👤 Təşkilatçı: ${data.organizer}`

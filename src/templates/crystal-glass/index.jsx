@@ -53,7 +53,7 @@ function Opening(props) {
         padding: 'clamp(28px, 8vw, 44px) clamp(22px, 7vw, 40px)',
         maxWidth: 380, width: '100%', overflow: 'hidden',
       }}>
-        <div style={{ fontSize: 9, letterSpacing: '.34em', textTransform: 'uppercase', color: theme.accent, marginBottom: 'clamp(16px, 5vw, 24px)' }}>
+        <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: theme.accent, marginBottom: 'clamp(16px, 5vw, 24px)' }}>
           Dəvətnamə
         </div>
 
@@ -86,10 +86,12 @@ export default function CrystalGlassTemplate(props) {
         buttonRadius: 0,
         align: 'center',
         headingTransform: 'uppercase',
-        kicker: '.3em',
+        kicker: '.2em',
         dark: false,
         alternate: true,
         motion: 'fade',
+        /* Location — OSM tile mozaikasının şablona məxsus emalı */
+        map: { opacity: 0.45, filter: 'grayscale(1) brightness(1.2) contrast(.8)', tintOpacity: 0.35 },
         headingColor: TH.text,
       }}
     />

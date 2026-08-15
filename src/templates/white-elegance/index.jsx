@@ -23,7 +23,7 @@ const KEYFRAMES = `
 
 function Monogram({ theme, weddingData, isCouple }) {
   const initials = isCouple
-    ? `${(weddingData.brideName || '?')[0]}&${(weddingData.groomName || '?')[0]}`.toUpperCase()
+    ? `${(weddingData.groomName || '?')[0]}&${(weddingData.brideName || '?')[0]}`.toUpperCase()
     : ((weddingData.eventName || weddingData.brideName || '·')[0] || '·').toUpperCase()
 
   return (
@@ -62,7 +62,7 @@ function Opening(props) {
         border: `1px solid ${alpha(theme.accent, 0.2)}`,
         maxWidth: 380, width: '100%',
       }}>
-        <div style={{ fontSize: 9, letterSpacing: '.34em', textTransform: 'uppercase', color: theme.muted, marginBottom: 'clamp(18px, 5vw, 26px)' }}>
+        <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: theme.muted, marginBottom: 'clamp(18px, 5vw, 26px)' }}>
           Dəvətnamə
         </div>
         <Monogram theme={theme} weddingData={weddingData} isCouple={isCouple} />
@@ -85,10 +85,12 @@ export default function WhiteEleganceTemplate(props) {
         buttonRadius: 0,
         align: 'center',
         headingTransform: 'uppercase',
-        kicker: '.3em',
+        kicker: '.2em',
         dark: false,
         alternate: true,
         motion: 'fade',
+        /* Location — OSM tile mozaikasının şablona məxsus emalı */
+        map: { opacity: 0.42, filter: 'grayscale(1) brightness(1.28) contrast(.78)', tintOpacity: 0.3 },
         headingColor: TH.text,
         accentColor: TH.accent,
         ctaBg: TH.text,

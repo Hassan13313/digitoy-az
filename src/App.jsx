@@ -9,6 +9,7 @@ const PhotoShare       = lazy(() => import('./components/invitation/PhotoShare')
 const GalleryPage      = lazy(() => import('./components/invitation/GalleryPage'))
 const AdminApp         = lazy(() => import('./components/admin/AdminApp'))
 const AdminLoginGate   = lazy(() => import('./components/admin/AdminLoginGate'))
+const TemplatesPage    = lazy(() => import('./components/landing/TemplatesPage'))
 /* Template Engine — InvitationPage onsuz da statik import edir,
    preview marşrutu üçün ayrıca chunk yaratmağa ehtiyac yoxdur. */
 import TemplateRenderer from './templates/TemplateRenderer'
@@ -42,6 +43,15 @@ function getSEOConfig(view, { weddingData, slug } = {}) {
         type: 'website',
       }
 
+    /* Şablonlar vitrini — müştəriyə göndərilə bilən ictimai səhifə */
+    case 'templates':
+      return {
+        title: 'Dəvətnamə Şablonları — DigiToy',
+        description: 'DigiToy-un bütün rəqəmsal dəvətnamə şablonları: klassik qızıl, botanik bağ, modern qara, gecə səması və daha çoxu. Hər birinin canlı önbaxışına baxın.',
+        path: '/templates',
+        type: 'website',
+      }
+
     /* Şablon önbaxışı — yalnız daxili test marşrutu, indekslənmir */
     case 'template-preview':
       return {
@@ -53,7 +63,8 @@ function getSEOConfig(view, { weddingData, slug } = {}) {
     case 'invite': {
       const bride = weddingData?.brideName || ''
       const groom = weddingData?.groomName || ''
-      const names = [bride, groom].filter(Boolean).join(' & ')
+      /* Phase 27.1: göstərim sırası BƏY → GƏLİN (slug toxunulmur) */
+      const names = [groom, bride].filter(Boolean).join(' & ')
       const title = names ? `${names} — Toy Dəvətnaməsi | DigiToy` : 'Toy Dəvətnaməsi | DigiToy'
       const venue = weddingData?.venueName ? ` ${weddingData.venueName} məkanında` : ''
       const description = names
@@ -118,6 +129,10 @@ function decodeData(encoded) {
     return JSON.parse(new TextDecoder().decode(bytes))
   } catch { return null }
 }
+
+/* Phase 27: /demo marşrutunun şablonu. Landing-dəki bütün "Nümunə dəvətnamə"
+   CTA-ları da bura gəlir — tək mənbə budur, dəyişmək üçün yalnız bu sətir. */
+const DEMO_TEMPLATE_ID = 'floral-garden'
 
 /* ── /demo/template/:id — daxili şablon önbaxışı (production linklərinə toxunmur) ── */
 function parseTemplatePreviewId() {
@@ -227,9 +242,20 @@ export default function App() {
   const [entering,    setEntering]    = useState(false)
   /* Şablon önbaxışı (/demo/template/:id) — yalnız daxili test */
   const [previewTemplateId, setPreviewTemplateId] = useState(DEFAULT_TEMPLATE_ID)
+  /* Önbaxışdan builder-ə qayıdanda bərpa olunan paket (Phase 27.1) */
+  const [resumePackage, setResumePackage] = useState(null)
+  /* «Paketlərə keç» — landing paket kartları ilə açılsın (Phase 27.4) */
+  const [packagesIntent, setPackagesIntent] = useState(false)
 
   /* Hər view dəyişəndə <head> meta-larını yenilə (title, description, OG, Twitter, canonical) */
   useSEO(getSEOConfig(view, { weddingData, slug: adminSlug || parseInviteSlug().slug }))
+
+  /* ⚠ KRİTİK LOCALE DÜZƏLİŞİ (Phase 27): `<html lang>` statik olaraq "az" idi və
+     dil dəyişəndə yenilənmirdi. CSS `text-transform: uppercase` element dilinə
+     görə işlədiyi üçün Azərbaycan qaydası BÜTÜN mətnə tətbiq olunurdu:
+     ingilis "Wedding" → "WEDDİNG", "Min" → "MİN", rus "DigiToy" → "DİGİTOY".
+     Dil ilə birlikdə yenilənəndə hər dil öz düzgün böyük hərf qaydasını alır. */
+  useEffect(() => { document.documentElement.lang = lang || 'az' }, [lang])
 
   /* Analitika: GA4/PostHog-u bir dəfə işə sal (yalnız production + env dəyişənləri varsa) */
   useEffect(() => { initAnalytics() }, [])
@@ -249,6 +275,127 @@ export default function App() {
       window.scrollTo(0, 0)   // new view always starts from the top, regardless of prior scroll position
       setTimeout(() => setEntering(false), 80)
     }, 800)
+  }, [])
+
+  /* Önbaxış/dəvətnamə səhifələrindən builder-ə qayıdış.
+     Ayrıca `/builder` marşrutu yoxdur — builder landing səhifəsinin içindədir,
+     ona görə landing-ə keçib `#builder-content` bloku görünəcək yerə sürüşürük. */
+  /* ── Şablon önbaxışından GERİ ────────────────────────────────────────────
+     İstifadəçi önbaxışa haradan girdisə ora qayıdır (Phase 27.3):
+       • `/templates` vitrinindən  → vitrinə, filtrlər + scroll bərpa olunur
+       • builder-dən              → builder-ə, paket saxlanılır, şablon seçiminə scroll
+       • birbaşa link (kontekst yox) → landing/builder (default)
+     Kontekst önbaxış açılarkən sessionStorage-a yazılır. */
+  const goBackFromPreview = useCallback(() => {
+    let ctx = null
+    try {
+      const raw = sessionStorage.getItem('digitoy_preview_return')
+      if (raw) ctx = JSON.parse(raw)
+      sessionStorage.removeItem('digitoy_preview_return')
+    } catch { /* private mode */ }
+
+    if (ctx?.origin === 'templates') {
+      /* Vitrin öz vəziyyətini mount-da bu açardan oxuyur */
+      try {
+        sessionStorage.setItem('digitoy_templates_restore', JSON.stringify({
+          status: ctx.status, category: ctx.category, scrollY: ctx.scrollY,
+        }))
+      } catch { /* private mode */ }
+      window.history.pushState({}, '', '/templates')
+      setView('templates')
+      return
+    }
+
+    if (ctx?.pkg) setResumePackage(ctx.pkg)
+    window.history.pushState({}, '', '/')
+    setView('landing')
+
+    /* Scroll bərpası — builder blokunun tam qurulması bir neçə kadr çəkir
+       (paket → BuilderForm mount → şablon kartları). Ona görə tək setTimeout
+       kifayət etmir: səhifə hündürlüyü hədəfə çatana qədər bir neçə dəfə
+       cəhd edilir, sonra dayanır. */
+    const target = ctx?.scrollY
+    let tries = 0
+    const tick = () => {
+      tries += 1
+      const el = document.getElementById(ctx?.pkg ? 'template-select' : 'builder-content')
+        || document.getElementById('builder-content')
+      /* Əvvəlcə dəqiq mövqe (istifadəçi harada idisə), yoxdursa bloka hizala */
+      const top = Number.isFinite(target) && target > 0
+        ? target
+        : (el ? el.getBoundingClientRect().top + window.pageYOffset - 72 : null)
+      if (top == null) { if (tries < 12) setTimeout(tick, 120); return }
+      /* Səhifə hələ o qədər uzun deyilsə — gözlə */
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight
+      if (top > maxScroll + 8 && tries < 12) { setTimeout(tick, 120); return }
+      window.scrollTo({ top: Math.min(top, Math.max(0, maxScroll)), behavior: 'auto' })
+    }
+    setTimeout(tick, 220)
+  }, [])
+
+  /* Landing-in builder blokuna keçid (şablon vitrinindəki "Dəvətnaməni hazırla") */
+  const goToBuilder = useCallback(() => {
+    window.history.pushState({}, '', '/')
+    setView('landing')
+    setTimeout(() => {
+      const el = document.getElementById('builder-content')
+      if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 72, behavior: 'smooth' })
+    }, 260)
+  }, [])
+
+  /* Builder-dəki "Önbaxış" düyməsi — eyni tabda şablon önbaxışına keç */
+  useEffect(() => {
+    const onPreview = (e) => {
+      const id = e?.detail?.id
+      if (!id) return
+      setPackagesIntent(false)
+      window.history.pushState({}, '', `/demo/template/${id}`)
+      setPreviewTemplateId(resolveTemplateId(id, { allowDisabled: true }))
+      setView('template-preview')
+      window.scrollTo(0, 0)
+    }
+    window.addEventListener('digitoy:preview', onPreview)
+    return () => window.removeEventListener('digitoy:preview', onPreview)
+  }, [])
+
+  /* ── «Paketlərə keç» (şablonun son CTA-sı) ─────────────────────────────────
+     Demo / önbaxış / vitrin — hamısından landing-in paket kartlarına aparır.
+     Sərt reload YOXDUR: yalnız view dəyişir, sonra LandingPage `#paketler`-ə
+     hamar scroll edir. Builder snapshot-una TOXUNMUR, ona görə istifadəçi
+     paketi seçən kimi forma məlumatları olduğu kimi qayıdır. */
+  useEffect(() => {
+    const onPackages = () => {
+      window.history.pushState({}, '', '/')
+      setPackagesIntent(true)
+      setView('landing')
+      window.scrollTo(0, 0)
+    }
+    window.addEventListener('digitoy:packages', onPackages)
+    return () => window.removeEventListener('digitoy:packages', onPackages)
+  }, [])
+
+  /* ⚠ Brauzerin öz GERİ/İRƏLİ düymələri (Phase 27.3).
+     Əvvəl `popstate` dinlənilmirdi: pushState ilə açılan önbaxışdan geri
+     basanda URL dəyişir, ekran isə önbaxışda qalırdı. İndi URL-ə uyğun
+     view bərpa olunur. */
+  useEffect(() => {
+    const onPop = () => {
+      const path = window.location.pathname
+      /* Brauzerin geri/irəli düyməsi «Paketlərə keç» niyyətini ləğv edir —
+         əks halda builder əvəzinə paket kartları açılırdı. */
+      setPackagesIntent(false)
+      const previewId = parseTemplatePreviewId()
+      if (previewId) {
+        setPreviewTemplateId(resolveTemplateId(previewId, { allowDisabled: true }))
+        setView('template-preview')
+        return
+      }
+      if (/^\/templates\/?$/.test(path)) { setView('templates'); return }
+      if (path === '/demo') { setView('demo'); return }
+      if (path === '/') { setView('landing'); return }
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
   }, [])
 
   useEffect(() => {
@@ -276,6 +423,12 @@ export default function App() {
 
     if (window.location.pathname === '/demo') {
       setView('demo')
+      return
+    }
+
+    /* Şablonlar vitrini — /templates (müştəriyə göndərilən ictimai link) */
+    if (/^\/templates\/?$/.test(window.location.pathname)) {
+      setView('templates')
       return
     }
 
@@ -356,16 +509,39 @@ export default function App() {
           weddingData={demoInvitation}
           isDemoMode={true}
           initialGuestbook={demoGuestbook}
-          onBack={() => { window.history.pushState({}, '', '/'); setView('landing') }}
+          onBack={goBackFromPreview}
         />
       </div>
     )
   }
 
+  /* ── /templates — şablonlar vitrini (Phase 27.1).
+     Bütün məlumat `templateConfig`-dən oxunur, builder-dən asılı deyil. ── */
+  if (view === 'templates') {
+    return (
+      <Suspense fallback={<RouteLoader />}>
+        <TemplatesPage
+          lang={lang} setLang={setLang}
+          onBack={() => { window.history.pushState({}, '', '/'); setView('landing'); window.scrollTo(0, 0) }}
+          onPreview={(tpl) => {
+            window.history.pushState({}, '', `/demo/template/${tpl.id}`)
+            setPreviewTemplateId(tpl.id)
+            setView('template-preview')
+            window.scrollTo(0, 0)
+          }}
+          onCreate={goToBuilder}
+        />
+      </Suspense>
+    )
+  }
+
+  /* ── /demo — Phase 27: nümunə dəvətnamə artıq FLORAL GARDEN şablonudur.
+     URL istifadəçi üçün `/demo` olaraq qalır (pushState edilmir). ── */
   if (view === 'demo') {
     return (
       <div className="min-h-screen bg-cream">
-        <InvitationPage
+        <TemplateRenderer
+          template={DEMO_TEMPLATE_ID}
           lang={lang} setLang={setLang}
           weddingData={demoInvitation}
           isDemoMode={true}
@@ -470,6 +646,8 @@ export default function App() {
         <LandingPage
           lang={lang} setLang={setLang}
           weddingData={weddingData} setWeddingData={setWeddingData}
+          initialPackage={resumePackage}
+          showPackages={packagesIntent}
           onViewInvitation={() => navigateTo(() => setView('invitation'))}
           onDemo={() => { trackEvent('demo_opened', { lang }); navigateTo(() => { window.history.pushState({}, '', '/demo'); setView('demo') }) }}
           isAdmin={isAdmin}

@@ -16,9 +16,9 @@ import { ensureTemplateFonts } from '../../templates/fonts'
    ───────────────────────────────────────────────────────────────────────── */
 
 const UI = {
-  az: { preview: 'Önbaxış', title: 'Dizayn seç', hint: 'Dəvətnamənizin görünüşünü seçin. Yeni dizaynlar mütəmadi əlavə olunur.', soon: 'Tezliklə', premium: 'Premium', selected: 'Seçildi' },
-  en: { preview: 'Preview', title: 'Choose a design', hint: 'Pick how your invitation looks. New designs are added regularly.', soon: 'Soon', premium: 'Premium', selected: 'Selected' },
-  ru: { preview: 'Просмотр', title: 'Выберите дизайн', hint: 'Выберите оформление приглашения. Новые дизайны добавляются регулярно.', soon: 'Скоро', premium: 'Премиум', selected: 'Выбрано' },
+  az: { preview: 'Önbaxış', title: 'Dizayn seç', hint: 'Dəvətnamənizin görünüşünü seçin. Yeni dizaynlar mütəmadi əlavə olunur.', soon: 'Tezliklə', selected: 'Seçildi' },
+  en: { preview: 'Preview', title: 'Choose a design', hint: 'Pick how your invitation looks. New designs are added regularly.', soon: 'Soon', selected: 'Selected' },
+  ru: { preview: 'Просмотр', title: 'Выберите дизайн', hint: 'Выберите оформление приглашения. Новые дизайны добавляются регулярно.', soon: 'Скоро', selected: 'Выбрано' },
 }
 
 /* Nümunə cütlük — design faylındakı ilə eyni */
@@ -35,7 +35,7 @@ const THUMBS = {
     <div style={{ ...fill, background: 'linear-gradient(160deg,#FDFAF4 0%,#F2EAD6 55%,#E8DCC0 100%)' }}>
       <div style={{ position: 'absolute', inset: 10, border: '1px solid rgba(197,160,89,.32)' }} />
       <div style={center}>
-        <span style={{ fontSize: 5.5, letterSpacing: '.4em', textTransform: 'uppercase', color: '#C5A059', marginBottom: 8 }}>Toy</span>
+        <span style={{ fontSize: 8, letterSpacing: '.14em', textTransform: 'uppercase', color: '#C5A059', marginBottom: 8 }}>Toy</span>
         <span style={{ fontFamily: serif, fontSize: 16, color: '#1A1A1A', lineHeight: 1.2 }}>{SAMPLE.a}</span>
         <span style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 10, color: '#C5A059', margin: '2px 0' }}>və</span>
         <span style={{ fontFamily: serif, fontSize: 16, color: '#1A1A1A', lineHeight: 1.2 }}>{SAMPLE.b}</span>
@@ -44,7 +44,7 @@ const THUMBS = {
           <span style={{ width: 3, height: 3, background: '#C5A059', transform: 'rotate(45deg)' }} />
           <span style={{ width: 14, height: 1, background: 'rgba(197,160,89,.5)' }} />
         </span>
-        <span style={{ fontSize: 5.5, letterSpacing: '.24em', textTransform: 'uppercase', color: '#8C7B6B', marginTop: 8 }}>{SAMPLE.date}</span>
+        <span style={{ fontSize: 8, letterSpacing: '.14em', textTransform: 'uppercase', color: '#8C7B6B', marginTop: 8 }}>{SAMPLE.date}</span>
       </div>
     </div>
   ),
@@ -57,7 +57,7 @@ const THUMBS = {
         <span style={{ width: 17, height: 17, border: '1px solid rgba(197,160,89,.6)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 7, color: '#C5A059', marginBottom: 6 }}>✦</span>
         <span style={{ fontFamily: serif, fontSize: 15, color: '#E8D5A3', lineHeight: 1.25 }}>{SAMPLE.a}<br />&amp; {SAMPLE.b}</span>
         <span style={{ width: 18, height: 1, background: '#C5A059', margin: '7px 0' }} />
-        <span style={{ fontSize: 5.5, letterSpacing: '.24em', textTransform: 'uppercase', color: '#8C7B6B' }}>{SAMPLE.date}</span>
+        <span style={{ fontSize: 8, letterSpacing: '.14em', textTransform: 'uppercase', color: '#8C7B6B' }}>{SAMPLE.date}</span>
       </div>
     </div>
   ),
@@ -69,14 +69,14 @@ const THUMBS = {
       <div style={center}>
         <span style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 16, color: '#4A4139', lineHeight: 1.25 }}>{SAMPLE.a}<br />&amp; {SAMPLE.b}</span>
         <span style={{ width: 26, height: 1, background: '#C98F84', margin: '8px 0' }} />
-        <span style={{ fontSize: 5.5, letterSpacing: '.24em', textTransform: 'uppercase', color: '#8A8175' }}>Bağ mərasimi</span>
+        <span style={{ fontSize: 8, letterSpacing: '.14em', textTransform: 'uppercase', color: '#8A8175' }}>Bağ mərasimi</span>
       </div>
     </div>
   ),
 
   'modern-black': () => (
     <div style={{ ...fill, background: '#0A0A0A', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 12, gap: 5 }}>
-      <span style={{ fontSize: 5.5, letterSpacing: '.3em', textTransform: 'uppercase', color: '#6C6C6C' }}>12.07.25 — BAKI</span>
+      <span style={{ fontSize: 8, letterSpacing: '.14em', textTransform: 'uppercase', color: '#6C6C6C' }}>12.07.25 — BAKI</span>
       <span style={{ fontFamily: "'Archivo','Inter',sans-serif", fontWeight: 500, fontSize: 20, lineHeight: .94, letterSpacing: '-.04em', color: '#FFF', textTransform: 'uppercase' }}>
         NİGAR<br />RAUF
       </span>
@@ -88,7 +88,7 @@ const THUMBS = {
       <div style={center}>
         <span style={{ width: 38, height: 38, borderRadius: '50%', background: '#FAF8F5', boxShadow: 'inset 0 1px 2px rgba(0,0,0,.06),0 8px 20px rgba(0,0,0,.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Marcellus',Georgia,serif", fontSize: 11, color: '#A79C90', marginBottom: 9 }}>N&amp;R</span>
         <span style={{ fontFamily: "'Marcellus',Georgia,serif", fontSize: 10.5, letterSpacing: '.14em', color: '#2B2723', textTransform: 'uppercase' }}>{SAMPLE.a} &amp; {SAMPLE.b}</span>
-        <span style={{ fontSize: 5.5, letterSpacing: '.26em', textTransform: 'uppercase', color: '#A79C90', marginTop: 7 }}>Sadəlik · Zəriflik</span>
+        <span style={{ fontSize: 8, letterSpacing: '.14em', textTransform: 'uppercase', color: '#A79C90', marginTop: 7 }}>Sadəlik · Zəriflik</span>
       </div>
     </div>
   ),
@@ -100,7 +100,7 @@ const THUMBS = {
       <span style={{ position: 'absolute', width: 1.5, height: 1.5, borderRadius: '50%', background: '#C8CEE0', bottom: 34, left: 40, opacity: .65 }} />
       <div style={center}>
         <span style={{ fontFamily: serif, fontSize: 15, color: '#E4E9F5', letterSpacing: '.02em', lineHeight: 1.25 }}>{SAMPLE.a}<br />&amp; {SAMPLE.b}</span>
-        <span style={{ fontSize: 5.5, letterSpacing: '.24em', textTransform: 'uppercase', color: '#8F98B0', marginTop: 8 }}>40°23′N · 49°52′E</span>
+        <span style={{ fontSize: 8, letterSpacing: '.14em', textTransform: 'uppercase', color: '#8F98B0', marginTop: 8 }}>40°23′N · 49°52′E</span>
       </div>
     </div>
   ),
@@ -111,7 +111,7 @@ const THUMBS = {
       <div style={center}>
         <span style={{ width: 28, height: 28, border: '1px solid rgba(217,179,108,.6)', transform: 'rotate(45deg)', marginBottom: 12 }} />
         <span style={{ fontFamily: "'Amiri',Georgia,serif", fontSize: 14, color: '#E9CE96', lineHeight: 1.3 }}>{SAMPLE.a}<br />&amp; {SAMPLE.b}</span>
-        <span style={{ fontSize: 5.5, letterSpacing: '.24em', textTransform: 'uppercase', color: '#B98F72', marginTop: 7 }}>Şərq zərifliyi</span>
+        <span style={{ fontSize: 8, letterSpacing: '.14em', textTransform: 'uppercase', color: '#B98F72', marginTop: 7 }}>Şərq zərifliyi</span>
       </div>
     </div>
   ),
@@ -121,7 +121,7 @@ const THUMBS = {
       <div style={center}>
         <span style={{ width: 1, height: 22, background: '#3E4A3A', marginBottom: 9 }} />
         <span style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 15, color: '#2F3A2C', lineHeight: 1.25 }}>{SAMPLE.a}<br />&amp; {SAMPLE.b}</span>
-        <span style={{ fontSize: 5.5, letterSpacing: '.24em', textTransform: 'uppercase', color: '#7A7566', marginTop: 8 }}>Açıq havada</span>
+        <span style={{ fontSize: 8, letterSpacing: '.14em', textTransform: 'uppercase', color: '#7A7566', marginTop: 8 }}>Açıq havada</span>
       </div>
     </div>
   ),
@@ -132,7 +132,7 @@ const THUMBS = {
       <div style={center}>
         <span style={{ width: 32, height: 32, border: '1px solid rgba(120,145,165,.5)', borderRadius: '50%', background: 'rgba(255,255,255,.5)', marginBottom: 10 }} />
         <span style={{ fontFamily: "'Italiana',Georgia,serif", fontSize: 11, letterSpacing: '.1em', color: '#3A4650' }}>NIGAR &amp; RAUF</span>
-        <span style={{ fontSize: 5.5, letterSpacing: '.26em', textTransform: 'uppercase', color: '#7E8D99', marginTop: 8 }}>Kristal · İşıq</span>
+        <span style={{ fontSize: 8, letterSpacing: '.14em', textTransform: 'uppercase', color: '#7E8D99', marginTop: 8 }}>Kristal · İşıq</span>
       </div>
     </div>
   ),
@@ -196,7 +196,8 @@ export default function TemplateSelect({ value, onChange, lang = 'az' }) {
   useEffect(() => { ensureTemplateFonts() }, [])
 
   return (
-    <div>
+    /* id — önbaxışdan qayıdanda scroll hədəfi (App.goToBuilder) */
+    <div id="template-select">
       <div className="mb-4">
         <p className="text-[10px] tracking-[0.22em] uppercase text-brown-muted/70 font-sans font-medium mb-1.5">
           {ui.title}
@@ -223,11 +224,22 @@ export default function TemplateSelect({ value, onChange, lang = 'az' }) {
             trackTemplateSelected(tpl.id, { source: 'builder' })
           }
 
+          /* ⚠ Phase 27.1: önbaxış EYNİ tabda açılır (əvvəl `window.open(_blank)`
+             idi → yeni tab təmiz mount olurdu və qayıdanda paket seçimi
+             yenidən soruşulurdu). Qayıdış konteksti sessionStorage-a yazılır;
+             `App.goToBuilder` onu oxuyub builder-i paket seçmədən bərpa edir. */
           const handlePreview = (e) => {
             e.stopPropagation()
             trackTemplatePreviewed(tpl.id, { source: 'builder' })
-            /* Metadata-dakı mövcud route — yeni route yaradılmır */
-            window.open(tpl.previewRoute, '_blank', 'noopener,noreferrer')
+            try {
+              sessionStorage.setItem('digitoy_preview_return', JSON.stringify({
+                origin: 'builder',
+                pkg: localStorage.getItem('selected_package') || null,
+                templateId: tpl.id,
+                scrollY: Math.round(window.scrollY),
+              }))
+            } catch { /* private mode — sadəcə paket bərpası olmayacaq */ }
+            window.dispatchEvent(new CustomEvent('digitoy:preview', { detail: { id: tpl.id } }))
           }
 
           return (
@@ -267,12 +279,9 @@ export default function TemplateSelect({ value, onChange, lang = 'az' }) {
                   </p>
 
                   <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                    {/* ⚠ Phase 27.1: "Premium" nişanı tamamilə silindi —
+                        müştəriyə yalnız status göstərilir (Canlı/Beta/Tezliklə). */}
                     <StatusBadge badge={badge} />
-                    {tpl.premium && (
-                      <span className="text-[7.5px] tracking-[0.16em] uppercase font-sans font-semibold text-gold/70">
-                        {ui.premium}
-                      </span>
-                    )}
                     {selected && (
                       <span className="text-[7.5px] tracking-[0.16em] uppercase font-sans font-semibold text-gold">
                         · {ui.selected}

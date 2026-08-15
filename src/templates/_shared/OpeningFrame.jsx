@@ -14,6 +14,15 @@ import { alpha } from './TemplateShell'
 
    Rənglər `theme` token-lərindən gəlir — burada hardcode rəng yoxdur.
    ───────────────────────────────────────────────────────────────────────── */
+
+/* Claude Design v2 — bütün açılış ekranlarında ortaq üç hərəkət.
+   Bir dəfə burada elan olunur ki, 8 şablonun keyframe sətri təkrarlanmasın.
+   `prefers-reduced-motion` TemplateShell-in qlobal qaydası ilə söndürülür. */
+const OPENING_KEYFRAMES = `
+@keyframes tpl-blurin   { from { opacity:0; filter:blur(12px); transform:translateY(16px) scale(.985) } to { opacity:1; filter:blur(0); transform:none } }
+@keyframes tpl-halo     { 0%,100% { opacity:.22; transform:translate(-50%,-50%) scale(1) } 50% { opacity:.5; transform:translate(-50%,-50%) scale(1.1) } }
+@keyframes tpl-slowring { from { transform:translate(-50%,-50%) rotate(0) } to { transform:translate(-50%,-50%) rotate(360deg) } }
+`
 export default function OpeningFrame({
   theme, onOpen, children,
   label,                       /* CTA mətni */
@@ -43,6 +52,15 @@ export default function OpeningFrame({
     iris:    { opacity: 0, scale: 1.15 },
   }
 
+  /* Konsentrik fon qatı — mərkəzdə nəfəs alan halo + çox yavaş dönən halqa.
+     `isolation:isolate` ilə örtük öz stacking context-ini yaradır, ona görə
+     zIndex:-1 qatları məzmunun ALTINDA, amma fonun ÜSTÜNDƏ qalır. */
+  const orb = (size, extra) => ({
+    position: 'absolute', left: '50%', top: '48%', transform: 'translate(-50%, -50%)',
+    width: size, height: size, borderRadius: '50%', pointerEvents: 'none', zIndex: -1,
+    ...extra,
+  })
+
   return (
     <motion.div
       onClick={start}
@@ -58,8 +76,25 @@ export default function OpeningFrame({
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         textAlign: 'center', padding: '0 clamp(18px, 6vw, 28px)',
         fontFamily: theme.fonts?.body,
+        isolation: 'isolate',
+        /* ⚠ `both` fill-mode CSS transform-u inline stildən üstün tutur — açılış
+           başlayanda söndürülməsə, framer-motion-un çıxış transformu (up/zoom/
+           curtain/iris) işləməzdi. Giriş animasiyası onsuz da 1.15s-də bitir. */
+        animation: opening ? 'none' : 'tpl-blurin 1.15s cubic-bezier(.22,.61,.36,1) both',
       }}
     >
+      {/* Ortaq açılış qatları — bütün şablonlarda eyni (Claude Design v2) */}
+      <style>{OPENING_KEYFRAMES}</style>
+      <span style={orb('min(78vw, 320px)', {
+        background: `radial-gradient(circle, ${alpha(theme.accent, 0.3)}, transparent 68%)`,
+        filter: 'blur(26px)',
+        animation: 'tpl-halo 8s ease-in-out infinite',
+      })} />
+      <span style={orb('min(62vw, 250px)', {
+        border: `1px solid ${alpha(theme.accent, 0.3)}`, opacity: 0.4,
+        animation: 'tpl-slowring 80s linear infinite',
+      })} />
+
       {children}
 
       {label && (
@@ -67,7 +102,7 @@ export default function OpeningFrame({
           marginTop: 'clamp(28px, 8vw, 40px)', display: 'inline-flex', alignItems: 'center', gap: 10,
           border: `1px solid ${alpha(theme.accent, 0.45)}`, borderRadius: 100,
           padding: 'clamp(12px, 3.5vw, 14px) clamp(20px, 6vw, 26px)',
-          fontSize: 'clamp(9px, 2.6vw, 10px)', letterSpacing: '.22em', textTransform: 'uppercase',
+          fontSize: 'clamp(10px, 2.6vw, 10px)', letterSpacing: '.22em', textTransform: 'uppercase',
           color: theme.accent, background: alpha(theme.primary, 0.1),
         }}>
           {label}<span>→</span>
@@ -76,7 +111,7 @@ export default function OpeningFrame({
 
       <div style={{
         position: 'absolute', bottom: 30, left: 0, right: 0, textAlign: 'center',
-        fontSize: 9, letterSpacing: '.18em', color: alpha(theme.muted, 0.75),
+        fontSize: 10, letterSpacing: '.14em', color: alpha(theme.muted, 0.75),
         animation: 'tpl-hint 2.6s ease-in-out infinite',
       }}>
         {hint}
@@ -88,7 +123,7 @@ export default function OpeningFrame({
 /* Açılış ekranında istifadə olunan ortaq ad/tarix bloku */
 export function OpeningNames({ theme, weddingData, isCouple, lang = 'az', style = {}, transform = 'none', italic = false }) {
   const names = isCouple
-    ? `${weddingData.brideName || ''}\n& ${weddingData.groomName || ''}`
+    ? `${weddingData.groomName || ''}\n& ${weddingData.brideName || ''}`
     : (weddingData.eventName || weddingData.brideName || '')
   return (
     <>
@@ -100,7 +135,7 @@ export function OpeningNames({ theme, weddingData, isCouple, lang = 'az', style 
         {names}
       </div>
       <div style={{ width: 28, height: 1, background: theme.primary, margin: '14px auto' }} />
-      <div style={{ fontSize: 'clamp(9px, 2.5vw, 10px)', letterSpacing: '.26em', textTransform: 'uppercase', color: theme.muted }}>
+      <div style={{ fontSize: 'clamp(10px, 2.5vw, 10px)', letterSpacing: '.2em', textTransform: 'uppercase', color: theme.muted }}>
         {formatFullDateByLang(weddingData.date, lang)}
       </div>
     </>

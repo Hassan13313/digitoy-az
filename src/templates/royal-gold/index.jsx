@@ -2,12 +2,16 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { QRCodeSVG } from 'qrcode.react'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
-import DressCodeCard from '../_shared/DressCodeCard'
+import DressCodeSection from '../_shared/DressCodeSection'
+import MapMosaic, { MapRings } from '../_shared/MapMosaic'
+import { parseLatLon } from '../_shared/geo'
+import { OrderCta, MusicStartBubble } from '../_shared/TemplateActions'
+import TemplateOutro from '../_shared/TemplateOutro'
 import { getTemplateTheme } from '../templateConfig'
 import { buildPresetMusic, PRESET_TRACKS, MUSIC_PLAY_MODES } from '../../data/music'
 import { getPackageGates } from '../../data/packages'
 import { formatAzDate, formatFullDateByLang, formatTime24 } from '../../utils/dateFormat'
-import { isAudioUnlocked, unlockAudio } from '../../utils/audioUnlock'
+import { unlockAudio } from '../../utils/audioUnlock'
 import { trackEvent } from '../../utils/analytics'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
 import { useCountdown } from '../../hooks/useCountdown'
@@ -101,7 +105,7 @@ function Reveal({ children, style, delay = 0 }) {
 function SectionHead({ kicker, title, sub }) {
   return (
     <div style={{ textAlign: 'center', marginBottom: 20 }}>
-      <div style={{ fontSize: 9, letterSpacing: '.32em', textTransform: 'uppercase', color: TH.primary }}>
+      <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.primary }}>
         {kicker}
       </div>
       <div style={{
@@ -130,7 +134,7 @@ function GoldOrnament() {
 
 const btn = (filled) => ({
   flex: 1, textAlign: 'center', padding: '12px 6px',
-  fontSize: 9.5, letterSpacing: '.14em', textTransform: 'uppercase',
+  fontSize: 10, letterSpacing: '.14em', textTransform: 'uppercase',
   fontFamily: sans, cursor: 'pointer', textDecoration: 'none', display: 'block',
   background: filled ? TH.primary : 'transparent',
   color: filled ? '#1A1408' : TH.accent,
@@ -147,11 +151,11 @@ function SealedEnvelope({ weddingData, isCouple, isCorp, eventLabel, onOpen }) {
   const [gone, setGone] = useState(false)
 
   const names = isCouple
-    ? `${weddingData.brideName || ''} & ${weddingData.groomName || ''}`
+    ? `${weddingData.groomName || ''} & ${weddingData.brideName || ''}`
     : (weddingData.eventName || weddingData.brideName || '')
 
   const monogram = isCouple
-    ? `${(weddingData.brideName || '?')[0]}&${(weddingData.groomName || '?')[0]}`.toUpperCase()
+    ? `${(weddingData.groomName || '?')[0]}&${(weddingData.brideName || '?')[0]}`.toUpperCase()
     : ((weddingData.eventName || weddingData.brideName || '·')[0] || '·').toUpperCase()
 
   const start = () => {
@@ -186,7 +190,7 @@ function SealedEnvelope({ weddingData, isCouple, isCorp, eventLabel, onOpen }) {
         transition={{ duration: 0.75, delay: opening ? 0.45 : 0, ease: 'easeInOut' }}
         style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}
       >
-        <div style={{ fontSize: 9, letterSpacing: '.34em', textTransform: 'uppercase', color: TH.muted, marginBottom: 26 }}>
+        <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.muted, marginBottom: 26 }}>
           {eventLabel}
         </div>
 
@@ -233,7 +237,7 @@ function SealedEnvelope({ weddingData, isCouple, isCorp, eventLabel, onOpen }) {
           {names}
         </div>
         <span style={{ width: 28, height: 1, background: TH.primary, margin: '12px 0' }} />
-        <div style={{ fontSize: 9, letterSpacing: '.26em', textTransform: 'uppercase', color: TH.muted }}>
+        <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.muted }}>
           {formatFullDateByLang(weddingData.date, 'az')}
           {weddingData.venueName ? ` · ${String(weddingData.venueName).split(',').pop().trim()}` : ''}
         </div>
@@ -250,7 +254,7 @@ function SealedEnvelope({ weddingData, isCouple, isCorp, eventLabel, onOpen }) {
 
       <div style={{
         position: 'absolute', bottom: 34, left: 0, right: 0, textAlign: 'center',
-        fontSize: 9, letterSpacing: '.18em', color: `${TH.muted}B3`,
+        fontSize: 10, letterSpacing: '.14em', color: `${TH.muted}B3`,
         animation: 'rg-hint 2.6s ease-in-out infinite',
       }}>
         toxunun
@@ -264,16 +268,30 @@ function SealedEnvelope({ weddingData, isCouple, isCorp, eventLabel, onOpen }) {
    ═══════════════════════════════════════════════════════════════════════════ */
 function GoldMusic({ lang, music, playerRef }) {
   const { audioProps, playing, play, pause, toggle, hasMusic } = useMusicPlayer({ lang, music })
+  const [prompt, setPrompt] = useState(false)
 
   useEffect(() => {
     if (playerRef) playerRef.current = { play, pause }
   })
+
+  /* ⚠ Phase 27: autoplay YOXDUR — zərf açılandan 900ms sonra yalnız
+     "Musiqini Başlat" bubble-ı çıxır, səs qonağın toxunuşu ilə başlayır. */
+  useEffect(() => {
+    if (!hasMusic) return
+    const id = setTimeout(() => setPrompt(true), 900)
+    return () => clearTimeout(id)
+  }, [hasMusic])
 
   if (!hasMusic) return null
 
   return (
     <>
       <audio {...audioProps} />
+      {/* YALNIZ start helper — musiqi çalırsa klik heç nə etmir */}
+      <MusicStartBubble
+        theme={TH} lang={lang} visible={prompt} playing={playing}
+        onStart={() => { if (!playing) play(); setPrompt(false) }}
+      />
       <button
         onClick={toggle}
         aria-label={playing ? 'Musiqini dayandır' : 'Musiqini başlat'}
@@ -310,6 +328,8 @@ export default function RoyalGoldTemplate({
   const musicRef = useRef(null)
 
   const isCouple = ['toy', 'nishan'].includes(weddingData.eventType)
+  /* Location: koordinat varsa real xəritə, yoxsa köhnə abstrakt kart */
+  const hasCoords = !!parseLatLon(weddingData)
   const isCorp   = ['corporate', 'other'].includes(weddingData.eventType)
 
   const eventLabels = {
@@ -320,7 +340,6 @@ export default function RoyalGoldTemplate({
   const eventLabel = eventLabels[weddingData.eventType] || tr.event_toy
 
   const invMusic  = weddingData?.music || DEFAULT_MUSIC
-  const autoStart = weddingData?.music ? invMusic.playMode === 'auto' : true
 
   const activePkgId = isDemoMode ? 'PREMIUM' : (weddingData.package || 'SADE')
   const { allowRsvp: canShowRsvp, allowSeating: canShowSeating, allowGallery: canShowGallery } = getPackageGates(activePkgId)
@@ -336,14 +355,6 @@ export default function RoyalGoldTemplate({
   useEffect(() => {
     if (!isDemoMode) trackEvent('invitation_opened', { lang, event_type: weddingData?.eventType })
   }, [])
-
-  useEffect(() => {
-    if (!opened) return
-    const id = setTimeout(() => {
-      if (isAudioUnlocked() && autoStart) musicRef.current?.play()
-    }, 900)
-    return () => clearTimeout(id)
-  }, [opened, autoStart])
 
   const { formattedDate, dayName } = formatAzDate(weddingData.date, lang)
 
@@ -385,7 +396,7 @@ export default function RoyalGoldTemplate({
                 onClick={onBack}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none',
-                  fontSize: 9, letterSpacing: '.18em', textTransform: 'uppercase', color: TH.muted,
+                  fontSize: 10, letterSpacing: '.14em', textTransform: 'uppercase', color: TH.muted,
                   cursor: 'pointer', fontFamily: sans, minHeight: 44, padding: '0 8px 0 0',
                 }}
               >
@@ -408,10 +419,10 @@ export default function RoyalGoldTemplate({
               <span style={{ position: 'absolute', top: 14, right: 18, width: 34, height: 34, borderTop: `1px solid ${TH.primary}66`, borderRight: `1px solid ${TH.primary}66` }} />
 
               <div style={{ maxWidth: 560, margin: '0 auto' }}>
-                <div style={{ fontSize: 9, letterSpacing: '.45em', textTransform: 'uppercase', color: TH.primary, marginBottom: 14 }}>
+                <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.primary, marginBottom: 14 }}>
                   {eventLabel}
                 </div>
-                <div style={{ fontFamily: serif, fontSize: 11, letterSpacing: '.3em', textTransform: 'uppercase', color: TH.muted }}>
+                <div style={{ fontFamily: serif, fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.muted }}>
                   {tr.inv_join}
                 </div>
 
@@ -426,15 +437,15 @@ export default function RoyalGoldTemplate({
                 }}>
                   {isCouple ? (
                     <>
-                      {weddingData.brideName}
-                      <span style={{ display: 'block', fontStyle: 'italic', fontSize: '.5em', color: TH.primary, WebkitTextFillColor: TH.primary, margin: '2px 0' }}>&</span>
                       {weddingData.groomName}
+                      <span style={{ display: 'block', fontStyle: 'italic', fontSize: '.5em', color: TH.primary, WebkitTextFillColor: TH.primary, margin: '2px 0' }}>&</span>
+                      {weddingData.brideName}
                     </>
                   ) : (weddingData.eventName || weddingData.brideName)}
                 </h1>
 
                 {isCorp && weddingData.organizer?.trim() && (
-                  <div style={{ fontSize: 10, letterSpacing: '.24em', textTransform: 'uppercase', color: `${TH.primary}B3`, marginTop: 10 }}>
+                  <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: `${TH.primary}B3`, marginTop: 10 }}>
                     {tr.organizer_display}: {weddingData.organizer}
                   </div>
                 )}
@@ -449,7 +460,7 @@ export default function RoyalGoldTemplate({
                   <div style={{ fontSize: 13, color: '#B9A88F', marginTop: 5 }}>{formatTime24(weddingData.time)}</div>
                 )}
                 {weddingData.venueName && (
-                  <div style={{ fontSize: 10, letterSpacing: '.28em', textTransform: 'uppercase', color: `${TH.primary}B3`, marginTop: 18 }}>
+                  <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: `${TH.primary}B3`, marginTop: 18 }}>
                     {weddingData.venueName}
                   </div>
                 )}
@@ -480,7 +491,7 @@ export default function RoyalGoldTemplate({
                       <div style={{ fontFamily: serif, fontSize: 'clamp(22px,6vw,26px)', color: TH.accent, fontVariantNumeric: 'tabular-nums' }}>
                         {String(v).padStart(2, '0')}
                       </div>
-                      <div style={{ fontSize: 7, letterSpacing: '.16em', textTransform: 'uppercase', color: TH.muted, marginTop: 2 }}>{l}</div>
+                      <div style={{ fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase', color: TH.muted, marginTop: 2 }}>{l}</div>
                     </div>
                   ))}
                 </div>
@@ -490,21 +501,36 @@ export default function RoyalGoldTemplate({
             {/* 06 — LOCATION */}
             <section style={{ padding: '34px 26px', ...sectionBorder }}>
               <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
-                <SectionHead kicker="Location" title={tr.inv_location} />
+                <SectionHead kicker="LOCATION" title={tr.inv_location} />
+                {/* Hibrid xəritə — koordinat varsa OSM tile mozaikası,
+                    yoxdursa köhnə abstrakt şəbəkə (heç vaxt boş blok olmur). */}
                 <div style={{
-                  height: 132, background: 'linear-gradient(140deg,#191309,#241C10)',
-                  border: `1px solid ${TH.primary}29`, display: 'flex', alignItems: 'center',
-                  justifyContent: 'center', position: 'relative', overflow: 'hidden',
+                  background: 'radial-gradient(120% 120% at 50% 50%,#241C10,#120D07)',
+                  border: `1px solid ${TH.primary}38`, position: 'relative', overflow: 'hidden',
                 }}>
-                  <span style={{
-                    position: 'absolute', inset: 0, opacity: .2,
-                    backgroundImage: `linear-gradient(${TH.primary}59 1px, transparent 1px), linear-gradient(90deg, ${TH.primary}59 1px, transparent 1px)`,
-                    backgroundSize: '26px 26px',
-                  }} />
-                  <span style={{
-                    width: 12, height: 12, borderRadius: '50%', background: TH.primary,
-                    animation: 'rg-halo 4s ease-out infinite',
-                  }} />
+                  <MapMosaic
+                    weddingData={weddingData}
+                    theme={TH}
+                    map={{ opacity: 0.55, filter: 'grayscale(1) brightness(.42) contrast(1.15)', tintOpacity: 0.4 }}
+                    frame={<MapRings accent={TH.primary} />}
+                  />
+                  {!hasCoords && (
+                    <div style={{
+                      height: 'clamp(148px, 42vw, 168px)', display: 'flex', alignItems: 'center',
+                      justifyContent: 'center', position: 'relative', overflow: 'hidden',
+                    }}>
+                      <span style={{
+                        position: 'absolute', inset: 0, opacity: .2,
+                        backgroundImage: `linear-gradient(${TH.primary}59 1px, transparent 1px), linear-gradient(90deg, ${TH.primary}59 1px, transparent 1px)`,
+                        backgroundSize: '26px 26px',
+                      }} />
+                      <MapRings accent={TH.primary} />
+                      <span style={{
+                        width: 12, height: 12, borderRadius: '50%', background: TH.primary,
+                        animation: 'rg-halo 4s ease-out infinite',
+                      }} />
+                    </div>
+                  )}
                 </div>
                 <div style={{ textAlign: 'center', marginTop: 14, fontSize: 13, color: TH.text }}>
                   {weddingData.venueName}
@@ -548,13 +574,14 @@ export default function RoyalGoldTemplate({
             {/* 08 — DRESS CODE (ikon əsaslı premium kart, theme-aware) */}
             <section style={{ padding: '34px 26px', ...sectionBorder }}>
               <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
-                <SectionHead kicker="Style" title={tr.inv_dresscode} />
-                <DressCodeCard
+                <SectionHead kicker="STYLE" title={tr.inv_dresscode} />
+                <DressCodeSection
                   theme={TH}
                   paletteId={weddingData.dressCodePalette}
                   note={weddingData.dressCodeDescription}
                   lang={lang}
-                  isCouple={isCouple}
+                  serif={serif}
+                  align="center"
                   onDark
                 />
               </Reveal>
@@ -564,7 +591,7 @@ export default function RoyalGoldTemplate({
             {canShowSeating && !seating.isEmpty && (
               <section style={{ padding: '34px 26px', ...sectionBorder }}>
                 <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
-                  <SectionHead kicker="Seating" title={seating.labels.title} sub={seating.labels.sub} />
+                  <SectionHead kicker="SEATING" title={seating.labels.title} sub={seating.labels.sub} />
 
                   {/* ⚠ Təkliflər siyahısı normal document flow-dadır — overlap olmur */}
                   <div>
@@ -606,7 +633,7 @@ export default function RoyalGoldTemplate({
                           >
                             <span style={{ fontSize: 13, color: TH.text }}>{g.full_name}</span>
                             <span style={{
-                              background: TH.primary, color: '#1A1408', fontSize: 9,
+                              background: TH.primary, color: '#1A1408', fontSize: 10,
                               letterSpacing: '.14em', padding: '4px 9px', whiteSpace: 'nowrap',
                             }}>{g.table_id}</span>
                           </li>
@@ -616,15 +643,15 @@ export default function RoyalGoldTemplate({
                   </div>
 
                   {seating.showNotFound && (
-                    <div style={{ marginTop: 12, fontSize: 12, color: TH.muted }}>{tr.inv_seat_fullname}</div>
+                    <div style={{ marginTop: 12, fontSize: 12.5, color: TH.muted }}>{tr.inv_seat_fullname}</div>
                   )}
 
                   {seating.selected && (
                     <div style={{ marginTop: 12, background: `${TH.primary}0F`, border: `1px solid ${TH.primary}2E`, padding: 16 }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-                        <span style={{ fontSize: 12, color: TH.text }}>{seating.selected.full_name}</span>
+                        <span style={{ fontSize: 12.5, color: TH.text }}>{seating.selected.full_name}</span>
                         <span style={{
-                          background: TH.primary, color: '#1A1408', fontSize: 9,
+                          background: TH.primary, color: '#1A1408', fontSize: 10,
                           letterSpacing: '.14em', padding: '4px 9px', textTransform: 'uppercase', whiteSpace: 'nowrap',
                         }}>{seating.selected.table_id}</span>
                       </div>
@@ -635,7 +662,7 @@ export default function RoyalGoldTemplate({
                         onClick={seating.reset}
                         style={{
                           marginTop: 6, background: 'none', border: 'none', cursor: 'pointer',
-                          fontSize: 10, letterSpacing: '.16em', textTransform: 'uppercase',
+                          fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase',
                           color: TH.primary, fontFamily: sans, minHeight: 44, padding: '0 8px 0 0',
                         }}
                       >
@@ -669,18 +696,16 @@ export default function RoyalGoldTemplate({
                   }}>
                     <QRCodeSVG value={gallery.photoShareUrl} size={104} bgColor="#FFFFFF" fgColor="#1A1408" level="M" />
                   </div>
-                  <div style={{ fontSize: 8, letterSpacing: '.28em', textTransform: 'uppercase', color: `${TH.muted}99`, marginTop: 12 }}>
-                    Scan to upload
+                  <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: `${TH.muted}99`, marginTop: 12 }}>
+                    {tr.inv_scan_upload}
                   </div>
 
                   <a href={gallery.photoShareUrl} style={{ ...btn(true), marginTop: 16, padding: 13 }}>
-                    📷 Şəkilləri Paylaş
+                    📷 {tr.inv_gallery_btn}
                   </a>
-                  <button onClick={gallery.downloadTableCard} style={{ ...btn(false), marginTop: 8, padding: 13, width: '100%' }}>
-                    ⤓ Masa kartını yüklə
-                  </button>
+                  {/* ⚠ Phase 27: "Masa kartını yüklə" tamamilə silindi (QR + foto paylaşımı qalır) */}
 
-                  <div style={{ fontSize: 12, color: TH.muted, marginTop: 16, lineHeight: 1.9 }}>
+                  <div style={{ fontSize: 12.5, color: TH.muted, marginTop: 16, lineHeight: 1.9 }}>
                     {tr.inv_gallery_desc}
                   </div>
                 </Reveal>
@@ -691,14 +716,14 @@ export default function RoyalGoldTemplate({
             {canShowRsvp && (
               <section style={{ padding: '38px 26px 48px', textAlign: 'center', ...sectionBorder }}>
                 <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 9, letterSpacing: '.42em', textTransform: 'uppercase', color: TH.primary }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.primary }}>
                     <span style={{ width: 22, height: 1, background: `${TH.primary}99` }} />RSVP
                     <span style={{ width: 22, height: 1, background: `${TH.primary}99` }} />
                   </div>
                   <div style={{ fontFamily: serif, fontWeight: 300, fontSize: 'clamp(24px,7vw,28px)', color: TH.accent, lineHeight: 1.25, marginTop: 12 }}>
                     {rsvp.labels.title}
                   </div>
-                  <div style={{ fontSize: 12, color: TH.muted, margin: '10px 0 22px' }}>{rsvp.labels.subtitle}</div>
+                  <div style={{ fontSize: 12.5, color: TH.muted, margin: '10px 0 22px' }}>{rsvp.labels.subtitle}</div>
 
                   {rsvp.rsvpClosed && !rsvp.submitted ? (
                     <div style={{ border: `1px solid ${TH.primary}2E`, background: `${TH.primary}0D`, padding: 24 }}>
@@ -754,7 +779,7 @@ export default function RoyalGoldTemplate({
                                 }}
                               >
                                 <span style={{ fontSize: 13, color: TH.text }}>{g.full_name}</span>
-                                <span style={{ fontSize: 9, letterSpacing: '.12em', color: TH.primary }}>{g.table_id}</span>
+                                <span style={{ fontSize: 10, letterSpacing: '.12em', color: TH.primary }}>{g.table_id}</span>
                               </li>
                             ))}
                           </ul>
@@ -778,7 +803,7 @@ export default function RoyalGoldTemplate({
                               onClick={() => rsvp.chooseStatus(val)}
                               style={{
                                 flex: '1 1 40%', minHeight: 48, borderRadius: 100, cursor: 'pointer',
-                                padding: '14px 8px', fontSize: 10.5, letterSpacing: '.18em',
+                                padding: '14px 8px', fontSize: 10.5, letterSpacing: '.14em',
                                 textTransform: 'uppercase', fontFamily: sans,
                                 background: active ? `linear-gradient(135deg, ${TH.primary}, #B8903A)` : 'transparent',
                                 color: active ? '#FFFFFF' : TH.accent,
@@ -829,38 +854,9 @@ export default function RoyalGoldTemplate({
                     </form>
                   )}
 
-                  {/* Statistika paneli — yalnız qonaq siyahısı olanda */}
-                  {rsvp.stats && (
-                    <div style={{
-                      marginTop: 24, border: `1px solid ${TH.primary}2E`,
-                      background: 'linear-gradient(160deg,#16110A,#100C07)', textAlign: 'left',
-                    }}>
-                      <div style={{ padding: '12px 18px', borderBottom: `1px solid ${TH.primary}1F`, display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: 9, letterSpacing: '.28em', textTransform: 'uppercase', color: `${TH.primary}E6` }}>Cəmi cavab</span>
-                        <span style={{ fontSize: 9, color: TH.muted }}>{rsvp.stats.responded}/{rsvp.stats.total}</span>
-                      </div>
-                      <div style={{ padding: '16px 18px 0' }}>
-                        <div style={{ height: 2, background: 'rgba(221,213,200,0.18)' }}>
-                          <div style={{
-                            width: `${rsvp.stats.total ? Math.round((rsvp.stats.responded / rsvp.stats.total) * 100) : 0}%`,
-                            height: '100%', background: `linear-gradient(90deg, ${TH.primary}99, ${TH.primary})`,
-                          }} />
-                        </div>
-                      </div>
-                      <div style={{ padding: '8px 0 4px' }}>
-                        {[
-                          { l: 'İştirak edəcək', v: rsvp.stats.going,    c: TH.accent },
-                          { l: 'Gəlməyəcək',     v: rsvp.stats.notGoing, c: TH.muted },
-                          { l: 'Əlavə qonaq',    v: rsvp.stats.extra,    c: `${TH.primary}99` },
-                        ].map(({ l, v, c }) => (
-                          <div key={l} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 18px' }}>
-                            <span style={{ fontSize: 10, color: '#B9A88F' }}>{l}</span>
-                            <span style={{ fontFamily: serif, fontSize: 22, color: c }}>{v}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  {/* ⚠ Phase 27: RSVP statistika paneli SİLİNDİ — qonaq digər
+                      qonaqların cavablarını görməməlidir. Hesablama hook-da
+                      qalır (API dəyişmir), sadəcə render olunmur. */}
                 </Reveal>
               </section>
             )}
@@ -924,30 +920,19 @@ export default function RoyalGoldTemplate({
               </Reveal>
             </section>
 
-            {/* 13 — FOOTER */}
-            <footer style={{
-              padding: '44px 26px 56px', textAlign: 'center',
-              background: TH.footerBg, borderTop: `1px solid ${TH.primary}24`,
-            }}>
-              <div style={{ fontFamily: serif, fontSize: 19, letterSpacing: '.04em' }}>
-                {isCouple ? (
-                  <>
-                    <span style={{ color: TH.primary }}>{weddingData.brideName}</span>
-                    <span style={{ color: 'rgba(255,255,255,0.25)', fontStyle: 'italic', margin: '0 10px' }}>&</span>
-                    <span style={{ color: TH.primary }}>{weddingData.groomName}</span>
-                  </>
-                ) : (
-                  <span style={{ color: TH.primary }}>{weddingData.eventName || weddingData.brideName}</span>
-                )}
-              </div>
-              <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginTop: 12 }}>
-                {formatFullDateByLang(weddingData.date, lang)}
-              </div>
-              <div style={{ width: 100, height: 1, background: `linear-gradient(90deg, transparent, ${TH.primary}66, transparent)`, margin: '24px auto' }} />
-              <div style={{ fontSize: 9, letterSpacing: '.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)' }}>
-                Digitoy.az ilə hazırlanıb
-              </div>
-            </footer>
+            {/* 12.5 — SİFARİŞ CTA (yalnız builder önbaxışında; şərt komponentin içindədir) */}
+            <OrderCta
+              theme={TH} weddingData={weddingData} lang={lang}
+              pageSlug={gallery.pageSlug} isDemoMode={isDemoMode}
+              effectiveSlug={gallery.effectiveSlug} serif={serif}
+            />
+
+            {/* 13 — SON HİSSƏ: demo CTA + footer (9 şablonun ortağı) */}
+            <TemplateOutro
+              theme={TH} weddingData={weddingData} lang={lang}
+              isDemoMode={isDemoMode} isCouple={isCouple} isCorp={isCorp}
+              eventLabel={eventLabel} serif={serif}
+            />
           </motion.div>
         )}
       </AnimatePresence>

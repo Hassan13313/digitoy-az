@@ -19,7 +19,7 @@ const DRESS_COLORS = {
 }
 
 const DRESS_LABELS_FALLBACK = {
-  blacktie: 'Black Tie', cocktail: 'Cocktail', smartcasual: 'Smart Casual', creative: 'Creative',
+  blacktie: 'Rəsmi', cocktail: 'Cocktail', smartcasual: 'Smart Casual', creative: 'Creative',
 }
 
 /* Phase 25.3 — dress code premium kart ikonları (BuilderForm ilə eyni xəritə) */
@@ -248,11 +248,12 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
             {eventLabels[data.eventType] || tr.event_other}
           </p>
           <h3 className="font-serif text-[28px] text-espresso font-light tracking-tight leading-tight">
+            {/* ⚠ Phase 27: göstərim sırası BƏY → GƏLİN (data açarları dəyişmir) */}
             {isCouple ? (
               <>
-                {data.brideName || '—'}
-                <span className="text-gold mx-3 font-serif italic font-light">&amp;</span>
                 {data.groomName || '—'}
+                <span className="text-gold mx-3 font-serif italic font-light">&amp;</span>
+                {data.brideName || '—'}
               </>
             ) : (
               data.brideName || data.eventName || '—'
