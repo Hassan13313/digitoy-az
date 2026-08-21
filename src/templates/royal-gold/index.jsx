@@ -8,7 +8,7 @@ import { parseLatLon } from '../_shared/geo'
 import { OrderCta, MusicStartBubble } from '../_shared/TemplateActions'
 import TemplateOutro from '../_shared/TemplateOutro'
 import { getTemplateTheme } from '../templateConfig'
-import { buildPresetMusic, PRESET_TRACKS, MUSIC_PLAY_MODES } from '../../data/music'
+import { buildPresetMusic, PRESET_TRACKS, MUSIC_PLAY_MODES, shouldAutoPlay } from '../../data/music'
 import { getPackageGates } from '../../data/packages'
 import { formatAzDate, formatFullDateByLang, formatTime24 } from '../../utils/dateFormat'
 import { unlockAudio } from '../../utils/audioUnlock'
@@ -21,6 +21,7 @@ import { useRsvp } from '../../hooks/useRsvp'
 import { useGuestbook } from '../../hooks/useGuestbook'
 import { useGallery } from '../../hooks/useGallery'
 import { useMusicPlayer } from '../../hooks/useMusicPlayer'
+import { useMusicPrompt } from '../../hooks/useMusicPrompt'
 import t from '../../data/translations'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -250,21 +251,17 @@ function SealedEnvelope({ weddingData, isCouple, isCorp, eventLabel, onOpen, onO
 /* ═══════════════════════════════════════════════════════════════════════════
    03 — MUSİQİ: hero-nun sağ küncündə qızıl ekvalayzer dairəsi
    ═══════════════════════════════════════════════════════════════════════════ */
-function GoldMusic({ lang, music, playerRef, visible = false }) {
-  const { audioProps, playing, play, pause, toggle, hasMusic } = useMusicPlayer({ lang, music, autoStart: visible })
-  const [prompt, setPrompt] = useState(false)
+function GoldMusic({ lang, music, playerRef, visible = false, autoPlay = false }) {
+  const { audioProps, playing, play, pause, toggle, hasMusic } = useMusicPlayer({
+    lang, music, autoStart: visible && autoPlay,
+  })
 
   useEffect(() => {
     if (playerRef) playerRef.current = { play, pause }
   })
 
-  /* Bubble açılışdan 900ms sonra çıxır və toxunulana qədər qalır.
-     Musiqi artıq çalırsa toxunuş yalnız bubble-ı gizlədir — DAYANDIRMIR. */
-  useEffect(() => {
-    if (!hasMusic || !visible) return
-    const id = setTimeout(() => setPrompt(true), 900)
-    return () => clearTimeout(id)
-  }, [hasMusic, visible])
+  /* Bubble: açılışdan 900ms sonra çıxır, İLK SCROLL-da və ya toxunanda gedir */
+  const [prompt, dismissPrompt] = useMusicPrompt({ enabled: visible && hasMusic })
 
   if (!hasMusic) return null
 
@@ -280,10 +277,11 @@ function GoldMusic({ lang, music, playerRef, visible = false }) {
       {/* YALNIZ start helper — musiqi çalırsa klik heç nə etmir */}
       <MusicStartBubble
         theme={TH} lang={lang} visible={prompt} playing={playing}
-        onStart={() => { if (!playing) play(); setPrompt(false) }}
+        onStart={() => { if (!playing) play(); dismissPrompt() }}
       />
       <button
         onClick={toggle}
+        data-press
         aria-label={playing ? 'Musiqini dayandır' : 'Musiqini başlat'}
         style={{
           position: 'fixed',
@@ -332,6 +330,9 @@ export default function RoyalGoldTemplate({
   const eventLabel = eventLabels[weddingData.eventType] || tr.event_toy
 
   const invMusic  = weddingData?.music || DEFAULT_MUSIC
+  /* ⚠ Autoplay YALNIZ builder-də "Dəvətnamə açılan kimi" seçiləndə (və ya
+     musiqi seçilməyib default preset işlədiləndə) — bax data/music.js */
+  const autoPlay  = shouldAutoPlay(invMusic)
 
   const activePkgId = isDemoMode ? 'PREMIUM' : (weddingData.package || 'SADE')
   const { allowRsvp: canShowRsvp, allowSeating: canShowSeating, allowGallery: canShowGallery } = getPackageGates(activePkgId)
@@ -370,7 +371,7 @@ export default function RoyalGoldTemplate({
           isCorp={isCorp}
           eventLabel={eventLabel}
           onOpen={() => setOpened(true)}
-          onOpenStart={() => musicRef.current?.play()}
+          onOpenStart={autoPlay ? () => musicRef.current?.play() : undefined}
         />
       )}
 
@@ -383,7 +384,7 @@ export default function RoyalGoldTemplate({
         </Parallax>
       )}
       {/* 03 — MUSİQİ TOGGLE */}
-      <GoldMusic lang={lang} music={invMusic} playerRef={musicRef} visible={opened} />
+      <GoldMusic lang={lang} music={invMusic} playerRef={musicRef} visible={opened} autoPlay={autoPlay} />
 
       <AnimatePresence>
         {opened && (

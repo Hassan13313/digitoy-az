@@ -37,6 +37,18 @@ export const MUSIC_PLAY_MODES = {
 
 export const DEFAULT_PLAY_MODE = MUSIC_PLAY_MODES.BUTTON
 
+/**
+ * Dəvətnamə açılanda musiqi ÖZÜ başlasınmı?
+ *
+ * Qərarın YEGANƏ mənbəyi budur — şablonlar öz-özünə autoplay etmir.
+ * Builder-də "Musiqi düyməsinə basıldıqdan sonra" (tövsiyə olunan) seçilibsə
+ * səs yalnız qonağın toxunuşu ilə başlayır; bubble yenə çıxır və YANDIRMAQ
+ * üçün işləyir.
+ */
+export function shouldAutoPlay(music) {
+  return (music?.playMode || DEFAULT_PLAY_MODE) === MUSIC_PLAY_MODES.AUTO
+}
+
 /* MP3 yükləmə limitləri */
 export const MP3_MAX_BYTES = 20 * 1024 * 1024 /* 20 MB */
 export const MP3_MIME_TYPES = ['audio/mpeg', 'audio/mp3']

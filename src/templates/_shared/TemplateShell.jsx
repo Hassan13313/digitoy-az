@@ -7,7 +7,7 @@ import MapMosaic, { MapRings } from './MapMosaic'
 import { parseLatLon } from './geo'
 import { OrderCta, MusicStartBubble } from './TemplateActions'
 import TemplateOutro from './TemplateOutro'
-import { buildPresetMusic, PRESET_TRACKS, MUSIC_PLAY_MODES } from '../../data/music'
+import { buildPresetMusic, PRESET_TRACKS, MUSIC_PLAY_MODES, shouldAutoPlay } from '../../data/music'
 import { getPackageGates } from '../../data/packages'
 import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
 import { trackEvent } from '../../utils/analytics'
@@ -19,6 +19,7 @@ import { useRsvp } from '../../hooks/useRsvp'
 import { useGuestbook } from '../../hooks/useGuestbook'
 import { useGallery } from '../../hooks/useGallery'
 import { useMusicPlayer } from '../../hooks/useMusicPlayer'
+import { useMusicPrompt } from '../../hooks/useMusicPrompt'
 import t from '../../data/translations'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -76,7 +77,6 @@ export default function TemplateShell({
 }) {
   const tr = t[lang] || t.az
   const [opened, setOpened] = useState(false)
-  const [showMusicPrompt, setShowMusicPrompt] = useState(false)
 
   const D = {
     radius: 16,
@@ -126,21 +126,21 @@ export default function TemplateShell({
   const { inputRef: rsvpInputRef, ...rsvp }    = useRsvp({ lang, weddingData })
   const gbook    = useGuestbook({ lang, initialMessages: initialGuestbook })
   const gallery  = useGallery({ weddingData, isCouple, isCorp })
-  /* `autoStart` — zərf açılan kimi musiqi özü başlayır (bax useMusicPlayer) */
-  const music    = useMusicPlayer({ lang, music: invMusic, autoStart: opened })
+  /* ⚠ Autoplay YALNIZ builder-də "Dəvətnamə açılan kimi" seçiləndə (və ya
+     musiqi seçilməyib default preset işlədiləndə). Tövsiyə olunan "düymə ilə"
+     rejimində səs qonağın toxunuşunu gözləyir — bax data/music.js. */
+  const autoPlay = shouldAutoPlay(invMusic)
+  const music    = useMusicPlayer({ lang, music: invMusic, autoStart: opened && autoPlay })
+
+  /* Bubble: açılışdan 900ms sonra çıxır, İLK SCROLL-da və ya ona toxunanda
+     yox olur (9 şablonda eyni qayda — bax hooks/useMusicPrompt.js). */
+  const [showMusicPrompt, dismissMusicPrompt] = useMusicPrompt({
+    enabled: opened && music.hasMusic,
+  })
 
   useEffect(() => {
     if (!isDemoMode) trackEvent('invitation_opened', { lang, event_type: weddingData?.eventType })
   }, [])
-
-  /* Bubble açılışdan 900ms sonra çıxır və qonaq ona toxunana qədər qalır.
-     Musiqi artıq çalırsa toxunuş yalnız bubble-ı gizlədir — DAYANDIRMIR
-     (söndürmək üçün sağ-aşağıdakı toggle var). */
-  useEffect(() => {
-    if (!opened || !music.hasMusic) return
-    const id = setTimeout(() => setShowMusicPrompt(true), 900)
-    return () => clearTimeout(id)
-  }, [opened, music.hasMusic])
 
   const { formattedDate, dayName } = formatAzDate(weddingData.date, lang)
 
@@ -201,7 +201,7 @@ export default function TemplateShell({
           theme={theme} weddingData={weddingData} isCouple={isCouple} isCorp={isCorp}
           eventLabel={eventLabel} lang={lang}
           onOpen={() => setOpened(true)}
-          onOpenStart={music.play}
+          onOpenStart={autoPlay ? music.play : undefined}
         />
       )}
 
@@ -250,7 +250,7 @@ export default function TemplateShell({
               musiqi artıq çalırsa klik heç nə etmir (pause/stop YOX). */}
           <MusicStartBubble
             theme={theme} lang={lang} visible={showMusicPrompt} playing={music.playing}
-            onStart={() => { if (!music.playing) music.play(); setShowMusicPrompt(false) }}
+            onStart={() => { if (!music.playing) music.play(); dismissMusicPrompt() }}
           />
         </>
       )}

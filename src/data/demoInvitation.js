@@ -29,7 +29,10 @@ export const demoInvitation = {
 
   galleryLink: '',
 
-  /* Phase 25.3 — demo musiqi: lokal MP3 preset nümayişi (düymə ilə başlama) */
+  /* Demo musiqi: lokal MP3 preset nümayişi.
+     ⚠ `playMode: 'auto'` QƏSDƏNdir — nümunə dəvətnamə məhsulun avtomatik
+     başlayan musiqisini göstərməlidir. Müştərinin öz dəvətnaməsində bu seçim
+     builder-dən gəlir (default: 'button' — tövsiyə olunan). */
   music: {
     type: 'track',
     provider: 'preset',
@@ -41,7 +44,7 @@ export const demoInvitation = {
     startTime: 0,
     coverImage: null,
     isDefault: false,
-    playMode: 'button',
+    playMode: 'auto',
   },
 
   demoPhotos: [

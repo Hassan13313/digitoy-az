@@ -20,11 +20,12 @@ import { OrderCta, MusicStartBubble } from '../_shared/TemplateActions'
 import { Reveal, Stagger, enterDirection } from '../_shared/motion'
 import TemplateOutro from '../_shared/TemplateOutro'
 import { getTemplateTheme } from '../templateConfig'
-import { buildPresetMusic, PRESET_TRACKS, MUSIC_PLAY_MODES } from '../../data/music'
+import { buildPresetMusic, PRESET_TRACKS, MUSIC_PLAY_MODES, shouldAutoPlay } from '../../data/music'
 import { getPackageGates } from '../../data/packages'
 import { unlockAudio } from '../../utils/audioUnlock'
 import { trackEvent } from '../../utils/analytics'
 import { useGallery } from '../../hooks/useGallery'
+import { useMusicPrompt } from '../../hooks/useMusicPrompt'
 import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
 import t from '../../data/translations'
 
@@ -61,12 +62,14 @@ const DEFAULT_INV_MUSIC = buildPresetMusic(PRESET_TRACKS[0], { playMode: MUSIC_P
    ───────────────────────────────────────────────────────────────────────── */
 export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBack, isDemoMode = false, initialGuestbook }) {
   const tr = t[lang]
-  const [envelopeOpened,   setEnvelopeOpened]   = useState(false)
-  const [showMusicPrompt, setShowMusicPrompt] = useState(false)
+  const [envelopeOpened, setEnvelopeOpened] = useState(false)
   const musicRef = useRef(null)
 
-  /* ⚠ Bubble scroll ilə GİZLƏNMİR — 9 şablonun hamısında eyni qayda:
-     yalnız qonaq ona toxunanda yoxa çıxır. */
+  /* Bubble: açılışdan 1.8s sonra çıxır, İLK SCROLL-da və ya ona toxunanda
+     yox olur (9 şablonda eyni qayda — bax hooks/useMusicPrompt.js). */
+  const [showMusicPrompt, dismissMusicPrompt] = useMusicPrompt({
+    enabled: envelopeOpened, delay: 1800,
+  })
 
   /* Dəvətnamə açıldı — demo rejimi nəzərə alınmır (yalnız real qonaq baxışları) */
   useEffect(() => {
@@ -105,6 +108,9 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
   /* Phase 25.3 — istifadəçinin seçdiyi musiqi (preset/mp3). Yoxdursa standart
      lokal preset melodiya (YouTube YOXDUR) + mövcud autoplay cəhdi. */
   const invMusic  = weddingData?.music || DEFAULT_INV_MUSIC
+  /* ⚠ Autoplay YALNIZ builder-də "Dəvətnamə açılan kimi" seçiləndə (və ya
+     musiqi seçilməyib default preset işlədiləndə) — bax data/music.js */
+  const autoPlay  = shouldAutoPlay(invMusic)
 
   const isCouple = ['toy', 'nishan'].includes(weddingData.eventType)
   const isCorp   = ['corporate', 'other'].includes(weddingData.eventType)
@@ -145,21 +151,20 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
              toxunuşunda təkrar cəhd edir, bubble isə açıq qalır.
              "Keç" düyməsi ilə keçiləndə bu çağırış birbaşa klik hadisəsinin
              içindədir və dərhal işləyir. */
-          musicRef.current?.play()
-          setTimeout(() => setShowMusicPrompt(true), 1800)
+          if (autoPlay) musicRef.current?.play()
         }}
         weddingData={weddingData}
         lang={lang}
       />
 
       {/* Music control — root level so position:fixed is viewport-relative, not transform-relative */}
-      <MusicToggle ref={musicRef} lang={lang} music={invMusic} visible={envelopeOpened} />
+      <MusicToggle ref={musicRef} lang={lang} music={invMusic} visible={envelopeOpened} autoPlay={autoPlay} />
 
       {/* Musiqini başlat bubble — Phase 27: 9 şablonun ortaq komponenti */}
       {/* YALNIZ start helper — MusicToggle.play() artıq çalırsa təsirsizdir */}
       <MusicStartBubble
         theme={TH} lang={lang} visible={showMusicPrompt}
-        onStart={() => { musicRef.current?.play(); setShowMusicPrompt(false) }}
+        onStart={() => { musicRef.current?.play(); dismissMusicPrompt() }}
       />
 
       {/* Ambient premium background — Phase 25.4. Kept OUTSIDE the animated

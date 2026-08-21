@@ -9,9 +9,11 @@ import { useMusicPlayer } from '../../hooks/useMusicPlayer'
    ⚠ `visible` = dəvətnamə açılıb (açılış videosu bitib). <audio> BUNDAN ASILI
    DEYİL — həmişə mount olunur ki, video "Keç" düyməsi ilə keçiləndə play()
    birbaşa klik hadisəsinin içində çağırıla bilsin. Görünən yalnız düymədir. */
-const MusicToggle = forwardRef(function MusicToggle({ lang, music = null, visible = false }, ref) {
+const MusicToggle = forwardRef(function MusicToggle({ lang, music = null, visible = false, autoPlay = false }, ref) {
   const tr = t[lang]
-  const { audioProps, playing, play, pause, toggle, hasMusic } = useMusicPlayer({ lang, music, autoStart: visible })
+  const { audioProps, playing, play, pause, toggle, hasMusic } = useMusicPlayer({
+    lang, music, autoStart: visible && autoPlay,
+  })
 
   useImperativeHandle(ref, () => ({ play, pause }))
 
