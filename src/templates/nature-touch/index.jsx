@@ -91,7 +91,6 @@ export default function NatureTouchTemplate(props) {
         kicker: '.2em',
         dark: false,
         alternate: true,
-        motion: 'settle',
         /* Location — OSM tile mozaikasının şablona məxsus emalı */
         map: { opacity: 0.5, filter: 'grayscale(1) brightness(1.05) contrast(.95)', tintOpacity: 0.45 },
         headingColor: TH.text,

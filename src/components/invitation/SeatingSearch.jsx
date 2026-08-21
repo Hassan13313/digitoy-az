@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, X } from 'lucide-react'
-import { useScrollReveal } from '../../hooks/useScrollReveal'
 import { useSeating } from '../../hooks/useSeating'
+import { Reveal } from '../../templates/_shared/motion'
 import t from '../../data/translations'
 
 /* Axtarış/normalizasiya/masa yoldaşı məntiqi artıq `hooks/useSeating.js`-dədir —
@@ -15,13 +15,12 @@ export default function SeatingSearch({ seatingPlan, lang }) {
     isEmpty, showNotFound, pick, reset, onKeyDown, inputRef,
     labels: L, statusMap: STATUS_DOT,
   } = useSeating({ seatingPlan, lang })
-  const [ref, visible] = useScrollReveal()
 
   if (isEmpty) return null
 
   return (
     <section className="py-28 px-6 bg-beige">
-      <div ref={ref} className={`max-w-lg mx-auto reveal-hidden ${visible ? 'reveal-visible' : ''}`}>
+      <Reveal className="max-w-lg mx-auto">
 
         {/* Header */}
         <div className="text-center mb-12">
@@ -172,7 +171,7 @@ export default function SeatingSearch({ seatingPlan, lang }) {
                       {selected.table_id}
                     </p>
                   </div>
-                  <button onClick={reset} aria-label="Yenidən axtar"
+                  <button onClick={reset} data-press aria-label="Yenidən axtar"
                     style={{ flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', padding: 6 }}>
                     <X size={15} strokeWidth={1.5} style={{ color: 'rgba(140,123,107,0.55)' }} />
                   </button>
@@ -215,7 +214,7 @@ export default function SeatingSearch({ seatingPlan, lang }) {
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </Reveal>
     </section>
   )
 }

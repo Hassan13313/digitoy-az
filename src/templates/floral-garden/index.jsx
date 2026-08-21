@@ -13,7 +13,7 @@ import { getPackageGates } from '../../data/packages'
 import { formatAzDate, formatFullDateByLang, formatTime24 } from '../../utils/dateFormat'
 import { unlockAudio } from '../../utils/audioUnlock'
 import { trackEvent } from '../../utils/analytics'
-import { useScrollReveal } from '../../hooks/useScrollReveal'
+import { Reveal, Stagger, Parallax, PopDigit, enterDirection } from '../_shared/motion'
 import { useCountdown } from '../../hooks/useCountdown'
 import { useTimeline } from '../../hooks/useTimeline'
 import { useSeating } from '../../hooks/useSeating'
@@ -71,24 +71,6 @@ function WatercolorBlobs({ opacity = 1 }) {
         animation: 'fg-drift 20s ease-in-out 2s infinite alternate-reverse',
       }} />
     </>
-  )
-}
-
-/* ── Scroll reveal: mətn blokları y:20px fade (design animation system) ── */
-function Reveal({ children, style }) {
-  const [ref, visible] = useScrollReveal()
-  return (
-    <div
-      ref={ref}
-      style={{
-        ...style,
-        opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(20px)',
-        transition: 'opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1)',
-      }}
-    >
-      {children}
-    </div>
   )
 }
 
@@ -333,7 +315,15 @@ export default function FloralGardenTemplate({
 
 
   return (
-    <div data-fg style={{ background: TH.background, minHeight: '100vh', fontFamily: sans, color: TH.text, overflowX: 'hidden' }}>
+    <div
+      data-fg
+      data-enter={enterDirection('floral-garden')}
+      style={{
+        background: TH.background, minHeight: '100vh', fontFamily: sans, color: TH.text,
+        overflowX: 'hidden',
+        '--tpl-glow': `${TH.primary}42`,
+      }}
+    >
       <style>{KEYFRAMES}</style>
 
       {/* 01 — ZƏRF AÇILIŞI */}
@@ -385,11 +375,16 @@ export default function FloralGardenTemplate({
 
             {/* 04 — HERO (design: sola düzləndirilmiş, mobil oxunaqlılıq üçün) */}
             <section style={{ position: 'relative', padding: '52px 28px 48px', overflow: 'hidden' }}>
-              <div style={{
-                position: 'absolute', width: 260, height: 260, borderRadius: '50%',
-                background: `radial-gradient(circle, ${TH.accent}4D, transparent 66%)`,
-                top: -70, right: -90, filter: 'blur(24px)', pointerEvents: 'none',
-              }} />
+              {/* Akvarel ləkəsi parallaksla dərinlik verir (scroll-a əks istiqamət) */}
+              <Parallax
+                speed={0.18}
+                max={38}
+                style={{
+                  position: 'absolute', width: 260, height: 260, borderRadius: '50%',
+                  background: `radial-gradient(circle, ${TH.accent}4D, transparent 66%)`,
+                  top: -70, right: -90, filter: 'blur(24px)', pointerEvents: 'none',
+                }}
+              />
               <div style={{ position: 'relative', maxWidth: 560, margin: '0 auto' }}>
                 <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.primary, marginBottom: 12 }}>
                   {eventLabel}
@@ -440,26 +435,27 @@ export default function FloralGardenTemplate({
             <section style={{ padding: '30px 28px', background: TH.surface }}>
               <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
                 <SectionHead kicker="Countdown" title={cd.title} />
-                <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap' }}>
+                <Stagger base={55} style={{ display: 'flex', gap: 18, flexWrap: 'wrap' }}>
                   {[
                     { v: cd.days, l: cd.labels.days },
                     { v: cd.hours, l: cd.labels.hours },
                     { v: cd.minutes, l: cd.labels.minutes },
-                    { v: cd.seconds, l: cd.labels.seconds, accent: true },
-                  ].map(({ v, l, accent }) => (
+                    { v: cd.seconds, l: cd.labels.seconds, accent: true, pop: true },
+                  ].map(({ v, l, accent, pop }) => (
                     <div key={l}>
                       <div style={{
                         fontFamily: serif, fontSize: 34, lineHeight: 1,
                         color: accent ? TH.accent : TH.text, fontVariantNumeric: 'tabular-nums',
                       }}>
-                        {String(v).padStart(2, '0')}
+                        {/* Yalnız saniyə rəqəmi döyünür */}
+                        <PopDigit value={v} pop={pop} />
                       </div>
                       <div style={{ fontSize: 10, letterSpacing: '.14em', textTransform: 'uppercase', color: TH.muted, marginTop: 4 }}>
                         {l}
                       </div>
                     </div>
                   ))}
-                </div>
+                </Stagger>
               </Reveal>
             </section>
 
@@ -496,13 +492,13 @@ export default function FloralGardenTemplate({
                     <div style={{ fontFamily: serif, fontSize: 20, color: TH.text, marginTop: 6 }}>
                       {weddingData.venueName || tr.inv_location}
                     </div>
-                    <div style={{ display: 'flex', gap: 6, marginTop: 14, flexWrap: 'wrap' }}>
-                      <a href={weddingData.googleMapsUrl || '#'} target="_blank" rel="noopener noreferrer" style={pill(true)}>Maps</a>
-                      <a href={weddingData.wazeUrl || '#'} target="_blank" rel="noopener noreferrer" style={pill(false)}>Waze</a>
+                    <Stagger base={110} style={{ display: 'flex', gap: 6, marginTop: 14, flexWrap: 'wrap' }}>
+                      <a data-press href={weddingData.googleMapsUrl || '#'} target="_blank" rel="noopener noreferrer" style={pill(true)}>Maps</a>
+                      <a data-press href={weddingData.wazeUrl || '#'} target="_blank" rel="noopener noreferrer" style={pill(false)}>Waze</a>
                       {weddingData.appleMapsUrl && (
-                        <a href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={pill(false)}>Apple</a>
+                        <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={pill(false)}>Apple</a>
                       )}
-                    </div>
+                    </Stagger>
                   </div>
                 </div>
               </Reveal>
@@ -512,7 +508,7 @@ export default function FloralGardenTemplate({
             <section style={{ padding: '34px 28px' }}>
               <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
                 <SectionHead kicker="Schedule" title={timeline.sectionLabel} />
-                <div>
+                <Stagger base={55}>
                   {timeline.events.map((ev, i) => (
                     <div key={i} style={{
                       display: 'flex', gap: 14, alignItems: 'flex-start',
@@ -536,7 +532,7 @@ export default function FloralGardenTemplate({
                       </span>
                     </div>
                   ))}
-                </div>
+                </Stagger>
               </Reveal>
             </section>
 
@@ -636,6 +632,7 @@ export default function FloralGardenTemplate({
                       </div>
                       <button
                         onClick={seating.reset}
+                        data-press
                         style={{
                           marginTop: 6, background: 'none', border: 'none', cursor: 'pointer',
                           fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase', color: TH.primary, fontFamily: sans,
@@ -680,7 +677,7 @@ export default function FloralGardenTemplate({
                       {tr.inv_scan_upload}
                     </div>
 
-                    <a href={gallery.photoShareUrl} style={{ ...pill(true), marginTop: 14, padding: 13 }}>
+                    <a data-press href={gallery.photoShareUrl} style={{ ...pill(true), marginTop: 14, padding: 13 }}>
                       📷 {tr.inv_gallery_btn}
                     </a>
                     {/* ⚠ Phase 27: "Masa kartını yüklə" tamamilə silindi (QR + foto paylaşımı qalır) */}
@@ -772,7 +769,7 @@ export default function FloralGardenTemplate({
                       </div>
 
                       {/* Status düymələri */}
-                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      <Stagger base={220} style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                         {[
                           { val: 'yes',   label: rsvp.labels.yes,   bg: TH.accent },
                           { val: 'no',    label: rsvp.labels.no,    bg: null },
@@ -784,6 +781,7 @@ export default function FloralGardenTemplate({
                               key={val}
                               type="button"
                               onClick={() => rsvp.chooseStatus(val)}
+                              data-press
                               style={{
                                 flex: '1 1 40%', minHeight: 48, borderRadius: 100, cursor: 'pointer',
                                 padding: '14px 8px', fontSize: 10.5, letterSpacing: '.12em',
@@ -791,14 +789,13 @@ export default function FloralGardenTemplate({
                                 background: active ? (bg || TH.primary) : '#FFFFFF',
                                 color: active ? '#FFFFFF' : '#6B6359',
                                 border: active ? '1px solid transparent' : `1px solid ${TH.primary}59`,
-                                transition: 'all .2s',
                               }}
                             >
                               {label}
                             </button>
                           )
                         })}
-                      </div>
+                      </Stagger>
 
                       {/* Əlavə qonaq */}
                       {rsvp.status === 'yes' && (
@@ -810,14 +807,14 @@ export default function FloralGardenTemplate({
                             {rsvp.labels.plusq}
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 26, marginTop: 16 }}>
-                            <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} aria-label="Azalt"
+                            <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} data-press aria-label="Azalt"
                               style={{ width: 40, height: 40, border: `1px solid ${TH.primary}4D`, borderRadius: '50%', background: 'none', color: TH.muted, cursor: 'pointer', opacity: rsvp.plusOne === 0 ? .35 : 1 }}>
                               −
                             </button>
                             <span style={{ fontFamily: serif, fontSize: 34, color: TH.text, width: 40, fontVariantNumeric: 'tabular-nums' }}>
                               {rsvp.plusOne}
                             </span>
-                            <button type="button" onClick={rsvp.incPlusOne} disabled={rsvp.plusOne === rsvp.maxExtraGuests} aria-label="Artır"
+                            <button type="button" onClick={rsvp.incPlusOne} disabled={rsvp.plusOne === rsvp.maxExtraGuests} data-press aria-label="Artır"
                               style={{ width: 40, height: 40, border: `1px solid ${TH.primary}4D`, borderRadius: '50%', background: 'none', color: TH.primary, cursor: 'pointer', opacity: rsvp.plusOne === rsvp.maxExtraGuests ? .35 : 1 }}>
                               +
                             </button>
@@ -828,6 +825,7 @@ export default function FloralGardenTemplate({
                       <button
                         type="submit"
                         disabled={!rsvp.canSubmit}
+                        data-press
                         style={{
                           marginTop: 12, width: '100%', minHeight: 50, borderRadius: 100, border: 'none',
                           background: TH.primary, color: TH.background, cursor: rsvp.canSubmit ? 'pointer' : 'not-allowed',
@@ -877,6 +875,7 @@ export default function FloralGardenTemplate({
                   <button
                     type="submit"
                     disabled={!gbook.canSubmit}
+                    data-press
                     style={{
                       minHeight: 46, borderRadius: 100, border: 'none', background: TH.primary,
                       color: TH.background, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed',
@@ -888,7 +887,7 @@ export default function FloralGardenTemplate({
                   </button>
                 </form>
 
-                <div style={{ display: 'grid', gap: 10 }}>
+                <Stagger base={110} style={{ display: 'grid', gap: 10 }}>
                   {gbook.messages.map((raw, i) => {
                     const m = gbook.readMessage(raw)
                     return (
@@ -902,7 +901,7 @@ export default function FloralGardenTemplate({
                       </div>
                     )
                   })}
-                </div>
+                </Stagger>
               </Reveal>
             </section>
 

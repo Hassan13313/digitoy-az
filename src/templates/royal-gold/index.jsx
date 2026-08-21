@@ -13,7 +13,7 @@ import { getPackageGates } from '../../data/packages'
 import { formatAzDate, formatFullDateByLang, formatTime24 } from '../../utils/dateFormat'
 import { unlockAudio } from '../../utils/audioUnlock'
 import { trackEvent } from '../../utils/analytics'
-import { useScrollReveal } from '../../hooks/useScrollReveal'
+import { Reveal, Stagger, Parallax, PopDigit, enterDirection } from '../_shared/motion'
 import { useCountdown } from '../../hooks/useCountdown'
 import { useTimeline } from '../../hooks/useTimeline'
 import { useSeating } from '../../hooks/useSeating'
@@ -78,25 +78,6 @@ function GoldLights() {
           }}
         />
       ))}
-    </div>
-  )
-}
-
-/* ── Scroll reveal: y:24px + blur 4px (design animation system) ── */
-function Reveal({ children, style, delay = 0 }) {
-  const [ref, visible] = useScrollReveal()
-  return (
-    <div
-      ref={ref}
-      style={{
-        ...style,
-        opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(24px)',
-        filter: visible ? 'blur(0px)' : 'blur(4px)',
-        transition: `opacity .7s cubic-bezier(.22,1,.36,1) ${delay}ms, transform .7s cubic-bezier(.22,1,.36,1) ${delay}ms, filter .7s ease ${delay}ms`,
-      }}
-    >
-      {children}
     </div>
   )
 }
@@ -359,7 +340,15 @@ export default function RoyalGoldTemplate({
   const { formattedDate, dayName } = formatAzDate(weddingData.date, lang)
 
   return (
-    <div data-rg style={{ background: TH.background, minHeight: '100vh', fontFamily: sans, color: TH.text, overflowX: 'hidden', position: 'relative' }}>
+    <div
+      data-rg
+      data-enter={enterDirection('royal-gold')}
+      style={{
+        background: TH.background, minHeight: '100vh', fontFamily: sans, color: TH.text,
+        overflowX: 'hidden', position: 'relative',
+        '--tpl-glow': `${TH.primary}47`,
+      }}
+    >
       <style>{KEYFRAMES}</style>
 
       {/* 01 — ZƏRF AÇILIŞI */}
@@ -373,7 +362,14 @@ export default function RoyalGoldTemplate({
         />
       )}
 
-      {opened && <GoldLights />}
+      {/* Qızıl işıq ləkələri scroll-a əks istiqamətdə sürüşür (parallaks).
+          ⚠ `translate` yazılır — ləkələrin öz `rg-drift` transform animasiyası
+          toxunulmaz qalır. */}
+      {opened && (
+        <Parallax mode="page" range={54} style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
+          <GoldLights />
+        </Parallax>
+      )}
       {/* 03 — MUSİQİ TOGGLE */}
       {opened && <GoldMusic lang={lang} music={invMusic} playerRef={musicRef} />}
 
@@ -477,24 +473,25 @@ export default function RoyalGoldTemplate({
             <section style={{ padding: '34px 26px', ...sectionBorder }}>
               <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
                 <SectionHead kicker="Countdown" title={cd.title} />
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8 }}>
+                <Stagger base={55} style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8 }}>
                   {[
                     { v: cd.days, l: cd.labels.days },
                     { v: cd.hours, l: cd.labels.hours },
                     { v: cd.minutes, l: cd.labels.minutes },
-                    { v: cd.seconds, l: cd.labels.seconds },
-                  ].map(({ v, l }) => (
+                    { v: cd.seconds, l: cd.labels.seconds, pop: true },
+                  ].map(({ v, l, pop }) => (
                     <div key={l} style={{
                       background: `${TH.primary}0D`, border: `1px solid ${TH.primary}24`,
                       padding: '12px 4px', textAlign: 'center',
                     }}>
                       <div style={{ fontFamily: serif, fontSize: 'clamp(22px,6vw,26px)', color: TH.accent, fontVariantNumeric: 'tabular-nums' }}>
-                        {String(v).padStart(2, '0')}
+                        {/* Yalnız saniyə xanası döyünür */}
+                        <PopDigit value={v} pop={pop} />
                       </div>
                       <div style={{ fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase', color: TH.muted, marginTop: 2 }}>{l}</div>
                     </div>
                   ))}
-                </div>
+                </Stagger>
               </Reveal>
             </section>
 
@@ -535,13 +532,13 @@ export default function RoyalGoldTemplate({
                 <div style={{ textAlign: 'center', marginTop: 14, fontSize: 13, color: TH.text }}>
                   {weddingData.venueName}
                 </div>
-                <div style={{ display: 'flex', gap: 6, marginTop: 14, flexWrap: 'wrap' }}>
-                  <a href={weddingData.googleMapsUrl || '#'} target="_blank" rel="noopener noreferrer" style={btn(true)}>Maps</a>
-                  <a href={weddingData.wazeUrl || '#'} target="_blank" rel="noopener noreferrer" style={btn(false)}>Waze</a>
+                <Stagger base={165} style={{ display: 'flex', gap: 6, marginTop: 14, flexWrap: 'wrap' }}>
+                  <a data-press href={weddingData.googleMapsUrl || '#'} target="_blank" rel="noopener noreferrer" style={btn(true)}>Maps</a>
+                  <a data-press href={weddingData.wazeUrl || '#'} target="_blank" rel="noopener noreferrer" style={btn(false)}>Waze</a>
                   {weddingData.appleMapsUrl && (
-                    <a href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Apple</a>
+                    <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Apple</a>
                   )}
-                </div>
+                </Stagger>
               </Reveal>
             </section>
 
@@ -549,7 +546,7 @@ export default function RoyalGoldTemplate({
             <section style={{ padding: '34px 26px', ...sectionBorder }}>
               <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
                 <SectionHead kicker="Schedule" title={timeline.sectionLabel} />
-                <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 20 }}>
+                <Stagger base={55} style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 20 }}>
                   <span style={{
                     position: 'absolute', left: 63, top: 14, bottom: 14, width: 1,
                     background: `linear-gradient(180deg, transparent, ${TH.primary}59, transparent)`,
@@ -567,7 +564,7 @@ export default function RoyalGoldTemplate({
                       <span style={{ paddingTop: 7, fontFamily: serif, fontSize: 17, color: TH.text }}>{ev.label}</span>
                     </div>
                   ))}
-                </div>
+                </Stagger>
               </Reveal>
             </section>
 
@@ -660,6 +657,7 @@ export default function RoyalGoldTemplate({
                       </div>
                       <button
                         onClick={seating.reset}
+                        data-press
                         style={{
                           marginTop: 6, background: 'none', border: 'none', cursor: 'pointer',
                           fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase',
@@ -700,7 +698,7 @@ export default function RoyalGoldTemplate({
                     {tr.inv_scan_upload}
                   </div>
 
-                  <a href={gallery.photoShareUrl} style={{ ...btn(true), marginTop: 16, padding: 13 }}>
+                  <a data-press href={gallery.photoShareUrl} style={{ ...btn(true), marginTop: 16, padding: 13 }}>
                     📷 {tr.inv_gallery_btn}
                   </a>
                   {/* ⚠ Phase 27: "Masa kartını yüklə" tamamilə silindi (QR + foto paylaşımı qalır) */}
@@ -789,7 +787,7 @@ export default function RoyalGoldTemplate({
                         )}
                       </div>
 
-                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      <Stagger base={220} style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                         {[
                           { val: 'yes',   label: rsvp.labels.yes },
                           { val: 'no',    label: rsvp.labels.no },
@@ -801,6 +799,7 @@ export default function RoyalGoldTemplate({
                               key={val}
                               type="button"
                               onClick={() => rsvp.chooseStatus(val)}
+                              data-press
                               style={{
                                 flex: '1 1 40%', minHeight: 48, borderRadius: 100, cursor: 'pointer',
                                 padding: '14px 8px', fontSize: 10.5, letterSpacing: '.14em',
@@ -808,14 +807,13 @@ export default function RoyalGoldTemplate({
                                 background: active ? `linear-gradient(135deg, ${TH.primary}, #B8903A)` : 'transparent',
                                 color: active ? '#FFFFFF' : TH.accent,
                                 border: active ? '1px solid transparent' : `1px solid ${TH.primary}40`,
-                                transition: 'all .2s',
                               }}
                             >
                               {label}
                             </button>
                           )
                         })}
-                      </div>
+                      </Stagger>
 
                       {rsvp.status === 'yes' && (
                         <div style={{ marginTop: 12, border: `1px solid ${TH.primary}2E`, background: `${TH.primary}0D`, padding: '22px 18px' }}>
@@ -823,14 +821,14 @@ export default function RoyalGoldTemplate({
                             {rsvp.labels.plusq}
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 26, marginTop: 18 }}>
-                            <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} aria-label="Azalt"
+                            <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} data-press aria-label="Azalt"
                               style={{ width: 40, height: 40, border: `1px solid ${TH.primary}4D`, background: 'none', color: TH.muted, cursor: 'pointer', opacity: rsvp.plusOne === 0 ? .35 : 1 }}>
                               −
                             </button>
                             <span style={{ fontFamily: serif, fontSize: 34, color: TH.accent, width: 40, fontVariantNumeric: 'tabular-nums' }}>
                               {rsvp.plusOne}
                             </span>
-                            <button type="button" onClick={rsvp.incPlusOne} disabled={rsvp.plusOne === rsvp.maxExtraGuests} aria-label="Artır"
+                            <button type="button" onClick={rsvp.incPlusOne} disabled={rsvp.plusOne === rsvp.maxExtraGuests} data-press aria-label="Artır"
                               style={{ width: 40, height: 40, border: `1px solid ${TH.primary}4D`, background: 'none', color: TH.primary, cursor: 'pointer', opacity: rsvp.plusOne === rsvp.maxExtraGuests ? .35 : 1 }}>
                               +
                             </button>
@@ -841,6 +839,7 @@ export default function RoyalGoldTemplate({
                       <button
                         type="submit"
                         disabled={!rsvp.canSubmit}
+                        data-press
                         style={{
                           marginTop: 12, width: '100%', minHeight: 50, border: 'none',
                           background: TH.primary, color: '#1A1408',
@@ -891,6 +890,7 @@ export default function RoyalGoldTemplate({
                   <button
                     type="submit"
                     disabled={!gbook.canSubmit}
+                    data-press
                     style={{
                       minHeight: 46, border: 'none', background: TH.primary, color: '#1A1408',
                       cursor: gbook.canSubmit ? 'pointer' : 'not-allowed',
@@ -902,7 +902,7 @@ export default function RoyalGoldTemplate({
                   </button>
                 </form>
 
-                <div style={{ display: 'grid', gap: 14 }}>
+                <Stagger base={110} style={{ display: 'grid', gap: 14 }}>
                   {gbook.messages.map((raw, i) => {
                     const m = gbook.readMessage(raw)
                     return (
@@ -916,7 +916,7 @@ export default function RoyalGoldTemplate({
                       </div>
                     )
                   })}
-                </div>
+                </Stagger>
               </Reveal>
             </section>
 

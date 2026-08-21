@@ -129,7 +129,9 @@ export default function DressCodeSection({
   const noteCol = readableOn(bg, theme.muted, theme.text)
 
   return (
-    <div style={{ maxWidth: 560, margin: '0 auto', textAlign: align }}>
+    /* `data-stagger`: ad → ikonlar → qeyd 55ms addımla gəlir.
+       ⚠ `--tpl-base` 55ms — bölmə başlığından SONRA başlasın (bax index.css). */
+    <div data-stagger style={{ maxWidth: 560, margin: '0 auto', textAlign: align, '--tpl-base': '55ms' }}>
       {kicker && (
         <div style={{
           fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase',

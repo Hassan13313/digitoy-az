@@ -87,7 +87,6 @@ export default function OrientalLuxeTemplate(props) {
         kicker: '.2em',
         dark: true,
         alternate: true,
-        motion: 'rise',
         /* Location — OSM tile mozaikasının şablona məxsus emalı */
         map: { opacity: 0.45, filter: 'grayscale(1) brightness(.45) contrast(1.2)', tintOpacity: 0.55 },
         headingColor: TH.text,

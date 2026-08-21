@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, X, Minus, Plus, Send, Search, AlertCircle } from 'lucide-react'
-import { useScrollReveal } from '../../hooks/useScrollReveal'
 import { useRsvp } from '../../hooks/useRsvp'
+import { Reveal, Stagger } from '../../templates/_shared/motion'
 import t from '../../data/translations'
 
 /* Qonaq siyahısı, autocomplete və göndərmə məntiqi artıq
@@ -19,14 +19,10 @@ export default function RSVPSection({ lang, weddingData }) {
   } = useRsvp({ lang, weddingData })
 
   const tr = t[lang] || t.az
-  const [ref, visible] = useScrollReveal()
 
   return (
     <section className="py-28 px-6 bg-cream">
-      <div
-        ref={ref}
-        className={`max-w-[540px] mx-auto px-6 text-center reveal-hidden ${visible ? 'reveal-visible' : ''}`}
-      >
+      <Reveal className="max-w-[540px] mx-auto px-6 text-center">
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-3 font-mono text-[10px] tracking-[0.42em] text-gold-dark uppercase">
             <span className="w-[22px] h-px bg-gold opacity-60" />
@@ -166,7 +162,7 @@ export default function RSVPSection({ lang, weddingData }) {
               )}
 
               {/* ── 3 status düyməsi ── */}
-              <div className="flex flex-col gap-2.5">
+              <Stagger base={110} className="flex flex-col gap-2.5">
                 {[
                   { val: 'yes',   label: L.yes,   activeClass: 'bg-gradient-to-br from-gold to-gold-dark text-white border-transparent', inactiveClass: 'bg-gold/[0.12] border-gold/50 text-gold-dark' },
                   { val: 'maybe', label: L.maybe, activeClass: 'bg-[#C5A059]/30 border-[#C5A059] text-[#8A6A20]',                        inactiveClass: 'bg-white/40 border-gold/25 text-espresso/70' },
@@ -175,13 +171,14 @@ export default function RSVPSection({ lang, weddingData }) {
                   <button
                     key={val}
                     type="button"
+                    data-press
                     onClick={() => chooseStatus(val)}
-                    className={`min-h-[52px] px-7 font-semibold text-[13px] tracking-[0.18em] uppercase transition-all duration-200 border ${status === val ? activeClass : inactiveClass}`}
+                    className={`min-h-[52px] px-7 font-semibold text-[13px] tracking-[0.18em] uppercase border ${status === val ? activeClass : inactiveClass}`}
                   >
                     {label}
                   </button>
                 ))}
-              </div>
+              </Stagger>
 
               {/* ── Əlavə qonaq ── */}
               <AnimatePresence>
@@ -190,13 +187,13 @@ export default function RSVPSection({ lang, weddingData }) {
                     <div className="border border-beige-dark/50 bg-beige/40 p-7">
                       <p className="text-[10px] tracking-[0.22em] uppercase text-brown-muted mb-6 font-sans font-medium text-center">{L.plusq}</p>
                       <div className="flex items-center justify-center gap-8">
-                        <button type="button" disabled={plusOne === 0} onClick={decPlusOne}
-                          className="w-10 h-10 border border-beige-dark flex items-center justify-center text-brown-muted hover:border-gold hover:text-gold transition-all disabled:opacity-25">
+                        <button type="button" disabled={plusOne === 0} onClick={decPlusOne} data-press
+                          className="w-10 h-10 border border-beige-dark flex items-center justify-center text-brown-muted hover:border-gold hover:text-gold transition-colors disabled:opacity-25">
                           <Minus size={13} strokeWidth={1.5} />
                         </button>
                         <span className="font-serif text-4xl text-ink font-light w-12 text-center tabular-nums">{plusOne}</span>
-                        <button type="button" disabled={plusOne === maxExtraGuests} onClick={incPlusOne}
-                          className="w-10 h-10 border border-beige-dark flex items-center justify-center text-brown-muted hover:border-gold hover:text-gold transition-all disabled:opacity-25">
+                        <button type="button" disabled={plusOne === maxExtraGuests} onClick={incPlusOne} data-press
+                          className="w-10 h-10 border border-beige-dark flex items-center justify-center text-brown-muted hover:border-gold hover:text-gold transition-colors disabled:opacity-25">
                           <Plus size={13} strokeWidth={1.5} />
                         </button>
                       </div>
@@ -208,6 +205,7 @@ export default function RSVPSection({ lang, weddingData }) {
               <button
                 type="submit"
                 disabled={!canSubmit}
+                data-press
                 className="btn-gold w-full min-h-[52px] flex items-center justify-center gap-2.5 disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <Send size={12} strokeWidth={1.5} />
@@ -216,7 +214,7 @@ export default function RSVPSection({ lang, weddingData }) {
             </motion.form>
           )}
         </AnimatePresence>
-      </div>
+      </Reveal>
     </section>
   )
 }

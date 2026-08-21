@@ -136,6 +136,177 @@ button, [role="button"], a, label, select {
   font-feature-settings: "tnum";
 }
 
+/* =============================================================================
+   TEMPLATE MOTION SYSTEM — 9 dəvətnamə şablonunun ORTAQ hərəkət dili.
+
+   Dörd qat:
+     1. Scroll reveal  — bölmə görünəndə blur + sürüşmə ilə açılır
+     2. Stagger        — bölmə daxilindəki elementlər 55ms addımla ardınca gəlir
+     3. Press feedback — hover-də qalxma + işıqlanma, basanda 0.955 scale
+     4. Pop            — sayğacın saniyə rəqəmi hər saniyə döyünür
+
+   ⚠ NİYƏ `translate`/`scale`, `transform` DEYİL: reveal və press tez-tez EYNİ
+   elementə düşür (məs. xəritə düyməsi həm stagger uşağı, həm də basılandır).
+   Tək `transform` xassəsi olsaydı biri digərini üzərinə yazardı. Ona görə
+   reveal müstəqil `translate`/`scale` xassələrini, press isə `transform`-u
+   işlədir — ikisi eyni anda, münaqişəsiz komponuye olunur.
+
+   ⚠ `filter: blur(6px)` → `filter: none` düzgün interpolasiya olunur (çatışmayan
+   funksiya sıfır dəyərlə əvəzlənir), ona görə reveal bitəndə element üzərində
+   artıq kompozisiya qatı qalmır.
+
+   JS tərəfi: `templates/_shared/motion.jsx` (Reveal / Stagger / useParallax).
+   ============================================================================= */
+
+:root {
+  --tpl-ease:       cubic-bezier(0.22, 1, 0.36, 1);
+  --tpl-reveal-dur: 700ms;
+  --tpl-child-dur:  560ms;
+  --tpl-stagger:     55ms;
+  --tpl-blur:         6px;
+  /* Şablon kökü öz aksentini ötürür (TemplateShell / royal-gold / …) */
+  --tpl-glow:       rgba(0, 0, 0, 0.16);
+}
+
+/* ── Beş giriş istiqaməti — şablonlar arasında növbələnir ──
+   `data-enter` şablonun KÖKÜNDƏ durur, dəyişənlər bütün bölmələrə miras qalır.
+   `--tpl-t/s` = bölmənin özü, `--tpl-tc/sc` = bölmə daxilindəki elementlər. */
+[data-enter="up"]    { --tpl-t: 0 26px;  --tpl-s: 1;    --tpl-tc: 0 15px;  --tpl-sc: 1; }
+[data-enter="down"]  { --tpl-t: 0 -24px; --tpl-s: 1;    --tpl-tc: 0 -13px; --tpl-sc: 1; }
+[data-enter="left"]  { --tpl-t: -30px 0; --tpl-s: 1;    --tpl-tc: -17px 0; --tpl-sc: 1; }
+[data-enter="right"] { --tpl-t: 30px 0;  --tpl-s: 1;    --tpl-tc: 17px 0;  --tpl-sc: 1; }
+[data-enter="zoom"]  { --tpl-t: 0 14px;  --tpl-s: 0.94; --tpl-tc: 0 9px;   --tpl-sc: 0.965; }
+
+/* ── 1. Bölmə reveal ───────────────────────────────────────────────────────── */
+[data-reveal] {
+  opacity: 0;
+  translate: var(--tpl-t, 0 26px);
+  scale: var(--tpl-s, 1);
+  filter: blur(var(--tpl-blur));
+  transition:
+    opacity   var(--tpl-reveal-dur) var(--tpl-ease),
+    translate var(--tpl-reveal-dur) var(--tpl-ease),
+    scale     var(--tpl-reveal-dur) var(--tpl-ease),
+    filter    var(--tpl-reveal-dur) var(--tpl-ease);
+}
+[data-reveal="in"] {
+  opacity: 1;
+  translate: none;
+  scale: none;
+  filter: none;
+}
+
+/* ── 2. Stagger — 55ms addım ───────────────────────────────────────────────────
+   `:not([data-stagger])`: içində öz stagger-i olan konteyner ÖZÜ animasiya
+   olunmur, yalnız uşaqları gəlir. Əks halda uşaq öz valideynindən əvvəl
+   görünərdi (bütün gecikmələr eyni başlanğıcdan hesablanır). */
+:is([data-reveal][data-stagger], [data-reveal] [data-stagger]) > *:not([data-stagger]) {
+  opacity: 0;
+  translate: var(--tpl-tc, 0 15px);
+  scale: var(--tpl-sc, 1);
+  transition:
+    opacity    var(--tpl-child-dur) var(--tpl-ease),
+    translate  var(--tpl-child-dur) var(--tpl-ease),
+    scale      var(--tpl-child-dur) var(--tpl-ease),
+    transform  160ms var(--tpl-ease),
+    box-shadow 200ms var(--tpl-ease),
+    filter     200ms var(--tpl-ease);
+}
+:is([data-reveal="in"][data-stagger], [data-reveal="in"] [data-stagger]) > *:not([data-stagger]) {
+  opacity: 1;
+  translate: none;
+  scale: none;
+}
+
+/* Gecikmə pilləkəni — hər uşaq öz sırasını `--tpl-i` kimi alır.
+   `--tpl-base` daxili konteynerlərdə inline verilir (məs. bölmə başlığından
+   sonra gələn şəbəkə → base 55ms). */
+:is([data-reveal="in"][data-stagger], [data-reveal="in"] [data-stagger]) > *:nth-child(1)  { --tpl-i:  0; }
+:is([data-reveal="in"][data-stagger], [data-reveal="in"] [data-stagger]) > *:nth-child(2)  { --tpl-i:  1; }
+:is([data-reveal="in"][data-stagger], [data-reveal="in"] [data-stagger]) > *:nth-child(3)  { --tpl-i:  2; }
+:is([data-reveal="in"][data-stagger], [data-reveal="in"] [data-stagger]) > *:nth-child(4)  { --tpl-i:  3; }
+:is([data-reveal="in"][data-stagger], [data-reveal="in"] [data-stagger]) > *:nth-child(5)  { --tpl-i:  4; }
+:is([data-reveal="in"][data-stagger], [data-reveal="in"] [data-stagger]) > *:nth-child(6)  { --tpl-i:  5; }
+:is([data-reveal="in"][data-stagger], [data-reveal="in"] [data-stagger]) > *:nth-child(7)  { --tpl-i:  6; }
+:is([data-reveal="in"][data-stagger], [data-reveal="in"] [data-stagger]) > *:nth-child(8)  { --tpl-i:  7; }
+:is([data-reveal="in"][data-stagger], [data-reveal="in"] [data-stagger]) > *:nth-child(9)  { --tpl-i:  8; }
+:is([data-reveal="in"][data-stagger], [data-reveal="in"] [data-stagger]) > *:nth-child(10) { --tpl-i:  9; }
+:is([data-reveal="in"][data-stagger], [data-reveal="in"] [data-stagger]) > *:nth-child(11) { --tpl-i: 10; }
+/* 12-dən sonrakılar (uzun qonaq dəftəri siyahısı) bir yerdə gəlir — əks halda
+   son mesaj yarım saniyədən çox gözləyərdi. */
+:is([data-reveal="in"][data-stagger], [data-reveal="in"] [data-stagger]) > *:nth-child(n+12) { --tpl-i: 11; }
+
+/* ⚠ Gecikmə YALNIZ reveal xassələrinə (opacity/translate/scale) düşür; siyahının
+   son üç dəyəri 0s-dir ki, EYNİ elementdə basma cavabı (transform/box-shadow/
+   filter) gecikməsin. Xəritə düyməsi həm stagger uşağı, həm də basılandır —
+   tək dəyər yazsaydıq hover 200ms+ ləngiyərdi.
+   Sıra yuxarıdakı `transition-property` sırası ilə eynidir. */
+:is([data-reveal="in"][data-stagger], [data-reveal="in"] [data-stagger]) > *:not([data-stagger]) {
+  transition-delay:
+    calc(var(--tpl-base, 0ms) + var(--tpl-i, 0) * var(--tpl-stagger)),
+    calc(var(--tpl-base, 0ms) + var(--tpl-i, 0) * var(--tpl-stagger)),
+    calc(var(--tpl-base, 0ms) + var(--tpl-i, 0) * var(--tpl-stagger)),
+    0s, 0s, 0s;
+}
+
+/* ── 3. İnteraktiv toxunuş ─────────────────────────────────────────────────────
+   Maps/Waze/Apple, RSVP düymələri, ±, axtarış, paylaş/yüklə, sosial ikonlar.
+   ⚠ SIRA VACİBDİR: bu blok stagger-dən SONRA gəlir ki, eyni elementdə
+   transition siyahısı itməsin (ona görə burada reveal xassələri də var). */
+[data-press] {
+  transition:
+    transform  160ms var(--tpl-ease),
+    box-shadow 200ms var(--tpl-ease),
+    filter     200ms var(--tpl-ease),
+    opacity    var(--tpl-child-dur) var(--tpl-ease),
+    translate  var(--tpl-child-dur) var(--tpl-ease),
+    scale      var(--tpl-child-dur) var(--tpl-ease);
+}
+/* Toxunma cihazlarında hover tap zamanı yanlış işə düşür → yalnız kursorla */
+@media (hover: hover) and (pointer: fine) {
+  [data-press]:hover:not(:disabled):not([aria-disabled="true"]) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 26px var(--tpl-glow);
+    filter: brightness(1.06);
+  }
+}
+[data-press]:active:not(:disabled) {
+  transform: scale(0.955);
+  filter: brightness(1.02);
+}
+[data-press]:disabled {
+  transform: none;
+  box-shadow: none;
+  filter: none;
+}
+
+/* ── 4. Sayğac — saniyə rəqəmi ────────────────────────────────────────────────
+   Saniyədə bir dəfə oynayır, ~400ms — növbəti tıqqıltıya qədər bitir. */
+@keyframes tpl-pop {
+  0%   { scale: 1 }
+  34%  { scale: 1.16 }
+  100% { scale: 1 }
+}
+[data-pop] {
+  display: inline-block;
+  animation: tpl-pop 400ms var(--tpl-ease);
+}
+
+/* ── Reduced motion ───────────────────────────────────────────────────────────
+   Hərəkət söndürülür, MƏZMUN İSƏ HƏMİŞƏ GÖRÜNÜR (opacity 1). */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal],
+  :is([data-reveal][data-stagger], [data-reveal] [data-stagger]) > * {
+    opacity: 1 !important;
+    translate: none !important;
+    scale: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+  [data-press]:hover, [data-press]:active { transform: none !important; }
+  [data-pop] { animation: none !important; }
+}
+
 /* Reduced motion — accessibility */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

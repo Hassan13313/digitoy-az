@@ -11,7 +11,7 @@ import { buildPresetMusic, PRESET_TRACKS, MUSIC_PLAY_MODES } from '../../data/mu
 import { getPackageGates } from '../../data/packages'
 import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
 import { trackEvent } from '../../utils/analytics'
-import { useScrollReveal } from '../../hooks/useScrollReveal'
+import { Reveal, Stagger, Parallax, PopDigit, enterDirection } from './motion'
 import { useCountdown } from '../../hooks/useCountdown'
 import { useTimeline } from '../../hooks/useTimeline'
 import { useSeating } from '../../hooks/useSeating'
@@ -51,24 +51,6 @@ function alpha(hex, a) {
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`
 }
 
-/* ── Scroll reveal — hər şablonun öz "hərəkət dili" ilə ── */
-function Reveal({ children, style, motionStyle = 'fade' }) {
-  const [ref, visible] = useScrollReveal()
-  const variants = {
-    fade:   { hidden: { opacity: 0, transform: 'translateY(12px)' },  shown: { opacity: 1, transform: 'translateY(0)' } },
-    rise:   { hidden: { opacity: 0, transform: 'translateY(24px)' },  shown: { opacity: 1, transform: 'translateY(0)' } },
-    settle: { hidden: { opacity: 0, transform: 'translateY(32px)' },  shown: { opacity: 1, transform: 'translateY(0)' } },
-    clip:   { hidden: { opacity: 0, transform: 'translateY(18px)' },  shown: { opacity: 1, transform: 'translateY(0)' } },
-  }
-  const v = variants[motionStyle] || variants.fade
-  const st = visible ? v.shown : v.hidden
-  return (
-    <div ref={ref} style={{ ...style, ...st, transition: 'opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1)' }}>
-      {children}
-    </div>
-  )
-}
-
 /* Bölmə başlığı — MODUL səviyyəsində (render daxilində yaradılsa,
    hər render-də yeni komponent tipi olar və subtree remount edilər). */
 function SectionHead({ kicker, title, sub, theme, design, serif }) {
@@ -104,7 +86,6 @@ export default function TemplateShell({
     kicker: '.2em',
     dark: false,
     alternate: true,
-    motion: 'fade',
     buttonRadius: 100,
     ...design,
   }
@@ -197,7 +178,13 @@ export default function TemplateShell({
   return (
     <div
       data-tpl={templateId}
-      style={{ background: theme.background, minHeight: '100vh', fontFamily: sans, color: theme.text, overflowX: 'hidden', position: 'relative' }}
+      data-enter={enterDirection(templateId)}
+      style={{
+        background: theme.background, minHeight: '100vh', fontFamily: sans, color: theme.text,
+        overflowX: 'hidden', position: 'relative',
+        /* Basma/hover işığının rəngi — bax index.css › [data-press] */
+        '--tpl-glow': alpha(theme.accent, 0.3),
+      }}
     >
       <style>{`
         @media (prefers-reduced-motion: reduce) {
@@ -214,7 +201,18 @@ export default function TemplateShell({
         />
       )}
 
-      {opened && ambient}
+      {/* Ambient işıq/naxış qatları — səhifə boyu scroll-a əks istiqamətdə sürüşür.
+          ⚠ Qat `position: fixed` olduğu üçün element riyaziyyatı sıfır verir,
+          ona görə parallaks `page` rejimindədir. */}
+      {opened && ambient && (
+        <Parallax
+          mode="page"
+          range={54}
+          style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}
+        >
+          {ambient}
+        </Parallax>
+      )}
 
       {/* 03 — MUSİQİ TOGGLE */}
       {opened && music.hasMusic && (
@@ -222,6 +220,7 @@ export default function TemplateShell({
           <audio {...music.audioProps} />
           <button
             onClick={music.toggle}
+            data-press
             aria-label={music.playing ? 'Musiqini dayandır' : 'Musiqini başlat'}
             style={{
               position: 'fixed', bottom: 'max(20px, env(safe-area-inset-bottom, 20px))', right: 20, zIndex: 55,
@@ -337,32 +336,33 @@ export default function TemplateShell({
 
             {/* 05 — COUNTDOWN */}
             <section style={sectionStyle(1)}>
-              <Reveal style={inner} motionStyle={D.motion}>
+              <Reveal style={inner}>
                 <SectionHead kicker="Countdown" title={cd.title} theme={theme} design={D} serif={serif} />
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'clamp(6px, 2vw, 8px)' }}>
+                <Stagger base={55} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'clamp(6px, 2vw, 8px)' }}>
                   {[
                     { v: cd.days, l: cd.labels.days },
                     { v: cd.hours, l: cd.labels.hours },
                     { v: cd.minutes, l: cd.labels.minutes },
-                    { v: cd.seconds, l: cd.labels.seconds },
-                  ].map(({ v, l }) => (
+                    { v: cd.seconds, l: cd.labels.seconds, pop: true },
+                  ].map(({ v, l, pop }) => (
                     <div key={l} style={{
                       background: soft, border: `1px solid ${alpha(theme.accent, 0.18)}`,
                       borderRadius: D.radius === 0 ? 0 : 10, padding: 'clamp(10px, 3vw, 14px) 2px', textAlign: 'center',
                     }}>
                       <div style={{ fontFamily: serif, fontSize: 'clamp(20px, 6vw, 26px)', color: HEAD, fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
-                        {String(v).padStart(2, '0')}
+                        {/* Yalnız saniyə xanası döyünür — dəqiqə/saat/gün sakit qalır */}
+                        <PopDigit value={v} pop={pop} />
                       </div>
                       <div style={{ fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase', color: theme.muted, marginTop: 5 }}>{l}</div>
                     </div>
                   ))}
-                </div>
+                </Stagger>
               </Reveal>
             </section>
 
             {/* 06 — LOCATION */}
             <section style={sectionStyle(2)}>
-              <Reveal style={inner} motionStyle={D.motion}>
+              <Reveal style={inner}>
                 <SectionHead kicker="LOCATION" title={tr.inv_location} theme={theme} design={D} serif={serif} />
                 <div style={{ borderRadius: D.radius, overflow: 'hidden', border: `1px solid ${line}` }}>
                   {/* Hibrid xəritə — məkanın koordinatı varsa real OSM tile mozaikası,
@@ -397,13 +397,13 @@ export default function TemplateShell({
                     <div style={{ fontFamily: serif, fontSize: 'clamp(17px, 5vw, 20px)', color: theme.text }}>
                       {weddingData.venueName || tr.inv_location}
                     </div>
-                    <div style={{ display: 'flex', gap: 6, marginTop: 14, flexWrap: 'wrap' }}>
-                      <a href={weddingData.googleMapsUrl || '#'} target="_blank" rel="noopener noreferrer" style={btn(true)}>Maps</a>
-                      <a href={weddingData.wazeUrl || '#'} target="_blank" rel="noopener noreferrer" style={btn(false)}>Waze</a>
+                    <Stagger base={110} style={{ display: 'flex', gap: 6, marginTop: 14, flexWrap: 'wrap' }}>
+                      <a data-press href={weddingData.googleMapsUrl || '#'} target="_blank" rel="noopener noreferrer" style={btn(true)}>Maps</a>
+                      <a data-press href={weddingData.wazeUrl || '#'} target="_blank" rel="noopener noreferrer" style={btn(false)}>Waze</a>
                       {weddingData.appleMapsUrl && (
-                        <a href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Apple</a>
+                        <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Apple</a>
                       )}
-                    </div>
+                    </Stagger>
                   </div>
                 </div>
               </Reveal>
@@ -411,9 +411,9 @@ export default function TemplateShell({
 
             {/* 07 — PROQRAM */}
             <section style={sectionStyle(3)}>
-              <Reveal style={inner} motionStyle={D.motion}>
+              <Reveal style={inner}>
                 <SectionHead kicker="Schedule" title={timeline.sectionLabel} theme={theme} design={D} serif={serif} />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16, textAlign: 'left' }}>
+                <Stagger base={55} style={{ display: 'flex', flexDirection: 'column', gap: 16, textAlign: 'left' }}>
                   {timeline.events.map((ev, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 'clamp(10px, 3vw, 14px)' }}>
                       <span style={{ width: 44, flex: '0 0 auto', fontSize: 10, letterSpacing: '.1em', color: theme.muted, paddingTop: 9, textAlign: 'right' }}>
@@ -429,13 +429,13 @@ export default function TemplateShell({
                       </span>
                     </div>
                   ))}
-                </div>
+                </Stagger>
               </Reveal>
             </section>
 
             {/* 08 — DRESS CODE (ortaq komponent) */}
             <section style={sectionStyle(4)}>
-              <Reveal style={inner} motionStyle={D.motion}>
+              <Reveal style={inner}>
                 <SectionHead kicker="STYLE" title={tr.inv_dresscode} theme={theme} design={D} serif={serif} />
                 <DressCodeSection
                   theme={theme}
@@ -452,10 +452,10 @@ export default function TemplateShell({
             {/* 09 — OTURMA PLANI */}
             {canShowSeating && !seating.isEmpty && (
               <section style={sectionStyle(5)}>
-                <Reveal style={inner} motionStyle={D.motion}>
+                <Reveal style={inner}>
                   <SectionHead kicker="SEATING" title={seating.labels.title} sub={seating.labels.sub} theme={theme} design={D} serif={serif} />
                   {/* ⚠ Təkliflər siyahısı normal document flow-da — overlap olmur */}
-                  <div style={{ textAlign: 'left' }}>
+                  <Stagger base={55} style={{ textAlign: 'left' }}>
                     <input
                       ref={seatInputRef}
                       type="text"
@@ -517,14 +517,14 @@ export default function TemplateShell({
                         <div style={{ fontSize: 11, color: theme.muted, marginTop: 10, lineHeight: 1.6 }}>
                           {seating.selected.table_id}: {seating.tablemates.map((g) => g.full_name).join(', ')}
                         </div>
-                        <button onClick={seating.reset} style={{
+                        <button onClick={seating.reset} data-press style={{
                           marginTop: 6, background: 'none', border: 'none', cursor: 'pointer',
                           fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase',
                           color: ACC, fontFamily: sans, minHeight: 44, padding: '0 8px 0 0',
                         }}>Yenidən axtar</button>
                       </div>
                     )}
-                  </div>
+                  </Stagger>
                 </Reveal>
               </section>
             )}
@@ -532,8 +532,8 @@ export default function TemplateShell({
             {/* 10 — QALEREYA + QR */}
             {canShowGallery && (
               <section id="gallery-section" style={sectionStyle(6)}>
-                <Reveal style={inner} motionStyle={D.motion}>
-                  <div style={{ background: card, border: `1px solid ${line}`, borderRadius: D.radius, padding: 'clamp(16px, 5vw, 22px)', textAlign: 'center' }}>
+                <Reveal style={inner}>
+                  <Stagger base={0} style={{ background: card, border: `1px solid ${line}`, borderRadius: D.radius, padding: 'clamp(16px, 5vw, 22px)', textAlign: 'center' }}>
                     <SectionHead kicker="Gallery" title={tr.inv_gallery} theme={theme} design={D} serif={serif} />
 
                     {gallery.demoPhotos.length > 0 && (
@@ -557,11 +557,11 @@ export default function TemplateShell({
                       {tr.inv_scan_upload}
                     </div>
 
-                    <a href={gallery.photoShareUrl} style={{ ...btn(true), marginTop: 14, padding: 13 }}>📷 {tr.inv_gallery_btn}</a>
+                    <a data-press href={gallery.photoShareUrl} style={{ ...btn(true), marginTop: 14, padding: 13 }}>📷 {tr.inv_gallery_btn}</a>
                     {/* ⚠ Phase 27: "Masa kartını yüklə" tamamilə silindi (QR + foto paylaşımı qalır) */}
 
                     <div style={{ fontSize: 12.5, color: theme.muted, marginTop: 14, lineHeight: 1.8 }}>{tr.inv_gallery_desc}</div>
-                  </div>
+                  </Stagger>
                 </Reveal>
               </section>
             )}
@@ -569,7 +569,7 @@ export default function TemplateShell({
             {/* 11 — RSVP */}
             {canShowRsvp && (
               <section style={sectionStyle(7)}>
-                <Reveal style={inner} motionStyle={D.motion}>
+                <Reveal style={inner}>
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: ACC }}>
                     <span style={{ width: 22, height: 1, background: alpha(ACC, 0.6) }} />RSVP
                     <span style={{ width: 22, height: 1, background: alpha(ACC, 0.6) }} />
@@ -638,7 +638,7 @@ export default function TemplateShell({
                         )}
                       </div>
 
-                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      <Stagger base={220} style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                         {[
                           { val: 'yes',   label: rsvp.labels.yes },
                           { val: 'no',    label: rsvp.labels.no },
@@ -648,6 +648,7 @@ export default function TemplateShell({
                           return (
                             <button
                               key={val} type="button" onClick={() => rsvp.chooseStatus(val)}
+                              data-press
                               style={{
                                 flex: '1 1 40%', minWidth: 110, minHeight: 48, cursor: 'pointer',
                                 borderRadius: D.buttonRadius, padding: '13px 8px',
@@ -656,27 +657,26 @@ export default function TemplateShell({
                                 background: active ? CTA_BG : 'transparent',
                                 color: active ? CTA_TXT : theme.accent,
                                 border: active ? '1px solid transparent' : `1px solid ${alpha(theme.accent, 0.35)}`,
-                                transition: 'all .2s',
                               }}
                             >{label}</button>
                           )
                         })}
-                      </div>
+                      </Stagger>
 
                       {rsvp.status === 'yes' && (
                         <div style={{ marginTop: 12, background: card, border: `1px solid ${line}`, borderRadius: D.radius, padding: 20, textAlign: 'center' }}>
                           <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: theme.muted }}>{rsvp.labels.plusq}</div>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 24, marginTop: 16 }}>
-                            <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} aria-label="Azalt"
+                            <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} data-press aria-label="Azalt"
                               style={{ width: 40, height: 40, border: `1px solid ${alpha(theme.accent, 0.3)}`, borderRadius: D.buttonRadius === 0 ? 0 : '50%', background: 'none', color: theme.muted, cursor: 'pointer', opacity: rsvp.plusOne === 0 ? 0.35 : 1 }}>−</button>
                             <span style={{ fontFamily: serif, fontSize: 32, color: HEAD, width: 40, fontVariantNumeric: 'tabular-nums' }}>{rsvp.plusOne}</span>
-                            <button type="button" onClick={rsvp.incPlusOne} disabled={rsvp.plusOne === rsvp.maxExtraGuests} aria-label="Artır"
+                            <button type="button" onClick={rsvp.incPlusOne} disabled={rsvp.plusOne === rsvp.maxExtraGuests} data-press aria-label="Artır"
                               style={{ width: 40, height: 40, border: `1px solid ${alpha(theme.accent, 0.3)}`, borderRadius: D.buttonRadius === 0 ? 0 : '50%', background: 'none', color: ACC, cursor: 'pointer', opacity: rsvp.plusOne === rsvp.maxExtraGuests ? 0.35 : 1 }}>+</button>
                           </div>
                         </div>
                       )}
 
-                      <button type="submit" disabled={!rsvp.canSubmit} style={{
+                      <button type="submit" disabled={!rsvp.canSubmit} data-press style={{
                         marginTop: 12, width: '100%', minHeight: 50, border: 'none', borderRadius: D.buttonRadius,
                         background: CTA_BG, color: CTA_TXT,
                         cursor: rsvp.canSubmit ? 'pointer' : 'not-allowed',
@@ -695,13 +695,13 @@ export default function TemplateShell({
 
             {/* 12 — QONAQ DƏFTƏRİ */}
             <section style={sectionStyle(8)}>
-              <Reveal style={inner} motionStyle={D.motion}>
+              <Reveal style={inner}>
                 <SectionHead kicker="Guestbook" title={gbook.labels.title} theme={theme} design={D} serif={serif} />
                 <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 18, textAlign: 'left' }}>
                   <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbook.labels.namePh} style={inputStyle} />
                   <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbook.labels.msgPh} rows={3}
                     style={{ ...inputStyle, borderRadius: D.radius, resize: 'none' }} />
-                  <button type="submit" disabled={!gbook.canSubmit} style={{
+                  <button type="submit" disabled={!gbook.canSubmit} data-press style={{
                     minHeight: 46, border: 'none', borderRadius: D.buttonRadius, background: CTA_BG,
                     color: CTA_TXT, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed',
                     fontSize: 10.5, letterSpacing: '.14em', textTransform: 'uppercase', fontFamily: sans,
@@ -709,7 +709,7 @@ export default function TemplateShell({
                   }}>{gbook.sending ? gbook.labels.sending : gbook.labels.btn}</button>
                 </form>
 
-                <div style={{ display: 'grid', gap: 10, textAlign: 'left' }}>
+                <Stagger base={110} style={{ display: 'grid', gap: 10, textAlign: 'left' }}>
                   {gbook.messages.map((raw, i) => {
                     const m = gbook.readMessage(raw)
                     return (
@@ -726,7 +726,7 @@ export default function TemplateShell({
                       </div>
                     )
                   })}
-                </div>
+                </Stagger>
               </Reveal>
             </section>
 

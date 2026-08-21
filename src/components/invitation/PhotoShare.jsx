@@ -173,6 +173,7 @@ export default function PhotoShare() {
                 #{slug}
               </p>
               <button
+                data-press
                 onClick={() => {
                   queueRef.current.forEach(q => { if (q.preview) URL.revokeObjectURL(q.preview) })
                   setDone(false)
@@ -302,6 +303,7 @@ export default function PhotoShare() {
 
                   {/* Add more */}
                   <button
+                    data-press
                     onClick={() => inputRef.current?.click()}
                     aria-label="Daha çox şəkil əlavə et"
                     style={{
@@ -319,6 +321,7 @@ export default function PhotoShare() {
               {/* Upload button — toSendCount = pending + error, ona görə
                   uğursuz qalanlar eyni düymə ilə yenidən göndərilə bilir */}
               <button
+                data-press
                 onClick={handleUpload}
                 disabled={toSendCount === 0 || uploading}
                 className="w-full btn-gold disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2.5"

@@ -136,11 +136,13 @@ export default function FloralBackground() {
     const onScroll = () => {
       // Never let a pass start mid-scroll: cancel anything pending…
       clearTimeout(sweepTimerRef.current)
-      // …and glow-follow eases a few px toward the scrolled card (compositor only).
+      // …and the glow field drifts against the scroll (parallax, compositor only).
+      // The page moves up, the glow lags behind by up to 40px, so the light
+      // reads as a layer sitting further back than the invitation card.
       if (!rafRef.current) {
         rafRef.current = requestAnimationFrame(() => {
           rafRef.current = 0
-          const shift = Math.max(-9, Math.min(9, (window.scrollY || 0) * 0.014))
+          const shift = Math.max(-40, Math.min(40, (window.scrollY || 0) * 0.05))
           glowFollowRef.current?.style.setProperty('--glow-shift-y', shift.toFixed(2) + 'px')
         })
       }

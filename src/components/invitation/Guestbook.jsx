@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { Send } from 'lucide-react'
-import { useScrollReveal } from '../../hooks/useScrollReveal'
 import { useGuestbook } from '../../hooks/useGuestbook'
+import { Reveal } from '../../templates/_shared/motion'
 
 /* Mesaj yükləmə/göndərmə məntiqi artıq `hooks/useGuestbook.js`-dədir —
    bu fayl yalnız simple-luxury UI qatıdır. */
@@ -11,14 +11,9 @@ export default function Guestbook({ lang, initialMessages }) {
     messages, name, setName, text, setText, sending,
     handleAdd, canSubmit, labels: L, formatDate,
   } = useGuestbook({ lang, initialMessages })
-  const [ref, visible] = useScrollReveal()
-
   return (
     <section className="py-28 px-6 bg-beige">
-      <div
-        ref={ref}
-        className={`max-w-[680px] mx-auto px-6 reveal-hidden ${visible ? 'reveal-visible' : ''}`}
-      >
+      <Reveal className="max-w-[680px] mx-auto px-6">
         <div className="text-center mb-12">
           <p className="text-[9px] tracking-[0.38em] uppercase text-gold mb-5 font-medium font-sans">
             Guestbook
@@ -46,6 +41,7 @@ export default function Guestbook({ lang, initialMessages }) {
           />
           <button
             type="submit"
+            data-press
             disabled={!canSubmit}
             className="btn-gold w-full min-h-[52px] flex items-center justify-center gap-2.5 disabled:opacity-30"
           >
@@ -63,7 +59,7 @@ export default function Guestbook({ lang, initialMessages }) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.35, delay: idx * 0.04 }}
+                transition={{ duration: 0.35, delay: idx * 0.055 }}
               >
                 <div className="glass rounded-xl p-5">
                   <div className="flex items-center gap-3 mb-3">
@@ -92,7 +88,7 @@ export default function Guestbook({ lang, initialMessages }) {
             ))}
           </AnimatePresence>
         </div>
-      </div>
+      </Reveal>
     </section>
   )
 }

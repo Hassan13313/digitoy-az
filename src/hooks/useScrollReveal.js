@@ -1,6 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 
-export function useScrollReveal(threshold = 0.12) {
+/**
+ * Element ekrana girəndə bir dəfə `visible` qaytarır (sonra observer sönür).
+ *
+ * @param {number|{threshold?:number, rootMargin?:string}} options
+ *   Köhnə çağırış forması (`useScrollReveal(0.2)`) saxlanılıb.
+ *
+ * ⚠ `rootMargin` alt kənardan -8%: bölmə ekranın lap kənarına toxunanda yox,
+ * bir az içəri girəndə açılır — telefonda hərəkət daha təbii oxunur.
+ */
+export function useScrollReveal(options = 0.12) {
+  const { threshold = 0.12, rootMargin = '0px 0px -8% 0px' } =
+    typeof options === 'number' ? { threshold: options } : (options || {})
+
   const ref = useRef(null)
   const [visible, setVisible] = useState(false)
 
@@ -15,12 +27,12 @@ export function useScrollReveal(threshold = 0.12) {
           observer.unobserve(el)
         }
       },
-      { threshold }
+      { threshold, rootMargin }
     )
 
     observer.observe(el)
     return () => observer.unobserve(el)
-  }, [threshold])
+  }, [threshold, rootMargin])
 
   return [ref, visible]
 }

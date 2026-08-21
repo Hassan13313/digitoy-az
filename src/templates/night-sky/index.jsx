@@ -101,7 +101,6 @@ export default function NightSkyTemplate(props) {
         kicker: '.2em',
         dark: true,
         alternate: true,
-        motion: 'rise',
         /* Location — OSM tile mozaikasının şablona məxsus emalı */
         map: { opacity: 0.5, filter: 'grayscale(1) brightness(.38) contrast(1.2)', tintOpacity: 0.5 },
         headingColor: TH.text,

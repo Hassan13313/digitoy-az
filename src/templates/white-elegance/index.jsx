@@ -8,7 +8,8 @@ import { getTemplateTheme } from '../templateConfig'
    Design story: ağ kağız, qabartma çap, heç nə artıq deyil. "Az, amma bahalı".
    Açılış: tam ağ kart, mərkəzdə monoqram dairəsi və caps adlar; kart yuxarı
    qaldırılır (y:-24px, kölgə 2x), sonra fade.
-   Animasiya disiplini: yalnız opacity + y:12px — blur/scale YOXDUR.
+   Animasiya: ortaq motion sistemi (bax _shared/motion.jsx) — bu şablon
+   yuxarıdan aşağı (down) girir, kağız kimi yerinə oturur.
 
    ⚠ Rənglər theme token-lərindən (templateConfig · white-elegance).
    ───────────────────────────────────────────────────────────────────────── */
@@ -88,7 +89,6 @@ export default function WhiteEleganceTemplate(props) {
         kicker: '.2em',
         dark: false,
         alternate: true,
-        motion: 'fade',
         /* Location — OSM tile mozaikasının şablona məxsus emalı */
         map: { opacity: 0.42, filter: 'grayscale(1) brightness(1.28) contrast(.78)', tintOpacity: 0.3 },
         headingColor: TH.text,

@@ -17,28 +17,19 @@ import EventTimeline from '../../components/invitation/EventTimeline'
 const DynamicHeroAnimation = lazy(() => import('../../components/invitation/DynamicHeroAnimation'))
 import DressCodeSection from '../_shared/DressCodeSection'
 import { OrderCta, MusicStartBubble } from '../_shared/TemplateActions'
+import { Reveal, Stagger, enterDirection } from '../_shared/motion'
 import TemplateOutro from '../_shared/TemplateOutro'
 import { getTemplateTheme } from '../templateConfig'
 import { buildPresetMusic, PRESET_TRACKS, MUSIC_PLAY_MODES } from '../../data/music'
 import { getPackageGates } from '../../data/packages'
 import { unlockAudio } from '../../utils/audioUnlock'
 import { trackEvent } from '../../utils/analytics'
-import { useScrollReveal } from '../../hooks/useScrollReveal'
 import { useGallery } from '../../hooks/useGallery'
 import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
 import t from '../../data/translations'
 
 /* Ortaq komponentlər (sifariş CTA / musiqi bubble) theme token-ləri ilə işləyir */
 const TH = getTemplateTheme('simple-luxury')
-
-function SectionWrapper({ children, className = '' }) {
-  const [ref, visible] = useScrollReveal()
-  return (
-    <div ref={ref} className={`reveal-hidden ${visible ? 'reveal-visible' : ''} ${className}`}>
-      {children}
-    </div>
-  )
-}
 
 function GoldDividerOrnament() {
   return (
@@ -149,7 +140,13 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
      9 şablonun hamısında eyni mətn və eyni davranış (WhatsApp + draft). */
 
   return (
-    <div className="relative min-h-screen bg-cream overflow-x-hidden">
+    <div
+      className="relative min-h-screen bg-cream overflow-x-hidden"
+      data-tpl="simple-luxury"
+      data-enter={enterDirection('simple-luxury')}
+      /* Basma/hover işığı — qızıl aksent (bax index.css › [data-press]) */
+      style={{ '--tpl-glow': 'rgba(197,160,89,0.34)' }}
+    >
       {/* Opening video — manages its own lifecycle, fades into invitation */}
       <OpeningVideo
         onComplete={() => {
@@ -301,13 +298,14 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
 
             {/* ── LOCATION ── */}
             <section className="py-28 px-6 bg-cream">
-              <SectionWrapper className="max-w-lg mx-auto text-center">
+              <Reveal className="max-w-lg mx-auto text-center">
                 <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">LOCATION</p>
                 <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-4">{tr.inv_location}</h2>
                 <p className="text-brown-muted text-sm font-light tracking-wide leading-relaxed mb-10">{weddingData.venueName}</p>
                 <GoldDividerOrnament />
-                <div className="flex gap-3 mt-4">
+                <Stagger base={110} className="flex gap-3 mt-4">
                   <a
+                    data-press
                     href={weddingData.googleMapsUrl || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -318,6 +316,7 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
                     <span className="sm:hidden">Maps</span>
                   </a>
                   <a
+                    data-press
                     href={weddingData.wazeUrl || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -328,6 +327,7 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
                   </a>
                   {weddingData.appleMapsUrl && (
                     <a
+                      data-press
                       href={weddingData.appleMapsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -337,8 +337,8 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
                       Apple Maps
                     </a>
                   )}
-                </div>
-              </SectionWrapper>
+                </Stagger>
+              </Reveal>
             </section>
 
             {/* ── EVENT TIMELINE (Program) ── */}
@@ -346,7 +346,7 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
 
             {/* ── DRESS CODE ── */}
             <section className="py-28 px-6 bg-beige">
-              <SectionWrapper className="max-w-lg mx-auto text-center">
+              <Reveal className="max-w-lg mx-auto text-center">
                 <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">Style</p>
                 <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-10">{tr.inv_dresscode}</h2>
 
@@ -362,7 +362,7 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
                     align="center"
                   />
                 </div>
-              </SectionWrapper>
+              </Reveal>
             </section>
 
             {/* ── SEATING — lüks axtarış UI ── */}
@@ -372,7 +372,7 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
 
             {/* ── GALLERY ── */}
             {canShowGallery && <section id="gallery-section" className="py-28 px-6 bg-cream">
-              <SectionWrapper className="max-w-lg mx-auto text-center">
+              <Reveal className="max-w-lg mx-auto text-center">
                 <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">{tr.f_gallery}</p>
                 <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-5">{tr.inv_gallery}</h2>
                 <GoldDividerOrnament />
@@ -416,6 +416,7 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
                   </div>
                   <p className="text-[9px] tracking-[0.28em] uppercase text-brown-muted/60 font-medium font-sans mb-5">{tr.inv_scan_upload}</p>
                   <a
+                    data-press
                     href={photoShareUrl}
                     className="inline-flex items-center gap-2.5 btn-gold"
                     style={{ textDecoration: 'none' }}
@@ -428,7 +429,7 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
                 <p className="text-sm text-brown-muted leading-[1.9] max-w-xs mx-auto font-light tracking-wide">
                   {tr.inv_gallery_desc}
                 </p>
-              </SectionWrapper>
+              </Reveal>
             </section>}
 
             {/* ── RSVP — yalnız VIP/PREMIUM paketlərdə ── */}

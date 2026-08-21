@@ -89,7 +89,6 @@ export default function CrystalGlassTemplate(props) {
         kicker: '.2em',
         dark: false,
         alternate: true,
-        motion: 'fade',
         /* Location — OSM tile mozaikasının şablona məxsus emalı */
         map: { opacity: 0.45, filter: 'grayscale(1) brightness(1.2) contrast(.8)', tintOpacity: 0.35 },
         headingColor: TH.text,

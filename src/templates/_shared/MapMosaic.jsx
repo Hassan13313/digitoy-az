@@ -15,6 +15,7 @@
    həm də bu fayl YALNIZ komponent export etsin (react-refresh qaydası).
    `geo.js` heç nə idxal etmir → dairəvi idxal riski yoxdur. */
 import { parseLatLon, toTile, alpha } from './geo'
+import { useParallax } from './motion'
 
 const ZOOM = 16
 const TILE = 256
@@ -42,6 +43,12 @@ export function MapRings({ accent }) {
  * @param {number}   height  konteyner hündürlüyü (CSS dəyəri)
  */
 export default function MapMosaic({ weddingData, theme, map = {}, frame = null, height }) {
+  /* Parallaks: tile mozaikası scroll-a əks istiqamətdə sürüşür.
+     ⚠ Hook erkən `return null`-dan ƏVVƏL çağırılır (rules-of-hooks).
+     ⚠ Təhlükəsizdir: mozaika 768px, konteyner ~168px — hər tərəfdə ən azı
+     172px ehtiyat var, ±22px sürüşmə heç vaxt boş zolaq açmır. */
+  const tilesRef = useParallax({ speed: 0.1, max: 22 })
+
   const pt = parseLatLon(weddingData)
   if (!pt) return null
 
@@ -73,7 +80,7 @@ export default function MapMosaic({ weddingData, theme, map = {}, frame = null, 
         opacity: map.opacity ?? 0.5,
         filter: map.filter || 'grayscale(1) brightness(.45) contrast(1.2)',
       }}>
-        <div style={{
+        <div ref={tilesRef} style={{
           position: 'absolute', left: '50%', top: '50%',
           /* Mərkəzi tile-ın sol-üst küncü konteyner mərkəzindən (TILE+px, TILE+py)
              geri çəkilir → məkan nöqtəsi tam mərkəzdə qalır. */

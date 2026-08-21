@@ -94,6 +94,7 @@ function LazyMedia({ item, selected, onToggle, onDelete, onPreview }) {
               <Trash2 size={13} color="white" strokeWidth={2} />
             </button>
             <button
+              data-press
               onClick={() => downloadItem(item)}
               aria-label="Şəkli HD endir"
               style={{
@@ -217,6 +218,7 @@ function Btn({ children, danger, disabled, onClick, style: extraStyle = {} }) {
   return (
     <button
       type="button"
+      data-press
       disabled={disabled}
       onClick={onClick}
       style={{

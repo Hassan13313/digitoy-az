@@ -81,7 +81,6 @@ export default function ModernBlackTemplate(props) {
         kicker: '.2em',
         dark: true,
         alternate: false,
-        motion: 'clip',
         /* Location — OSM tile mozaikasının şablona məxsus emalı */
         map: { opacity: 0.28, filter: 'grayscale(1) brightness(.4) contrast(1.5) invert(1)', blend: 'multiply', tintOpacity: 0.25 },
         accentColor: TH.secondary,
