@@ -126,14 +126,16 @@ export default function TemplateShell({
   const { inputRef: rsvpInputRef, ...rsvp }    = useRsvp({ lang, weddingData })
   const gbook    = useGuestbook({ lang, initialMessages: initialGuestbook })
   const gallery  = useGallery({ weddingData, isCouple, isCorp })
-  const music    = useMusicPlayer({ lang, music: invMusic })
+  /* `autoStart` — zərf açılan kimi musiqi özü başlayır (bax useMusicPlayer) */
+  const music    = useMusicPlayer({ lang, music: invMusic, autoStart: opened })
 
   useEffect(() => {
     if (!isDemoMode) trackEvent('invitation_opened', { lang, event_type: weddingData?.eventType })
   }, [])
 
-  /* ⚠ Phase 27: AUTOPLAY SİLİNDİ. Zərf açılandan sonra yalnız "Musiqini
-     Başlat" bubble-ı göstərilir — səs YALNIZ qonaq ona toxunanda başlayır. */
+  /* Bubble açılışdan 900ms sonra çıxır və qonaq ona toxunana qədər qalır.
+     Musiqi artıq çalırsa toxunuş yalnız bubble-ı gizlədir — DAYANDIRMIR
+     (söndürmək üçün sağ-aşağıdakı toggle var). */
   useEffect(() => {
     if (!opened || !music.hasMusic) return
     const id = setTimeout(() => setShowMusicPrompt(true), 900)
@@ -197,7 +199,9 @@ export default function TemplateShell({
       {!opened && Opening && (
         <Opening
           theme={theme} weddingData={weddingData} isCouple={isCouple} isCorp={isCorp}
-          eventLabel={eventLabel} lang={lang} onOpen={() => setOpened(true)}
+          eventLabel={eventLabel} lang={lang}
+          onOpen={() => setOpened(true)}
+          onOpenStart={music.play}
         />
       )}
 
@@ -214,10 +218,13 @@ export default function TemplateShell({
         </Parallax>
       )}
 
+      {/* ⚠ <audio> zərf açılmamışdan ƏVVƏL də mount olunur: açılış toxunuşunda
+          play() sinxron çağırılsın deyə (bax OpeningFrame › onOpenStart). */}
+      {music.hasMusic && <audio {...music.audioProps} />}
+
       {/* 03 — MUSİQİ TOGGLE */}
       {opened && music.hasMusic && (
         <>
-          <audio {...music.audioProps} />
           <button
             onClick={music.toggle}
             data-press

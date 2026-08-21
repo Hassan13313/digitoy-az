@@ -104,7 +104,7 @@ const pill = (filled) => ({
 /* ═══════════════════════════════════════════════════════════════════════════
    01 — ZƏRF AÇILIŞI: ekran iki taydan aralanır (design: easeInOutQuart, 1000ms)
    ═══════════════════════════════════════════════════════════════════════════ */
-function GardenOpening({ weddingData, isCouple, isCorp, eventLabel, onOpen }) {
+function GardenOpening({ weddingData, isCouple, isCorp, eventLabel, onOpen, onOpenStart }) {
   const [opening, setOpening] = useState(false)
   const [gone, setGone] = useState(false)
 
@@ -115,6 +115,9 @@ function GardenOpening({ weddingData, isCouple, isCorp, eventLabel, onOpen }) {
   const start = () => {
     if (opening) return
     unlockAudio()
+    /* ⚠ Musiqi toxunuş hadisəsinin İÇİNDƏ başlayır — `onOpen` 950ms sonra
+       gəlir və o vaxt brauzerin jest pəncərəsi bağlı olur. */
+    onOpenStart?.()
     setOpening(true)
     setTimeout(() => { setGone(true); onOpen() }, 950)
   }
@@ -213,27 +216,33 @@ function GardenOpening({ weddingData, isCouple, isCorp, eventLabel, onOpen }) {
 /* ═══════════════════════════════════════════════════════════════════════════
    03 — MUSİQİ: adaçayı ekvalayzer dairəsi (audio engine useMusicPlayer-dədir)
    ═══════════════════════════════════════════════════════════════════════════ */
-function GardenMusic({ lang, music, playerRef }) {
-  const { audioProps, playing, play, pause, toggle, hasMusic } = useMusicPlayer({ lang, music })
+function GardenMusic({ lang, music, playerRef, visible = false }) {
+  const { audioProps, playing, play, pause, toggle, hasMusic } = useMusicPlayer({ lang, music, autoStart: visible })
   const [prompt, setPrompt] = useState(false)
 
   useEffect(() => {
     if (playerRef) playerRef.current = { play, pause }
   })
 
-  /* ⚠ Phase 27: autoplay YOXDUR — açılışdan 900ms sonra yalnız "Musiqini
-     Başlat" bubble-ı çıxır, səs qonağın toxunuşu ilə başlayır. */
+  /* Bubble açılışdan 900ms sonra çıxır və toxunulana qədər qalır.
+     Musiqi artıq çalırsa toxunuş yalnız bubble-ı gizlədir — DAYANDIRMIR. */
   useEffect(() => {
-    if (!hasMusic) return
+    if (!hasMusic || !visible) return
     const id = setTimeout(() => setPrompt(true), 900)
     return () => clearTimeout(id)
-  }, [hasMusic])
+  }, [hasMusic, visible])
 
   if (!hasMusic) return null
 
   return (
     <>
+      {/* ⚠ `visible` = dəvətnamə açılıb. <audio> BUNDAN ASILI DEYİL — zərf
+          açılmamışdan əvvəl də mount olunur ki, açılış toxunuşunda play()
+          sinxron çağırıla bilsin (iOS Safari yalnız jest daxilində icazə
+          verir). Görünən yalnız UI-dır: ekvalayzer düyməsi və bubble. */}
       <audio {...audioProps} />
+      {!visible ? null : (
+      <>
       {/* YALNIZ start helper — musiqi çalırsa klik heç nə etmir */}
       <MusicStartBubble
         theme={TH} lang={lang} visible={prompt} playing={playing}
@@ -264,6 +273,8 @@ function GardenMusic({ lang, music, playerRef }) {
           }} />
         ))}
       </button>
+      </>
+      )}
     </>
   )
 }
@@ -334,11 +345,12 @@ export default function FloralGardenTemplate({
           isCorp={isCorp}
           eventLabel={eventLabel}
           onOpen={() => setOpened(true)}
+          onOpenStart={() => musicRef.current?.play()}
         />
       )}
 
       {/* 03 — MUSİQİ TOGGLE */}
-      {opened && <GardenMusic lang={lang} music={invMusic} playerRef={musicRef} />}
+      <GardenMusic lang={lang} music={invMusic} playerRef={musicRef} visible={opened} />
 
       <AnimatePresence>
         {opened && (

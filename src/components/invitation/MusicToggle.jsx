@@ -4,10 +4,14 @@ import t from '../../data/translations'
 import { useMusicPlayer } from '../../hooks/useMusicPlayer'
 
 /* Audio engine artıq `hooks/useMusicPlayer.js`-dədir — bu fayl yalnız
-   simple-luxury-nin üzən qızıl düyməsidir (UI qatı). */
-const MusicToggle = forwardRef(function MusicToggle({ lang, music = null }, ref) {
+   simple-luxury-nin üzən qızıl düyməsidir (UI qatı).
+
+   ⚠ `visible` = dəvətnamə açılıb (açılış videosu bitib). <audio> BUNDAN ASILI
+   DEYİL — həmişə mount olunur ki, video "Keç" düyməsi ilə keçiləndə play()
+   birbaşa klik hadisəsinin içində çağırıla bilsin. Görünən yalnız düymədir. */
+const MusicToggle = forwardRef(function MusicToggle({ lang, music = null, visible = false }, ref) {
   const tr = t[lang]
-  const { audioProps, playing, play, pause, toggle, hasMusic } = useMusicPlayer({ lang, music })
+  const { audioProps, playing, play, pause, toggle, hasMusic } = useMusicPlayer({ lang, music, autoStart: visible })
 
   useImperativeHandle(ref, () => ({ play, pause }))
 
@@ -20,8 +24,10 @@ const MusicToggle = forwardRef(function MusicToggle({ lang, music = null }, ref)
       <audio {...audioProps} />
 
       {/* Floating toggle button */}
+      {visible && (
       <button
         onClick={toggle}
+        data-press
         title={playing ? tr.inv_music_off : tr.inv_music_on}
         aria-label={playing ? tr.inv_music_off : tr.inv_music_on}
         className="fixed w-14 h-14 rounded-full flex items-center justify-center glass glow-gold transition-all duration-base group"
@@ -47,6 +53,7 @@ const MusicToggle = forwardRef(function MusicToggle({ lang, music = null }, ref)
           />
         )}
       </button>
+      )}
     </>
   )
 })

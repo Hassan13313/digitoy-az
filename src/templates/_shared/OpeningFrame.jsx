@@ -24,7 +24,7 @@ const OPENING_KEYFRAMES = `
 @keyframes tpl-slowring { from { transform:translate(-50%,-50%) rotate(0) } to { transform:translate(-50%,-50%) rotate(360deg) } }
 `
 export default function OpeningFrame({
-  theme, onOpen, children,
+  theme, onOpen, onOpenStart, children,
   label,                       /* CTA mətni */
   background,                  /* öz fonu (yoxdursa theme.background)        */
   exit = 'fade',               /* fade | up | zoom | curtain | iris          */
@@ -38,6 +38,10 @@ export default function OpeningFrame({
   const start = () => {
     if (opening) return
     unlockAudio()
+    /* ⚠ MUSİQİ MƏHZ BURADA başlayır — toxunuş hadisəsinin İÇİNDƏ. `onOpen`
+       çıxış animasiyasından sonra (setTimeout) işə düşür, yəni jest pəncərəsi
+       artıq bağlı olur və iOS Safari play()-i bloklayır. */
+    onOpenStart?.()
     setOpening(true)
     setTimeout(() => { setGone(true); onOpen() }, duration)
   }

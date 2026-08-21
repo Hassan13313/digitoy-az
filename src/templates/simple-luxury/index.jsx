@@ -64,21 +64,9 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
   const [envelopeOpened,   setEnvelopeOpened]   = useState(false)
   const [showMusicPrompt, setShowMusicPrompt] = useState(false)
   const musicRef = useRef(null)
-  const musicHintDismissedRef = useRef(false)
 
-  /* Musiqi ipucu — qonaq ilk dəfə scroll edəndə 300ms sonra yumşaq itir
-     (yalnız bir dəfə, demo + real). Musiqi toggle-ı qalır, yalnız ipucu gizlənir. */
-  useEffect(() => {
-    if (!envelopeOpened) return
-    const onFirstScroll = () => {
-      if (musicHintDismissedRef.current) return
-      musicHintDismissedRef.current = true
-      window.removeEventListener('scroll', onFirstScroll)
-      setTimeout(() => setShowMusicPrompt(false), 300)
-    }
-    window.addEventListener('scroll', onFirstScroll, { passive: true, once: true })
-    return () => window.removeEventListener('scroll', onFirstScroll)
-  }, [envelopeOpened])
+  /* ⚠ Bubble scroll ilə GİZLƏNMİR — 9 şablonun hamısında eyni qayda:
+     yalnız qonaq ona toxunanda yoxa çıxır. */
 
   /* Dəvətnamə açıldı — demo rejimi nəzərə alınmır (yalnız real qonaq baxışları) */
   useEffect(() => {
@@ -151,8 +139,13 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
       <OpeningVideo
         onComplete={() => {
           setEnvelopeOpened(true)
-          /* ⚠ Phase 27: AUTOPLAY SİLİNDİ — yalnız bubble göstərilir,
-             musiqi qınağın toxunuşu ilə başlayır. */
+          /* Musiqi dəvətnamə açılan kimi başlayır.
+             ⚠ Video ÖZÜ bitəndə ortada istifadəçi jesti olmur → brauzer
+             bloklaya bilər; o halda `useMusicPlayer` qonağın növbəti
+             toxunuşunda təkrar cəhd edir, bubble isə açıq qalır.
+             "Keç" düyməsi ilə keçiləndə bu çağırış birbaşa klik hadisəsinin
+             içindədir və dərhal işləyir. */
+          musicRef.current?.play()
           setTimeout(() => setShowMusicPrompt(true), 1800)
         }}
         weddingData={weddingData}
@@ -160,9 +153,7 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
       />
 
       {/* Music control — root level so position:fixed is viewport-relative, not transform-relative */}
-      {envelopeOpened && (
-        <MusicToggle ref={musicRef} lang={lang} music={invMusic} />
-      )}
+      <MusicToggle ref={musicRef} lang={lang} music={invMusic} visible={envelopeOpened} />
 
       {/* Musiqini başlat bubble — Phase 27: 9 şablonun ortaq komponenti */}
       {/* YALNIZ start helper — MusicToggle.play() artıq çalırsa təsirsizdir */}
