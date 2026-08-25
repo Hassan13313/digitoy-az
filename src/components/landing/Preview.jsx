@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { Eye, MessageCircle, Edit2, Calendar, MapPin, Shirt, Users, Image, ListOrdered, ShieldCheck, Copy, Check, Crown, Martini, Palette, Music } from 'lucide-react'
 import { DRESS_CODE_PALETTES } from '../../data/constants'
+import { resolveDressGenders } from '../../data/dressCode'
 import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
 import { buildWhatsAppUrl, buildShortLiveLink } from '../../utils/whatsappOrder'
 import { saveInvitation, submitDraft } from '../../utils/api'
@@ -138,7 +139,18 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
         </span>
       ),
     },
-    { icon: MapPin, label: tr.venue_summary, value: data.venueName || '—' },
+    {
+      icon: MapPin, label: tr.venue_summary,
+      /* Məkan qeydi varsa ikinci sətirdə; yoxdursa əvvəlki kimi tək sətir */
+      value: data.venueNote
+        ? (
+          <span className="flex flex-col gap-0.5">
+            <span>{data.venueName || '—'}</span>
+            <span className="text-brown-muted/60 text-xs">{data.venueNote}</span>
+          </span>
+        )
+        : (data.venueName || '—'),
+    },
     ...(data.programSteps?.filter(r => r.time || r.activity).length > 0 ? [{
       icon: ListOrdered, label: tr.program_summary_label,
       value: (
@@ -158,8 +170,13 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
       value: (() => {
         /* Phase 25.3 — premium mini-kart: ikon + başlıq + açıqlama + palitra */
         const id      = data.dressCodePalette
-        const label   = palette?.label?.[lang] || t[lang]?.[`dresscode_${id}_label`] || DRESS_LABELS_FALLBACK[id] || id
-        const sub     = t[lang]?.[`dresscode_${id}_sub`] || palette?.description?.[lang] || ''
+        /* Fərdi ad varsa o, yoxdursa standart ad (köhnə sifarişlər üçün fallback) */
+        const custom  = (data.dressCodeLabels?.[id] || '').trim()
+        const label   = custom || palette?.label?.[lang] || t[lang]?.[`dresscode_${id}_label`] || DRESS_LABELS_FALLBACK[id] || id
+        /* Alt sətir kişi/qadın mətnlərindən qurulur → dəvətnamədəki ilə eynidir */
+        const g       = resolveDressGenders(id, lang, data.dressCodeGenders)
+        const sub     = [g.male, g.female].filter(Boolean).join(' · ')
+                        || t[lang]?.[`dresscode_${id}_sub`] || palette?.description?.[lang] || ''
         const colors  = palette?.colors || DRESS_COLORS[id] || []
         const DCIcon  = DRESS_ICONS[id] || Shirt
         return (

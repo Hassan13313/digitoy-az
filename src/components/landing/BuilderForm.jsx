@@ -24,6 +24,7 @@ function loadGoogleMaps(apiKey) {
   return _mapsPromise
 }
 import { DRESS_CODE_PALETTES, EVENT_TYPES } from '../../data/constants'
+import { resolveDressGenders } from '../../data/dressCode'
 import { PACKAGE_DEFS, getLockedSteps } from '../../data/packages'
 import { ACTIVE_PARTNERS } from '../../data/partners'
 import MusicStep from './MusicStep'
@@ -2086,6 +2087,17 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
                 <p className="mt-1 text-[10px] text-red-400/80">{errors.venueName}</p>
               )}
             </div>
+            {/* Məkan qeydi — MƏCBURİ DEYİL, validasiyaya girmir.
+                Boş qalsa dəvətnamədə heç nə göstərilmir. */}
+            <div>
+              <Label>{tr.venue_note_label}</Label>
+              <Input
+                type="text"
+                value={data.venueNote || ''}
+                onChange={(e) => set('venueNote', e.target.value)}
+                placeholder={tr.venue_note_placeholder}
+              />
+            </div>
           </div>
         )}
 
@@ -2104,18 +2116,29 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
           <div className="space-y-8">
             <div>
               <Label>{tr.dresscode_type_label}</Label>
+              {/* Kartların adının dəyişdirilə bildiyini bildirən qısa izah */}
+              <p className="text-[10.5px] text-brown-muted/60 font-light -mt-1 mb-1">{tr.dresscode_custom_label}</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
                 {DRESS_CODE_OPTIONS.map(({ id, icon: DressIcon, colors }) => {
-                  const label = tr[`dresscode_${id}_label`] || id
-                  const sub   = tr[`dresscode_${id}_sub`]   || ''
+                  /* Kartın adı fərdiləşdirilə bilər. Boşdursa standart ad qalır
+                     → bu sahəsi olmayan köhnə sifarişlər eyni görünür. */
+                  const defaultLabel = tr[`dresscode_${id}_label`] || id
+                  const custom = (data.dressCodeLabels?.[id] || '').trim()
+                  const label = custom || defaultLabel
+                  /* Kişi/qadın mətnləri də fərdiləşdirilə bilər. Kartın alt
+                     sətri (`sub`) həmin iki mətndən qurulur ki, builder-də
+                     görünən dəvətnamədəki ilə eyni olsun. */
+                  const gDef  = resolveDressGenders(id, lang)
+                  const gCur  = resolveDressGenders(id, lang, data.dressCodeGenders)
+                  const sub   = [gCur.male, gCur.female].filter(Boolean).join(' · ')
                   const isActive = data.dressCodePalette === id
                   return (
+                    <div key={id} className="flex flex-col">
                     <button
-                      key={id}
                       type="button"
                       onClick={() => set('dressCodePalette', id)}
                       aria-pressed={isActive}
-                      className={`group relative text-left p-5 min-h-[88px] rounded-xl border transition-all duration-250 touch-manipulation ${
+                      className={`group relative text-left p-5 min-h-[88px] flex-1 rounded-xl border transition-all duration-250 touch-manipulation ${
                         isActive
                           ? 'border-gold shadow-[0_8px_28px_rgba(197,160,89,0.18)]'
                           : 'border-beige-dark/55 hover:border-gold/50 hover:-translate-y-[2px] hover:shadow-[0_6px_22px_rgba(197,160,89,0.12)]'
@@ -2173,6 +2196,35 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
                         </div>
                       )}
                     </button>
+                    {/* Fərdi mətnlər — ⚠ `<button>`-un İÇİNDƏ deyil, altındadır:
+                        input-u button-un içinə qoymaq həm etibarsız HTML-dir,
+                        həm də hər klik kartı seçərdi. */}
+                    <input
+                      type="text"
+                      value={data.dressCodeLabels?.[id] || ''}
+                      onChange={(e) => set('dressCodeLabels', { ...(data.dressCodeLabels || {}), [id]: e.target.value })}
+                      placeholder={defaultLabel}
+                      aria-label={`${defaultLabel} — ${tr.dresscode_custom_label}`}
+                      className="mt-1.5 w-full border-0 border-b border-beige-dark/60 bg-transparent text-ink text-[12px] px-1 py-1.5 focus:outline-none focus:border-gold transition-colors duration-300 placeholder:text-brown-muted/40 rounded-none"
+                    />
+                    {/* İkonların altındakı kişi / qadın mətnləri */}
+                    <div className="grid grid-cols-2 gap-2">
+                      {['male', 'female'].map((sex) => (
+                        <input
+                          key={sex}
+                          type="text"
+                          value={data.dressCodeGenders?.[id]?.[sex] || ''}
+                          onChange={(e) => set('dressCodeGenders', {
+                            ...(data.dressCodeGenders || {}),
+                            [id]: { ...(data.dressCodeGenders?.[id] || {}), [sex]: e.target.value },
+                          })}
+                          placeholder={gDef[sex]}
+                          aria-label={`${defaultLabel} — ${sex === 'male' ? tr.dresscode_male_label : tr.dresscode_female_label}`}
+                          className="mt-1 w-full border-0 border-b border-beige-dark/40 bg-transparent text-brown-muted text-[11px] px-1 py-1 focus:outline-none focus:border-gold transition-colors duration-300 placeholder:text-brown-muted/35 rounded-none"
+                        />
+                      ))}
+                    </div>
+                    </div>
                   )
                 })}
               </div>

@@ -82,21 +82,45 @@ const GENDERS = {
   },
 }
 
-/** Palitra → { male, female } geyim mətnləri (naməlum id-də blacktie) */
-export function resolveDressGenders(paletteId, lang = 'az') {
+/**
+ * Palitra → { male, female } geyim mətnləri (naməlum id-də blacktie)
+ *
+ * @param {object} [customGenders] `weddingData.dressCodeGenders` —
+ *   { [paletteId]: { male, female } }. Hər sahə AYRICA yoxlanılır: boşdursa
+ *   standart mətn qalır → köhnə sifarişlər və yarımçıq doldurulmuş kartlar
+ *   eyni əvvəlki kimi göstərilir.
+ */
+export function resolveDressGenders(paletteId, lang = 'az', customGenders = null) {
   const g = GENDERS[paletteId] || GENDERS.blacktie
-  return g[lang] || g.az
+  const base = g[lang] || g.az
+  const c = customGenders?.[paletteId]
+  const pick = (v, fallback) => (typeof v === 'string' && v.trim() ? v.trim() : fallback)
+  return {
+    male: pick(c?.male, base.male),
+    female: pick(c?.female, base.female),
+  }
 }
 
-/** id → { name, colors, subtitle, description } — hər iki id dəstini birləşdirir */
-export function resolveDressCode(paletteId, lang = 'az') {
+/**
+ * id → { name, colors, subtitle, description } — hər iki id dəstini birləşdirir
+ *
+ * @param {object} [customLabels] `weddingData.dressCodeLabels` — istifadəçinin
+ *   builder-də yazdığı fərdi adlar ({ blacktie: 'Black Tie', ... }).
+ *   ⚠ FALLBACK: açar yoxdursa və ya boşdursa standart ad qalır → bu sahəsi
+ *   olmayan KÖHNƏ sifarişlər eyni əvvəlki kimi göstərilir.
+ */
+export function resolveDressCode(paletteId, lang = 'az', customLabels = null) {
   const fromPalettes = DRESS_CODE_PALETTES.find((p) => p.id === paletteId)
   const extra = EXTRA[paletteId]
   const base = fromPalettes || extra || DRESS_CODE_PALETTES[0]
 
+  const custom = typeof customLabels?.[paletteId] === 'string'
+    ? customLabels[paletteId].trim()
+    : ''
+
   return {
     id: paletteId || base.id,
-    name: base.label?.[lang] || base.label?.az || '',
+    name: custom || base.label?.[lang] || base.label?.az || '',
     colors: base.colors || [],
     subtitle: SUBTITLES[paletteId]?.[lang] || SUBTITLES[paletteId]?.az || '',
     description: fromPalettes?.description?.[lang] || fromPalettes?.description?.az || '',

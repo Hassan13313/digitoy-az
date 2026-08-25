@@ -99,6 +99,10 @@ function DressIcon({ icon, stroke, detail, surface }) {
 /**
  * @param {object}  theme     şablonun theme token-ləri (templateConfig)
  * @param {string}  paletteId weddingData.dressCodePalette
+ * @param {object}  customLabels weddingData.dressCodeLabels — fərdi kart adları;
+ *                            yoxdursa standart adlar işlədilir (köhnə sifarişlər)
+ * @param {object}  customGenders weddingData.dressCodeGenders — ikonların
+ *                            altındakı fərdi kişi/qadın mətnləri; yoxdursa standart
  * @param {string}  note      weddingData.dressCodeDescription
  * @param {string}  title     bölmə başlığı (tr.inv_dresscode)
  * @param {string}  kicker    üst etiket (varsa)
@@ -107,12 +111,12 @@ function DressIcon({ icon, stroke, detail, surface }) {
  * @param {boolean} onDark    tünd şablonlarda ikon səthi tündləşir
  */
 export default function DressCodeSection({
-  theme, paletteId, note, title, kicker, lang = 'az',
+  theme, paletteId, customLabels, customGenders, note, title, kicker, lang = 'az',
   serif, align = 'left', onDark = false, italic = false,
 }) {
   const tr = t[lang] || t.az
-  const dc = resolveDressCode(paletteId, lang)
-  const genders = resolveDressGenders(paletteId, lang)
+  const dc = resolveDressCode(paletteId, lang, customLabels)
+  const genders = resolveDressGenders(paletteId, lang, customGenders)
   const labels = { male: tr.dresscode_male_label, female: tr.dresscode_female_label }
   /* Qeyd = YALNIZ müştərinin builder-də yazdığı mətn. Palitranın öz izahı
      burada göstərilmir, çünki ikonların altındakı kişi/qadın yazıları onsuz da

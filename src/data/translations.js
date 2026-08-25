@@ -228,6 +228,9 @@ const t = {
     venue_search_success: 'Məkan seçildi — naviqasiya hazırdır ✓',
     venue_search_no_results: 'Nəticə tapılmadı. Fərqli ad cəhd edin.',
     venue_search_searching: 'Axtarılır...',
+    venue_note_label: 'Məkan qeydi',
+    venue_note_placeholder: 'Məsələn: 4-cü zal',
+    dresscode_custom_label: 'Kartın adı (istəyə bağlı)',
     opening_tagline: 'Bir Dəvətnamədən Daha Artığı',
   },
   en: {
@@ -459,6 +462,9 @@ const t = {
     venue_search_success: 'Venue selected and maps synchronized!',
     venue_search_no_results: 'No results found. Try a different name.',
     venue_search_searching: 'Searching...',
+    venue_note_label: 'Venue note',
+    venue_note_placeholder: 'Example: Hall 4',
+    dresscode_custom_label: 'Card name (optional)',
     opening_tagline: 'MORE THAN AN INVITATION',
   },
   ru: {
@@ -690,6 +696,9 @@ const t = {
     venue_search_success: 'Место выбрано и карты синхронизированы!',
     venue_search_no_results: 'Ничего не найдено. Попробуйте другое название.',
     venue_search_searching: 'Поиск...',
+    venue_note_label: 'Примечание к месту',
+    venue_note_placeholder: 'Например: Зал 4',
+    dresscode_custom_label: 'Название карточки (необязательно)',
     opening_tagline: 'БОЛЬШЕ, ЧЕМ ПРИГЛАШЕНИЕ',
   },
 }

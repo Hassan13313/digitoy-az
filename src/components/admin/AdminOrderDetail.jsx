@@ -533,8 +533,8 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
         <InfoRow icon={LayoutTemplate} label="Şablon" value={getTemplateName(fd.templateId || draft.template_id || DEFAULT_TEMPLATE_ID)} />
         <InfoRow icon={User}     label="Hadisə" value={fd.eventType} />
         <InfoRow icon={Calendar} label="Tarix"  value={[dateStr, timeStr].filter(Boolean).join(', ')} />
-        <InfoRow icon={MapPin}   label="Məkan"  value={fd.venueName} />
-        <InfoRow icon={Shirt}    label="Dress Code" value={fd.dressCodePalette} />
+        <InfoRow icon={MapPin}   label="Məkan"  value={[fd.venueName, fd.venueNote].filter(Boolean).join(' — ')} />
+        <InfoRow icon={Shirt}    label="Dress Code" value={[fd.dressCodePalette, (fd.dressCodeLabels?.[fd.dressCodePalette] || '').trim()].filter(Boolean).join(' — ')} />
         {fd.seatingMethod === 'digitory' && (
           <InfoRow icon={Users} label="Oturma Planı" value="DigiToy dolduracaq (+15 AZN)" />
         )}

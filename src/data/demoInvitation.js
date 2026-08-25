@@ -11,6 +11,7 @@ export const demoInvitation = {
   date:        DEMO_DATE,
   time:        '19:00',
   venueName:  'Buta Palace, Bakı',
+  venueNote:  'Crystal Hall',
 
   googleMapsUrl: 'https://www.google.com/maps/search/Buta+Palace+Baku/@40.3975,49.8537',
   wazeUrl:       'https://waze.com/ul?q=Buta+Palace+Baku&navigate=yes',

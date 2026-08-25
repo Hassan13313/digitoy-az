@@ -545,6 +545,12 @@ export default function RoyalGoldTemplate({
                 <div style={{ textAlign: 'center', marginTop: 14, fontSize: 13, color: TH.text }}>
                   {weddingData.venueName}
                 </div>
+                {/* Məkan qeydi (zal/mərtəbə) — YALNIZ doludursa */}
+                {weddingData.venueNote && (
+                  <div style={{ textAlign: 'center', marginTop: 5, fontSize: 12, color: TH.muted, lineHeight: 1.5 }}>
+                    {weddingData.venueNote}
+                  </div>
+                )}
                 <Stagger base={165} style={{ display: 'flex', gap: 6, marginTop: 14, flexWrap: 'wrap' }}>
                   <a data-press href={weddingData.googleMapsUrl || '#'} target="_blank" rel="noopener noreferrer" style={btn(true)}>Maps</a>
                   <a data-press href={weddingData.wazeUrl || '#'} target="_blank" rel="noopener noreferrer" style={btn(false)}>Waze</a>
@@ -588,6 +594,8 @@ export default function RoyalGoldTemplate({
                 <DressCodeSection
                   theme={TH}
                   paletteId={weddingData.dressCodePalette}
+                  customLabels={weddingData.dressCodeLabels}
+                  customGenders={weddingData.dressCodeGenders}
                   note={weddingData.dressCodeDescription}
                   lang={lang}
                   serif={serif}

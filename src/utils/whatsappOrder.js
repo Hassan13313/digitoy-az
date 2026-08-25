@@ -47,7 +47,9 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '', draftCode = '
   const timeStr = formatTime24(data.time)
 
   const paletteObj = DRESS_CODE_PALETTES.find(p => p.id === data.dressCodePalette)
-  const dressLabel = paletteObj?.label?.az || data.dressCodePalette || '—'
+  /* Fərdi kart adı varsa sifariş mesajında da o görünsün (yoxdursa standart) */
+  const dressCustom = (data.dressCodeLabels?.[data.dressCodePalette] || '').trim()
+  const dressLabel = dressCustom || paletteObj?.label?.az || data.dressCodePalette || '—'
 
   const programCount = (data.programSteps || []).filter(r => r.time || r.activity).length
 
@@ -72,7 +74,7 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '', draftCode = '
     nameLines,
     `📅 Tarix: ${dateStr}`,
     `🕒 Saat: ${timeStr}`,
-    `📍 Məkan: ${data.venueName || '—'}`,
+    `📍 Məkan: ${data.venueName || '—'}${data.venueNote ? ` (${data.venueNote})` : ''}`,
     `👔 Geyim: ${dressLabel}`,
     ...(programCount > 0 ? [`📋 Proqram: ${programCount} addım`] : []),
     ...(data.seatingMethod === 'digitory' ? [`🪑 Oturma planı: DigiToy dolduracaq (+15 AZN)`] : []),

@@ -297,7 +297,14 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
               <Reveal className="max-w-lg mx-auto text-center">
                 <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">LOCATION</p>
                 <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-4">{tr.inv_location}</h2>
-                <p className="text-brown-muted text-sm font-light tracking-wide leading-relaxed mb-10">{weddingData.venueName}</p>
+                {/* mb-10 konteynerə keçdi → qeyd olmayanda boşluq əvvəlki kimi qalır */}
+                <div className="mb-10">
+                  <p className="text-brown-muted text-sm font-light tracking-wide leading-relaxed">{weddingData.venueName}</p>
+                  {/* Məkan qeydi (zal/mərtəbə) — YALNIZ doludursa */}
+                  {weddingData.venueNote && (
+                    <p className="text-brown-muted/75 text-[13px] font-light tracking-wide leading-relaxed mt-1">{weddingData.venueNote}</p>
+                  )}
+                </div>
                 <GoldDividerOrnament />
                 <Stagger base={110} className="flex gap-3 mt-4">
                   <a
@@ -352,6 +359,8 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
                   <DressCodeSection
                     theme={TH}
                     paletteId={weddingData.dressCodePalette}
+                    customLabels={weddingData.dressCodeLabels}
+                    customGenders={weddingData.dressCodeGenders}
                     note={weddingData.dressCodeDescription}
                     lang={lang}
                     serif={TH.fonts?.heading}

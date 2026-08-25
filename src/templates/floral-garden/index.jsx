@@ -505,6 +505,12 @@ export default function FloralGardenTemplate({
                     <div style={{ fontFamily: serif, fontSize: 20, color: TH.text, marginTop: 6 }}>
                       {weddingData.venueName || tr.inv_location}
                     </div>
+                    {/* Məkan qeydi (zal/mərtəbə) — YALNIZ doludursa */}
+                    {weddingData.venueNote && (
+                      <div style={{ fontSize: 12.5, color: TH.muted, marginTop: 5, lineHeight: 1.5 }}>
+                        {weddingData.venueNote}
+                      </div>
+                    )}
                     <Stagger base={110} style={{ display: 'flex', gap: 6, marginTop: 14, flexWrap: 'wrap' }}>
                       <a data-press href={weddingData.googleMapsUrl || '#'} target="_blank" rel="noopener noreferrer" style={pill(true)}>Maps</a>
                       <a data-press href={weddingData.wazeUrl || '#'} target="_blank" rel="noopener noreferrer" style={pill(false)}>Waze</a>
@@ -558,6 +564,8 @@ export default function FloralGardenTemplate({
                   title={tr.inv_dresscode}
                   kicker="STYLE"
                   paletteId={weddingData.dressCodePalette}
+                  customLabels={weddingData.dressCodeLabels}
+                  customGenders={weddingData.dressCodeGenders}
                   note={weddingData.dressCodeDescription}
                   lang={lang}
                   serif={serif}
