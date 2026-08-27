@@ -47,31 +47,89 @@ const sans  = TH.fonts.body
 
 /* Şablona məxsus keyframe-lər — qlobal CSS-ə toxunmur, prefiks `fg-` */
 const KEYFRAMES = `
-@keyframes fg-drift { from { transform: translate3d(0,0,0) } to { transform: translate3d(18px,-22px,0) } }
 @keyframes fg-eq    { 0%,100% { transform: scaleY(.35) } 50% { transform: scaleY(1) } }
 @keyframes fg-hint  { 0%,100% { transform: translateY(0); opacity:.35 } 50% { transform: translateY(6px); opacity:1 } }
+
+/* «Açılış Ekranı düzəliş V1» — açan çiçək ardıcıllığı */
+@keyframes fg-veil   { from { opacity:1 } to { opacity:0 } }
+@keyframes fg-rise   { from { opacity:0; transform:translateY(14px) } to { opacity:1; transform:none } }
+@keyframes fg-halo   { 0%,100% { opacity:.55; transform:scale(1) } 50% { opacity:1; transform:scale(1.1) } }
+@keyframes fg-vine   { from { transform:scaleY(0) } to { transform:scaleY(1) } }
+@keyframes fg-fall   { 0% { opacity:0; transform:translate3d(0,-34px,0) rotate(0) } 14% { opacity:.85 } 100% { opacity:0; transform:translate3d(-40px,320px,0) rotate(300deg) } }
+@keyframes fg-bloom  { 0% { opacity:0; transform:rotate(-120deg) scale(.15) } 70% { opacity:1; transform:rotate(6deg) scale(1.06) } 100% { opacity:1; transform:rotate(0) scale(1) } }
+@keyframes fg-letter { from { opacity:0; transform:translateY(26px) rotateX(52deg); filter:blur(7px) } to { opacity:1; transform:none; filter:blur(0) } }
+@keyframes fg-cta    { from { opacity:0; transform:translateY(16px) scale(.94) } to { opacity:1; transform:none } }
+@keyframes fg-gleam  { 0% { transform:translateX(-140%) skewX(-18deg); opacity:0 } 22% { opacity:.9 } 100% { transform:translateX(300%) skewX(-18deg); opacity:0 } }
+
+/* Daxili arxa fon (ambient) */
+@keyframes fg-wander { 0%,100% { transform:translate3d(0,0,0) } 33% { transform:translate3d(26px,-34px,0) } 66% { transform:translate3d(-22px,20px,0) } }
+@keyframes fg-abloom { 0% { transform:translate3d(0,-16%,0) rotate(-20deg) scale(.85); opacity:0 } 12% { opacity:.9 } 88% { opacity:.9 } 100% { transform:translate3d(-56px,116%,0) rotate(200deg) scale(1.05); opacity:0 } }
+@keyframes fg-afall  { 0% { transform:translate3d(0,-14%,0) rotate(0); opacity:0 } 12% { opacity:.85 } 100% { transform:translate3d(-48px,114%,0) rotate(280deg); opacity:0 } }
 @media (prefers-reduced-motion: reduce) {
   [data-fg] *, [data-fg] { animation: none !important; transition: none !important; }
 }
 `
 
-/* ── Ambient: iki akvarel ləkəsi, əks istiqamətli yavaş drift ── */
-function WatercolorBlobs({ opacity = 1 }) {
+/* ── Daxili arxa fon — «Açılış Ekranı düzəliş V1» ────────────────────────────
+   Design t2-də dəvətnamənin fonu düz kağız deyil: iki akvarel ləkəsi gəzişir,
+   yuxarıdan çiçək və ləçək süzülür. Qat `multiply` blend ilə məzmunun
+   ÜSTÜNDƏDİR — açıq şablonda yalnız kölgələyir, mətni örtmür.
+   ⚠ zIndex 3: məzmundan yuxarı, amma başlıq/düymələrdən aşağı. */
+const AMBIENT_BLOOMS = [
+  { left: '8%',  size: 34, dur: 21, delay: 0,  fill: 'rgba(214,166,157,.5)' },
+  { left: '30%', size: 26, dur: 16, delay: 6,  fill: 'rgba(201,143,132,.45)' },
+  { left: '54%', size: 40, dur: 25, delay: 12, fill: 'rgba(230,196,190,.5)' },
+  { left: '76%', size: 28, dur: 17, delay: 3,  fill: 'rgba(201,143,132,.42)' },
+  { left: '92%', size: 32, dur: 20, delay: 17, fill: 'rgba(214,166,157,.45)' },
+]
+
+const AMBIENT_PETALS = [
+  { left: '16%', dur: 11, delay: 1 },
+  { left: '37%', dur: 13, delay: 5 },
+  { left: '58%', dur: 12, delay: 9 },
+  { left: '78%', dur: 14, delay: 2.5 },
+  { left: '92%', dur: 12.5, delay: 13 },
+]
+
+function WatercolorBlobs() {
   return (
-    <>
-      <div style={{
-        position: 'absolute', width: 300, height: 300, borderRadius: '50%',
-        background: `radial-gradient(circle, ${TH.accent}66, transparent 66%)`,
-        top: -90, left: -90, filter: 'blur(28px)', pointerEvents: 'none', opacity,
-        animation: 'fg-drift 16s ease-in-out infinite alternate',
+    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+      <span style={{
+        position: 'absolute', left: '-18%', top: '8%', width: '70%', height: '34%', borderRadius: '50%',
+        background: `radial-gradient(circle, ${TH.accent}52, transparent 68%)`,
+        filter: 'blur(38px)', animation: 'fg-wander 19s ease-in-out infinite',
       }} />
-      <div style={{
-        position: 'absolute', width: 280, height: 280, borderRadius: '50%',
-        background: `radial-gradient(circle, ${TH.primary}57, transparent 66%)`,
-        bottom: -80, right: -70, filter: 'blur(28px)', pointerEvents: 'none', opacity,
-        animation: 'fg-drift 20s ease-in-out 2s infinite alternate-reverse',
+      <span style={{
+        position: 'absolute', right: '-20%', bottom: '14%', width: '64%', height: '30%', borderRadius: '50%',
+        background: `radial-gradient(circle, ${TH.primary}52, transparent 70%)`,
+        filter: 'blur(40px)', animation: 'fg-wander 24s ease-in-out 8s infinite reverse',
       }} />
-    </>
+
+      {AMBIENT_BLOOMS.map((b, i) => (
+        <span key={i} style={{
+          position: 'absolute', left: b.left, top: '-12%', width: b.size, height: b.size,
+          animation: `fg-abloom ${b.dur}s linear ${b.delay}s infinite`,
+        }}>
+          <svg viewBox="0 0 40 40" width={b.size} height={b.size} fill="none" aria-hidden="true">
+            <g transform="translate(20 20)">
+              {[0, 60, 120, 180, 240, 300].map((deg) => (
+                <ellipse key={deg} cx="0" cy="-9" rx="6" ry="10" transform={`rotate(${deg})`} fill={b.fill} />
+              ))}
+              <circle cx="0" cy="0" r="4" fill="rgba(246,226,194,.75)" />
+            </g>
+          </svg>
+        </span>
+      ))}
+
+      {AMBIENT_PETALS.map((p, i) => (
+        <span key={i} style={{
+          position: 'absolute', left: p.left, top: 0, width: 9, height: 12,
+          borderRadius: '60% 60% 55% 55% / 70% 70% 45% 45%',
+          background: `${TH.accent}73`,
+          animation: `fg-afall ${p.dur}s linear ${p.delay}s infinite`,
+        }} />
+      ))}
+    </div>
   )
 }
 
@@ -103,15 +161,59 @@ const pill = (filled) => ({
 })
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   01 — ZƏRF AÇILIŞI: ekran iki taydan aralanır (design: easeInOutQuart, 1000ms)
+   01 — AÇILIŞ: açan çiçək («Açılış Ekranı düzəliş V1»)
+
+   Design t2 açılışı artıq iki taya bölünən pərdə deyil — BAĞÇANIN ÖZÜDÜR.
+   Ağ işıq pərdəsi əriyir, yanlardan iki sarmaşıq xətti böyüyür, havada ləçək
+   düşür, mərkəzdə çiçək altı ləçəyi ilə AÇILIR (fl-bloom) — yalnız bundan
+   sonra adlar qalxır.
+
+   ⚠ `onOpenStart` MÜTLƏQ toxunuş hadisəsinin içində çağırılır (musiqi).
    ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Havada düşən ləçəklər — açılış ekranı üçün (deterministik) */
+const PETALS = [
+  { left: '14%', dur: 11, delay: 0 },
+  { left: '30%', dur: 13, delay: 2.4 },
+  { left: '48%', dur: 10, delay: 1.2 },
+  { left: '64%', dur: 12.5, delay: 4 },
+  { left: '80%', dur: 11.5, delay: 3 },
+  { left: '92%', dur: 14, delay: 5.6 },
+  { left: '22%', dur: 12, delay: 6.8 },
+]
+
+/* Altı ləçəkli çiçək — mərkəzdən burularaq açılır */
+function BloomFlower({ delay = 1.5 }) {
+  return (
+    <div style={{
+      position: 'relative', width: 120, height: 120, margin: '0 auto',
+      animation: `fg-bloom 1.7s cubic-bezier(.2,.9,.25,1) ${delay}s both`,
+    }}>
+      {[0, 60, 120, 180, 240, 300].map((deg) => (
+        <span key={deg} style={{
+          position: 'absolute', left: '50%', top: '50%', width: 26, height: 40,
+          margin: '-40px 0 0 -13px', transformOrigin: '50% 100%', transform: `rotate(${deg}deg)`,
+          borderRadius: '60% 60% 40% 40% / 70% 70% 30% 30%',
+          background: `linear-gradient(170deg, #FBEDEA, ${TH.accent}D9)`,
+          border: `1px solid ${TH.accent}59`,
+        }} />
+      ))}
+      <span style={{
+        position: 'absolute', left: '50%', top: '50%', width: 20, height: 20,
+        transform: 'translate(-50%,-50%)', borderRadius: '50%',
+        background: `radial-gradient(circle at 36% 30%, #F6E2C2, ${TH.accent})`,
+        boxShadow: '0 3px 10px rgba(140,90,80,.28)',
+      }} />
+    </div>
+  )
+}
+
 function GardenOpening({ weddingData, isCouple, isCorp, eventLabel, onOpen, onOpenStart }) {
   const [opening, setOpening] = useState(false)
   const [gone, setGone] = useState(false)
 
-  const names = isCouple
-    ? `${weddingData.groomName || ''}\n& ${weddingData.brideName || ''}`
-    : (weddingData.eventName || weddingData.brideName || '')
+  const first = isCouple ? (weddingData.groomName || '') : (weddingData.eventName || weddingData.brideName || '')
+  const second = isCouple ? (weddingData.brideName || '') : ''
 
   const start = () => {
     if (opening) return
@@ -125,92 +227,142 @@ function GardenOpening({ weddingData, isCouple, isCorp, eventLabel, onOpen, onOp
 
   if (gone) return null
 
-  const half = (side) => ({
-    position: 'absolute', top: 0, bottom: 0, [side]: 0, width: '50%',
-    background: TH.background,
-    borderRight: side === 'left' ? `1px solid ${TH.primary}47` : 'none',
-    zIndex: 1,
+  /* Sarmaşıq — biri yuxarıdan, digəri aşağıdan böyüyür */
+  const vine = (side, origin, delay) => ({
+    position: 'absolute', top: 0, bottom: 0, [side]: 26, width: 1, pointerEvents: 'none',
+    background: `linear-gradient(180deg, transparent, ${TH.primary}80, transparent)`,
+    transformOrigin: `50% ${origin}`,
+    animation: `fg-vine 1.6s cubic-bezier(.22,.61,.36,1) ${delay}s both`,
   })
 
   return (
-    <div
+    <motion.div
       onClick={start}
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') start() }}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); start() } }}
       aria-label="Dəvətnaməni aç"
+      data-fg
+      animate={opening ? { opacity: 0, scale: 1.04 } : {}}
+      transition={{ duration: 0.95, ease: [0.65, 0, 0.35, 1] }}
       style={{
-        position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer',
-        overflow: 'hidden', background: TH.background, fontFamily: sans,
+        position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden',
+        background: `radial-gradient(120% 80% at 50% 22%, #FFFDFB, #F4EBE5 76%)`,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        textAlign: 'center', padding: '0 clamp(22px, 8vw, 32px)', fontFamily: sans,
+        isolation: 'isolate',
       }}
     >
-      {/* Arxadan açılan işıq */}
-      <div style={{
-        position: 'absolute', inset: 0,
-        background: `radial-gradient(ellipse 60% 40% at 50% 50%, ${TH.secondary}80, transparent 70%)`,
+      {/* Pərdə */}
+      <span aria-hidden="true" style={{
+        position: 'absolute', inset: 0, background: TH.background, pointerEvents: 'none', zIndex: 2,
+        animation: 'fg-veil 1s ease-out .1s both',
       }} />
 
-      {/* İki tay */}
-      <motion.div style={half('left')}
-        animate={opening ? { x: '-100%' } : { x: 0 }}
-        transition={{ duration: 1, ease: [0.77, 0, 0.175, 1] }}
-      />
-      <motion.div style={half('right')}
-        animate={opening ? { x: '100%' } : { x: 0 }}
-        transition={{ duration: 1, ease: [0.77, 0, 0.175, 1] }}
-      />
+      {/* İki akvarel ləkəsi — tozlu qızılgül və adaçayı */}
+      <span aria-hidden="true" style={{
+        position: 'absolute', top: -100, left: -100, width: 320, height: 320, borderRadius: '50%',
+        background: `radial-gradient(circle, ${TH.accent}52, transparent 68%)`,
+        filter: 'blur(30px)', pointerEvents: 'none', zIndex: -1,
+        animation: 'fg-halo 10s ease-in-out 1s infinite',
+      }} />
+      <span aria-hidden="true" style={{
+        position: 'absolute', bottom: -90, right: -80, width: 280, height: 280, borderRadius: '50%',
+        background: `radial-gradient(circle, ${TH.primary}4D, transparent 68%)`,
+        filter: 'blur(30px)', pointerEvents: 'none', zIndex: -1,
+        animation: 'fg-halo 12s ease-in-out 2s infinite',
+      }} />
 
-      {/* Akvarel ləkələri — tayların ÜSTÜNDƏ, mətnin ALTINDA */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 2, overflow: 'hidden', pointerEvents: 'none' }}>
-        <WatercolorBlobs />
-      </div>
+      {/* Düşən ləçəklər */}
+      <span aria-hidden="true" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: -1 }}>
+        {PETALS.map((p, i) => (
+          <span key={i} style={{
+            position: 'absolute', left: p.left, top: '-6%', width: 9, height: 12, opacity: 0,
+            borderRadius: '60% 60% 55% 55% / 70% 70% 45% 45%',
+            background: `linear-gradient(160deg, #F0D3CE, ${TH.accent})`,
+            animation: `fg-fall ${p.dur}s linear ${p.delay}s infinite`,
+          }} />
+        ))}
+      </span>
 
-      {/* Mərkəz məzmunu */}
-      <motion.div
-        animate={opening ? { opacity: 0, scale: 1.04 } : { opacity: 1, scale: 1 }}
-        transition={{ duration: 0.55, ease: 'easeOut' }}
-        style={{
-          position: 'absolute', inset: 0, zIndex: 3,
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          textAlign: 'center', padding: '0 24px',
-        }}
-      >
-        <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.muted }}>
-          {eventLabel}
+      <span aria-hidden="true" style={vine('left', '0', 0.6)} />
+      <span aria-hidden="true" style={vine('right', '100%', 0.8)} />
+
+      <div style={{ position: 'relative' }}>
+        {/* Kicker — yanlarda adaçayı xətləri */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
+          animation: 'fg-rise .9s cubic-bezier(.22,.61,.36,1) 1.1s both',
+        }}>
+          <span style={{ width: 20, height: 1, background: `${TH.primary}B3` }} />
+          <span style={{ fontSize: 9.5, letterSpacing: '.4em', textTransform: 'uppercase', color: TH.muted, whiteSpace: 'nowrap' }}>
+            {eventLabel}
+          </span>
+          <span style={{ width: 20, height: 1, background: `${TH.primary}B3` }} />
         </div>
-        <motion.div
-          initial={{ scale: 0.96, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          style={{
-            fontFamily: serif, fontStyle: 'italic',
-            fontSize: 'clamp(34px,11vw,44px)', color: '#4A4139',
-            lineHeight: 1.15, margin: '18px 0 8px', whiteSpace: 'pre-line',
-          }}
-        >
-          {names}
-        </motion.div>
-        <div style={{ width: 1, height: 36, background: TH.primary, margin: '16px auto' }} />
-        <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.muted }}>
+
+        <div style={{ marginTop: 32 }}>
+          <BloomFlower delay={1.5} />
+        </div>
+
+        {/* Adlar — hər söz ayrıca qalxır */}
+        <div style={{
+          display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 11, marginTop: 28,
+          fontFamily: serif, fontSize: 'clamp(28px, 10vw, 36px)', color: '#4A3B37', lineHeight: 1,
+        }}>
+          <span style={{ display: 'inline-block', animation: 'fg-letter 1s cubic-bezier(.22,.61,.36,1) 2.9s both' }}>{first}</span>
+          {second && (
+            <>
+              <span style={{ display: 'inline-block', fontSize: 'clamp(18px, 6.5vw, 23px)', color: TH.accent, animation: 'fg-letter 1s cubic-bezier(.22,.61,.36,1) 3.1s both' }}>&amp;</span>
+              <span style={{ display: 'inline-block', animation: 'fg-letter 1s cubic-bezier(.22,.61,.36,1) 3.3s both' }}>{second}</span>
+            </>
+          )}
+        </div>
+
+        {/* Ornament — solub gedən xətlər və ortada qızılgül nöqtəsi */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, marginTop: 16,
+          animation: 'fg-rise .8s ease-out 3.6s both',
+        }}>
+          <span style={{ width: 30, height: 1, background: `linear-gradient(90deg, transparent, ${TH.accent})` }} />
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: TH.accent }} />
+          <span style={{ width: 30, height: 1, background: `linear-gradient(90deg, ${TH.accent}, transparent)` }} />
+        </div>
+
+        <div style={{
+          fontSize: 10.5, letterSpacing: '.24em', textTransform: 'uppercase', color: TH.muted, marginTop: 14,
+          animation: 'fg-rise .8s ease-out 3.8s both',
+        }}>
           {formatFullDateByLang(weddingData.date, 'az')}
         </div>
+
+        {/* CTA — ağ, üzərindən işıq keçir */}
         <div style={{
-          marginTop: 46, display: 'inline-flex', alignItems: 'center', gap: 10,
-          background: TH.primary, color: TH.background, borderRadius: 100,
-          padding: '14px 26px', fontSize: 10, letterSpacing: '.22em', textTransform: 'uppercase',
+          position: 'relative', overflow: 'hidden', marginTop: 38,
+          display: 'inline-flex', alignItems: 'center', gap: 10,
+          border: `1px solid ${TH.accent}8C`, borderRadius: 100, padding: '14px 26px',
+          fontSize: 10, letterSpacing: '.24em', textTransform: 'uppercase',
+          color: '#7A5C55', background: 'rgba(255,255,255,.7)',
+          animation: 'fg-cta .9s cubic-bezier(.22,.61,.36,1) 4.1s both',
         }}>
-          {isCorp ? 'Tədbirə daxil olun' : 'Bağçaya daxil olun'}<span>→</span>
+          <span aria-hidden="true" style={{
+            position: 'absolute', top: 0, bottom: 0, left: 0, width: '38%',
+            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,.9), transparent)',
+            animation: 'fg-gleam 4.6s ease-in-out 5.3s infinite',
+          }} />
+          <span style={{ position: 'relative' }}>{isCorp ? 'Tədbirə daxil olun' : 'Dəvətnaməyə daxil olun'}</span>
+          <span style={{ position: 'relative' }}>→</span>
         </div>
-      </motion.div>
+      </div>
 
       <div style={{
-        position: 'absolute', bottom: 34, left: 0, right: 0, textAlign: 'center', zIndex: 3,
-        fontSize: 10, letterSpacing: '.14em', color: '#A79C90',
-        animation: 'fg-hint 2.6s ease-in-out infinite',
+        position: 'absolute', left: 0, right: 0, bottom: 32, textAlign: 'center',
+        fontSize: 10.5, letterSpacing: '.2em', color: '#9C8B84',
+        animation: 'fg-rise .8s ease-out 4.6s both, fg-hint 2.8s ease-in-out 5.4s infinite',
       }}>
         toxunun
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -332,7 +484,10 @@ export default function FloralGardenTemplate({
       data-enter={enterDirection('floral-garden')}
       style={{
         background: TH.background, minHeight: '100vh', fontFamily: sans, color: TH.text,
-        overflowX: 'hidden',
+        overflowX: 'hidden', position: 'relative',
+        /* ⚠ ambient qatının `multiply` blend-ini bu kökə bağlayır — olmasa
+           blend səhifədən kənara (body) sızır. */
+        isolation: 'isolate',
         '--tpl-glow': `${TH.primary}42`,
       }}
     >
@@ -348,6 +503,17 @@ export default function FloralGardenTemplate({
           onOpen={() => setOpened(true)}
           onOpenStart={autoPlay ? () => musicRef.current?.play() : undefined}
         />
+      )}
+
+      {/* Daxili arxa fon — scroll-a əks istiqamətdə sürüşür (parallaks).
+          ⚠ `translate` yazılır — ləkələrin öz `fg-wander` transform animasiyası
+          toxunulmaz qalır. */}
+      {opened && (
+        <Parallax mode="page" range={54} style={{
+          position: 'fixed', inset: 0, zIndex: 3, pointerEvents: 'none', mixBlendMode: 'multiply',
+        }}>
+          <WatercolorBlobs />
+        </Parallax>
       )}
 
       {/* 03 — MUSİQİ TOGGLE */}

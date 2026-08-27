@@ -73,7 +73,7 @@ export default function TemplateShell({
   /* şablon propsları */
   lang, setLang, weddingData, onBack, isDemoMode = false, initialGuestbook,
   /* şablona məxsus */
-  templateId, theme, design = {}, Opening, keyframes = '', ambient = null,
+  templateId, theme, design = {}, Opening, keyframes = '', ambient = null, ambientBlend = null,
 }) {
   const tr = t[lang] || t.az
   const [opened, setOpened] = useState(false)
@@ -184,6 +184,9 @@ export default function TemplateShell({
       style={{
         background: theme.background, minHeight: '100vh', fontFamily: sans, color: theme.text,
         overflowX: 'hidden', position: 'relative',
+        /* ⚠ `isolation` ambient qatının blend rejimini bu köke bağlayır —
+           olmasa `mix-blend-mode` səhifədən kənara (body) sızır. */
+        isolation: 'isolate',
         /* Basma/hover işığının rəngi — bax index.css › [data-press] */
         '--tpl-glow': alpha(theme.accent, 0.3),
       }}
@@ -207,12 +210,24 @@ export default function TemplateShell({
 
       {/* Ambient işıq/naxış qatları — səhifə boyu scroll-a əks istiqamətdə sürüşür.
           ⚠ Qat `position: fixed` olduğu üçün element riyaziyyatı sıfır verir,
-          ona görə parallaks `page` rejimindədir. */}
+          ona görə parallaks `page` rejimindədir.
+
+          `ambientBlend` («Açılış Ekranı düzəliş V1»): qat məzmunun ALTINDA
+          deyil, ÜSTÜNDƏ dayanır və blend ilə səhifəni çalarlandırır — tünd
+          şablonlarda `screen` (işıqlandırır), açıqlarda `multiply` (kölgələyir).
+          ⚠ zIndex 3 seçilib: məzmundan (1) yuxarı, amma sticky başlıq (40) və
+          idarə düymələrindən (54–55) aşağı — onlar həmişə təmiz qalır.
+          `ambientBlend="none"` — qat üstdə qalır, amma blend olmur (qatın öz
+          içində `soft-light` alt qatları olanda, məs. Crystal Glass). */}
       {opened && ambient && (
         <Parallax
           mode="page"
           range={54}
-          style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}
+          style={{
+            position: 'fixed', inset: 0, pointerEvents: 'none',
+            zIndex: ambientBlend ? 3 : 0,
+            mixBlendMode: (ambientBlend && ambientBlend !== 'none') ? ambientBlend : undefined,
+          }}
         >
           {ambient}
         </Parallax>

@@ -152,3 +152,124 @@ export function PopDigit({ value, pad = 2, pop = false, style }) {
     </span>
   )
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AMBIENT — dəvətnamənin daxili arxa fonu («Açılış Ekranı düzəliş V1»)
+
+   Design-də hər şablonun scroll edilən hissəsi düz rəngli fon deyil: üstündə
+   çox yavaş gəzişən işıq ləkələri, qalxan zərrəciklər, keçən şüa qatı var.
+   Qat `TemplateShell › ambientBlend` ilə blend rejimində məzmunun üstündədir.
+
+   ⚠ Bütün hərəkət 5–30 saniyəlik dövrlərlə gedir — göz onu «hərəkət» kimi
+   deyil, «canlı fon» kimi oxuyur. Sürətləndirmək dizaynı ucuzlaşdırır.
+   ⚠ `prefers-reduced-motion` TemplateShell-in qlobal qaydası ilə söndürülür.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const AMBIENT_KEYFRAMES = `
+@keyframes ab-wander { 0%,100% { transform:translate3d(0,0,0) } 33% { transform:translate3d(26px,-34px,0) } 66% { transform:translate3d(-22px,20px,0) } }
+@keyframes ab-pulse  { 0%,100% { opacity:.28 } 50% { opacity:.72 } }
+@keyframes ab-rot    { from { transform:rotate(0) } to { transform:rotate(360deg) } }
+@keyframes ab-orbit  { from { transform:rotate(0) translateX(58px) rotate(0) } to { transform:rotate(360deg) translateX(58px) rotate(-360deg) } }
+@keyframes ab-up     { 0% { transform:translate3d(0,110%,0); opacity:0 } 12% { opacity:1 } 100% { transform:translate3d(-18px,-20%,0); opacity:0 } }
+@keyframes ab-fall   { 0% { transform:translate3d(0,-14%,0) rotate(0); opacity:0 } 12% { opacity:.85 } 100% { transform:translate3d(-48px,114%,0) rotate(280deg); opacity:0 } }
+@keyframes ab-beam   { 0% { transform:translateX(-60%) skewX(-14deg); opacity:0 } 20% { opacity:.85 } 100% { transform:translateX(220%) skewX(-14deg); opacity:0 } }
+@keyframes ab-scan   { 0% { transform:translateY(-30%); opacity:0 } 18% { opacity:1 } 78% { opacity:1 } 100% { transform:translateY(130%); opacity:0 } }
+@keyframes ab-shard  { 0%,100% { transform:translate3d(0,0,0) rotate(0); opacity:.35 } 50% { transform:translate3d(14px,-22px,0) rotate(18deg); opacity:.7 } }
+@keyframes ab-ribbon { 0%,100% { transform:translateY(0) scaleY(1) } 50% { transform:translateY(-14px) scaleY(1.08) } }
+@keyframes ab-shoot  { 0% { transform:translate3d(0,0,0); opacity:0 } 5% { opacity:.9 } 26% { opacity:0 } 100% { transform:translate3d(210px,150px,0); opacity:0 } }
+@keyframes ab-twinkle{ 0%,100% { opacity:.15 } 50% { opacity:.9 } }
+@keyframes ab-leaf   { 0% { transform:translate3d(0,-14%,0) rotate(-30deg); opacity:0 } 14% { opacity:.75 } 86% { opacity:.75 } 100% { transform:translate3d(-64px,118%,0) rotate(220deg); opacity:0 } }
+@keyframes ab-sway   { 0%,100% { transform:translateX(-9px) rotate(-1.6deg) } 50% { transform:translateX(9px) rotate(1.6deg) } }
+@keyframes ab-diag   { 0% { transform:translate3d(-70%,-70%,0) } 100% { transform:translate3d(70%,70%,0) } }
+`
+
+/** Deterministik psevdo-təsadüf — hər render eyni yerləşdirmə (jitter yoxdur). */
+function abHash(n) { const x = Math.sin(n * 127.1) * 43758.5453; return x - Math.floor(x) }
+
+/**
+ * Ambient kökü — keyframe-ləri bir dəfə yerləşdirir və uşaqları örtük qata alır.
+ * `TemplateShell › ambient` propuna verilir; mövqeləmə Shell-in öz qatındadır.
+ */
+export function Ambient({ children }) {
+  return (
+    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+      <style>{AMBIENT_KEYFRAMES}</style>
+      {children}
+    </div>
+  )
+}
+
+/** Yavaş gəzişən bulanıq işıq ləkəsi — fonun «nəfəs alması». */
+export function Blob({ color, w = '70%', h = '32%', blur = 40, duration = 21, delay = 0, reverse = false, ...pos }) {
+  return (
+    <span style={{
+      position: 'absolute', width: w, height: h, borderRadius: '50%', ...pos,
+      background: `radial-gradient(circle, ${color}, transparent 69%)`,
+      filter: `blur(${blur}px)`,
+      animation: `ab-wander ${duration}s ease-in-out ${delay}s infinite${reverse ? ' reverse' : ''}`,
+    }} />
+  )
+}
+
+/**
+ * Zərrəcik sahəsi — qalxan qığılcım / düşən ləçək / sayrışan ulduz.
+ * `kind`: 'up' | 'fall' | 'twinkle'.  Say mobil paint qiymətinə görə ≤ 24.
+ */
+export function Particles({ kind = 'up', count = 6, color, size = 2, seed = 0, minDur = 10, maxDur = 15, glow = true, shape }) {
+  const n = Math.min(count, 24)
+  return Array.from({ length: n }, (_, i) => {
+    const r1 = abHash(seed + i + 1)
+    const r2 = abHash(seed + i + 61)
+    const r3 = abHash(seed + i + 131)
+    const dur = (minDur + r2 * (maxDur - minDur)).toFixed(2)
+    const delay = (r3 * (kind === 'twinkle' ? 3.4 : 14)).toFixed(2)
+    const base = {
+      position: 'absolute', left: `${(r1 * 96 + 2).toFixed(2)}%`,
+      width: shape ? shape.w : size, height: shape ? shape.h : size,
+      background: color,
+      borderRadius: shape ? shape.radius : '50%',
+      boxShadow: glow && !shape ? `0 0 ${size * 3.5}px ${color}` : undefined,
+    }
+    if (kind === 'up') {
+      return <span key={i} style={{ ...base, bottom: '-4%', animation: `ab-up ${dur}s linear ${delay}s infinite` }} />
+    }
+    if (kind === 'fall') {
+      return <span key={i} style={{ ...base, top: 0, animation: `ab-fall ${dur}s linear ${delay}s infinite` }} />
+    }
+    return <span key={i} style={{ ...base, top: `${(r2 * 92 + 4).toFixed(2)}%`, animation: `ab-twinkle ${dur}s ease-in-out ${delay}s infinite` }} />
+  })
+}
+
+/** Şaquli işıq şüası — soldan sağa çox yavaş süzülür (Modern Black). */
+export function Beam({ color, width = '22%', duration = 13, delay = 0 }) {
+  return (
+    <span style={{
+      position: 'absolute', left: 0, top: 0, bottom: 0, width,
+      background: `linear-gradient(90deg, transparent, ${color}, transparent)`,
+      animation: `ab-beam ${duration}s cubic-bezier(.4,0,.6,1) ${delay}s infinite`,
+    }} />
+  )
+}
+
+/** Üfüqi tarama xətti — yuxarıdan aşağı sürüşür (Modern Black). */
+export function Scan({ color, duration = 7.5, delay = 0 }) {
+  return (
+    <span style={{
+      position: 'absolute', left: 0, right: 0, top: 0, height: 1,
+      background: `linear-gradient(90deg, transparent, ${color}, transparent)`,
+      animation: `ab-scan ${duration}s cubic-bezier(.4,0,.6,1) ${delay}s infinite`,
+    }} />
+  )
+}
+
+/** Mərkəzdən dönən halqa — şərq/lüks şablonların girih hərəkəti. */
+export function RotRing({ color, size = 330, top = '38%', duration = 48, dashed = false, reverse = false }) {
+  return (
+    <span style={{
+      position: 'absolute', left: '50%', top, width: size, height: size,
+      margin: `${-size / 2}px 0 0 ${-size / 2}px`, borderRadius: '50%',
+      border: `1px ${dashed ? 'dashed' : 'solid'} ${color}`,
+      animation: `ab-rot ${duration}s linear infinite${reverse ? ' reverse' : ''}`,
+    }} />
+  )
+}

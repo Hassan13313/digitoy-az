@@ -47,10 +47,28 @@ const sans  = TH.fonts.body
 
 /* Şablona məxsus keyframe-lər — qlobal CSS-ə toxunmur, prefiks `rg-` */
 const KEYFRAMES = `
-@keyframes rg-seal   { 0%,100% { transform: translate(-50%,-50%) scale(1) } 50% { transform: translate(-50%,-50%) scale(1.06) } }
 @keyframes rg-eq     { 0%,100% { transform: scaleY(.35) } 50% { transform: scaleY(1) } }
+
+/* «Açılış Ekranı düzəliş V1» — lövhə + möhür ardıcıllığı */
+@keyframes rg-veil       { from { opacity:1 } to { opacity:0 } }
+@keyframes rg-rise       { from { opacity:0; transform:translateY(14px) } to { opacity:1; transform:none } }
+@keyframes rg-drawx      { from { transform:scaleX(0) } to { transform:scaleX(1) } }
+@keyframes rg-frame      { from { transform:scaleY(0) } to { transform:scaleY(1) } }
+@keyframes rg-letter     { from { opacity:0; transform:translateY(26px) rotateX(52deg); filter:blur(7px) } to { opacity:1; transform:none; filter:blur(0) } }
+@keyframes rg-cta        { from { opacity:0; transform:translateY(16px) scale(.94) } to { opacity:1; transform:none } }
+@keyframes rg-cta-glow   { 0%,100% { box-shadow: 0 0 0 0 ${TH.primary}00 } 50% { box-shadow: 0 0 28px 2px ${TH.primary}47 } }
+@keyframes rg-gleam      { 0% { transform:translateX(-140%) skewX(-18deg); opacity:0 } 22% { opacity:.9 } 100% { transform:translateX(300%) skewX(-18deg); opacity:0 } }
+@keyframes rg-stamp      { 0% { opacity:0; transform:translate(-50%,-50%) scale(2.6) rotate(-14deg) } 55% { opacity:1 } 70% { transform:translate(-50%,-50%) scale(.94) rotate(0) } 82% { transform:translate(-50%,-50%) scale(1.05) } 100% { opacity:1; transform:translate(-50%,-50%) scale(1) rotate(0) } }
+@keyframes rg-shock      { 0% { opacity:0; transform:translate(-50%,-50%) scale(.3) } 12% { opacity:.85 } 100% { opacity:0; transform:translate(-50%,-50%) scale(3.1) } }
+@keyframes rg-shadowgrow { from { opacity:0; transform:translateX(-50%) scaleX(.4) } to { opacity:1; transform:translateX(-50%) scaleX(1) } }
+@keyframes rg-dust       { 0% { transform:translate3d(0,14px,0); opacity:0 } 18% { opacity:.85 } 100% { transform:translate3d(-16px,-120px,0); opacity:0 } }
+@keyframes rg-halo2      { 0%,100% { opacity:.22; transform:translate(-50%,-50%) scale(1) } 50% { opacity:.5; transform:translate(-50%,-50%) scale(1.1) } }
+@keyframes rg-slowring   { from { transform:translate(-50%,-50%) rotate(0) } to { transform:translate(-50%,-50%) rotate(360deg) } }
+
+/* Daxili arxa fon (ambient) */
+@keyframes rg-wander     { 0%,100% { transform:translate3d(0,0,0) } 33% { transform:translate3d(26px,-34px,0) } 66% { transform:translate3d(-22px,20px,0) } }
+@keyframes rg-up         { 0% { transform:translate3d(0,110%,0); opacity:0 } 12% { opacity:1 } 100% { transform:translate3d(-18px,-20%,0); opacity:0 } }
 @keyframes rg-hint   { 0%,100% { transform: translateY(0); opacity:.35 } 50% { transform: translateY(6px); opacity:1 } }
-@keyframes rg-drift  { from { transform: translate3d(0,0,0) } to { transform: translate3d(24px,-30px,0) } }
 @keyframes rg-halo   { 0% { box-shadow: 0 0 0 6px ${TH.primary}24, 0 0 0 14px ${TH.primary}12 } 100% { box-shadow: 0 0 0 14px ${TH.primary}00, 0 0 0 26px ${TH.primary}00 } }
 @keyframes rg-sweep  { 0% { background-position: 0% 50% } 100% { background-position: 200% 50% } }
 @media (prefers-reduced-motion: reduce) {
@@ -58,26 +76,39 @@ const KEYFRAMES = `
 }
 `
 
-/* ── Ambient: 3 çox yavaş qızıl işıq ləkəsi, opacity ≤ .07 (design spec) ── */
+/* ── Daxili arxa fon — «Açılış Ekranı düzəliş V1» ────────────────────────────
+   Design t1-də dəvətnamənin fonu düz rəng deyil: iki nəhəng qızıl işıq ləkəsi
+   çox yavaş gəzişir, aşağıdan qızıl qığılcımlar qalxır. Qat `screen` blend
+   ilə məzmunun ÜSTÜNDƏDİR — səhifəni işıqlandırır, örtmür.
+   ⚠ zIndex 3: məzmundan yuxarı, amma başlıq/düymələrdən aşağı. */
+const SPARKS = [
+  { left: '10%', dur: 13, delay: 0 },
+  { left: '24%', dur: 10, delay: 2.4 },
+  { left: '41%', dur: 15, delay: 5.1 },
+  { left: '58%', dur: 11.5, delay: 7.6 },
+  { left: '73%', dur: 14, delay: 3.3 },
+  { left: '89%', dur: 12, delay: 9.2 },
+]
+
 function GoldLights() {
-  const spots = [
-    { w: 320, top: '12%',  left: '-14%', dur: 18, delay: 0 },
-    { w: 260, top: '46%',  right: '-12%', dur: 22, delay: 3 },
-    { w: 300, bottom: '8%', left: '18%', dur: 26, delay: 6 },
-  ]
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
-      {spots.map((s, i) => (
-        <span
-          key={i}
-          style={{
-            position: 'absolute', width: s.w, height: s.w, borderRadius: '50%',
-            top: s.top, left: s.left, right: s.right, bottom: s.bottom,
-            background: `radial-gradient(circle, ${TH.primary}, transparent 68%)`,
-            opacity: 0.07, filter: 'blur(30px)',
-            animation: `rg-drift ${s.dur}s ease-in-out ${s.delay}s infinite alternate`,
-          }}
-        />
+    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+      <span style={{
+        position: 'absolute', left: '-16%', top: '4%', width: '68%', height: '36%', borderRadius: '50%',
+        background: `radial-gradient(circle, ${TH.primary}6B, transparent 68%)`,
+        filter: 'blur(36px)', animation: 'rg-wander 17s ease-in-out infinite',
+      }} />
+      <span style={{
+        position: 'absolute', right: '-20%', bottom: '10%', width: '60%', height: '32%', borderRadius: '50%',
+        background: `radial-gradient(circle, ${TH.accent}4D, transparent 70%)`,
+        filter: 'blur(40px)', animation: 'rg-wander 22s ease-in-out 6s infinite reverse',
+      }} />
+      {SPARKS.map((s, i) => (
+        <span key={i} style={{
+          position: 'absolute', left: s.left, bottom: '-4%', width: 2, height: 2, borderRadius: '50%',
+          background: TH.accent, boxShadow: `0 0 7px ${TH.accent}E6`,
+          animation: `rg-up ${s.dur}s linear ${s.delay}s infinite`,
+        }} />
       ))}
     </div>
   )
@@ -126,19 +157,65 @@ const btn = (filled) => ({
 const sectionBorder = { borderBottom: `1px solid ${TH.primary}1A` }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   01 — ZƏRF AÇILIŞI: möhürlənmiş zərf, flap rotateX(-165°), 1.4 s (design)
+   01 — AÇILIŞ: qızıl lövhə + mum möhür («Açılış Ekranı düzəliş V1»)
+
+   Design t1 açılışı artıq zərf deyil — DİVARDAN ASILMIŞ QIZIL LÖVHƏDİR.
+   Ardıcıllıq bir mərasim kimi gedir: pərdə əriyir → künc bucaqları düşür →
+   lövhənin çərçivəsi əvvəl üfüqi, sonra şaquli çəkilir → mum möhür yuxarıdan
+   basılır (zərbə dalğası ilə) → adlar hərf-hərf qalxır → CTA parıldayır.
+
+   ⚠ `onOpenStart` MÜTLƏQ toxunuş hadisəsinin içində çağırılır (musiqi).
    ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Toy ilinin roma rəqəmi — lövhənin üstündəki «Anno» yazısı üçün. */
+function roman(year) {
+  const map = [[1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'],
+    [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']]
+  let n = Number(year) || 0
+  if (n < 1 || n > 3999) return ''
+  return map.reduce((out, [v, s]) => { while (n >= v) { out += s; n -= v } return out }, '')
+}
+
+/* Qızıl toz — aşağıdan yuxarı süzülən yeddi zərrəcik (deterministik) */
+const DUST = [
+  { left: '22%', top: '78%', dur: 9.5, delay: 0 },
+  { left: '38%', top: '92%', dur: 11, delay: 1.6 },
+  { left: '58%', top: '70%', dur: 8.5, delay: 3.1 },
+  { left: '74%', top: '88%', dur: 12, delay: 4.4 },
+  { left: '88%', top: '64%', dur: 10, delay: 2.2 },
+  { left: '12%', top: '60%', dur: 11.5, delay: 5.6 },
+  { left: '66%', top: '96%', dur: 9, delay: 6.8 },
+]
+
+/* Ornament sətri — solub gedən xətlər və ortada qızıl ulduz */
+function GoldStarRule({ width = 34, delay = 0, style = {} }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9,
+      animation: `rg-rise .8s ease-out ${delay}s both`, ...style,
+    }}>
+      <span style={{ width, height: 1, background: `linear-gradient(90deg, transparent, ${TH.primary})` }} />
+      <svg viewBox="0 0 12 12" width="7" height="7" aria-hidden="true">
+        <path d="M6 0 L7.6 4.4 L12 6 L7.6 7.6 L6 12 L4.4 7.6 L0 6 L4.4 4.4 Z" fill={TH.primary} />
+      </svg>
+      <span style={{ width, height: 1, background: `linear-gradient(90deg, ${TH.primary}, transparent)` }} />
+    </div>
+  )
+}
+
 function SealedEnvelope({ weddingData, isCouple, isCorp, eventLabel, onOpen, onOpenStart }) {
   const [opening, setOpening] = useState(false)
   const [gone, setGone] = useState(false)
 
-  const names = isCouple
-    ? `${weddingData.groomName || ''} & ${weddingData.brideName || ''}`
-    : (weddingData.eventName || weddingData.brideName || '')
+  const first = isCouple ? (weddingData.groomName || '') : (weddingData.eventName || weddingData.brideName || '')
+  const second = isCouple ? (weddingData.brideName || '') : ''
 
   const monogram = isCouple
-    ? `${(weddingData.groomName || '?')[0]}&${(weddingData.brideName || '?')[0]}`.toUpperCase()
-    : ((weddingData.eventName || weddingData.brideName || '·')[0] || '·').toUpperCase()
+    ? `${(weddingData.groomName || '?')[0]}&${(weddingData.brideName || '?')[0]}`.toLocaleUpperCase('az')
+    : ((weddingData.eventName || weddingData.brideName || '·')[0] || '·').toLocaleUpperCase('az')
+
+  const anno = roman((weddingData.date || '').slice(0, 4))
+  const place = weddingData.venueName ? String(weddingData.venueName).split(',').pop().trim() : ''
 
   const start = () => {
     if (opening) return
@@ -152,99 +229,227 @@ function SealedEnvelope({ weddingData, isCouple, isCorp, eventLabel, onOpen, onO
 
   if (gone) return null
 
+  /* Künc bucağı — dördü ardıcıl düşür */
+  const bracket = (pos, delay) => ({
+    position: 'absolute', width: 30, height: 30, pointerEvents: 'none',
+    ...pos, animation: `rg-rise .7s ease-out ${delay}s both`,
+  })
+
   return (
-    <div
+    <motion.div
       onClick={start}
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') start() }}
-      aria-label="Möhürü aç"
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); start() } }}
+      aria-label={isCorp ? 'Dəvətnaməni aç' : 'Möhürü aç'}
+      data-rg
+      animate={opening ? { opacity: 0, scale: 1.06 } : {}}
+      transition={{ duration: 1.1, ease: [0.65, 0, 0.35, 1] }}
       style={{
         position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden',
-        background: `radial-gradient(120% 80% at 50% 30%, #1C1509, ${TH.background} 72%)`,
+        background: `radial-gradient(120% 82% at 50% 26%, #211906, ${TH.background} 74%)`,
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        fontFamily: sans, padding: '0 24px',
+        fontFamily: sans, padding: '0 clamp(20px, 7vw, 30px)', textAlign: 'center',
+        perspective: 1100, isolation: 'isolate',
       }}
     >
-      {/* İki qatlı künc çərçivəsi */}
-      <span style={{ position: 'absolute', inset: 18, border: `1px solid ${TH.primary}29`, pointerEvents: 'none' }} />
-      <span style={{ position: 'absolute', inset: 24, border: `1px solid ${TH.primary}14`, pointerEvents: 'none' }} />
+      {/* Pərdə — ekran örtülü başlayır, sonra əriyir */}
+      <span aria-hidden="true" style={{
+        position: 'absolute', inset: 0, background: '#0A0805', pointerEvents: 'none', zIndex: 2,
+        animation: 'rg-veil 1s ease-out .1s both',
+      }} />
+
+      {/* Halo + çox yavaş dönən halqa */}
+      <span aria-hidden="true" style={{
+        position: 'absolute', left: '50%', top: '44%', transform: 'translate(-50%,-50%)',
+        width: 'min(92vw, 340px)', height: 'min(92vw, 340px)', borderRadius: '50%',
+        pointerEvents: 'none', zIndex: -1, filter: 'blur(30px)',
+        background: `radial-gradient(circle, ${TH.primary}52, transparent 68%)`,
+        animation: 'rg-halo2 9s ease-in-out 1s infinite',
+      }} />
+      <span aria-hidden="true" style={{
+        position: 'absolute', left: '50%', top: '44%', transform: 'translate(-50%,-50%)',
+        width: 'min(76vw, 268px)', height: 'min(76vw, 268px)', borderRadius: '50%',
+        border: `1px solid ${TH.primary}42`, pointerEvents: 'none', zIndex: -1,
+        animation: 'rg-slowring 96s linear infinite',
+      }} />
+
+      {/* Qızıl toz */}
+      <span aria-hidden="true" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: -1 }}>
+        {DUST.map((d, i) => (
+          <span key={i} style={{
+            position: 'absolute', left: d.left, top: d.top, width: 2, height: 2, borderRadius: '50%',
+            background: TH.accent, opacity: 0, boxShadow: `0 0 6px ${TH.accent}CC`,
+            animation: `rg-dust ${d.dur}s linear ${d.delay}s infinite`,
+          }} />
+        ))}
+      </span>
+
+      {/* Ekran çərçivəsi — iki üfüqi xətt və dörd künc bucağı */}
+      <span aria-hidden="true" style={{
+        position: 'absolute', left: 18, right: 18, top: 18, height: 1, pointerEvents: 'none',
+        background: `linear-gradient(90deg, transparent, ${TH.primary}8C, transparent)`,
+        transformOrigin: '50% 50%', animation: 'rg-drawx 1.1s cubic-bezier(.22,.61,.36,1) .5s both',
+      }} />
+      <span aria-hidden="true" style={{
+        position: 'absolute', left: 18, right: 18, bottom: 18, height: 1, pointerEvents: 'none',
+        background: `linear-gradient(90deg, transparent, ${TH.primary}8C, transparent)`,
+        transformOrigin: '50% 50%', animation: 'rg-drawx 1.1s cubic-bezier(.22,.61,.36,1) .5s both',
+      }} />
+      <span aria-hidden="true" style={bracket({ left: 18, top: 18, borderTop: `1px solid ${TH.primary}80`, borderLeft: `1px solid ${TH.primary}80` }, 1.2)} />
+      <span aria-hidden="true" style={bracket({ right: 18, top: 18, borderTop: `1px solid ${TH.primary}80`, borderRight: `1px solid ${TH.primary}80` }, 1.3)} />
+      <span aria-hidden="true" style={bracket({ left: 18, bottom: 18, borderBottom: `1px solid ${TH.primary}80`, borderLeft: `1px solid ${TH.primary}80` }, 1.4)} />
+      <span aria-hidden="true" style={bracket({ right: 18, bottom: 18, borderBottom: `1px solid ${TH.primary}80`, borderRight: `1px solid ${TH.primary}80` }, 1.5)} />
 
       <motion.div
-        animate={opening ? { opacity: 0, y: 26 } : { opacity: 1, y: 0 }}
-        transition={{ duration: 0.75, delay: opening ? 0.45 : 0, ease: 'easeInOut' }}
-        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}
+        animate={opening ? { opacity: 0, y: 22 } : {}}
+        transition={{ duration: 0.7, delay: opening ? 0.3 : 0, ease: 'easeInOut' }}
+        style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
       >
-        <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.muted, marginBottom: 26 }}>
-          {eventLabel}
+        {/* Kicker */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, animation: 'rg-rise .9s cubic-bezier(.22,.61,.36,1) .85s both' }}>
+          <span style={{ width: 22, height: 1, background: `${TH.primary}80` }} />
+          <span style={{ fontSize: 9.5, letterSpacing: '.42em', textTransform: 'uppercase', color: TH.muted, whiteSpace: 'nowrap' }}>
+            {eventLabel}
+          </span>
+          <span style={{ width: 22, height: 1, background: `${TH.primary}80` }} />
         </div>
 
-        {/* Zərf + möhür */}
-        <div style={{ position: 'relative', width: 220, height: 150, maxWidth: '72vw' }}>
-          <span style={{
-            position: 'absolute', inset: 0,
-            background: 'linear-gradient(150deg,#241D11,#15100A)',
-            border: `1px solid ${TH.primary}4D`,
+        {/* Qızıl lövhə — çərçivə çəkilir, möhür basılır */}
+        <div style={{
+          position: 'relative', width: 214, height: 168, maxWidth: '70vw', marginTop: 30,
+          animation: 'rg-rise 1s cubic-bezier(.22,.61,.36,1) 1s both',
+        }}>
+          <span aria-hidden="true" style={{
+            position: 'absolute', left: '50%', bottom: -16, width: 170, height: 12, transform: 'translateX(-50%)',
+            background: 'radial-gradient(ellipse, rgba(0,0,0,.65), transparent 70%)',
+            animation: 'rg-shadowgrow 1s ease-out 1.6s both',
           }} />
-          {/* Üst qapaq — toxunuşda 3D açılır */}
-          <motion.span
-            animate={opening ? { rotateX: -165 } : { rotateX: 0 }}
-            transition={{ duration: 0.9, ease: [0.32, 0.72, 0, 1] }}
-            style={{
-              position: 'absolute', top: 0, left: 0, right: 0, height: 82,
-              clipPath: 'polygon(0 0,100% 0,50% 100%)',
-              background: 'linear-gradient(160deg,#2C2415,#1B1610)',
-              borderBottom: `1px solid ${TH.primary}33`,
-              transformOrigin: 'top center', transformStyle: 'preserve-3d', backfaceVisibility: 'hidden',
-            }}
-          />
-          {/* Mum möhür */}
-          <motion.span
-            animate={opening ? { opacity: 0, scale: 0.7 } : {}}
-            transition={{ duration: 0.35 }}
-            style={{
-              position: 'absolute', top: '32%', left: '50%',
-              transform: 'translate(-50%,-50%)',
-              width: 44, height: 44, borderRadius: '50%',
-              background: 'radial-gradient(circle at 35% 30%,#D9B36C,#8A6A2E)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: serif, fontSize: 15, color: '#2A1F0C',
-              boxShadow: '0 6px 18px rgba(0,0,0,.55)',
-              animation: opening ? 'none' : 'rg-seal 3.4s ease-in-out infinite',
-              zIndex: 2,
-            }}
-          >
+
+          {/* Üfüqi kənarlar */}
+          <span aria-hidden="true" style={{
+            position: 'absolute', left: 0, right: 0, top: 0, height: 1,
+            background: `linear-gradient(90deg, transparent, ${TH.primary}, transparent)`,
+            transformOrigin: '50% 50%', animation: 'rg-drawx 1.1s cubic-bezier(.22,.61,.36,1) 1.2s both',
+          }} />
+          <span aria-hidden="true" style={{
+            position: 'absolute', left: 0, right: 0, bottom: 0, height: 1,
+            background: `linear-gradient(90deg, transparent, ${TH.primary}, transparent)`,
+            transformOrigin: '50% 50%', animation: 'rg-drawx 1.1s cubic-bezier(.22,.61,.36,1) 1.2s both',
+          }} />
+          {/* Şaquli kənarlar — üfüqidən sonra */}
+          <span aria-hidden="true" style={{
+            position: 'absolute', top: 0, bottom: 0, left: 0, width: 1,
+            background: `linear-gradient(180deg, transparent, ${TH.primary}D9, transparent)`,
+            transformOrigin: '50% 50%', animation: 'rg-frame 1.1s cubic-bezier(.22,.61,.36,1) 1.55s both',
+          }} />
+          <span aria-hidden="true" style={{
+            position: 'absolute', top: 0, bottom: 0, right: 0, width: 1,
+            background: `linear-gradient(180deg, transparent, ${TH.primary}D9, transparent)`,
+            transformOrigin: '50% 50%', animation: 'rg-frame 1.1s cubic-bezier(.22,.61,.36,1) 1.55s both',
+          }} />
+
+          <span aria-hidden="true" style={{
+            position: 'absolute', inset: 9, border: `1px solid ${TH.primary}38`,
+            animation: 'rg-rise .9s ease-out 2s both',
+          }} />
+
+          {/* Lövhənin içi + üzərindən keçən işıq */}
+          <span aria-hidden="true" style={{
+            position: 'absolute', inset: 1, overflow: 'hidden',
+            background: 'linear-gradient(158deg, rgba(48,38,20,.55), rgba(16,12,7,.55))',
+          }}>
+            <span style={{
+              position: 'absolute', left: 0, top: 0, bottom: 0, width: '34%',
+              background: `linear-gradient(90deg, ${TH.accent}2E, transparent)`,
+              animation: 'rg-gleam 6.5s ease-in-out 3.4s infinite',
+            }} />
+          </span>
+
+          {anno && (
+            <div style={{
+              position: 'absolute', left: 0, right: 0, top: 22,
+              fontSize: 9, letterSpacing: '.42em', textTransform: 'uppercase',
+              color: `${TH.accent}99`, whiteSpace: 'nowrap',
+              animation: 'rg-rise .9s ease-out 2.3s both',
+            }}>
+              Anno {anno}
+            </div>
+          )}
+
+          {/* Zərbə dalğası — möhür düşəndən bir az sonra */}
+          <span aria-hidden="true" style={{
+            position: 'absolute', left: '50%', top: '50%', width: 78, height: 78,
+            transform: 'translate(-50%,-50%)', borderRadius: '50%',
+            border: `1px solid ${TH.primary}59`, pointerEvents: 'none',
+            animation: 'rg-shock 1.5s ease-out 2.5s both',
+          }} />
+
+          {/* Mum möhür — yuxarıdan basılır */}
+          <div style={{
+            position: 'absolute', left: '50%', top: '50%', width: 58, height: 58,
+            borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'radial-gradient(circle at 34% 28%, #E2BE79, #8A6A2E 72%, #6A4F1E)',
+            fontFamily: serif, fontSize: 17, letterSpacing: '.04em', color: '#2A1F0C',
+            boxShadow: '0 10px 26px rgba(0,0,0,.6), inset 0 1px 2px rgba(255,236,190,.55)',
+            animation: 'rg-stamp 1.05s cubic-bezier(.3,1.5,.4,1) 2.2s both',
+          }}>
             {monogram}
-          </motion.span>
+          </div>
+
+          <GoldStarRule width={20} delay={3.4} style={{ position: 'absolute', left: 0, right: 0, bottom: 22, gap: 7 }} />
         </div>
 
-        <div style={{ fontFamily: serif, fontWeight: 300, fontSize: 'clamp(24px,7vw,30px)', color: TH.accent, marginTop: 34 }}>
-          {names}
+        {/* Adlar — hər söz ayrıca qalxır */}
+        <div style={{
+          display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 11, marginTop: 38,
+          fontFamily: serif, fontWeight: 300, fontSize: 'clamp(26px, 9vw, 34px)', color: TH.accent, lineHeight: 1,
+        }}>
+          <span style={{ display: 'inline-block', animation: 'rg-letter .95s cubic-bezier(.22,.61,.36,1) 3.9s both' }}>{first}</span>
+          {second && (
+            <>
+              <span style={{ display: 'inline-block', fontSize: 'clamp(17px, 6vw, 22px)', color: TH.primary, animation: 'rg-letter .95s cubic-bezier(.22,.61,.36,1) 4.1s both' }}>&amp;</span>
+              <span style={{ display: 'inline-block', animation: 'rg-letter .95s cubic-bezier(.22,.61,.36,1) 4.3s both' }}>{second}</span>
+            </>
+          )}
         </div>
-        <span style={{ width: 28, height: 1, background: TH.primary, margin: '12px 0' }} />
-        <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.muted }}>
-          {formatFullDateByLang(weddingData.date, 'az')}
-          {weddingData.venueName ? ` · ${String(weddingData.venueName).split(',').pop().trim()}` : ''}
-        </div>
+
+        <GoldStarRule delay={4.6} style={{ marginTop: 16 }} />
 
         <div style={{
-          marginTop: 40, display: 'inline-flex', alignItems: 'center', gap: 10,
-          border: `1px solid ${TH.primary}73`, borderRadius: 100, padding: '13px 24px',
-          fontSize: 10, letterSpacing: '.22em', textTransform: 'uppercase',
-          color: TH.accent, background: `${TH.primary}14`,
+          fontSize: 10.5, letterSpacing: '.24em', textTransform: 'uppercase', color: TH.muted, marginTop: 14,
+          animation: 'rg-rise .8s ease-out 4.8s both',
         }}>
-          {isCorp ? 'Dəvətnaməni aç' : 'Möhürü aç'}<span>→</span>
+          {[formatFullDateByLang(weddingData.date, 'az'), place].filter(Boolean).join(' · ')}
+        </div>
+
+        {/* CTA — parıldayan qızıl həlqə */}
+        <div style={{
+          position: 'relative', overflow: 'hidden', marginTop: 40,
+          display: 'inline-flex', alignItems: 'center', gap: 10,
+          border: `1px solid ${TH.primary}80`, borderRadius: 100, padding: '14px 26px',
+          fontSize: 10, letterSpacing: '.24em', textTransform: 'uppercase',
+          color: '#F2E4BE', background: `${TH.primary}1A`,
+          animation: 'rg-cta .9s cubic-bezier(.22,.61,.36,1) 5.1s both, rg-cta-glow 3.6s ease-in-out 6s infinite',
+        }}>
+          <span aria-hidden="true" style={{
+            position: 'absolute', top: 0, bottom: 0, left: 0, width: '38%',
+            background: 'linear-gradient(90deg, transparent, rgba(255,240,205,.3), transparent)',
+            animation: 'rg-gleam 4.4s ease-in-out 6.2s infinite',
+          }} />
+          <span style={{ position: 'relative' }}>{isCorp ? 'Dəvətnaməni aç' : 'Dəvəti aç'}</span>
+          <span style={{ position: 'relative' }}>→</span>
         </div>
       </motion.div>
 
       <div style={{
-        position: 'absolute', bottom: 34, left: 0, right: 0, textAlign: 'center',
-        fontSize: 10, letterSpacing: '.14em', color: `${TH.muted}B3`,
-        animation: 'rg-hint 2.6s ease-in-out infinite',
+        position: 'absolute', left: 0, right: 0, bottom: 32, textAlign: 'center',
+        fontSize: 10.5, letterSpacing: '.2em', color: `${TH.muted}BF`,
+        animation: 'rg-rise .8s ease-out 5.6s both, rg-hint 2.8s ease-in-out 6.4s infinite',
       }}>
         toxunun
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -358,6 +563,9 @@ export default function RoyalGoldTemplate({
       style={{
         background: TH.background, minHeight: '100vh', fontFamily: sans, color: TH.text,
         overflowX: 'hidden', position: 'relative',
+        /* ⚠ ambient qatının `screen` blend-ini bu kökə bağlayır — olmasa
+           blend səhifədən kənara (body) sızır. */
+        isolation: 'isolate',
         '--tpl-glow': `${TH.primary}47`,
       }}
     >
@@ -376,10 +584,14 @@ export default function RoyalGoldTemplate({
       )}
 
       {/* Qızıl işıq ləkələri scroll-a əks istiqamətdə sürüşür (parallaks).
-          ⚠ `translate` yazılır — ləkələrin öz `rg-drift` transform animasiyası
-          toxunulmaz qalır. */}
+          ⚠ `translate` yazılır — ləkələrin öz `rg-wander` transform animasiyası
+          toxunulmaz qalır.
+          ⚠ `mix-blend-mode: screen` qatı məzmunun üstündən İŞIQLANDIRIR —
+          buna görə zIndex 3 (başlıq 40 və düymələr 54–55 təmiz qalır). */}
       {opened && (
-        <Parallax mode="page" range={54} style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
+        <Parallax mode="page" range={54} style={{
+          position: 'fixed', inset: 0, zIndex: 3, pointerEvents: 'none', mixBlendMode: 'screen',
+        }}>
           <GoldLights />
         </Parallax>
       )}
