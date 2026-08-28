@@ -129,34 +129,6 @@ export const FONT_STACKS = {
 
 export const TEMPLATES = [
   {
-    id: 'simple-luxury',
-    name: 'Simple Luxury',
-    tagline: 'Krem · Qızıl · Digitoy klassik',
-    description: 'Digitoy-un klassik krem-qızıl dəvətnaməsi — indiyə qədər işlənən standart dizayn.',
-    shortDescription: { az: 'Digitoy klassik krem-qızıl dizayn', en: 'Digitoy classic cream & gold style' },
-    status: TEMPLATE_STATUS.LIVE,
-    category: 'classic',
-    version: 1,
-    previewRoute: '/demo/template/simple-luxury',
-    theme: {
-      primary:   '#C5A059',
-      accent:    '#E8D5A3',
-      secondary: '#8A6A2E',
-      background: '#FDFAF4',
-      surface:   '#F2EAD6',
-      text:      '#1A1A1A',
-      muted:     '#8C7B6B',
-      footerBg:  '#2C2523',
-      footerText: '#E8D5A3',
-      fonts: { heading: FONT_STACKS.cormorant, body: FONT_STACKS.inter },
-    },
-    preview: {
-      accent: '#C5A059',
-      background: 'linear-gradient(160deg, #FDFAF4 0%, #F2EAD6 55%, #E8DCC0 100%)',
-      swatches: ['#C5A059', '#FDFAF4', '#2C2318'],
-    },
-  },
-  {
     id: 'royal-gold',
     name: 'Royal Gold',
     tagline: 'Qızıl · Zərf möhürü · Gecə',
@@ -371,21 +343,54 @@ export const TEMPLATES = [
     previewRoute: '/demo/template/crystal-glass',
     theme: {
       primary:   '#2E3A44',
-      accent:    '#7E8D99',
+      /* ⚠ accent AÇIQ fonda oxunaqlı olmalıdır: köhnə #7E8D99 fonla cəmi
+         3.17:1 kontrast verirdi (WCAG AA kiçik mətn üçün 4.5 tələb edir) —
+         kicker, etiket və ornamentlər solğun görünürdü. #5A6874 → 5.33:1
+         (surface üzərində 4.98:1), eyni soyuq platin çalarında qalır. */
+      accent:    '#5A6874',
       secondary: '#DCE6EE',
       background: '#F4F7FA',
       surface:   '#EAF0F4',
       text:      '#2E3A44',
-      muted:     '#66727D',
-      mapTint:  '#7E8D99',
+      /* muted surface üzərində 4.28:1 idi → 5.0:1 */
+      muted:     '#5C6873',
+      mapTint:  '#5A6874',
       footerBg:  '#2E3A44',
       footerText: '#DCE6EE',
       fonts: { heading: FONT_STACKS.italiana, body: FONT_STACKS.jost },
     },
     preview: {
-      accent: '#7E8D99',
+      accent: '#5A6874',
       background: 'linear-gradient(150deg, #F4F7FA, #DCE6EE 60%, #EAF0F4)',
-      swatches: ['#7E8D99', '#F4F7FA', '#2E3A44'],
+      swatches: ['#5A6874', '#F4F7FA', '#2E3A44'],
+    },
+  },
+  {
+    id: 'simple-luxury',
+    name: 'Simple Luxury',
+    tagline: 'Krem · Qızıl · Digitoy klassik',
+    description: 'Digitoy-un klassik krem-qızıl dəvətnaməsi — indiyə qədər işlənən standart dizayn.',
+    shortDescription: { az: 'Digitoy klassik krem-qızıl dizayn', en: 'Digitoy classic cream & gold style' },
+    status: TEMPLATE_STATUS.LIVE,
+    category: 'classic',
+    version: 1,
+    previewRoute: '/demo/template/simple-luxury',
+    theme: {
+      primary:   '#C5A059',
+      accent:    '#E8D5A3',
+      secondary: '#8A6A2E',
+      background: '#FDFAF4',
+      surface:   '#F2EAD6',
+      text:      '#1A1A1A',
+      muted:     '#8C7B6B',
+      footerBg:  '#2C2523',
+      footerText: '#E8D5A3',
+      fonts: { heading: FONT_STACKS.cormorant, body: FONT_STACKS.inter },
+    },
+    preview: {
+      accent: '#C5A059',
+      background: 'linear-gradient(160deg, #FDFAF4 0%, #F2EAD6 55%, #E8DCC0 100%)',
+      swatches: ['#C5A059', '#FDFAF4', '#2C2318'],
     },
   },
 ]
@@ -458,6 +463,21 @@ export function getTemplateName(id) {
 /** Şablonun önbaxış marşrutu (metadata-dan, hardcode yox). */
 export function getTemplatePreviewRoute(id) {
   return BY_ID[id]?.previewRoute || `/demo/template/${DEFAULT_TEMPLATE_ID}`
+}
+
+/**
+ * Builder-də İLK OLARAQ seçili gələn şablon — reyestrin BİRİNCİ seçilə bilən
+ * şablonu (indi Royal Gold).
+ *
+ * ⚠ Bu, `DEFAULT_TEMPLATE_ID`-dən FƏRQLİDİR və qəsdən belədir:
+ *   • DEFAULT_TEMPLATE_ID = simple-luxury → RENDER fallback-ıdır. `templateId`
+ *     olmayan KÖHNƏ dəvətnamələr bununla açılır, ona görə heç vaxt dəyişmir.
+ *   • BUILDER_DEFAULT_TEMPLATE_ID → YENİ müştəriyə ilk göstərilən dizayndır.
+ *     Simple Luxury artıq siyahının sonundadır (köhnə klassik nümunə kimi),
+ *     ona görə builder-də də ilk o çıxmamalıdır.
+ */
+export function builderDefaultTemplateId() {
+  return listTemplates({ onlySelectable: true })[0]?.id || DEFAULT_TEMPLATE_ID
 }
 
 /** Reyestrdə mövcud olan bütün kateqoriyalar (təkrarsız). */

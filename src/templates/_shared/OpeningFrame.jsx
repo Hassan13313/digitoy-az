@@ -34,6 +34,20 @@ const OPENING_KEYFRAMES = `
 @keyframes tpl-gleam    { 0% { transform:translateX(-140%) skewX(-18deg); opacity:0 } 22% { opacity:.9 } 100% { transform:translateX(300%) skewX(-18deg); opacity:0 } }
 @keyframes tpl-twinkle  { 0%,100% { opacity:.15 } 50% { opacity:.9 } }
 @keyframes tpl-shock    { 0% { opacity:0; transform:translate(-50%,-50%) scale(.3) } 12% { opacity:.85 } 100% { opacity:0; transform:translate(-50%,-50%) scale(3.1) } }
+
+/* ⚠ TOXUNUŞDAN SONRA açılış xoreoqrafiyası DAYANDIRILIR.
+
+   Səbəb: giriş ardıcıllığı 4–6 saniyə sürür və bütün ekranı tutan qradiyent/
+   blur qatlarının üzərində işləyir. İstifadəçi ortasında toxunanda əsas axın
+   hələ də bu kadrları çəkirdi və start()-dakı setTimeout(duration) VAXTINDA
+   İŞLƏMİRDİ — ölçmə (6x throttle): 950 ms-lik gözləmə 3.2 saniyəyə, 20x-də
+   6.6 saniyəyə uzanırdı. İstifadəçi bunu «donub, açılmır» kimi görürdü.
+
+   paused seçilib, none yox: none, both fill-mode-lu qatları (məsələn pərdəni)
+   ilkin vəziyyətinə qaytarıb ekranda sıçrayış yaradardı. paused hər şeyi olduğu
+   kadrda dondurur — çıxış animasiyası isə framer-motion-un inline transform-udur,
+   CSS animation-play-state ona toxunmur. */
+[data-tpl-opening] * { animation-play-state: paused !important; }
 `
 export default function OpeningFrame({
   theme, onOpen, onOpenStart, children,
@@ -104,6 +118,7 @@ export default function OpeningFrame({
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); start() } }}
       aria-label={ariaLabel}
+      data-tpl-opening={opening ? '' : undefined}
       animate={opening ? EXITS[exit] : {}}
       transition={{ duration: duration / 1000, ease: [0.65, 0, 0.35, 1] }}
       style={{

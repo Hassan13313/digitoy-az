@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, lazy, Suspense } from 'react'
 import { ArrowLeft, MapPin, Navigation, ExternalLink, ChevronDown, Camera } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
+import { hidePhoto } from '../../utils/photoGallery'
 import { motion, AnimatePresence } from 'framer-motion'
 import FloralBackground from '../../components/invitation/FloralBackground'
 import CountdownTimer from '../../components/invitation/CountdownTimer'
@@ -397,6 +398,7 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
                           src={url}
                           alt=""
                           loading="lazy"
+                          onError={hidePhoto}
                           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                         />
                       </div>

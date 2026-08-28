@@ -29,6 +29,11 @@ export function useMusicPlayer({ lang, music = null, autoStart = false }) {
   const startedRef = useRef(false)
   const seekedRef  = useRef(false)
   const [playing, setPlaying] = useState(false)
+  /* Fayl serverdə YOXDUR (404 / silinib / formatı dəstəklənmir).
+     Digitoy-da musiqi faylları əl ilə silinə bilər, dəvətnamə linki isə
+     ÖMÜRLÜK açıq qalmalıdır — ona görə bu hal xəta deyil, normal haldır:
+     musiqi düyməsi gizlənir, dəvətnamənin qalan hər şeyi işləyir. */
+  const [dead, setDead] = useState(false)
 
   const src       = music?.file || null
   const startTime = Math.max(0, Math.floor(music?.startTime || 0))
@@ -56,12 +61,16 @@ export function useMusicPlayer({ lang, music = null, autoStart = false }) {
   const pause  = () => { audioRef.current?.pause() }
   const toggle = () => { playing ? pause() : play() }
 
+  /* Mahnı dəyişdi → «ölü fayl» bayrağını sıfırla (builder-də seçim dəyişəndə
+     yeni fayl köhnəsinin xətasına görə bloklanmasın). */
+  useEffect(() => { setDead(false); seekedRef.current = false }, [src])
+
   /* Effekt həmişə ƏN SON `play`-i çağırsın (hər render-də yenisi yaranır) */
   const playRef = useRef(play)
   playRef.current = play
 
   useEffect(() => {
-    if (!autoStart || !src || startedRef.current) return
+    if (!autoStart || !src || dead || startedRef.current) return
 
     let alive = true
 
@@ -82,7 +91,7 @@ export function useMusicPlayer({ lang, music = null, autoStart = false }) {
     window.addEventListener('keydown', attempt, true)
 
     return () => { alive = false; disarm() }
-  }, [autoStart, src])
+  }, [autoStart, src, dead])
 
   /* Consumer bu propsları birbaşa <audio>-ya yayır */
   const audioProps = {
@@ -98,9 +107,14 @@ export function useMusicPlayer({ lang, music = null, autoStart = false }) {
     },
     onPlay:  () => setPlaying(true),
     onPause: () => setPlaying(false),
+    /* ⚠ Fayl açılmadı — səssizcə imtina et. Bu, dinləyiciləri də söndürür:
+       əks halda hər toxunuşda uğursuz play() cəhdi təkrarlanardı. */
+    onError: () => { setDead(true); setPlaying(false) },
   }
 
-  return { audioProps, audioRef, playing, play, pause, toggle, hasMusic: !!src }
+  /* `dead` olanda hasMusic false-dur → şablon nə <audio>, nə də musiqi
+     düyməsini render etmir. Dəvətnamə tam işlək qalır. */
+  return { audioProps, audioRef, playing, play, pause, toggle, hasMusic: !!src && !dead }
 }
 
 export default useMusicPlayer

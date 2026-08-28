@@ -203,3 +203,25 @@ export async function downloadAllAsZip(items, slug) {
     }
   }
 }
+
+/* ══════════════════════════════════════════════════
+   SİLİNMİŞ ŞƏKİL — sınıq ikon əvəzinə boşluq
+
+   Digitoy-da yüklənmiş fayllar (musiqi, foto) vaxtaşırı ƏL İLƏ təmizlənir,
+   amma dəvətnamə linkləri ÖMÜRLÜK açıq qalmalıdır. Fayl silinəndə brauzer
+   404 alır və <img> yerində sınıq şəkil ikonu göstərir — dəvətnamə nasaz
+   görünür. Bu köməkçi həmin xananı sadəcə gizlədir: qalan hər şey işləyir.
+
+   İstifadə:  <img src={url} onError={hidePhoto} />
+══════════════════════════════════════════════════ */
+export function hidePhoto(e) {
+  const img = e?.currentTarget
+  if (!img) return
+  /* ⚠ Inline `style` YAZILMIR: React style-ı da, src-i də prop kimi idarə edir,
+     növbəti render (məs. sayğac hər saniyə yenilənir) onu geri qaytarardı və
+     sınıq şəkil təzədən görünərdi. `data-*` atributu React-in props-larında
+     olmadığı üçün toxunulmaz qalır; gizlətməni index.css-dəki qayda edir. */
+  img.setAttribute('data-photo-failed', '')
+  const cell = img.parentElement
+  if (cell && cell.childElementCount === 1) cell.setAttribute('data-photo-failed', '')
+}

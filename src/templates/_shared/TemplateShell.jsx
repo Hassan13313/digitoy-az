@@ -11,7 +11,8 @@ import { buildPresetMusic, PRESET_TRACKS, MUSIC_PLAY_MODES, shouldAutoPlay } fro
 import { getPackageGates } from '../../data/packages'
 import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
 import { trackEvent } from '../../utils/analytics'
-import { Reveal, Stagger, Parallax, PopDigit, enterDirection } from './motion'
+import { Reveal, Stagger, PopDigit, enterDirection, AmbientLayer } from './motion'
+import { hidePhoto } from '../../utils/photoGallery'
 import { useCountdown } from '../../hooks/useCountdown'
 import { useTimeline } from '../../hooks/useTimeline'
 import { useSeating } from '../../hooks/useSeating'
@@ -212,25 +213,22 @@ export default function TemplateShell({
           ⚠ Qat `position: fixed` olduğu üçün element riyaziyyatı sıfır verir,
           ona görə parallaks `page` rejimindədir.
 
-          `ambientBlend` («Açılış Ekranı düzəliş V1»): qat məzmunun ALTINDA
-          deyil, ÜSTÜNDƏ dayanır və blend ilə səhifəni çalarlandırır — tünd
-          şablonlarda `screen` (işıqlandırır), açıqlarda `multiply` (kölgələyir).
-          ⚠ zIndex 3 seçilib: məzmundan (1) yuxarı, amma sticky başlıq (40) və
-          idarə düymələrindən (54–55) aşağı — onlar həmişə təmiz qalır.
-          `ambientBlend="none"` — qat üstdə qalır, amma blend olmur (qatın öz
-          içində `soft-light` alt qatları olanda, məs. Crystal Glass). */}
+          `ambientBlend` artıq BLEND REJİMİ deyil, qatın YERİNİ seçir —
+          bax motion.jsx › AmbientLayer. `mix-blend-mode` Phase 30-dakı donmanın
+          kök səbəbi idi (blend qatın içindəki elementlərin GPU qatına
+          qalxmasını bloklayır → hər kadrda bütün ekran yenidən çəkilir), ona
+          görə tamam götürülüb.
+            screen (TÜND şablonlar) → qat məzmunun ÜSTÜNDƏ, adi alfa ilə.
+                Tünd fonda screen ilə adi alfa arasında göz fərq görmür.
+            qalan hamısı (AÇIQ şablonlar: multiply, none, verilməyib)
+                → qat məzmunun ALTINDA. Açıq fonda işıqlı duman məzmunun
+                üstündə qalsaydı mətni ağardardı — oxunaqlılıq itərdi.
+          ⚠ Üstdə qalanda zIndex 3-dür: məzmundan (1) yuxarı, amma sticky
+          başlıq (40) və idarə düymələrindən (54–55) aşağı. */}
       {opened && ambient && (
-        <Parallax
-          mode="page"
-          range={54}
-          style={{
-            position: 'fixed', inset: 0, pointerEvents: 'none',
-            zIndex: ambientBlend ? 3 : 0,
-            mixBlendMode: (ambientBlend && ambientBlend !== 'none') ? ambientBlend : undefined,
-          }}
-        >
+        <AmbientLayer below={ambientBlend !== 'screen'}>
           {ambient}
-        </Parallax>
+        </AmbientLayer>
       )}
 
       {/* ⚠ <audio> zərf açılmamışdan ƏVVƏL də mount olunur: açılış toxunuşunda
@@ -570,7 +568,8 @@ export default function TemplateShell({
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 18 }}>
                         {gallery.demoPhotos.map((url, i) => (
                           <div key={i} style={{ aspectRatio: '3/2', overflow: 'hidden', background: theme.surface, borderRadius: D.radius === 0 ? 0 : 6 }}>
-                            <img src={url} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                            {/* ⚠ Şəkil serverdən silinibsə sınıq ikon qalmasın — xana gizlədilir. */}
+                            <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                           </div>
                         ))}
                       </div>

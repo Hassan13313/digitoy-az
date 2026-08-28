@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -196,6 +196,105 @@ export function Ambient({ children }) {
       <style>{AMBIENT_KEYFRAMES}</style>
       {children}
     </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AMBIENT LAYER — ambient qatının DAŞIYICISI (fixed qat + parallaks + qoruma)
+
+   ⚠⚠ PERFORMANS — Phase 30-dakı DONMANIN kök səbəbi məhz bu qat idi.
+
+   Qat `position:fixed; inset:0` ilə bütün ekranı tutur. Phase 30-da üzərinə
+   `mix-blend-mode` qoyulmuşdu. Blend arxa fonun qatla BİRLİKDƏ rasterləşməsini
+   tələb edir — nəticədə brauzer qatın içindəki HEÇ BİR elementi ayrıca GPU
+   qatına qaldıra bilmir və hər animasiya kadrında BÜTÜN ekran yenidən çəkilir.
+   Qat 20 saniyəlik sonsuz animasiyalar saxladığı üçün bu, dəvətnamə açıq
+   qaldığı MÜDDƏTCƏ davam edirdi.
+
+   Canlı ölçmə (digitoy.az, oriental-luxe, 390x844@3x, 6x CPU throttle,
+   eyni məzmun — yalnız blend açılıb-bağlanır):
+       blend AÇIQ  → 36 fps, ən pis kadr 135 ms
+       blend BAĞLI → 58 fps, ən pis kadr  40 ms
+   20x throttle-da (ucuz Android) blend açıq olanda 40 saniyənin 30 saniyəsi
+   bloklanmış əsas axın idi — telefon praktiki olaraq donurdu.
+
+   Ona görə blend İŞLƏDİLMİR. Əvəzində:
+     • screen (tünd şablonlar) → qat məzmunun ÜSTÜNDƏ qalır, adi alfa ilə.
+       Tünd fonun üzərində `screen` ilə adi alfa nəticəsi göz üçün eynidir.
+     • multiply (açıq şablonlar) → qat məzmunun ALTINA keçir. Açıq fonda
+       üstdə qalsaydı, blend olmadan mətni ağardardı.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Qat özünü söndürəndən sonra bir daha qurulmur — sayğac yanıb-sönməsin. */
+const AMBIENT_WATCH_DELAY = 1400   /* açılış revealləri bitsin, sonra ölç      */
+const AMBIENT_WATCH_MS    = 2000   /* ölçmə pəncərəsi                         */
+const AMBIENT_BUDGET_MS   = 34     /* ~30 fps — bundan pisdirsə qat yükdür    */
+
+/**
+ * Açıq-aydın zəif cihaz? Yalnız HƏR İKİ göstərici məlum və aşağı olanda —
+ * normal telefonlar dizaynı itirməsin deyə qəsdən ehtiyatlı seçilib.
+ * (iOS `deviceMemory` vermir → orada bu yoxlama işləmir, runtime keşiyi tutur.)
+ */
+function weakDevice() {
+  if (typeof navigator === 'undefined') return false
+  if (prefersReducedMotion()) return true
+  const cores = navigator.hardwareConcurrency || 0
+  const mem = navigator.deviceMemory || 0
+  return cores > 0 && cores <= 4 && mem > 0 && mem <= 4
+}
+
+/**
+ * Ambient qatı — fixed daşıyıcı + səhifə parallaksı + performans keşiyi.
+ *
+ * `below` — qat məzmunun ALTINDA (açıq fonlu şablonlar üçün).
+ *
+ * Keşik: qat quruldeqdan ~1.4 s sonra 2 saniyəlik kadr vaxtı ölçülür; medyan
+ * kadr 34 ms-dən pisdirsə qat özünü söndürür. Bu, tanımadığımız zəif
+ * telefonlarda dəvətnamənin donmamasına zəmanət verir — dizayn güclü
+ * cihazlarda olduğu kimi qalır.
+ */
+export function AmbientLayer({ children, below = false, range = 54 }) {
+  const [alive, setAlive] = useState(() => !weakDevice())
+
+  useEffect(() => {
+    if (!alive || prefersReducedMotion()) return
+    let raf = 0
+    let start = 0
+    const frames = []
+    let last = 0
+
+    const tick = (now) => {
+      if (!start) { start = now; last = now; raf = requestAnimationFrame(tick); return }
+      const elapsed = now - start
+      if (elapsed > AMBIENT_WATCH_DELAY) frames.push(now - last)
+      last = now
+      if (elapsed < AMBIENT_WATCH_DELAY + AMBIENT_WATCH_MS) {
+        raf = requestAnimationFrame(tick)
+        return
+      }
+      if (frames.length > 20) {
+        frames.sort((a, b) => a - b)
+        if (frames[Math.floor(frames.length / 2)] > AMBIENT_BUDGET_MS) setAlive(false)
+      }
+    }
+
+    raf = requestAnimationFrame(tick)
+    return () => { if (raf) cancelAnimationFrame(raf) }
+  }, [alive])
+
+  if (!alive) return null
+
+  return (
+    <Parallax
+      mode="page"
+      range={range}
+      style={{
+        position: 'fixed', inset: 0, pointerEvents: 'none',
+        zIndex: below ? 0 : 3,
+      }}
+    >
+      {children}
+    </Parallax>
   )
 }
 

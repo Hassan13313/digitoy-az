@@ -14,8 +14,11 @@ import { getTemplateTheme } from '../templateConfig'
    qurur — mərkəzdə kəsilmiş daş yerinə oturur və üzərindən parıltı keçir.
    Daxili fonda prizma dumanı və havada asılı kristal qırıqları var.
 
-   ⚠ Ambient `blend: none` — qatın öz içində `soft-light` şüa qatları var,
-   bütün qata blend verilsə onlar ikiqat hesablanardı.
+   ⚠ OXUNAQLILIQ: bu AÇIQ fonlu şablondur, ona görə ambient qatı məzmunun
+   ALTINDADIR (bax TemplateShell — yalnız `screen`, yəni tünd şablonlar qatı
+   üstdə saxlayır). Əvvəl qat üstdə idi və ağ kristal qırıqları + prizma
+   dumanı mətni ağardırdı. Blend (`soft-light`) də götürülüb: qat altda olduğu
+   üçün qazanc vermir, amma 180%x180% animasiyalı blend qatı çox bahalıdır.
    ───────────────────────────────────────────────────────────────────────── */
 
 const TH = getTemplateTheme('crystal-glass')
@@ -199,8 +202,8 @@ const SHARDS = [
 
 /* Səhifə boyu sürüşən refraksiya şüaları */
 const BEAMS = [
-  { gradient: 'linear-gradient(108deg, transparent 42%, rgba(255,255,255,.55) 50%, transparent 58%)', opacity: 0.32, dur: 12, delay: 0, reverse: false },
-  { gradient: 'linear-gradient(96deg, transparent 45%, rgba(150,200,230,.42) 50%, rgba(220,190,160,.34) 53%, transparent 59%)', opacity: 0.3, dur: 17, delay: 6, reverse: true },
+  { gradient: 'linear-gradient(108deg, transparent 42%, rgba(255,255,255,.55) 50%, transparent 58%)', opacity: 0.5, dur: 12, delay: 0, reverse: false },
+  { gradient: 'linear-gradient(96deg, transparent 45%, rgba(150,200,230,.4) 50%, rgba(220,190,160,.3) 53%, transparent 59%)', opacity: 0.42, dur: 17, delay: 6, reverse: true },
 ]
 
 export default function CrystalGlassTemplate(props) {
@@ -217,7 +220,7 @@ export default function CrystalGlassTemplate(props) {
         <Ambient>
           <span style={{
             position: 'absolute', left: '50%', top: '34%', width: 400, height: 400,
-            margin: '-200px 0 0 -200px', borderRadius: '50%', opacity: 0.34,
+            margin: '-200px 0 0 -200px', borderRadius: '50%', opacity: 0.2,
             background: 'conic-gradient(from 0deg, rgba(190,150,220,.28), rgba(150,200,230,.28), rgba(220,190,160,.24), rgba(160,220,205,.24), rgba(190,150,220,.28))',
             filter: 'blur(48px)', animation: 'ab-rot 30s linear infinite',
           }} />
@@ -228,8 +231,8 @@ export default function CrystalGlassTemplate(props) {
               animation: `ab-shard ${s.dur}s ease-in-out ${s.delay}s infinite`,
             }}>
               <svg viewBox="0 0 20 30" width={s.w} height={s.w * 1.5} fill="none" aria-hidden="true">
-                <path d="M10 0 L19 11 L10 30 L1 11 Z" fill="rgba(255,255,255,.34)" stroke={alpha(ICE, 0.34)} strokeWidth=".7" />
-                <path d="M1 11 H19 M10 0 L6 11 L10 30 M10 0 L14 11 L10 30" stroke={alpha(ICE, 0.32)} strokeWidth=".5" />
+                <path d="M10 0 L19 11 L10 30 L1 11 Z" fill="rgba(255,255,255,.5)" stroke={alpha(ICE, 0.5)} strokeWidth=".7" />
+                <path d="M1 11 H19 M10 0 L6 11 L10 30 M10 0 L14 11 L10 30" stroke={alpha(ICE, 0.45)} strokeWidth=".5" />
               </svg>
             </span>
           ))}
@@ -237,7 +240,7 @@ export default function CrystalGlassTemplate(props) {
           {BEAMS.map((b, i) => (
             <span key={i} style={{
               position: 'absolute', left: '-40%', top: '-40%', width: '180%', height: '180%',
-              opacity: b.opacity, mixBlendMode: 'soft-light', background: b.gradient,
+              opacity: b.opacity, background: b.gradient,
               animation: `ab-diag ${b.dur}s cubic-bezier(.45,0,.55,1) ${b.delay}s infinite${b.reverse ? ' reverse' : ''}`,
             }} />
           ))}

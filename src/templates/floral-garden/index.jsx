@@ -13,7 +13,8 @@ import { getPackageGates } from '../../data/packages'
 import { formatAzDate, formatFullDateByLang, formatTime24 } from '../../utils/dateFormat'
 import { unlockAudio } from '../../utils/audioUnlock'
 import { trackEvent } from '../../utils/analytics'
-import { Reveal, Stagger, Parallax, PopDigit, enterDirection } from '../_shared/motion'
+import { Reveal, Stagger, Parallax, PopDigit, enterDirection, AmbientLayer } from '../_shared/motion'
+import { hidePhoto } from '../../utils/photoGallery'
 import { useCountdown } from '../../hooks/useCountdown'
 import { useTimeline } from '../../hooks/useTimeline'
 import { useSeating } from '../../hooks/useSeating'
@@ -507,13 +508,14 @@ export default function FloralGardenTemplate({
 
       {/* Daxili arxa fon — scroll-a əks istiqamətdə sürüşür (parallaks).
           ⚠ `translate` yazılır — ləkələrin öz `fg-wander` transform animasiyası
-          toxunulmaz qalır. */}
+          toxunulmaz qalır.
+          ⚠ Qat məzmunun ALTINDADIR. Əvvəl üstdə `mix-blend-mode: multiply` ilə
+          idi — bax motion.jsx › AmbientLayer: blend donmanın səbəbi idi, blendsiz
+          üstdə qalsaydı isə bu AÇIQ fonda mətni ağardardı. */}
       {opened && (
-        <Parallax mode="page" range={54} style={{
-          position: 'fixed', inset: 0, zIndex: 3, pointerEvents: 'none', mixBlendMode: 'multiply',
-        }}>
+        <AmbientLayer below>
           <WatercolorBlobs />
-        </Parallax>
+        </AmbientLayer>
       )}
 
       {/* 03 — MUSİQİ TOGGLE */}
@@ -848,7 +850,7 @@ export default function FloralGardenTemplate({
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 6, marginBottom: 18 }}>
                         {gallery.demoPhotos.map((url, i) => (
                           <div key={i} style={{ aspectRatio: '3/2', overflow: 'hidden', background: '#EFE7DE', borderRadius: 6 }}>
-                            <img src={url} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                            <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                           </div>
                         ))}
                       </div>

@@ -13,7 +13,8 @@ import { getPackageGates } from '../../data/packages'
 import { formatAzDate, formatFullDateByLang, formatTime24 } from '../../utils/dateFormat'
 import { unlockAudio } from '../../utils/audioUnlock'
 import { trackEvent } from '../../utils/analytics'
-import { Reveal, Stagger, Parallax, PopDigit, enterDirection } from '../_shared/motion'
+import { Reveal, Stagger, PopDigit, enterDirection, AmbientLayer } from '../_shared/motion'
+import { hidePhoto } from '../../utils/photoGallery'
 import { useCountdown } from '../../hooks/useCountdown'
 import { useTimeline } from '../../hooks/useTimeline'
 import { useSeating } from '../../hooks/useSeating'
@@ -586,14 +587,14 @@ export default function RoyalGoldTemplate({
       {/* Qızıl işıq ləkələri scroll-a əks istiqamətdə sürüşür (parallaks).
           ⚠ `translate` yazılır — ləkələrin öz `rg-wander` transform animasiyası
           toxunulmaz qalır.
-          ⚠ `mix-blend-mode: screen` qatı məzmunun üstündən İŞIQLANDIRIR —
-          buna görə zIndex 3 (başlıq 40 və düymələr 54–55 təmiz qalır). */}
+          ⚠ Qat məzmunun üstündədir (zIndex 3), amma `mix-blend-mode` YOXDUR —
+          bax motion.jsx › AmbientLayer: blend bütün ekranın hər kadrda yenidən
+          çəkilməsinə səbəb olurdu. Fon onsuz da tünddür, `screen` ilə adi alfa
+          arasında göz fərq görmür. */}
       {opened && (
-        <Parallax mode="page" range={54} style={{
-          position: 'fixed', inset: 0, zIndex: 3, pointerEvents: 'none', mixBlendMode: 'screen',
-        }}>
+        <AmbientLayer>
           <GoldLights />
-        </Parallax>
+        </AmbientLayer>
       )}
       {/* 03 — MUSİQİ TOGGLE */}
       <GoldMusic lang={lang} music={invMusic} playerRef={musicRef} visible={opened} autoPlay={autoPlay} />
@@ -915,7 +916,7 @@ export default function RoyalGoldTemplate({
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 6, marginBottom: 20 }}>
                       {gallery.demoPhotos.map((url, i) => (
                         <div key={i} style={{ aspectRatio: '3/2', overflow: 'hidden', background: '#1A1409' }}>
-                          <img src={url} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: 'sepia(.18)' }} />
+                          <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: 'sepia(.18)' }} />
                         </div>
                       ))}
                     </div>

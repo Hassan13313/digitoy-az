@@ -319,3 +319,13 @@ button, [role="button"], a, label, select {
     transform: none;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SİLİNMİŞ ŞƏKİL — bax utils/photoGallery.js › hidePhoto
+
+   Digitoy-da yüklənmiş fayllar əl ilə təmizlənir, dəvətnamə linkləri isə
+   ÖMÜRLÜK açıq qalır. Fayl silinəndə <img> sınıq ikon göstərir — bu qayda
+   həmin şəkli (və tək uşağı olan xanasını) gizlədir.
+   Atribut JS-dən qoyulur, çünki React inline style-ı hər render-də silərdi.
+   ═══════════════════════════════════════════════════════════════════════════ */
+[data-photo-failed] { display: none !important; }

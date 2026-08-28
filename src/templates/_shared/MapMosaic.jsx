@@ -15,6 +15,7 @@
    həm də bu fayl YALNIZ komponent export etsin (react-refresh qaydası).
    `geo.js` heç nə idxal etmir → dairəvi idxal riski yoxdur. */
 import { parseLatLon, toTile, alpha } from './geo'
+import { hidePhoto } from '../../utils/photoGallery'
 import { useParallax } from './motion'
 
 const ZOOM = 16
@@ -97,6 +98,7 @@ export default function MapMosaic({ weddingData, theme, map = {}, frame = null, 
               alt=""
               loading="lazy"
               referrerPolicy="no-referrer"
+              onError={hidePhoto}
               style={{ width: TILE, height: TILE, display: 'block' }}
             />
           ))}

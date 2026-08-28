@@ -29,7 +29,7 @@ import { PACKAGE_DEFS, getLockedSteps } from '../../data/packages'
 import { ACTIVE_PARTNERS } from '../../data/partners'
 import MusicStep from './MusicStep'
 import TemplateSelect from './TemplateSelect'
-import { DEFAULT_TEMPLATE_ID } from '../../templates/templateConfig'
+import { builderDefaultTemplateId } from '../../templates/templateConfig'
 import { defaultWedding } from '../../data/defaultWedding'
 import { buildShortLiveLink } from '../../utils/whatsappOrder'
 import { formatFullDateByLang } from '../../utils/dateFormat'
@@ -1495,7 +1495,10 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
      Artıq `data.templateId` sahəsindədir: autosave → draft → submit → approve
      → invitations.form_data zəncirinin hamısından keçir və reload-dan sonra
      bərpa olunur. Dəyər yoxdursa default şablon (simple-luxury). */
-  const selectedTemplate = data.templateId || DEFAULT_TEMPLATE_ID
+  /* ⚠ builderDefaultTemplateId() — DEFAULT_TEMPLATE_ID DEYİL. Bax
+     templateConfig: simple-luxury render fallback-ı olaraq qalır, amma
+     builder-də ilk seçili gələn dizayn siyahının birincisidir. */
+  const selectedTemplate = data.templateId || builderDefaultTemplateId()
   const setSelectedTemplate = (id) => set('templateId', id)
 
   const sessionIdRef   = useRef(null)
