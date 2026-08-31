@@ -14,8 +14,15 @@ RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# SPA fallback - butun diger route-lar -> index.html
-RewriteRule ^ index.html [L]
+# SPA fallback -> seo.php
+# seo.php index.html-i oxuyur ve <head>-deki meta bloku MARSRUTA UYGUN
+# evezleyir (canonical, robots, OG). Bu olmadan butun URL-ler eyni
+# canonical="https://digitoy.az/" verirdi (dublikat kontent) ve
+# WhatsApp/Telegram devetname linkinde cutluyun adini gostermirdi
+# (sosial crawler-ler JS icra etmir).
+# TEHLUKESIZLIK: seo.php-de her hansi problem olarsa o, xam index.html
+# qaytarir — sayt hec vaxt bu sebebden sinmir.
+RewriteRule ^ seo.php [L]
 
 # -- Security Headers --
 <IfModule mod_headers.c>

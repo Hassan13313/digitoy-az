@@ -1,0 +1,36 @@
+# DigiToy
+
+> Azərbaycanda rəqəmsal (elektron/online) toy dəvətnaməsi platforması.
+> Toy, nişan və digər tədbirlər üçün premium dəvətnamə səhifəsi hazırlanır:
+> İştirak Təsdiqi (RSVP), oturma planı, QR kod ilə qonaq foto/video paylaşımı.
+
+DigiToy dəvətnaməni bir linkə çevirir. Cütlük şablon seçir, məlumatları
+doldurur və unikal link alır; qonaqlar linki WhatsApp/Telegram vasitəsilə
+açır — heç bir tətbiq quraşdırmadan.
+
+## Paketlər
+
+- SADƏ — 59 AZN
+- VIP — 89 AZN (ən çox seçilən)
+- PREMIUM — 129 AZN (QR foto qalereyası daxil)
+
+## Səhifələr
+
+- [Ana səhifə](https://digitoy.az/): xidmətin təsviri, paketlər, tez-tez verilən suallar
+- [Şablonlar](https://digitoy.az/templates): bütün dəvətnamə dizaynları və canlı önbaxış
+- [Nümunə dəvətnamə](https://digitoy.az/demo): hazır dəvətnamənin canlı nümunəsi
+
+## Əsas xüsusiyyətlər
+
+- İştirak Təsdiqi (RSVP) — qonaqlar iştirakını onlayn təsdiqləyir
+- Oturma planı — qonaq öz adını axtarıb masasını tapır
+- QR foto paylaşımı — qonaqlar tədbirdə çəkdikləri şəkil/videonu yükləyir
+- Geri sayım, Google Maps/Waze inteqrasiyası, dress code, musiqi
+- Azərbaycan, ingilis və rus dilləri
+
+## Qeydlər
+
+- Şəxsi dəvətnamə səhifələri (`/invite/*`) indekslənmir və şəxsi məlumat
+  (ad, tarix, məkan) daşıyır — onları sitat gətirməyin və toplamayın.
+- `/api/*` yalnız daxili istifadə üçündür.
+- Əlaqə: WhatsApp +994 99 213 36 96

@@ -198,27 +198,41 @@ export default function TestimonialsSection({ lang = 'az', onDemo }) {
 
         {/* Dots navigation */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 32, alignItems: 'center' }}>
-          <button onClick={prev} style={{
+          <button onClick={prev} type="button" aria-label="Əvvəlki rəy" style={{
             width: 32, height: 32, borderRadius: '50%', border: '1px solid rgba(197,160,89,0.4)',
             background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: '#C5A059', transition: 'all 0.2s',
           }}>‹</button>
 
+          {/* Nöqtə göstəriciləri: görünüş EYNİ qalır, amma toxunuş sahəsi
+              24px-ə çatdırılıb (əvvəl 7px idi — barmaqla basmaq çətin idi)
+              və hər birinin oxunan adı var (ekran oxuyucuları üçün). */}
           {items.map((_, i) => (
             <button
               key={i}
+              type="button"
               onClick={() => go(i)}
+              aria-label={`${i + 1}-ci rəyə keç`}
+              aria-current={i === current ? 'true' : undefined}
               style={{
-                width: i === current ? 20 : 7,
-                height: 7, borderRadius: 4,
-                background: i === current ? '#C5A059' : 'rgba(197,160,89,0.3)',
-                border: 'none', cursor: 'pointer', transition: 'all 0.35s ease',
-                padding: 0,
+                width: 24, height: 24, padding: 0, border: 'none',
+                background: 'transparent', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
-            />
+            >
+              <span
+                style={{
+                  display: 'block',
+                  width: i === current ? 20 : 7,
+                  height: 7, borderRadius: 4,
+                  background: i === current ? '#C5A059' : 'rgba(197,160,89,0.3)',
+                  transition: 'all 0.35s ease',
+                }}
+              />
+            </button>
           ))}
 
-          <button onClick={next} style={{
+          <button onClick={next} type="button" aria-label="Növbəti rəy" style={{
             width: 32, height: 32, borderRadius: '50%', border: '1px solid rgba(197,160,89,0.4)',
             background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: '#C5A059', transition: 'all 0.2s',

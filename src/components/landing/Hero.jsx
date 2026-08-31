@@ -98,18 +98,28 @@ function GallerySlider({ tr }) {
           </div>
         </div>
         <button onClick={() => setCurrent(i => (i - 1 + slides.length) % slides.length)}
+          type="button" aria-label="Əvvəlki şəkil"
           className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/60 border border-white/70 backdrop-blur-sm flex items-center justify-center hover:bg-white/80 transition-all duration-200 shadow-sm">
           <ChevronLeft size={14} className="text-gold" strokeWidth={2} />
         </button>
         <button onClick={() => setCurrent(i => (i + 1) % slides.length)}
+          type="button" aria-label="Növbəti şəkil"
           className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/60 border border-white/70 backdrop-blur-sm flex items-center justify-center hover:bg-white/80 transition-all duration-200 shadow-sm">
           <ChevronRight size={14} className="text-gold" strokeWidth={2} />
         </button>
       </div>
       <div className="flex justify-center gap-2">
         {slides.map((_, i) => (
+          /* Toxunuş sahəsi 24px-ə çatdırılıb (əvvəl 8px idi — barmaqla
+             dəqiq basmaq mümkün deyildi). Görünən nöqtə eyni ölçüdə
+             qalır: sahə şəffaf padding ilə genişləndirilib. */
           <button key={i} onClick={() => setCurrent(i)}
-            className={`rounded-full transition-all duration-300 ${i === current ? 'w-4 h-2 bg-gold' : 'w-2 h-2 bg-gold/30'}`} />
+            type="button"
+            aria-label={`${i + 1}-ci şəkilə keç`}
+            aria-current={i === current ? 'true' : undefined}
+            className="flex items-center justify-center" style={{ width: 24, height: 24, padding: 0, border: 0, background: 'transparent', cursor: 'pointer' }}>
+            <span className={`block rounded-full transition-all duration-300 ${i === current ? 'w-4 h-2 bg-gold' : 'w-2 h-2 bg-gold/30'}`} />
+          </button>
         ))}
       </div>
       <p className="text-[11px] text-brown-muted/70 font-light">{tr.gallery_qr_hint}</p>

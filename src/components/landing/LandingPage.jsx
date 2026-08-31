@@ -276,6 +276,11 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
         }
       />
 
+      {/* Əsas məzmun landmark-ı: ekran oxuyucuları və axtarış botları
+         naviqasiya/altbilgi ilə əsas məzmunu ayıra bilsin (Lighthouse
+         `landmark-one-main` auditi bunu tələb edir). */}
+      <main>
+
       {/* ── 1. Hero ── */}
       <Hero lang={lang} onStart={() => scrollToSection('how-it-works')} onDemo={onDemo} />
 
@@ -361,6 +366,8 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
 
       {/* ── 6. FAQ ── */}
       <FAQSection lang={lang} />
+
+      </main>
 
       {/* ── 7. Footer ── */}
       <HeroFooter lang={lang} />
