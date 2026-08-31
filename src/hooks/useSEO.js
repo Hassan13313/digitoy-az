@@ -25,6 +25,16 @@ function setCanonical(href) {
   el.setAttribute('href', href)
 }
 
+/* SPA-da marşrut dəyişəndə köhnə canonical qalıb-qalmasın.
+   ⚠ Bu olmadan real defekt yaranırdı: tətbiq əvvəlcə qısa müddət
+   'landing' kimi render olunur (noindex=false) və canonical="/" qoyur;
+   sonra marşrut 'invite' olur (noindex=true) və YENİ canonical qoyulmur,
+   amma KÖHNƏSİ də silinmirdi. Nəticədə şəxsi dəvətnamə səhifəsi
+   render olunmuş DOM-da ana səhifəyə canonical verirdi. */
+function removeCanonical() {
+  document.head.querySelectorAll('link[rel="canonical"]').forEach(el => el.remove())
+}
+
 /* ── Route-aware SEO: title, meta description, canonical, OG, Twitter Card ──
    SPA-da react-router/helmet olmadığı üçün <head>-i birbaşa idarə edir.
    Statik JSON-LD (Organization/WebSite/Service) index.html-də qalır —
@@ -52,6 +62,8 @@ export function useSEO({ title, description, path = '/', image, type = 'website'
     setMeta('name', 'twitter:description', description)
     setMeta('name', 'twitter:image', ogImage)
 
-    if (!noindex) setCanonical(url)
+    /* noindex səhifədə canonical OLMAMALIDIR — ziddiyyətli siqnaldır */
+    if (noindex) removeCanonical()
+    else         setCanonical(url)
   }, [title, description, path, image, type, noindex])
 }
