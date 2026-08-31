@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/slug_alloc.php';
 
 requireAdmin();
 
@@ -10,9 +11,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$body     = json_decode(file_get_contents('php://input'), true);
-$slug     = trim($body['slug']    ?? '');
-$formData = $body['formData']     ?? null;
+$body      = json_decode(file_get_contents('php://input'), true);
+$slug      = trim($body['slug']       ?? '');
+$formData  = $body['formData']        ?? null;
+$draftCode = trim($body['draft_code'] ?? '');   /* sifarişin unikal kodu (varsa) */
 
 if (!$slug || !$formData) {
     http_response_code(400);
@@ -39,26 +41,53 @@ if (!$json) {
 $db = getDB();
 ensureTables();
 
-/* Köhnə format slug artıq mövcuddursa → yenilə (backward compat) */
-$checkOld = $db->prepare("SELECT 1 FROM invitations WHERE slug = :slug LIMIT 1");
-$checkOld->execute([':slug' => $slug]);
+/* ══════════════════════════════════════════════════
+   KANONİK SLUG TƏYİNİ
+   Məntiq (və nəyə görə belədir) slug_alloc.php-dədir; ora həm də
+   real DB olmadan test edilə bilir (tests/slug_alloc_test.php).
+══════════════════════════════════════════════════ */
 
-if ($checkOld->fetchColumn()) {
-    $upd = $db->prepare("UPDATE invitations SET form_data = :data, template_id = :tpl, updated_at = NOW() WHERE slug = :slug");
-    $upd->execute([':data' => $json, ':tpl' => $templateId, ':slug' => $slug]);
-    echo json_encode(['ok' => true, 'slug' => $slug]);
+try {
+    $res = resolveCanonicalSlug($db, $slug, $draftCode);
+} catch (RuntimeException $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Could not allocate a unique slug']);
     exit;
 }
 
-/* Yeni slug: deterministik 6-simvollu kod əlavə et (md5 lowercase verir) */
-$code = substr(md5($slug . 'digitoy'), 0, 6);
-$uniqueSlug = $slug . '-' . $code;
+if ($res['action'] === 'update_slug') {
+    $upd = $db->prepare("UPDATE invitations SET form_data = :data, template_id = :tpl, updated_at = NOW() WHERE slug = :slug");
+    $upd->execute([':data' => $json, ':tpl' => $templateId, ':slug' => $res['slug']]);
+    echo json_encode(['ok' => true, 'slug' => $res['slug'], 'created' => false]);
+    exit;
+}
 
-$ins = $db->prepare("
-    INSERT INTO invitations (slug, form_data, template_id)
-    VALUES (:slug, :data, :tpl)
-    ON DUPLICATE KEY UPDATE form_data = :data2, template_id = :tpl2, updated_at = NOW()
-");
-$ins->execute([':slug' => $uniqueSlug, ':data' => $json, ':tpl' => $templateId, ':data2' => $json, ':tpl2' => $templateId]);
+if ($res['action'] === 'update_code') {
+    $upd = $db->prepare("UPDATE invitations SET form_data = :data, template_id = :tpl, updated_at = NOW() WHERE draft_code = :c");
+    $upd->execute([':data' => $json, ':tpl' => $templateId, ':c' => $draftCode]);
+    echo json_encode(['ok' => true, 'slug' => $res['slug'], 'created' => false]);
+    exit;
+}
 
-echo json_encode(['ok' => true, 'slug' => $uniqueSlug]);
+/* Adi INSERT — ON DUPLICATE KEY UPDATE QƏSDƏN İSTİFADƏ EDİLMİR:
+   toqquşma baş verərsə başqasının dəvətnaməsini üstündən yazmaqdansa
+   xəta qaytarmaq DOĞRUDUR. */
+try {
+    $ins = $db->prepare("INSERT INTO invitations (slug, form_data, template_id, draft_code) VALUES (:slug, :data, :tpl, :code)");
+    $ins->execute([
+        ':slug' => $res['slug'],
+        ':data' => $json,
+        ':tpl'  => $templateId,
+        ':code' => preg_match(DRAFT_CODE_PATTERN, $draftCode) ? $draftCode : null,
+    ]);
+} catch (PDOException $e) {
+    /* 23000 = unikallıq pozuntusu (paralel sorğu araya girdi) */
+    if ($e->getCode() === '23000') {
+        http_response_code(409);
+        echo json_encode(['error' => 'Slug already taken, please retry']);
+        exit;
+    }
+    throw $e;
+}
+
+echo json_encode(['ok' => true, 'slug' => $res['slug'], 'created' => true]);

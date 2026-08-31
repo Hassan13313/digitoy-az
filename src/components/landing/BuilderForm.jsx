@@ -756,14 +756,20 @@ function Textarea({ ...props }) {
    Müştəriyə: QR önizlənməsi + link
    Admin: + Masa Kartını HD SVG Endir düyməsi
 ══════════════════════════════════════════════════ */
-function GalleryAdminStep({ data, isCouple, isCorp, isAdmin = false }) {
+function GalleryAdminStep({ data, isCouple, isCorp, isAdmin = false, canonicalSlug = '' }) {
   const qrExportRef = useRef()
   const [copied, setCopied] = useState(false)
 
-  let slug = ''
-  if (isCouple) slug = `${toSlug(data.brideName || '')}-ve-${toSlug(data.groomName || '')}`
-  else if (isCorp) slug = toSlug(data.eventName || 'tedbir')
-  else slug = toSlug(data.brideName || 'davetname')
+  /* KANONİK slug prioritetlidir. Adlardan hesablanan slug yalnız
+     dəvətnamə hələ saxlanılmayıbkı önizləmə üçündür — QR kodu ondan
+     çap etmək iki eyni adlı toyu eyni `uploads/<slug>/` qovluğuna
+     yönəldərdi (bir toyun qonaqları digərinin qalereyasına yükləyər). */
+  let slug = canonicalSlug
+  if (!slug) {
+    if (isCouple) slug = `${toSlug(data.brideName || '')}-ve-${toSlug(data.groomName || '')}`
+    else if (isCorp) slug = toSlug(data.eventName || 'tedbir')
+    else slug = toSlug(data.brideName || 'davetname')
+  }
 
   const photoShareUrl = slug
     ? `${window.location.origin}/invite/${slug}/foto`
@@ -1481,6 +1487,10 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     snapshot?.data ? { ...initialData, ...snapshot.data } : initialData
   ))
   const [errors, setErrors] = useState({})
+  /* Serverin təyin etdiyi KANONİK slug (aytekin-ve-ferid-abc234).
+     QR və qalereya linkləri adlardan yenidən hesablanmamalıdır — əks
+     halda eyni adlı iki cütlük eyni foto qovluğunu paylaşar. */
+  const [canonicalSlug, setCanonicalSlug] = useState('')
   const [generatedLiveLink, setGeneratedLiveLink] = useState('')
   const [linkCopied,        setLinkCopied]        = useState(false)
   const [showApproveModal,  setShowApproveModal]  = useState(false)
@@ -1682,12 +1692,16 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     setApproving(true)
     setApproveError('')
     try {
-      /* Server unikal kod əlavə edir: azer-nermin → azer-nermin-AB12CD */
-      const saveResult = await saveInvitation(slug, data)
-      const finalSlug = saveResult?.slug || slug
-
-      /* draft_code URL-dən oxu, varsa approve et (unikal slug ötür ki, admin paneldə link görsənsin) */
+      /* draft_code sifarişin unikal kimliyidir — kanonik slug ondan
+         törəyir (aytekin-ve-ferid-abc234). Eyni adlı iki cütlük artıq
+         eyni slug ala bilmir və bir-birinin dəvətnaməsini üstündən
+         yazmır. Təkrar approve eyni slug-ı qaytarır (idempotent). */
       const draftCode = new URLSearchParams(window.location.search).get('draft')
+
+      const saveResult = await saveInvitation(slug, data, draftCode)
+      const finalSlug = saveResult?.slug || slug
+      setCanonicalSlug(finalSlug)
+
       if (draftCode) {
         try {
           await approveDraft(draftCode, finalSlug)
@@ -2271,7 +2285,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
 
         {/* STEP 7 — Foto Qalereya & QR İdarəetmə */}
         {actualStep === 7 && (
-          <GalleryAdminStep data={data} isCouple={isCouple} isCorp={isCorp} isAdmin={isAdmin || adminMode} />
+          <GalleryAdminStep data={data} isCouple={isCouple} isCorp={isCorp} isAdmin={isAdmin || adminMode} canonicalSlug={canonicalSlug} />
         )}
 
         {/* STEP 8 — Partnyorlar (bütün paketlərdə son addım) */}

@@ -20,3 +20,11 @@
 
 # Struktur media loglari — slug/olcu/xeta melumatlari sizmasin
 RedirectMatch 404 ^/api/_logs/
+
+<Files "slug_alloc.php">
+    Require all denied
+</Files>
+
+<Files "media_store.php">
+    Require all denied
+</Files>

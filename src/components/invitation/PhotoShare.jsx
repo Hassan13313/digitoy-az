@@ -3,11 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Camera, Images, Video, Check, X, Film, ArrowLeft, Upload, RotateCcw,
 } from 'lucide-react'
-import { uploadPhoto } from '../../utils/api'
+import { uploadPhoto, uploadPhotoChunked } from '../../utils/api'
 import { trackEvent } from '../../utils/analytics'
 import {
   MAX_UPLOAD_LABEL, ACCEPT_IMAGE, ACCEPT_VIDEO, ACCEPT_ANY,
   humanSize, validateFile, compressImage, extractVideoPoster,
+  needsChunkedUpload, slowUploadWarning,
 } from '../../utils/uploadPolicy'
 
 /* Paralel yükləmə işçiləri — sıra ilə (1-bir) yükləmək 50-100 fotoluq
@@ -75,6 +76,12 @@ export default function PhotoShare() {
   const [uploading, setUploading] = useState(false)
   const [done,      setDone]      = useState(false)
   const [rejected,  setRejected]  = useState([])   /* { name, reason } */
+  const [notices,   setNotices]   = useState([])   /* xəbərdarlıq, xəta deyil */
+  /* Şəbəkə itəndə sorğular çox vaxt xəta vermir, ASILI QALIR — qonaq
+     sistemin donduğunu düşünür. Brauzerin öz siqnalı ilə vəziyyəti
+     DƏRHAL göstəririk. */
+  const [online,    setOnline]    = useState(() =>
+    typeof navigator === 'undefined' ? true : navigator.onLine !== false)
 
   const cameraRef  = useRef()
   const galleryRef = useRef()
@@ -84,9 +91,21 @@ export default function PhotoShare() {
 
   useEffect(() => { queueRef.current = queue }, [queue])
 
+  useEffect(() => {
+    const up   = () => setOnline(true)
+    const down = () => setOnline(false)
+    window.addEventListener('online', up)
+    window.addEventListener('offline', down)
+    return () => {
+      window.removeEventListener('online', up)
+      window.removeEventListener('offline', down)
+    }
+  }, [])
+
   /* Qalan bütün blob preview URL-ləri azad et — istifadəçi yükləmə
      yarımçıq ikən səhifədən çıxsa belə sızma olmur. */
   useEffect(() => () => {
+    /* Unmount: qalan bütün preview-lar azad olunur (effekt artıq işləməyəcək) */
     queueRef.current.forEach(q => { if (q.preview) URL.revokeObjectURL(q.preview) })
     abortRef.current?.abort()
   }, [])
@@ -108,6 +127,13 @@ export default function PhotoShare() {
     })
 
     if (refused.length) setRejected(prev => [...prev, ...refused])
+
+    /* Böyük fayl üçün vaxt xəbərdarlığı — qonaq "donub" düşünməsin */
+    const warns = accepted.map(f => {
+      const w = slowUploadWarning(f)
+      return w ? { name: f.name, reason: w } : null
+    }).filter(Boolean)
+    if (warns.length) setNotices(prev => [...prev, ...warns])
 
     if (accepted.length) {
       setQueue(prev => [
@@ -155,12 +181,24 @@ export default function PhotoShare() {
   }, [pendingPosterIds])
 
   const removeItem = useCallback((id) => {
-    setQueue(prev => {
-      const item = prev.find(q => q.id === id)
-      if (item?.preview) URL.revokeObjectURL(item.preview)
-      return prev.filter(q => q.id !== id)
-    })
+    setQueue(prev => prev.filter(q => q.id !== id))
   }, [])
+
+  /* ── Blob preview URL-lərinin azad edilməsi ──
+     ⚠ Azad etmə RENDER-DƏN SONRA olmalıdır. Əvvəl setQueue-nun içində
+     revokeObjectURL çağırılırdı: React hələ köhnə <img src={blob}> ilə
+     bir kadr render edə bilirdi və brauzer artıq ləğv edilmiş blob-u
+     yükləməyə çalışıb konsola ERR_FILE_NOT_FOUND yazırdı.
+     İndi commit-dən sonra yalnız NÖVBƏDƏ QALMAYAN URL-lər azad edilir —
+     sızma da olmur, xəta da. */
+  const knownPreviews = useRef(new Set())
+  useEffect(() => {
+    const current = new Set(queue.map(q => q.preview).filter(Boolean))
+    for (const url of knownPreviews.current) {
+      if (!current.has(url)) URL.revokeObjectURL(url)
+    }
+    knownPreviews.current = current
+  }, [queue])
 
   const setItem = useCallback((id, patch) => {
     setQueue(prev => prev.map(q => q.id === id ? { ...q, ...patch } : q))
@@ -179,7 +217,12 @@ export default function PhotoShare() {
         /* Böyük fotolar göndərilməzdən əvvəl kiçildilir (8-20 MB → ~1-2 MB) */
         const file = await compressImage(item.file)
 
-        await uploadPhoto(file, slug, {
+        /* Kiçik fayl → tək sorğu (ən sürətli yol).
+           Böyük fayl → hissə-hissə: server limitlərinə toxunmur və
+           bağlantı kəsilsə qaldığı yerdən davam edir. */
+        const send = needsChunkedUpload(file) ? uploadPhotoChunked : uploadPhoto
+
+        await send(file, slug, {
           poster: item.poster || undefined,
           signal,
           onProgress: pct => setItem(item.id, { pct }),
@@ -252,10 +295,11 @@ export default function PhotoShare() {
   const openPicker = (ref) => ref.current?.click()
 
   const resetAll = () => {
-    queueRef.current.forEach(q => { if (q.preview) URL.revokeObjectURL(q.preview) })
+    /* Preview-lar yuxarıdakı effekt tərəfindən render-dən sonra azad edilir */
     setDone(false)
     setQueue([])
     setRejected([])
+    setNotices([])
   }
 
   return (
@@ -302,6 +346,22 @@ export default function PhotoShare() {
           </p>
           <div className="gold-divider mt-8 max-w-[80px] mx-auto" />
         </div>
+
+        {!online && (
+          <div
+            role="status" aria-live="assertive"
+            style={{
+              marginBottom: 14, padding: '12px 16px',
+              border: '1px solid rgba(170,35,35,0.45)',
+              background: 'rgba(170,35,35,0.07)',
+              fontSize: 12, lineHeight: 1.6, color: 'rgba(140,28,28,0.98)',
+              fontFamily: '"Inter",system-ui,sans-serif',
+            }}
+          >
+            <strong>İnternet bağlantısı yoxdur.</strong> Bağlantı qayıdanda
+            «Yenidən göndər» düyməsinə toxunun — yükləmə qaldığı yerdən davam edəcək.
+          </div>
+        )}
 
         <AnimatePresence mode="wait">
           {done ? (
@@ -358,7 +418,7 @@ export default function PhotoShare() {
                   hint="Şəkil və ya video — birdən çox seçə bilərsiniz"
                   onClick={() => openPicker(galleryRef)} />
                 <ChoiceButton icon={Video} title="Video göndər"
-                  hint={`Maksimum ${MAX_UPLOAD_LABEL} · MP4 və ya MOV`}
+                  hint={`Uzun video olar — maksimum ${MAX_UPLOAD_LABEL} · MP4 və ya MOV`}
                   onClick={() => openPicker(videoRef)} />
               </div>
 
@@ -370,7 +430,7 @@ export default function PhotoShare() {
                 JPG · PNG · HEIC · MP4 · MOV — fayl başına maks. <strong>{MAX_UPLOAD_LABEL}</strong>
                 <br />
                 <span style={{ color: 'rgba(140,123,107,0.75)' }}>
-                  (təxminən 1080p-də 90 saniyə, 4K-da 25 saniyə video)
+                  Böyük fayllar hissə-hissə göndərilir — bağlantı kəsilsə qaldığı yerdən davam edir
                 </span>
               </p>
 
@@ -396,6 +456,33 @@ export default function PhotoShare() {
                     style={{
                       ...st.label, marginTop: 9, background: 'none', border: 'none',
                       color: 'rgba(140,28,28,0.7)', cursor: 'pointer', padding: 0, fontSize: 9,
+                    }}
+                  >
+                    Bağla
+                  </button>
+                </div>
+              )}
+
+              {/* Xəbərdarlıqlar — xəta DEYİL, sadəcə vaxt barədə məlumat */}
+              {notices.length > 0 && (
+                <div style={{
+                  marginBottom: 14, padding: '11px 14px',
+                  border: '1px solid rgba(197,160,89,0.42)',
+                  background: 'rgba(197,160,89,0.06)',
+                }}>
+                  {notices.map((n, i) => (
+                    <p key={i} style={{
+                      fontSize: 11, lineHeight: 1.55, color: 'rgba(110,88,40,0.95)',
+                      fontFamily: '"Inter",system-ui,sans-serif', marginTop: i ? 6 : 0,
+                    }}>
+                      <strong>{n.name}</strong> — {n.reason}
+                    </p>
+                  ))}
+                  <button
+                    onClick={() => setNotices([])}
+                    style={{
+                      ...st.label, marginTop: 9, background: 'none', border: 'none',
+                      color: 'rgba(140,110,50,0.75)', cursor: 'pointer', padding: 0, fontSize: 9,
                     }}
                   >
                     Bağla

@@ -74,14 +74,16 @@ export async function adminLogin(key) {
 }
 
 /* ── Dəvətnaməni serverə saxla (UPSERT) — admin tələb olunur ── */
-export async function saveInvitation(slug, formData) {
+export async function saveInvitation(slug, formData, draftCode = null) {
   const res = await fetch(`${BASE}/save_invitation.php`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...adminHeaders() },
-    body: JSON.stringify({ slug, formData }),
+    /* draft_code sifarişin unikal kodudur — kanonik slug ondan törəyir,
+       yəni təkrar saxlama yeni dublikat dəvətnamə yaratmır (idempotent) */
+    body: JSON.stringify({ slug, formData, draft_code: draftCode }),
   })
   if (!res.ok) throw new Error(`save_invitation: ${res.status}`)
-  return res.json()
+  return res.json() /* { ok, slug, created } — slug KANONİKDİR */
 }
 
 /* ── Dəvətnaməni serverdən oxu (public) ── */
@@ -91,6 +93,196 @@ export async function getInvitation(slug) {
   if (!res.ok) throw new Error(`get_invitation: ${res.status}`)
   const json = await res.json()
   return json.data ?? null
+}
+
+/* ══════════════════════════════════════════════════
+   HİSSƏLİ / DAVAM ETDİRİLƏ BİLƏN YÜKLƏMƏ
+
+   Böyük video TƏK sorğu ilə göndərilmir. Səbəb (ölçülmüş):
+   production-da `post_max_size ≈ 104M` — 2 GB-lıq tək sorğu üçün bu limiti
+   qaldırmaq lazım gələrdi, bu isə hər paralel yükləmə üçün ~4 GB anlıq
+   disk, saatlarla açıq qalan sorğu və kəsiləndə SIFIRDAN başlamaq
+   deməkdir. Bunun əvəzinə fayl 4 MB-lıq parçalarla gedir: server
+   limitlərinə toxunulmur və kəsilmə olarsa yalnız son parça itir.
+══════════════════════════════════════════════════ */
+
+/** Faylı təkrar açılışlarda tanımaq üçün sabit açar */
+function fileKey(file, slug) {
+  return `digitoyUpload:${slug}:${file.name}:${file.size}:${file.lastModified}`
+}
+
+function loadUploadId(file, slug) {
+  try {
+    const v = localStorage.getItem(fileKey(file, slug))
+    if (v && /^[a-z0-9]{16,64}$/.test(v)) return v
+  } catch { /* private mode */ }
+  return null
+}
+
+function newUploadId(file, slug) {
+  const id = (Array.from({ length: 4 }, () =>
+    Math.random().toString(36).slice(2, 10)).join('')).slice(0, 32).replace(/[^a-z0-9]/g, '0')
+  try { localStorage.setItem(fileKey(file, slug), id) } catch { /* private mode */ }
+  return id
+}
+
+function clearUploadId(file, slug) {
+  try { localStorage.removeItem(fileKey(file, slug)) } catch { /* private mode */ }
+}
+
+/** Serverdə artıq neçə bayt var? (davam nöqtəsi) */
+async function fetchReceived(slug, uploadId, signal) {
+  try {
+    const res = await fetch(
+      `${BASE}/upload_chunk.php?slug=${encodeURIComponent(slug)}&uploadId=${uploadId}`,
+      { signal, cache: 'no-store' })
+    if (!res.ok) return 0
+    const j = await res.json()
+    return Number(j?.received) || 0
+  } catch { return 0 }
+}
+
+/** Tək hissəni göndər — XHR, çünki fetch yükləmə progress-i vermir */
+function sendChunk({ slug, uploadId, blob, chunkIndex, totalChunks, fileSize, poster, onBytes, signal }) {
+  return new Promise((resolve, reject) => {
+    const fd = new FormData()
+    fd.append('slug', slug)
+    fd.append('uploadId', uploadId)
+    fd.append('chunkIndex', String(chunkIndex))
+    fd.append('totalChunks', String(totalChunks))
+    fd.append('fileSize', String(fileSize))
+    fd.append('chunk', blob, 'chunk.bin')
+    if (poster) fd.append('poster', poster, 'poster.jpg')
+
+    const xhr = new XMLHttpRequest()
+    xhr.open('POST', `${BASE}/upload_chunk.php`)
+
+    /* ── Donma (stall) aşkarlayıcısı ──
+       Telefon şəbəkəni itirəndə sorğu çox vaxt XƏTA VERMİR, sadəcə ASILI
+       QALIR — brauzer timeout-u gözləyənə qədər (dəqiqələr) istifadəçi
+       heç nə görmür və sistem "donmuş" kimi qalır. Ona görə: müəyyən
+       müddət ərzində heç bir yükləmə hadisəsi gəlməsə, sorğunu özümüz
+       kəsib aydın "bağlantı kəsildi" xətası veririk.
+       Astana 4 MB-lıq hissə üçün Slow 4G-də belə bol vaxtdır (~80 san
+       ötürmə davam edərkən onprogress müntəzəm gəlir). */
+    const STALL_MS = 25000
+    let stallTimer = null
+    let stalled = false
+    const armStall = () => {
+      clearTimeout(stallTimer)
+      stallTimer = setTimeout(() => { stalled = true; xhr.abort() }, STALL_MS)
+    }
+
+    xhr.upload.onprogress = (e) => {
+      armStall()
+      if (e.lengthComputable) onBytes?.(e.loaded)
+    }
+
+    const onAbort = () => xhr.abort()
+    signal?.addEventListener('abort', onAbort)
+    const cleanup = () => {
+      clearTimeout(stallTimer)
+      signal?.removeEventListener('abort', onAbort)
+    }
+
+    xhr.onload = () => {
+      cleanup()
+      let data = null
+      try { data = JSON.parse(xhr.responseText) } catch { /* JSON deyil */ }
+      if (xhr.status >= 200 && xhr.status < 300 && data?.ok) return resolve(data)
+
+      const err = new Error(data?.message || 'Yükləmə alınmadı. Yenidən cəhd edin.')
+      err.status = xhr.status
+      err.code = data?.code || 'HTTP_' + xhr.status
+      /* Server həqiqi mövqeyi bildirirsə saxla — çağıran ondan davam edir */
+      if (Number.isFinite(Number(data?.received))) err.received = Number(data.received)
+      err.permanent = data?.permanent === true
+        || (xhr.status >= 400 && xhr.status < 500 && xhr.status !== 429 && xhr.status !== 409)
+      reject(err)
+    }
+    xhr.onerror = () => {
+      cleanup()
+      const e = new Error('İnternet bağlantısı kəsildi. Yenidən cəhd edin.')
+      e.code = 'NETWORK'; e.permanent = false; reject(e)
+    }
+    xhr.onabort = () => {
+      cleanup()
+      if (stalled) {
+        const e = new Error('İnternet bağlantısı kəsildi. Yenidən cəhd edin.')
+        e.code = 'NETWORK'; e.permanent = false; return reject(e)
+      }
+      const e = new Error('Ləğv edildi'); e.code = 'ABORTED'; e.permanent = true; reject(e)
+    }
+    xhr.timeout = 180000        /* Slow 4G-də 4 MB ~80 san çəkə bilər */
+    xhr.ontimeout = () => {
+      cleanup()
+      const e = new Error('Bağlantı çox yavaşdır.'); e.code = 'TIMEOUT'; e.permanent = false; reject(e)
+    }
+    xhr.send(fd)
+  })
+}
+
+export async function uploadPhotoChunked(file, slug, opts = {}) {
+  const { onProgress, poster, signal } = opts
+  const CHUNK = 4 * 1024 * 1024
+
+  let uploadId = loadUploadId(file, slug) || newUploadId(file, slug)
+
+  /* Əvvəlki cəhddən qalan hissələr varsa oradan davam et */
+  let offset = await fetchReceived(slug, uploadId, signal)
+  if (offset > file.size) { offset = 0; uploadId = newUploadId(file, slug) }
+
+  const totalChunks = Math.max(1, Math.ceil(file.size / CHUNK))
+
+  while (offset < file.size) {
+    if (signal?.aborted) {
+      const e = new Error('Ləğv edildi'); e.code = 'ABORTED'; e.permanent = true; throw e
+    }
+
+    const end        = Math.min(offset + CHUNK, file.size)
+    const blob       = file.slice(offset, end)
+    const chunkIndex = Math.floor(offset / CHUNK)
+    const isLast     = end >= file.size
+    const base       = offset
+
+    let res
+    try {
+      res = await sendChunk({
+        slug, uploadId, blob, chunkIndex, totalChunks,
+        fileSize: file.size,
+        poster: isLast ? poster : undefined,
+        signal,
+        onBytes: (loaded) =>
+          onProgress?.(Math.min(99, Math.round(((base + loaded) / file.size) * 100))),
+      })
+    } catch (e) {
+      /* Sıra pozulub (məs. eyni fayl iki tabda göndərilir) — server həqiqi
+         mövqeyi bildirir, oradan davam edirik. Sonsuz döngə olmasın deyə
+         yalnız İRƏLİ gedirik. */
+      if (e?.code === 'CHUNK_OUT_OF_ORDER' && Number.isFinite(e.received) && e.received > offset) {
+        offset = e.received
+        onProgress?.(Math.min(99, Math.round((offset / file.size) * 100)))
+        continue
+      }
+      throw e
+    }
+
+    if (res.done) {
+      clearUploadId(file, slug)
+      onProgress?.(100)
+      return res
+    }
+
+    /* Server həqiqəti bildirir — təkrar/qismən yazılmış hissədə də düz qalırıq */
+    const next = Number(res.received)
+    offset = Number.isFinite(next) && next > offset ? next : end
+    onProgress?.(Math.min(99, Math.round((offset / file.size) * 100)))
+  }
+
+  /* Bura düşməməlidir: son hissə həmişə done qaytarır */
+  const e = new Error('Yükləmə tamamlanmadı. Yenidən cəhd edin.')
+  e.code = 'INCOMPLETE'; e.permanent = false
+  throw e
 }
 
 /* ── Media yüklə (qonaq — public) ──
@@ -125,7 +317,18 @@ export function uploadPhoto(file, slug, opts = {}) {
     const admin = adminHeaders()
     if (admin['X-Admin-Token']) xhr.setRequestHeader('X-Admin-Token', admin['X-Admin-Token'])
 
+    /* Donma aşkarlayıcısı — bax: sendChunk-dakı izah. Şəbəkə itəndə sorğu
+       xəta vermir, asılı qalır; istifadəçi «donub» görür. */
+    const STALL_MS = 25000
+    let stallTimer = null
+    let stalled = false
+    const armStall = () => {
+      clearTimeout(stallTimer)
+      stallTimer = setTimeout(() => { stalled = true; xhr.abort() }, STALL_MS)
+    }
+
     xhr.upload.onprogress = (e) => {
+      armStall()
       if (e.lengthComputable && onProgress) {
         onProgress(Math.min(99, Math.round((e.loaded / e.total) * 100)))
       }
@@ -134,7 +337,10 @@ export function uploadPhoto(file, slug, opts = {}) {
     const onAbort = () => xhr.abort()
     signal?.addEventListener('abort', onAbort)
 
-    const cleanup = () => signal?.removeEventListener('abort', onAbort)
+    const cleanup = () => {
+      clearTimeout(stallTimer)
+      signal?.removeEventListener('abort', onAbort)
+    }
 
     xhr.onload = () => {
       cleanup()
@@ -173,6 +379,10 @@ export function uploadPhoto(file, slug, opts = {}) {
 
     xhr.onabort = () => {
       cleanup()
+      if (stalled) {
+        const e = new Error('İnternet bağlantısı kəsildi. Yenidən cəhd edin.')
+        e.code = 'NETWORK'; e.permanent = false; return reject(e)
+      }
       const err = new Error('Ləğv edildi'); err.code = 'ABORTED'; err.permanent = true
       reject(err)
     }
@@ -180,6 +390,7 @@ export function uploadPhoto(file, slug, opts = {}) {
     /* Böyük videolar zəif mobil şəbəkədə uzun çəkə bilər — geniş pəncərə.
        Server tərəfdə max_execution_time = 300s. */
     xhr.timeout = 600000
+    armStall()
     xhr.send(fd)
   })
 }

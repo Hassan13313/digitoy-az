@@ -8,7 +8,7 @@
      PHP sorğu gövdəsini skript İCRA OLUNMAZDAN ƏVVƏL parse edir.
      Ölçülmüş real tavan: upload_max_filesize=100M, post_max_size≈104M.
      Ona görə silindilər (bax: media_policy.php — ölçmə qeydləri).
-   • Tətbiq limiti 50MB → 90MB (MAX_UPLOAD_BYTES). 50MB 4K/30 videoda
+   • Tək sorğu limiti 50MB → 90MB (MAX_SINGLE_REQUEST_BYTES). 50MB 4K/30-da
      cəmi ~15 saniyəyə uyğun gəlirdi — "15-20 saniyədən uzun video
      getmir" şikayətinin birbaşa səbəbi.
    • post_max_size aşılanda PHP $_POST/$_FILES-i sükutla atır; köhnə kod
@@ -41,9 +41,9 @@ if (postBodyWasDiscarded()) {
         'error'     => 'REQUEST_TOO_LARGE',
         'code'      => 'REQUEST_TOO_LARGE',
         'permanent' => true,
-        'limit'     => MAX_UPLOAD_LABEL,
+        'limit'     => MAX_SINGLE_REQUEST_LABEL,
         'message'   => 'Fayl serverin qəbul etdiyi ölçüdən böyükdür ('
-                     . humanBytes($sent) . '). Maksimum ' . MAX_UPLOAD_LABEL
+                     . humanBytes($sent) . '). Maksimum ' . MAX_SINGLE_REQUEST_LABEL
                      . '. Videonu qısaldın və ya kamera ayarlarından 1080p seçin.',
     ]);
     mediaLog('upload_failed', ['reason' => 'post_max_size', 'bytes' => $sent]);
@@ -74,7 +74,7 @@ if (empty($_FILES['photo']) || $_FILES['photo']['error'] !== UPLOAD_ERR_OK) {
     $err = $_FILES['photo']['error'] ?? -1;
     [$httpCode, $code, $msg, $permanent] = match ($err) {
         UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => [413, 'FILE_TOO_LARGE',
-            'Fayl çox böyükdür. Maksimum ' . MAX_UPLOAD_LABEL . '.', true],
+            'Fayl çox böyükdür. Maksimum ' . MAX_SINGLE_REQUEST_LABEL . '.', true],
         UPLOAD_ERR_PARTIAL => [400, 'UPLOAD_INTERRUPTED',
             'Yükləmə yarımçıq qaldı — bağlantı kəsildi. Yenidən cəhd edin.', false],
         UPLOAD_ERR_NO_FILE => [400, 'NO_FILE', 'Fayl seçilməyib.', true],
@@ -147,16 +147,16 @@ if (!$rlAllowed) {
 $file = $_FILES['photo'];
 
 /* ── Ölçü limiti — MIME/emal işindən ƏVVƏL (ucuz və dərhal aydın cavab) ── */
-if ($file['size'] > MAX_UPLOAD_BYTES) {
+if ($file['size'] > MAX_SINGLE_REQUEST_BYTES) {
     http_response_code(413);
     echo json_encode([
         'error'     => 'FILE_TOO_LARGE',
         'code'      => 'FILE_TOO_LARGE',
         'permanent' => true,
-        'limit'     => MAX_UPLOAD_LABEL,
+        'limit'     => MAX_SINGLE_REQUEST_LABEL,
         'size'      => humanBytes((int) $file['size']),
         'message'   => 'Fayl çox böyükdür (' . humanBytes((int) $file['size'])
-                     . '). Maksimum ' . MAX_UPLOAD_LABEL . '.',
+                     . '). Maksimum ' . MAX_SINGLE_REQUEST_LABEL . '.',
     ]);
     mediaLog('upload_failed', ['slug' => $slug, 'reason' => 'too_large', 'bytes' => (int) $file['size']]);
     exit;
@@ -225,7 +225,9 @@ if (!in_array($mime, $allowed, true)) {
     exit;
 }
 
-/* Ölçü limiti yuxarıda — MIME emalından əvvəl — yoxlanılıb (MAX_UPLOAD_BYTES) */
+/* Ölçü limiti yuxarıda yoxlanılıb (MAX_SINGLE_REQUEST_BYTES).
+   Daha böyük fayllar bu endpoint-ə HEÇ VAXT gəlmir — client onları
+   upload_chunk.php üzərindən hissə-hissə göndərir (2 GB-a qədər). */
 
 /* ── Qovluq yarat ── */
 $uploadDir = __DIR__ . '/../uploads/' . $slug . '/';

@@ -216,4 +216,29 @@ function ensureTables(): void {
             $db->exec("ALTER TABLE `$tbl` ADD INDEX idx_template_id (template_id)");
         }
     }
+
+    /* ── Phase 33: invitations.draft_code — sifarişin unikal kimliyi ──
+       NƏ ÜÇÜN: slug adlardan hesablanır (aytekin-ve-ferid). İki eyni adlı
+       cütlük eyni slug verir. save_invitation.php isə şəkilçini
+       substr(md5($slug.'digitoy'),0,6) ilə — yəni YALNIZ ADDAN — düzəldirdi,
+       ona görə ikinci cütlük də EYNİ kanonik slug alırdı və
+       ON DUPLICATE KEY UPDATE birincinin dəvətnaməsini SƏSSİZCƏ ÜSTÜNDƏN
+       YAZIRDI (məlumat itkisi + hər iki toyun eyni uploads qovluğunu
+       paylaşması).
+
+       Bu sütun dəvətnaməni sifarişin ARTIQ MÖVCUD unikal kodu (draft_code,
+       DT-XXXXXX, DB-də UNIQUE) ilə bağlayır: kanonik slug ondan törəyir,
+       yəni həm unikaldır, həm də təkrar saxlamada DƏYİŞMİR (idempotent).
+
+       ADDITIVE və IDEMPOTENT: sütun NULL qəbul edir, mövcud sətirlər
+       toxunulmur, köhnə linklər işləməyə davam edir.
+       ROLLBACK: `ALTER TABLE invitations DROP COLUMN draft_code;` —
+       heç bir mövcud məlumat itmir. */
+    $dcCols = $db->query("SHOW COLUMNS FROM invitations LIKE 'draft_code'")->fetchAll();
+    if (empty($dcCols)) {
+        $db->exec("ALTER TABLE invitations ADD COLUMN draft_code VARCHAR(20) DEFAULT NULL");
+        /* UNIQUE: bir sifariş → bir dəvətnamə. NULL-lar MySQL-də unikallığa
+           daxil deyil, ona görə köhnə sətirlərin hamısı NULL qala bilər. */
+        $db->exec("ALTER TABLE invitations ADD UNIQUE KEY uq_inv_draft_code (draft_code)");
+    }
 }

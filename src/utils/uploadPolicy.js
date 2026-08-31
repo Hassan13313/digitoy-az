@@ -16,8 +16,21 @@
    şəbəkəyə heç nə göndərilmədən yoxlanılır.
 ══════════════════════════════════════════════════ */
 
-export const MAX_UPLOAD_BYTES = 94371840          /* 90 MiB */
-export const MAX_UPLOAD_LABEL = '90 MB'
+/* ══ İki ayrı tavan (server media_policy.php ilə eyni) ══
+   TƏK SORĞU yolu server limitlərinə tabedir (post_max_size ≈ 104M) → 90 MB.
+   HİSSƏLİ yol faylı 4 MB-lıq parçalarla göndərir, yəni server limitlərinə
+   toxunmur → siyasət tavanı 2 GB. 2 GB-a çatmaq üçün heç bir server
+   konfiqurasiyası dəyişdirilmir. */
+export const MAX_UPLOAD_BYTES = 2147483648       /* 2 GiB */
+export const MAX_UPLOAD_LABEL = '2 GB'
+
+/** Bundan böyük fayllar hissə-hissə göndərilir */
+export const CHUNK_THRESHOLD_BYTES = 6 * 1024 * 1024    /* 6 MB */
+export const CHUNK_SIZE_BYTES      = 4 * 1024 * 1024    /* 4 MB — server tavanı 8 MB */
+
+/* Bu ölçüdən yuxarı istifadəçiyə vaxt barədə xəbərdarlıq göstərilir:
+   mobil internetdə 500 MB onlarla dəqiqə çəkə bilər. */
+export const SLOW_UPLOAD_WARN_BYTES = 300 * 1024 * 1024 /* 300 MB */
 
 /* Şəkillər bu ölçüdən böyükdürsə göndərməzdən əvvəl kiçildilir.
    Müasir telefon fotosu 8-20 MB olur; 2560px/JPEG 0.82 tipik olaraq
@@ -60,7 +73,7 @@ export function validateFile(file) {
     return {
       ok: false,
       message: `Çox böyükdür (${humanSize(file.size)}). Maksimum ${MAX_UPLOAD_LABEL}. `
-             + 'Videonu qısaldın və ya kamera ayarlarından 1080p seçin.',
+             + 'Videonu qısaldın və ya kamera ayarlarından daha aşağı keyfiyyət seçin.',
     }
   }
 
@@ -174,4 +187,16 @@ export function extractVideoPoster(file) {
       try { video.currentTime = Math.min(0.5, (video.duration || 1) / 4) } catch { /* boş ver */ }
     }
   })
+}
+
+/** Bu fayl hissə-hissə göndərilməlidirmi? */
+export function needsChunkedUpload(file) {
+  return file.size > CHUNK_THRESHOLD_BYTES
+}
+
+/** Yavaş şəbəkədə uzun çəkəcək fayl üçün xəbərdarlıq (yoxdursa null) */
+export function slowUploadWarning(file) {
+  if (file.size <= SLOW_UPLOAD_WARN_BYTES) return null
+  return `${humanSize(file.size)} — mobil internetdə uzun çəkə bilər. `
+       + 'Səhifəni bağlamayın; kəsilsə qaldığı yerdən davam edəcək.'
 }

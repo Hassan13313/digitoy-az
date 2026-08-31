@@ -154,12 +154,33 @@ if (is_array($dbOnly)) $totals['issues'] += count($dbOnly);
 
 usort($report, fn($a, $b) => count($b['issues']) <=> count($a['issues']));
 
+/* ── Yarımçıq qalmış hissəli yükləmələr ──
+   Qonaq brauzeri yükləmə ortasında bağlayanda `_incoming/*.part` qalır.
+   Bu MÜŞTƏRİ MEDİASI DEYİL və qalereyada görünmür; upload_chunk.php
+   24 saatdan köhnələri özü təmizləyir. Burada yalnız HESABAT verilir ki,
+   diskin nəyə getdiyi görünsün. */
+$incoming = ['count' => 0, 'mb' => 0.0, 'oldest_hours' => null];
+$incDir   = $uploadsDir . '_incoming';
+if (is_dir($incDir)) {
+    $now = time();
+    foreach (glob($incDir . '/*.part') ?: [] as $part) {
+        $incoming['count']++;
+        $incoming['mb'] += @filesize($part) / 1048576;
+        $ageH = ($now - (int) @filemtime($part)) / 3600;
+        if ($incoming['oldest_hours'] === null || $ageH > $incoming['oldest_hours']) {
+            $incoming['oldest_hours'] = round($ageH, 1);
+        }
+    }
+    $incoming['mb'] = round($incoming['mb'], 1);
+}
+
 echo json_encode([
-    'ok'              => true,
-    'read_only'       => true,
-    'source_of_truth' => 'filesystem',
-    'generated_at'    => gmdate('c'),
-    'totals'          => $totals,
-    'db_only'         => $dbOnly,
-    'galleries'       => $report,
+    'ok'                => true,
+    'read_only'         => true,
+    'source_of_truth'   => 'filesystem',
+    'generated_at'      => gmdate('c'),
+    'totals'            => $totals,
+    'incomplete_uploads' => $incoming,
+    'db_only'           => $dbOnly,
+    'galleries'         => $report,
 ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);

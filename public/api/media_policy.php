@@ -24,9 +24,22 @@
    birebir üst-üstə düşür.
 ══════════════════════════════════════════════════ */
 
-/** Fayl başına maksimum ölçü — frontend (src/utils/uploadPolicy.js) ilə eyni olmalıdır */
-define('MAX_UPLOAD_BYTES', 94371840);          /* 90 MiB */
-define('MAX_UPLOAD_LABEL', '90 MB');
+/* ══ Phase 33 — iki ayrı tavan ══════════════════════
+   TƏK SORĞU yolu (upload_photo.php) server limitlərinə TABEDİR: gövdə
+   post_max_size ≈ 104M-dan kiçik qalmalıdır → 90 MB.
+
+   HİSSƏLİ yol (upload_chunk.php) fayl 4 MB-lıq parçalarla gəldiyi üçün
+   server limitlərinə HEÇ TOXUNMUR — buna görə siyasət tavanı 2 GB-dır.
+   Yəni 2 GB-a çatmaq üçün post_max_size DƏYİŞDİRİLMİR; tək sorğuda 2 GB
+   göndərmək isə hər paralel yükləmə üçün ~4 GB anlıq disk tələb edər və
+   zəif mobil şəbəkədə saatlarla açıq qalan, kəsiləndə sıfırdan başlayan
+   sorğu deməkdir (bax: upload_chunk.php-dəki memarlıq qeydi).
+
+   Frontend (src/utils/uploadPolicy.js) ilə eyni olmalıdır. */
+define('MAX_UPLOAD_BYTES',         2147483648);  /* 2 GiB — hissəli yolun tavanı */
+define('MAX_UPLOAD_LABEL',         '2 GB');
+define('MAX_SINGLE_REQUEST_BYTES', 94371840);    /* 90 MiB — tək sorğu tavanı */
+define('MAX_SINGLE_REQUEST_LABEL', '90 MB');
 
 /** Serverin real tavanı — bunu aşan sorğu PHP-yə heç çatmır */
 define('SERVER_POST_CEILING_BYTES', 104857600); /* ~100 MiB */
