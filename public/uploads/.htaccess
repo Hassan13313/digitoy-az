@@ -1,0 +1,43 @@
+# ══════════════════════════════════════════════════
+# DIGITOY.AZ — Yuklenen media qovlugunun sertlesdirilmesi
+#
+# upload_photo.php onsuz da yalniz sekil/video MIME-i qebul edir ve
+# uzantini ASKARLANMIS MIME-dan yaradir, yeni bura .php fayl yazila
+# bilmez. Bu fayl MUDAFIENIN IKINCI QATIDIR: PHP konfiqi, kod ve ya
+# hosting deyisse bele bu qovluqda hec bir skript ICRA OLUNMAMALIDIR.
+# ══════════════════════════════════════════════════
+
+# Butun skript emalcilarini sondur
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_lsapi.c>
+    lsapi_engine Off
+</IfModule>
+
+RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8 .phps .cgi .pl .py .sh
+RemoveType    .php .phtml .php3 .php4 .php5 .php7 .php8 .phps .cgi .pl .py .sh
+
+# Icra oluna bilen fayllara HTTP erisimini tamamile bagla
+<FilesMatch "\.(php|phtml|php[0-9]|phps|cgi|pl|py|sh|htaccess|htpasswd)$">
+    Require all denied
+</FilesMatch>
+
+# Qovluq siyahisini gosterme
+Options -Indexes -ExecCGI
+
+<IfModule mod_headers.c>
+    # Brauzer Content-Type-i tehmin etmesin (saxta uzantili faylin
+    # HTML kimi serh edilib XSS-e cevrilmesinin qarsisini alir)
+    Header always set X-Content-Type-Options "nosniff"
+    # QEYD: buraya CSP/sandbox basligi ELAVE EDILMEYIB — CSP sened
+    # cavablarina tetbiq olunur, <img>/<video> yuklemelerine yox, yeni
+    # fayda vermir, amma bezi brauzer/proxy kombinasiyalarinda medianin
+    # oynadilmasini poza biler. nosniff burada esas mudafiedir.
+</IfModule>

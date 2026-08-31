@@ -1,65 +1,158 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Upload, ImageIcon, Check, X, Film, ArrowLeft } from 'lucide-react'
+import {
+  Camera, Images, Video, Check, X, Film, ArrowLeft, Upload, RotateCcw,
+} from 'lucide-react'
 import { uploadPhoto } from '../../utils/api'
 import { trackEvent } from '../../utils/analytics'
+import {
+  MAX_UPLOAD_LABEL, ACCEPT_IMAGE, ACCEPT_VIDEO, ACCEPT_ANY,
+  humanSize, validateFile, compressImage, extractVideoPoster,
+} from '../../utils/uploadPolicy'
 
 /* Paralel yükləmə işçiləri — sıra ilə (1-bir) yükləmək 50-100 fotoluq
-   partiyalarda son dərəcə yavaş idi. 3 paralel iş mobil şəbəkələrdə
-   sürəti nəzərəçarpacaq dərəcədə artırır, server tərəfdə isə hələ də
-   "sorğu başına 1 fayl" qaydasına tabe olur (upload_photo.php). */
+   partiyalarda son dərəcə yavaş idi. Server tərəfdə hələ də "sorğu
+   başına 1 fayl" qaydası qüvvədədir (upload_photo.php). */
 const MAX_CONCURRENT = 3
-const MAX_RETRIES    = 2
 
-async function uploadWithRetry(file, slug) {
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-    try {
-      await uploadPhoto(file, slug)
-      return true
-    } catch {
-      if (attempt < MAX_RETRIES) await new Promise(r => setTimeout(r, 500 * (attempt + 1)))
-    }
-  }
-  return false
+/* Yalnız MÜVƏQQƏTİ xətalar üçün. Köhnə kod HƏR uğursuzluğu 2 dəfə
+   təkrarlayırdı — 60 MB-lıq video limitə görə rədd olunanda eyni fayl
+   3 dəfə göndərilirdi: 180 MB mobil trafik və dəqiqələrlə əbəs gözləmə. */
+const MAX_RETRIES = 2
+
+const st = {
+  label: {
+    fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase',
+    fontFamily: '"Inter",system-ui,sans-serif', fontWeight: 600,
+  },
+}
+
+/* ── Böyük, aydın seçim düyməsi ──
+   Köhnə UI-da tək bir passiv "bura at" sahəsi var idi; tədbir qonağı
+   şəkil çəkə biləcəyini, qalereyadan seçə biləcəyini və ya video
+   göndərə biləcəyini başa düşmürdü. İndi hər yol ayrıca düymədir.
+   Toxunuş sahəsi ≥ 64px, mətn + ikon (yalnız rəngə güvənilmir). */
+function ChoiceButton({ icon: Icon, title, hint, onClick }) {
+  return (
+    <button
+      type="button"
+      data-press
+      onClick={onClick}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 14,
+        width: '100%', minHeight: 68, padding: '14px 16px',
+        border: '1px solid rgba(197,160,89,0.42)',
+        background: 'linear-gradient(150deg, #FDFAF4 0%, #F6EFE1 100%)',
+        cursor: 'pointer', textAlign: 'left',
+        transition: 'border-color 0.18s, background 0.18s',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(197,160,89,0.85)' }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(197,160,89,0.42)' }}
+    >
+      <span style={{
+        flexShrink: 0, width: 42, height: 42,
+        border: '1px solid rgba(197,160,89,0.45)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <Icon size={19} strokeWidth={1.5} style={{ color: 'rgba(160,124,52,1)' }} />
+      </span>
+      <span style={{ minWidth: 0 }}>
+        <span style={{ ...st.label, display: 'block', color: '#2A2118' }}>{title}</span>
+        <span style={{
+          display: 'block', marginTop: 3, fontSize: 11,
+          color: 'rgba(110,92,70,0.85)',
+          fontFamily: '"Inter",system-ui,sans-serif', letterSpacing: '0.01em',
+        }}>{hint}</span>
+      </span>
+    </button>
+  )
 }
 
 export default function PhotoShare() {
-  const [queue,     setQueue]     = useState([])   // { file, preview, id, status }
+  /* queue elementi: { id, file, preview, poster, status, pct, error } */
+  const [queue,     setQueue]     = useState([])
   const [dragging,  setDragging]  = useState(false)
   const [uploading, setUploading] = useState(false)
   const [done,      setDone]      = useState(false)
-  const inputRef       = useRef()
-  const queueRef       = useRef(queue)
-  const successCountRef = useRef(0)
+  const [rejected,  setRejected]  = useState([])   /* { name, reason } */
+
+  const cameraRef  = useRef()
+  const galleryRef = useRef()
+  const videoRef   = useRef()
+  const queueRef   = useRef(queue)
+  const abortRef   = useRef(null)
 
   useEffect(() => { queueRef.current = queue }, [queue])
 
-  /* Komponent unmount olarkən qalan bütün blob preview URL-ləri azad et —
-     istifadəçi yükləmə yarımçıq ikən səhifədən çıxsa belə sızma olmur. */
+  /* Qalan bütün blob preview URL-ləri azad et — istifadəçi yükləmə
+     yarımçıq ikən səhifədən çıxsa belə sızma olmur. */
   useEffect(() => () => {
     queueRef.current.forEach(q => { if (q.preview) URL.revokeObjectURL(q.preview) })
+    abortRef.current?.abort()
   }, [])
 
   const slugMatch = window.location.pathname.match(/\/invite\/([^/?#]+)/)
   const slug = slugMatch?.[1] || 'preview'
-  // Returns to the gallery section of the same invitation — #gallery lets
-  // InvitationPage scroll the guest back to where the QR/share link was found
   const backHref = slugMatch ? `/invite/${slugMatch[1]}#gallery` : null
 
+  /* Fayllar SEÇİLƏN KİMİ yoxlanılır — limitə uyğun olmayan fayl heç vaxt
+     şəbəkəyə çıxmır və istifadəçi səbəbi dərhal görür. */
   const addFiles = useCallback((incoming) => {
-    const valid = Array.from(incoming).filter(f =>
-      f.type.startsWith('image/') || f.type.startsWith('video/')
-    )
-    setQueue(prev => [
-      ...prev,
-      ...valid.map(f => ({
-        file:    f,
-        preview: f.type.startsWith('image/') ? URL.createObjectURL(f) : null,
-        id:      Math.random().toString(36).slice(2),
-        status:  'pending',
-      })),
-    ])
+    const accepted = []
+    const refused  = []
+
+    Array.from(incoming || []).forEach(f => {
+      const v = validateFile(f)
+      if (v.ok) accepted.push(f)
+      else      refused.push({ name: f.name, reason: v.message })
+    })
+
+    if (refused.length) setRejected(prev => [...prev, ...refused])
+
+    if (accepted.length) {
+      setQueue(prev => [
+        ...prev,
+        ...accepted.map(f => ({
+          id:      Math.random().toString(36).slice(2),
+          file:    f,
+          preview: f.type.startsWith('image/') ? URL.createObjectURL(f) : null,
+          poster:  null,
+          status:  'pending',
+          pct:     0,
+          error:   null,
+        })),
+      ])
+    }
   }, [])
+
+  /* ── Video posterləri fonda hazırlanır — qalereyada real kadr görünsün ──
+     ⚠ Bu effekt `queue`-dan ASILI OLA BİLMƏZ: yükləmə zamanı onProgress
+     saniyədə onlarla dəfə setQueue çağırır; `queue` asılılığı effekti hər
+     dəfə söndürüb yenidən qurar, çıxarılan poster həmişə atılar və hər
+     tick-də yeni <video> + blob URL yaradılıb tərk edilərdi (mobil
+     telefonda 60-90 MB-lıq blob-lar yığılır). Ona görə asılılıq yalnız
+     poster gözləyən videoların İD SİYAHISIDIR — o, progress zamanı
+     dəyişmir. */
+  const pendingPosterIds = queue
+    .filter(q => q.poster === null && q.file.type.startsWith('video/'))
+    .map(q => q.id).join(',')
+
+  useEffect(() => {
+    if (!pendingPosterIds) return
+    const ids = pendingPosterIds.split(',')
+    let cancelled = false
+    ;(async () => {
+      for (const id of ids) {
+        const item = queueRef.current.find(q => q.id === id)
+        if (!item || cancelled) return
+        const blob = await extractVideoPoster(item.file)
+        if (cancelled) return
+        /* false = cəhd edildi, alınmadı — təkrar cəhd olunmasın */
+        setQueue(prev => prev.map(q => q.id === id ? { ...q, poster: blob || false } : q))
+      }
+    })()
+    return () => { cancelled = true }
+  }, [pendingPosterIds])
 
   const removeItem = useCallback((id) => {
     setQueue(prev => {
@@ -69,44 +162,101 @@ export default function PhotoShare() {
     })
   }, [])
 
-  /* Növbə-hovuz: 2-3 paralel yükləmə işçisi (sıralı 1-1 yükləmə 50-100
-     fotoluq partiyalarda dəqiqələrlə sürünürdü). Hər işçi paylaşılan
-     kursordan növbəti faylı götürür; uğursuz fayllar avtomatik 2 dəfəyə
-     qədər yenidən cəhd olunur (uploadWithRetry). 'pending' VƏ 'error'
-     statuslu elementlər hədəf siyahısına düşür — eyni "Göndər" düyməsi
-     uğursuz qalanlar üçün təbii "yenidən cəhd et" düyməsinə çevrilir. */
-  const handleUpload = async () => {
-    const targets = queue.filter(q => q.status === 'pending' || q.status === 'error')
-    if (!targets.length || uploading) return
-    setUploading(true)
-    successCountRef.current = 0
+  const setItem = useCallback((id, patch) => {
+    setQueue(prev => prev.map(q => q.id === id ? { ...q, ...patch } : q))
+  }, [])
 
-    let cursor = 0
-    const runWorker = async () => {
-      while (cursor < targets.length) {
-        const item = targets[cursor++]
-        setQueue(prev => prev.map(q => q.id === item.id ? { ...q, status: 'uploading' } : q))
-        const ok = await uploadWithRetry(item.file, slug)
-        setQueue(prev => prev.map(q => q.id === item.id ? { ...q, status: ok ? 'done' : 'error' } : q))
-        if (ok) successCountRef.current++
+  /* Növbə-hovuz: 3 paralel işçi paylaşılan kursordan fayl götürür.
+     Yalnız MÜVƏQQƏTİ xətalar təkrarlanır (server `permanent` bayrağı
+     verir) — limit/format xətasında dərhal dayanılır. */
+  const uploadOne = useCallback(async (item, signal) => {
+    let lastErr = null
+
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        setItem(item.id, { status: 'uploading', pct: 0, error: null })
+
+        /* Böyük fotolar göndərilməzdən əvvəl kiçildilir (8-20 MB → ~1-2 MB) */
+        const file = await compressImage(item.file)
+
+        await uploadPhoto(file, slug, {
+          poster: item.poster || undefined,
+          signal,
+          onProgress: pct => setItem(item.id, { pct }),
+        })
+
+        setItem(item.id, { status: 'done', pct: 100, error: null })
+        return true
+      } catch (e) {
+        lastErr = e
+        if (e?.code === 'ABORTED') {
+          setItem(item.id, { status: 'pending', pct: 0, error: null })
+          return false
+        }
+        if (e?.permanent || attempt === MAX_RETRIES) break
+        setItem(item.id, { status: 'retrying', error: null })
+        await new Promise(r => setTimeout(r, 700 * (attempt + 1)))
       }
     }
 
-    const workerCount = Math.min(MAX_CONCURRENT, targets.length)
-    await Promise.all(Array.from({ length: workerCount }, runWorker))
+    setItem(item.id, {
+      status: 'error', pct: 0,
+      error: lastErr?.message || 'Göndərilmədi. Yenidən cəhd edin.',
+    })
+    return false
+  }, [slug, setItem])
 
+  const handleUpload = async () => {
+    const targets = queue.filter(q => q.status === 'pending' || q.status === 'error')
+    if (!targets.length || uploading) return
+
+    const controller = new AbortController()
+    abortRef.current = controller
+    setUploading(true)
+
+    let cursor = 0
+    let successCount = 0
+    const runWorker = async () => {
+      while (cursor < targets.length && !controller.signal.aborted) {
+        const item = targets[cursor++]
+        const ok = await uploadOne(item, controller.signal)
+        if (ok) successCount++
+      }
+    }
+
+    await Promise.all(
+      Array.from({ length: Math.min(MAX_CONCURRENT, targets.length) }, runWorker))
+
+    abortRef.current = null
     setUploading(false)
+
+    if (successCount > 0) trackEvent('gallery_upload', { count: successCount })
+
     setQueue(prev => {
-      if (prev.every(q => q.status === 'done')) setDone(true)
+      if (prev.length > 0 && prev.every(q => q.status === 'done')) setDone(true)
       return prev
     })
-    if (successCountRef.current > 0) trackEvent('gallery_upload', { count: successCountRef.current })
   }
+
+  const cancelUpload = () => abortRef.current?.abort()
 
   const pendingCount = queue.filter(q => q.status === 'pending').length
   const errorCount   = queue.filter(q => q.status === 'error').length
   const doneCount    = queue.filter(q => q.status === 'done').length
   const toSendCount  = pendingCount + errorCount
+
+  /* Ümumi faiz — bayt əsaslı deyil, fayl əsaslıdır (sadə və dürüst) */
+  const overallPct = queue.length === 0 ? 0 : Math.round(
+    queue.reduce((sum, q) => sum + (q.status === 'done' ? 100 : q.pct || 0), 0) / queue.length)
+
+  const openPicker = (ref) => ref.current?.click()
+
+  const resetAll = () => {
+    queueRef.current.forEach(q => { if (q.preview) URL.revokeObjectURL(q.preview) })
+    setDone(false)
+    setQueue([])
+    setRejected([])
+  }
 
   return (
     <div className={`min-h-screen bg-cream flex flex-col items-center justify-center px-4 pb-16 ${backHref ? 'pt-24' : 'pt-16'}`}>
@@ -129,9 +279,19 @@ export default function PhotoShare() {
         </header>
       )}
 
+      {/* Gizli inputlar — hər biri bir yola uyğundur.
+          capture="environment" → kamera birbaşa açılır (iOS/Android).
+          Kamera mövcud deyilsə brauzer avtomatik fayl seçiciyə keçir. */}
+      <input ref={cameraRef}  type="file" accept={ACCEPT_IMAGE} capture="environment"
+             className="hidden" onChange={e => { addFiles(e.target.files); e.target.value = '' }} />
+      <input ref={galleryRef} type="file" accept={ACCEPT_ANY} multiple
+             className="hidden" onChange={e => { addFiles(e.target.files); e.target.value = '' }} />
+      <input ref={videoRef}   type="file" accept={ACCEPT_VIDEO} multiple
+             className="hidden" onChange={e => { addFiles(e.target.files); e.target.value = '' }} />
+
       <div className="w-full max-w-md relative">
         {/* Header */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-8">
           <div className="gold-divider mb-8 max-w-[80px] mx-auto" />
           <p className="text-[9px] tracking-[0.38em] uppercase text-gold mb-4 font-medium font-sans">Photo · Share</p>
           <h1 className="font-serif text-3xl text-ink font-light tracking-tight mb-3">
@@ -172,174 +332,261 @@ export default function PhotoShare() {
               }}>
                 #{slug}
               </p>
-              <button
-                data-press
-                onClick={() => {
-                  queueRef.current.forEach(q => { if (q.preview) URL.revokeObjectURL(q.preview) })
-                  setDone(false)
-                  setQueue([])
-                }}
-                className="mt-8 inline-flex items-center gap-2 btn-gold"
-              >
+              <button data-press onClick={resetAll} className="mt-8 inline-flex items-center gap-2 btn-gold">
                 <Upload size={12} strokeWidth={1.5} />
-                Daha Çox Yüklə
+                Daha Çox Göndər
               </button>
             </motion.div>
           ) : (
             <motion.div key="upload" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              {/* Drop zone */}
+
+              {/* ── Üç aydın yol ── */}
               <div
-                onClick={() => inputRef.current?.click()}
                 onDragOver={e => { e.preventDefault(); setDragging(true) }}
                 onDragLeave={() => setDragging(false)}
                 onDrop={e => { e.preventDefault(); setDragging(false); addFiles(e.dataTransfer.files) }}
                 style={{
-                  border: `1px ${dragging ? 'solid' : 'dashed'} rgba(197,160,89,${dragging ? '0.65' : '0.3'})`,
-                  background: dragging ? 'rgba(197,160,89,0.05)' : 'transparent',
-                  padding: '36px 24px',
-                  cursor: 'pointer', textAlign: 'center',
-                  transition: 'all 0.2s',
-                  marginBottom: 20,
+                  display: 'grid', gap: 8, marginBottom: 14,
+                  outline: dragging ? '2px dashed rgba(197,160,89,0.7)' : 'none',
+                  outlineOffset: 6,
                 }}
               >
-                <input
-                  ref={inputRef}
-                  type="file"
-                  accept="image/*,video/*"
-                  multiple
-                  className="hidden"
-                  onChange={e => addFiles(e.target.files)}
-                />
-                <div style={{
-                  width: 48, height: 48, margin: '0 auto 14px',
-                  border: '1px solid rgba(197,160,89,0.3)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <Upload size={18} style={{ color: 'rgba(197,160,89,0.65)' }} strokeWidth={1.5} />
-                </div>
-                <p className="font-serif text-base text-ink font-light mb-1">
-                  Şəkil / Video seç və ya bura at
-                </p>
-                <p style={{
-                  fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase',
-                  color: 'rgba(140,123,107,0.55)', fontFamily: '"Inter",system-ui,sans-serif',
-                }}>
-                  JPG · PNG · HEIC · MP4 · MOV
-                </p>
+                <ChoiceButton icon={Camera} title="Şəkil çək"
+                  hint="Kameranı aç və indi çək"
+                  onClick={() => openPicker(cameraRef)} />
+                <ChoiceButton icon={Images} title="Qalereyadan seç"
+                  hint="Şəkil və ya video — birdən çox seçə bilərsiniz"
+                  onClick={() => openPicker(galleryRef)} />
+                <ChoiceButton icon={Video} title="Video göndər"
+                  hint={`Maksimum ${MAX_UPLOAD_LABEL} · MP4 və ya MOV`}
+                  onClick={() => openPicker(videoRef)} />
               </div>
 
-              {/* Preview grid */}
-              {queue.length > 0 && (
+              {/* Qəbul şərtləri — fayl seçilməzdən ƏVVƏL görünür */}
+              <p style={{
+                fontSize: 10.5, lineHeight: 1.6, textAlign: 'center', marginBottom: 18,
+                color: 'rgba(120,102,80,0.9)', fontFamily: '"Inter",system-ui,sans-serif',
+              }}>
+                JPG · PNG · HEIC · MP4 · MOV — fayl başına maks. <strong>{MAX_UPLOAD_LABEL}</strong>
+                <br />
+                <span style={{ color: 'rgba(140,123,107,0.75)' }}>
+                  (təxminən 1080p-də 90 saniyə, 4K-da 25 saniyə video)
+                </span>
+              </p>
+
+              {/* Qəbul edilməyən fayllar — səbəbi ilə birlikdə */}
+              {rejected.length > 0 && (
                 <div style={{
-                  display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
-                  gap: 6, marginBottom: 16,
+                  marginBottom: 14, padding: '11px 14px',
+                  border: '1px solid rgba(170,35,35,0.35)',
+                  background: 'rgba(170,35,35,0.05)',
                 }}>
-                  {queue.map(item => (
-                    <div key={item.id} style={{ position: 'relative', aspectRatio: '1', overflow: 'hidden' }}>
-                      {item.preview ? (
-                        <img src={item.preview} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      ) : (
-                        <div style={{
-                          width: '100%', height: '100%',
-                          background: 'rgba(20,16,10,0.8)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}>
-                          <Film size={22} style={{ color: 'rgba(197,160,89,0.7)' }} strokeWidth={1} />
-                        </div>
-                      )}
-
-                      {/* Status overlay */}
-                      {item.status === 'uploading' && (
-                        <div style={{
-                          position: 'absolute', inset: 0,
-                          background: 'rgba(0,0,0,0.45)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}>
-                          <div style={{
-                            width: 20, height: 20, border: '2px solid rgba(197,160,89,0.3)',
-                            borderTop: '2px solid rgba(197,160,89,0.9)',
-                            borderRadius: '50%',
-                            animation: 'spin 0.8s linear infinite',
-                          }} />
-                        </div>
-                      )}
-                      {item.status === 'done' && (
-                        <div style={{
-                          position: 'absolute', inset: 0,
-                          background: 'rgba(197,160,89,0.25)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}>
-                          <Check size={20} color="white" strokeWidth={2} />
-                        </div>
-                      )}
-                      {item.status === 'error' && (
-                        <div style={{
-                          position: 'absolute', inset: 0,
-                          background: 'rgba(180,40,40,0.35)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}>
-                          <X size={18} color="white" strokeWidth={2} />
-                        </div>
-                      )}
-
-                      {/* Remove button */}
-                      {item.status === 'pending' && (
-                        <button
-                          onClick={() => removeItem(item.id)}
-                          aria-label="Şəkli çıxar"
-                          style={{
-                            position: 'absolute', top: 4, right: 4,
-                            width: 22, height: 22,
-                            background: 'rgba(0,0,0,0.6)',
-                            border: 'none', cursor: 'pointer',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          }}
-                        >
-                          <X size={11} color="white" strokeWidth={2} />
-                        </button>
-                      )}
-                    </div>
+                  {rejected.map((r, i) => (
+                    <p key={i} style={{
+                      fontSize: 11, lineHeight: 1.55, color: 'rgba(140,28,28,0.95)',
+                      fontFamily: '"Inter",system-ui,sans-serif',
+                      marginTop: i ? 6 : 0,
+                    }}>
+                      <X size={11} strokeWidth={2.5} style={{ display: 'inline', marginRight: 5, verticalAlign: -1 }} />
+                      <strong>{r.name}</strong> — {r.reason}
+                    </p>
                   ))}
-
-                  {/* Add more */}
                   <button
-                    data-press
-                    onClick={() => inputRef.current?.click()}
-                    aria-label="Daha çox şəkil əlavə et"
+                    onClick={() => setRejected([])}
                     style={{
-                      aspectRatio: '1',
-                      border: '1px dashed rgba(197,160,89,0.28)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      cursor: 'pointer', background: 'transparent',
+                      ...st.label, marginTop: 9, background: 'none', border: 'none',
+                      color: 'rgba(140,28,28,0.7)', cursor: 'pointer', padding: 0, fontSize: 9,
                     }}
                   >
-                    <ImageIcon size={18} style={{ color: 'rgba(197,160,89,0.3)' }} strokeWidth={1} />
+                    Bağla
                   </button>
                 </div>
               )}
 
-              {/* Upload button — toSendCount = pending + error, ona görə
-                  uğursuz qalanlar eyni düymə ilə yenidən göndərilə bilir */}
-              <button
-                data-press
-                onClick={handleUpload}
-                disabled={toSendCount === 0 || uploading}
-                className="w-full btn-gold disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2.5"
-              >
-                {uploading ? (
-                  <span>Yüklənir… ({doneCount}/{queue.length})</span>
-                ) : (
-                  <>
-                    <Upload size={12} strokeWidth={1.5} />
-                    {errorCount > 0
-                      ? `${toSendCount} Faylı Yenidən Göndər`
-                      : toSendCount > 0
-                        ? `${toSendCount} Faylı Göndər`
-                        : 'Fayl Seç'
-                    }
-                  </>
-                )}
-              </button>
+              {/* ── Seçilmiş fayllar ── */}
+              {queue.length > 0 && (
+                <>
+                  <div style={{
+                    display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
+                    marginBottom: 8,
+                  }}>
+                    <span style={{ ...st.label, fontSize: 9, color: 'rgba(140,123,107,0.8)' }}>
+                      {queue.length} fayl seçildi
+                    </span>
+                    {uploading && (
+                      <span style={{ ...st.label, fontSize: 9, color: 'rgba(160,124,52,1)' }}>
+                        {overallPct}% · {doneCount}/{queue.length}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Ümumi tərəqqi zolağı */}
+                  {uploading && (
+                    <div
+                      role="progressbar" aria-valuenow={overallPct} aria-valuemin={0} aria-valuemax={100}
+                      style={{ height: 3, background: 'rgba(197,160,89,0.16)', marginBottom: 12 }}
+                    >
+                      <div style={{
+                        width: `${overallPct}%`, height: '100%',
+                        background: 'rgba(197,160,89,0.95)', transition: 'width 0.25s ease',
+                      }} />
+                    </div>
+                  )}
+
+                  <div style={{
+                    display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
+                    gap: 6, marginBottom: 16,
+                  }}>
+                    {queue.map(item => (
+                      <div key={item.id} style={{ position: 'relative', aspectRatio: '1', overflow: 'hidden' }}>
+                        {item.preview ? (
+                          <img src={item.preview} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          <div style={{
+                            width: '100%', height: '100%',
+                            background: 'rgba(20,16,10,0.8)',
+                            display: 'flex', flexDirection: 'column',
+                            alignItems: 'center', justifyContent: 'center', gap: 4,
+                          }}>
+                            <Film size={20} style={{ color: 'rgba(197,160,89,0.75)' }} strokeWidth={1} />
+                            <span style={{
+                              fontSize: 8.5, color: 'rgba(197,160,89,0.75)',
+                              fontFamily: '"Inter",system-ui,sans-serif',
+                            }}>
+                              {humanSize(item.file.size)}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Fayl üzrə tərəqqi — faiz RƏQƏMLƏ göstərilir */}
+                        {(item.status === 'uploading' || item.status === 'retrying') && (
+                          <div style={{
+                            position: 'absolute', inset: 0,
+                            background: 'rgba(0,0,0,0.55)',
+                            display: 'flex', flexDirection: 'column',
+                            alignItems: 'center', justifyContent: 'center', gap: 6,
+                          }}>
+                            <span style={{
+                              color: 'white', fontSize: 15, fontWeight: 600,
+                              fontFamily: '"Inter",system-ui,sans-serif',
+                            }}>
+                              {item.status === 'retrying' ? '…' : `${item.pct}%`}
+                            </span>
+                            <div style={{ width: '68%', height: 2, background: 'rgba(255,255,255,0.25)' }}>
+                              <div style={{
+                                width: `${item.pct}%`, height: '100%',
+                                background: 'white', transition: 'width 0.2s ease',
+                              }} />
+                            </div>
+                            {item.status === 'retrying' && (
+                              <span style={{ ...st.label, fontSize: 8, color: 'rgba(255,255,255,0.9)' }}>
+                                Yenidən
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        {item.status === 'done' && (
+                          <div style={{
+                            position: 'absolute', inset: 0,
+                            background: 'rgba(120,150,90,0.55)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          }}>
+                            <Check size={22} color="white" strokeWidth={2.5} />
+                          </div>
+                        )}
+
+                        {item.status === 'error' && (
+                          <div
+                            title={item.error}
+                            style={{
+                              position: 'absolute', inset: 0,
+                              background: 'rgba(150,30,30,0.62)',
+                              display: 'flex', flexDirection: 'column',
+                              alignItems: 'center', justifyContent: 'center', gap: 3, padding: 4,
+                            }}
+                          >
+                            <X size={18} color="white" strokeWidth={2.5} />
+                            <span style={{
+                              ...st.label, fontSize: 7.5, color: 'white',
+                              textAlign: 'center', letterSpacing: '0.08em',
+                            }}>
+                              Alınmadı
+                            </span>
+                          </div>
+                        )}
+
+                        {item.status === 'pending' && !uploading && (
+                          <button
+                            onClick={() => removeItem(item.id)}
+                            aria-label="Faylı çıxar"
+                            style={{
+                              position: 'absolute', top: 3, right: 3,
+                              width: 26, height: 26,
+                              background: 'rgba(0,0,0,0.68)',
+                              border: 'none', cursor: 'pointer',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            }}
+                          >
+                            <X size={12} color="white" strokeWidth={2.5} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Uğursuz fayllar — SƏBƏBİ ilə açıq mətn şəklində */}
+                  {errorCount > 0 && !uploading && (
+                    <div style={{
+                      marginBottom: 14, padding: '11px 14px',
+                      border: '1px solid rgba(170,35,35,0.35)',
+                      background: 'rgba(170,35,35,0.05)',
+                    }}>
+                      {queue.filter(q => q.status === 'error').map(q => (
+                        <p key={q.id} style={{
+                          fontSize: 11, lineHeight: 1.55, marginBottom: 4,
+                          color: 'rgba(140,28,28,0.95)',
+                          fontFamily: '"Inter",system-ui,sans-serif',
+                        }}>
+                          <strong>{q.file.name}</strong> — {q.error}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* ── Əsas hərəkət ── */}
+              {queue.length > 0 && (
+                <button
+                  data-press
+                  onClick={handleUpload}
+                  disabled={toSendCount === 0 || uploading}
+                  className="w-full btn-gold disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2.5"
+                  style={{ minHeight: 52 }}
+                >
+                  {uploading ? (
+                    <span>Göndərilir… {overallPct}%</span>
+                  ) : errorCount > 0 ? (
+                    <><RotateCcw size={13} strokeWidth={1.8} /> {toSendCount} faylı yenidən göndər</>
+                  ) : (
+                    <><Upload size={13} strokeWidth={1.8} /> {toSendCount} faylı göndər</>
+                  )}
+                </button>
+              )}
+
+              {uploading && (
+                <button
+                  onClick={cancelUpload}
+                  style={{
+                    ...st.label, display: 'block', margin: '12px auto 0',
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: 'rgba(140,123,107,0.85)', fontSize: 9, padding: 8,
+                  }}
+                >
+                  Ləğv et
+                </button>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -352,10 +599,6 @@ export default function PhotoShare() {
           digitoy.az
         </p>
       </div>
-
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-      `}</style>
     </div>
   )
 }

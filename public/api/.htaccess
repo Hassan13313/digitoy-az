@@ -8,3 +8,15 @@
 <Files "auth.php">
     Require all denied
 </Files>
+
+# Yalniz include edilen helper-ler (birbaxa cagirilmamalidir)
+<Files "gallery_auth.php">
+    Require all denied
+</Files>
+
+<Files "media_policy.php">
+    Require all denied
+</Files>
+
+# Struktur media loglari — slug/olcu/xeta melumatlari sizmasin
+RedirectMatch 404 ^/api/_logs/

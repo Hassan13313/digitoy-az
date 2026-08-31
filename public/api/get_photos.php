@@ -31,7 +31,13 @@ $baseUrl   = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['H
    bizim əl ilə idarə olunan şərti sorğu məntiqi ilə qarışmasının qarşısını
    alır (bax: src/utils/api.js::getPhotos). */
 $dirMtime = is_dir($uploadDir) ? (int) @filemtime($uploadDir) : 0;
-$etag     = '"' . md5($slug . '|' . $dirMtime) . '"';
+
+/* ETag SƏHİFƏLƏMƏ parametrlərini də əhatə etməlidir — əks halda client
+   1-ci səhifənin ETag-i ilə 2-ci səhifəni soruşub 304 alır və 1-ci
+   səhifəni təkrar göstərir. */
+$etagLimit  = isset($_GET['limit'])  ? (int) $_GET['limit']  : -1;
+$etagOffset = isset($_GET['offset']) ? (int) $_GET['offset'] : 0;
+$etag       = '"' . md5($slug . '|' . $dirMtime . '|' . $etagLimit . '|' . $etagOffset) . '"';
 $lastMod  = gmdate('D, d M Y H:i:s', $dirMtime) . ' GMT';
 
 header('ETag: ' . $etag);
@@ -54,24 +60,37 @@ if (is_dir($uploadDir)) {
 
     foreach ($allFiles as $file) {
         if ($file === '.' || $file === '..') continue;
-        if (substr($file, -10) === '_thumb.jpg') continue; /* thumbnail-lar ayrıca media kimi sayılmır */
+        /* Törəmə fayllar ayrıca media kimi sayılmır — yalnız orijinala
+           bağlı kiçik təsvirlərdir (_thumb: foto önizləməsi,
+           _poster: videonun ilk kadrı) */
+        if (substr($file, -10) === '_thumb.jpg')  continue;
+        if (substr($file, -11) === '_poster.jpg') continue;
 
         $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
         if (!in_array($ext, array_merge($imgExt, $videoExt))) continue;
 
-        $mime = in_array($ext, $videoExt) ? 'video/mp4' : 'image/jpeg';
-        $stat = stat($uploadDir . $file);
+        $isVideo = in_array($ext, $videoExt);
+        $mime    = $isVideo ? ($ext === 'mov' ? 'video/quicktime' : 'video/mp4') : 'image/jpeg';
+        $stat    = stat($uploadDir . $file);
 
-        /* Thumbnail varsa istifadə et — yoxdursa orijinala fallback
-           (videolar + bu yeniləmədən əvvəl yüklənmiş köhnə fotolar) */
-        $base      = pathinfo($file, PATHINFO_FILENAME);
-        $thumbFile = $base . '_thumb.jpg';
-        $hasThumb  = isset($fileSet[$thumbFile]);
+        /* Önizləmə seçimi:
+             foto  → _thumb.jpg (480px)
+             video → _poster.jpg (client tərəfdə çıxarılmış ilk kadr)
+           İkisi də yoxdursa orijinala fallback (bu yeniləmədən əvvəl
+           yüklənmiş köhnə media) — heç nə pozulmur. */
+        $base       = pathinfo($file, PATHINFO_FILENAME);
+        $thumbFile  = $base . '_thumb.jpg';
+        $posterFile = $base . '_poster.jpg';
+        $hasThumb   = isset($fileSet[$thumbFile]);
+        $hasPoster  = isset($fileSet[$posterFile]);
+
+        $preview = $hasThumb ? $thumbFile : ($hasPoster ? $posterFile : $file);
 
         $photos[] = [
             'id'         => $file,
             'url'        => $baseUrl . '/uploads/' . $slug . '/' . $file,
-            'thumbUrl'   => $baseUrl . '/uploads/' . $slug . '/' . ($hasThumb ? $thumbFile : $file),
+            'thumbUrl'   => $baseUrl . '/uploads/' . $slug . '/' . $preview,
+            'posterUrl'  => $hasPoster ? ($baseUrl . '/uploads/' . $slug . '/' . $posterFile) : null,
             'name'       => $file,
             'type'       => $mime,
             'size'       => $stat ? (int) $stat['size'] : 0,
@@ -83,4 +102,22 @@ if (is_dir($uploadDir)) {
     usort($photos, fn($a, $b) => strcmp($b['uploadedAt'], $a['uploadedAt']));
 }
 
-echo json_encode(['ok' => true, 'slug' => $slug, 'photos' => $photos]);
+/* ── Server tərəfi səhifələmə (könüllü) ──
+   Parametrsiz sorğu ƏVVƏLKİ kimi bütün siyahını qaytarır — mövcud
+   istifadəçilər (köhnə keşlənmiş frontend daxil) pozulmur. `limit`
+   verildikdə isə 500+ medialı qalereyada manifest kiçik qalır. */
+$total  = count($photos);
+$limit  = isset($_GET['limit'])  ? max(1, min((int) $_GET['limit'], 500)) : null;
+$offset = isset($_GET['offset']) ? max(0, (int) $_GET['offset'])          : 0;
+
+if ($limit !== null) {
+    $photos = array_slice($photos, $offset, $limit);
+}
+
+echo json_encode([
+    'ok'     => true,
+    'slug'   => $slug,
+    'total'  => $total,
+    'offset' => $offset,
+    'photos' => $photos,
+]);

@@ -4,18 +4,21 @@ import {
   Trash2, CheckSquare, Square, Download,
   ImagePlus, X, Check, RotateCcw, Film, ArrowLeft,
 } from 'lucide-react'
-import { getPhotos, deletePhoto } from '../../utils/api'
+import { getPhotos, deletePhoto, storeGalleryKey, canManageGallery } from '../../utils/api'
 import { downloadItemsHD, downloadItem } from '../../utils/photoGallery'
 import { trackEvent } from '../../utils/analytics'
 
 const PAGE_SIZE = 30
 
 /* ── Lazy media cell ── */
-function LazyMedia({ item, selected, onToggle, onDelete, onPreview }) {
+function LazyMedia({ item, selected, canManage, onToggle, onDelete, onPreview }) {
   const ref = useRef()
   const [vis, setVis] = useState(false)
   const [hov, setHov] = useState(false)
   const isVideo = item.type?.startsWith('video/')
+  /* Video posteri varsa real kadr göstərilir; yoxdursa (köhnə yükləmələr)
+     əvvəlki kimi Film ikonu. Video HEÇ VAXT preload edilmir. */
+  const poster  = isVideo ? item.posterUrl : null
 
   useEffect(() => {
     const obs = new IntersectionObserver(
@@ -53,10 +56,28 @@ function LazyMedia({ item, selected, onToggle, onDelete, onPreview }) {
       {/* Media */}
       {vis && (isVideo ? (
         <div style={{
-          width: '100%', height: '100%', display: 'flex', alignItems: 'center',
-          justifyContent: 'center', background: 'rgba(20,16,10,0.88)',
+          position: 'relative', width: '100%', height: '100%',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(20,16,10,0.88)',
         }}>
-          <Film size={26} style={{ color: 'rgba(197,160,89,0.7)' }} strokeWidth={1} />
+          {poster && (
+            <img
+              src={poster} alt={item.name}
+              loading="lazy" decoding="async"
+              style={{
+                position: 'absolute', inset: 0,
+                width: '100%', height: '100%', objectFit: 'cover',
+              }}
+            />
+          )}
+          {/* Film nişanı posterin üzərində qalır — bunun video olduğu aydın olsun */}
+          <div style={{
+            position: 'relative', width: 38, height: 38, borderRadius: '50%',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: poster ? 'rgba(0,0,0,0.5)' : 'transparent',
+          }}>
+            <Film size={22} style={{ color: 'rgba(255,255,255,0.92)' }} strokeWidth={1.2} />
+          </div>
         </div>
       ) : (
         <img
@@ -82,28 +103,32 @@ function LazyMedia({ item, selected, onToggle, onDelete, onPreview }) {
               padding: 6, gap: 4,
             }}
           >
+            {/* Silmə yalnız idarəetmə səlahiyyəti olanda görünür — qonaq
+                heç vaxt işləməyəcək düyməyə baxmır (əvvəl 401 alırdı) */}
+            {canManage && (
             <button
               onClick={() => onDelete(item.id)}
               aria-label="Şəkli sil"
               style={{
-                width: 30, height: 30, borderRadius: 2,
+                width: 34, height: 34, borderRadius: 2,
                 background: 'rgba(170,35,35,0.88)', border: 'none', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
             >
-              <Trash2 size={13} color="white" strokeWidth={2} />
+              <Trash2 size={14} color="white" strokeWidth={2} />
             </button>
+            )}
             <button
               data-press
               onClick={() => downloadItem(item)}
               aria-label="Şəkli HD endir"
               style={{
-                width: 30, height: 30, borderRadius: 2,
+                width: 34, height: 34, borderRadius: 2,
                 background: 'rgba(197,160,89,0.9)', border: 'none', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
             >
-              <Download size={13} color="white" strokeWidth={2} />
+              <Download size={14} color="white" strokeWidth={2} />
             </button>
           </motion.div>
         )}
@@ -159,7 +184,9 @@ function Lightbox({ item, onClose }) {
         {/* Media */}
         {item.type?.startsWith('video/') ? (
           <video
-            src={item.url} controls autoPlay
+            src={item.url} controls autoPlay playsInline
+            poster={item.posterUrl || undefined}
+            preload="metadata"
             style={{
               maxWidth: '90vw', maxHeight: '82vh', display: 'block',
               border: '1px solid rgba(197,160,89,0.18)',
@@ -250,6 +277,29 @@ function Btn({ children, danger, disabled, onClick, style: extraStyle = {} }) {
 export default function GalleryPage() {
   const slug = (window.location.pathname.match(/\/invite\/([^/?#]+)/) || [])[1] || 'preview'
 
+  /* İdarəetmə linkindəki ?k=… tokeni.
+     Başlanğıc dəyər render zamanı YALNIZ OXUNUR (side-effect yoxdur);
+     yaddaşa yazmaq və URL-i təmizləmək effektə köçürülüb — StrictMode-un
+     ikiqat render-i heç nəyi pozmur. */
+  const urlKey = (() => {
+    try { return new URLSearchParams(window.location.search).get('k') } catch { return null }
+  })()
+
+  const [canManage] = useState(() => Boolean(urlKey) || canManageGallery(slug))
+
+  useEffect(() => {
+    if (!urlKey) return
+    storeGalleryKey(slug, urlKey)
+    try {
+      /* Yalnız `k` silinir — utm_* və digər parametrlər qorunur */
+      const params = new URLSearchParams(window.location.search)
+      params.delete('k')
+      const qs = params.toString()
+      window.history.replaceState({}, '',
+        window.location.pathname + (qs ? `?${qs}` : '') + window.location.hash)
+    } catch { /* history əlçatmazdırsa token yenə də saxlanıldı */ }
+  }, [slug, urlKey])
+
   const [items,    setItems]    = useState([])
   const [loading,  setLoading]  = useState(false)
   const [selected, setSelected] = useState(new Set())
@@ -257,7 +307,15 @@ export default function GalleryPage() {
   const [page,     setPage]     = useState(1)
   const [zipState, setZipState] = useState('idle')
   const [delConfirm, setDelConfirm] = useState(false)
+  const [notice,   setNotice]   = useState(null)   /* { kind:'error'|'ok', text } */
   const sentinelRef = useRef()
+
+  /* Bildirişlər özləri sönür — istifadəçi əl ilə bağlamalı olmasın */
+  useEffect(() => {
+    if (!notice) return
+    const t = setTimeout(() => setNotice(null), 6000)
+    return () => clearTimeout(t)
+  }, [notice])
 
   /* Serverdən yüklə */
   const fetchItems = useCallback(async () => {
@@ -304,19 +362,51 @@ export default function GalleryPage() {
   const clearSel  = () => setSelected(new Set())
   const allSelected = items.length > 0 && selected.size === items.length
 
+  /* ⚠ SİLMƏ DÜRÜSTLÜYÜ QAYDASI
+     Element UI-dan YALNIZ server silinməni təsdiqləyəndən sonra çıxarılır.
+     Köhnə kod `catch {}` ilə xətanı udub elementi hər halda çıxarırdı —
+     cütlük "silindi" görürdü, refresh-də media geri qayıdırdı və admin
+     əl ilə uploads qovluğuna girməli olurdu. Bu, 2026-08-31 hadisəsinin
+     kök səbəbi idi. */
   const handleDelete = useCallback(async (id) => {
-    try { await deletePhoto(slug, id) } catch {}
-    setItems(prev => prev.filter(i => i.id !== id))
-    setSelected(s => { const n = new Set(s); n.delete(id); return n })
+    try {
+      await deletePhoto(slug, id)
+      setItems(prev => prev.filter(i => i.id !== id))
+      setSelected(s => { const n = new Set(s); n.delete(id); return n })
+      setNotice({ kind: 'ok', text: 'Silindi.' })
+    } catch (e) {
+      /* Element QALIR — UI serverlə uyğunsuz vəziyyətə düşmür */
+      setNotice({ kind: 'error', text: e?.message || 'Silinmə alınmadı.' })
+    }
   }, [slug])
 
   const handleDeleteSelected = async () => {
     const ids = Array.from(selected)
-    await Promise.allSettled(ids.map(id => deletePhoto(slug, id)))
-    const idSet = new Set(ids)
-    setItems(prev => prev.filter(i => !idSet.has(i.id)))
-    setSelected(new Set())
     setDelConfirm(false)
+
+    const results = await Promise.allSettled(ids.map(id => deletePhoto(slug, id)))
+
+    const deleted = new Set()
+    let firstError = null
+    results.forEach((r, i) => {
+      if (r.status === 'fulfilled') deleted.add(ids[i])
+      else if (!firstError) firstError = r.reason
+    })
+
+    /* Yalnız HƏQİQƏTƏN silinənlər siyahıdan çıxır */
+    if (deleted.size) setItems(prev => prev.filter(i => !deleted.has(i.id)))
+    setSelected(new Set(ids.filter(id => !deleted.has(id))))
+
+    const failed = ids.length - deleted.size
+    if (failed === 0) {
+      setNotice({ kind: 'ok', text: `${deleted.size} fayl silindi.` })
+    } else {
+      setNotice({
+        kind: 'error',
+        text: `${failed} fayl silinmədi${deleted.size ? ` (${deleted.size} silindi)` : ''}. `
+            + (firstError?.message || 'Yenidən cəhd edin.'),
+      })
+    }
   }
 
   const HD_WARN_THRESHOLD = 15
@@ -402,6 +492,44 @@ export default function GalleryPage() {
       {/* ── Main content ── */}
       <main style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 24px 80px' }}>
 
+        {/* Əməliyyat bildirişi — silmə uğuru/uğursuzluğu HƏMİŞƏ görünür.
+            Yalnız rənglə deyil, mətnlə də ifadə olunur (accessibility). */}
+        <AnimatePresence>
+          {notice && (
+            <motion.div
+              role="status" aria-live="polite"
+              initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+              style={{
+                marginBottom: 14, padding: '12px 16px',
+                display: 'flex', alignItems: 'center', gap: 10,
+                border: `1px solid ${notice.kind === 'error' ? 'rgba(170,35,35,0.4)' : 'rgba(197,160,89,0.4)'}`,
+                background: notice.kind === 'error' ? 'rgba(170,35,35,0.06)' : 'rgba(197,160,89,0.06)',
+                fontSize: 12, lineHeight: 1.5,
+                color: notice.kind === 'error' ? 'rgba(140,28,28,0.95)' : 'rgba(90,70,35,0.95)',
+              }}
+            >
+              {notice.kind === 'error'
+                ? <X size={15} strokeWidth={2} style={{ flexShrink: 0 }} />
+                : <Check size={15} strokeWidth={2} style={{ flexShrink: 0 }} />}
+              <span>{notice.text}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* İdarəetmə səlahiyyəti yoxdursa açıq izah — qonaq işləməyəcək
+            düymələrə baxmasın, cütlük isə nə etməli olduğunu bilsin */}
+        {!canManage && (
+          <div style={{
+            marginBottom: 14, padding: '12px 16px',
+            border: '1px solid rgba(197,160,89,0.28)',
+            background: 'rgba(197,160,89,0.04)',
+            fontSize: 12, lineHeight: 1.6, color: 'rgba(110,92,70,0.95)',
+          }}>
+            Baxış rejimi — şəkilləri görə və endirə bilərsiniz.
+            Silmək üçün sizə göndərilən <strong>idarəetmə linki</strong> ilə daxil olun.
+          </div>
+        )}
+
         {/* Toolbar */}
         <div style={{
           ...CARD,
@@ -439,14 +567,14 @@ export default function GalleryPage() {
 
           {/* Sağ: əməliyyatlar */}
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-            {selected.size > 0 && !delConfirm && (
+            {canManage && selected.size > 0 && !delConfirm && (
               <Btn danger onClick={() => setDelConfirm(true)}>
                 <Trash2 size={11} strokeWidth={1.5} />
                 Seçilənləri Sil ({selected.size})
               </Btn>
             )}
 
-            {delConfirm && (
+            {canManage && delConfirm && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ fontSize: 9, color: 'rgba(170,35,35,0.8)', letterSpacing: '0.12em' }}>
                   {selected.size} fayl silinəcək — əminsiniz?
@@ -516,6 +644,7 @@ export default function GalleryPage() {
                   key={item.id}
                   item={item}
                   selected={selected.has(item.id)}
+                  canManage={canManage}
                   onToggle={toggleSelect}
                   onDelete={handleDelete}
                   onPreview={setPreview}

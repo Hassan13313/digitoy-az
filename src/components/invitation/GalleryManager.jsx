@@ -322,20 +322,30 @@ export default function GalleryManager({ slug, onRefresh }) {
   const selectAll = () => setSelected(new Set(items.map(i => i.id)))
   const clearSel  = () => setSelected(new Set())
 
+  /* ⚠ Element UI-dan YALNIZ server təsdiqindən sonra çıxarılır.
+     Xətanı udub çıxarmaq "silindi, amma refresh-də geri gəldi"
+     hadisəsinin kök səbəbi idi (bax: GalleryPage.jsx). */
   const handleDelete = useCallback(async (id) => {
     try {
       await deletePhoto(slug, id)
-    } catch { /* server xəta — yenə də UI-dan çıxar */ }
-    setItems(prev => prev.filter(i => i.id !== id))
-    setSelected(s => { const n = new Set(s); n.delete(id); return n })
+      setItems(prev => prev.filter(i => i.id !== id))
+      setSelected(s => { const n = new Set(s); n.delete(id); return n })
+    } catch {
+      /* Silinmədi — element siyahıda qalır (UI yalan demir).
+         ⚠ Bu komponent hazırda İSTİFADƏ EDİLMİR (heç yerdən import
+         olunmur); GalleryPage.jsx onu əvəz edib. Yenidən işə salınsa,
+         GalleryPage-dəki kimi görünən xəta bildirişi ƏLAVƏ EDİLMƏLİDİR —
+         əks halda admin niyə silinmədiyini bilməyəcək. */
+    }
   }, [slug])
 
   const handleDeleteSelected = async () => {
     const ids = Array.from(selected)
-    await Promise.allSettled(ids.map(id => deletePhoto(slug, id)))
-    const idSet = new Set(ids)
-    setItems(prev => prev.filter(i => !idSet.has(i.id)))
-    setSelected(new Set())
+    const results = await Promise.allSettled(ids.map(id => deletePhoto(slug, id)))
+    /* Yalnız həqiqətən silinənlər siyahıdan çıxır */
+    const deleted = new Set(ids.filter((_, i) => results[i].status === 'fulfilled'))
+    if (deleted.size) setItems(prev => prev.filter(i => !deleted.has(i.id)))
+    setSelected(new Set(ids.filter(id => !deleted.has(id))))
   }
 
   const HD_WARN_THRESHOLD = 15

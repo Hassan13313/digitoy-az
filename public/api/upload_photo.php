@@ -1,14 +1,52 @@
 <?php
-@ini_set('upload_max_filesize', '128M');
-@ini_set('post_max_size',       '128M');
-@ini_set('max_execution_time',  '300');
-@ini_set('memory_limit',        '256M');
+/* ══════════════════════════════════════════════════
+   DIGITOY.AZ — Qonaq media yükləməsi
+
+   2026-08-31 düzəlişi (real toy hadisəsi: uzun videolar yüklənmirdi):
+   • Köhnə @ini_set('upload_max_filesize'|'post_max_size', '128M')
+     sətirləri TAMAMİLƏ TƏSİRSİZ idi — bu direktivlər PHP_INI_PERDIR-dir,
+     PHP sorğu gövdəsini skript İCRA OLUNMAZDAN ƏVVƏL parse edir.
+     Ölçülmüş real tavan: upload_max_filesize=100M, post_max_size≈104M.
+     Ona görə silindilər (bax: media_policy.php — ölçmə qeydləri).
+   • Tətbiq limiti 50MB → 90MB (MAX_UPLOAD_BYTES). 50MB 4K/30 videoda
+     cəmi ~15 saniyəyə uyğun gəlirdi — "15-20 saniyədən uzun video
+     getmir" şikayətinin birbaşa səbəbi.
+   • post_max_size aşılanda PHP $_POST/$_FILES-i sükutla atır; köhnə kod
+     bu halda "Valid slug required" (400) qaytarırdı — yanıldıcı idi.
+     İndi 413 + aydın Azərbaycanca mesaj.
+   • Bütün rədd cavabları maşın-oxunaqlı `code` + `permanent` bayrağı ilə
+     qayıdır ki, frontend daimi xətanı (yenidən cəhd mənasızdır)
+     müvəqqətidən ayıra bilsin.
+══════════════════════════════════════════════════ */
+
+@ini_set('max_execution_time', '300');   /* PHP_INI_ALL — real təsir edir */
+@ini_set('memory_limit',       '256M');  /* PHP_INI_ALL — real təsir edir */
 
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/media_policy.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['error' => 'POST required']);
+    exit;
+}
+
+/* ── 0. post_max_size aşımı — HƏR ŞEYDƏN ƏVVƏL ──
+   PHP gövdəni atdığı üçün $_POST['slug'] boş olur; bu yoxlama olmasa
+   aşağıdakı slug yoxlaması yanıldıcı "Valid slug required" qaytarardı. */
+if (postBodyWasDiscarded()) {
+    $sent = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
+    http_response_code(413);
+    echo json_encode([
+        'error'     => 'REQUEST_TOO_LARGE',
+        'code'      => 'REQUEST_TOO_LARGE',
+        'permanent' => true,
+        'limit'     => MAX_UPLOAD_LABEL,
+        'message'   => 'Fayl serverin qəbul etdiyi ölçüdən böyükdür ('
+                     . humanBytes($sent) . '). Maksimum ' . MAX_UPLOAD_LABEL
+                     . '. Videonu qısaldın və ya kamera ayarlarından 1080p seçin.',
+    ]);
+    mediaLog('upload_failed', ['reason' => 'post_max_size', 'bytes' => $sent]);
     exit;
 }
 
@@ -17,22 +55,41 @@ $slug = trim($_POST['slug'] ?? '');
 
 if (!$slug || !preg_match('/^[a-z0-9\-]{2,120}$/', $slug)) {
     http_response_code(400);
-    echo json_encode(['error' => 'Valid slug required']);
+    echo json_encode(['error' => 'Valid slug required', 'code' => 'BAD_SLUG', 'permanent' => true]);
     exit;
 }
 
-/* ── Eyni requestdə maksimum 1 fayl ── */
-if (count($_FILES) > 1 || (isset($_FILES['photo']) && is_array($_FILES['photo']['name']))) {
+/* ── Sorğu başına bir media (+ videolar üçün könüllü poster kadrı) ── */
+$extraFiles = array_diff(array_keys($_FILES), ['photo', 'poster']);
+if (!empty($extraFiles) || (isset($_FILES['photo']) && is_array($_FILES['photo']['name']))) {
     http_response_code(400);
-    echo json_encode(['error' => 'Only one file per request allowed']);
+    echo json_encode(['error' => 'Only one file per request allowed', 'code' => 'BAD_REQUEST', 'permanent' => true]);
     exit;
 }
 
+/* ── Yükləmə xətalarını AYDIN mesajlara çevir ──
+   Köhnə kod yalnız xam PHP rəqəmini qaytarırdı ('code' => 1) — qonaq nə
+   baş verdiyini heç cür başa düşə bilmirdi. */
 if (empty($_FILES['photo']) || $_FILES['photo']['error'] !== UPLOAD_ERR_OK) {
-    http_response_code(400);
-    echo json_encode(['error' => 'File upload error', 'code' => $_FILES['photo']['error'] ?? -1]);
+    $err = $_FILES['photo']['error'] ?? -1;
+    [$httpCode, $code, $msg, $permanent] = match ($err) {
+        UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => [413, 'FILE_TOO_LARGE',
+            'Fayl çox böyükdür. Maksimum ' . MAX_UPLOAD_LABEL . '.', true],
+        UPLOAD_ERR_PARTIAL => [400, 'UPLOAD_INTERRUPTED',
+            'Yükləmə yarımçıq qaldı — bağlantı kəsildi. Yenidən cəhd edin.', false],
+        UPLOAD_ERR_NO_FILE => [400, 'NO_FILE', 'Fayl seçilməyib.', true],
+        UPLOAD_ERR_NO_TMP_DIR, UPLOAD_ERR_CANT_WRITE => [500, 'SERVER_STORAGE',
+            'Serverdə müvəqqəti yaddaş xətası. Bir az sonra yenidən cəhd edin.', false],
+        default => [400, 'UPLOAD_ERROR',
+            'Fayl yüklənərkən xəta baş verdi. Yenidən cəhd edin.', false],
+    };
+    http_response_code($httpCode);
+    echo json_encode(['error' => $code, 'code' => $code, 'message' => $msg, 'permanent' => $permanent]);
+    mediaLog('upload_failed', ['slug' => $slug, 'reason' => $code, 'php_err' => $err]);
     exit;
 }
+
+mediaLog('upload_started', ['slug' => $slug, 'bytes' => (int) $_FILES['photo']['size']]);
 
 /* ── Rate limit — (slug, IP) açarı ilə saatda 300, flock ilə atomik ──
    Köhnə versiya YALNIZ IP-yə görə (saatda 30) limitləyirdi: toy
@@ -77,12 +134,35 @@ if ($fp !== false) {
 
 if (!$rlAllowed) {
     http_response_code(429);
-    echo json_encode(['error' => 'Too many uploads from this network. Please try again in a while.']);
+    echo json_encode([
+        'error'     => 'RATE_LIMITED',
+        'code'      => 'RATE_LIMITED',
+        'permanent' => false,
+        'message'   => 'Bu şəbəkədən çox sayda yükləmə oldu. Bir neçə dəqiqə sonra cəhd edin.',
+    ]);
+    mediaLog('upload_failed', ['slug' => $slug, 'reason' => 'rate_limited']);
+    exit;
+}
+
+$file = $_FILES['photo'];
+
+/* ── Ölçü limiti — MIME/emal işindən ƏVVƏL (ucuz və dərhal aydın cavab) ── */
+if ($file['size'] > MAX_UPLOAD_BYTES) {
+    http_response_code(413);
+    echo json_encode([
+        'error'     => 'FILE_TOO_LARGE',
+        'code'      => 'FILE_TOO_LARGE',
+        'permanent' => true,
+        'limit'     => MAX_UPLOAD_LABEL,
+        'size'      => humanBytes((int) $file['size']),
+        'message'   => 'Fayl çox böyükdür (' . humanBytes((int) $file['size'])
+                     . '). Maksimum ' . MAX_UPLOAD_LABEL . '.',
+    ]);
+    mediaLog('upload_failed', ['slug' => $slug, 'reason' => 'too_large', 'bytes' => (int) $file['size']]);
     exit;
 }
 
 /* ── MIME aşkarlama (real fayl məzmununa görə — Content-Type header-ə güvənmir) ── */
-$file = $_FILES['photo'];
 $mime = mime_content_type($file['tmp_name']);
 
 /* ── HEIC/HEIF strategiyası ──
@@ -116,9 +196,12 @@ if (in_array($mime, ['image/heic', 'image/heif'], true)) {
     if (!$converted) {
         http_response_code(415);
         echo json_encode([
-            'error'   => 'HEIC_NOT_SUPPORTED',
-            'message' => 'Bu fayl formatı (HEIC) hazırda dəstəklənmir. Zəhmət olmasa telefonunuzun Kamera ayarlarından "Formatlar → Ən Uyğun" (Most Compatible) seçimini aktivləşdirib yenidən cəhd edin — bu, şəkilləri avtomatik JPG formatında çəkəcək.',
+            'error'     => 'HEIC_NOT_SUPPORTED',
+            'code'      => 'HEIC_NOT_SUPPORTED',
+            'permanent' => true,
+            'message'   => 'Bu fayl formatı (HEIC) hazırda dəstəklənmir. Zəhmət olmasa telefonunuzun Kamera ayarlarından "Formatlar → Ən Uyğun" (Most Compatible) seçimini aktivləşdirib yenidən cəhd edin — bu, şəkilləri avtomatik JPG formatında çəkəcək.',
         ]);
+        mediaLog('upload_failed', ['slug' => $slug, 'reason' => 'heic_unsupported']);
         exit;
     }
 
@@ -131,17 +214,18 @@ $allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', '
 if (!in_array($mime, $allowed, true)) {
     if ($heicTemp) @unlink($heicTemp);
     http_response_code(415);
-    echo json_encode(['error' => 'File type not allowed', 'mime' => $mime]);
+    echo json_encode([
+        'error'     => 'UNSUPPORTED_TYPE',
+        'code'      => 'UNSUPPORTED_TYPE',
+        'permanent' => true,
+        'mime'      => $mime,
+        'message'   => 'Bu fayl növü dəstəklənmir. Yalnız şəkil (JPG, PNG, WebP) və video (MP4, MOV) göndərmək olar.',
+    ]);
+    mediaLog('upload_failed', ['slug' => $slug, 'reason' => 'bad_mime', 'mime' => $mime]);
     exit;
 }
 
-/* ── Max file size: 50MB ── */
-if ($file['size'] > 52428800) {
-    if ($heicTemp) @unlink($heicTemp);
-    http_response_code(413);
-    echo json_encode(['error' => 'File too large (max 50MB)']);
-    exit;
-}
+/* Ölçü limiti yuxarıda — MIME emalından əvvəl — yoxlanılıb (MAX_UPLOAD_BYTES) */
 
 /* ── Qovluq yarat ── */
 $uploadDir = __DIR__ . '/../uploads/' . $slug . '/';
@@ -172,13 +256,17 @@ $extByMime = [
     'video/mp4'       => 'mp4',
     'video/quicktime' => 'mov',
 ];
-$ext      = $extByMime[$mime] ?? (strtolower(pathinfo($file['name'], PATHINFO_EXTENSION)) ?: 'jpg');
+/* Uzantı YALNIZ aşkarlanmış MIME-dan gəlir — istifadəçinin göndərdiyi ad
+   heç vaxt istifadə edilmir. Bu, uzantı saxtakarlığını, path traversal-ı
+   və fayl adı vasitəsilə XSS-i kökündən aradan qaldırır. */
+$ext      = $extByMime[$mime];
 $basename = time() . '_' . uniqid('', true);
 $filename = $basename . '.' . $ext;
 $destPath = $uploadDir . $filename;
 
 $isImage     = (strpos($mime, 'image/') === 0);
 $thumbName   = null;
+$posterName  = null;
 $processedOK = false;
 
 /* ── Şəkillər: EXIF (GPS/cihaz metadata) silinir + thumbnail yaradılır ──
@@ -230,36 +318,91 @@ if ($isImage && extension_loaded('gd')) {
     }
 
     if (!$processedOK) {
+        /* Yarımçıq qalan hər şeyi təmizlə — uğursuz yükləmədən sonra
+           diskdə "zibil" media qalmamalıdır (consistency invariantı) */
         @unlink($destPath);
+        @unlink($uploadDir . $basename . '_thumb.jpg');
         if ($heicTemp) @unlink($heicTemp);
         http_response_code(422);
-        echo json_encode(['error' => 'Could not process image — file may be corrupted']);
+        echo json_encode([
+            'error'     => 'CORRUPT_IMAGE',
+            'code'      => 'CORRUPT_IMAGE',
+            'permanent' => true,
+            'message'   => 'Şəkil oxuna bilmədi — fayl zədəlidir. Başqa şəkil seçin.',
+        ]);
+        mediaLog('upload_failed', ['slug' => $slug, 'reason' => 'gd_failed', 'mime' => $mime]);
         exit;
     }
 } else {
     /* Video (və ya GD əlçatmaz olduğu nadir hal) — orijinalı olduğu kimi köçür.
-       Videolar üçün EXIF/thumbnail emalı tətbiq edilmir — qalereyada Film
-       ikonu ilə göstərilir (mövcud davranış dəyişməyib). */
-    if (!move_uploaded_file($file['tmp_name'], $destPath)) {
+       Videolar üçün EXIF/thumbnail emalı tətbiq edilmir.
+
+       ⚠ HEIC konversiyasından sonra $file['tmp_name'] artıq YÜKLƏNMİŞ fayl
+       deyil, Imagick-in yazdığı adi müvəqqəti fayldır. move_uploaded_file()
+       belə yol üçün HƏMİŞƏ false qaytarır — GD quraşdırılmamış serverdə hər
+       iPhone şəkli 500 xətası verərdi. Mənbənin növünə görə düzgün funksiya
+       seçilir. */
+    $moved = $heicTemp
+        ? @rename($file['tmp_name'], $destPath)
+        : move_uploaded_file($file['tmp_name'], $destPath);
+
+    if ($moved && $heicTemp) $heicTemp = null;   /* köçürüldü — silinməyə çalışma */
+
+    if (!$moved) {
         if ($heicTemp) @unlink($heicTemp);
         http_response_code(500);
-        echo json_encode(['error' => 'Could not save file']);
+        echo json_encode([
+            'error'     => 'STORAGE_ERROR',
+            'code'      => 'STORAGE_ERROR',
+            'permanent' => false,
+            'message'   => 'Fayl saxlanıla bilmədi. Yenidən cəhd edin.',
+        ]);
+        mediaLog('upload_failed', ['slug' => $slug, 'reason' => 'move_failed']);
         exit;
+    }
+
+    /* ── Video poster kadrı ──
+       Serverdə ffmpeg yoxdur, ona görə ilk kadr CLIENT tərəfdə <video>+canvas
+       ilə çıxarılır və könüllü 'poster' sahəsində göndərilir. Poster varsa
+       qalereya grid-i videonu real kadrla göstərir (əvvəl yalnız ümumi Film
+       ikonu var idi). Poster gəlməsə davranış dəyişmir — heç nə pozulmur. */
+    if (!empty($_FILES['poster']) && $_FILES['poster']['error'] === UPLOAD_ERR_OK
+        && $_FILES['poster']['size'] > 0 && $_FILES['poster']['size'] <= 2097152
+        && mime_content_type($_FILES['poster']['tmp_name']) === 'image/jpeg') {
+        $candidatePoster = $basename . '_poster.jpg';
+        if (@move_uploaded_file($_FILES['poster']['tmp_name'], $uploadDir . $candidatePoster)) {
+            $posterName = $candidatePoster;
+        }
     }
 }
 
 if ($heicTemp) @unlink($heicTemp);
 
+/* Qalereya manifestinin ETag-i qovluq mtime-inə bağlıdır — yeni fayl
+   bütün açıq tabların növbəti sorğuda yeniliyi görməsini təmin edir */
+@touch($uploadDir);
+
 /* ── Public URL ── */
 $baseUrl  = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
 $url      = $baseUrl . '/uploads/' . $slug . '/' . $filename;
-$thumbUrl = $thumbName ? ($baseUrl . '/uploads/' . $slug . '/' . $thumbName) : $url;
+$thumbUrl = $thumbName   ? ($baseUrl . '/uploads/' . $slug . '/' . $thumbName)
+          : ($posterName ? ($baseUrl . '/uploads/' . $slug . '/' . $posterName) : $url);
+
+mediaLog('upload_completed', [
+    'slug'        => $slug,
+    'bytes'       => (int) $file['size'],
+    'mime'        => $mime,
+    'thumb'       => (bool) $thumbName,
+    'poster'      => (bool) $posterName,
+    'duration_ms' => elapsedMs(),
+]);
 
 echo json_encode([
-    'ok'       => true,
-    'url'      => $url,
-    'thumbUrl' => $thumbUrl,
-    'filename' => $filename,
-    'id'       => $filename,
-    'mime'     => $mime,
+    'ok'        => true,
+    'url'       => $url,
+    'thumbUrl'  => $thumbUrl,
+    'posterUrl' => $posterName ? ($baseUrl . '/uploads/' . $slug . '/' . $posterName) : null,
+    'filename'  => $filename,
+    'id'        => $filename,
+    'mime'      => $mime,
 ]);

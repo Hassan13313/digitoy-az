@@ -63,7 +63,7 @@ if ($_origin !== '') {
         header('Access-Control-Allow-Origin: ' . $_origin);
         header('Vary: Origin');
         header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-        header('Access-Control-Allow-Headers: Content-Type, X-Admin-Token, Authorization');
+        header('Access-Control-Allow-Headers: Content-Type, X-Admin-Token, X-Gallery-Token, Authorization');
     } else {
         http_response_code(403);
         echo json_encode(['error' => 'Origin not allowed']);
