@@ -9,6 +9,13 @@ RewriteCond %{REQUEST_URI} ^/api/ [OR]
 RewriteCond %{REQUEST_URI} ^/uploads/
 RewriteRule ^ - [L]
 
+# ANA SEHIFE -> seo.php (asagidaki -d serti ile SUSDURULMASIN)
+# '/' ucun REQUEST_FILENAME public_html/ qovlugudur, yeni '-d' DOGRUDUR.
+# Bu setir olmasa asagidaki "movcud fayl/qovluq" qaydasi emali dayandirir,
+# Apache DirectoryIndex ile index.html-i XAM verir ve seo.php hec vaxt
+# islemir — ana sehife Service/FAQPage schema-sini itirir.
+RewriteRule ^$ seo.php [L]
+
 # Movcud fayllar/qovluqlar birbaxa xidmet edilir
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
