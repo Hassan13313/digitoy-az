@@ -1,43 +1,29 @@
 # ══════════════════════════════════════════════════
 # DIGITOY.AZ — Yuklenen media qovlugunun sertlesdirilmesi
 #
-# upload_photo.php onsuz da yalniz sekil/video MIME-i qebul edir ve
-# uzantini ASKARLANMIS MIME-dan yaradir, yeni bura .php fayl yazila
-# bilmez. Bu fayl MUDAFIENIN IKINCI QATIDIR: PHP konfiqi, kod ve ya
-# hosting deyisse bele bu qovluqda hec bir skript ICRA OLUNMAMALIDIR.
+# ⚠ 2026-08-31 hadisesi: bu faylin ilk versiyasi production-da BUTUN
+# media fayllarina HTTP 500 verdi. Sebeb: `php_flag engine off`,
+# `lsapi_engine Off`, `RemoveHandler` ve `RemoveType` direktivleri bu
+# hostinqde .htaccess kontekstinde ICAZELI DEYIL (AllowOverride
+# FileInfo verilmeyib; LiteSpeed-de lsapi_engine .htaccess-de qadagandir).
+# Icazesiz direktiv Apache-de 500 verir.
+#
+# ONA GORE burada YALNIZ bu serverde ISLEDIYI SUBUT OLUNMUS iki
+# mexanizm istifade olunur:
+#   • Options -Indexes      → kok .htaccess-de artiq isleyir
+#   • Require all denied    → api/.htaccess-de artiq isleyir (config.php = 403)
+#
+# Yeni direktiv elave etmezden EVVEL production-da sinaqdan kecirin.
+#
+# ESAS MUDAFIE ONSUZ DA KODDADIR: upload_photo.php / upload_chunk.php
+# yalniz sekil/video MIME-i qebul edir ve uzantini ASKARLANMIS MIME-dan
+# yaradir — bu qovluga .php fayl yazila bilmez. Asagidakilar ikinci qatdir.
 # ══════════════════════════════════════════════════
 
-# Butun skript emalcilarini sondur
-<IfModule mod_php.c>
-    php_flag engine off
-</IfModule>
-<IfModule mod_php7.c>
-    php_flag engine off
-</IfModule>
-<IfModule mod_php8.c>
-    php_flag engine off
-</IfModule>
-<IfModule mod_lsapi.c>
-    lsapi_engine Off
-</IfModule>
+# Qovluq siyahisini gosterme
+Options -Indexes
 
-RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8 .phps .cgi .pl .py .sh
-RemoveType    .php .phtml .php3 .php4 .php5 .php7 .php8 .phps .cgi .pl .py .sh
-
-# Icra oluna bilen fayllara HTTP erisimini tamamile bagla
+# Icra oluna bilen fayllara HTTP erisimini bagla
 <FilesMatch "\.(php|phtml|php[0-9]|phps|cgi|pl|py|sh|htaccess|htpasswd)$">
     Require all denied
 </FilesMatch>
-
-# Qovluq siyahisini gosterme
-Options -Indexes -ExecCGI
-
-<IfModule mod_headers.c>
-    # Brauzer Content-Type-i tehmin etmesin (saxta uzantili faylin
-    # HTML kimi serh edilib XSS-e cevrilmesinin qarsisini alir)
-    Header always set X-Content-Type-Options "nosniff"
-    # QEYD: buraya CSP/sandbox basligi ELAVE EDILMEYIB — CSP sened
-    # cavablarina tetbiq olunur, <img>/<video> yuklemelerine yox, yeni
-    # fayda vermir, amma bezi brauzer/proxy kombinasiyalarinda medianin
-    # oynadilmasini poza biler. nosniff burada esas mudafiedir.
-</IfModule>
