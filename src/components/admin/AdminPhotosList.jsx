@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { RefreshCw, Search, X, Camera, HardDrive, Images, Upload } from 'lucide-react'
+import { RefreshCw, Search, X, Camera, HardDrive, Images, Upload, Link2, Check } from 'lucide-react'
 
 const BASE = import.meta.env.VITE_API_URL || '/api'
 
@@ -10,6 +10,20 @@ function getAdminToken() {
     if (t && e && Date.now() < e * 1000) return t
   } catch {}
   return null
+}
+
+/* Cütlüyə veriləcək qalereya İDARƏETMƏ linki.
+   İçindəki ?k= tokeni MƏHZ bu toyun slug-una imzalanıb — başqa toyun
+   mediasına toxuna bilmir. Cütlük linki bir dəfə açır, token brauzerində
+   qalır və bundan sonra adi ünvanla da silə bilir.
+   Bu link OLMADAN cütlük qalereyada yalnız BAXIŞ rejimindədir. */
+async function fetchGalleryLink(slug) {
+  const token = getAdminToken()
+  const res = await fetch(`${BASE}/gallery_link.php?slug=${encodeURIComponent(slug)}`, {
+    headers: token ? { 'X-Admin-Token': token } : {},
+  })
+  if (!res.ok) throw new Error(`gallery_link: ${res.status}`)
+  return res.json()
 }
 
 async function getPhotosSummary(search = '', limit = 50, offset = 0) {
@@ -34,6 +48,7 @@ export default function AdminPhotosList() {
   const [loading,   setLoading]   = useState(true)
   const [error,     setError]     = useState('')
   const [searchVal, setSearchVal] = useState('')
+  const [linkCopied, setLinkCopied] = useState('')   /* kopyalanmış slug */
   const [search,    setSearch]    = useState('')
   const debounceRef = useRef(null)
 
@@ -130,6 +145,42 @@ export default function AdminPhotosList() {
 
               {/* Əməliyyat düymələri */}
               <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                {/* Cütlüyə göndəriləcək İDARƏETMƏ linkini kopyala.
+                    Bu link olmadan cütlük şəkil SİLƏ BİLMİR (baxış rejimi). */}
+                <button
+                  type="button"
+                  title="Cütlüyə göndəriləcək idarəetmə linkini kopyala"
+                  onClick={async () => {
+                    let url
+                    try {
+                      url = (await fetchGalleryLink(alb.slug)).url
+                    } catch {
+                      window.alert('Link yaradıla bilmədi. Sessiya bitibsə yenidən giriş edin.')
+                      return
+                    }
+                    /* Clipboard API HTTPS/icazə tələb edir və köhnə Safari-də
+                       yoxdur. Alınmasa link HƏR HALDA göstərilir — admin
+                       linksiz qalmamalıdır. */
+                    try {
+                      await navigator.clipboard.writeText(url)
+                      setLinkCopied(alb.slug)
+                      setTimeout(() => setLinkCopied(''), 2500)
+                    } catch {
+                      window.prompt('Bu linki kopyalayıb cütlüyə göndərin:', url)
+                    }
+                  }}
+                  style={{
+                    width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: linkCopied === alb.slug ? 'oklch(88% 0.09 145)' : 'oklch(94% 0.03 300)',
+                    borderRadius: 4, border: 'none', cursor: 'pointer',
+                    color: linkCopied === alb.slug ? 'oklch(38% 0.12 145)' : 'oklch(45% 0.09 300)',
+                    transition: 'background 0.15s',
+                  }}
+                >
+                  {linkCopied === alb.slug
+                    ? <Check size={13} strokeWidth={2} />
+                    : <Link2 size={13} strokeWidth={1.5} />}
+                </button>
                 <a
                   href={`/invite/${alb.slug}/qalereya-idare`}
                   target="_blank"
