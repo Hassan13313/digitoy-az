@@ -30,3 +30,6 @@ public/api/config.local.php
 public/api/config.production.php
 PRODUCT.md
 DIGITOY_AUDIT.md
+
+# Alet kesleri — her defe yeniden yaranir, commit edilmir
+.claude-flow/
