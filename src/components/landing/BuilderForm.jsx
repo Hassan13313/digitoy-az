@@ -5,6 +5,8 @@ import {
   ChevronRight, ChevronLeft, Check, Crown, Shirt, Calendar, User, MapPin, Search,
   Download, QrCode, Archive, Minus, Plus, X, GripVertical, MessageCircle,
   Martini, Palette,
+  /* Phase 35 — bölmələr addımı + şablon addımı ikonları */
+  Clock, ListOrdered, Users, Image as ImageIcon, UserCheck, Music, Lock,
 } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 /* Google Maps JS API — singleton promise, script injected once */
@@ -26,6 +28,7 @@ function loadGoogleMaps(apiKey) {
 import { DRESS_CODE_PALETTES, EVENT_TYPES } from '../../data/constants'
 import { resolveDressGenders } from '../../data/dressCode'
 import { PACKAGE_DEFS, getLockedSteps } from '../../data/packages'
+import { listBuilderSections, isSectionOn } from '../../data/sections'
 import { ACTIVE_PARTNERS } from '../../data/partners'
 import MusicStep from './MusicStep'
 import TemplateSelect from './TemplateSelect'
@@ -1301,37 +1304,197 @@ function SeatingMethodSelector({ seatingPlan, seatingMethod, onPlanChange, onMet
   )
 }
 
+/* ── Phase 35 — Builder addımlarının SIRASI ────────────────────────────────
+   Addım NÖMRƏLƏRİ (id) sabitdir və DƏYİŞMİR: `packages.lockedSteps` (6, 7),
+   `LandingPage.returnToStep` və serverdəki `draft.current_step` hamısı bu
+   id-lərə istinad edir. Dəyişən yalnız GÖSTƏRİLMƏ sırasıdır.
+
+   Phase 35-də iki yeni id əlavə olundu — mövcud 1–8 toxunulmaz qaldı:
+     0 — Dizayn seçimi (əvvəl 1-ci addımın içində idi, indi BİRİNCİ addım)
+     9 — Dəvətnamə bölmələri (göstər/gizlət)                                */
+const BUILDER_STEP_ORDER = [0, 1, 9, 2, 3, 4, 5, 6, 7, 8]
+
+/* Bölmə → onu dolduran builder addımı. Bölmə söndürüləndə addım da gizlənir
+   (müştəri istifadə etməyəcəyi formanı doldurmağa məcbur qalmasın).
+   Siyahıda olmayan bölmələrin (geri sayım, RSVP, qonaq dəftəri) ayrıca addımı
+   yoxdur — onlar mövcud məlumatdan avtomatik qurulur. */
+const SECTION_STEP_ID = {
+  venue:     2,
+  program:   3,
+  dresscode: 4,
+  music:     5,
+  seating:   6,
+  gallery:   7,
+}
+
+/* Addım id → başlıq. `tr` və partnyor UI-dan gələnlər komponentin içindədir. */
+const STEP_EXTRA_TITLES = {
+  az: { 0: 'Dizayn Seçimi', 9: 'Dəvətnamə Bölmələri' },
+  en: { 0: 'Choose Design', 9: 'Invitation Sections' },
+  ru: { 0: 'Выбор дизайна', 9: 'Разделы приглашения' },
+}
+
+/* Addım id → təsvir (əvvəl massiv idi; artıq id ilə açılır ki, sıra
+   dəyişəndə mətnlər sürüşməsin). */
 const STEP_DESCRIPTIONS = {
-  az: [
-    'Toyunuz haqqında əsas məlumatları daxil edin.',
-    'Tədbirinizin keçiriləcəyi məkanı xəritədə tapın.',
-    'Günün əsas anları üçün proqram cədvəli yaradın.',
-    'Qonaqlar üçün geyim tərzi seçin.',
-    'Dəvətnamənizin fon musiqisini şəxsi zövqünüzə uyğun seçin.',
-    'Qonaqların öz masalarını asanlıqla tapması üçün.',
-    'QR kod vasitəsilə xatirə şəkillərini toplayın.',
-    'Digitoy tərəfdaşları vasitəsilə xüsusi endirim və üstünlüklərdən yararlana bilərsiniz.',
-  ],
-  en: [
-    'Enter the key details about your event.',
-    'Find and pin your event venue on the map.',
-    'Create a schedule for the key moments of the day.',
-    'Choose a dress code recommendation for your guests.',
-    'Choose the background music of your invitation to match your taste.',
-    'Help guests find their table quickly and easily.',
-    'Collect memories via QR photo sharing.',
-    'Through Digitoy partners you can enjoy special discounts and benefits.',
-  ],
-  ru: [
-    'Введите основную информацию о мероприятии.',
-    'Найдите и отметьте место проведения на карте.',
-    'Создайте программу на весь день.',
-    'Выберите дресс-код для ваших гостей.',
-    'Выберите фоновую музыку приглашения по своему вкусу.',
-    'Помогите гостям быстро найти свой стол.',
-    'Собирайте воспоминания через QR-фотообмен.',
-    'Через партнёров Digitoy вы можете получить специальные скидки и преимущества.',
-  ],
+  az: {
+    0: 'Əvvəlcə dəvətnamənizin dizaynını seçin — qalan addımlar bu görünüşə tətbiq olunacaq.',
+    1: 'Toyunuz haqqında əsas məlumatları daxil edin.',
+    2: 'Tədbirinizin keçiriləcəyi məkanı xəritədə tapın.',
+    3: 'Günün əsas anları üçün proqram cədvəli yaradın.',
+    4: 'Qonaqlar üçün geyim tərzi seçin.',
+    5: 'Dəvətnamənizin fon musiqisini şəxsi zövqünüzə uyğun seçin.',
+    6: 'Qonaqların öz masalarını asanlıqla tapması üçün.',
+    7: 'QR kod vasitəsilə xatirə şəkillərini toplayın.',
+    8: 'Digitoy tərəfdaşları vasitəsilə xüsusi endirim və üstünlüklərdən yararlana bilərsiniz.',
+    9: 'Dəvətnamədə hansı blokların görünəcəyini seçin. Söndürdüyünüz bölmə qonağa göstərilmir.',
+  },
+  en: {
+    0: 'Start by choosing the look of your invitation — every later step is applied to this design.',
+    1: 'Enter the key details about your event.',
+    2: 'Find and pin your event venue on the map.',
+    3: 'Create a schedule for the key moments of the day.',
+    4: 'Choose a dress code recommendation for your guests.',
+    5: 'Choose the background music of your invitation to match your taste.',
+    6: 'Help guests find their table quickly and easily.',
+    7: 'Collect memories via QR photo sharing.',
+    8: 'Through Digitoy partners you can enjoy special discounts and benefits.',
+    9: 'Choose which blocks appear in your invitation. A section you switch off is never shown to guests.',
+  },
+  ru: {
+    0: 'Сначала выберите оформление приглашения — все следующие шаги применяются к нему.',
+    1: 'Введите основную информацию о мероприятии.',
+    2: 'Найдите и отметьте место проведения на карте.',
+    3: 'Создайте программу на весь день.',
+    4: 'Выберите дресс-код для ваших гостей.',
+    5: 'Выберите фоновую музыку приглашения по своему вкусу.',
+    6: 'Помогите гостям быстро найти свой стол.',
+    7: 'Собирайте воспоминания через QR-фотообмен.',
+    8: 'Через партнёров Digitoy вы можете получить специальные скидки и преимущества.',
+    9: 'Выберите, какие блоки появятся в приглашении. Выключенный раздел гостям не показывается.',
+  },
+}
+
+/* ── Phase 35 — «Dəvətnamə Bölmələri» addımı ───────────────────────────────
+   Hər bölmə üçün bir açar/bağla açarı. Dəyər `data.sections[id]`-dədir və
+   forma datasının bir hissəsi olduğu üçün autosave → draft → invitations
+   zəncirindən öz-özünə keçir (yeni API və ya DB sütunu YOXDUR).
+
+   ⚠ Paketdə bağlı olan bölmə (SADE-də RSVP və s.) burada `locked` gəlir:
+   göstərilir, amma dəyişdirilə bilmir — istifadəçi nəyin niyə yoxa çıxdığını
+   görsün deyə gizlətmirik. ── */
+const SECTIONS_UI = {
+  az: {
+    locked: 'Paketdə yoxdur', allOn: 'Hamısını aç',
+    note: 'Bütün bölmələr standart olaraq açıqdır. Bağladığınız bölmə dəvətnamədə görünmür və builder-də sizdən soruşulmur — yenidən açsanız, yazdıqlarınız olduğu kimi qayıdır.',
+    skips: 'Bu addım builder-dən çıxarıldı',
+  },
+  en: {
+    locked: 'Not in your package', allOn: 'Turn all on',
+    note: 'Every section is on by default. A section you switch off is not shown to guests and is not asked for in the builder — turn it back on and everything you typed is still there.',
+    skips: 'Its builder step is hidden',
+  },
+  ru: {
+    locked: 'Нет в пакете', allOn: 'Включить все',
+    note: 'Все разделы включены по умолчанию. Выключенный раздел не показывается гостям и не запрашивается в конструкторе — включите обратно, и введённые данные останутся на месте.',
+    skips: 'Шаг убран из конструктора',
+  },
+}
+
+const SECTION_ICONS = {
+  countdown: Clock,
+  venue:     MapPin,
+  program:   ListOrdered,
+  dresscode: Shirt,
+  seating:   Users,
+  gallery:   ImageIcon,
+  rsvp:      UserCheck,
+  guestbook: MessageCircle,
+  music:     Music,
+}
+
+function SectionsStep({ lang, pkgId, sections, onToggle, onAllOn }) {
+  const ui   = SECTIONS_UI[lang] || SECTIONS_UI.az
+  const list = listBuilderSections(pkgId)
+  const anyOff = list.some((s) => !s.locked && sections?.[s.id] === false)
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <p className="text-[11.5px] text-brown-muted/60 font-sans font-light leading-relaxed flex-1 min-w-[180px]">
+          {ui.note}
+        </p>
+        {anyOff && (
+          <button
+            type="button"
+            onClick={onAllOn}
+            className="shrink-0 min-h-[38px] px-4 border border-beige-dark/55 text-brown-muted/70 hover:border-gold/50 hover:text-gold transition-colors duration-200 text-[9px] tracking-[0.18em] uppercase font-sans font-medium touch-manipulation"
+          >
+            {ui.allOn}
+          </button>
+        )}
+      </div>
+
+      <div role="group" className="divide-y divide-beige-dark/25 border-y border-beige-dark/25">
+        {list.map((s) => {
+          const Icon    = SECTION_ICONS[s.id] || Sparkles
+          const label   = s.labels[lang] || s.labels.az
+          const hint    = s.hints[lang]  || s.hints.az
+          const checked = !s.locked && sections?.[s.id] !== false
+
+          return (
+            <label
+              key={s.id}
+              className={`flex items-center gap-3 sm:gap-4 py-4 min-h-[56px] ${
+                s.locked ? 'opacity-45 cursor-not-allowed' : 'cursor-pointer group'
+              }`}
+            >
+              <span className={`shrink-0 w-9 h-9 flex items-center justify-center border transition-colors duration-200 ${
+                checked ? 'border-gold/45 text-gold bg-gold/[0.05]' : 'border-beige-dark/50 text-brown-muted/45'
+              }`}>
+                {s.locked ? <Lock size={14} strokeWidth={1.5} /> : <Icon size={15} strokeWidth={1.4} />}
+              </span>
+
+              <span className="flex-1 min-w-0">
+                <span className={`block text-[12.5px] font-sans font-medium leading-tight ${checked ? 'text-ink' : 'text-brown-muted/60'}`}>
+                  {label}
+                </span>
+                <span className="block mt-0.5 text-[10.5px] text-brown-muted/50 font-sans font-light leading-snug">
+                  {s.locked ? ui.locked : hint}
+                </span>
+                {/* Bu bölmənin builder-də öz addımı var → bağlananda addım da çıxır */}
+                {!s.locked && !checked && SECTION_STEP_ID[s.id] != null && (
+                  <span className="block mt-1 text-[10px] text-gold/55 font-sans font-light italic leading-snug">
+                    {ui.skips}
+                  </span>
+                )}
+              </span>
+
+              {/* Switch — 44px toxunma hədəfi, qızıl dizayn dili */}
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={checked}
+                disabled={s.locked}
+                onChange={() => onToggle(s.id)}
+                aria-label={label}
+              />
+              <span
+                aria-hidden="true"
+                className={`shrink-0 relative w-[46px] h-[26px] rounded-full transition-colors duration-250 ${
+                  checked ? 'bg-gold shadow-[0_2px_10px_rgba(197,160,89,0.32)]' : 'bg-beige-dark/45'
+                } ${s.locked ? '' : 'group-hover:opacity-90'}`}
+              >
+                <span className={`absolute top-[3px] w-5 h-5 rounded-full bg-cream shadow-[0_1px_3px_rgba(0,0,0,0.18)] transition-transform duration-250 ${
+                  checked ? 'translate-x-[23px]' : 'translate-x-[3px]'
+                }`} />
+              </span>
+            </label>
+          )
+        })}
+      </div>
+    </div>
+  )
 }
 
 /* ── Phase 25.3 — Partnyorlar: Builder-in ayrıca SON addımı (bütün paketlərdə).
@@ -1462,9 +1625,36 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
   /* ── Paket kilidləmə — həmişə initialData.package oxunur, rol fərqi yoxdur ── */
   const pkgId = initialData?.package || localStorage.getItem('selected_package') || 'SADE'
   const lockedSteps = getLockedSteps(pkgId)
-  /* Phase 25.3 axını: 1 Tədbir · 2 Məkan · 3 Proqram · 4 Geyim · 5 Musiqi (YENİ)
-     · 6 Oturma · 7 Qalereya · 8 Partnyorlar (həmişə SON, heç vaxt kilidlənmir) */
-  const visibleSteps = [1, 2, 3, 4, 5, 6, 7, 8].filter(n => !lockedSteps.includes(n))
+
+  /* ⚠ Önbaxışdan qayıdış: builder vəziyyəti sessionStorage-dan SİNXRON bərpa
+     olunur (bax utils/builderSession.js). Bu, ilk render-də tətbiq olunur —
+     boş forma "flash"-ı olmur və server draft-ını gözləmək lazım gəlmir.
+     Admin rejimində snapshot oxunmur: admin URL-dən gələn data prioritetlidir. */
+  const [snapshot] = useState(() => (isAdmin ? null : readBuilderSnapshot()))
+
+  /* ⚠ `data` addım siyahısından ƏVVƏL elan olunur: söndürülmüş bölmələr
+     builder addımlarını da gizlədir (aşağıya bax), yəni siyahı datadan asılıdır. */
+  const [data, setData] = useState(() => (
+    snapshot?.data ? { ...initialData, ...snapshot.data } : initialData
+  ))
+
+  /* Phase 35 axını: 0 Dizayn · 1 Tədbir · 9 Bölmələr · 2 Məkan · 3 Proqram
+     · 4 Geyim · 5 Musiqi · 6 Oturma · 7 Qalereya · 8 Partnyorlar (həmişə SON).
+     Sıra BUILDER_STEP_ORDER-dədir; id-lər Phase 25.3-dəki kimi qalır.
+
+     ⚠ İki filtr var:
+       1. paket kilidi   — SADE/VIP-də bağlı addımlar (6, 7)
+       2. bölmə açarı    — «Bölmələr» addımında söndürülən bölmənin öz addımı
+                           da yox olur ki, müştəri lazımsız formanı doldurmasın.
+     Doldurulmuş məlumat SİLİNMİR — bölmə yenidən açılanda addım öz datası
+     ilə birlikdə geri qayıdır. */
+  const hiddenStepIds = Object.entries(SECTION_STEP_ID)
+    .filter(([sectionId]) => !isSectionOn(data, sectionId))
+    .map(([, stepId]) => stepId)
+
+  const visibleSteps = BUILDER_STEP_ORDER.filter(
+    n => !lockedSteps.includes(n) && !hiddenStepIds.includes(n)
+  )
   const VISIBLE_TOTAL = visibleSteps.length
 
   /* initialStep-i görünən addımlara uyğunlaşdır */
@@ -1474,18 +1664,16 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     return idx >= 0 ? idx + 1 : visibleSteps.length
   })()
 
-  /* ⚠ Önbaxışdan qayıdış: builder vəziyyəti sessionStorage-dan SİNXRON bərpa
-     olunur (bax utils/builderSession.js). Bu, ilk render-də tətbiq olunur —
-     boş forma "flash"-ı olmur və server draft-ını gözləmək lazım gəlmir.
-     Admin rejimində snapshot oxunmur: admin URL-dən gələn data prioritetlidir. */
-  const [snapshot] = useState(() => (isAdmin ? null : readBuilderSnapshot()))
+  /* ⚠ Phase 35: addım sırası dəyişkəndir (paket + bölmə açarları), ona görə
+     KÖHNƏ snapshot/draft mövqeyi diapazondan çıxa bilər — həmişə sıxılır. */
+  const clampStep = (n) => Math.min(Math.max(1, n), VISIBLE_TOTAL)
 
-  const [step, setStep] = useState(() => (
-    snapshot?.step && snapshot.step > 0 ? snapshot.step : safeInitialStep
+  const [stepRaw, setStep] = useState(() => (
+    snapshot?.step && snapshot.step > 0 ? clampStep(snapshot.step) : safeInitialStep
   ))
-  const [data, setData] = useState(() => (
-    snapshot?.data ? { ...initialData, ...snapshot.data } : initialData
-  ))
+  /* Bölmə söndürüləndə siyahı qısala bilər — render həmişə etibarlı mövqe görür */
+  const step = clampStep(stepRaw)
+
   const [errors, setErrors] = useState({})
   /* Serverin təyin etdiyi KANONİK slug (aytekin-ve-ferid-abc234).
      QR və qalereya linkləri adlardan yenidən hesablanmamalıdır — əks
@@ -1566,7 +1754,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
         .then(function(draft) {
           if (!draft?.found || !draft.form_data) return
           setData(function(prev) { return { ...prev, ...draft.form_data } })
-          if (draft.current_step > 1) setStep(draft.current_step)
+          if (draft.current_step > 1) setStep(clampStep(draft.current_step))
           setDraftRestored(true) /* banner göstər */
         })
         .catch(function() {}) /* draft restore non-critical */
@@ -1601,15 +1789,35 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
 
   const partnerUi = PARTNER_UI[lang] || PARTNER_UI.az
 
-  const steps = [
-    tr.step1_title, tr.step2_title, tr.step3_title,
-    tr.step4_title, tr.step_music_title,
-    tr.step5_title, tr.step6_title,
-    partnerUi.stepLabel,
-  ]
+  const extraTitles = STEP_EXTRA_TITLES[lang] || STEP_EXTRA_TITLES.az
+
+  /* Addım id → başlıq (sıra deyil, ID ilə — bax BUILDER_STEP_ORDER) */
+  const STEP_TITLES = {
+    0: extraTitles[0],
+    1: tr.step1_title,
+    2: tr.step2_title,
+    3: tr.step3_title,
+    4: tr.step4_title,
+    5: tr.step_music_title,
+    6: tr.step5_title,
+    7: tr.step6_title,
+    8: partnerUi.stepLabel,
+    9: extraTitles[9],
+  }
+  const titleOf = (id) => STEP_TITLES[id] || ''
 
   /* Görünən addımlar içərisindəki mövqedən həqiqi addım nömrəsi */
-  const actualStep = visibleSteps[step - 1] ?? 1
+  const actualStep = visibleSteps[step - 1] ?? 0
+
+  /* ── Phase 35 — bölmə açarları (data.sections) ── */
+  const sections = data.sections || {}
+  const toggleSection = (id) => {
+    setData((d) => ({
+      ...d,
+      sections: { ...(d.sections || {}), [id]: !isSectionOn(d, id) },
+    }))
+  }
+  const enableAllSections = () => setData((d) => ({ ...d, sections: {} }))
 
   const validate = () => {
     const e = {}
@@ -1638,13 +1846,13 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
   const next = (e) => {
     if (e) { e.preventDefault(); e.stopPropagation() }
     if (validate()) {
-      setStep((s) => Math.min(s + 1, VISIBLE_TOTAL))
+      setStep(Math.min(step + 1, VISIBLE_TOTAL))
       scrollToTop()
     }
   }
   const prev = (e) => {
     if (e) { e.preventDefault(); e.stopPropagation() }
-    setStep((s) => Math.max(s - 1, 1))
+    setStep(Math.max(step - 1, 1))
     scrollToTop()
   }
   const handleSubmit = async (e) => {
@@ -1907,31 +2115,68 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
         </div>
       )}
 
-      {/* Mobile step label — compact "Addım X / Y · Title" */}
-      <div className="sm:hidden flex items-center justify-between mb-4">
-        <span className="text-[9px] tracking-[0.28em] uppercase text-gold font-medium font-sans">
-          {step} / {VISIBLE_TOTAL}
-        </span>
-        <span className="text-[9px] tracking-[0.14em] uppercase text-brown-muted/60 font-sans truncate ml-3 max-w-[55%] text-right">
-          {steps[actualStep - 1]}
-        </span>
+      {/* ── Addım göstəricisi ─────────────────────────────────────────────
+          Phase 35: addım sayı 8-dən 10-a qalxdı, ona görə iki variant var.
+
+          < md  → «Addım X / Y · BAŞLIQ» + seqmentli qızıl relslər.
+                  Nə kəsilir, nə sətirdən çıxır, nə də nömrələr üst-üstə
+                  düşür — seqment sayı nə olursa olsun eni 100%-dir.
+          ≥ md  → köhnə nömrəli/etiketli rels olduğu kimi qalır.
+          ────────────────────────────────────────────────────────────── */}
+
+      {/* Mobil / tablet: kompakt başlıq + seqmentli rels */}
+      <div className="md:hidden mb-8">
+        <div className="flex items-baseline justify-between gap-3 mb-2.5">
+          <span className="shrink-0 text-[9px] tracking-[0.28em] uppercase text-gold font-medium font-sans tabular-nums">
+            {step} / {VISIBLE_TOTAL}
+          </span>
+          <span className="text-[9px] tracking-[0.14em] uppercase text-brown-muted/60 font-sans truncate text-right">
+            {titleOf(actualStep)}
+          </span>
+        </div>
+        <div className="flex items-center gap-1 w-full" role="tablist" aria-label={titleOf(actualStep)}>
+          {visibleSteps.map((actualN, i) => {
+            const n = i + 1
+            const done = n < step
+            const active = n === step
+            return (
+              <button
+                key={actualN}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                aria-label={`${n}. ${titleOf(actualN)}`}
+                onClick={() => setStep(n)}
+                /* Görünən zolaq 3px-dir; toxunma hədəfi şəffaf padding ilə 44px */
+                className="flex-1 min-w-0 py-[21px] -my-[21px] focus:outline-none touch-manipulation"
+              >
+                <span className={`block h-[3px] w-full transition-colors duration-400 ${
+                  done ? 'bg-gold/55' : active ? 'bg-gold shadow-[0_1px_6px_rgba(197,160,89,0.5)]' : 'bg-beige-dark/40'
+                }`} />
+              </button>
+            )
+          })}
+        </div>
       </div>
 
-      {/* Step indicator */}
-      <div className="flex items-center mb-8 sm:mb-12">
+      {/* Masaüstü: nömrəli rels + etiketlər */}
+      <div className="hidden md:flex items-start mb-12">
         {visibleSteps.map((actualN, i) => {
           const n = i + 1
           const done = n < step
           const active = n === step
-          const title = steps[actualN - 1]
+          const title = titleOf(actualN)
           return (
-            <div key={actualN} className="flex items-center flex-1 last:flex-none last:flex-initial">
+            /* ⚠ `items-start` + birləşdirici xəttin sabit `mt-4`-ü: etiketi bir
+               sətir olan addımların dairəsi 5px aşağı sürüşürdü (10 addımda
+               nəzərə çarpırdı). İndi bütün dairələr eyni xətdədir. */
+            <div key={actualN} className="flex items-start flex-1 last:flex-none last:flex-initial">
               <button
                 type="button"
                 onClick={() => setStep(n)}
-                className="flex flex-col items-center gap-2.5 focus:outline-none group min-w-[28px] sm:min-w-[48px] min-h-[44px] sm:min-h-[48px] justify-center touch-manipulation"
+                className="flex flex-col items-center gap-2.5 focus:outline-none group min-w-[44px] min-h-[48px] touch-manipulation"
               >
-                <div className={`w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center transition-all duration-250 ${
+                <div className={`w-8 h-8 flex items-center justify-center transition-all duration-250 ${
                   done
                     ? 'bg-gold shadow-[0_2px_10px_rgba(197,160,89,0.35)] group-hover:opacity-80'
                     : active
@@ -1943,14 +2188,14 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
                     : <span className={`text-[11px] font-medium font-sans ${active ? 'text-gold' : 'text-brown-muted/38 group-hover:text-brown-muted/60'}`}>{n}</span>
                   }
                 </div>
-                <span className={`hidden sm:block text-[8.5px] tracking-[0.14em] uppercase text-center max-w-[60px] leading-tight font-sans font-medium transition-colors duration-200 ${
+                <span className={`block text-[8.5px] tracking-[0.14em] uppercase text-center max-w-[56px] lg:max-w-[68px] leading-tight font-sans font-medium transition-colors duration-200 ${
                   done ? 'text-brown-muted/45' : active ? 'text-gold' : 'text-brown-muted/28 group-hover:text-brown-muted/45'
                 }`}>
                   {title}
                 </span>
               </button>
               {i < visibleSteps.length - 1 && (
-                <div className={`flex-1 min-w-0 h-px mx-0.5 sm:mx-3 transition-colors duration-500 ${done ? 'step-line-active' : 'bg-beige-dark/35'}`} />
+                <div className={`flex-1 min-w-0 h-px mt-4 mx-1.5 lg:mx-3 transition-colors duration-500 ${done ? 'step-line-active' : 'bg-beige-dark/35'}`} />
               )}
             </div>
           )
@@ -1960,9 +2205,32 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
       {/* Step content */}
       <div className="bg-cream border border-beige-dark/40 shadow-[0_1px_4px_rgba(0,0,0,0.04),0_8px_32px_rgba(197,160,89,0.04)] px-6 sm:px-12 py-10 sm:py-14 overflow-visible">
         <div className="mb-8 pb-6 border-b border-beige-dark/25">
-          <h3 className="font-serif text-2xl text-ink font-light tracking-tight mb-2">{actualStep === 8 ? partnerUi.title : actualStep === 5 ? `🎵 ${steps[4]}` : steps[actualStep - 1]}</h3>
-          <p className="text-[11.5px] text-brown-muted/60 font-sans font-light leading-relaxed">{(STEP_DESCRIPTIONS[lang] || STEP_DESCRIPTIONS.az)[actualStep - 1]}</p>
+          <h3 className="font-serif text-2xl text-ink font-light tracking-tight mb-2">{actualStep === 8 ? partnerUi.title : actualStep === 5 ? `🎵 ${titleOf(5)}` : titleOf(actualStep)}</h3>
+          <p className="text-[11.5px] text-brown-muted/60 font-sans font-light leading-relaxed">{(STEP_DESCRIPTIONS[lang] || STEP_DESCRIPTIONS.az)[actualStep]}</p>
         </div>
+
+        {/* STEP 0 — DİZAYN SEÇİMİ (Phase 35: builderin İLK addımı).
+            Əvvəl 1-ci addımın altında bir blok idi; funksionallıq eynidir,
+            yalnız yeri dəyişdi — `data.templateId` axını toxunulmazdır. */}
+        {actualStep === 0 && (
+          <TemplateSelect
+            value={selectedTemplate}
+            onChange={setSelectedTemplate}
+            lang={lang}
+            hideHeading
+          />
+        )}
+
+        {/* STEP 9 — DƏVƏTNAMƏ BÖLMƏLƏRİ (Phase 35) */}
+        {actualStep === 9 && (
+          <SectionsStep
+            lang={lang}
+            pkgId={pkgId}
+            sections={sections}
+            onToggle={toggleSection}
+            onAllOn={enableAllSections}
+          />
+        )}
 
         {/* STEP 1 */}
         {actualStep === 1 && (
@@ -2074,14 +2342,8 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
               </div>
             </div>
 
-            {/* ── DİZAYN SEÇ — Template Engine (data.templateId → DB) ── */}
-            <div className="pt-2 border-t border-beige-dark/25">
-              <TemplateSelect
-                value={selectedTemplate}
-                onChange={setSelectedTemplate}
-                lang={lang}
-              />
-            </div>
+            {/* ⚠ Phase 35: «Dizayn seç» bloku buradan ÇIXARILDI — artıq
+                builderin 0-cı (ilk) addımıdır. Bax: actualStep === 0. */}
           </div>
         )}
 
@@ -2295,24 +2557,27 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
       </div>
 
       {/* Navigation */}
-      <div className="flex justify-between mt-8 sm:mt-10">
+      {/* ⚠ Phase 35 mobil audit: 320px-də «Dəvətnaməni Yarat» düyməsi kartdan
+          6px çıxırdı. Kiçik ekranda hərf ölçüsü/aralığı və padding azalır —
+          sm-dən yuxarı görünüş dəyişmir. */}
+      <div className="flex items-center justify-between gap-3 mt-8 sm:mt-10">
         <button
           type="button"
           onClick={prev}
           disabled={step === 1}
-          className="flex items-center gap-2 px-5 sm:px-8 py-3 sm:py-3.5 min-h-[46px] border border-beige-dark/55 text-brown-muted/70 text-[10px] tracking-[0.22em] uppercase font-sans font-medium hover:border-gold/55 hover:text-gold hover:bg-gold/[0.02] transition-all duration-200 active:scale-[0.97] disabled:opacity-20 disabled:cursor-not-allowed touch-manipulation"
+          className="flex items-center gap-1.5 sm:gap-2 shrink-0 px-4 sm:px-8 py-3 sm:py-3.5 min-h-[46px] text-[10px] sm:text-[10px] tracking-[0.12em] sm:tracking-[0.22em] border border-beige-dark/55 text-brown-muted/70 text-[10px] tracking-[0.22em] uppercase font-sans font-medium hover:border-gold/55 hover:text-gold hover:bg-gold/[0.02] transition-all duration-200 active:scale-[0.97] disabled:opacity-20 disabled:cursor-not-allowed touch-manipulation"
         >
           <ChevronLeft size={12} strokeWidth={2} />
           {tr.btn_prev}
         </button>
 
         {step < VISIBLE_TOTAL ? (
-          <button type="button" onClick={next} className="flex items-center gap-2.5 btn-gold min-h-[46px] shadow-[0_4px_18px_rgba(197,160,89,0.2)] touch-manipulation">
+          <button type="button" onClick={next} className="flex items-center gap-2 sm:gap-2.5 btn-gold min-h-[46px] px-5 sm:px-9 text-[10px] sm:text-xs tracking-[0.12em] sm:tracking-[0.18em] shadow-[0_4px_18px_rgba(197,160,89,0.2)] touch-manipulation">
             {tr.btn_next}
             <ChevronRight size={12} strokeWidth={2} />
           </button>
         ) : (
-          <button type="button" onClick={handleSubmit} disabled={submitLoading} className="btn-gold min-h-[46px] shadow-[0_4px_18px_rgba(197,160,89,0.2)] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed">
+          <button type="button" onClick={handleSubmit} disabled={submitLoading} className="btn-gold min-h-[46px] min-w-0 px-5 sm:px-9 text-[10px] sm:text-xs tracking-[0.12em] sm:tracking-[0.18em] leading-tight shadow-[0_4px_18px_rgba(197,160,89,0.2)] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed">
             {submitLoading ? '…' : tr.btn_create}
           </button>
         )}

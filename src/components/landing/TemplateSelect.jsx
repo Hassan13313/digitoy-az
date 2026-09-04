@@ -187,7 +187,10 @@ function TemplateThumbnail({ tpl, selected, locked }) {
   )
 }
 
-export default function TemplateSelect({ value, onChange, lang = 'az' }) {
+/* `hideHeading` — Phase 35: şablon seçimi builderin ayrıca 0-cı addımıdır və
+   addımın öz başlığı/təsviri var; blokun daxili başlığı təkrar olmasın deyə
+   söndürülür. Digər istifadə yerlərində (varsa) davranış dəyişmir. */
+export default function TemplateSelect({ value, onChange, lang = 'az', hideHeading = false }) {
   const ui = UI[lang] || UI.az
   const templates = listTemplates()
 
@@ -198,14 +201,16 @@ export default function TemplateSelect({ value, onChange, lang = 'az' }) {
   return (
     /* id — önbaxışdan qayıdanda scroll hədəfi (App.goToBuilder) */
     <div id="template-select">
-      <div className="mb-4">
-        <p className="text-[10px] tracking-[0.22em] uppercase text-brown-muted/70 font-sans font-medium mb-1.5">
-          {ui.title}
-        </p>
-        <p className="text-[11.5px] text-brown-muted/55 font-sans font-light leading-relaxed">
-          {ui.hint}
-        </p>
-      </div>
+      {!hideHeading && (
+        <div className="mb-4">
+          <p className="text-[10px] tracking-[0.22em] uppercase text-brown-muted/70 font-sans font-medium mb-1.5">
+            {ui.title}
+          </p>
+          <p className="text-[11.5px] text-brown-muted/55 font-sans font-light leading-relaxed">
+            {ui.hint}
+          </p>
+        </div>
+      )}
 
       <div
         role="radiogroup"

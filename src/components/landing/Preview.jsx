@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { Eye, MessageCircle, Edit2, Calendar, MapPin, Shirt, Users, Image, ListOrdered, ShieldCheck, Copy, Check, Crown, Martini, Palette, Music } from 'lucide-react'
+import { Eye, EyeOff, MessageCircle, Edit2, Calendar, MapPin, Shirt, Users, Image, ListOrdered, ShieldCheck, Copy, Check, Crown, Martini, Palette, Music } from 'lucide-react'
 import { DRESS_CODE_PALETTES } from '../../data/constants'
 import { resolveDressGenders } from '../../data/dressCode'
 import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
@@ -8,6 +8,7 @@ import { buildWhatsAppUrl, buildShortLiveLink } from '../../utils/whatsappOrder'
 import { saveInvitation, submitDraft } from '../../utils/api'
 import { trackEvent } from '../../utils/analytics'
 import t from '../../data/translations'
+import { SECTION_DEFS, isSectionOn } from '../../data/sections'
 
 const ADMIN_WA = '994992133696'
 
@@ -25,6 +26,9 @@ const DRESS_LABELS_FALLBACK = {
 
 /* Phase 25.3 — dress code premium kart ikonları (BuilderForm ilə eyni xəritə) */
 const DRESS_ICONS = { blacktie: Crown, cocktail: Martini, smartcasual: Shirt, creative: Palette }
+
+/* Phase 35 — xülasədəki "gizlədilmiş bölmələr" sətrinin başlığı */
+const HIDDEN_LABEL = { az: 'Gizlədilən bölmələr', en: 'Hidden sections', ru: 'Скрытые разделы' }
 
 const MUSIC_MODE_LABELS = {
   az: { auto: 'Açılan kimi', button: 'Düymə ilə', start: 'Başlanğıc' },
@@ -128,6 +132,12 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
     }).catch(() => {})
   }, [data, lang])
 
+  /* Phase 35 — cütlüyün söndürdüyü bölmələrin adları (paket kilidi SAYILMIR:
+     burada yalnız istifadəçinin öz seçimi göstərilir). */
+  const hiddenSectionNames = SECTION_DEFS
+    .filter((sdef) => !isSectionOn(data, sdef.id))
+    .map((sdef) => sdef.labels[lang] || sdef.labels.az)
+
   /* Xülasə sətirləri */
   const rows = [
     {
@@ -139,7 +149,7 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
         </span>
       ),
     },
-    {
+    ...(isSectionOn(data, 'venue') ? [{
       icon: MapPin, label: tr.venue_summary,
       /* Məkan qeydi varsa ikinci sətirdə; yoxdursa əvvəlki kimi tək sətir */
       value: data.venueNote
@@ -150,8 +160,8 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
           </span>
         )
         : (data.venueName || '—'),
-    },
-    ...(data.programSteps?.filter(r => r.time || r.activity).length > 0 ? [{
+    }] : []),
+    ...(isSectionOn(data, 'program') && data.programSteps?.filter(r => r.time || r.activity).length > 0 ? [{
       icon: ListOrdered, label: tr.program_summary_label,
       value: (
         <span className="flex flex-col gap-1">
@@ -165,7 +175,7 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
         </span>
       ),
     }] : []),
-    {
+    ...(isSectionOn(data, 'dresscode') ? [{
       icon: Shirt, label: tr.dresscode_summary,
       value: (() => {
         /* Phase 25.3 — premium mini-kart: ikon + başlıq + açıqlama + palitra */
@@ -205,8 +215,8 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
           </div>
         )
       })(),
-    },
-    ...(data.music ? [{
+    }] : []),
+    ...(isSectionOn(data, 'music') && data.music ? [{
       icon: Music, label: tr.music_summary || 'Musiqi',
       value: (() => {
         const m  = data.music
@@ -230,11 +240,17 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
         )
       })(),
     }] : []),
-    { icon: Users, label: tr.seating_label,
+    ...(isSectionOn(data, 'seating') ? [{ icon: Users, label: tr.seating_label,
       value: data.seatingMethod === 'digitory'
         ? 'DigiToy (+15 AZN)'
-        : data.seatingPlan ? tr.seating_yes : tr.seating_no },
-    { icon: Image, label: tr.gallery_label,   value: data.galleryLink ? tr.gallery_yes : tr.gallery_no },
+        : data.seatingPlan ? tr.seating_yes : tr.seating_no }] : []),
+    ...(isSectionOn(data, 'gallery') ? [{ icon: Image, label: tr.gallery_label, value: data.galleryLink ? tr.gallery_yes : tr.gallery_no }] : []),
+    /* Phase 35 — söndürülmüş bölmələr xülasədə bir sətirlə görünür ki,
+       cütlük sifarişdən əvvəl nəyin gizli qaldığını təsdiqləyə bilsin. */
+    ...(hiddenSectionNames.length > 0 ? [{
+      icon: EyeOff, label: HIDDEN_LABEL[lang] || HIDDEN_LABEL.az,
+      value: <span className="font-light">{hiddenSectionNames.join(' · ')}</span>,
+    }] : []),
   ]
 
   return (

@@ -32,4 +32,10 @@ export const defaultWedding = {
   /* Phase 4 — seçilmiş dizayn şablonu. Boş/naməlum dəyər avtomatik
      `simple-luxury`-yə düşür (bax: templates/templateConfig.resolveTemplateId) */
   templateId: '',
+
+  /* Phase 35 — dəvətnamə bölmələrinin göstər/gizlət vəziyyəti.
+     Boş obyekt = HAMISI AÇIQ. Yalnız açıq-aşkar `false` gizlədir, ona görə
+     bu sahəsi olmayan köhnə dəvətnamələr olduğu kimi işləyir.
+     Açarlar: data/sections.js › SECTION_IDS */
+  sections: {},
 }

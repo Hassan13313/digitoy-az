@@ -22,7 +22,7 @@ import { Reveal, Stagger, enterDirection } from '../_shared/motion'
 import TemplateOutro from '../_shared/TemplateOutro'
 import { getTemplateTheme } from '../templateConfig'
 import { buildPresetMusic, PRESET_TRACKS, MUSIC_PLAY_MODES, shouldAutoPlay } from '../../data/music'
-import { getPackageGates } from '../../data/packages'
+import { getSectionVisibility } from '../../data/sections'
 import { unlockAudio } from '../../utils/audioUnlock'
 import { trackEvent } from '../../utils/analytics'
 import { useGallery } from '../../hooks/useGallery'
@@ -106,9 +106,16 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
       document.removeEventListener('click',      unlock, { capture: true })
     }
   }, [])
+  /* ── Phase 35 — bölmə görünürlüyü: paket icazəsi AND cütlüyün seçimi ──
+     Köhnə (sections sahəsi olmayan) dəvətnamələrdə hamısı `true` qayıdır. */
+  const activePkgId = isDemoMode ? 'PREMIUM' : (weddingData.package || 'SADE')
+  const SECTIONS = getSectionVisibility(weddingData, activePkgId)
+
   /* Phase 25.3 — istifadəçinin seçdiyi musiqi (preset/mp3). Yoxdursa standart
-     lokal preset melodiya (YouTube YOXDUR) + mövcud autoplay cəhdi. */
-  const invMusic  = weddingData?.music || DEFAULT_INV_MUSIC
+     lokal preset melodiya (YouTube YOXDUR) + mövcud autoplay cəhdi.
+     Phase 35 — «Fon Musiqisi» bölməsi söndürülübsə mənbə `null`-dır →
+     `MusicToggle` heç nə render etmir (nə <audio>, nə üzən düymə). */
+  const invMusic  = SECTIONS.music ? (weddingData?.music || DEFAULT_INV_MUSIC) : null
   /* ⚠ Autoplay YALNIZ builder-də "Dəvətnamə açılan kimi" seçiləndə (və ya
      musiqi seçilməyib default preset işlədiləndə) — bax data/music.js */
   const autoPlay  = shouldAutoPlay(invMusic)
@@ -127,9 +134,11 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
      qalır, çünki admin paneli masa kartını oradan yaradır. */
   const { pageSlug, effectiveSlug, photoShareUrl } = useGallery({ weddingData, isCouple, isCorp })
 
-  /* Feature gating — həmişə weddingData.package-dən oxunur, rol/URL fərqi yoxdur */
-  const activePkgId = isDemoMode ? 'PREMIUM' : (weddingData.package || 'SADE')
-  const { allowRsvp: canShowRsvp, allowSeating: canShowSeating, allowGallery: canShowGallery } = getPackageGates(activePkgId)
+  /* Feature gating — həmişə weddingData.package-dən oxunur, rol/URL fərqi yoxdur.
+     Phase 35: paket icazəsi cütlüyün bölmə seçimi ilə AND edilir. */
+  const canShowSeating = SECTIONS.seating
+  const canShowGallery = SECTIONS.gallery
+  const canShowRsvp    = SECTIONS.rsvp
 
   /* ⚠ Phase 27: sifariş CTA-sı `_shared/TemplateActions.jsx`-ə köçdü —
      9 şablonun hamısında eyni mətn və eyni davranış (WhatsApp + draft). */
@@ -285,16 +294,16 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
             </section>
 
             {/* ── COUNTDOWN ── */}
-            <CountdownTimer
+            {SECTIONS.countdown && <CountdownTimer
               date={weddingData.date}
               time={weddingData.time}
               lang={lang}
               eventType={weddingData.eventType || 'toy'}
               eventName={weddingData.eventName || ''}
-            />
+            />}
 
             {/* ── LOCATION ── */}
-            <section className="py-28 px-6 bg-cream">
+            {SECTIONS.venue && <section className="py-28 px-6 bg-cream">
               <Reveal className="max-w-lg mx-auto text-center">
                 <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">LOCATION</p>
                 <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-4">{tr.inv_location}</h2>
@@ -343,13 +352,13 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
                   )}
                 </Stagger>
               </Reveal>
-            </section>
+            </section>}
 
             {/* ── EVENT TIMELINE (Program) ── */}
-            <EventTimeline lang={lang} eventType={weddingData.eventType} programSteps={weddingData.programSteps} />
+            {SECTIONS.program && <EventTimeline lang={lang} eventType={weddingData.eventType} programSteps={weddingData.programSteps} />}
 
             {/* ── DRESS CODE ── */}
-            <section className="py-28 px-6 bg-beige">
+            {SECTIONS.dresscode && <section className="py-28 px-6 bg-beige">
               <Reveal className="max-w-lg mx-auto text-center">
                 <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">Style</p>
                 <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-10">{tr.inv_dresscode}</h2>
@@ -369,7 +378,7 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
                   />
                 </div>
               </Reveal>
-            </section>
+            </section>}
 
             {/* ── SEATING — lüks axtarış UI ── */}
             {weddingData.seatingPlan && canShowSeating && (
@@ -443,7 +452,7 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
             {canShowRsvp && <RSVPSection lang={lang} weddingData={weddingData} />}
 
             {/* ── GUESTBOOK ── */}
-            <Guestbook lang={lang} initialMessages={initialGuestbook} />
+            {SECTIONS.guestbook && <Guestbook lang={lang} initialMessages={initialGuestbook} />}
 
             {/* ── SİFARİŞ CTA — Phase 27: 9 şablonun ortaq komponenti.
                 Görünmə şərti (!pageSlug && !isDemoMode) komponentin içindədir. ── */}

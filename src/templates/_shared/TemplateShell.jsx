@@ -8,7 +8,7 @@ import { parseLatLon } from './geo'
 import { OrderCta, MusicStartBubble } from './TemplateActions'
 import TemplateOutro from './TemplateOutro'
 import { buildPresetMusic, PRESET_TRACKS, MUSIC_PLAY_MODES, shouldAutoPlay } from '../../data/music'
-import { getPackageGates } from '../../data/packages'
+import { getSectionVisibility } from '../../data/sections'
 import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
 import { trackEvent } from '../../utils/analytics'
 import { Reveal, Stagger, PopDigit, enterDirection, AmbientLayer } from './motion'
@@ -115,10 +115,20 @@ export default function TemplateShell({
   }
   const eventLabel = eventLabels[weddingData.eventType] || tr.event_toy
 
-  const invMusic  = weddingData?.music || DEFAULT_MUSIC
-
   const activePkgId = isDemoMode ? 'PREMIUM' : (weddingData.package || 'SADE')
-  const { allowRsvp: canShowRsvp, allowSeating: canShowSeating, allowGallery: canShowGallery } = getPackageGates(activePkgId)
+
+  /* ── Phase 35 — bölmə görünürlüyü: paket icazəsi AND cütlüyün seçimi ──
+     `getSectionVisibility` iki qaydanı birləşdirir (bax data/sections.js).
+     `sections` sahəsi olmayan KÖHNƏ dəvətnamələrdə hamısı `true` qayıdır,
+     yəni davranış Phase 34-dəki ilə eynidir. */
+  const S = getSectionVisibility(weddingData, activePkgId)
+  const canShowSeating = S.seating
+  const canShowGallery = S.gallery
+  const canShowRsvp    = S.rsvp
+
+  /* Musiqi söndürülübsə mənbə `null`-dır → `useMusicPlayer.hasMusic` false,
+     nə <audio>, nə üzən düymə, nə də başlat balonu render olunur. */
+  const invMusic  = S.music ? (weddingData?.music || DEFAULT_MUSIC) : null
 
   /* ── 7 HOOK — biznes məntiqinin YEGANƏ mənbəyi ── */
   const cd       = useCountdown({ date: weddingData.date, time: weddingData.time, lang, eventType: weddingData.eventType, eventName: weddingData.eventName })
@@ -355,6 +365,7 @@ export default function TemplateShell({
             </section>
 
             {/* 05 — COUNTDOWN */}
+            {S.countdown && (
             <section style={sectionStyle(1)}>
               <Reveal style={inner}>
                 <SectionHead kicker="Countdown" title={cd.title} theme={theme} design={D} serif={serif} />
@@ -379,8 +390,10 @@ export default function TemplateShell({
                 </Stagger>
               </Reveal>
             </section>
+            )}
 
             {/* 06 — LOCATION */}
+            {S.venue && (
             <section style={sectionStyle(2)}>
               <Reveal style={inner}>
                 <SectionHead kicker="LOCATION" title={tr.inv_location} theme={theme} design={D} serif={serif} />
@@ -434,8 +447,10 @@ export default function TemplateShell({
                 </div>
               </Reveal>
             </section>
+            )}
 
             {/* 07 — PROQRAM */}
+            {S.program && (
             <section style={sectionStyle(3)}>
               <Reveal style={inner}>
                 <SectionHead kicker="Schedule" title={timeline.sectionLabel} theme={theme} design={D} serif={serif} />
@@ -458,8 +473,10 @@ export default function TemplateShell({
                 </Stagger>
               </Reveal>
             </section>
+            )}
 
             {/* 08 — DRESS CODE (ortaq komponent) */}
+            {S.dresscode && (
             <section style={sectionStyle(4)}>
               <Reveal style={inner}>
                 <SectionHead kicker="STYLE" title={tr.inv_dresscode} theme={theme} design={D} serif={serif} />
@@ -476,6 +493,7 @@ export default function TemplateShell({
                 />
               </Reveal>
             </section>
+            )}
 
             {/* 09 — OTURMA PLANI */}
             {canShowSeating && !seating.isEmpty && (
@@ -723,6 +741,7 @@ export default function TemplateShell({
             )}
 
             {/* 12 — QONAQ DƏFTƏRİ */}
+            {S.guestbook && (
             <section style={sectionStyle(8)}>
               <Reveal style={inner}>
                 <SectionHead kicker="Guestbook" title={gbook.labels.title} theme={theme} design={D} serif={serif} />
@@ -758,6 +777,7 @@ export default function TemplateShell({
                 </Stagger>
               </Reveal>
             </section>
+            )}
 
             {/* 12.5 — SİFARİŞ CTA (yalnız builder önbaxışında; şərt komponentin içindədir) */}
             <OrderCta

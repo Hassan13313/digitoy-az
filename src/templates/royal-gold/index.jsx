@@ -9,7 +9,7 @@ import { OrderCta, MusicStartBubble } from '../_shared/TemplateActions'
 import TemplateOutro from '../_shared/TemplateOutro'
 import { getTemplateTheme } from '../templateConfig'
 import { buildPresetMusic, PRESET_TRACKS, MUSIC_PLAY_MODES, shouldAutoPlay } from '../../data/music'
-import { getPackageGates } from '../../data/packages'
+import { getSectionVisibility } from '../../data/sections'
 import { formatAzDate, formatFullDateByLang, formatTime24 } from '../../utils/dateFormat'
 import { unlockAudio } from '../../utils/audioUnlock'
 import { trackEvent } from '../../utils/analytics'
@@ -535,13 +535,20 @@ export default function RoyalGoldTemplate({
   }
   const eventLabel = eventLabels[weddingData.eventType] || tr.event_toy
 
-  const invMusic  = weddingData?.music || DEFAULT_MUSIC
+  const activePkgId = isDemoMode ? 'PREMIUM' : (weddingData.package || 'SADE')
+
+  /* ── Phase 35 — bölmə görünürlüyü: paket icazəsi AND cütlüyün seçimi ──
+     Köhnə (sections sahəsi olmayan) dəvətnamələrdə hamısı `true` qayıdır. */
+  const S = getSectionVisibility(weddingData, activePkgId)
+  const canShowSeating = S.seating
+  const canShowGallery = S.gallery
+  const canShowRsvp    = S.rsvp
+
+  /* Musiqi söndürülübsə mənbə `null` → nə <audio>, nə üzən düymə render olunur */
+  const invMusic  = S.music ? (weddingData?.music || DEFAULT_MUSIC) : null
   /* ⚠ Autoplay YALNIZ builder-də "Dəvətnamə açılan kimi" seçiləndə (və ya
      musiqi seçilməyib default preset işlədiləndə) — bax data/music.js */
   const autoPlay  = shouldAutoPlay(invMusic)
-
-  const activePkgId = isDemoMode ? 'PREMIUM' : (weddingData.package || 'SADE')
-  const { allowRsvp: canShowRsvp, allowSeating: canShowSeating, allowGallery: canShowGallery } = getPackageGates(activePkgId)
 
   /* ── Hook-lar: bütün biznes məntiqi ── */
   const cd       = useCountdown({ date: weddingData.date, time: weddingData.time, lang, eventType: weddingData.eventType, eventName: weddingData.eventName })
@@ -696,6 +703,7 @@ export default function RoyalGoldTemplate({
             </section>
 
             {/* 05 — COUNTDOWN */}
+            {S.countdown && (
             <section style={{ padding: '34px 26px', ...sectionBorder }}>
               <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
                 <SectionHead kicker="Countdown" title={cd.title} />
@@ -720,8 +728,10 @@ export default function RoyalGoldTemplate({
                 </Stagger>
               </Reveal>
             </section>
+            )}
 
             {/* 06 — LOCATION */}
+            {S.venue && (
             <section style={{ padding: '34px 26px', ...sectionBorder }}>
               <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
                 <SectionHead kicker="LOCATION" title={tr.inv_location} />
@@ -773,8 +783,10 @@ export default function RoyalGoldTemplate({
                 </Stagger>
               </Reveal>
             </section>
+            )}
 
             {/* 07 — PROQRAM */}
+            {S.program && (
             <section style={{ padding: '34px 26px', ...sectionBorder }}>
               <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
                 <SectionHead kicker="Schedule" title={timeline.sectionLabel} />
@@ -799,8 +811,10 @@ export default function RoyalGoldTemplate({
                 </Stagger>
               </Reveal>
             </section>
+            )}
 
             {/* 08 — DRESS CODE (ikon əsaslı premium kart, theme-aware) */}
+            {S.dresscode && (
             <section style={{ padding: '34px 26px', ...sectionBorder }}>
               <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
                 <SectionHead kicker="STYLE" title={tr.inv_dresscode} />
@@ -817,6 +831,7 @@ export default function RoyalGoldTemplate({
                 />
               </Reveal>
             </section>
+            )}
 
             {/* 09 — OTURMA PLANI */}
             {canShowSeating && !seating.isEmpty && (
@@ -1095,6 +1110,7 @@ export default function RoyalGoldTemplate({
             )}
 
             {/* 12 — QONAQ DƏFTƏRİ */}
+            {S.guestbook && (
             <section style={{ padding: '34px 26px', ...sectionBorder }}>
               <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
                 <SectionHead kicker="Guestbook" title={gbook.labels.title} />
@@ -1153,6 +1169,7 @@ export default function RoyalGoldTemplate({
                 </Stagger>
               </Reveal>
             </section>
+            )}
 
             {/* 12.5 — SİFARİŞ CTA (yalnız builder önbaxışında; şərt komponentin içindədir) */}
             <OrderCta
