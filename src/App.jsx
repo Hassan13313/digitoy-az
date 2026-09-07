@@ -1,16 +1,38 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import LandingPage from './components/landing/LandingPage'
 import InvitationPage from './components/invitation/InvitationPage'
 import PhotoShare from './components/invitation/PhotoShare'
 import GalleryPage from './components/invitation/GalleryPage'
-import DigitoyOrijinalUI from './components/DigitoyOrijinalUI'
 import { defaultWedding } from './data/defaultWedding'
 import { demoInvitation, demoGuestbook } from './data/demoInvitation'
 import ScrollProgress from './components/ui/ScrollProgress'
 import './App.css'
 
 const ACTIVE_UI = 'v3'
-const ADMIN_KEY = 'digitoyadmin2026'
+
+/* ── Admin token helpers (sessionStorage, 8-saat müddəti) ── */
+function getStoredToken() {
+  const token = sessionStorage.getItem('adminToken')
+  const exp   = Number(sessionStorage.getItem('adminTokenExp') || 0)
+  return token && exp > Math.floor(Date.now() / 1000) ? token : null
+}
+
+async function verifyAdminKey(key) {
+  try {
+    const res = await fetch('/api/admin_login.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key }),
+    })
+    const json = await res.json()
+    if (json.ok && json.token) {
+      sessionStorage.setItem('adminToken', json.token)
+      sessionStorage.setItem('adminTokenExp', String(json.exp))
+      return true
+    }
+  } catch {}
+  return false
+}
 
 function decodeData(token) {
   try {
@@ -36,25 +58,19 @@ export default function App() {
   const [isAdmin,     setIsAdmin]     = useState(false)
   const [adminSlug,   setAdminSlug]   = useState('')
 
-  useEffect(() => {
-    if (window.location.pathname === '/demo') {
-      setView('demo')
-      return
-    }
+  /* Admin login UI state */
+  const [adminLoginKey,     setAdminLoginKey]     = useState('')
+  const [adminLoginError,   setAdminLoginError]   = useState('')
+  const [adminLoginLoading, setAdminLoginLoading] = useState(false)
+  const pendingParamsRef = useRef(null)
+
+  /* ── URL routing məntiqini ayır — auth statusu bəlli olandan sonra çağırılır ── */
+  const doRoute = (hasAdmin, params) => {
+    if (window.location.pathname === '/demo') { setView('demo'); return }
 
     const { slug, sub } = parseInviteSlug()
-    const params = new URLSearchParams(window.location.search)
 
-    /* ── Admin səlahiyyət yoxlaması ── */
-    const isAdminParam = params.get('admin') === ADMIN_KEY
-    const isAdminLocal = localStorage.getItem('isAdmin') === 'true'
-    if (isAdminParam) {
-      localStorage.setItem('isAdmin', 'true')
-      setIsAdmin(true)
-    } else if (isAdminLocal) {
-      setIsAdmin(true)
-    }
-    const hasAdminAccess = isAdminParam || isAdminLocal
+    if (hasAdmin) setIsAdmin(true)
 
     if (slug) {
       if (sub === 'foto')           { setView('photo');        return }
@@ -64,7 +80,6 @@ export default function App() {
       const dParam    = params.get('d')
       const dataParam = params.get('data')
 
-      /* ── Yekun müştəri dəvətnaməsi: ?view=live&d=TOKEN ── */
       if (viewParam === 'live' && dParam) {
         const decoded = decodeData(dParam)
         if (decoded) setWeddingData({ ...defaultWedding, ...decoded })
@@ -72,8 +87,7 @@ export default function App() {
         return
       }
 
-      /* ── Admin modu: ?admin=KEY&data=TOKEN ── */
-      if (hasAdminAccess) {
+      if (hasAdmin) {
         if (dataParam) {
           const decoded = decodeData(dataParam)
           if (decoded) setWeddingData({ ...defaultWedding, ...decoded })
@@ -83,44 +97,70 @@ export default function App() {
         return
       }
 
-      /* ── Köhnə format: birbaşa ?data= parametrli link (geriyə uyğunluq) ── */
       if (dataParam) {
         const decoded = decodeData(dataParam)
-        if (decoded) {
-          setWeddingData({ ...defaultWedding, ...decoded })
-          setView('invite')
-          return
-        }
+        if (decoded) { setWeddingData({ ...defaultWedding, ...decoded }); setView('invite'); return }
       }
 
-      /* ── Heç bir data yoxdur — ana səhifəyə yönləndir ── */
       window.history.replaceState({}, '', '/')
-      try { localStorage.removeItem('isAdmin') } catch {}
-      setIsAdmin(false)
       setView('landing')
       return
     }
 
-    /* ── Slug yoxdur: köklü URL-də admin+data parametrləri yoxla ── */
     const token = params.get('data')
-    if (hasAdminAccess && token) {
+    if (hasAdmin && token) {
       const decoded = decodeData(token)
-      if (decoded) {
-        setWeddingData({ ...defaultWedding, ...decoded })
-        setView('admin-review')
-        return
-      }
+      if (decoded) { setWeddingData({ ...defaultWedding, ...decoded }); setView('admin-review'); return }
     }
 
-    /* ── Admin sessiyası bu URL-də aktiv deyil — localStorage temizlə ── */
-    if (!isAdminParam) {
-      try { localStorage.removeItem('isAdmin') } catch {}
-      setIsAdmin(false)
-    }
     setView('landing')
-  }, [])
+  }
 
-  if (ACTIVE_UI === 'new') return <DigitoyOrijinalUI />
+  useEffect(() => {
+    if (window.location.pathname === '/demo') { setView('demo'); return }
+
+    const params      = new URLSearchParams(window.location.search)
+    const adminParam  = params.get('admin')
+    const storedToken = getStoredToken()
+
+    /* 1. Mövcud session token varsa — dərhal admin mode */
+    if (storedToken) {
+      doRoute(true, params)
+      return
+    }
+
+    /* 2. URL-də admin parametri var — server tərəfi yoxlama */
+    if (adminParam) {
+      verifyAdminKey(adminParam).then(ok => {
+        if (ok) {
+          /* URL-dən açarı sil */
+          const clean = new URL(window.location.href)
+          clean.searchParams.delete('admin')
+          window.history.replaceState({}, '', clean.pathname + (clean.search || ''))
+        }
+        doRoute(ok, params)
+      })
+      return
+    }
+
+    /* 3. Admin parametri yoxdur — adi istifadəçi */
+    doRoute(false, params)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* ── Admin Login Handler (view === 'admin-login' state üçün) ── */
+  const handleAdminLogin = () => {
+    if (!adminLoginKey.trim() || adminLoginLoading) return
+    setAdminLoginLoading(true)
+    setAdminLoginError('')
+    verifyAdminKey(adminLoginKey.trim()).then(ok => {
+      if (ok) {
+        doRoute(true, pendingParamsRef.current || new URLSearchParams())
+      } else {
+        setAdminLoginError('Şifrə yanlışdır')
+        setAdminLoginLoading(false)
+      }
+    })
+  }
 
   /* URL ayrıştırılana qədər minimal yükləmə ekranı */
   if (view === 'loading') {
@@ -134,6 +174,43 @@ export default function App() {
           animation: 'spin 0.9s linear infinite',
         }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    )
+  }
+
+  /* Admin login formu — ?admin=KEY yoxdursa ama admin linki açılıbsa */
+  if (view === 'admin-login') {
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center px-4">
+        <div style={{
+          maxWidth: 360, width: '100%',
+          border: '1px solid rgba(197,160,89,0.35)',
+          background: '#faf8f4',
+          padding: '40px 32px',
+        }}>
+          <div style={{ height: 1, background: 'linear-gradient(to right,transparent,rgba(197,160,89,0.9),transparent)', marginBottom: 28 }} />
+          <p className="text-[10px] tracking-[0.32em] uppercase text-gold text-center mb-6 font-medium">Admin Girişi</p>
+          <input
+            type="password"
+            value={adminLoginKey}
+            onChange={e => setAdminLoginKey(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleAdminLogin()}
+            placeholder="Şifrə"
+            autoFocus
+            className="w-full border-b border-beige-dark/60 bg-transparent py-2.5 text-sm text-ink placeholder:text-brown-muted/40 focus:outline-none focus:border-gold/60 mb-4"
+          />
+          {adminLoginError && (
+            <p className="text-red-400 text-xs mb-3 text-center">{adminLoginError}</p>
+          )}
+          <button
+            onClick={handleAdminLogin}
+            disabled={adminLoginLoading}
+            className="w-full btn-gold text-xs py-3 disabled:opacity-50"
+          >
+            {adminLoginLoading ? '…' : 'Daxil ol'}
+          </button>
+          <div style={{ height: 1, background: 'linear-gradient(to right,transparent,rgba(197,160,89,0.9),transparent)', marginTop: 28 }} />
+        </div>
       </div>
     )
   }

@@ -17,12 +17,12 @@ function getBasePlatformUrl() {
   return isLocalhost ? window.location.origin : 'https://digitoy.az'
 }
 
-/* ── Admin idarəetmə linki — bütün formData URL-ə kodlanmış ── */
+/* ── Admin idarəetmə linki — açar URL-də görünmür ── */
 export function buildAdminLink(slug, data = null) {
-  const base = `${getBasePlatformUrl()}/invite/${slug}?admin=digitoyadmin2026`
+  const base = `${getBasePlatformUrl()}/invite/${slug}`
   if (!data) return base
   const token = encodeData(data)
-  return token ? `${base}&data=${token}` : base
+  return token ? `${base}?data=${token}` : base
 }
 
 /* ── Yekun müştəri dəvətnamə linki (admin təsdiqindən sonra) ── */
@@ -61,7 +61,7 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '') {
 
   const adminLink = slug
     ? buildAdminLink(slug, data)
-    : `${getBasePlatformUrl()}/?admin=digitoyadmin2026&data=${encodeData(data)}`
+    : `${getBasePlatformUrl()}/?data=${encodeData(data)}`
 
   let nameLines = ''
   if (isCouple) {
@@ -95,6 +95,6 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '') {
 }
 
 /* ── WhatsApp URL ── */
-export function buildWhatsAppUrl(data, lang = 'az', waNumber = '994557133696', slug = '') {
+export function buildWhatsAppUrl(data, lang = 'az', waNumber = '994992133696', slug = '') {
   return `https://wa.me/${waNumber}?text=${buildWhatsAppMessage(data, lang, slug)}`
 }
