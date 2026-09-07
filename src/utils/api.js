@@ -121,6 +121,40 @@ export async function getAdminGuestbook({ slug = '', search = '', limit = 100, o
   return res.json() /* { ok, messages, total } */
 }
 
+/* ══ Phase 37/39 — Admin baxım (backup vəziyyəti, draft təmizləmə, media indeksi) ══
+   Yeni endpointdir; mövcud API çağırışlarının heç biri dəyişmir. */
+export async function getMaintenanceStatus() {
+  const res = await fetch(`${BASE}/admin_maintenance.php?action=status`, { headers: adminHeaders() })
+  if (!res.ok) throw await toApiError(res, 'Baxım məlumatı yüklənmədi')
+  return res.json()
+}
+
+export async function getAdminAudit(limit = 50) {
+  const res = await fetch(`${BASE}/admin_maintenance.php?action=audit&limit=${limit}`, { headers: adminHeaders() })
+  if (!res.ok) throw await toApiError(res, 'Audit jurnalı yüklənmədi')
+  return res.json()
+}
+
+export async function cleanupDrafts() {
+  const res = await fetch(`${BASE}/admin_maintenance.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminHeaders() },
+    body: JSON.stringify({ action: 'cleanup_drafts' }),
+  })
+  if (!res.ok) throw await toApiError(res, 'Draft təmizləmə alınmadı')
+  return res.json()
+}
+
+export async function reindexMedia() {
+  const res = await fetch(`${BASE}/admin_maintenance.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminHeaders() },
+    body: JSON.stringify({ action: 'reindex_media' }),
+  })
+  if (!res.ok) throw await toApiError(res, 'Media indeksi qurulmadı')
+  return res.json()
+}
+
 export async function deleteGuestbookMessage(id) {
   const res = await fetch(`${BASE}/admin_guestbook.php`, {
     method: 'POST',
@@ -504,7 +538,7 @@ export async function getGuestResponses(invitationId) {
 }
 
 /* ── Qonaq cavabı göndər (public) ── */
-export async function submitGuestResponse({ invitationId, guestName, message, attendanceStatus, extraGuests }) {
+export async function submitGuestResponse({ invitationId, guestName, message, attendanceStatus, extraGuests, website }) {
   const res = await fetch(`${BASE}/submit_guest_response.php`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -514,6 +548,8 @@ export async function submitGuestResponse({ invitationId, guestName, message, at
       message:           message || null,
       attendance_status: attendanceStatus || null,
       extra_guests:      extraGuests || 0,
+      /* Phase 39 — honeypot: insan bunu heç vaxt doldurmur (bax utils/honeypot.js) */
+      website:           website || '',
     }),
   })
   if (!res.ok) throw new Error(`submit_guest_response: ${res.status}`)
@@ -674,7 +710,7 @@ export async function manageGuest(action, data) {
 }
 
 /* ── İştirak cavabı göndər (public) ── */
-export async function submitAttendance({ guestId, status, optionalMessage, extraGuests = 0 }) {
+export async function submitAttendance({ guestId, status, optionalMessage, extraGuests = 0, website }) {
   const res = await fetch(`${BASE}/submit_attendance.php`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -683,6 +719,8 @@ export async function submitAttendance({ guestId, status, optionalMessage, extra
       status,
       optional_message: optionalMessage || null,
       extra_guests:     Math.max(0, Math.min(10, parseInt(extraGuests) || 0)),
+      /* Phase 39 — honeypot (bax utils/honeypot.js) */
+      website:          website || '',
     }),
   })
   const json = await res.json()

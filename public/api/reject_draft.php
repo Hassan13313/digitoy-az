@@ -39,4 +39,6 @@ if ($stmt->rowCount() === 0) {
     exit;
 }
 
+adminAuditLog('draft_reject', null, 'draft_code=' . $draftCode);
+
 echo json_encode(['ok' => true, 'draft_code' => $draftCode, 'status' => 'rejected']);

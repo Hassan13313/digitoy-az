@@ -3,6 +3,7 @@ import { getGuests, submitAttendance, submitGuestResponse } from '../utils/api'
 import { trackEvent } from '../utils/analytics'
 import { formatFullDateByLang } from '../utils/dateFormat'
 import { normalizeAz, getInviteSlug } from './useSeating'
+import { useHoneypot } from '../utils/honeypot'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    useRsvp — İştirak Təsdiqi məntiqi (UI-sız).
@@ -77,6 +78,7 @@ export function useRsvp({ lang = 'az', weddingData }) {
   const [submitted,   setSubmitted]   = useState(false)
   const [alreadyDone, setAlreadyDone] = useState(false)
   const [sending,     setSending]     = useState(false)
+  const readHoneypot                  = useHoneypot()   /* Phase 39 — spam qorunması */
   const inputRef = useRef(null)
 
   const L = buildRsvpLabels(lang, weddingData)
@@ -140,6 +142,7 @@ export function useRsvp({ lang = 'az', weddingData }) {
             status: status === 'yes' ? 'GOING' : status === 'no' ? 'NOT_GOING' : 'MAYBE',
             optionalMessage: null,
             extraGuests: status === 'yes' ? plusOne : 0,
+            website: readHoneypot(),
           })
           if (result.alreadySubmitted) {
             setAlreadyDone(true)
@@ -154,6 +157,7 @@ export function useRsvp({ lang = 'az', weddingData }) {
             guestName: query.trim() || '—',
             attendanceStatus: status,
             extraGuests: status === 'yes' ? plusOne : 0,
+            website: readHoneypot(),
           })
         }
         trackEvent('participation_confirmed', { lang, status })

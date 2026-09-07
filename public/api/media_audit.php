@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 $onlySlug = trim($_GET['slug'] ?? '');
-if ($onlySlug !== '' && !preg_match('/^[a-z0-9\-]{2,120}$/', $onlySlug)) {
+if ($onlySlug !== '' && !isValidSlug($onlySlug)) {
     http_response_code(400);
     echo json_encode(['error' => 'Valid slug required']);
     exit;
@@ -50,7 +50,7 @@ if (is_dir($uploadsDir)) {
     foreach (scandir($uploadsDir) as $slug) {
         if ($slug === '.' || $slug === '..') continue;
         if ($slug !== '' && $slug[0] === '_') continue;          /* _logs kimi xidməti qovluqlar */
-        if (!preg_match('/^[a-z0-9\-]{2,120}$/', $slug)) continue;
+        if (!isValidSlug($slug)) continue;
         if ($onlySlug !== '' && $slug !== $onlySlug) continue;
 
         $dir = $uploadsDir . $slug . '/';
@@ -141,7 +141,7 @@ try {
         $s = (string) $r['slug'];
         $f = basename((string) $r['filename']);
         if ($onlySlug !== '' && $s !== $onlySlug) continue;
-        if (!preg_match('/^[a-z0-9\-]{2,120}$/', $s)) continue;
+        if (!isValidSlug($s)) continue;
         if (!is_file($uploadsDir . $s . '/' . $f)) {
             $dbOnly[] = ['slug' => $s, 'filename' => $f];
         }

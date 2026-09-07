@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { getGuestResponses, submitGuestResponse } from '../utils/api'
 import { trackEvent } from '../utils/analytics'
 import { getInviteSlug } from './useSeating'
+import { useHoneypot } from '../utils/honeypot'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    useGuestbook — qonaq dəftəri məntiqi (UI-sız).
@@ -40,6 +41,7 @@ export function useGuestbook({ lang = 'az', initialMessages }) {
   const [name,     setName]     = useState('')
   const [text,     setText]     = useState('')
   const [sending,  setSending]  = useState(false)
+  const readHoneypot            = useHoneypot()   /* Phase 39 — spam qorunması */
 
   /* Serverdən mövcud mesajları çək */
   useEffect(() => {
@@ -65,6 +67,7 @@ export function useGuestbook({ lang = 'az', initialMessages }) {
           invitationId: slug,
           guestName:    optimistic.name,
           message:      optimistic.text,
+          website:      readHoneypot(),
         })
         trackEvent('guestbook_message_sent')
       }

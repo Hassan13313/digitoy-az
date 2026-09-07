@@ -53,9 +53,26 @@ if (postBodyWasDiscarded()) {
 /* ── 1. Slug validation ── */
 $slug = trim($_POST['slug'] ?? '');
 
-if (!$slug || !preg_match('/^[a-z0-9\-]{2,120}$/', $slug)) {
+if (!$slug || !isValidSlug($slug)) {
     http_response_code(400);
     echo json_encode(['error' => 'Valid slug required', 'code' => 'BAD_SLUG', 'permanent' => true]);
+    exit;
+}
+
+/* ── Phase 37: dəvətnamə həqiqətən mövcuddurmu? ──
+   Formatı düzgün, amma uydurma slug hər sorğuda serverdə YENİ QOVLUQ
+   yaradır və 90 MB-a qədər fayl yazdırırdı. Yoxlama diskə toxunan hər
+   addımdan ƏVVƏL gəlir. invitationExists() DB xətasında fail-open-dir,
+   yəni baza əlçatmaz olsa toy günü yükləmə dayanmır. */
+if (!invitationExists(getDB(), $slug)) {
+    http_response_code(404);
+    echo json_encode([
+        'error'     => 'INVITATION_NOT_FOUND',
+        'code'      => 'INVITATION_NOT_FOUND',
+        'permanent' => true,
+        'message'   => 'Bu dəvətnamə tapılmadı. Zəhmət olmasa QR kodu yenidən skan edin.',
+    ]);
+    mediaLog('upload_failed', ['slug' => $slug, 'reason' => 'INVITATION_NOT_FOUND']);
     exit;
 }
 
@@ -102,8 +119,10 @@ mediaLog('upload_started', ['slug' => $slug, 'bytes' => (int) $_FILES['photo']['
    kilidlənmə yox idi (TOCTOU yarışı) — eyni andan iki sorğu say
    yoxlamasını eyni vaxtda keçə bilərdi. İndi fopen+flock(LOCK_EX) bütün
    oxu-dəyişdirmə-yazma dövrünü tək atomik blok halına gətirir. */
-$ip       = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-$ip       = trim(explode(',', $ip)[0]);
+/* Phase 37: XFF müştərinin göndərdiyi başlıqdır — hər sorğuda dəyişməklə
+   limit tamamilə keçilirdi. clientIp() onu YALNIZ etibarlı proxy-dən
+   qəbul edir, əks halda REMOTE_ADDR işlədir. Limit məntiqi dəyişmir. */
+$ip       = clientIp();
 $rlKey    = hash('sha256', $slug . '|' . $ip);
 $rlFile   = sys_get_temp_dir() . '/digitoy_rl_' . $rlKey . '.json';
 $rlLimit  = 300;   /* (toy, IP) cütü üzrə saatlıq tavan */
@@ -383,6 +402,10 @@ if ($heicTemp) @unlink($heicTemp);
 /* Qalereya manifestinin ETag-i qovluq mtime-inə bağlıdır — yeni fayl
    bütün açıq tabların növbəti sorğuda yeniliyi görməsini təmin edir */
 @touch($uploadDir);
+
+/* Phase 39 — media indeksi (birbaşa yükləmə yolu). Tək mənbə: config.php.
+   Qalereya bundan asılı deyil; indeks yalnız dashboard sayğacı üçündür. */
+indexMediaRow($slug, $filename, $mime, (int) @filesize($uploadDir . $filename));
 
 /* ── Public URL ── */
 $baseUrl  = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];

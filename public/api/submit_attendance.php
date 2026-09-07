@@ -32,6 +32,23 @@ if (!in_array($status, $allowed, true)) {
     exit;
 }
 
+/* ── Phase 39: honeypot (bax submit_guest_response.php) ── */
+if (trim($body['website'] ?? '') !== '') {
+    echo json_encode(['ok' => true, 'status' => $status, 'submitted_at' => date('Y-m-d H:i:s')]);
+    exit;
+}
+
+/* ── Phase 39: sürət qapısı ──
+   Açar `guest_id`-dir, IP DEYİL — bu endpoint onsuz da qonaq başına bir
+   cavaba icazə verir (aşağıda 409), ona görə burada məqsəd yalnız eyni
+   qonaq id-si üzrə sıx təkrarları dayandırmaqdır. Ümumi IP-dən yazan
+   fərqli qonaqlar bir-birinə təsir etmir. */
+if (!rateGate('att|' . $guestId, 5, 60)) {
+    http_response_code(429);
+    echo json_encode(['error' => 'RATE_LIMITED', 'message' => 'Çox sayda cəhd. Bir az gözləyin.']);
+    exit;
+}
+
 ensureTables();
 $db = getDB();
 

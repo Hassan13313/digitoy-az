@@ -1,4 +1,4 @@
-import { ShoppingBag, FileText, Image, LayoutDashboard, MessageSquare, LogOut } from 'lucide-react'
+import { ShoppingBag, FileText, Image, LayoutDashboard, MessageSquare, ShieldCheck, LogOut } from 'lucide-react'
 
 const NAV = [
   { key: 'dashboard',   label: 'Dashboard',     icon: LayoutDashboard },
@@ -7,6 +7,8 @@ const NAV = [
   { key: 'photos',      label: 'Fotolar',       icon: Image },
   /* Phase 36 — qonaqların təbrik mesajlarının moderasiyası */
   { key: 'guestbook',   label: 'Təbrik Məktubları', icon: MessageSquare },
+  /* Phase 37/39 — backup vəziyyəti, draft təmizləmə, media indeksi, audit */
+  { key: 'maintenance', label: 'Baxım',         icon: ShieldCheck },
 ]
 
 export default function AdminLayout({ children, section, onNavigate }) {

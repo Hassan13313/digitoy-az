@@ -85,8 +85,12 @@ function sweepStaleParts(): void {
 $slug     = trim($_REQUEST['slug']     ?? '');
 $uploadId = trim($_REQUEST['uploadId'] ?? '');
 
-if (!$slug || !preg_match('/^[a-z0-9\-]{2,120}$/', $slug)) {
+if (!$slug || !isValidSlug($slug)) {
     fail(400, 'BAD_SLUG', 'Qalereya tapılmadı.');
+}
+/* Phase 37 — uydurma slug-la hissəli yükləmə başlada bilməz (bax upload_photo.php) */
+if (!invitationExists(getDB(), $slug)) {
+    fail(404, 'INVITATION_NOT_FOUND', 'Bu dəvətnamə tapılmadı. Zəhmət olmasa QR kodu yenidən skan edin.');
 }
 if (!preg_match('/^[a-z0-9]{16,64}$/', $uploadId)) {
     fail(400, 'BAD_UPLOAD_ID', 'Yükləmə identifikatoru yanlışdır.');

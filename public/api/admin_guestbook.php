@@ -53,6 +53,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $mode = 'message_cleared';
     }
 
+    /* Phase 39 — dağıdıcı əməliyyat: audit jurnalı */
+    adminAuditLog('guestbook_delete', null, "id={$id} mode={$mode}");
+
     echo json_encode(['ok' => true, 'id' => $id, 'mode' => $mode]);
     exit;
 }
@@ -72,7 +75,7 @@ $search = trim($_GET['search'] ?? '');
 $conds  = ["message IS NOT NULL", "message != ''"];
 $params = [];
 
-if ($slug !== '' && preg_match('/^[a-zA-Z0-9\-]{2,120}$/', $slug)) {
+if ($slug !== '' && isValidSlug($slug)) {
     $conds[] = 'invitation_id = :inv';
     $params[':inv'] = $slug;
 }

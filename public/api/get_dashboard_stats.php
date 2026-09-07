@@ -44,20 +44,45 @@ foreach ($pkgRows as $r) {
 /* Dəvətnamə sayı */
 $invCount = (int)$db->query("SELECT COUNT(*) FROM invitations")->fetchColumn();
 
-/* Foto sayı — filesystem-dən (photos cədvəli istifadə edilmir) */
-$uploadBase = __DIR__ . '/../uploads/';
-$photoCount = 0;
-if (is_dir($uploadBase)) {
-    $mediaExts = ['jpg','jpeg','png','gif','webp','heic','mp4','mov'];
-    foreach ((array) glob($uploadBase . '*', GLOB_ONLYDIR) as $albumDir) {
-        foreach ((array) glob($albumDir . '/*') as $file) {
-            $ext  = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-            $base = pathinfo($file, PATHINFO_BASENAME);
-            if (in_array($ext, $mediaExts) && substr($base, -10) !== '_thumb.jpg') {
-                $photoCount++;
+/* ── Foto sayı (Phase 39) ──
+   ƏVVƏL: hər dashboard açılışında BÜTÜN uploads ağacı `glob()` ilə gəzilirdi.
+   1000 toy × ~200 fayl = 200 000 `pathinfo()` çağırışı — panelin timeout
+   verməsinin birinci səbəbi.
+
+   İNDİ: sayğac `photos` cədvəlindən gəlir. Cədvəl yalnız Phase 39-dan
+   sonrakı yükləmələri avtomatik alır, ona görə köhnə fayllar üçün BİR DƏFƏ
+   indeks qurulmalıdır (admin panel → «Media indeksini qur»).
+
+   ⚠ İndeks qurulmayıbsa KÖHNƏ fayl sistemi sayğacı işləyir — yəni rəqəm
+   deploy-dan dərhal sonra DƏYİŞMİR və sıfıra düşmür. */
+$photoIndexed = false;
+try {
+    $flag = $db->query("SELECT meta_value FROM schema_meta WHERE meta_key = 'media_indexed' LIMIT 1")
+               ->fetchColumn();
+    $photoIndexed = ($flag === '1');
+} catch (Throwable $e) {
+    $photoIndexed = false;
+}
+
+if ($photoIndexed) {
+    $photoCount  = (int) $db->query("SELECT COUNT(*) FROM photos")->fetchColumn();
+    $photoSource = 'index';
+} else {
+    $uploadBase = __DIR__ . '/../uploads/';
+    $photoCount = 0;
+    if (is_dir($uploadBase)) {
+        $mediaExts = ['jpg','jpeg','png','gif','webp','heic','mp4','mov'];
+        foreach ((array) glob($uploadBase . '*', GLOB_ONLYDIR) as $albumDir) {
+            foreach ((array) glob($albumDir . '/*') as $file) {
+                $ext  = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+                $base = pathinfo($file, PATHINFO_BASENAME);
+                if (in_array($ext, $mediaExts) && substr($base, -10) !== '_thumb.jpg') {
+                    $photoCount++;
+                }
             }
         }
     }
+    $photoSource = 'filesystem';
 }
 
 /* Son 7 günün gündəlik sifarişləri — bütün günlər doldurulur */
@@ -95,5 +120,8 @@ echo json_encode([
     'packages'    => $packages,
     'invitations' => $invCount,
     'photos'      => $photoCount,
+    /* Phase 39 — sayğacın mənbəyi: 'index' (sürətli) və ya 'filesystem'
+       (köhnə üsul, indeks hələ qurulmayıb). Admin panel bunu göstərir. */
+    'photos_source' => $photoSource,
     'daily'       => $daily,
 ]);

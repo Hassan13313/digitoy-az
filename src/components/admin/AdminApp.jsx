@@ -6,6 +6,7 @@ import AdminOrderDetail from './AdminOrderDetail'
 import AdminInvitationsList from './AdminInvitationsList'
 import AdminPhotosList from './AdminPhotosList'
 import AdminGuestbook from './AdminGuestbook'
+import AdminMaintenance from './AdminMaintenance'
 
 export default function AdminApp({ lang = 'az', setLang }) {
   const [section,   setSection]   = useState('dashboard')
@@ -45,6 +46,7 @@ export default function AdminApp({ lang = 'az', setLang }) {
       {section === 'invitations'  && <AdminInvitationsList />}
       {section === 'photos'       && <AdminPhotosList />}
       {section === 'guestbook'    && <AdminGuestbook />}
+      {section === 'maintenance'  && <AdminMaintenance />}
     </AdminLayout>
   )
 }

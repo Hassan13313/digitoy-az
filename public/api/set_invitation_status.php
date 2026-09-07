@@ -27,7 +27,7 @@ $slug = trim($body['slug'] ?? '');
    hərflidir (məs. `sasas-ve-sasasa-DDE863`). Yalnız kiçik hərf qəbul etsək
    admin həmin KÖHNƏ linkləri deaktiv edə bilməzdi. `get_invitation.php` da
    eyni geniş şablonu işlədir. */
-if (!$slug || !preg_match('/^[a-zA-Z0-9\-]{2,120}$/', $slug)) {
+if (!$slug || !isValidSlug($slug)) {
     http_response_code(400);
     echo json_encode(['error' => 'Valid slug required']);
     exit;
@@ -63,5 +63,8 @@ if ($st->rowCount() === 0) {
         exit;
     }
 }
+
+/* Phase 39 — dagidici emeliyyat: audit jurnali */
+adminAuditLog($active ? 'invitation_activate' : 'invitation_deactivate', $slug);
 
 echo json_encode(['ok' => true, 'slug' => $slug, 'active' => (bool)$active]);

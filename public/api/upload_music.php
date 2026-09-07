@@ -20,9 +20,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 /* ── Slug validation ── */
 $slug = trim($_POST['slug'] ?? '');
-if (!$slug || !preg_match('/^[a-z0-9\-]{2,120}$/', $slug)) {
+if (!$slug || !isValidSlug($slug)) {
     http_response_code(400);
     echo json_encode(['error' => 'Valid slug required']);
+    exit;
+}
+/* Phase 37 — uydurma slug-la musiqi yüklənə bilməz (bax upload_photo.php) */
+if (!invitationExists(getDB(), $slug)) {
+    http_response_code(404);
+    echo json_encode(['error' => 'INVITATION_NOT_FOUND', 'message' => 'Bu dəvətnamə tapılmadı.']);
     exit;
 }
 
@@ -40,8 +46,10 @@ if (empty($_FILES['music']) || $_FILES['music']['error'] !== UPLOAD_ERR_OK) {
 }
 
 /* ── Rate limit — (slug, IP) üzrə saatda 20, flock ilə atomik ── */
-$ip       = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-$ip       = trim(explode(',', $ip)[0]);
+/* Phase 37: XFF müştərinin göndərdiyi başlıqdır — hər sorğuda dəyişməklə
+   limit tamamilə keçilirdi. clientIp() onu YALNIZ etibarlı proxy-dən
+   qəbul edir, əks halda REMOTE_ADDR işlədir. Limit məntiqi dəyişmir. */
+$ip       = clientIp();
 $rlKey    = hash('sha256', 'music|' . $slug . '|' . $ip);
 $rlFile   = sys_get_temp_dir() . '/digitoy_rl_' . $rlKey . '.json';
 $rlLimit  = 20;

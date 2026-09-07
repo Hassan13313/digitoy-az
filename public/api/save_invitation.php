@@ -23,7 +23,7 @@ if (!$slug || !$formData) {
 }
 
 /* Slug: yalnız a-z, 0-9, tire */
-if (!preg_match('/^[a-z0-9\-]{2,120}$/', $slug)) {
+if (!isValidSlug($slug)) {
     http_response_code(400);
     echo json_encode(['error' => 'Invalid slug']);
     exit;

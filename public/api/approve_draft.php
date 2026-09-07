@@ -22,7 +22,7 @@ if (!$draftCode || !preg_match('/^DT-[A-Z0-9]{6}$/', $draftCode)) {
 }
 
 /* Slug validation — böyük hərflərə icazə ver (köhnə uppercase sluglar üçün) */
-if ($slug !== '' && !preg_match('/^[a-zA-Z0-9\-]{2,120}$/', $slug)) {
+if ($slug !== '' && !isValidSlug($slug)) {
     $slug = '';
 }
 
@@ -58,5 +58,7 @@ if ($stmt->rowCount() === 0) {
     echo json_encode(['error' => 'Draft not found', 'draft_code' => $draftCode]);
     exit;
 }
+
+adminAuditLog('draft_approve', $actualSlug ?: null, 'draft_code=' . $draftCode);
 
 echo json_encode(['ok' => true, 'draft_code' => $draftCode, 'status' => 'approved', 'approved_slug' => $actualSlug ?: null]);

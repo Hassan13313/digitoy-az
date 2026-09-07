@@ -95,9 +95,188 @@ function getDB(): PDO {
     return $pdo;
 }
 
-/* ── Cədvəlləri avtomatik yarat ── */
+/* ══════════════════════════════════════════════════
+   Phase 37 — PAYLAŞILAN KÖMƏKÇİLƏR
+   Aşağıdakı dörd funksiya əvvəllər endpointlərə səpələnmiş məntiqin
+   YEGANƏ mənbəyidir. Davranış dəyişmir — yalnız bir yerə yığılır.
+══════════════════════════════════════════════════ */
+
+/* ── Slug validasiyası — TƏK MƏNBƏ ──
+   NƏ ÜÇÜN: eyni qayda kod bazasında iki cür yazılmışdı. 8 endpoint
+   `[a-z0-9-]` işlədirdi, 6-sı `[a-zA-Z0-9-]`. Phase 33-dən ƏVVƏLKİ
+   sluglarda BÖYÜK HƏRF var (`sasas-ve-sasasa-DDE863`), ona görə
+   kiçik-hərf-only variant həmin toylarda foto/video/musiqi yükləməsini,
+   qalereya linkini və RSVP oxunuşunu SƏSSİZCƏ bağlayırdı — dəvətnamənin
+   özü isə açılırdı, yəni cütlük problemi toy gününə qədər görmürdü.
+
+   Qayda `get_invitation.php`-dakı ƏN GENİŞ variantdır: mövcud heç bir
+   slug sıradan çıxmır, yalnız əvvəllər rədd edilənlər indi qəbul edilir.
+   Path traversal qapalı qalır: nöqtə, kəsik və boşluq yoxdur. */
+function isValidSlug($slug): bool {
+    return is_string($slug) && preg_match('/^[a-zA-Z0-9\-]{2,120}$/', $slug) === 1;
+}
+
+/* ── Dəvətnamə həqiqətən mövcuddurmu? ──
+   NƏ ÜÇÜN: yazma endpointləri slug-un formatını yoxlayırdı, amma real
+   dəvətnaməyə aid olduğunu YOX. Uydurma slug göndərən hər sorğu serverdə
+   yeni qovluq yaradır və 90 MB-a qədər fayl yazdıra bilirdi. */
+function invitationExists(PDO $db, string $slug): bool {
+    try {
+        $q = $db->prepare('SELECT 1 FROM invitations WHERE slug = :s LIMIT 1');
+        $q->execute([':s' => $slug]);
+        return (bool) $q->fetchColumn();
+    } catch (Throwable $e) {
+        /* FAIL-OPEN: DB oxunmursa qonağın yükləməsini bloklamırıq —
+           toy günü işləyən axını sındırmaq, sui-istifadə riskindən pisdir. */
+        return true;
+    }
+}
+
+/* ── Etibarlı müştəri IP-si ──
+   NƏ ÜÇÜN: rate limit `HTTP_X_FORWARDED_FOR`-dan açarlanırdı, o isə
+   MÜŞTƏRİNİN göndərdiyi başlıqdır — hər sorğuda dəyişdirməklə limit
+   tamamilə keçilirdi. İndi XFF yalnız sorğu ETİBARLI proxy-dən gəldikdə
+   oxunur; əks halda TCP-dən gələn `REMOTE_ADDR` işlədilir.
+   TRUSTED_PROXIES env faylında təyin edilə bilər (CIDR yox, dəqiq IP). */
+function clientIp(): string {
+    $remote = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $trusted = defined('TRUSTED_PROXIES') ? (array) TRUSTED_PROXIES : [];
+
+    if ($trusted && in_array($remote, $trusted, true) && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        /* Zəncirdəki İLK dəyər orijinal müştəridir */
+        $first = trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0]);
+        if (filter_var($first, FILTER_VALIDATE_IP)) return $first;
+    }
+    return $remote;
+}
+
+/* ── Admin əməliyyat jurnalı (Phase 39) ──
+   Dağıdıcı əməliyyatların izi. Admin identifikatoru kimi tokenin `iat`
+   hissəsi saxlanılır — sistemdə istifadəçi hesabı yoxdur, amma bu, bir
+   giriş seansını digərindən ayırmağa imkan verir.
+   ⚠ Heç vaxt istisna atmır: jurnal yazıla bilməsə əsas əməliyyat davam edir. */
+function adminAuditLog(string $action, ?string $slug = null, ?string $detail = null): void {
+    try {
+        $db = getDB();
+        $actor = 'unknown';
+        $tok = $_SERVER['HTTP_X_ADMIN_TOKEN'] ?? '';
+        if ($tok === '' && !empty($_SERVER['HTTP_AUTHORIZATION'])
+            && preg_match('/^Bearer\s+(.+)$/i', $_SERVER['HTTP_AUTHORIZATION'], $m)) {
+            $tok = trim($m[1]);
+        }
+        if ($tok !== '' && ($dot = strrpos($tok, '.')) !== false) {
+            $raw = base64_decode(strtr(substr($tok, 0, $dot), '-_', '+/'));
+            if ($raw && ($p = explode(':', $raw, 2)) && count($p) === 2) {
+                $actor = 'session:' . $p[0];   /* token iat — seans kimliyi */
+            }
+        }
+        $st = $db->prepare(
+            'INSERT INTO admin_audit (action, slug, actor, ip, detail)
+             VALUES (:a, :s, :ac, :ip, :d)'
+        );
+        $st->execute([
+            ':a'  => substr($action, 0, 60),
+            ':s'  => $slug !== null ? substr($slug, 0, 120) : null,
+            ':ac' => substr($actor, 0, 64),
+            ':ip' => substr(clientIp(), 0, 45),
+            ':d'  => $detail !== null ? substr($detail, 0, 500) : null,
+        ]);
+    } catch (Throwable $e) {
+        /* jurnal əsas əməliyyatı heç vaxt bloklamır */
+    }
+}
+
+/* ── Media indeksi (Phase 39) — TƏK MƏNBƏ ──
+   `photos` cədvəli sxemdə var idi, amma HEÇ VAXT doldurulmurdu: qalereya da,
+   dashboard da fayl sistemini gəzirdi. İki yükləmə yolu var və onlar AYRI
+   saxlama məntiqi işlədir (`upload_photo.php` daxili, `upload_chunk.php` isə
+   `media_store.php`), ona görə indeksləmə hər ikisinin çağırdığı bu funksiyadadır.
+
+   ⚠ QALEREYA DAVRANIŞI DƏYİŞMİR — `get_photos.php` olduğu kimi qovluğu oxuyur.
+   Cədvəl yalnız sayğac və hesabat üçündür, ona görə indeksin boş və ya
+   natamam olması heç nəyi sındırmır.
+   ⚠ Heç vaxt istisna atmır: indeks yazıla bilməsə media onsuz da diskdədir. */
+function indexMediaRow(string $slug, string $filename, string $mime, int $size): void {
+    try {
+        $st = getDB()->prepare(
+            'INSERT INTO photos (slug, url, filename, mime_type, file_size)
+             VALUES (:s, :u, :f, :m, :z)'
+        );
+        $st->execute([
+            ':s' => $slug,
+            ':u' => '/uploads/' . $slug . '/' . $filename,
+            ':f' => $filename,
+            ':m' => $mime,
+            ':z' => $size,
+        ]);
+    } catch (Throwable $e) {
+        /* indeks köməkçidir — yükləmə uğurlu sayılır */
+    }
+}
+
+/* ── Sürüşən pəncərəli sayğac (paylaşılan) ──
+   `upload_photo.php`-dakı flock nümunəsinin ümumiləşdirilmiş variantı.
+   TRUE qaytarırsa əməliyyata icazə var və sayğac artırılıb. */
+function rateGate(string $key, int $limit, int $window): bool {
+    $file = sys_get_temp_dir() . '/digitoy_rl_' . hash('sha256', $key) . '.json';
+    $fp = @fopen($file, 'c+');
+    if ($fp === false) return true;          /* yaza bilmiriksə bloklamırıq */
+
+    $allowed = true;
+    if (flock($fp, LOCK_EX)) {
+        $raw  = stream_get_contents($fp);
+        $data = $raw ? (json_decode($raw, true) ?: []) : [];
+        $now  = time();
+        $data = array_values(array_filter($data, fn($t) => ($now - $t) < $window));
+        if (count($data) >= $limit) {
+            $allowed = false;
+        } else {
+            $data[] = $now;
+        }
+        ftruncate($fp, 0);
+        rewind($fp);
+        fwrite($fp, json_encode($data));
+        fflush($fp);
+        flock($fp, LOCK_UN);
+    }
+    fclose($fp);
+    return $allowed;
+}
+
+/* ── Sxem versiyası (Phase 39) ──
+   Sütun və ya cədvəl əlavə edəndə BU RƏQƏMİ ARTIR — əks halda miqrasiya
+   canlıda işləməz. */
+const SCHEMA_VERSION = 39;
+
+/* ── Cədvəlləri avtomatik yarat ──
+   Phase 39 OPTİMİZASİYASI: əvvəl bu funksiya HƏR sorğuda 6 `CREATE TABLE
+   IF NOT EXISTS` + 6 `SHOW COLUMNS` icra edirdi — sorğu başına ~12 əlavə
+   round-trip. İndi yalnız versiya sətri oxunur (1 sorğu); uyğundursa
+   dərhal qayıdır. Miqrasiya yalnız versiya fərqli olanda işləyir.
+   Davranış eynidir, sadəcə boş yerə təkrarlanmır. */
 function ensureTables(): void {
+    static $checked = false;
+    if ($checked) return;                     /* eyni sorğuda ikinci çağırış: 0 sorğu */
+
     $db = getDB();
+    try {
+        $v = $db->query("SELECT meta_value FROM schema_meta WHERE meta_key = 'version' LIMIT 1")
+                ->fetchColumn();
+        if ($v !== false && (int) $v === SCHEMA_VERSION) {
+            $checked = true;
+            return;                           /* steady state: cəmi 1 sorğu */
+        }
+    } catch (Throwable $e) {
+        /* schema_meta hələ yoxdur (ilk işə salma) → tam miqrasiya */
+    }
+
+    runMigrations($db);
+    $checked = true;
+}
+
+/* Tam miqrasiya — yalnız sxem versiyası fərqli olanda çağırılır.
+   Bütün addımlar idempotentdir, ona görə paralel iki sorğu təhlükəsizdir. */
+function runMigrations(PDO $db): void {
     $db->exec("
         CREATE TABLE IF NOT EXISTS invitations (
             id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -257,4 +436,56 @@ function ensureTables(): void {
            daxil deyil, ona görə köhnə sətirlərin hamısı NULL qala bilər. */
         $db->exec("ALTER TABLE invitations ADD UNIQUE KEY uq_inv_draft_code (draft_code)");
     }
+
+    /* ── Phase 39: admin əməliyyat jurnalı ──
+       Dağıdıcı əməliyyatların izi. Tamamilə additivdir: heç bir mövcud
+       cədvələ və ya axına toxunmur, yalnız yazılır.
+       ROLLBACK: `DROP TABLE admin_audit;` */
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS admin_audit (
+            id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            action     VARCHAR(60)  NOT NULL,
+            slug       VARCHAR(120) DEFAULT NULL,
+            actor      VARCHAR(64)  NOT NULL DEFAULT 'unknown',
+            ip         VARCHAR(45)  DEFAULT NULL,
+            detail     VARCHAR(500) DEFAULT NULL,
+            created_at DATETIME     DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_audit_created (created_at),
+            INDEX idx_audit_action  (action)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
+    /* ── Phase 39: sıralama indeksləri ──
+       NƏ ÜÇÜN: admin siyahıları `ORDER BY created_at DESC` / `submitted_at DESC`
+       işlədir, amma bu sütunlarda indeks yox idi → hər səhifə açılışında
+       filesort. Yalnız indeksdir: sorğu nəticələri EYNİ qalır.
+       ROLLBACK: `ALTER TABLE invitations DROP INDEX idx_inv_created;` və s. */
+    $idx = [
+        ['invitations',       'idx_inv_created',   'created_at'],
+        ['draft_invitations', 'idx_draft_submitted','submitted_at'],
+        ['photos',            'idx_photos_slug_at','slug, uploaded_at'],
+    ];
+    foreach ($idx as [$tbl, $name, $cols]) {
+        try {
+            $has = $db->query("SHOW INDEX FROM `$tbl` WHERE Key_name = '$name'")->fetchAll();
+            if (empty($has)) $db->exec("ALTER TABLE `$tbl` ADD INDEX `$name` ($cols)");
+        } catch (Throwable $e) {
+            /* indeks əlavə edilə bilməsə sorğular işləməyə davam edir */
+        }
+    }
+
+    /* ── Sxem versiyasını qeyd et ──
+       Bu sətir olmasa ensureTables() hər sorğuda tam miqrasiya işlədər. */
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS schema_meta (
+            meta_key   VARCHAR(40) NOT NULL PRIMARY KEY,
+            meta_value VARCHAR(80) NOT NULL,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ");
+    $st = $db->prepare(
+        "INSERT INTO schema_meta (meta_key, meta_value) VALUES ('version', :v)
+         ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)"
+    );
+    $st->execute([':v' => (string) SCHEMA_VERSION]);
 }

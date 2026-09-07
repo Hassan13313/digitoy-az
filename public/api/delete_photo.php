@@ -28,7 +28,7 @@ $body   = json_decode(file_get_contents('php://input'), true);
 $slug   = trim($body['slug'] ?? '');
 $rawId  = trim($body['id'] ?? '');
 
-if (!$slug || !preg_match('/^[a-z0-9\-]{2,120}$/', $slug)) {
+if (!$slug || !isValidSlug($slug)) {
     http_response_code(400);
     echo json_encode(['error' => 'Valid slug required']);
     exit;
@@ -107,6 +107,15 @@ foreach ($derivatives as $d) {
    dəyişir, yəni bütün açıq tablar növbəti sorğuda yeni siyahı alır. */
 @touch($uploadDir);
 
+/* Phase 39 — media indeksindən də çıxar ki, dashboard sayğacı düz qalsın.
+   Fayl artıq silinib; indeks xətası silməni geri qaytarmır. */
+try {
+    $st = getDB()->prepare('DELETE FROM photos WHERE slug = :s AND filename = :f');
+    $st->execute([':s' => $slug, ':f' => $filename]);
+} catch (Throwable $e) {
+    /* indeks köməkçidir */
+}
+
 mediaLog('delete_completed', [
     'slug'         => $slug,
     'file'         => $filename,
@@ -114,6 +123,9 @@ mediaLog('delete_completed', [
     'derivatives'  => $removedDerivatives,
     'duration_ms'  => elapsedMs(),
 ]);
+
+/* Phase 39 — dağıdıcı əməliyyat: audit jurnalı */
+adminAuditLog('photo_delete', $slug, $filename);
 
 echo json_encode([
     'ok'      => true,

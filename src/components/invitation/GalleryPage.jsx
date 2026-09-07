@@ -332,10 +332,39 @@ export default function GalleryPage() {
   /* Qalereya idarəetmə səhifəsi açıldı — bir dəfə */
   useEffect(() => { trackEvent('gallery_opened') }, [])
 
-  /* 30 saniyədə bir avtomatik yeniləmə — real-time sinxronizasiya */
+  /* ── 30 saniyəlik avtomatik yeniləmə — YALNIZ tab görünəndə (Phase 39) ──
+     ƏVVƏL: interval tab arxa planda olsa da işləyirdi. Cavab ETag/304
+     sayəsində ucuz olsa da, hər sorğu mobil radionu OYADIR — bu, telefon
+     batareyasında ən bahalı əməliyyatdır və qalereya toy gecəsi saatlarla
+     açıq qalır.
+
+     İNDİ: tab gizlənəndə interval tam dayanır; geri qayıdanda DƏRHAL bir
+     dəfə yenilənir (qonaq gözləmir) və interval yenidən qurulur.
+     ⚠ Davranış istifadəçi üçün eynidir — görünən tabda heç nə dəyişmir. */
   useEffect(() => {
-    const timer = setInterval(fetchItems, 30000)
-    return () => clearInterval(timer)
+    let timer = null
+
+    const start = () => {
+      if (timer === null) timer = setInterval(fetchItems, 30000)
+    }
+    const stop = () => {
+      if (timer !== null) { clearInterval(timer); timer = null }
+    }
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        fetchItems()   /* geri qayıdanda gecikmə olmasın */
+        start()
+      } else {
+        stop()
+      }
+    }
+
+    if (document.visibilityState === 'visible') start()
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility)
+      stop()
+    }
   }, [fetchItems])
 
   /* Infinite scroll sentinel */

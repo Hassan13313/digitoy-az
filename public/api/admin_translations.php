@@ -27,7 +27,7 @@ $MAX_FIELD_LEN = 2000;               /* bir sahənin maksimum uzunluğu       */
 /* ⚠ BÖYÜK HƏRF: köhnə (Phase 33-dən əvvəlki) sluglarda böyük hərf var —
    `get_invitation.php` ilə eyni geniş şablon işlədilir. */
 function invSlugOk(string $s): bool {
-    return (bool)preg_match('/^[a-zA-Z0-9\-]{2,120}$/', $s);
+    return (bool)isValidSlug($s);
 }
 
 /* ─────────────────────────── OXU ─────────────────────────── */

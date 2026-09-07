@@ -146,6 +146,11 @@ function storeMedia(string $srcPath, string $mime, string $slug,
     /* Manifest ETag-i qovluq mtime-inə bağlıdır — açıq tablar yeniliyi görsün */
     @touch($dir);
 
+    /* Phase 39 — media indeksi (hissəli yükləmə yolu). Tək mənbə: config.php */
+    if (function_exists('indexMediaRow')) {
+        indexMediaRow($slug, $filename, $mime, (int) @filesize($destPath));
+    }
+
     return ['ok' => true, 'filename' => $filename, 'thumb' => $thumbName, 'poster' => $posterName];
 }
 
