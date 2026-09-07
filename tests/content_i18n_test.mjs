@@ -1,4 +1,4 @@
-import { resolveWeddingContent, translatePhrase } from '../src/data/contentI18n.js'
+import { resolveWeddingContent, translatePhrase, buildAutoI18n } from '../src/data/contentI18n.js'
 
 let pass = 0, fail = 0
 const eq = (name, a, b) => {
@@ -71,6 +71,26 @@ eq('exact phrase still works', translatePhrase('ağ rəngdən çəkinin', 'en'),
 // 9. dressCodeDescription: taninmayan cümlə ORİJİNAL qalır (yarımçıq deyil)
 const dd = resolveWeddingContent({ dressCodeDescription: 'Xahiş edirik ağ rəngdən çəkinin' }, 'en')
 eq('dressCodeDescription untouched', dd.dressCodeDescription, 'Xahiş edirik ağ rəngdən çəkinin')
+
+// 10. Phase 40 — buildAutoI18n: DB-yə YAZILACAQ avtomatik tərcümə ağacı
+const auto = buildAutoI18n(base)
+eq('auto en venueName', auto.i18n.en.venueName, 'Gülüstan Wedding Hall')
+eq('auto ru venueNote', auto.i18n.ru.venueNote, 'Зал 2, 3-й этаж')
+eq('auto en step 0', auto.i18n.en.programSteps[0], 'Guest Reception')
+eq('auto skips unknown step 2', auto.i18n.en.programSteps[2], undefined)
+eq('auto never touches names', [auto.i18n.en.brideName, auto.i18n.en.groomName], [undefined, undefined])
+eq('auto skips untranslatable sentence', auto.i18n.en.dressCodeDescription, undefined)
+eq('auto meta marks produced field', auto.i18nMeta.en.venueName, 'auto')
+eq('auto meta for steps', auto.i18nMeta.en.programSteps[0], 'auto')
+eq('auto meta mirrors i18n keys', Object.keys(auto.i18n.en).sort(), Object.keys(auto.i18nMeta.en).sort())
+
+// Lüğət heç nə tapmasa DB-yə heç nə yazılmır → köhnə dəvətnamələr toxunulmaz
+eq('auto null when nothing matches', buildAutoI18n({ brideName: 'A', groomName: 'B' }), null)
+eq('auto null on garbage input', buildAutoI18n(null), null)
+
+// Avtomatik ağac resolver-ə verilsə eyni nəticəni verməlidir (dövrə bağlanır)
+const viaDb = resolveWeddingContent({ ...base, i18n: auto.i18n }, 'en')
+eq('stored auto renders same as live dictionary', viaDb.venueName, 'Gülüstan Wedding Hall')
 
 console.log(`\n${pass} passed, ${fail} failed`)
 process.exit(fail ? 1 : 0)

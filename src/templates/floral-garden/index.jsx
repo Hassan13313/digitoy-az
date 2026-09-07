@@ -591,7 +591,7 @@ export default function FloralGardenTemplate({
 
                 {isCorp && weddingData.organizer?.trim() && (
                   <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.primary, marginTop: 10 }}>
-                    {tr.organizer_display}, {weddingData.organizer}
+                    {tr.organizer_display}: {weddingData.organizer}
                   </div>
                 )}
 

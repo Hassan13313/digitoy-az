@@ -17,6 +17,16 @@ import { TRANSLATABLE_FIELDS, translatePhrase } from '../../data/contentI18n'
 
    ⚠ BOŞ SAHƏ = TƏRCÜMƏ YOXDUR: sahə boş buraxılsa dəvətnamə əvvəlcə lüğətə,
    sonra orijinal AZ mətnə düşür. Yəni boş qoymaq heç nəyi pozmur.
+
+   ── Phase 40 ──
+   1. AÇILIŞDA AVTOMATİK DOLDURMA: saxlanılmış tərcüməsi OLMAYAN sahələr
+      lüğətdən doldurulur və «avtomatik» işarələnir. Admin artıq boş formaya
+      baxmır — hazır tərcüməni görüb yalnız istədiyini düzəldir.
+   2. SAXLANILMIŞ MƏTN TOXUNULMAZ: DB-də dəyəri olan sahə HEÇ VAXT yenidən
+      tərcümə edilmir — modal həmişə son save olunmuş mətni göstərir.
+   3. `i18nMeta` (auto | manual) birlikdə saxlanılır: builder növbəti dəfə
+      dəvətnaməni saxlayanda yalnız 'auto' sahələri yeniləyə bilir, admin-in
+      əli ilə yazdığı mətnə toxuna bilmir (bax `api/i18n_merge.php`).
    ───────────────────────────────────────────────────────────────────────── */
 
 const C = {
@@ -41,6 +51,21 @@ const inputStyle = {
   fontFamily: 'inherit', lineHeight: 1.5,
 }
 
+/* «Avtomatik» nişanı — admin hansı mətnin lüğətdən gəldiyini dərhal görsün.
+   Sahəyə toxunan kimi nişan itir (meta 'manual' olur). */
+function AutoBadge() {
+  return (
+    <span style={{
+      marginLeft: 8, padding: '1px 6px', borderRadius: 3, fontSize: 9,
+      letterSpacing: '0.08em', textTransform: 'uppercase',
+      color: C.gold, background: 'oklch(96% 0.03 80)', border: `1px solid ${C.line}`,
+      verticalAlign: 'middle',
+    }}>
+      avtomatik
+    </span>
+  )
+}
+
 /** i18n obyektində bir sahəni oxu (proqram sətirləri indeksə görə saxlanılır) */
 function readValue(i18n, lang, key, index) {
   const bucket = i18n?.[lang]
@@ -52,10 +77,75 @@ function readValue(i18n, lang, key, index) {
   return typeof v === 'string' ? v : ''
 }
 
+/** `i18nMeta` eyni forma daşıyır — `readValue` onu da oxuya bilir */
+const readMeta = readValue
+
+/** Bir qovaya sahə yaz / sil — `draft` və `meta` üçün eyni məntiq */
+function writeBucket(bucket, key, index, value) {
+  const next = { ...(bucket || {}) }
+  if (index == null) {
+    if (value) next[key] = value
+    else delete next[key]
+    return next
+  }
+  const steps = { ...(next.programSteps || {}) }
+  if (value) steps[index] = value
+  else delete steps[index]
+  if (Object.keys(steps).length) next.programSteps = steps
+  else delete next.programSteps
+  return next
+}
+
+/* ── Açılışda avtomatik doldurma ──
+   YALNIZ saxlanılmış dəyəri OLMAYAN sahələr doldurulur. Saxlanılmış mətn
+   (admin nə yazıbsa) heç bir halda üstələnmir — «son save olunan mətn =
+   həqiqət mənbəyi». Lüğətdə qarşılığı olmayan sərbəst cümlə boş qalır. */
+function seedAuto(savedI18n, savedMeta, source) {
+  const draft = { en: { ...(savedI18n.en || {}) }, ru: { ...(savedI18n.ru || {}) } }
+  const meta  = { en: {}, ru: {} }
+
+  for (const lang of ['en', 'ru']) {
+    /* Saxlanılmış sahələrin metası: yoxdursa 'manual' sayılır ki, Phase 36-da
+       yazılmış tərcümələr builder tərəfindən yenilənməsin. */
+    const savedBucket = savedI18n[lang] || {}
+    for (const key of Object.keys(savedBucket)) {
+      if (key === 'programSteps') continue
+      meta[lang][key] = readMeta(savedMeta, lang, key) === 'auto' ? 'auto' : 'manual'
+    }
+    const savedSteps = savedBucket.programSteps || {}
+    for (const idx of Object.keys(savedSteps)) {
+      const m = readMeta(savedMeta, lang, null, idx) === 'auto' ? 'auto' : 'manual'
+      meta[lang].programSteps = { ...(meta[lang].programSteps || {}), [idx]: m }
+    }
+
+    if (!source) continue
+
+    for (const { key } of TRANSLATABLE_FIELDS) {
+      if (key === 'brideName' || key === 'groomName') continue  /* adlar maşınla tərcümə olunmur */
+      if (readValue(draft, lang, key)) continue
+      const auto = translatePhrase(source[key], lang)
+      if (!auto) continue
+      draft[lang] = writeBucket(draft[lang], key, null, auto)
+      meta[lang]  = writeBucket(meta[lang],  key, null, 'auto')
+    }
+    ;(source.programSteps || []).forEach((row, i) => {
+      if (readValue(draft, lang, null, i)) return
+      const auto = translatePhrase(row?.activity, lang)
+      if (!auto) return
+      draft[lang] = writeBucket(draft[lang], null, i, auto)
+      meta[lang]  = writeBucket(meta[lang],  null, i, 'auto')
+    })
+  }
+
+  return { draft, meta }
+}
+
 export default function AdminTranslations({ slug, onClose, onSaved }) {
   const [lang,    setLang]    = useState('en')
   const [source,  setSource]  = useState(null)   /* form_data */
   const [draft,   setDraft]   = useState({ en: {}, ru: {} })
+  /* Hansı sahə lüğətdən gəlib ('auto'), hansını admin yazıb ('manual') */
+  const [meta,    setMeta]    = useState({ en: {}, ru: {} })
   const [loading, setLoading] = useState(true)
   const [saving,  setSaving]  = useState(false)
   const [error,   setError]   = useState('')
@@ -69,9 +159,13 @@ export default function AdminTranslations({ slug, onClose, onSaved }) {
     getInvitationTranslations(slug)
       .then((d) => {
         if (!alive) return
-        setSource(d.form_data || {})
-        const i = d.i18n && !Array.isArray(d.i18n) ? d.i18n : {}
-        setDraft({ en: i.en || {}, ru: i.ru || {} })
+        const fd = d.form_data || {}
+        const i  = d.i18n     && !Array.isArray(d.i18n)     ? d.i18n     : {}
+        const m  = d.i18nMeta && !Array.isArray(d.i18nMeta) ? d.i18nMeta : {}
+        const seeded = seedAuto({ en: i.en || {}, ru: i.ru || {} }, m, fd)
+        setSource(fd)
+        setDraft(seeded.draft)
+        setMeta(seeded.meta)
       })
       .catch((e) => { if (alive) setError(e?.message || 'Yüklənmədi.') })
       .finally(() => { if (alive) setLoading(false) })
@@ -85,22 +179,12 @@ export default function AdminTranslations({ slug, onClose, onSaved }) {
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
+  /* Admin bir sahəyə toxundusa o sahə ARTIQ 'manual'dır: builder onu bir daha
+     avtomatik tərcümə ilə əvəz edə bilməz. Sahə boşaldılsa meta da silinir. */
   const setField = useCallback((key, value, index) => {
     setSaved(false)
-    setDraft((prev) => {
-      const bucket = { ...(prev[lang] || {}) }
-      if (index == null) {
-        if (value) bucket[key] = value
-        else delete bucket[key]
-      } else {
-        const steps = { ...(bucket.programSteps || {}) }
-        if (value) steps[index] = value
-        else delete steps[index]
-        if (Object.keys(steps).length) bucket.programSteps = steps
-        else delete bucket.programSteps
-      }
-      return { ...prev, [lang]: bucket }
-    })
+    setDraft((prev) => ({ ...prev, [lang]: writeBucket(prev[lang], key, index, value) }))
+    setMeta((prev)  => ({ ...prev, [lang]: writeBucket(prev[lang], key, index, value ? 'manual' : '') }))
   }, [lang])
 
   /* ── Lüğətlə avtomatik doldurma ──
@@ -109,30 +193,19 @@ export default function AdminTranslations({ slug, onClose, onSaved }) {
   const autoFill = () => {
     if (!source) return
     setSaved(false)
-    setDraft((prev) => {
-      const bucket = { ...(prev[lang] || {}) }
-      for (const { key } of TRANSLATABLE_FIELDS) {
-        if (key === 'brideName' || key === 'groomName') continue  /* adlar maşınla tərcümə olunmur */
-        if (bucket[key]) continue
-        const auto = translatePhrase(source[key], lang)
-        if (auto) bucket[key] = auto
-      }
-      const steps = { ...(bucket.programSteps || {}) }
-      ;(source.programSteps || []).forEach((row, i) => {
-        if (steps[i]) return
-        const auto = translatePhrase(row?.activity, lang)
-        if (auto) steps[i] = auto
-      })
-      if (Object.keys(steps).length) bucket.programSteps = steps
-      return { ...prev, [lang]: bucket }
-    })
+    /* `seedAuto` eyni qaydanı işlədir: DOLU sahəyə toxunmur. Modal açılışında
+       onsuz da işə düşür — bu düymə yalnız adminin sonradan boşaltdığı
+       sahələri yenidən doldurmaq üçün qalır. */
+    const seeded = seedAuto(draft, meta, source)
+    setDraft(seeded.draft)
+    setMeta(seeded.meta)
   }
 
   const handleSave = async () => {
     setSaving(true)
     setError('')
     try {
-      const res = await saveInvitationTranslations(slug, draft)
+      const res = await saveInvitationTranslations(slug, draft, meta)
       setSaved(true)
       onSaved?.(res.i18n)
       setTimeout(() => setSaved(false), 2500)
@@ -231,14 +304,16 @@ export default function AdminTranslations({ slug, onClose, onSaved }) {
           ) : (
             <>
               <p style={{ fontSize: 11.5, color: C.faint, lineHeight: 1.6, margin: '0 0 16px' }}>
-                Boş buraxılan sahə üçün dəvətnamə əvvəlcə daxili lüğətə, o da tapmasa
-                orijinal Azərbaycan mətninə düşür — boş qoymaq heç nəyi pozmur.
+                «Avtomatik» nişanlı mətnlər daxili lüğətdən doldurulub — istədiyinizi
+                dəyişə bilərsiniz, dəyişdiyiniz mətn bir daha avtomatik yenilənmir.
+                Boş buraxılan sahə orijinal Azərbaycan mətnini göstərir.
               </p>
 
               {textFields.map((f) => (
                 <div key={f.key} style={{ marginBottom: 14 }}>
                   <label htmlFor={`tr-${f.key}`} style={{ display: 'block', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.sub, marginBottom: 4 }}>
                     {f.az}
+                    {readMeta(meta, lang, f.key) === 'auto' && <AutoBadge />}
                   </label>
                   <p style={{ fontSize: 12, color: C.faint, margin: '0 0 5px', fontStyle: 'italic', wordBreak: 'break-word' }}>
                     {f.original}
@@ -263,6 +338,7 @@ export default function AdminTranslations({ slug, onClose, onSaved }) {
                       <p style={{ fontSize: 12, color: C.faint, margin: '0 0 5px', fontStyle: 'italic' }}>
                         <span style={{ fontFamily: 'monospace', marginRight: 8, color: C.gold }}>{r.time || '—'}</span>
                         {r.activity}
+                        {readMeta(meta, lang, null, r.i) === 'auto' && <AutoBadge />}
                       </p>
                       <input
                         type="text"

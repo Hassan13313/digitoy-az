@@ -2,8 +2,14 @@
 /* ══════════════════════════════════════════════════
    DIGITOY.AZ — Phase 36: dəvətnamə məzmununun əl ilə tərcüməsi (admin)
 
-   GET  ?slug=…            → { form_data, i18n }  — redaktor üçün mənbə mətnlər
-   POST { slug, i18n:{…} } → yalnız `form_data.i18n` açarını yeniləyir
+   GET  ?slug=…                        → { form_data, i18n, i18nMeta }
+   POST { slug, i18n:{…}, i18nMeta:{…} } → `form_data.i18n` + `form_data.i18nMeta`
+
+   ⚠ Phase 40 — `i18nMeta`: hər sahə üçün 'auto' (lüğətdən avtomatik doldurulub)
+   və ya 'manual' (admin öz əli ilə yazıb). Bu ayrım `save_invitation.php`-yə
+   lazımdır: builder yalnız 'auto' sahələri yeniləyə bilər, admin-in yazdığına
+   heç vaxt toxunmur (bax `i18n_merge.php`). Meta OLMAYAN köhnə sahələr
+   'manual' sayılır — Phase 36 tərcümələri qorunur.
 
    NƏ ÜÇÜN AYRICA ENDPOINT (save_invitation.php DEYİL):
    `save_invitation.php` slug allokasiya məntiqini işə salır
@@ -58,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         'slug'      => $slug,
         'form_data' => $fd,
         'i18n'      => is_array($fd['i18n'] ?? null) ? $fd['i18n'] : new stdClass(),
+        'i18nMeta'  => is_array($fd['i18nMeta'] ?? null) ? $fd['i18nMeta'] : new stdClass(),
     ]);
     exit;
 }
@@ -72,6 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $body = json_decode(file_get_contents('php://input'), true);
 $slug = trim($body['slug'] ?? '');
 $in   = $body['i18n'] ?? null;
+$inMeta = $body['i18nMeta'] ?? null;
 
 if (!invSlugOk($slug)) {
     http_response_code(400);
@@ -116,6 +124,36 @@ foreach ($LANGS as $lg) {
     if ($bucket) $clean[$lg] = $bucket;
 }
 
+/* ── Meta: yalnız 'auto' | 'manual', yalnız DOLU sahələr üçün ──
+   Naməlum dəyər 'manual' olur: səhv halda qoruyucu tərəfə əyilirik
+   (builder o sahəyə toxuna bilməsin). */
+function cleanI18nMeta($v) {
+    if (is_string($v)) return $v === 'auto' ? 'auto' : 'manual';
+    if (is_array($v)) {
+        $out = [];
+        foreach ($v as $k => $item) {
+            if (is_string($item)) $out[$k] = $item === 'auto' ? 'auto' : 'manual';
+        }
+        return $out ?: null;
+    }
+    return null;
+}
+
+$cleanMeta = [];
+if (is_array($inMeta)) {
+    foreach ($LANGS as $lg) {
+        if (!isset($clean[$lg]) || !isset($inMeta[$lg]) || !is_array($inMeta[$lg])) continue;
+        $bucket = [];
+        foreach ($inMeta[$lg] as $field => $val) {
+            /* Dəyəri saxlanılmayan sahənin metası da saxlanılmır */
+            if (!isset($clean[$lg][$field])) continue;
+            $c = cleanI18nMeta($val);
+            if ($c !== null) $bucket[$field] = $c;
+        }
+        if ($bucket) $cleanMeta[$lg] = $bucket;
+    }
+}
+
 $db = getDB();
 $db->beginTransaction();
 
@@ -144,6 +182,9 @@ try {
     if ($clean) $fd['i18n'] = $clean;
     else        unset($fd['i18n']);
 
+    if ($clean && $cleanMeta) $fd['i18nMeta'] = $cleanMeta;
+    else                      unset($fd['i18nMeta']);
+
     $json = json_encode($fd, JSON_UNESCAPED_UNICODE);
     if ($json === false) {
         $db->rollBack();
@@ -163,4 +204,9 @@ try {
     exit;
 }
 
-echo json_encode(['ok' => true, 'slug' => $slug, 'i18n' => $clean ?: new stdClass()]);
+echo json_encode([
+    'ok'       => true,
+    'slug'     => $slug,
+    'i18n'     => $clean ?: new stdClass(),
+    'i18nMeta' => $cleanMeta ?: new stdClass(),
+]);

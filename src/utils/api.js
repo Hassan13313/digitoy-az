@@ -4,6 +4,8 @@
    Production: /api (same-origin)
 ══════════════════════════════════════════════════ */
 
+import { buildAutoI18n } from '../data/contentI18n'
+
 const BASE = import.meta.env.VITE_API_URL || '/api'
 
 /* ── Admin HMAC tokeni sessionStorage-dan oxu ── */
@@ -73,14 +75,27 @@ export async function adminLogin(key) {
   return res.json() /* { ok, token, exp } */
 }
 
-/* ── Dəvətnaməni serverə saxla (UPSERT) — admin tələb olunur ── */
+/* ── Dəvətnaməni serverə saxla (UPSERT) — admin tələb olunur ──
+
+   Phase 40: builder yalnız AZ mətn toplayır. Göndərməzdən ƏVVƏL lüğət
+   avtomatik EN/RU qarşılıqlarını qurur və `i18n` + `i18nMeta` (hamısı 'auto')
+   olaraq əlavə edilir — beləliklə tərcümə DB-də ilk saxlamadan mövcud olur,
+   admin heç nə etməsə də dəvətnamə EN/RU-da düzgün görünür.
+
+   ⚠ Admin-in ƏL İLƏ yazdığına toxunmur: server 'manual' işarəli sahələri
+   qoruyur (`api/i18n_merge.php`), buradan gələn 'auto' dəyər onları
+   ƏVƏZ EDƏ BİLMİR. Builder-də AZ mətn dəyişəndə isə yalnız 'auto' sahələr
+   yenilənir — köhnəlmiş avtomatik tərcümə qalmır. */
 export async function saveInvitation(slug, formData, draftCode = null) {
+  const auto = buildAutoI18n(formData)
+  const payload = auto ? { ...formData, ...auto } : formData
+
   const res = await fetch(`${BASE}/save_invitation.php`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...adminHeaders() },
     /* draft_code sifarişin unikal kodudur — kanonik slug ondan törəyir,
        yəni təkrar saxlama yeni dublikat dəvətnamə yaratmır (idempotent) */
-    body: JSON.stringify({ slug, formData, draft_code: draftCode }),
+    body: JSON.stringify({ slug, formData: payload, draft_code: draftCode }),
   })
   if (!res.ok) throw new Error(`save_invitation: ${res.status}`)
   return res.json() /* { ok, slug, created } — slug KANONİKDİR */
@@ -174,14 +189,14 @@ export async function getInvitationTranslations(slug) {
   return res.json() /* { ok, slug, form_data, i18n } */
 }
 
-export async function saveInvitationTranslations(slug, i18n) {
+export async function saveInvitationTranslations(slug, i18n, i18nMeta = null) {
   const res = await fetch(`${BASE}/admin_translations.php`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...adminHeaders() },
-    body: JSON.stringify({ slug, i18n }),
+    body: JSON.stringify({ slug, i18n, i18nMeta }),
   })
   if (!res.ok) throw await toApiError(res, 'Tərcümələr saxlanılmadı')
-  return res.json() /* { ok, slug, i18n } */
+  return res.json() /* { ok, slug, i18n, i18nMeta } */
 }
 
 /* ══════════════════════════════════════════════════

@@ -178,6 +178,67 @@ function localizeOrdinals(text, lang) {
   })
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   AVTOMATİK TƏRCÜMƏ QATI (Phase 40)
+
+   NƏ ÜÇÜN: əvvəllər EN/RU sahələri YALNIZ admin modalında əl ilə doldurulurdu.
+   İndi dəvətnamə ilk dəfə saxlanılanda lüğət avtomatik işə düşür və nəticə
+   `form_data.i18n`-ə YAZILIR (əvvəl tərcümə yalnız render anında hesablanırdı,
+   DB-də qalmırdı).
+
+   ⚠ NƏYƏ TOXUNMUR:
+     • gəlin/bəy adları — maşın adları korlayır
+     • lüğətdə qarşılığı olmayan sərbəst cümlələr — `translatePhrase` `null`
+       qaytarır, sahə ümumiyyətlə yaradılmır və render AZ mətnə düşür.
+       (Yarımçıq «franken-mətn» yazmaqdansa tərcüməsiz saxlamaq DAHA DOĞRUdur.)
+
+   ⚠ `i18nMeta`: burada yaradılan hər sahə 'auto' işarələnir. Admin modaldan
+   dəyişəndə 'manual' olur və bir daha avtomatik yenilənmir — «son save olunan
+   mətn = həqiqət mənbəyi» prinsipi. Birləşdirmə qaydası: `api/i18n_merge.php`.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/** Maşın tərcüməsindən KƏNAR sahələr (xüsusi adlar) */
+const NEVER_AUTO = new Set(['brideName', 'groomName'])
+
+/**
+ * Builder məlumatından avtomatik EN/RU tərcümə ağacı qur.
+ * @returns {{ i18n: object, i18nMeta: object }|null}  lüğət heç nə tapmasa `null`
+ */
+export function buildAutoI18n(source) {
+  if (!source || typeof source !== 'object') return null
+
+  const i18n = {}
+  const meta = {}
+
+  for (const lang of CONTENT_LANGS) {
+    const bucket = {}
+    const metaBucket = {}
+
+    for (const { key } of TRANSLATABLE_FIELDS) {
+      if (NEVER_AUTO.has(key)) continue
+      const auto = translatePhrase(source[key], lang)
+      if (auto) { bucket[key] = auto; metaBucket[key] = 'auto' }
+    }
+
+    if (Array.isArray(source.programSteps)) {
+      const steps = {}
+      const stepsMeta = {}
+      source.programSteps.forEach((row, i) => {
+        const auto = translatePhrase(row && row.activity, lang)
+        if (auto) { steps[i] = auto; stepsMeta[i] = 'auto' }
+      })
+      if (Object.keys(steps).length) {
+        bucket.programSteps = steps
+        metaBucket.programSteps = stepsMeta
+      }
+    }
+
+    if (Object.keys(bucket).length) { i18n[lang] = bucket; meta[lang] = metaBucket }
+  }
+
+  return Object.keys(i18n).length ? { i18n, i18nMeta: meta } : null
+}
+
 /** Sahə üçün yekun mətn: əl ilə tərcümə → lüğət → orijinal */
 function pickField(original, manual, lang) {
   if (typeof manual === 'string' && manual.trim()) return manual

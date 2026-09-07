@@ -245,7 +245,7 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
 
                 {isCorp && weddingData.organizer?.trim() && (
                   <p className="text-[10px] tracking-[0.28em] uppercase text-gold/70 font-medium mt-2 mb-1">
-                    {tr.organizer_display}, {weddingData.organizer}
+                    {tr.organizer_display}: {weddingData.organizer}
                   </p>
                 )}
 
