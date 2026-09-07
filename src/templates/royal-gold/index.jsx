@@ -635,7 +635,8 @@ export default function RoyalGoldTemplate({
                 <span style={{ color: TH.primary }}>Digitoy</span>
                 <span style={{ color: `${TH.muted}73` }}>.az</span>
               </div>
-              <LanguageSwitcher lang={lang} setLang={setLang} />
+              {/* Phase 36: seçici şablonun palitrasından rəng alır */}
+              <LanguageSwitcher lang={lang} setLang={setLang} theme={TH} />
             </header>
 
             {/* 04 — HERO */}

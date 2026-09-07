@@ -208,7 +208,8 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
                   <span className="text-gold font-light">Digitoy</span>
                   <span className="text-brown-dark/80 font-light">.az</span>
                 </div>
-                <LanguageSwitcher lang={lang} setLang={setLang} />
+                {/* Phase 36: seçici şablonun palitrasından rəng alır */}
+                <LanguageSwitcher lang={lang} setLang={setLang} theme={TH} />
               </div>
             </header>
 

@@ -1,10 +1,11 @@
-import { createElement, useEffect, Suspense } from 'react'
+import { createElement, useEffect, useMemo, Suspense } from 'react'
 import { TemplateProvider } from './TemplateProvider'
 import TemplateBoundary from './TemplateBoundary'
 import { getTemplateComponent } from './registry'
 import { DEFAULT_TEMPLATE_ID, resolveTemplateId } from './templateConfig'
 import { ensureTemplateFonts } from './fonts'
 import { trackTemplateView, trackTemplateFallback } from './templateAnalytics'
+import { resolveWeddingContent } from '../data/contentI18n'
 
 /* Şablon chunk-ı yüklənənə qədər krem fon (yalnız lazy şablonlarda görünür —
    simple-luxury statik import olduğu üçün heç vaxt bu vəziyyətə düşmür). */
@@ -37,7 +38,7 @@ function TemplateLoader() {
    yalnız enabled=true şablonlar render olunur. Hazırlanmaqda olan şablon
    id-si DB-yə düşsə belə müştəri simple-luxury görəcək.
    ───────────────────────────────────────────────────────────────────────── */
-export default function TemplateRenderer({ template, isPreview = false, ...templateProps }) {
+export default function TemplateRenderer({ template, isPreview = false, weddingData, lang, ...restProps }) {
   const templateId = resolveTemplateId(template, { allowDisabled: isPreview })
   const didFallback = !!template && templateId !== template
 
@@ -52,18 +53,34 @@ export default function TemplateRenderer({ template, isPreview = false, ...templ
     if (didFallback) trackTemplateFallback(template, templateId)
   }, [templateId, isPreview, didFallback, template])
 
+  /* ── Phase 36: MƏZMUN TƏRCÜMƏSİ ──
+     Bütün 9 şablon məhz buradan `weddingData` alır, ona görə tərcümə qatı
+     TƏK bu nöqtədədir — heç bir şablon faylı dəyişmir.
+     `az` dilində və ya tərcümə mənbəyi olmayanda EYNİ obyekt referansı
+     qayıdır → React remount etmir, mövcud render axını dəyişmir.
+     Dil dəyişəndə yalnız props yenilənir: reload YOXDUR, real-time. */
+  /* ⚠ useMemo BURADA vacibdir: `resolveWeddingContent` tərcümə olan halda hər
+     render-də YENİ obyekt qaytarır. Memo olmasa `weddingData` referansı hər
+     render-də dəyişər və ondan asılı hook-lar (useGallery / useRsvp) təkrar
+     işə düşərdi. Tərcümə YOXDURSA funksiya onsuz da eyni referansı qaytarır. */
+  const localizedWedding = useMemo(
+    () => resolveWeddingContent(weddingData, lang),
+    [weddingData, lang],
+  )
+  const localizedProps = { ...restProps, lang, weddingData: localizedWedding }
+
   /* createElement — komponent registry-dən (modul səviyyəsində sabit obyekt)
      gəlir, render zamanı yaradılmır; JSX yazılışı linter-i yanlış xəbərdarlığa
      salır, ona görə birbaşa createElement istifadə olunur. */
   const content = createElement(getTemplateComponent(templateId), {
-    ...templateProps,
+    ...localizedProps,
     isPreview,
   })
 
   /* Nasaz şablon çökərsə ağ ekran yerinə default şablon göstərilir */
   const safeFallback = templateId === DEFAULT_TEMPLATE_ID
     ? null
-    : createElement(getTemplateComponent(DEFAULT_TEMPLATE_ID), { ...templateProps, isPreview })
+    : createElement(getTemplateComponent(DEFAULT_TEMPLATE_ID), { ...localizedProps, isPreview })
 
   return (
     <TemplateProvider templateId={templateId} isPreview={isPreview}>

@@ -42,7 +42,9 @@ $cntStmt = $db->prepare("SELECT COUNT(*) FROM invitations $where");
 $cntStmt->execute($params);
 $total = (int)$cntStmt->fetchColumn();
 
-$sql  = "SELECT id, slug, form_data, template_id, created_at, updated_at
+/* Phase 36 — is_active. ensureTables() yuxarida cagirilib, yeni sutun
+   burada zemanetlidir; yine de kohne sxeme qarsi fail-open saxlanilir. */
+$sql  = "SELECT id, slug, form_data, template_id, is_active, created_at, updated_at
          FROM invitations $where
          ORDER BY created_at DESC
          LIMIT :lim OFFSET :off";
@@ -77,6 +79,13 @@ foreach ($rows as $row) {
         'venue'      => $fd['venueName'] ?? '',
         'package'     => $fd['package'] ?? '',
         'template_id' => !empty($fd['templateId']) ? $fd['templateId'] : ($row['template_id'] ?? DEFAULT_TEMPLATE_ID),
+        /* Sutun yoxdursa AKTIV sayilir — kohne sxemde link baglanmis gorunmesin */
+        'is_active'  => !array_key_exists('is_active', $row) || (int)$row['is_active'] === 1,
+        /* Phase 36 — hansi dillerde elle terceume var? (yalniz nisan, blob deyil) */
+        'has_i18n'   => [
+            'en' => !empty($fd['i18n']['en']),
+            'ru' => !empty($fd['i18n']['ru']),
+        ],
         'created_at' => $row['created_at'],
         'updated_at' => $row['updated_at'],
     ];

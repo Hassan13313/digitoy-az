@@ -39,12 +39,18 @@ function removeCanonical() {
    SPA-da react-router/helmet olmadığı üçün <head>-i birbaşa idarə edir.
    Statik JSON-LD (Organization/WebSite/Service) index.html-də qalır —
    crawler-lər JS icra etmədən də onu görsün deyə. */
-export function useSEO({ title, description, path = '/', image, type = 'website', noindex = false }) {
+export function useSEO({ title, description, path = '/', image, type = 'website', noindex = false, nofollow = false }) {
   useEffect(() => {
     if (title) document.title = title
 
     setMeta('name', 'description', description)
-    setMeta('name', 'robots', noindex ? 'noindex, follow' : 'index, follow')
+    /* Phase 36: `nofollow` YALNIZ deaktiv edilmiş dəvətnamə səhifəsi üçündür.
+       Default davranış (noindex, follow) toxunulmur — mövcud marşrutların
+       heç birində robots siqnalı dəyişmir. */
+    const robots = noindex
+      ? (nofollow ? 'noindex, nofollow' : 'noindex, follow')
+      : 'index, follow'
+    setMeta('name', 'robots', robots)
 
     const url = `${SITE_URL}${path}`
     const ogImage = image || DEFAULT_OG_IMAGE
@@ -65,5 +71,5 @@ export function useSEO({ title, description, path = '/', image, type = 'website'
     /* noindex səhifədə canonical OLMAMALIDIR — ziddiyyətli siqnaldır */
     if (noindex) removeCanonical()
     else         setCanonical(url)
-  }, [title, description, path, image, type, noindex])
+  }, [title, description, path, image, type, noindex, nofollow])
 }

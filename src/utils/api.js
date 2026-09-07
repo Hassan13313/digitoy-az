@@ -86,13 +86,68 @@ export async function saveInvitation(slug, formData, draftCode = null) {
   return res.json() /* { ok, slug, created } — slug KANONİKDİR */
 }
 
-/* ── Dəvətnaməni serverdən oxu (public) ── */
+/* ── Dəvətnaməni serverdən oxu (public) ──
+   Phase 36: cavab artıq `active` bayrağı da daşıyır.
+   ⚠ GERİYƏ UYĞUNLUQ: köhnə serverdə (deploy yarımçıq qalarsa) `active`
+   sahəsi ümumiyyətlə gəlmir — `!== false` yazılışı belə halda dəvətnaməni
+   AKTİV sayır, yəni heç bir mövcud link səhvən bağlı görünmür.
+   @returns {null | { data: object|null, active: boolean }} */
 export async function getInvitation(slug) {
   const res = await fetch(`${BASE}/get_invitation.php?slug=${encodeURIComponent(slug)}`)
   if (res.status === 404) return null
   if (!res.ok) throw new Error(`get_invitation: ${res.status}`)
   const json = await res.json()
-  return json.data ?? null
+  return { data: json.data ?? null, active: json.active !== false }
+}
+
+/* ── Phase 36: dəvətnamə linkini aktiv/deaktiv et (admin) ── */
+export async function setInvitationActive(slug, active) {
+  const res = await fetch(`${BASE}/set_invitation_status.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminHeaders() },
+    body: JSON.stringify({ slug, active: !!active }),
+  })
+  if (!res.ok) throw await toApiError(res, 'Status dəyişdirilə bilmədi')
+  return res.json() /* { ok, slug, active } */
+}
+
+/* ── Phase 36: təbrik məktubları — admin moderasiyası ── */
+export async function getAdminGuestbook({ slug = '', search = '', limit = 100, offset = 0 } = {}) {
+  const p = new URLSearchParams({ limit: String(limit), offset: String(offset) })
+  if (slug)   p.set('slug', slug)
+  if (search) p.set('search', search)
+  const res = await fetch(`${BASE}/admin_guestbook.php?${p}`, { headers: adminHeaders() })
+  if (!res.ok) throw await toApiError(res, 'Mesajlar yüklənmədi')
+  return res.json() /* { ok, messages, total } */
+}
+
+export async function deleteGuestbookMessage(id) {
+  const res = await fetch(`${BASE}/admin_guestbook.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminHeaders() },
+    body: JSON.stringify({ id }),
+  })
+  if (!res.ok) throw await toApiError(res, 'Mesaj silinmədi')
+  return res.json() /* { ok, id, mode } */
+}
+
+/* ── Phase 36: məzmun tərcümələri (admin) ── */
+export async function getInvitationTranslations(slug) {
+  const res = await fetch(`${BASE}/admin_translations.php?slug=${encodeURIComponent(slug)}`, {
+    headers: adminHeaders(),
+  })
+  if (!res.ok) throw await toApiError(res, 'Tərcümələr yüklənmədi')
+  return res.json() /* { ok, slug, form_data, i18n } */
+}
+
+export async function saveInvitationTranslations(slug, i18n) {
+  const res = await fetch(`${BASE}/admin_translations.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminHeaders() },
+    body: JSON.stringify({ slug, i18n }),
+  })
+  if (!res.ok) throw await toApiError(res, 'Tərcümələr saxlanılmadı')
+  return res.json() /* { ok, slug, i18n } */
 }
 
 /* ══════════════════════════════════════════════════

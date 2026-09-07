@@ -234,6 +234,22 @@ function ensureTables(): void {
        toxunulmur, köhnə linklər işləməyə davam edir.
        ROLLBACK: `ALTER TABLE invitations DROP COLUMN draft_code;` —
        heç bir mövcud məlumat itmir. */
+    /* ── Phase 36: invitations.is_active — dəvətnamə linkinin açar/bağlar düyməsi ──
+       NƏ ÜÇÜN: təsdiqlənmiş link ömürlük açıq qalırdı. Ödəniş geri alınanda və ya
+       xidmət dayandırılanda admin-in linki bağlamaq imkanı yox idi.
+
+       NƏ ÜÇÜN SÜTUN, form_data DEYİL: statusu dəyişmək üçün bütün form_data
+       JSON blob-unu oxu-dəyiş-yaz etmək lazım gələrdi — paralel saxlamada
+       dəvətnamə məzmununu itirmək riski var. Sütun atomikdir.
+
+       ADDITIVE və IDEMPOTENT: DEFAULT 1, yəni MÖVCUD BÜTÜN dəvətnamələr
+       avtomatik AKTİVdir. Slug, URL, QR, qalereya — heç birinə toxunmur.
+       ROLLBACK: `ALTER TABLE invitations DROP COLUMN is_active;` — məlumat itmir. */
+    $iaCols = $db->query("SHOW COLUMNS FROM invitations LIKE 'is_active'")->fetchAll();
+    if (empty($iaCols)) {
+        $db->exec("ALTER TABLE invitations ADD COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1");
+    }
+
     $dcCols = $db->query("SHOW COLUMNS FROM invitations LIKE 'draft_code'")->fetchAll();
     if (empty($dcCols)) {
         $db->exec("ALTER TABLE invitations ADD COLUMN draft_code VARCHAR(20) DEFAULT NULL");

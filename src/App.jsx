@@ -77,6 +77,16 @@ function getSEOConfig(view, { weddingData, slug } = {}) {
       return { title, description, path: slug ? `/invite/${slug}` : '/', type: 'profile', noindex: true }
     }
 
+    /* ── Phase 36: admin tərəfindən deaktiv edilmiş dəvətnamə ──
+       Status kodu 200 OLARAQ QALIR (SPA marşrutudur, server 200 verir).
+       Robots: noindex + nofollow — bağlanmış link crawl edilməsin. */
+    case 'invite-disabled':
+      return {
+        title: 'Dəvətnamə deaktivdir | DigiToy',
+        description: 'Bu dəvətnamə deaktiv edilmişdir.',
+        path: '/', noindex: true, nofollow: true,
+      }
+
     case 'invite-not-found':
       return { title: 'Dəvətnamə tapılmadı | DigiToy', description: 'Axtardığınız dəvətnamə mövcud deyil və ya köhnəlmiş linkdir.', path: '/', noindex: true }
 
@@ -192,8 +202,14 @@ function routeAfterAuth(
     /* Slug var, data yoxdur → DB-dən yüklə */
     getInvitation(slug)
       .then(function(result) {
-        if (result) {
-          setWeddingData({ ...defaultWedding, ...result })
+        /* Phase 36: `active === false` → link admin tərəfindən bağlanıb.
+           Slug mövcuddur, ona görə bu 404 DEYİL — ayrıca səhifə göstərilir. */
+        if (result && result.active === false) {
+          setView('invite-disabled')
+          return
+        }
+        if (result && result.data) {
+          setWeddingData({ ...defaultWedding, ...result.data })
           setView('invite')
         } else {
           setView('invite-not-found')
@@ -585,6 +601,40 @@ export default function App() {
           />
         </div>
       </>
+    )
+  }
+
+  /* ── DEAKTİV EDİLMİŞ DƏVƏTNAMƏ (Phase 36) ──
+     Məzmun serverdən ümumiyyətlə gəlmir (get_invitation.php `data: null`
+     qaytarır), ona görə burada cütlüyün adı/tarixi/məkanı sızmır. */
+  if (view === 'invite-disabled') {
+    const goHome = () => { window.history.pushState({}, '', '/'); setView('landing') }
+    return (
+      <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 text-center relative overflow-hidden">
+        <div style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none',
+          background: 'radial-gradient(ellipse 55% 35% at 50% 38%, rgba(197,160,89,0.07) 0%, transparent 65%)',
+        }} />
+        <div className="relative" style={{ maxWidth: 420 }}>
+          <div style={{ width: 48, height: 1, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.6), transparent)', margin: '0 auto 28px' }} />
+          <p className="font-mono text-[10px] tracking-[0.38em] uppercase text-gold mb-7">Digitoy.az</p>
+          <h1 className="font-serif text-2xl sm:text-3xl text-ink font-light tracking-tight mb-4 leading-snug">
+            Bu dəvətnamə deaktiv edilmişdir.
+          </h1>
+          <p className="text-brown-muted text-sm font-light leading-relaxed mb-10">
+            Əlavə məlumat üçün təşkilatçı ilə əlaqə saxlayın.
+          </p>
+          <button
+            onClick={goHome}
+            className="inline-flex items-center gap-2.5 btn-gold"
+            style={{ textDecoration: 'none' }}
+          >
+            Ana səhifəyə qayıt
+            <span style={{ fontSize: 14 }}>→</span>
+          </button>
+          <div style={{ width: 48, height: 1, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.4), transparent)', margin: '40px auto 0' }} />
+        </div>
+      </div>
     )
   }
 

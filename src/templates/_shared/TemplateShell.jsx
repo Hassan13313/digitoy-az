@@ -303,7 +303,9 @@ export default function TemplateShell({
                 <span style={{ color: ACC }}>Digitoy</span>
                 <span style={{ color: alpha(theme.muted, 0.6) }}>.az</span>
               </div>
-              <LanguageSwitcher lang={lang} setLang={setLang} />
+              {/* Phase 36: ACC = design.accentColor || theme.primary — modern-black /
+                  white-elegance kimi şablonlarda kontrast qorunsun deyə */}
+              <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} accent={ACC} radius={D.buttonRadius} />
             </header>
 
             {/* 04 — HERO */}

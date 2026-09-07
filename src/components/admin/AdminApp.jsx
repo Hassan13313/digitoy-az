@@ -5,6 +5,7 @@ import AdminOrdersList from './AdminOrdersList'
 import AdminOrderDetail from './AdminOrderDetail'
 import AdminInvitationsList from './AdminInvitationsList'
 import AdminPhotosList from './AdminPhotosList'
+import AdminGuestbook from './AdminGuestbook'
 
 export default function AdminApp({ lang = 'az', setLang }) {
   const [section,   setSection]   = useState('dashboard')
@@ -43,6 +44,7 @@ export default function AdminApp({ lang = 'az', setLang }) {
       {section === 'order-detail' && <AdminOrderDetail draftCode={draftCode} onBack={handleBack} lang={lang} />}
       {section === 'invitations'  && <AdminInvitationsList />}
       {section === 'photos'       && <AdminPhotosList />}
+      {section === 'guestbook'    && <AdminGuestbook />}
     </AdminLayout>
   )
 }
