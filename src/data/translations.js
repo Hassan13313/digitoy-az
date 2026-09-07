@@ -216,7 +216,9 @@ const t = {
     footer_rights: 'Bütün hüquqlar qorunur.',
     organizer_label: 'Təşkilatçı (İstəyə uyğun)',
     organizer_placeholder: 'Şirkət və ya təşkilatçı adı',
-    organizer_display: 'Təşkilatçı',
+    /* Devətnamədə imza kimi görünür («Təşkilatçı» DEYİL) — builder
+       sahəsinin adı `organizer_label`-dədir və dəyişməyib. */
+    organizer_display: 'Hörmətlə',
     dresscode_type_label: 'Geyim növü',
     maps_link_label: 'Tədbir məkanı (Google Maps linki)',
     maps_link_placeholder: 'Məkanın linkini bura yapışdırın',
@@ -450,7 +452,7 @@ const t = {
     footer_rights: 'All rights reserved.',
     organizer_label: 'Organizer (Optional)',
     organizer_placeholder: 'Company or organizer name',
-    organizer_display: 'Organizer',
+    organizer_display: 'Sincerely',
     dresscode_type_label: 'Dress code type',
     maps_link_label: 'Event Venue (Google Maps link)',
     maps_link_placeholder: 'Paste the location link here',
@@ -684,7 +686,7 @@ const t = {
     footer_rights: 'Все права защищены.',
     organizer_label: 'Организатор (Опционально)',
     organizer_placeholder: 'Название компании или организатора',
-    organizer_display: 'Организатор',
+    organizer_display: 'С уважением',
     dresscode_type_label: 'Тип дресс-кода',
     maps_link_label: 'Место проведения (Ссылка Google Maps)',
     maps_link_placeholder: 'Вставьте ссылку на локацию',
