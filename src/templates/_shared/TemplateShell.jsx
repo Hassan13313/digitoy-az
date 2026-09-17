@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { QRCodeSVG } from 'qrcode.react'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
 import DressCodeSection from './DressCodeSection'
-import MapMosaic, { MapRings } from './MapMosaic'
-import { parseLatLon } from './geo'
+import MapSection, { MapRings } from './MapSection'
+import { directionsUrl, openMapUrl } from './geo'
 import { OrderCta, MusicStartBubble } from './TemplateActions'
 import TemplateOutro from './TemplateOutro'
 import { buildPresetMusic, PRESET_TRACKS, MUSIC_PLAY_MODES, shouldAutoPlay } from '../../data/music'
@@ -75,6 +75,24 @@ export default function TemplateShell({
   lang, setLang, weddingData, onBack, isDemoMode = false, initialGuestbook,
   /* şablona məxsus */
   templateId, theme, design = {}, Opening, keyframes = '', ambient = null, ambientBlend = null,
+  /* ── Bölmə adlarının şablona məxsus qarşılığı (Phase 41) ────────────────
+     Claude Design-da hər şablon bölmələri ÖZ metaforasında adlandırır:
+     Boarding Pass-da proqram «Uçuş cədvəli», Vinyl-də «Tracklist · Side A»,
+     Gazette-də «Günün cədvəli»-dir. Bu prop həmin adları verir.
+
+     Forma:
+       sectionLabels={{
+         program: {
+           kicker: { az:'Schedule', en:'Schedule', ru:'Расписание' },
+           title:  { az:'Uçuş cədvəli', en:'Flight schedule', ru:'Расписание рейса' },
+         },
+       }}
+
+     ⚠ TƏRCÜMƏ SİSTEMİ POZULMUR: dəyər həmişə {az,en,ru} obyektidir və
+     aktiv dilə görə seçilir. Verilməyən bölmə/dil üçün MÖVCUD tərcümə
+     (`tr.*`, hook etiketləri) işlənir — yəni 9 köhnə şablon bu propu
+     ötürmür və çıxışları ZƏRRƏ QƏDƏR dəyişmir. */
+  sectionLabels = null,
 }) {
   const tr = t[lang] || t.az
   const [opened, setOpened] = useState(false)
@@ -102,8 +120,23 @@ export default function TemplateShell({
   const serif = theme.fonts?.heading
   const sans  = theme.fonts?.body
 
-  /* Location: koordinat varsa real xəritə, yoxsa köhnə abstrakt kart */
-  const hasCoords = !!parseLatLon(weddingData)
+  /**
+   * Bölmə adını həll et: şablon öz adını veribsə onu, verməyibsə mövcud
+   * tərcüməni qaytarır. Dəyər sətir də ola bilər (hər üç dildə eyni qalır).
+   * ⚠ Fallback ZƏNCİRİ: şablonun aktiv dili → şablonun AZ-ı → sistemin öz
+   * tərcüməsi. Beləliklə yarımçıq tərcümə boş başlıq yaratmır.
+   */
+  const L = (key, field, fallback) => {
+    const v = sectionLabels?.[key]?.[field]
+    if (!v) return fallback
+    if (typeof v === 'string') return v
+    return v[lang] || v.az || fallback
+  }
+
+  /* Location: naviqasiya linkləri tək mənbədən (MapSection) gəlir —
+     hədəf yoxdursa `null` olur və düymə render edilmir. */
+  const dirUrl = directionsUrl(weddingData)
+  const mapUrl = openMapUrl(weddingData)
 
   const isCouple = ['toy', 'nishan'].includes(weddingData.eventType)
   const isCorp   = ['corporate', 'other'].includes(weddingData.eventType)
@@ -370,7 +403,7 @@ export default function TemplateShell({
             {S.countdown && (
             <section style={sectionStyle(1)}>
               <Reveal style={inner}>
-                <SectionHead kicker="Countdown" title={cd.title} theme={theme} design={D} serif={serif} />
+                <SectionHead kicker={L('countdown', 'kicker', 'Countdown')} title={L('countdown', 'title', cd.title)} theme={theme} design={D} serif={serif} />
                 <Stagger base={55} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'clamp(6px, 2vw, 8px)' }}>
                   {[
                     { v: cd.days, l: cd.labels.days },
@@ -398,35 +431,22 @@ export default function TemplateShell({
             {S.venue && (
             <section style={sectionStyle(2)}>
               <Reveal style={inner}>
-                <SectionHead kicker="LOCATION" title={tr.inv_location} theme={theme} design={D} serif={serif} />
+                <SectionHead kicker={L('venue', 'kicker', 'LOCATION')} title={L('venue', 'title', tr.inv_location)} theme={theme} design={D} serif={serif} />
                 <div style={{ borderRadius: D.radius, overflow: 'hidden', border: `1px solid ${line}` }}>
-                  {/* Hibrid xəritə — məkanın koordinatı varsa real OSM tile mozaikası,
-                      yoxdursa köhnə abstrakt şəbəkə kartı (heç vaxt boş blok olmur). */}
+                  {/* Canlı Google Maps — hədəf/açar yoxdursa MapSection özü
+                      dekorativ kartı verir (heç vaxt boş blok olmur). */}
                   <div style={{
                     position: 'relative', overflow: 'hidden',
                     background: `radial-gradient(120% 120% at 50% 50%, ${alpha(theme.primary, 0.22)}, ${alpha(theme.background, 0.9)})`,
                     borderBottom: `1px solid ${alpha(theme.primary, 0.22)}`,
                   }}>
-                    <MapMosaic
+                    <MapSection
                       weddingData={weddingData}
                       theme={theme}
+                      accent={ACC}
                       map={D.map}
                       frame={<MapRings accent={ACC} />}
                     />
-                    {!hasCoords && (
-                      <div style={{
-                        height: 'clamp(148px, 42vw, 168px)', position: 'relative', overflow: 'hidden',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      }}>
-                        <span style={{
-                          position: 'absolute', inset: 0, opacity: 0.2,
-                          backgroundImage: `linear-gradient(${alpha(theme.accent, 0.35)} 1px, transparent 1px), linear-gradient(90deg, ${alpha(theme.accent, 0.35)} 1px, transparent 1px)`,
-                          backgroundSize: '26px 26px',
-                        }} />
-                        <MapRings accent={ACC} />
-                        <span style={{ width: 12, height: 12, borderRadius: '50%', background: ACC, boxShadow: `0 0 0 8px ${alpha(theme.primary, 0.16)}` }} />
-                      </div>
-                    )}
                   </div>
                   <div style={{ padding: 'clamp(14px, 4vw, 18px)', background: card }}>
                     <div style={{ fontFamily: serif, fontSize: 'clamp(17px, 5vw, 20px)', color: theme.text }}>
@@ -439,8 +459,17 @@ export default function TemplateShell({
                       </div>
                     )}
                     <Stagger base={110} style={{ display: 'flex', gap: 6, marginTop: 14, flexWrap: 'wrap' }}>
-                      <a data-press href={weddingData.googleMapsUrl || '#'} target="_blank" rel="noopener noreferrer" style={btn(true)}>Maps</a>
-                      <a data-press href={weddingData.wazeUrl || '#'} target="_blank" rel="noopener noreferrer" style={btn(false)}>Waze</a>
+                      {/* Yol göstər — hədəf yoxdursa düymə ÜMUMİYYƏTLƏ çıxmır
+                          (əvvəllər `href="#"` ilə ölü düymə qalırdı). */}
+                      {dirUrl && (
+                        <a data-press href={dirUrl} target="_blank" rel="noopener noreferrer" style={btn(true)}>{tr.inv_directions_btn}</a>
+                      )}
+                      {mapUrl && (
+                        <a data-press href={mapUrl} target="_blank" rel="noopener noreferrer" style={btn(!dirUrl)}>Maps</a>
+                      )}
+                      {weddingData.wazeUrl && (
+                        <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Waze</a>
+                      )}
                       {weddingData.appleMapsUrl && (
                         <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Apple</a>
                       )}
@@ -455,23 +484,80 @@ export default function TemplateShell({
             {S.program && (
             <section style={sectionStyle(3)}>
               <Reveal style={inner}>
-                <SectionHead kicker="Schedule" title={timeline.sectionLabel} theme={theme} design={D} serif={serif} />
-                <Stagger base={55} style={{ display: 'flex', flexDirection: 'column', gap: 16, textAlign: 'left' }}>
-                  {timeline.events.map((ev, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 'clamp(10px, 3vw, 14px)' }}>
-                      <span style={{ width: 44, flex: '0 0 auto', fontSize: 10, letterSpacing: '.1em', color: theme.muted, paddingTop: 9, textAlign: 'right' }}>
-                        {ev.time}
-                      </span>
-                      <span style={{
-                        width: 32, height: 32, flex: '0 0 auto', border: `1px solid ${alpha(theme.accent, 0.3)}`,
-                        borderRadius: D.radius === 0 ? 0 : 8, background: card,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14,
-                      }}>{ev.icon}</span>
-                      <span style={{ paddingTop: 6, fontFamily: serif, fontSize: 'clamp(15px, 4.4vw, 17px)', color: theme.text, minWidth: 0 }}>
-                        {ev.label}
-                      </span>
-                    </div>
-                  ))}
+                <SectionHead kicker={L('program', 'kicker', 'Schedule')} title={L('program', 'title', timeline.sectionLabel)} theme={theme} design={D} serif={serif} />
+                {/* ── Proqramın vizual variantı (Phase 41) ────────────────
+                    Claude Design-da hər şablon cədvəli ÖZ dilində qurur:
+                      'timeline'  — ikon + saat + ad (default, 9 köhnə şablon)
+                      'table'     — saat | ad, aralarında qayda xətti
+                                    (Boarding Pass uçuş cədvəli, Gazette)
+                      'tracklist' — A1 | ad | saat (Vinyl plyonka trekləri)
+                    ⚠ DATA EYNİDİR: hər üç variant `timeline.events`-i oxuyur.
+                    Knob verilməyəndə 'timeline' qalır → köhnə şablonlar
+                    zərrə qədər dəyişmir. */}
+                <Stagger base={55} style={{ display: 'flex', flexDirection: 'column', gap: D.programStyle ? 0 : 16, textAlign: 'left' }}>
+                  {timeline.events.map((ev, i) => {
+                    const last = i === timeline.events.length - 1
+                    const rule = `1px ${D.programRule || 'solid'} ${alpha(theme.accent, 0.22)}`
+
+                    if (D.programStyle === 'table') {
+                      return (
+                        <div key={i} style={{
+                          display: 'flex', gap: 'clamp(10px, 3.5vw, 14px)', alignItems: 'baseline',
+                          padding: '11px 0', borderBottom: rule,
+                        }}>
+                          <span style={{
+                            flex: '0 0 auto', minWidth: 46, fontFamily: serif, fontWeight: 700,
+                            fontSize: 'clamp(14px, 4.2vw, 15px)', color: ACC, fontVariantNumeric: 'tabular-nums',
+                          }}>{ev.time}</span>
+                          <span style={{
+                            fontFamily: sans, fontSize: 'clamp(11.5px, 3.4vw, 12.5px)',
+                            color: theme.text, lineHeight: 1.5, minWidth: 0,
+                          }}>{ev.label}</span>
+                        </div>
+                      )
+                    }
+
+                    if (D.programStyle === 'tracklist') {
+                      return (
+                        <div key={i} style={{
+                          display: 'flex', alignItems: 'center', gap: 12,
+                          padding: '11px 0', borderBottom: last ? 'none' : rule,
+                        }}>
+                          <span style={{
+                            flex: '0 0 auto', minWidth: 22, fontFamily: sans, fontSize: 10,
+                            color: D.programIndexColor || ACC, letterSpacing: '.08em',
+                          }}>
+                            {`${D.programPrefix || ''}${i + 1}`}
+                          </span>
+                          <span style={{
+                            flex: 1, fontFamily: serif, fontWeight: 500,
+                            fontSize: 'clamp(13px, 4vw, 14px)', color: theme.text, minWidth: 0,
+                          }}>{ev.label}</span>
+                          <span style={{
+                            flex: '0 0 auto', fontFamily: sans, fontSize: 10, color: theme.muted,
+                            fontVariantNumeric: 'tabular-nums',
+                          }}>{ev.time}</span>
+                        </div>
+                      )
+                    }
+
+                    /* default — ikonlu zaman xətti (dəyişməyib) */
+                    return (
+                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 'clamp(10px, 3vw, 14px)' }}>
+                        <span style={{ width: 44, flex: '0 0 auto', fontSize: 10, letterSpacing: '.1em', color: theme.muted, paddingTop: 9, textAlign: 'right' }}>
+                          {ev.time}
+                        </span>
+                        <span style={{
+                          width: 32, height: 32, flex: '0 0 auto', border: `1px solid ${alpha(theme.accent, 0.3)}`,
+                          borderRadius: D.radius === 0 ? 0 : 8, background: card,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14,
+                        }}>{ev.icon}</span>
+                        <span style={{ paddingTop: 6, fontFamily: serif, fontSize: 'clamp(15px, 4.4vw, 17px)', color: theme.text, minWidth: 0 }}>
+                          {ev.label}
+                        </span>
+                      </div>
+                    )
+                  })}
                 </Stagger>
               </Reveal>
             </section>
@@ -481,7 +567,7 @@ export default function TemplateShell({
             {S.dresscode && (
             <section style={sectionStyle(4)}>
               <Reveal style={inner}>
-                <SectionHead kicker="STYLE" title={tr.inv_dresscode} theme={theme} design={D} serif={serif} />
+                <SectionHead kicker={L('dresscode', 'kicker', 'STYLE')} title={L('dresscode', 'title', tr.inv_dresscode)} theme={theme} design={D} serif={serif} />
                 <DressCodeSection
                   theme={theme}
                   paletteId={weddingData.dressCodePalette}
@@ -501,7 +587,7 @@ export default function TemplateShell({
             {canShowSeating && !seating.isEmpty && (
               <section style={sectionStyle(5)}>
                 <Reveal style={inner}>
-                  <SectionHead kicker="SEATING" title={seating.labels.title} sub={seating.labels.sub} theme={theme} design={D} serif={serif} />
+                  <SectionHead kicker={L('seating', 'kicker', 'SEATING')} title={L('seating', 'title', seating.labels.title)} sub={seating.labels.sub} theme={theme} design={D} serif={serif} />
                   {/* ⚠ Təkliflər siyahısı normal document flow-da — overlap olmur */}
                   <Stagger base={55} style={{ textAlign: 'left' }}>
                     <input
@@ -582,7 +668,7 @@ export default function TemplateShell({
               <section id="gallery-section" style={sectionStyle(6)}>
                 <Reveal style={inner}>
                   <Stagger base={0} style={{ background: card, border: `1px solid ${line}`, borderRadius: D.radius, padding: 'clamp(16px, 5vw, 22px)', textAlign: 'center' }}>
-                    <SectionHead kicker="Gallery" title={tr.inv_gallery} theme={theme} design={D} serif={serif} />
+                    <SectionHead kicker={L('gallery', 'kicker', 'Gallery')} title={L('gallery', 'title', tr.inv_gallery)} theme={theme} design={D} serif={serif} />
 
                     {gallery.demoPhotos.length > 0 && (
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 18 }}>
@@ -620,11 +706,11 @@ export default function TemplateShell({
               <section style={sectionStyle(7)}>
                 <Reveal style={inner}>
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: ACC }}>
-                    <span style={{ width: 22, height: 1, background: alpha(ACC, 0.6) }} />RSVP
+                    <span style={{ width: 22, height: 1, background: alpha(ACC, 0.6) }} />{L('rsvp', 'kicker', 'RSVP')}
                     <span style={{ width: 22, height: 1, background: alpha(ACC, 0.6) }} />
                   </div>
                   <div style={{ fontFamily: serif, fontStyle: D.headingStyle, fontSize: 'clamp(22px, 6.5vw, 28px)', color: HEAD, marginTop: 12, lineHeight: 1.3 }}>
-                    {rsvp.labels.title}
+                    {L('rsvp', 'title', rsvp.labels.title)}
                   </div>
                   <div style={{ fontSize: 12.5, color: theme.muted, margin: '10px 0 20px' }}>{rsvp.labels.subtitle}</div>
 
@@ -746,7 +832,7 @@ export default function TemplateShell({
             {S.guestbook && (
             <section style={sectionStyle(8)}>
               <Reveal style={inner}>
-                <SectionHead kicker="Guestbook" title={gbook.labels.title} theme={theme} design={D} serif={serif} />
+                <SectionHead kicker={L('guestbook', 'kicker', 'Guestbook')} title={L('guestbook', 'title', gbook.labels.title)} theme={theme} design={D} serif={serif} />
                 <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 18, textAlign: 'left' }}>
                   <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbook.labels.namePh} style={inputStyle} />
                   <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbook.labels.msgPh} rows={3}

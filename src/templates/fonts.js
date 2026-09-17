@@ -20,6 +20,14 @@ const FONT_HREF =
   '&family=Archivo:wght@300;400;500;600' +
   '&family=Jost:wght@200;300;400;500' +
   '&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500' +
+  /* Phase 41 — Claude Design «Seçilmiş 7» dəsti üçün.
+     Çəkilər QƏSDƏN dardır: dizayn faylının işlətdiyi variantlar qədər,
+     bir dənə də artıq deyil (lazy dəstə olsa da hər ailə bir fayldır). */
+  '&family=Space+Grotesk:wght@300;400;500;700' +   /* Boarding Pass, Vinyl   */
+  '&family=JetBrains+Mono:wght@300;400;500' +      /* Boarding Pass, Vinyl   */
+  '&family=Bebas+Neue' +                            /* Cinema Premiere        */
+  '&family=Cinzel:wght@400;500;600' +               /* Royal Palace           */
+  '&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400' + /* Gazette        */
   '&display=swap'
 
 const LINK_ID = 'digitoy-template-fonts'

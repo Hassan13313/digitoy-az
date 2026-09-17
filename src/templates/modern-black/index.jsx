@@ -211,6 +211,8 @@ export default function ModernBlackTemplate(props) {
         </Ambient>
       }
       design={{
+        /* Location — xeritə şəklinin şablona məxsus rəng emalı (bax MapSection) */
+        map: { opacity: 0.28, filter: 'grayscale(1) brightness(.4) contrast(1.5) invert(1)', blend: 'multiply', tintOpacity: 0.25 },
         radius: 0,
         buttonRadius: 0,
         align: 'left',
@@ -218,8 +220,6 @@ export default function ModernBlackTemplate(props) {
         kicker: '.2em',
         dark: true,
         alternate: false,
-        /* Location — OSM tile mozaikasının şablona məxsus emalı */
-        map: { opacity: 0.28, filter: 'grayscale(1) brightness(.4) contrast(1.5) invert(1)', blend: 'multiply', tintOpacity: 0.25 },
         accentColor: TH.secondary,
         ctaBg: TH.accent,
         ctaText: TH.primary,

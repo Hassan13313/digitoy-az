@@ -32,8 +32,13 @@ DIST = os.path.join(ROOT, 'dist')
 SECRET_FILES = {'config.local.php', 'config.production.php'}
 
 # Repo zibili / yalnız-lokal artefaktlar
-JUNK_DIRS  = {'.claude-flow', '_logs', 'node_modules', '.git'}
-JUNK_NAMES = {'$mime', 'qiymetlendirilebilir', 'desktop.ini', '.DS_Store'}
+#   _maps   — /api/venue_map.php-in yaratdığı xəritə keşi (Phase 41).
+#             Serverdə özü yaranır və deploy-dan sonra da qalmalıdır;
+#             ZIP-ə düşsə lokal sınaq şəkillərini canlıya daşıyardıq.
+JUNK_DIRS  = {'.claude-flow', '_logs', 'node_modules', '.git', '_maps'}
+#   _router.php — yalnız lokal PHP daxili serveri üçün SPA marşrutlayıcısı.
+#                 Canlıda bu işi kök .htaccess görür.
+JUNK_NAMES = {'$mime', 'qiymetlendirilebilir', 'desktop.ini', '.DS_Store', '_router.php'}
 
 
 def is_junk(rel: str) -> bool:

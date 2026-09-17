@@ -24,6 +24,14 @@ const COMPONENTS = {
   'oriental-luxe':  lazy(() => import('./oriental-luxe')),
   'nature-touch':   lazy(() => import('./nature-touch')),
   'crystal-glass':  lazy(() => import('./crystal-glass')),
+  /* Phase 41 — Claude Design «Seçilmiş 7» dəsti (hamısı lazy) */
+  'boarding-pass':   lazy(() => import('./boarding-pass')),
+  'cinema-premiere': lazy(() => import('./cinema-premiere')),
+  'vinyl-record':    lazy(() => import('./vinyl-record')),
+  'royal-palace':    lazy(() => import('./royal-palace')),
+  'mediterranean':   lazy(() => import('./mediterranean')),
+  'gazette':         lazy(() => import('./gazette')),
+  'luxury-jewelry':  lazy(() => import('./luxury-jewelry')),
 }
 
 /** Şablonun öz komponenti varmı (yoxsa scaffold göstəriləcək)? */

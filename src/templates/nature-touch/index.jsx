@@ -211,6 +211,8 @@ export default function NatureTouchTemplate(props) {
         </Ambient>
       }
       design={{
+        /* Location — xeritə şəklinin şablona məxsus rəng emalı (bax MapSection) */
+        map: { opacity: 0.5, filter: 'grayscale(1) brightness(1.05) contrast(.95)', tintOpacity: 0.45 },
         radius: 10,
         buttonRadius: 100,
         align: 'center',
@@ -218,8 +220,6 @@ export default function NatureTouchTemplate(props) {
         kicker: '.2em',
         dark: false,
         alternate: true,
-        /* Location — OSM tile mozaikasının şablona məxsus emalı */
-        map: { opacity: 0.5, filter: 'grayscale(1) brightness(1.05) contrast(.95)', tintOpacity: 0.45 },
         headingColor: TH.text,
       }}
     />

@@ -161,6 +161,8 @@ export default function NightSkyTemplate(props) {
         </Ambient>
       }
       design={{
+        /* Location — xeritə şəklinin şablona məxsus rəng emalı (bax MapSection) */
+        map: { opacity: 0.5, filter: 'grayscale(1) brightness(.38) contrast(1.2)', tintOpacity: 0.5 },
         radius: 14,
         buttonRadius: 100,
         align: 'center',
@@ -168,8 +170,6 @@ export default function NightSkyTemplate(props) {
         kicker: '.2em',
         dark: true,
         alternate: true,
-        /* Location — OSM tile mozaikasının şablona məxsus emalı */
-        map: { opacity: 0.5, filter: 'grayscale(1) brightness(.38) contrast(1.2)', tintOpacity: 0.5 },
         headingColor: TH.text,
         accentColor: TH.accent,
         ctaBg: TH.accent,

@@ -181,6 +181,8 @@ export default function OrientalLuxeTemplate(props) {
         </Ambient>
       }
       design={{
+        /* Location — xeritə şəklinin şablona məxsus rəng emalı (bax MapSection) */
+        map: { opacity: 0.45, filter: 'grayscale(1) brightness(.45) contrast(1.2)', tintOpacity: 0.55 },
         radius: 4,
         buttonRadius: 0,
         align: 'center',
@@ -188,8 +190,6 @@ export default function OrientalLuxeTemplate(props) {
         kicker: '.2em',
         dark: true,
         alternate: true,
-        /* Location — OSM tile mozaikasının şablona məxsus emalı */
-        map: { opacity: 0.45, filter: 'grayscale(1) brightness(.45) contrast(1.2)', tintOpacity: 0.55 },
         headingColor: TH.text,
         accentColor: TH.accent,
         ctaBg: TH.accent,

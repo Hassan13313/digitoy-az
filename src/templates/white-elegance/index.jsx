@@ -146,6 +146,8 @@ export default function WhiteEleganceTemplate(props) {
         </Ambient>
       }
       design={{
+        /* Location — xeritə şəklinin şablona məxsus rəng emalı (bax MapSection) */
+        map: { opacity: 0.42, filter: 'grayscale(1) brightness(1.28) contrast(.78)', tintOpacity: 0.3 },
         radius: 2,
         buttonRadius: 0,
         align: 'center',
@@ -153,8 +155,6 @@ export default function WhiteEleganceTemplate(props) {
         kicker: '.2em',
         dark: false,
         alternate: true,
-        /* Location — OSM tile mozaikasının şablona məxsus emalı */
-        map: { opacity: 0.42, filter: 'grayscale(1) brightness(1.28) contrast(.78)', tintOpacity: 0.3 },
         headingColor: TH.text,
         accentColor: TH.accent,
         ctaBg: TH.text,

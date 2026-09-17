@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { QRCodeSVG } from 'qrcode.react'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
 import DressCodeSection from '../_shared/DressCodeSection'
-import MapMosaic, { MapRings } from '../_shared/MapMosaic'
-import { parseLatLon } from '../_shared/geo'
+import MapSection, { MapRings } from '../_shared/MapSection'
+import { directionsUrl, openMapUrl } from '../_shared/geo'
 import { OrderCta, MusicStartBubble } from '../_shared/TemplateActions'
 import TemplateOutro from '../_shared/TemplateOutro'
 import { getTemplateTheme } from '../templateConfig'
@@ -525,7 +525,9 @@ export default function RoyalGoldTemplate({
 
   const isCouple = ['toy', 'nishan'].includes(weddingData.eventType)
   /* Location: koordinat varsa real xəritə, yoxsa köhnə abstrakt kart */
-  const hasCoords = !!parseLatLon(weddingData)
+  /* Naviqasiya linkləri tək mənbədən (MapSection) — yoxdursa null */
+  const dirUrl = directionsUrl(weddingData)
+  const mapUrl = openMapUrl(weddingData)
   const isCorp   = ['corporate', 'other'].includes(weddingData.eventType)
 
   const eventLabels = {
@@ -742,29 +744,32 @@ export default function RoyalGoldTemplate({
                   background: 'radial-gradient(120% 120% at 50% 50%,#241C10,#120D07)',
                   border: `1px solid ${TH.primary}38`, position: 'relative', overflow: 'hidden',
                 }}>
-                  <MapMosaic
+                  <MapSection
                     weddingData={weddingData}
                     theme={TH}
+                    accent={TH.primary}
                     map={{ opacity: 0.55, filter: 'grayscale(1) brightness(.42) contrast(1.15)', tintOpacity: 0.4 }}
                     frame={<MapRings accent={TH.primary} />}
+                    /* Royal Gold-un ÖZ fallback-ı: `rg-halo` döyünən nöqtə —
+                       xəritə hədəfi olmayanda şablonun dili qorunur. */
+                    fallback={(
+                      <div style={{
+                        height: 'clamp(148px, 42vw, 168px)', display: 'flex', alignItems: 'center',
+                        justifyContent: 'center', position: 'relative', overflow: 'hidden',
+                      }}>
+                        <span style={{
+                          position: 'absolute', inset: 0, opacity: .2,
+                          backgroundImage: `linear-gradient(${TH.primary}59 1px, transparent 1px), linear-gradient(90deg, ${TH.primary}59 1px, transparent 1px)`,
+                          backgroundSize: '26px 26px',
+                        }} />
+                        <MapRings accent={TH.primary} />
+                        <span style={{
+                          width: 12, height: 12, borderRadius: '50%', background: TH.primary,
+                          animation: 'rg-halo 4s ease-out infinite',
+                        }} />
+                      </div>
+                    )}
                   />
-                  {!hasCoords && (
-                    <div style={{
-                      height: 'clamp(148px, 42vw, 168px)', display: 'flex', alignItems: 'center',
-                      justifyContent: 'center', position: 'relative', overflow: 'hidden',
-                    }}>
-                      <span style={{
-                        position: 'absolute', inset: 0, opacity: .2,
-                        backgroundImage: `linear-gradient(${TH.primary}59 1px, transparent 1px), linear-gradient(90deg, ${TH.primary}59 1px, transparent 1px)`,
-                        backgroundSize: '26px 26px',
-                      }} />
-                      <MapRings accent={TH.primary} />
-                      <span style={{
-                        width: 12, height: 12, borderRadius: '50%', background: TH.primary,
-                        animation: 'rg-halo 4s ease-out infinite',
-                      }} />
-                    </div>
-                  )}
                 </div>
                 <div style={{ textAlign: 'center', marginTop: 14, fontSize: 13, color: TH.text }}>
                   {weddingData.venueName}
@@ -776,8 +781,9 @@ export default function RoyalGoldTemplate({
                   </div>
                 )}
                 <Stagger base={165} style={{ display: 'flex', gap: 6, marginTop: 14, flexWrap: 'wrap' }}>
-                  <a data-press href={weddingData.googleMapsUrl || '#'} target="_blank" rel="noopener noreferrer" style={btn(true)}>Maps</a>
-                  <a data-press href={weddingData.wazeUrl || '#'} target="_blank" rel="noopener noreferrer" style={btn(false)}>Waze</a>
+                  {dirUrl && <a data-press href={dirUrl} target="_blank" rel="noopener noreferrer" style={btn(true)}>{tr.inv_directions_btn}</a>}
+                  {mapUrl && <a data-press href={mapUrl} target="_blank" rel="noopener noreferrer" style={btn(!dirUrl)}>Maps</a>}
+                  {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Waze</a>}
                   {weddingData.appleMapsUrl && (
                     <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Apple</a>
                   )}

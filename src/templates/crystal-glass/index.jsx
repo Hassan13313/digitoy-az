@@ -247,6 +247,8 @@ export default function CrystalGlassTemplate(props) {
         </Ambient>
       }
       design={{
+        /* Location — xeritə şəklinin şablona məxsus rəng emalı (bax MapSection) */
+        map: { opacity: 0.45, filter: 'grayscale(1) brightness(1.2) contrast(.8)', tintOpacity: 0.35 },
         radius: 2,
         buttonRadius: 0,
         align: 'center',
@@ -254,8 +256,6 @@ export default function CrystalGlassTemplate(props) {
         kicker: '.2em',
         dark: false,
         alternate: true,
-        /* Location — OSM tile mozaikasının şablona məxsus emalı */
-        map: { opacity: 0.45, filter: 'grayscale(1) brightness(1.2) contrast(.8)', tintOpacity: 0.35 },
         headingColor: TH.text,
       }}
     />

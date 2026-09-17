@@ -16,6 +16,8 @@ import EventTimeline from '../../components/invitation/EventTimeline'
    invitation hero, never on the landing/initial path. Visual enhancement;
    fades in when ready (fallback renders nothing, no layout shift). */
 const DynamicHeroAnimation = lazy(() => import('../../components/invitation/DynamicHeroAnimation'))
+import MapSection, { MapRings } from '../_shared/MapSection'
+import { directionsUrl, openMapUrl } from '../_shared/geo'
 import DressCodeSection from '../_shared/DressCodeSection'
 import { OrderCta, MusicStartBubble } from '../_shared/TemplateActions'
 import { Reveal, Stagger, enterDirection } from '../_shared/motion'
@@ -61,8 +63,23 @@ const DEFAULT_INV_MUSIC = buildPresetMusic(PRESET_TRACKS[0], { playMode: MUSIC_P
    Şablon müqaviləsi (bütün şablonlar bu propsları qəbul edir):
      { lang, setLang, weddingData, onBack, isDemoMode, initialGuestbook }
    ───────────────────────────────────────────────────────────────────────── */
+/* Xəritə bloku üçün minimal theme — bu şablon Tailwind class-ları ilə
+   işləyir, `theme` obyekti yoxdur. Dəyərlər templateConfig-dəki
+   `simple-luxury` token-ləri ilə EYNİDİR (krem/qızıl). */
+const SL_MAP_THEME = {
+  primary:    '#C5A059',
+  accent:     '#E8D5A3',
+  background: '#FDFAF4',
+  surface:    '#F2EAD6',
+}
+
 export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBack, isDemoMode = false, initialGuestbook }) {
   const tr = t[lang]
+
+  /* Naviqasiya linkləri tək mənbədən (MapSection) — hədəf yoxdursa null,
+     onda düymə render edilmir (əvvəlki `href="#"` ölü düyməsi aradan qalxdı). */
+  const dirUrl = directionsUrl(weddingData)
+  const mapUrl = openMapUrl(weddingData)
   const [envelopeOpened, setEnvelopeOpened] = useState(false)
   const musicRef = useRef(null)
 
@@ -316,29 +333,60 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
                     <p className="text-brown-muted/75 text-[13px] font-light tracking-wide leading-relaxed mt-1">{weddingData.venueNote}</p>
                   )}
                 </div>
+                {/* Canlı Google xəritəsi (Phase 41) — əvvəllər bu şablonda
+                    ÜMUMİYYƏTLƏ xəritə yox idi, yalnız düymələr vardı.
+                    ⚠ Hündürlük sabitdir → CLS yaranmır; hədəf/açar yoxdursa
+                    MapSection dekorativ kartı verir, boş blok qalmır. */}
+                <div className="mb-8 rounded-2xl overflow-hidden border border-gold/25">
+                  <MapSection
+                    weddingData={weddingData}
+                    theme={SL_MAP_THEME}
+                    accent={SL_MAP_THEME.primary}
+                    height="clamp(160px, 46vw, 196px)"
+                    /* Krem-qızıl şablon — xəritə açıq və isti tonda qalır */
+                    map={{ opacity: 0.46, filter: 'grayscale(1) brightness(1.15) contrast(.85)', tintOpacity: 0.34 }}
+                    frame={<MapRings accent={SL_MAP_THEME.primary} />}
+                  />
+                </div>
                 <GoldDividerOrnament />
                 <Stagger base={110} className="flex gap-3 mt-4">
-                  <a
-                    data-press
-                    href={weddingData.googleMapsUrl || '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 btn-gold text-xs"
-                  >
-                    <MapPin size={13} strokeWidth={1.5} />
-                    <span className="hidden sm:inline">Google Maps</span>
-                    <span className="sm:hidden">Maps</span>
-                  </a>
-                  <a
-                    data-press
-                    href={weddingData.wazeUrl || '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 btn-outline-gold text-xs"
-                  >
-                    <Navigation size={13} strokeWidth={1.5} />
-                    Waze
-                  </a>
+                  {dirUrl && (
+                    <a
+                      data-press
+                      href={dirUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-2 btn-gold text-xs"
+                    >
+                      <Navigation size={13} strokeWidth={1.5} />
+                      {tr.inv_directions_btn}
+                    </a>
+                  )}
+                  {mapUrl && (
+                    <a
+                      data-press
+                      href={mapUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`flex-1 flex items-center justify-center gap-2 text-xs ${dirUrl ? 'btn-outline-gold' : 'btn-gold'}`}
+                    >
+                      <MapPin size={13} strokeWidth={1.5} />
+                      <span className="hidden sm:inline">Google Maps</span>
+                      <span className="sm:hidden">Maps</span>
+                    </a>
+                  )}
+                  {weddingData.wazeUrl && (
+                    <a
+                      data-press
+                      href={weddingData.wazeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-2 btn-outline-gold text-xs"
+                    >
+                      <Navigation size={13} strokeWidth={1.5} />
+                      Waze
+                    </a>
+                  )}
                   {weddingData.appleMapsUrl && (
                     <a
                       data-press

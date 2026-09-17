@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { QRCodeSVG } from 'qrcode.react'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
 import DressCodeSection from '../_shared/DressCodeSection'
-import MapMosaic, { MapRings } from '../_shared/MapMosaic'
-import { parseLatLon } from '../_shared/geo'
+import MapSection, { MapRings } from '../_shared/MapSection'
+import { directionsUrl, openMapUrl } from '../_shared/geo'
 import { OrderCta, MusicStartBubble } from '../_shared/TemplateActions'
 import TemplateOutro from '../_shared/TemplateOutro'
 import { getTemplateTheme } from '../templateConfig'
@@ -440,7 +440,9 @@ export default function FloralGardenTemplate({
 
   const isCouple = ['toy', 'nishan'].includes(weddingData.eventType)
   /* Location: koordinat varsa real xəritə, yoxsa köhnə abstrakt kart */
-  const hasCoords = !!parseLatLon(weddingData)
+  /* Naviqasiya linkləri tək mənbədən (MapSection) — yoxdursa null */
+  const dirUrl = directionsUrl(weddingData)
+  const mapUrl = openMapUrl(weddingData)
   const isCorp   = ['corporate', 'other'].includes(weddingData.eventType)
 
   const eventLabels = {
@@ -658,26 +660,29 @@ export default function FloralGardenTemplate({
                   {/* Hibrid xəritə — koordinat varsa OSM tile mozaikası,
                       yoxdursa köhnə botanik nöqtə fonu (boş blok olmur). */}
                   <div style={{ background: 'linear-gradient(150deg,#E4E7DC,#D3D9C8)', position: 'relative', overflow: 'hidden' }}>
-                    <MapMosaic
+                    <MapSection
                       weddingData={weddingData}
                       theme={TH}
+                      accent={TH.primary}
+                      /* Açıq fonlu şablon — xəritə qaraldılmır, işıqlandırılır */
                       map={{ opacity: 0.5, filter: 'grayscale(1) brightness(1.12) contrast(.9)', tintOpacity: 0.42 }}
                       frame={<MapRings accent={TH.primary} />}
-                    />
-                    {!hasCoords && (
-                      <div style={{
-                        height: 'clamp(148px, 42vw, 168px)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
-                      }}>
+                      /* Floral Garden-in ÖZ fallback-ı: botanik nöqtə fonu */
+                      fallback={(
                         <div style={{
-                          position: 'absolute', inset: 0, opacity: .35,
-                          backgroundImage: `radial-gradient(circle at 30% 40%, ${TH.primary}80 0 3px, transparent 4px), radial-gradient(circle at 72% 66%, ${TH.primary}66 0 2px, transparent 3px)`,
-                          backgroundSize: '60px 60px',
-                        }} />
-                        <MapRings accent={TH.primary} />
-                        <div style={{ width: 12, height: 12, borderRadius: '50%', background: TH.accent, boxShadow: `0 0 0 8px ${TH.accent}33` }} />
-                      </div>
-                    )}
+                          height: 'clamp(148px, 42vw, 168px)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
+                        }}>
+                          <div style={{
+                            position: 'absolute', inset: 0, opacity: .35,
+                            backgroundImage: `radial-gradient(circle at 30% 40%, ${TH.primary}80 0 3px, transparent 4px), radial-gradient(circle at 72% 66%, ${TH.primary}66 0 2px, transparent 3px)`,
+                            backgroundSize: '60px 60px',
+                          }} />
+                          <MapRings accent={TH.primary} />
+                          <div style={{ width: 12, height: 12, borderRadius: '50%', background: TH.accent, boxShadow: `0 0 0 8px ${TH.accent}33` }} />
+                        </div>
+                      )}
+                    />
                   </div>
                   <div style={{ padding: 18, background: '#FFFFFF' }}>
                     <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.primary }}>LOCATION</div>
@@ -691,8 +696,9 @@ export default function FloralGardenTemplate({
                       </div>
                     )}
                     <Stagger base={110} style={{ display: 'flex', gap: 6, marginTop: 14, flexWrap: 'wrap' }}>
-                      <a data-press href={weddingData.googleMapsUrl || '#'} target="_blank" rel="noopener noreferrer" style={pill(true)}>Maps</a>
-                      <a data-press href={weddingData.wazeUrl || '#'} target="_blank" rel="noopener noreferrer" style={pill(false)}>Waze</a>
+                      {dirUrl && <a data-press href={dirUrl} target="_blank" rel="noopener noreferrer" style={pill(true)}>{tr.inv_directions_btn}</a>}
+                      {mapUrl && <a data-press href={mapUrl} target="_blank" rel="noopener noreferrer" style={pill(!dirUrl)}>Maps</a>}
+                      {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={pill(false)}>Waze</a>}
                       {weddingData.appleMapsUrl && (
                         <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={pill(false)}>Apple</a>
                       )}
