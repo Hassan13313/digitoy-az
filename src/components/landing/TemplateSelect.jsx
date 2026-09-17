@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Check, Lock, Eye } from 'lucide-react'
-import { listTemplates, isTemplateSelectable, getStatusMeta } from '../../templates/templateConfig'
+import { listTemplates, isTemplateSelectable, getStatusMeta, getTemplateTheme } from '../../templates/templateConfig'
+import { DEMO_DATE } from '../../data/demoInvitation'
 import { trackTemplateSelected, trackTemplatePreviewed } from '../../templates/templateAnalytics'
 import { ensureTemplateFonts } from '../../templates/fonts'
 
@@ -22,11 +23,58 @@ const UI = {
 }
 
 /* Nümunə cütlük — design faylındakı ilə eyni */
-const SAMPLE = { a: 'Nigar', b: 'Rauf', date: '12 İyul 2025' }
+/* Nümunə cütlük — design faylındakı ilə eyni.
+   ⚠ Tarix SABİT YAZILMIR: keçmiş tarix builder-i köhnə göstərir. Demo ilə
+   eyni mənbədən gəlir (həmişə növbəti 13 mart). */
+const SAMPLE = { a: 'Nigar', b: 'Rauf', date: DEMO_DATE.split('-').reverse().join('.') }
 
 const serif  = "'Cormorant Garamond', Georgia, serif"
 const fill   = { position: 'absolute', inset: 0 }
 const center = { position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 10px' }
+
+/* ── ÜMUMİ MİNİATÜR — metadata-dan qurulur (Phase 43 · ISSUE #1) ──────────
+   NƏ ÜÇÜN: `THUMBS` yalnız ilk 9 şablon üçün əl ilə yazılmış art saxlayır.
+   Phase 41-də 7 yeni şablon gəldi və onlarda `THUMBS[id]` undefined idi →
+   kartın içi TAMAMİLƏ BOŞ qalırdı (yalnız düz qradiyent, nə ad, nə tarix).
+
+   Bu komponent HƏR şablon üçün `templateConfig`-dən (theme + preview) mini
+   dəvətnamə qurur. Beləliklə:
+     • heç bir şablon bir daha boş görünə bilməz — gələcəkdə əlavə olunan da
+     • hər şablon ÖZ rəngi və ÖZ şrifti ilə göstərilir, ümumi görünmür
+     • əl ilə yazılmış art varsa yenə O göstərilir (aşağıdakı seçim məntiqi)
+   ⚠ Vitrin səhifəsi (`TemplatesPage`) onsuz da bu modeli işlədirdi — indi
+   builder seçicisi də eyni mənbədən qidalanır. */
+function GenericThumb({ tpl }) {
+  const th = getTemplateTheme(tpl.id) || {}
+  const heading = th.fonts?.heading || serif
+  const body    = th.fonts?.body    || serif
+  /* Taglinein ilk hissəsi kicker kimi işlənir («Qızıl · Zərf möhürü» → «Qızıl») */
+  const kicker = tpl.tagline?.split('·')[0]?.trim() || tpl.name
+
+  return (
+    <div style={{ ...fill, background: tpl.preview?.background || th.background || '#FDFBF7' }}>
+      <div style={{ position: 'absolute', inset: 10, border: `1px solid ${(th.primary || '#C5A059')}40` }} />
+      <div style={center}>
+        <span style={{
+          fontFamily: body, fontSize: 7.5, letterSpacing: '.18em', textTransform: 'uppercase',
+          color: th.primary || '#C5A059', marginBottom: 7, maxWidth: '100%',
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        }}>{kicker}</span>
+
+        <span style={{ fontFamily: heading, fontSize: 15, color: th.accent || th.text, lineHeight: 1.22 }}>{SAMPLE.a}</span>
+        <span style={{ fontFamily: heading, fontSize: 9, color: th.primary || '#C5A059', margin: '1px 0' }}>&amp;</span>
+        <span style={{ fontFamily: heading, fontSize: 15, color: th.accent || th.text, lineHeight: 1.22 }}>{SAMPLE.b}</span>
+
+        <span style={{ width: 24, height: 1, background: th.primary || '#C5A059', margin: '8px 0', opacity: .7 }} />
+
+        <span style={{
+          fontFamily: body, fontSize: 7, letterSpacing: '.14em',
+          color: th.muted || th.text, opacity: .85,
+        }}>{SAMPLE.date}</span>
+      </div>
+    </div>
+  )
+}
 
 /* ── Hər şablonun öz thumbnail kompozisiyası ── */
 const THUMBS = {
@@ -76,7 +124,7 @@ const THUMBS = {
 
   'modern-black': () => (
     <div style={{ ...fill, background: '#0A0A0A', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 12, gap: 5 }}>
-      <span style={{ fontSize: 8, letterSpacing: '.14em', textTransform: 'uppercase', color: '#6C6C6C' }}>12.07.25 — BAKI</span>
+      <span style={{ fontSize: 8, letterSpacing: '.14em', textTransform: 'uppercase', color: '#6C6C6C' }}>{`${SAMPLE.date} — BAKI`}</span>
       <span style={{ fontFamily: "'Archivo','Inter',sans-serif", fontWeight: 500, fontSize: 20, lineHeight: .94, letterSpacing: '-.04em', color: '#FFF', textTransform: 'uppercase' }}>
         NİGAR<br />RAUF
       </span>
@@ -163,11 +211,13 @@ function StatusBadge({ badge }) {
 }
 
 function TemplateThumbnail({ tpl, selected, locked }) {
+  /* ⚠ Əl ilə yazılmış art ÜSTÜNDÜR (ilk 9 şablonun öz kompozisiyası var),
+     amma olmayanda BOŞ QALMIR — metadata-dan qurulan miniatür göstərilir. */
   const Art = THUMBS[tpl.id]
 
   return (
     <div className="relative w-full overflow-hidden" style={{ aspectRatio: '3 / 4', background: tpl.preview?.background || '#FDFBF7' }}>
-      {Art ? <Art /> : null}
+      {Art ? <Art /> : <GenericThumb tpl={tpl} />}
 
       {selected && (
         <span className="absolute top-2 right-2 w-5 h-5 rounded-full bg-gold flex items-center justify-center shadow-[0_2px_8px_rgba(197,160,89,0.5)] z-10">

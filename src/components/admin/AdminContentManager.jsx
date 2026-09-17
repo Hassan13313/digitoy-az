@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { X, Check, RotateCcw, Smartphone, Monitor, Type, Palette, Layout, FileText } from 'lucide-react'
 import { getInvitationContent, saveInvitationContent, getInvitation } from '../../utils/api'
 import TemplateRenderer from '../../templates/TemplateRenderer'
@@ -143,6 +143,13 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
   const [lang, setLang] = useState('az')
   const [device, setDevice] = useState('mobile')
 
+  /* ── Canlı önbaxış (Phase 43 · ISSUE #5) ──────────────────────────────
+     `previewData` hər klaviatura vuruşunda yenidən qurulur; onu BİRBAŞA
+     render etsək bütün dəvətnamə ağacı hər simvolda yenidən çəkilir və
+     yazmaq «yapışqan» olur. Ona görə 90 ms debounce var — istifadəçi üçün
+     dərhal görünür, amma render sayı kəskin azalır. */
+  const scrollBoxRef = useRef(null)
+
   /* Redaktə olunan vəziyyət */
   const [theme, setTheme]       = useState({})
   const [fonts, setFonts]       = useState({})
@@ -203,6 +210,37 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
       admin: Object.keys(admin).length ? admin : undefined,
     }
   }, [wedding, theme, fonts, labels, sections])
+
+  /* ── Debounce (maks. 100 ms tələbi) ───────────────────────────────────
+     `previewData` hər klaviatura vuruşunda yeni obyektdir. Onu birbaşa
+     render etsək bütün dəvətnamə ağacı hər simvolda yenidən çəkilir və
+     yazmaq «yapışqan» olur. 90 ms gözləmə gözlə görünmür, amma render
+     sayını kəskin azaldır.
+     ⚠ setState `setTimeout` içindədir (sinxron deyil) — kaskad render
+     yaratmır. */
+  const [shownData, setShownData] = useState(null)
+  useEffect(() => {
+    if (!previewData) return undefined
+    const t = setTimeout(() => setShownData(previewData), 90)
+    return () => clearTimeout(t)
+  }, [previewData])
+
+  /**
+   * Redaktə olunan bölməni önbaxışda tapıb yumşaq sürüşdür.
+   * ⚠ `scrollIntoView` İŞLƏMİR: önbaxış `transform: scale(...)` ilə
+   * kiçildilib və brauzer sürüşmə hesabını miqyasdan ƏVVƏLKİ ölçüyə görə
+   * aparır — bölmə yanlış yerə düşür. Ona görə offset əl ilə hesablanır
+   * və miqyasa vurulur.
+   */
+  const focusSection = useCallback((key) => {
+    const box = scrollBoxRef.current
+    if (!box) return
+    const el = box.querySelector(`[data-section="${key}"]`)
+    if (!el) return
+    const scale = device === 'mobile' ? 0.86 : 0.34
+    const top = el.offsetTop * scale
+    box.scrollTo({ top: Math.max(0, top - 16), behavior: 'smooth' })
+  }, [device])
 
   const setLabelField = useCallback((key, field, lg, value) => {
     setLabels((prev) => {
@@ -266,6 +304,7 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
                 <input
                   type="text" value={entry.kicker || ''} placeholder="—"
                   onChange={(e) => setLabelField(sec.key, 'kicker', null, e.target.value)}
+                  onFocus={() => focusSection(sec.key)}
                   style={{ ...input, textTransform: 'uppercase' }}
                 />
               </div>
@@ -274,6 +313,7 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
                 <input
                   type="text" value={entry.title?.[lang] || ''} placeholder="Şablonun öz mətni"
                   onChange={(e) => setLabelField(sec.key, 'title', lang, e.target.value)}
+                  onFocus={() => focusSection(sec.key)}
                   style={input}
                 />
               </div>
@@ -407,7 +447,7 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
                 </span>
               )}
             </span>
-            <Toggle on={on} onChange={(v) => setSections((prev) => ({ ...prev, [def.id]: v }))} />
+            <Toggle on={on} onChange={(v) => { setSections((prev) => ({ ...prev, [def.id]: v })); focusSection(def.id) }} />
           </div>
         )
       })}
@@ -566,8 +606,8 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
                 </div>
               </div>
 
-              <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: 12, display: 'flex', justifyContent: 'center' }}>
-                {previewData && templateId && hasTemplateComponent(templateId) ? (
+              <div ref={scrollBoxRef} style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: 12, display: 'flex', justifyContent: 'center' }}>
+                {shownData && templateId && hasTemplateComponent(templateId) ? (
                   <div style={{
                     /* ⚠ `zoom` DEYİL, `transform: scale` — zoom Firefox-da yoxdur.
                        Kiçildilmiş çərçivə şablonun öz responsiv sınaq nöqtələrini
@@ -586,11 +626,14 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
                       key={`${templateId}-${lang}`}
                       template={templateId}
                       isPreview
-                      weddingData={previewData}
+                      weddingData={shownData}
                       lang={lang}
                       isDemoMode
                       onBack={() => {}}
                       setLang={setLang}
+                      /* ⚠ Açılış ekranını atla: yoxsa önbaxış zərfdə ilişir
+                         və admin redaktə etdiyi bölmələri görmür. */
+                      startOpened
                     />
                   </div>
                 ) : (

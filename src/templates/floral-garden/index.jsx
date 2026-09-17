@@ -564,7 +564,10 @@ export default function FloralGardenTemplate({
               <LanguageSwitcher lang={lang} setLang={setLang} theme={TH} />
             </header>
 
-            {/* 04 — HERO (design: sola düzləndirilmiş, mobil oxunaqlılıq üçün) */}
+            {/* 04 — HERO
+                ⚠ Phase 43: əvvəl sola düzləndirilmişdi. İndi bütün şablonlarda
+                hero MƏRKƏZDƏDİR (referans: Royal Palace) — cütlüyün adı
+                kənarda qalmasın. Bölmənin qalan hissələri toxunulmayıb. */}
             <section style={{ position: 'relative', padding: '52px 28px 48px', overflow: 'hidden' }}>
               {/* Akvarel ləkəsi parallaksla dərinlik verir (scroll-a əks istiqamət) */}
               <Parallax
@@ -576,7 +579,7 @@ export default function FloralGardenTemplate({
                   top: -70, right: -90, filter: 'blur(24px)', pointerEvents: 'none',
                 }}
               />
-              <div style={{ position: 'relative', maxWidth: 560, margin: '0 auto' }}>
+              <div style={{ position: 'relative', maxWidth: 560, margin: '0 auto', textAlign: 'center' }}>
                 <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.primary, marginBottom: 12 }}>
                   {eventLabel}
                 </div>

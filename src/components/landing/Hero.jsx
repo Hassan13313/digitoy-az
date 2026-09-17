@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { DEMO_DATE } from '../../data/demoInvitation'
 import { ChevronDown, Timer, MapPin, Shirt, Users, Camera, Music, Crown, ChevronLeft, ChevronRight, UserCheck, Clock, BookOpen, Eye } from 'lucide-react'
 
 const MaleSuitIcon = () => (
@@ -274,7 +275,9 @@ function MusicPlayer({ tr }) {
 
 function FeatureContent({ featureKey, tr }) {
   const [seatingName, setSeatingName] = useState('')
-  const WEDDING_DATE = new Date('2027-09-20T18:00:00')
+  /* ⚠ SABİT TARİX YAZILMIR: keçəndə sayğac sıfırlanıb «0 gün» göstərərdi.
+     Demo ilə eyni mənbə (həmişə növbəti 13 mart) — bax data/demoInvitation.js */
+  const WEDDING_DATE = new Date(`${DEMO_DATE}T19:00:00`)
   const calcTime = () => {
     const diff = WEDDING_DATE - Date.now()
     if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 }

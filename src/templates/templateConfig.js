@@ -55,21 +55,19 @@ export const STATUS_META = {
    Naməlum kateqoriya üçün `getCategoryMeta` id-nin özünü qaytarır, yəni
    bura yazmaq unudulsa da səhifə sınmır. */
 export const CATEGORY_META = {
-  classic:   { az: 'Klassik',  en: 'Classic',   ru: 'Классика'  },
-  luxury:    { az: 'Lüks',     en: 'Luxury',    ru: 'Люкс'      },
-  floral:    { az: 'Çiçəkli',  en: 'Floral',    ru: 'Цветочный' },
-  modern:    { az: 'Modern',   en: 'Modern',    ru: 'Модерн'    },
-  minimal:   { az: 'Minimal',  en: 'Minimal',   ru: 'Минимализм'},
-  celestial: { az: 'Səma',     en: 'Celestial', ru: 'Небесный'  },
-  oriental:  { az: 'Şərq',     en: 'Oriental',  ru: 'Восточный' },
-  nature:    { az: 'Təbiət',   en: 'Nature',    ru: 'Природа'   },
-  crystal:   { az: 'Kristal',  en: 'Crystal',   ru: 'Кристалл'  },
-  /* Phase 41 — «Seçilmiş 7» dəsti. Qalan 4 şablon mövcud kateqoriyalara
-     düşdü (modern / luxury / nature), ona görə cəmi 3 yeni çip yaranır. */
-  cinema:    { az: 'Kino',     en: 'Cinema',    ru: 'Кино'      },
-  retro:     { az: 'Retro',    en: 'Retro',     ru: 'Ретро'     },
-  editorial: { az: 'Qəzet',    en: 'Editorial', ru: 'Газетный'  },
+  /* ⚠ Phase 43-də yenidən quruldu: əvvəl 12 kateqoriya vardı və 8-i TƏK
+     şablonlu idi («Kino 1», «Retro 1»…) — vitrində peşəkarsız görünürdü.
+     Qayda: hər kateqoriyada ƏN AZI 2 şablon.
+     Yeni şablon əlavə edəndə ya mövcud qrupa qoşulsun, ya da qoşa gəlsin. */
+  luxury:    { az: 'Lüks',       en: 'Luxury',     ru: 'Люкс'        },
+  classic:   { az: 'Klassik',    en: 'Classic',    ru: 'Классика'    },
+  minimal:   { az: 'Minimalist', en: 'Minimal',    ru: 'Минимализм'  },
+  celestial: { az: 'Səma',       en: 'Celestial',  ru: 'Небесный'    },
+  nature:    { az: 'Təbiət',     en: 'Nature',     ru: 'Природа'     },
+  vintage:   { az: 'Vintage',    en: 'Vintage',    ru: 'Винтаж'      },
+  editorial: { az: 'Editorial',  en: 'Editorial',  ru: 'Editorial'   },
 }
+
 
 /** Kateqoriya id → görünən ad (naməlum id-də id-nin özü) */
 export function getCategoryLabel(category, lang = 'az') {
@@ -120,23 +118,62 @@ export function getStatusMeta(status, lang = 'az') {
 /* Design faylında istifadə olunan Google Fonts ailələri — şablonlar
    `theme.fonts` vasitəsilə istinad edir, yükləmə index.html-dədir. */
 export const FONT_STACKS = {
+  /* ── AZƏRBAYCAN HƏRFLƏRİ (Phase 43 · ISSUE #2) ────────────────────────
+     Aşağıdakı zəncirlərdə ikinci pillə TƏSADÜFİ DEYİL. Bəzi şriftlərdə
+     `Ə` (U+018F) glyph-i yoxdur və CSS həmin HƏRFİ növbəti şriftdən götürür.
+     Əvvəl növbəti pillə sistem `Georgia`/`Inter` idi — hərf gözə çarpırdı.
+     İndi hər zəncirdə vizual olaraq ƏN YAXIN, tam əhatəli VEB şrifti durur.
+
+     Brauzerdə ölçülüb — `Ə` OLMAYANLAR:
+       Italiana (Ə Ğ Ş İ) · Cinzel · Bebas Neue · Marcellus · Amiri · Jost
+     TAM əhatəlilər:
+       Cormorant · Playfair · Newsreader · Baskerville · Space Grotesk ·
+       JetBrains Mono · Archivo · DM Sans · Inter
+
+     ⚠ Yeni şrift əlavə edəndə `Ə` yoxlanmalıdır (tests/az_glyph_test.mjs). */
+
+  /* Tam əhatəli serif-lər — ikinci pilləyə ehtiyac yoxdur */
   cormorant:  "'Cormorant Garamond', Georgia, serif",
-  marcellus:  "'Marcellus', Georgia, serif",
-  instrument: "'Instrument Serif', Georgia, serif",
   newsreader: "'Newsreader', Georgia, serif",
-  italiana:   "'Italiana', Georgia, serif",
-  amiri:      "'Amiri', Georgia, serif",
+  baskerville: "'Libre Baskerville', Georgia, 'Times New Roman', serif",
+  instrument: "'Instrument Serif', 'Cormorant Garamond', Georgia, serif",
+
+  /* `Ə` çatmayan serif-lər → Cormorant/Playfair üzərinə düşür (Georgia yox) */
+  marcellus:  "'Marcellus', 'Cormorant Garamond', Georgia, serif",
+  italiana:   "'Italiana', 'Cormorant Garamond', Georgia, serif",
+  amiri:      "'Amiri', 'Cormorant Garamond', Georgia, serif",
+  /* Cinzel kapitel-kitabə üslubludur; Playfair-in majuskulları Cormorant-dan
+     daha yaxındır, ona görə birinci ehtiyat odur. */
+  cinzel:     "'Cinzel', 'Playfair Display', 'Cormorant Garamond', Georgia, serif",
+
+  /* Tam əhatəli sans-lar */
   archivo:    "'Archivo', 'Inter', system-ui, sans-serif",
-  jost:       "'Jost', 'Inter', system-ui, sans-serif",
   dmsans:     "'DM Sans', 'Inter', system-ui, sans-serif",
   inter:      "'Inter', system-ui, sans-serif",
-  /* Phase 41 — «Seçilmiş 7» dəsti (bax fonts.js) */
   spacegrotesk: "'Space Grotesk', 'Inter', system-ui, sans-serif",
   jetbrains:    "'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace",
-  bebas:        "'Bebas Neue', 'Archivo', Impact, system-ui, sans-serif",
-  cinzel:       "'Cinzel', 'Cormorant Garamond', Georgia, serif",
-  baskerville:  "'Libre Baskerville', Georgia, 'Times New Roman', serif",
+
+  /* `Ə` çatmayan sans-lar → həndəsi qohumu olan DM Sans üzərinə düşür.
+     ⚠ Jost 6 şablonun MƏTN şriftidir (floral-garden, modern-black,
+     night-sky, oriental-luxe, nature-touch, crystal-glass) — bu bir sətir
+     ən çox görünən düzəlişdir. */
+  jost:       "'Jost', 'DM Sans', 'Inter', system-ui, sans-serif",
+  /* Bebas kondensasiya olunmuş majuskuldur; Archivo dizaynın öz mətn
+     şriftidir və `Ə`-si var → təbii ehtiyatdır. */
+  bebas:      "'Bebas Neue', 'Archivo', Impact, system-ui, sans-serif",
 }
+
+/* Brauzerdə ÖLÇÜLƏRƏK təsdiqlənmiş siyahı: bu ailələrdə `Ə` glyph-i yoxdur.
+   Admin tipoqrafiya seçicisi bunları xəbərdarlıqla göstərir. */
+export const FONTS_MISSING_AZ = {
+  italiana:  'Ə Ğ Ş İ',
+  cinzel:    'Ə',
+  bebas:     'Ə',
+  marcellus: 'Ə',
+  amiri:     'Ə',
+  jost:      'Ə',
+}
+
 
 export const TEMPLATES = [
   {
@@ -175,7 +212,7 @@ export const TEMPLATES = [
     description: 'Gündüz, açıq havada, ot üzərində keçən toy. Qızıl yox — işıq və bitki.',
     shortDescription: { az: 'Botanik bağ mərasimi üslubu', en: 'Botanical garden ceremony style' },
     status: TEMPLATE_STATUS.LIVE,
-    category: 'floral',
+    category: 'classic',
     version: 1,
     previewRoute: '/demo/template/floral-garden',
     theme: {
@@ -204,7 +241,7 @@ export const TEMPLATES = [
     description: 'Minimalist qara-ağ tipoqrafik dizayn, kəskin kontrast, ornament yoxdur.',
     shortDescription: { az: 'Minimalist tipoqrafik dizayn', en: 'Minimalist typographic design' },
     status: TEMPLATE_STATUS.LIVE,
-    category: 'modern',
+    category: 'minimal',
     version: 0,
     previewRoute: '/demo/template/modern-black',
     theme: {
@@ -291,7 +328,7 @@ export const TEMPLATES = [
     description: 'Şərq ornamentləri — nar qırmızısı, buta və girih naxışı ilə qızıl.',
     shortDescription: { az: 'Şərq ornamentləri və nar tonları', en: 'Oriental ornaments and pomegranate tones' },
     status: TEMPLATE_STATUS.LIVE,
-    category: 'oriental',
+    category: 'luxury',
     version: 0,
     previewRoute: '/demo/template/oriental-luxe',
     theme: {
@@ -349,7 +386,7 @@ export const TEMPLATES = [
     description: 'Kristal refleksləri, şüşə effekti və platin aksentlər.',
     shortDescription: { az: 'Kristal refraksiya və şüşə effekti', en: 'Crystal refraction and glass effect' },
     status: TEMPLATE_STATUS.LIVE,
-    category: 'crystal',
+    category: 'celestial',
     version: 0,
     previewRoute: '/demo/template/crystal-glass',
     theme: {
@@ -368,7 +405,8 @@ export const TEMPLATES = [
       mapTint:  '#5A6874',
       footerBg:  '#2E3A44',
       footerText: '#DCE6EE',
-      fonts: { heading: FONT_STACKS.italiana, body: FONT_STACKS.jost },
+      fonts: { heading: FONT_STACKS.cormorant, body: FONT_STACKS.jost },  /* ⚠ Phase 43: Italiana idi — `Ə Ğ Ş İ` glyph-ləri yoxdur və
+     azərbaycanca başlıqlar daim qarışıq görünürdü. */
     },
     preview: {
       accent: '#5A6874',
@@ -391,7 +429,7 @@ export const TEMPLATES = [
     description: 'Dəvətnamə uçuş biletidir — check-in kartı, perforasiya xətti, barkod və mono tipoqrafiya.',
     shortDescription: { az: 'Uçuş bileti üslubunda mono dizayn', en: 'Boarding-pass styled mono design' },
     status: TEMPLATE_STATUS.LIVE,
-    category: 'modern',
+    category: 'editorial',
     version: 1,
     previewRoute: '/demo/template/boarding-pass',
     theme: {
@@ -419,7 +457,7 @@ export const TEMPLATES = [
     description: 'Bir ömürlük film — letterbox kadr, premyera afişası, qızıl titrlər və işıq süpürgəsi.',
     shortDescription: { az: 'Film premyerası üslubu', en: 'Film premiere styling' },
     status: TEMPLATE_STATUS.LIVE,
-    category: 'cinema',
+    category: 'vintage',
     version: 1,
     previewRoute: '/demo/template/cinema-premiere',
     theme: {
@@ -447,7 +485,7 @@ export const TEMPLATES = [
     description: 'Toy bir albomdur — fırlanan plyonka, qırmızı etiket, Side A / Side B proqramı və studiya mono tipoqrafiyası.',
     shortDescription: { az: 'Vinil plyonka üslubu', en: 'Vinyl record styling' },
     status: TEMPLATE_STATUS.LIVE,
-    category: 'retro',
+    category: 'vintage',
     version: 1,
     previewRoute: '/demo/template/vinyl-record',
     theme: {

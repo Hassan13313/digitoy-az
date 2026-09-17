@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, Eye, Lock } from 'lucide-react'
 import { listTemplates, listTemplateFacets, isTemplateSelectable, getStatusMeta, getTemplateTheme } from '../../templates/templateConfig'
+import { DEMO_DATE } from '../../data/demoInvitation'
+
+/* ⚠ Miniatürdəki tarix SABİT YAZILMIR: keçmiş tarix vitrini köhnə göstərir.
+   Demo ilə EYNİ mənbədən gəlir (həmişə növbəti 13 mart) → gün-gün
+   yenilənməyə ehtiyac yoxdur. */
+const DEMO_DATE_LABEL = DEMO_DATE.split('-').reverse().join('.')
+
 import { ensureTemplateFonts } from '../../templates/fonts'
 import { trackTemplatePreviewed } from '../../templates/templateAnalytics'
 import LanguageSwitcher from '../LanguageSwitcher'
@@ -120,7 +127,7 @@ function TemplateCard({ tpl, lang, ui, onPreview }) {
             color: theme.muted, fontFamily: theme.fonts?.body,
           }}
         >
-          12.07.2026
+          {DEMO_DATE_LABEL}
         </span>
 
         {!available && (

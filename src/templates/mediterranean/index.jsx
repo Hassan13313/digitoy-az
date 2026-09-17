@@ -207,14 +207,17 @@ export default function MediterraneanTemplate(props) {
            Tonlar dizayn faylındakı bölmə fonlarıdır; `pageWash` isə
            preview kartı ilə eyni dildə imza qradiyentidir — beləliklə
            vitrindəki görüntü ilə dəvətnamənin içi uyğun gəlir. */
-        sectionTones: ['transparent', 'rgba(228,239,240,.8)', 'transparent', 'rgba(242,239,231,.9)'],
+        /* Dizaynın sahil ritmi: şəffaf → yumşaq mavi → şəffaf → qum */
+        sectionTones: ['transparent', 'rgba(215,230,231,.85)', 'transparent', 'rgba(242,239,231,.85)'],
         pageWash:
-          /* Səhifə boyu bir üfüq səyahəti: yuxarıda səma, ortada sahil işığı,
-             aşağıda dəniz. Alfa dəyərləri mətn kontrastını pozmayacaq
-             həddədir (mətn #20343A, fon ~#F7F5F0 → 12:1-dən yüksək). */
-          'linear-gradient(180deg, rgba(215,230,231,.9) 0%, rgba(240,238,231,.55) 26%, '
-          + 'rgba(252,250,245,0) 48%, rgba(46,110,120,.10) 78%, rgba(46,110,120,.26) 100%), '
-          + 'radial-gradient(70% 26% at 92% 7%, rgba(217,142,90,.22), transparent 72%)',
+          /* ⚠ Dəyərlər Claude Design-ın ÖZ qradiyentlərindəndir. Əvvəlki
+             variant çox solğun idi (dəniz .14, terrakota .22) və səhifə
+             «boz/ölü» görünürdü — dizaynda isə İSTİ KƏHRƏBA işığı
+             (rgba(255,241,214,.85) / rgba(255,224,178,.5)) və daha güclü
+             dəniz (rgba(46,110,120,.32)) var. Yay hissini məhz o verir. */
+          'radial-gradient(75% 30% at 88% 6%, rgba(255,224,178,.55), transparent 70%), '
+          + 'linear-gradient(180deg, #D7E6E7 0%, rgba(234,241,242,.75) 22%, '
+          + 'rgba(252,250,245,0) 46%, rgba(46,110,120,.14) 76%, rgba(46,110,120,.32) 100%)',
         /* Location — xeritə şəklinin şablona məxsus rəng emalı (bax MapSection) */
         /* Xəritənin rəng emalı — Claude Design-dakı DƏQİQ filter zənciri.
            ⚠ tintOpacity 0-dır: dizayn ayrıca tint QATI işlətmir, rəngi

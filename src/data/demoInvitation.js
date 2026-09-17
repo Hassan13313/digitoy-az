@@ -1,8 +1,28 @@
 /* ── Demo data — statik, backend-ə sorğu getmir ── */
 
-const _d = new Date()
-_d.setMonth(_d.getMonth() + 3)
-export const DEMO_DATE = _d.toISOString().split('T')[0]
+/* ── Demo tarixi — HƏMİŞƏ NÖVBƏTİ 13 MART ────────────────────────────────
+   Həsənin tələbi «13 mart»dır, amma SABİT tarix yazmaq olmaz: 13 mart
+   keçəndən sonra geri sayım mənfiyə düşər və demo sınar (məhz qorxulan hal).
+   Ona görə tarix hesablanır — bu il 13 mart hələ gəlməyibsə bu il, gəlibsə
+   növbəti il. Beləliklə demo HEÇ VAXT keçmiş tarix göstərmir və il-il
+   yenilənməyə ehtiyac qalmır.
+
+   ⚠ Əvvəlki məntiq «bu gün + 3 ay» idi (tarix hər gün sürüşürdü).
+   ⚠ Ay indeksi 0-dan başlayır: 2 = mart. */
+function nextMarch13() {
+  const now = new Date()
+  const y = now.getFullYear()
+  /* Günü 13-dən BÖYÜK tutmuruq: 13 mart günü demo hələ «bu gün»ü göstərsin */
+  const thisYear = new Date(y, 2, 13)
+  const target = now <= thisYear ? thisYear : new Date(y + 1, 2, 13)
+  /* ⚠ `toISOString()` UTC-yə çevirir və Bakı saatında (UTC+4) tarixi bir gün
+     GERİ sürüşdürərdi (12 mart). Ona görə yerli komponentlərdən yığılır. */
+  const mm = String(target.getMonth() + 1).padStart(2, '0')
+  const dd = String(target.getDate()).padStart(2, '0')
+  return `${target.getFullYear()}-${mm}-${dd}`
+}
+
+export const DEMO_DATE = nextMarch13()
 
 export const demoInvitation = {
   eventType: 'toy',

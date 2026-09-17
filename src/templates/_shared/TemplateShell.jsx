@@ -111,9 +111,15 @@ export default function TemplateShell({
      bölmə adları YALNIZ həmin dəvətnamə üçün şablonun üstünə qoyulur.
      ⚠ null olanda hər şey əvvəlki kimidir (eyni referanslar, remount yox). */
   adminOverrides = null,
+  /* ── Açılış ekranını atla (Phase 43 · ISSUE #5) ────────────────────────
+     Admin «Məzmun meneceri»ndəki canlı önbaxış üçün. Önbaxışda zərf
+     açılışı göstərilsə admin redaktə etdiyi bölmələri ÜMUMİYYƏTLƏ görmür
+     (komponentin `key`-i dəyişmədiyinə görə açılış heç vaxt keçmir).
+     ⚠ Müştəri dəvətnaməsində HEÇ VAXT true olmur — default false. */
+  startOpened = false,
 }) {
   const tr = t[lang] || t.az
-  const [opened, setOpened] = useState(false)
+  const [opened, setOpened] = useState(startOpened)
 
   /* ⚠ Adı dəyişdirilib: aşağıdakı bütün kod `theme` adını işlədir, ona görə
      override tətbiqindən SONRAKI obyekt həmin adı alır. Override yoxdursa
@@ -238,6 +244,15 @@ export default function TemplateShell({
     }
   }
   const inner = { maxWidth: 560, margin: '0 auto', textAlign: D.align }
+
+  /* ── HERO HƏMİŞƏ MƏRKƏZDƏ (Phase 43 · ISSUE #3) ───────────────────────
+     Bəzi şablonlarda `design.align` 'left'-dir (boarding-pass, gazette,
+     vinyl-record, modern-black) və bu, hero-nu da sola yığırdı — cütlüyün
+     adı kənarda qalırdı. Referans Royal Palace hero-sudur: badge, giriş
+     mətni, adlar, ayırıcı, tarix və məkan MƏRKƏZDƏ.
+     ⚠ Yalnız HERO dəyişir — qalan bölmələr öz `align` dilini saxlayır,
+     yəni şablonun xarakteri itmir. */
+  const heroInner = { ...inner, textAlign: 'center' }
 
   const btn = (filled) => ({
     flex: 1, minWidth: 88, textAlign: 'center', display: 'block',
@@ -398,8 +413,8 @@ export default function TemplateShell({
             </header>
 
             {/* 04 — HERO */}
-            <section style={{ ...sectionStyle(0), padding: 'clamp(40px, 10vw, 56px) clamp(18px, 6vw, 28px) clamp(34px, 8vw, 48px)' }}>
-              <div style={inner}>
+            <section data-section="hero" style={{ ...sectionStyle(0), padding: 'clamp(40px, 10vw, 56px) clamp(18px, 6vw, 28px) clamp(34px, 8vw, 48px)' }}>
+              <div style={heroInner}>
                 <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: ACC, marginBottom: 12 }}>
                   {eventLabel}
                 </div>
@@ -429,7 +444,7 @@ export default function TemplateShell({
                 )}
 
                 {D.ornament ? <div style={{ margin: '20px 0' }}>{D.ornament}</div> : (
-                  <div style={{ display: 'flex', justifyContent: D.align === 'left' ? 'flex-start' : 'center', alignItems: 'center', gap: 8, margin: '20px 0' }}>
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, margin: '20px 0' }}>
                     <span style={{ width: 44, height: 1, background: alpha(theme.accent, 0.5) }} />
                     <span style={{ width: 4, height: 4, background: ACC, transform: 'rotate(45deg)' }} />
                     <span style={{ width: 44, height: 1, background: alpha(theme.accent, 0.5) }} />
@@ -457,7 +472,7 @@ export default function TemplateShell({
 
             {/* 05 — COUNTDOWN */}
             {S.countdown && (
-            <section style={sectionStyle(1)}>
+            <section data-section="countdown" style={sectionStyle(1)}>
               <Reveal style={inner}>
                 <SectionHead kicker={L('countdown', 'kicker', 'Countdown')} title={L('countdown', 'title', cd.title)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
                 <Stagger base={55} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'clamp(6px, 2vw, 8px)' }}>
@@ -485,7 +500,7 @@ export default function TemplateShell({
 
             {/* 06 — LOCATION */}
             {S.venue && (
-            <section style={sectionStyle(2)}>
+            <section data-section="venue" style={sectionStyle(2)}>
               <Reveal style={inner}>
                 <SectionHead kicker={L('venue', 'kicker', 'LOCATION')} title={L('venue', 'title', tr.inv_location)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
                 <div style={{ borderRadius: D.radius, overflow: 'hidden', border: `1px solid ${line}` }}>
@@ -538,7 +553,7 @@ export default function TemplateShell({
 
             {/* 07 — PROQRAM */}
             {S.program && (
-            <section style={sectionStyle(3)}>
+            <section data-section="program" style={sectionStyle(3)}>
               <Reveal style={inner}>
                 <SectionHead kicker={L('program', 'kicker', 'Schedule')} title={L('program', 'title', timeline.sectionLabel)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
                 {/* ── Proqramın vizual variantı (Phase 41) ────────────────
@@ -621,7 +636,7 @@ export default function TemplateShell({
 
             {/* 08 — DRESS CODE (ortaq komponent) */}
             {S.dresscode && (
-            <section style={sectionStyle(4)}>
+            <section data-section="dresscode" style={sectionStyle(4)}>
               <Reveal style={inner}>
                 <SectionHead kicker={L('dresscode', 'kicker', 'STYLE')} title={L('dresscode', 'title', tr.inv_dresscode)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
                 <DressCodeSection
@@ -641,7 +656,7 @@ export default function TemplateShell({
 
             {/* 09 — OTURMA PLANI */}
             {canShowSeating && !seating.isEmpty && (
-              <section style={sectionStyle(5)}>
+              <section data-section="seating" style={sectionStyle(5)}>
                 <Reveal style={inner}>
                   <SectionHead kicker={L('seating', 'kicker', 'SEATING')} title={L('seating', 'title', seating.labels.title)} sub={seating.labels.sub} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
                   {/* ⚠ Təkliflər siyahısı normal document flow-da — overlap olmur */}
@@ -721,7 +736,7 @@ export default function TemplateShell({
 
             {/* 10 — QALEREYA + QR */}
             {canShowGallery && (
-              <section id="gallery-section" style={sectionStyle(6)}>
+              <section id="gallery-section" data-section="gallery" style={sectionStyle(6)}>
                 <Reveal style={inner}>
                   <Stagger base={0} style={{ background: card, border: `1px solid ${line}`, borderRadius: D.radius, padding: 'clamp(16px, 5vw, 22px)', textAlign: 'center' }}>
                     <SectionHead kicker={L('gallery', 'kicker', 'Gallery')} title={L('gallery', 'title', tr.inv_gallery)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
@@ -759,7 +774,7 @@ export default function TemplateShell({
 
             {/* 11 — RSVP */}
             {canShowRsvp && (
-              <section style={sectionStyle(7)}>
+              <section data-section="rsvp" style={sectionStyle(7)}>
                 <Reveal style={inner}>
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: ACC }}>
                     <span style={{ width: 22, height: 1, background: alpha(ACC, 0.6) }} />{L('rsvp', 'kicker', 'RSVP')}
@@ -886,7 +901,7 @@ export default function TemplateShell({
 
             {/* 12 — QONAQ DƏFTƏRİ */}
             {S.guestbook && (
-            <section style={sectionStyle(8)}>
+            <section data-section="guestbook" style={sectionStyle(8)}>
               <Reveal style={inner}>
                 <SectionHead kicker={L('guestbook', 'kicker', 'Guestbook')} title={L('guestbook', 'title', gbook.labels.title)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
                 <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 18, textAlign: 'left' }}>
