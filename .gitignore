@@ -33,3 +33,10 @@ DIGITOY_AUDIT.md
 
 # Alet kesleri — her defe yeniden yaranir, commit edilmir
 .claude-flow/
+
+# ── Cihaz matrisi E2E fixture-ları (Phase 42.1) ────────────────────────────
+# ⚠ QƏSDƏN REPO-DA DEYİL: `vid_100mb.mp4` ~97 MB-dır, git tarixini şişirdər.
+# Yenidən yaratmaq üçün: tests/fixtures/README.md (ffmpeg + PHP GD əmrləri).
+tests/fixtures/*.mp4
+tests/fixtures/*.jpg
+!tests/fixtures/README.md
