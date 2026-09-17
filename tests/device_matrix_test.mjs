@@ -298,8 +298,45 @@ async function runOfflineTest(slug) {
   }
 }
 
+/* ── MÜHİT YOXLAMASI ─────────────────────────────────────────────────────
+   Bu fayl VAHİD TESTİ DEYİL — real yükləmə E2E harness-idir: işləyən server,
+   DB, 5 test dəvətnaməsi və ~100 MB media tələb edir.
+
+   Əvvəl mühit olmayanda ÇÖKÜRDÜ və `node tests/*.mjs` süpürgəsində daim
+   qırmızı görünürdü — halbuki bu, KODUN nasazlığı deyil, sadəcə mühitin
+   qurulmamasıdır. Yalançı qırmızı isə əsl nasazlığı gizlədir.
+
+   İndi mühit hazır deyilsə test SƏBƏBİ YAZIB 0 kodu ilə çıxır (SKIP).
+   Qurulum təlimatı: tests/fixtures/README.md
+   ──────────────────────────────────────────────────────────────────────── */
+const REQUIRED_MEDIA = ['phone_photo_12mp.jpg', 'real_video.mp4', 'vid_100mb.mp4']
+
+async function checkEnv() {
+  const missing = REQUIRED_MEDIA.filter((n) => !existsSync(f(n)))
+  if (missing.length) return `media fayllar yoxdur (MEDIA=${MEDIA}): ${missing.join(', ')}`
+  try {
+    /* Yüngül probe — brauzer açmadan ƏVVƏL serverin canlı olduğunu bil */
+    const r = await fetch(`${BASE}/api/health.php`, { signal: AbortSignal.timeout(6000) })
+    if (!r.ok) return `server cavab vermir: ${BASE} (HTTP ${r.status})`
+  } catch {
+    return `serverə qoşulmaq olmur: ${BASE}`
+  }
+  return null
+}
+
 console.log('DIGITOY — cihaz matrisi')
 console.log(`BASE=${BASE}`)
+
+const envProblem = await checkEnv()
+if (envProblem) {
+  console.log(`
+  SKIP — mühit qurulmayıb: ${envProblem}`)
+  console.log('  Bu, kodun nasazlığı DEYİL. Qurulum: tests/fixtures/README.md')
+  console.log('  İşlətmək: BASE=<server> MEDIA=tests/fixtures node tests/device_matrix_test.mjs')
+  console.log('  ⚠ Test REAL yükləmə edir — serverdə zz-dev-* sluglar mövcud olmalıdır.')
+  process.exit(0)
+}
+
 
 await runDevice('iPhone Safari (WebKit — əsl Safari mühərriki)', webkit, devices['iPhone 13'], 'zz-dev-ios')
 await runDevice('Android Chrome (Pixel 7)', chromium, devices['Pixel 7'], 'zz-dev-android')
