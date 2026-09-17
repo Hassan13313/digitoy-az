@@ -172,6 +172,15 @@ export default function CinemaPremiereTemplate(props) {
                     title: { az: 'Tənqidçi rəyləri', en: 'Reviews', ru: 'Отзывы' } },
       }}
       design={{
+        /* ── Vizual şəxsiyyət (Phase 42) ─────────────────────────────
+           Proyektor konusu yuxarıdan, zalın qaranlığı aşağıdan.
+           Tonlar dizayn faylındakı bölmə fonlarıdır; `pageWash` isə
+           preview kartı ilə eyni dildə imza qradiyentidir — beləliklə
+           vitrindəki görüntü ilə dəvətnamənin içi uyğun gəlir. */
+        sectionTones: ['transparent', '#0D1114', '#141013', '#101215', '#151116'],
+        pageWash:
+          'radial-gradient(100% 50% at 50% 0%, rgba(217,164,65,.10), transparent 60%), '
+          + 'radial-gradient(120% 70% at 50% 100%, rgba(20,22,26,.9), transparent 70%)',
         programStyle: 'table',
         /* Location — xeritə şəklinin şablona məxsus rəng emalı (bax MapSection) */
         /* Xəritənin rəng emalı — Claude Design-dakı DƏQİQ filter zənciri.

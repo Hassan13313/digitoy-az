@@ -6,6 +6,7 @@ import { DEFAULT_TEMPLATE_ID, resolveTemplateId } from './templateConfig'
 import { ensureTemplateFonts } from './fonts'
 import { trackTemplateView, trackTemplateFallback } from './templateAnalytics'
 import { resolveWeddingContent } from '../data/contentI18n'
+import { readOverrides } from '../data/adminOverrides'
 
 /* Şablon chunk-ı yüklənənə qədər krem fon (yalnız lazy şablonlarda görünür —
    simple-luxury statik import olduğu üçün heç vaxt bu vəziyyətə düşmür). */
@@ -67,7 +68,17 @@ export default function TemplateRenderer({ template, isPreview = false, weddingD
     () => resolveWeddingContent(weddingData, lang),
     [weddingData, lang],
   )
-  const localizedProps = { ...restProps, lang, weddingData: localizedWedding }
+  /* ── Phase 42: ADMIN OVERRIDE-LARI ──
+     `form_data.admin` açarı yalnız admin panelin Content Manager-ı tərəfindən
+     yazılır. Burada bir dəfə oxunub təmizlənir və şablona ötürülür — heç bir
+     şablon faylı `form_data`-ya birbaşa baxmır.
+     ⚠ Açar yoxdursa `null` → bütün şablonlar əvvəlki kimi işləyir. */
+  const adminOverrides = useMemo(
+    () => readOverrides(localizedWedding),
+    [localizedWedding],
+  )
+
+  const localizedProps = { ...restProps, lang, weddingData: localizedWedding, adminOverrides }
 
   /* createElement — komponent registry-dən (modul səviyyəsində sabit obyekt)
      gəlir, render zamanı yaradılmır; JSX yazılışı linter-i yanlış xəbərdarlığa

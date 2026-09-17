@@ -22,6 +22,7 @@ import { useGallery } from '../../hooks/useGallery'
 import { useMusicPlayer } from '../../hooks/useMusicPlayer'
 import { useMusicPrompt } from '../../hooks/useMusicPrompt'
 import t from '../../data/translations'
+import { applyThemeOverrides, mergeSectionLabels } from '../../data/adminOverrides'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    TEMPLATE SHELL — 13 bölməlik ortaq dəvətnamə skeleti.
@@ -53,15 +54,27 @@ function alpha(hex, a) {
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`
 }
 
+/* Başlıq ölçüsünü admin əmsalına vurur (Phase 42 · PART 5).
+
+   ⚠ `clamp()` DAXİLİNDƏ olan responsiv davranış QORUNUR: `calc()` bütöv
+   clamp dəyərini bir ədəd kimi qəbul edir, ona görə mobil/desktop
+   uyğunlaşması pozulmur — yalnız bütöv miqyas sürüşür.
+   ⚠ Əmsal yoxdursa (və ya 1-dirsə) ORİJİNAL sətir qayıdır — köhnə
+   dəvətnamələrin CSS-i zərrə qədər dəyişmir. */
+function scaleFont(size, scale) {
+  if (!scale || scale === 1 || typeof size !== 'string') return size
+  return `calc(${size} * ${scale})`
+}
+
 /* Bölmə başlığı — MODUL səviyyəsində (render daxilində yaradılsa,
    hər render-də yeni komponent tipi olar və subtree remount edilər). */
-function SectionHead({ kicker, title, sub, theme, design, serif }) {
+function SectionHead({ kicker, title, sub, theme, design, serif, headScale }) {
   return (
     <div style={{ marginBottom: 18, textAlign: design.align }}>
       <div style={{ fontSize: 10, letterSpacing: design.kicker, textTransform: 'uppercase', color: design.accentColor || theme.primary }}>{kicker}</div>
       <div style={{
         fontFamily: serif, fontStyle: design.headingStyle, fontWeight: 300,
-        fontSize: 'clamp(21px, 6vw, 26px)', color: design.headingColor || theme.accent, marginTop: 6, lineHeight: 1.25,
+        fontSize: scaleFont('clamp(21px, 6vw, 26px)', headScale), color: design.headingColor || theme.accent, marginTop: 6, lineHeight: 1.25,
         textTransform: design.headingTransform,
         letterSpacing: design.headingTransform === 'uppercase' ? '.08em' : 'normal',
       }}>{title}</div>
@@ -74,7 +87,7 @@ export default function TemplateShell({
   /* şablon propsları */
   lang, setLang, weddingData, onBack, isDemoMode = false, initialGuestbook,
   /* şablona məxsus */
-  templateId, theme, design = {}, Opening, keyframes = '', ambient = null, ambientBlend = null,
+  templateId, theme: rawTheme, design = {}, Opening, keyframes = '', ambient = null, ambientBlend = null,
   /* ── Bölmə adlarının şablona məxsus qarşılığı (Phase 41) ────────────────
      Claude Design-da hər şablon bölmələri ÖZ metaforasında adlandırır:
      Boarding Pass-da proqram «Uçuş cədvəli», Vinyl-də «Tracklist · Side A»,
@@ -92,10 +105,21 @@ export default function TemplateShell({
      aktiv dilə görə seçilir. Verilməyən bölmə/dil üçün MÖVCUD tərcümə
      (`tr.*`, hook etiketləri) işlənir — yəni 9 köhnə şablon bu propu
      ötürmür və çıxışları ZƏRRƏ QƏDƏR dəyişmir. */
-  sectionLabels = null,
+  sectionLabels: rawSectionLabels = null,
+  /* ── Admin override-ları (Phase 42) ────────────────────────────────────
+     `TemplateRenderer` `form_data.admin`-dən oxuyub ötürür. Rəng, şrift və
+     bölmə adları YALNIZ həmin dəvətnamə üçün şablonun üstünə qoyulur.
+     ⚠ null olanda hər şey əvvəlki kimidir (eyni referanslar, remount yox). */
+  adminOverrides = null,
 }) {
   const tr = t[lang] || t.az
   const [opened, setOpened] = useState(false)
+
+  /* ⚠ Adı dəyişdirilib: aşağıdakı bütün kod `theme` adını işlədir, ona görə
+     override tətbiqindən SONRAKI obyekt həmin adı alır. Override yoxdursa
+     `applyThemeOverrides` EYNİ referansı qaytarır. */
+  const theme = applyThemeOverrides(rawTheme, adminOverrides)
+  const sectionLabels = mergeSectionLabels(rawSectionLabels, adminOverrides)
 
   const D = {
     radius: 16,
@@ -194,11 +218,25 @@ export default function TemplateShell({
   const card   = D.dark ? alpha(theme.accent, 0.06) : alpha(theme.background, 1)
   const field  = D.dark ? alpha(theme.accent, 0.07) : alpha(theme.background, 1)
 
-  const sectionStyle = (i) => ({
-    padding: 'clamp(28px, 7vw, 36px) clamp(18px, 6vw, 28px)',
-    background: D.alternate && i % 2 === 1 ? theme.surface : 'transparent',
-    borderBottom: D.alternate ? 'none' : `1px solid ${alpha(theme.accent, 0.1)}`,
-  })
+  /* ── Bölmə fonu (Phase 42) ────────────────────────────────────────────
+     `design.sectionTones` verilibsə fonlar həmin siyahı üzrə dövr edir —
+     şablona öz ritmini verir. Verilməyibsə KÖHNƏ davranış: transparent ↔
+     theme.surface növbələşməsi (16 şablonun 9-u bu yoldadır, çıxışları
+     dəyişmir).
+     ⚠ 'transparent' xüsusi dəyərdir: altdakı `pageWash` görünsün deyə. */
+  const sectionStyle = (i) => {
+    const tones = D.sectionTones
+    const bg = (Array.isArray(tones) && tones.length)
+      ? tones[i % tones.length]
+      : (D.alternate && i % 2 === 1 ? theme.surface : 'transparent')
+    return {
+      padding: 'clamp(28px, 7vw, 36px) clamp(18px, 6vw, 28px)',
+      background: bg,
+      borderBottom: D.alternate ? 'none' : `1px solid ${alpha(theme.accent, 0.1)}`,
+      /* Ton qatı `pageWash`-un üstündədir, amma ambient-in altında qalır */
+      position: 'relative',
+    }
+  }
   const inner = { maxWidth: 560, margin: '0 auto', textAlign: D.align }
 
   const btn = (filled) => ({
@@ -226,13 +264,31 @@ export default function TemplateShell({
       data-tpl={templateId}
       data-enter={enterDirection(templateId)}
       style={{
-        background: theme.background, minHeight: '100vh', fontFamily: sans, color: theme.text,
+        /* ⚠ `pageWash` şablonun imza qradiyentidir (preview kartı ilə eyni
+           dil) və HƏMİŞƏ `theme.background` rənginin ÜSTÜNƏ qoyulur — belədə
+           qradiyent şəffaf olsa da arxada heç vaxt ağ boşluq qalmır. */
+        background: D.pageWash
+          ? `${D.pageWash}, ${theme.background}`
+          : theme.background,
+        /* ⚠ `background-attachment: fixed` QƏSDƏN İŞLƏDİLMİR: iOS Safari-də
+           etibarsızdır (çox vaxt `scroll` kimi davranır) və hər scroll
+           kadrında tam repaint tələb edir — mobil-first məhsulda bahalıdır.
+           Wash sənədin ÖZÜ boyunca uzanır: yuxarıdan aşağı bir səyahət
+           (məs. Mediterranean-də səmadan dənizə). */
+        backgroundRepeat: D.pageWash ? 'no-repeat' : undefined,
+        minHeight: '100vh', fontFamily: sans, color: theme.text,
         overflowX: 'hidden', position: 'relative',
         /* ⚠ `isolation` ambient qatının blend rejimini bu köke bağlayır —
            olmasa `mix-blend-mode` səhifədən kənara (body) sızır. */
         isolation: 'isolate',
         /* Basma/hover işığının rəngi — bax index.css › [data-press] */
         '--tpl-glow': alpha(theme.accent, 0.3),
+        /* ⚠ Tipoqrafiya ƏMSALI (Phase 42) — sabit piksel DEYİL.
+           Şablonlarda ölçülər `clamp(...vw...)` şəklindədir; `font-size`
+           əvəzinə kökdə `zoom`-a bənzər miqyas qursaq responsivlik sınardı.
+           Ona görə əmsal yalnız başlıq/mətn ailələrinin ÖZ ölçüsünə
+           `em` üzərindən təsir edir — struktur toxunulmaz qalır. */
+        fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined,
       }}
     >
       <style>{`
@@ -403,7 +459,7 @@ export default function TemplateShell({
             {S.countdown && (
             <section style={sectionStyle(1)}>
               <Reveal style={inner}>
-                <SectionHead kicker={L('countdown', 'kicker', 'Countdown')} title={L('countdown', 'title', cd.title)} theme={theme} design={D} serif={serif} />
+                <SectionHead kicker={L('countdown', 'kicker', 'Countdown')} title={L('countdown', 'title', cd.title)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
                 <Stagger base={55} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'clamp(6px, 2vw, 8px)' }}>
                   {[
                     { v: cd.days, l: cd.labels.days },
@@ -415,7 +471,7 @@ export default function TemplateShell({
                       background: soft, border: `1px solid ${alpha(theme.accent, 0.18)}`,
                       borderRadius: D.radius === 0 ? 0 : 10, padding: 'clamp(10px, 3vw, 14px) 2px', textAlign: 'center',
                     }}>
-                      <div style={{ fontFamily: serif, fontSize: 'clamp(20px, 6vw, 26px)', color: HEAD, fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
+                      <div style={{ fontFamily: serif, fontSize: scaleFont('clamp(20px, 6vw, 26px)', theme.headingScale), color: HEAD, fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
                         {/* Yalnız saniyə xanası döyünür — dəqiqə/saat/gün sakit qalır */}
                         <PopDigit value={v} pop={pop} />
                       </div>
@@ -431,7 +487,7 @@ export default function TemplateShell({
             {S.venue && (
             <section style={sectionStyle(2)}>
               <Reveal style={inner}>
-                <SectionHead kicker={L('venue', 'kicker', 'LOCATION')} title={L('venue', 'title', tr.inv_location)} theme={theme} design={D} serif={serif} />
+                <SectionHead kicker={L('venue', 'kicker', 'LOCATION')} title={L('venue', 'title', tr.inv_location)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
                 <div style={{ borderRadius: D.radius, overflow: 'hidden', border: `1px solid ${line}` }}>
                   {/* Canlı Google Maps — hədəf/açar yoxdursa MapSection özü
                       dekorativ kartı verir (heç vaxt boş blok olmur). */}
@@ -484,7 +540,7 @@ export default function TemplateShell({
             {S.program && (
             <section style={sectionStyle(3)}>
               <Reveal style={inner}>
-                <SectionHead kicker={L('program', 'kicker', 'Schedule')} title={L('program', 'title', timeline.sectionLabel)} theme={theme} design={D} serif={serif} />
+                <SectionHead kicker={L('program', 'kicker', 'Schedule')} title={L('program', 'title', timeline.sectionLabel)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
                 {/* ── Proqramın vizual variantı (Phase 41) ────────────────
                     Claude Design-da hər şablon cədvəli ÖZ dilində qurur:
                       'timeline'  — ikon + saat + ad (default, 9 köhnə şablon)
@@ -567,7 +623,7 @@ export default function TemplateShell({
             {S.dresscode && (
             <section style={sectionStyle(4)}>
               <Reveal style={inner}>
-                <SectionHead kicker={L('dresscode', 'kicker', 'STYLE')} title={L('dresscode', 'title', tr.inv_dresscode)} theme={theme} design={D} serif={serif} />
+                <SectionHead kicker={L('dresscode', 'kicker', 'STYLE')} title={L('dresscode', 'title', tr.inv_dresscode)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
                 <DressCodeSection
                   theme={theme}
                   paletteId={weddingData.dressCodePalette}
@@ -587,7 +643,7 @@ export default function TemplateShell({
             {canShowSeating && !seating.isEmpty && (
               <section style={sectionStyle(5)}>
                 <Reveal style={inner}>
-                  <SectionHead kicker={L('seating', 'kicker', 'SEATING')} title={L('seating', 'title', seating.labels.title)} sub={seating.labels.sub} theme={theme} design={D} serif={serif} />
+                  <SectionHead kicker={L('seating', 'kicker', 'SEATING')} title={L('seating', 'title', seating.labels.title)} sub={seating.labels.sub} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
                   {/* ⚠ Təkliflər siyahısı normal document flow-da — overlap olmur */}
                   <Stagger base={55} style={{ textAlign: 'left' }}>
                     <input
@@ -668,7 +724,7 @@ export default function TemplateShell({
               <section id="gallery-section" style={sectionStyle(6)}>
                 <Reveal style={inner}>
                   <Stagger base={0} style={{ background: card, border: `1px solid ${line}`, borderRadius: D.radius, padding: 'clamp(16px, 5vw, 22px)', textAlign: 'center' }}>
-                    <SectionHead kicker={L('gallery', 'kicker', 'Gallery')} title={L('gallery', 'title', tr.inv_gallery)} theme={theme} design={D} serif={serif} />
+                    <SectionHead kicker={L('gallery', 'kicker', 'Gallery')} title={L('gallery', 'title', tr.inv_gallery)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
 
                     {gallery.demoPhotos.length > 0 && (
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 18 }}>
@@ -709,7 +765,7 @@ export default function TemplateShell({
                     <span style={{ width: 22, height: 1, background: alpha(ACC, 0.6) }} />{L('rsvp', 'kicker', 'RSVP')}
                     <span style={{ width: 22, height: 1, background: alpha(ACC, 0.6) }} />
                   </div>
-                  <div style={{ fontFamily: serif, fontStyle: D.headingStyle, fontSize: 'clamp(22px, 6.5vw, 28px)', color: HEAD, marginTop: 12, lineHeight: 1.3 }}>
+                  <div style={{ fontFamily: serif, fontStyle: D.headingStyle, fontSize: scaleFont('clamp(22px, 6.5vw, 28px)', theme.headingScale), color: HEAD, marginTop: 12, lineHeight: 1.3 }}>
                     {L('rsvp', 'title', rsvp.labels.title)}
                   </div>
                   <div style={{ fontSize: 12.5, color: theme.muted, margin: '10px 0 20px' }}>{rsvp.labels.subtitle}</div>
@@ -832,7 +888,7 @@ export default function TemplateShell({
             {S.guestbook && (
             <section style={sectionStyle(8)}>
               <Reveal style={inner}>
-                <SectionHead kicker={L('guestbook', 'kicker', 'Guestbook')} title={L('guestbook', 'title', gbook.labels.title)} theme={theme} design={D} serif={serif} />
+                <SectionHead kicker={L('guestbook', 'kicker', 'Guestbook')} title={L('guestbook', 'title', gbook.labels.title)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
                 <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 18, textAlign: 'left' }}>
                   <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbook.labels.namePh} style={inputStyle} />
                   <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbook.labels.msgPh} rows={3}

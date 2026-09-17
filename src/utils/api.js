@@ -200,6 +200,32 @@ export async function saveInvitationTranslations(slug, i18n, i18nMeta = null) {
 }
 
 /* ══════════════════════════════════════════════════
+   MƏZMUN MENECERİ (Phase 42)
+
+   ⚠ `save_invitation.php`-yə GETMİR: o, slug allokasiyasını işə salır və
+   canlı linki dəyişmə riski yaradır. Bu endpoint yalnız `form_data`-nın
+   `admin` və `sections` açarlarını yeniləyir.
+════════════════════════════════════════════════════ */
+
+export async function getInvitationContent(slug) {
+  const res = await fetch(`${BASE}/admin_invitation_content.php?slug=${encodeURIComponent(slug)}`, {
+    headers: adminHeaders(),
+  })
+  if (!res.ok) throw await toApiError(res, 'Məzmun yüklənmədi')
+  return res.json() /* { slug, template_id, admin, sections } */
+}
+
+export async function saveInvitationContent(slug, admin, sections = null) {
+  const res = await fetch(`${BASE}/admin_invitation_content.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminHeaders() },
+    body: JSON.stringify({ slug, admin, sections }),
+  })
+  if (!res.ok) throw await toApiError(res, 'Məzmun saxlanılmadı')
+  return res.json() /* { ok, admin, sections } */
+}
+
+/* ══════════════════════════════════════════════════
    HİSSƏLİ / DAVAM ETDİRİLƏ BİLƏN YÜKLƏMƏ
 
    Böyük video TƏK sorğu ilə göndərilmir. Səbəb (ölçülmüş):

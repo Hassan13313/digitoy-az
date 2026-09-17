@@ -176,6 +176,15 @@ export default function RoyalPalaceTemplate(props) {
                     title: { az: 'Təbrik fərmanları', en: 'Congratulatory scrolls', ru: 'Поздравительные свитки' } },
       }}
       design={{
+        /* ── Vizual şəxsiyyət (Phase 42) ─────────────────────────────
+           Saray tavanının dərinliyi + mərkəzdə qızıl halo.
+           Tonlar dizayn faylındakı bölmə fonlarıdır; `pageWash` isə
+           preview kartı ilə eyni dildə imza qradiyentidir — beləliklə
+           vitrindəki görüntü ilə dəvətnamənin içi uyğun gəlir. */
+        sectionTones: ['transparent', '#131A31', '#121629', '#161C38', '#0D1224', '#1A2140'],
+        pageWash:
+          'radial-gradient(110% 55% at 50% 4%, rgba(27,34,70,.9), transparent 62%), '
+          + 'radial-gradient(80% 40% at 50% 46%, rgba(214,183,110,.09), transparent 68%)',
         programStyle: 'table',
         /* Location — xeritə şəklinin şablona məxsus rəng emalı (bax MapSection) */
         /* Xəritənin rəng emalı — Claude Design-dakı DƏQİQ filter zənciri.

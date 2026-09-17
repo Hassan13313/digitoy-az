@@ -232,6 +232,15 @@ export default function VinylRecordTemplate(props) {
                     title: { az: 'Liner notes', en: 'Liner notes', ru: 'Заметки на конверте' } },
       }}
       design={{
+        /* ── Vizual şəxsiyyət (Phase 42) ─────────────────────────────
+           Qırmızı etiketin işığı yuxarıda, qızıl isti alt ton.
+           Tonlar dizayn faylındakı bölmə fonlarıdır; `pageWash` isə
+           preview kartı ilə eyni dildə imza qradiyentidir — beləliklə
+           vitrindəki görüntü ilə dəvətnamənin içi uyğun gəlir. */
+        sectionTones: ['transparent', '#191919'],
+        pageWash:
+          'radial-gradient(90% 55% at 50% 22%, rgba(201,71,47,.10), transparent 64%), '
+          + 'radial-gradient(120% 60% at 50% 100%, rgba(201,162,74,.08), transparent 70%)',
         programStyle: 'tracklist',
         programPrefix: 'A',      /* A1, A2… — Side A trekləri */
         programIndexColor: TH.secondary,

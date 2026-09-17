@@ -224,6 +224,15 @@ export default function LuxuryJewelryTemplate(props) {
                     title: { az: 'Qonaq qeydləri', en: 'Guest notes', ru: 'Записи гостей' } },
       }}
       design={{
+        /* ── Vizual şəxsiyyət (Phase 42) ─────────────────────────────
+           Vitrin işığı aşağıdan qalxır, daşın parıltısı yuxarıda.
+           Tonlar dizayn faylındakı bölmə fonlarıdır; `pageWash` isə
+           preview kartı ilə eyni dildə imza qradiyentidir — beləliklə
+           vitrindəki görüntü ilə dəvətnamənin içi uyğun gəlir. */
+        sectionTones: ['transparent', '#0D1D19', '#0C1A17', '#10241F', '#091412'],
+        pageWash:
+          'radial-gradient(110% 60% at 50% 92%, rgba(18,48,41,.85), transparent 66%), '
+          + 'radial-gradient(70% 40% at 50% 30%, rgba(163,214,199,.08), transparent 66%)',
         programStyle: 'tracklist',
         /* Location — xeritə şəklinin şablona məxsus rəng emalı (bax MapSection) */
         /* Xəritənin rəng emalı — Claude Design-dakı DƏQİQ filter zənciri.

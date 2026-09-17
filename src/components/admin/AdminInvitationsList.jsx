@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import TemplateCell from './TemplateCell'
 import AdminTranslations from './AdminTranslations'
+import AdminContentManager from './AdminContentManager'
 import { setInvitationActive } from '../../utils/api'
-import { RefreshCw, Search, X, ExternalLink, Languages, Power } from 'lucide-react'
+import { RefreshCw, Search, X, ExternalLink, Languages, Power, SlidersHorizontal } from 'lucide-react'
 
 const BASE = import.meta.env.VITE_API_URL || '/api'
 
@@ -49,6 +50,11 @@ export default function AdminInvitationsList() {
   const [confirmSlug, setConfirmSlug] = useState(null)
   const [busySlug,    setBusySlug]    = useState(null)
   const [trSlug,      setTrSlug]      = useState(null)   /* açıq tərcümə modalı */
+  /* Phase 42 — məzmun meneceri. Tərcümə modalından AYRIDIR: bu, mətnlə
+     yanaşı rəng/şrift/bölmə görünürlüyünü də idarə edir və canlı
+     önbaxış göstərir. İkisi eyni `form_data`-nın FƏRQLİ açarlarına
+     yazır (`i18n` ↔ `admin`), ona görə bir-birini üstələmir. */
+  const [cmSlug,      setCmSlug]      = useState(null)   /* açıq məzmun meneceri */
   const debounceRef = useRef(null)
 
   const load = (q = '') => {
@@ -231,6 +237,16 @@ export default function AdminInvitationsList() {
                         <Languages size={13} strokeWidth={1.5} />
                       </button>
                       <button
+                        type="button" onClick={() => setCmSlug(inv.slug)}
+                        title="Məzmun meneceri — mətn, rəng, şrift, bölmələr"
+                        style={{
+                          background: 'none', border: 'none', cursor: 'pointer', padding: 3, display: 'flex',
+                          color: 'oklch(62% 0.03 60)',
+                        }}
+                      >
+                        <SlidersHorizontal size={13} strokeWidth={1.5} />
+                      </button>
+                      <button
                         type="button" onClick={() => setConfirmSlug(inv.slug)}
                         title={active ? 'Linki deaktiv et' : 'Linki yenidən aktiv et'}
                         style={{
@@ -256,6 +272,14 @@ export default function AdminInvitationsList() {
             )
           })}
         </div>
+      )}
+
+      {cmSlug && (
+        <AdminContentManager
+          key={cmSlug}
+          slug={cmSlug}
+          onClose={() => setCmSlug(null)}
+        />
       )}
 
       {trSlug && (

@@ -58,6 +58,27 @@ const PHRASES = {
   'tort kəsilməsi':           { en: 'Cake Cutting',           ru: 'Разрезание торта' },
   'buket atma':               { en: 'Bouquet Toss',           ru: 'Бросание букета' },
   'hədiyyə təqdimatı':        { en: 'Gift Presentation',      ru: 'Вручение подарков' },
+
+  /* ── Phase 42: demo dəvətnaməsinin proqram sətirləri ──────────────────
+     TAM UYĞUNLUQ açarlarıdır (ifadə-səviyyəli əvəzləmədən əvvəl yoxlanılır),
+     ona görə nəticə həmişə bütöv və keyfiyyətlidir — franken-mətn riski yoxdur.
+     ⚠ Bunlar həm də real müştərilərin tez-tez yazdığı ifadələrdir; demo üçün
+     ayrıca `i18n` bloku yazmaqdansa lüğətə qoymaq hamıya fayda verir. */
+  'qonaqların möhtəşəm qarşılanması':
+    { en: 'Grand Welcome for Guests',  ru: 'Торжественная встреча гостей' },
+  'bəy və gəlinin möhtəşəm girişi':
+    { en: 'Grand Entrance of the Bride and Groom', ru: 'Торжественный выход жениха и невесты' },
+  'şah süfrəsi — gala ziyafəti':
+    { en: 'Royal Banquet — Gala Dinner', ru: 'Королевский стол — Гала-банкет' },
+  'şah naxış rəqsi':
+    { en: '“Shah Nakhish” Dance',       ru: 'Танец «Королевский узор»' },
+  'diskoteka və yekun proqram':
+    { en: 'Disco and Closing Program',  ru: 'Дискотека и заключительная программа' },
+  /* Yuxarıdakıların tire-siz / qısa variantları — müştəri fərqli yazsa da tutulsun */
+  'şah süfrəsi - gala ziyafəti':
+    { en: 'Royal Banquet — Gala Dinner', ru: 'Королевский стол — Гала-банкет' },
+  'diskoteka':                { en: 'Disco',                  ru: 'Дискотека' },
+  'yekun proqram':            { en: 'Closing Program',        ru: 'Заключительная программа' },
   'foto sessiya':             { en: 'Photo Session',          ru: 'Фотосессия' },
   'fotosessiya':              { en: 'Photo Session',          ru: 'Фотосессия' },
   'əyləncə proqramı':         { en: 'Entertainment',          ru: 'Развлекательная программа' },
@@ -77,6 +98,16 @@ const PHRASES = {
   'axşam geyimi':             { en: 'Evening Wear',           ru: 'Вечерний наряд' },
   'ağ rəngdən çəkinin':       { en: 'please avoid white',     ru: 'просим воздержаться от белого' },
   'pastel çalarlar':          { en: 'pastel shades',          ru: 'пастельные оттенки' },
+
+  /* ── Phase 42: demo dəvətnaməsinin geyim kodu qeydi ───────────────────
+     ⚠ Açarda SON NÖQTƏ YOXDUR: `normalizeKey` mətnin sonundakı `.!?,;:`
+     işarələrini silir, ona görə nöqtəli açar heç vaxt uyğun gəlməzdi. */
+  'zəhmət olmasa ağ və açıq bej rənglərdən çəkinin — bu, gəlinin rəngidir':
+    { en: 'Please avoid white and light beige — these are the bride’s colors.',
+      ru: 'Пожалуйста, избегайте белого и светло-бежевого цветов — это цвет невесты.' },
+  'zəhmət olmasa ağ və açıq bej rənglərdən çəkinin - bu, gəlinin rəngidir':
+    { en: 'Please avoid white and light beige — these are the bride’s colors.',
+      ru: 'Пожалуйста, избегайте белого и светло-бежевого цветов — это цвет невесты.' },
 
   /* ── Məkan sözləri (kompozisiya üçün) ── */
   'şadlıq sarayı':            { en: 'Wedding Hall',           ru: 'Банкетный зал' },

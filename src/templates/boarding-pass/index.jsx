@@ -232,6 +232,15 @@ export default function BoardingPassTemplate(props) {
                     title: { az: 'Sərnişin qeydləri', en: 'Passenger notes', ru: 'Записи пассажиров' } },
       }}
       design={{
+        /* ── Vizual şəxsiyyət (Phase 42) ─────────────────────────────
+           Yuxarıdan soyuq teal işıq (kabin), aşağıda naranc aksentin izi.
+           Tonlar dizayn faylındakı bölmə fonlarıdır; `pageWash` isə
+           preview kartı ilə eyni dildə imza qradiyentidir — beləliklə
+           vitrindəki görüntü ilə dəvətnamənin içi uyğun gəlir. */
+        sectionTones: ['transparent', '#111A1F'],
+        pageWash:
+          'radial-gradient(120% 60% at 50% 0%, rgba(23,48,57,.75), transparent 62%), '
+          + 'radial-gradient(80% 45% at 88% 96%, rgba(226,84,47,.10), transparent 70%)',
         programStyle: 'table',
         programRule: 'dashed',   /* uçuş biletinin perforasiya dili */
         /* Location — xeritə şəklinin şablona məxsus rəng emalı (bax MapSection) */

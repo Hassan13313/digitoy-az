@@ -202,6 +202,19 @@ export default function MediterraneanTemplate(props) {
                     title: { az: 'Sahil məktubları', en: 'Seaside notes', ru: 'Записки с побережья' } },
       }}
       design={{
+        /* ── Vizual şəxsiyyət (Phase 42) ─────────────────────────────
+           Üfüq: yuxarıda səma, sağ yuxarıda terrakota günəş, aşağıda dəniz.
+           Tonlar dizayn faylındakı bölmə fonlarıdır; `pageWash` isə
+           preview kartı ilə eyni dildə imza qradiyentidir — beləliklə
+           vitrindəki görüntü ilə dəvətnamənin içi uyğun gəlir. */
+        sectionTones: ['transparent', 'rgba(228,239,240,.8)', 'transparent', 'rgba(242,239,231,.9)'],
+        pageWash:
+          /* Səhifə boyu bir üfüq səyahəti: yuxarıda səma, ortada sahil işığı,
+             aşağıda dəniz. Alfa dəyərləri mətn kontrastını pozmayacaq
+             həddədir (mətn #20343A, fon ~#F7F5F0 → 12:1-dən yüksək). */
+          'linear-gradient(180deg, rgba(215,230,231,.9) 0%, rgba(240,238,231,.55) 26%, '
+          + 'rgba(252,250,245,0) 48%, rgba(46,110,120,.10) 78%, rgba(46,110,120,.26) 100%), '
+          + 'radial-gradient(70% 26% at 92% 7%, rgba(217,142,90,.22), transparent 72%)',
         /* Location — xeritə şəklinin şablona məxsus rəng emalı (bax MapSection) */
         /* Xəritənin rəng emalı — Claude Design-dakı DƏQİQ filter zənciri.
            ⚠ tintOpacity 0-dır: dizayn ayrıca tint QATI işlətmir, rəngi

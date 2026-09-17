@@ -215,6 +215,16 @@ export default function GazetteTemplate(props) {
                     title: { az: 'Oxucu məktubları', en: 'Letters to the editor', ru: 'Письма читателей' } },
       }}
       design={{
+        /* ── Vizual şəxsiyyət (Phase 42) ─────────────────────────────
+           Qəzet kağızı: yuxarıda təmiz vərəq, klişe qırmızısının izi, altda mürəkkəb kölgəsi.
+           Tonlar dizayn faylındakı bölmə fonlarıdır; `pageWash` isə
+           preview kartı ilə eyni dildə imza qradiyentidir — beləliklə
+           vitrindəki görüntü ilə dəvətnamənin içi uyğun gəlir. */
+        sectionTones: ['transparent', '#F0EDE6', 'transparent', '#E9E5DC'],
+        pageWash:
+          'radial-gradient(100% 45% at 50% 0%, rgba(251,250,246,.95), transparent 58%), '
+          + 'radial-gradient(70% 35% at 96% 16%, rgba(138,43,34,.07), transparent 70%), '
+          + 'linear-gradient(180deg, transparent 60%, rgba(22,21,18,.07) 100%)',
         programStyle: 'table',
         /* Location — xeritə şəklinin şablona məxsus rəng emalı (bax MapSection) */
         /* Xəritənin rəng emalı — Claude Design-dakı DƏQİQ filter zənciri.
