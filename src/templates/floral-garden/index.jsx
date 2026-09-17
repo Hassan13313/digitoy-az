@@ -915,7 +915,10 @@ export default function FloralGardenTemplate({
               <section style={{ padding: '36px 28px 56px', background: TH.surface }}>
                 <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.primary }}>
-                    <span style={{ width: 22, height: 1, background: `${TH.primary}99` }} />RSVP
+                    {/* ⚠ SABİT «RSVP» DEYİL: AZ-da «İştirak Təsdiqi» görünməlidir
+                        (bax translations.js › inv_rsvp). Bu şablon TemplateShell
+                        işlətmir, ona görə düzəliş burada ayrıca edilir. */}
+                    <span style={{ width: 22, height: 1, background: `${TH.primary}99` }} />{tr.inv_rsvp}
                     <span style={{ width: 22, height: 1, background: `${TH.primary}99` }} />
                   </div>
                   <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 'clamp(24px,7vw,28px)', color: TH.text, marginTop: 12, lineHeight: 1.3 }}>

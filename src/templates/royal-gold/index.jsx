@@ -971,7 +971,10 @@ export default function RoyalGoldTemplate({
               <section style={{ padding: '38px 26px 48px', textAlign: 'center', ...sectionBorder }}>
                 <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.primary }}>
-                    <span style={{ width: 22, height: 1, background: `${TH.primary}99` }} />RSVP
+                    {/* ⚠ SABİT «RSVP» DEYİL: AZ-da «İştirak Təsdiqi» görünməlidir
+                        (bax translations.js › inv_rsvp). Bu şablon TemplateShell
+                        işlətmir, ona görə düzəliş burada ayrıca edilir. */}
+                    <span style={{ width: 22, height: 1, background: `${TH.primary}99` }} />{tr.inv_rsvp}
                     <span style={{ width: 22, height: 1, background: `${TH.primary}99` }} />
                   </div>
                   <div style={{ fontFamily: serif, fontWeight: 300, fontSize: 'clamp(24px,7vw,28px)', color: TH.accent, lineHeight: 1.25, marginTop: 12 }}>
