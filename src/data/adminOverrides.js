@@ -70,6 +70,81 @@ export const CONTENT_SECTIONS = [
 
 const LANGS = ['az', 'en', 'ru']
 
+/* ─────────────────────────────────────────────────────────────────────────
+   MƏTN KATALOQU (Phase 42.1 · #7)
+
+   Dəvətnamədə istifadəçinin GÖRDÜYÜ hər sətir. Admin panel bunları bölmə-
+   bölmə göstərir. Açarlar İKİ mənbədəndir:
+     • prefikssiz  → `translations.js` açarı (`tr.inv_location`)
+     • `rsvp.` / `gbook.` / `seating.` → həmin hook-un öz etiket obyekti
+       (məs. `useRsvp` öz daxili lüğətini saxlayır, translations.js-də deyil)
+
+   ⚠ BURAYA SİSTEM MƏTNİ YAZILMIR: API cavabları, xəta kodları, admin daxili
+   texniki mətnlər kataloqda YOXDUR — yalnız qonağın gördüyü sətirlər.
+   ───────────────────────────────────────────────────────────────────────── */
+export const STRING_CATALOG = {
+  hero: [
+    ['inv_join',          'Giriş cümləsi'],
+    ['inv_and',           '«və» bağlayıcısı'],
+    ['organizer_display', 'İmza («Hörmətlə»)'],
+    ['event_toy',         'Tədbir adı — toy'],
+    ['event_nishan',      'Tədbir adı — nişan'],
+    ['event_birthday',    'Tədbir adı — ad günü'],
+    ['event_corporate',   'Tədbir adı — korporativ'],
+    ['event_other',       'Tədbir adı — digər'],
+  ],
+  venue: [
+    ['inv_location',        'Bölmə adı'],
+    ['inv_directions_btn',  'Düymə — yol göstər'],
+  ],
+  dresscode: [
+    ['inv_dresscode', 'Bölmə adı'],
+  ],
+  seating: [
+    ['seating.title',     'Başlıq'],
+    ['seating.sub',       'Alt mətn'],
+    ['seating.hint',      'İpucu'],
+    ['inv_seat_fullname', 'Ad sahəsi'],
+  ],
+  gallery: [
+    ['inv_gallery',       'Bölmə adı'],
+    ['inv_gallery_desc',  'İzah'],
+    ['inv_gallery_btn',   'Düymə'],
+    ['inv_scan_upload',   'QR izahı'],
+  ],
+  rsvp: [
+    ['rsvp.title',        'Sual'],
+    ['rsvp.subtitle',     'Alt mətn'],
+    ['rsvp.namePh',       'Ad sahəsi'],
+    ['rsvp.yes',          'Cavab — gələcəyəm'],
+    ['rsvp.maybe',        'Cavab — dəqiq deyil'],
+    ['rsvp.no',           'Cavab — gəlməyəcəyəm'],
+    ['rsvp.plusq',        'Əlavə qonaq sualı'],
+    ['rsvp.send',         'Göndər düyməsi'],
+    ['rsvp.thanks_sub',   'Təşəkkür mətni'],
+    ['rsvp.already_done', 'Artıq cavablanıb'],
+    ['rsvp.not_in_list',  'Siyahıda yoxdur'],
+    ['rsvp_closed_title', 'Bağlıdır — başlıq'],
+    ['rsvp_closed_desc',  'Bağlıdır — izah'],
+  ],
+  guestbook: [
+    ['gbook.title',   'Başlıq'],
+    ['gbook.namePh',  'Ad sahəsi'],
+    ['gbook.msgPh',   'Mesaj sahəsi'],
+    ['gbook.btn',     'Göndər düyməsi'],
+    ['gbook.sending', 'Göndərilir…'],
+  ],
+  footer: [
+    ['btn_back', 'Geri düyməsi'],
+  ],
+}
+
+/** Kataloqdakı bütün açarlar (yoxlama üçün düz siyahı) */
+export const STRING_KEYS = Object.values(STRING_CATALOG).flat().map(([k]) => k)
+
+const STRING_KEY_SET = new Set(STRING_KEYS)
+
+
 /* ── Yoxlayıcılar ─────────────────────────────────────────────────────── */
 
 const HEX_RE = /^#[0-9A-Fa-f]{6}$/
@@ -161,7 +236,59 @@ export function normalizeOverrides(raw) {
     if (Object.keys(L).length) out.labels = L
   }
 
+  /* ── Mətn override-ları (Phase 42.1) ── */
+  if (raw.strings && typeof raw.strings === 'object') {
+    const S = {}
+    for (const [key, val] of Object.entries(raw.strings)) {
+      /* ⚠ Yalnız KATALOQDAKI açarlar: ixtiyari açar qəbul etsək admin
+         sistem mətnini də əvəz edə bilərdi. */
+      if (!STRING_KEY_SET.has(key) || !val || typeof val !== 'object') continue
+      const bucket = {}
+      for (const lang of LANGS) {
+        const t = safeText(val[lang], 400)
+        if (t) bucket[lang] = t
+      }
+      if (Object.keys(bucket).length) S[key] = bucket
+    }
+    if (Object.keys(S).length) out.strings = S
+  }
+
   return Object.keys(out).length ? out : null
+}
+
+/* ── Mətn tətbiqi ─────────────────────────────────────────────────────────
+   Çağırış nöqtələri DƏYİŞMİR: `tr.inv_location` kimi ~38 yer var, hər birini
+   əl ilə sarımaq həm riskli, həm baxımsız olardı. Əvəzinə obyektin özü nazik
+   `Proxy` ilə örtülür.
+
+   ⚠ Override yoxdursa Proxy YARADILMIR — EYNİ referans qayıdır, yəni mövcud
+   dəvətnamələrin render axını toxunulmaz qalır. */
+
+/**
+ * @param {object} base    orijinal etiket obyekti (`t[lang]`, `rsvp.labels`…)
+ * @param {object} strings `overrides.strings`
+ * @param {string} lang    aktiv dil
+ * @param {string} prefix  hook etiketləri üçün ('rsvp.', 'gbook.', 'seating.')
+ */
+export function withStringOverrides(base, strings, lang, prefix = '') {
+  if (!base || !strings) return base
+
+  /* Bu obyektə aid ən azı bir override varmı? Yoxdursa sarımırıq. */
+  let relevant = false
+  for (const k of Object.keys(strings)) {
+    if (prefix ? k.startsWith(prefix) : !k.includes('.')) { relevant = true; break }
+  }
+  if (!relevant) return base
+
+  return new Proxy(base, {
+    get(target, key) {
+      if (typeof key !== 'string') return target[key]
+      const entry = strings[prefix + key]
+      /* Fallback zənciri: aktiv dil → AZ → orijinal */
+      const value = entry && (entry[lang] || entry.az)
+      return value || target[key]
+    },
+  })
 }
 
 /* ── Render tərəfi ────────────────────────────────────────────────────── */

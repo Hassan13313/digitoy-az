@@ -194,6 +194,28 @@ if (is_array($inAdmin['labels'] ?? null)) {
     if ($L) $clean['labels'] = $L;
 }
 
+/* ── Təmizləmə: bölmə mətnləri (Phase 42.1 · #7) ──
+   ⚠ Açar ağ siyahısı BURADA saxlanılmır: kataloq müştəri tərəfdədir
+   (`src/data/adminOverrides.js` › STRING_CATALOG) və orada da yoxlanılır.
+   Server tərəfdə format yoxlanılır — açar adı təhlükəsiz simvollardan
+   ibarət olmalı, dəyər sətir və məhdud uzunluqda. Beləliklə kataloq
+   genişlənəndə PHP-ni hər dəfə yeniləmək lazım gəlmir, amma zibil də keçmir. */
+if (is_array($inAdmin['strings'] ?? null)) {
+    $S = [];
+    foreach ($inAdmin['strings'] as $key => $val) {
+        /* nöqtəli prefiks (rsvp.yes) və adi açar (inv_location) */
+        if (!preg_match('/^[a-z][a-z0-9_]*(\.[a-z][a-zA-Z0-9_]*)?$/i', (string)$key)) continue;
+        if (!is_array($val)) continue;
+        $bucket = [];
+        foreach (['az', 'en', 'ru'] as $lg) {
+            $t = cleanText($val[$lg] ?? null, 400);
+            if ($t !== null) $bucket[$lg] = $t;
+        }
+        if ($bucket) $S[$key] = $bucket;
+    }
+    if ($S) $clean['strings'] = $S;
+}
+
 /* ── Təmizləmə: bölmə görünürlüyü (Phase 35 açarı) ── */
 $cleanSections = null;
 if (is_array($inSections)) {
@@ -254,6 +276,7 @@ try {
         'theme'    => isset($clean['theme'])  ? array_keys($clean['theme'])  : [],
         'fonts'    => isset($clean['fonts'])  ? array_keys($clean['fonts'])  : [],
         'labels'   => isset($clean['labels']) ? array_keys($clean['labels']) : [],
+        'strings'  => isset($clean['strings']) ? count($clean['strings']) : 0,
         'sections' => $cleanSections !== null,
     ], JSON_UNESCAPED_UNICODE));
 

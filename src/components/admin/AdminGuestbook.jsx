@@ -171,12 +171,12 @@ export default function AdminGuestbook() {
               <span style={{ fontSize: 12.5, color: C.text, lineHeight: 1.55, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                 {m.text}
                 {m.has_rsvp && (
-                  <span title="Bu sətirdə iştirak cavabı da var — silinəndə yalnız mətn gedir, RSVP qalır" style={{
+                  <span title="Bu sətirdə iştirak cavabı da var — silinəndə yalnız mətn gedir, cavab qalır" style={{
                     marginLeft: 8, padding: '1px 6px', borderRadius: 3, fontSize: 9,
                     letterSpacing: '0.08em', textTransform: 'uppercase',
                     border: '1px solid oklch(80% 0.05 150)', color: 'oklch(45% 0.09 150)', whiteSpace: 'nowrap',
                   }}>
-                    RSVP
+                    İştirak
                   </span>
                 )}
               </span>

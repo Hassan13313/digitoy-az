@@ -600,8 +600,12 @@ export default function FloralGardenTemplate({
                   </div>
                 )}
 
-                {/* Ornament */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '22px 0' }}>
+                {/* Ornament
+                    ⚠ `justifyContent: 'center'` MƏCBURİDİR: bu sətir flex
+                    konteynerdir və valideyndəki `textAlign: center` flex
+                    elementlərinin yerləşməsinə TƏSİR ETMİR — onsuz ayırıcı
+                    adlar mərkəzdə olsa da solda qalır. */}
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, margin: '22px 0' }}>
                   <div style={{ width: 44, height: 1, background: TH.accent }} />
                   <div style={{ width: 4, height: 4, background: TH.accent, transform: 'rotate(45deg)' }} />
                   <div style={{ width: 22, height: 1, background: `${TH.accent}66` }} />
@@ -617,8 +621,10 @@ export default function FloralGardenTemplate({
                   </div>
                 )}
 
+                {/* ⚠ `marginInline: 'auto'` — sabit enli blokdur, `textAlign`
+                    onu mərkəzləmir (ornament ilə eyni səbəb). */}
                 <div style={{
-                  margin: '32px 0 0', width: 40, height: 40, border: `1px solid ${TH.primary}4D`,
+                  margin: '32px auto 0', width: 40, height: 40, border: `1px solid ${TH.primary}4D`,
                   borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 14, color: TH.primary, animation: 'fg-hint 2.8s ease-in-out infinite',
                 }}>⌄</div>

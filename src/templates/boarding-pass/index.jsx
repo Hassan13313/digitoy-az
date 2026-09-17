@@ -227,7 +227,7 @@ export default function BoardingPassTemplate(props) {
         gallery:   { kicker: 'ALBUM',
                     title: { az: 'In-flight album', en: 'In-flight album', ru: 'Бортовой альбом' } },
         rsvp:      { kicker: 'CHECK-IN',
-                    title: { az: 'Check-in · RSVP', en: 'Check-in · RSVP', ru: 'Регистрация · RSVP' } },
+                    title: { az: 'Check-in · İştirak təsdiqi', en: 'Check-in · RSVP', ru: 'Регистрация · Подтверждение' } },
         guestbook: { kicker: 'NOTES',
                     title: { az: 'Sərnişin qeydləri', en: 'Passenger notes', ru: 'Записи пассажиров' } },
       }}

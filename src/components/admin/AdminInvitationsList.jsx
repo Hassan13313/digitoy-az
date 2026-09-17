@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import TemplateCell from './TemplateCell'
 import AdminTranslations from './AdminTranslations'
 import AdminContentManager from './AdminContentManager'
+import { useIsNarrow } from '../../hooks/useIsNarrow'
 import { setInvitationActive } from '../../utils/api'
 import { RefreshCw, Search, X, ExternalLink, Languages, Power, SlidersHorizontal } from 'lucide-react'
 
@@ -40,6 +41,12 @@ const EVENT_LABELS = {
 const GRID = '118px 1fr 92px 70px 92px 84px 78px 78px'
 
 export default function AdminInvitationsList() {
+  /* ── Telefon rejimi ───────────────────────────────────────────────────
+     Sətirlər 860px-lik şəbəkədir (`minWidth: 860`) — 412px-də üfüqi sürüşmə
+     tələb edirdi və sütun başlıqları görünmürdü. Dar ekranda hər dəvətnamə
+     şaquli KARTA çevrilir. */
+  const narrow = useIsNarrow()
+
   const [items,     setItems]     = useState([])
   const [total,     setTotal]     = useState(0)
   const [loading,   setLoading]   = useState(true)
@@ -146,7 +153,12 @@ export default function AdminInvitationsList() {
       ) : (
         <div style={{ background: 'white', border: '1px solid oklch(88% 0.02 60)', borderRadius: 6, overflowX: 'auto' }}>
           {/* Header */}
-          <div style={{ display: 'grid', gridTemplateColumns: GRID, gap: 10, padding: '10px 20px', background: 'oklch(95% 0.01 75)', borderBottom: '1px solid oklch(88% 0.02 60)', minWidth: 860 }}>
+          <div style={{
+            display: narrow ? 'none' : 'grid',
+            gridTemplateColumns: GRID, gap: 10, padding: '10px 20px',
+            background: 'oklch(95% 0.01 75)', borderBottom: '1px solid oklch(88% 0.02 60)',
+            minWidth: 860,
+          }}>
             {['Slug', 'Ad', 'Şablon', 'Növ', 'Məkan', 'Yaradılma', 'Status', 'Əməliyyat'].map((h, i) => (
               <span key={i} style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'oklch(50% 0.03 60)' }}>{h}</span>
             ))}
@@ -159,7 +171,10 @@ export default function AdminInvitationsList() {
             const busy = busySlug === inv.slug
             return (
               <div key={inv.slug} style={{
-                display: 'grid', gridTemplateColumns: GRID, gap: 10, minWidth: 860,
+                display: 'grid',
+                gridTemplateColumns: narrow ? '1fr' : GRID,
+                gap: narrow ? 6 : 10,
+                minWidth: narrow ? 0 : 860,
                 padding: '13px 20px',
                 borderBottom: i < items.length - 1 ? '1px solid oklch(93% 0.01 75)' : 'none',
                 alignItems: 'center',

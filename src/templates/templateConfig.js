@@ -470,7 +470,12 @@ export const TEMPLATES = [
       muted:     '#7E8489',
       footerBg:  '#0A0B0D',
       footerText: '#E8C67A',
-      fonts: { heading: FONT_STACKS.bebas, body: FONT_STACKS.archivo },
+      fonts: { heading: FONT_STACKS.amiri, body: FONT_STACKS.amiri },
+      /* ⚠ QƏSDƏN Amiri (Həsənin qərarı). Amiri-də `Ə` (U+018F)
+         glyph-i YOXDUR — brauzerdə ölçülüb — ona görə azərbaycanca
+         mətndə həmin hərf zəncirdəki Cormorant-dan gələcək.
+         Bax: FONTS_MISSING_AZ. Admin Content Manager-dən şrifti
+         dəyişmək imkanı qalır. */
     },
     preview: {
       accent: '#D9A441',

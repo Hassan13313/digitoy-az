@@ -218,7 +218,7 @@ export default function LuxuryJewelryTemplate(props) {
                     title: { az: 'Sertifikat · yeriniz', en: 'Certificate · your seat', ru: 'Сертификат · ваше место' } },
         gallery:   { kicker: 'SHOWCASE',
                     title: { az: 'Vitrin', en: 'Showcase', ru: 'Витрина' } },
-        rsvp:      { kicker: 'RSVP',
+        rsvp:      { kicker: 'DƏVƏT',
                     title: { az: 'Dəvətə cavab', en: 'Reply to the invitation', ru: 'Ответ на приглашение' } },
         guestbook: { kicker: 'NOTES',
                     title: { az: 'Qonaq qeydləri', en: 'Guest notes', ru: 'Записи гостей' } },

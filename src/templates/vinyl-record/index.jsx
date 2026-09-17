@@ -226,8 +226,8 @@ export default function VinylRecordTemplate(props) {
                     title: { az: 'Zal planı · yeriniz', en: 'Seating · your spot', ru: 'План зала · ваше место' } },
         gallery:   { kicker: 'SLEEVE',
                     title: { az: 'Albom vərəqləri', en: 'Album sleeve', ru: 'Разворот альбома' } },
-        rsvp:      { kicker: 'RSVP',
-                    title: { az: 'RSVP · sessiyaya qoşulun', en: 'RSVP · join the session', ru: 'RSVP · присоединяйтесь' } },
+        rsvp:      { kicker: 'SESSİYA',
+                    title: { az: 'Sessiyaya qoşulun', en: 'RSVP · join the session', ru: 'Присоединяйтесь' } },
         guestbook: { kicker: 'LINER NOTES',
                     title: { az: 'Liner notes', en: 'Liner notes', ru: 'Заметки на конверте' } },
       }}

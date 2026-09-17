@@ -87,11 +87,22 @@ function Opening(props) {
           animation: 'tpl-rise .8s ease-out 1.9s both',
         }} />
 
-        {/* Möhürdən yayılan dalğa */}
+        {/* Möhürdən yayılan dalğa
+            ⚠ İKİ QÜSUR DÜZƏLDİLDİ (açılışda ekranın ortasında kvadrat çıxırdı):
+            1) `backwards` fill-mode YOX İDİ → 2.9 saniyəlik gecikmə boyunca
+               element STATİK halında görünürdü: 76×76, qızıl haşiyəli,
+               qeyri-şəffaf KVADRAT (keyframe-in `rotate(45deg)`-i hələ
+               tətbiq olunmamışdı).
+            2) Mərkəzləyən `translate(-50%,-50%)` YALNIZ keyframe-in içində
+               idi, ona görə statik halda yerləşmə də sürüşürdü.
+            İndi həm başlanğıc transform elementin özündədir, həm də
+            `backwards` ilə animasiyanın 0% halı gecikmə boyunca saxlanılır. */}
         <span aria-hidden="true" style={{
           position: 'absolute', left: '50%', top: '50%',
           width: 76, height: 76, border: `1px solid ${alpha(theme.primary, 0.7)}`,
-          animation: 'rp-shock 4.2s ease-out 2.9s infinite',
+          transform: 'translate(-50%,-50%) rotate(45deg) scale(.4)',
+          opacity: 0,
+          animation: 'rp-shock 4.2s ease-out 2.9s infinite backwards',
         }} />
 
         {/* Romb möhür — baş hərflər */}

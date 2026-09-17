@@ -1,4 +1,5 @@
 import { ShoppingBag, FileText, Image, LayoutDashboard, MessageSquare, ShieldCheck, LogOut } from 'lucide-react'
+import { useIsNarrow } from '../../hooks/useIsNarrow'
 
 const NAV = [
   { key: 'dashboard',   label: 'Dashboard',     icon: LayoutDashboard },
@@ -12,20 +13,33 @@ const NAV = [
 ]
 
 export default function AdminLayout({ children, section, onNavigate }) {
+  /* ── Telefon rejimi (Phase 42.1) ───────────────────────────────────────
+     220px-lik yan menyu 412px-lik ekranın YARISINI yeyir. Dar ekranda menyu
+     yuxarıya, üfüqi sürüşən lentə çevrilir: bütün bölmələr əlçatan qalır,
+     məzmuna isə tam en düşür. */
+  const narrow = useIsNarrow()
+
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: '"Inter",system-ui,sans-serif' }}>
+    <div style={{
+      display: 'flex',
+      flexDirection: narrow ? 'column' : 'row',
+      minHeight: '100vh', fontFamily: '"Inter",system-ui,sans-serif',
+    }}>
 
       {/* Sidebar */}
       <aside style={{
-        width: 220, flexShrink: 0,
+        width: narrow ? '100%' : 220, flexShrink: 0,
         background: 'oklch(14% 0.02 60)',
         display: 'flex', flexDirection: 'column',
-        borderRight: '1px solid oklch(22% 0.02 60)',
+        borderRight: narrow ? 'none' : '1px solid oklch(22% 0.02 60)',
+        borderBottom: narrow ? '1px solid oklch(22% 0.02 60)' : 'none',
+        /* Telefonda menyu yapışqan qalsın — uzun siyahıda naviqasiya itməsin */
+        position: narrow ? 'sticky' : 'static', top: 0, zIndex: 40,
       }}>
         {/* Logo */}
         <div style={{
-          padding: '28px 24px 24px',
-          borderBottom: '1px solid oklch(22% 0.02 60)',
+          padding: narrow ? '10px 14px 8px' : '28px 24px 24px',
+          borderBottom: narrow ? 'none' : '1px solid oklch(22% 0.02 60)',
         }}>
           <p style={{
             fontFamily: '"Cormorant Garamond","Playfair Display",serif',
@@ -43,7 +57,16 @@ export default function AdminLayout({ children, section, onNavigate }) {
         </div>
 
         {/* Nav */}
-        <nav style={{ flex: 1, padding: '12px 0' }}>
+        <nav style={{
+          flex: 1,
+          padding: narrow ? '0 6px 8px' : '12px 0',
+          /* ⚠ Üfüqi lent: 6 bölmə 412px-ə sığmır, ona görə sürüşür.
+             `WebkitOverflowScrolling` iOS-da inertial scroll verir. */
+          display: narrow ? 'flex' : 'block',
+          gap: narrow ? 4 : 0,
+          overflowX: narrow ? 'auto' : 'visible',
+          WebkitOverflowScrolling: 'touch',
+        }}>
           {NAV.map(({ key, label, icon: Icon }) => {
             const active = section === key
             return (
@@ -52,8 +75,13 @@ export default function AdminLayout({ children, section, onNavigate }) {
                 type="button"
                 onClick={() => onNavigate(key)}
                 style={{
-                  width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '10px 24px',
+                  width: narrow ? 'auto' : '100%',
+                  display: 'flex', alignItems: 'center', gap: narrow ? 6 : 10,
+                  padding: narrow ? '9px 12px' : '10px 24px',
+                  /* ⚠ Toxunma hədəfi ≥ 40px (barmaq üçün) */
+                  minHeight: narrow ? 40 : undefined,
+                  whiteSpace: 'nowrap', flex: narrow ? '0 0 auto' : undefined,
+                  borderRadius: narrow ? 6 : 0,
                   background: active ? 'oklch(22% 0.03 60)' : 'none',
                   border: 'none', cursor: 'pointer', textAlign: 'left',
                   borderLeft: active ? '2px solid oklch(72% 0.12 80)' : '2px solid transparent',
@@ -75,7 +103,7 @@ export default function AdminLayout({ children, section, onNavigate }) {
 
         {/* Footer */}
         <div style={{
-          padding: '16px 24px',
+          padding: narrow ? '10px 14px' : '16px 24px',
           borderTop: '1px solid oklch(22% 0.02 60)',
         }}>
           <button

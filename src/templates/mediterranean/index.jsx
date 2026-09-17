@@ -196,7 +196,7 @@ export default function MediterraneanTemplate(props) {
                     title: { az: 'Masanız', en: 'Your table', ru: 'Ваш столик' } },
         gallery:   { kicker: 'ALBUM',
                     title: { az: 'Sahil albomu', en: 'Coastal album', ru: 'Морской альбом' } },
-        rsvp:      { kicker: 'RSVP',
+        rsvp:      { kicker: 'İŞTİRAK',
                     title: { az: 'Bizə qoşulursunuz?', en: 'Will you join us?', ru: 'Вы присоединитесь?' } },
         guestbook: { kicker: 'NOTES',
                     title: { az: 'Sahil məktubları', en: 'Seaside notes', ru: 'Записки с побережья' } },

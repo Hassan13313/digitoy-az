@@ -23,10 +23,15 @@ import { useSEO } from './hooks/useSEO'
 import { initAnalytics, trackPageView, trackEvent } from './utils/analytics'
 import './App.css'
 
+/* Canlı önbaxış səhifəsi (yalnız admin iframe-i açır) — lazy, ayrı chunk.
+   ⚠ Adi istifadəçi bu marşruta düşmür, ona görə əsas bundle-a əlavə çəki
+   gətirmir. */
+const LivePreviewPage = lazy(() => import('./components/admin/LivePreviewPage'))
+
 const ACTIVE_UI = 'v3'
 
 const HOME_TITLE = 'DigiToy — Rəqəmsal Toy Dəvətnaməsi, İştirak Təsdiqi və QR Foto Paylaşımı'
-const HOME_DESC  = 'Bir Dəvətnamədən Daha Artığı. İştirak Təsdiqi (RSVP), oturma planı, QR foto paylaşımı və premium rəqəmsal toy dəvətnamələri.'
+const HOME_DESC  = 'Bir Dəvətnamədən Daha Artığı. İştirak Təsdiqi, oturma planı, QR foto paylaşımı və premium rəqəmsal toy dəvətnamələri.'
 
 /* ── view → SEO konfiqurasiyası (title/description/canonical/OG/Twitter) ── */
 function getSEOConfig(view, { weddingData, slug } = {}) {
@@ -250,7 +255,17 @@ function RouteLoader() {
 }
 
 export default function App() {
-  const [view,        setView]        = useState('loading')
+  /* ⚠ `/preview/live` İLKİN STATE-də həll olunur, effektdə yox:
+     bu, yalnız URL-dən asılı SAF qərardır. Effektdə etsək əvvəlcə 'loading'
+     render olunub sonra dəyişərdi (yanıp-sönmə) və `setState`-in effekt
+     içində sinxron çağırılması kaskad render yaradardı.
+     ⚠ Bu səhifə admin token TƏLƏB ETMİR — heç nə oxumur, datanı valideyn
+     pəncərə postMessage ilə verir. */
+  const [view,        setView]        = useState(
+    typeof window !== 'undefined' && window.location.pathname === '/preview/live'
+      ? 'live-preview'
+      : 'loading',
+  )
   const [lang,        setLang]        = useState('az')
   const [weddingData, setWeddingData] = useState(defaultWedding)
   const [isAdmin,     setIsAdmin]     = useState(false)
@@ -407,6 +422,7 @@ export default function App() {
         return
       }
       if (/^\/templates\/?$/.test(path)) { setView('templates'); return }
+      if (path === '/preview/live') { setView('live-preview'); return }
       if (path === '/demo') { setView('demo'); return }
       if (path === '/') { setView('landing'); return }
     }
@@ -415,6 +431,14 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    /* ⚠ CANLI ÖNBAXIŞ — /preview/live: marşrutlaşdırma APARILMIR.
+       Bu effekt sonda `routeWithDraft(...)` → `setView('landing')` çağırır
+       və ilkin state-də qoyduğumuz 'live-preview' görünüşünü üstələyirdi
+       (səhifə landing kimi açılırdı). Erkən çıxış bunun qarşısını alır.
+       ⚠ Burada `setView` ÇAĞIRILMIR — yalnız çıxış, ona görə kaskad render
+       xəbərdarlığı da yaranmır. */
+    if (window.location.pathname === '/preview/live') return
+
     /* Admin Panel — /admin/* route-ları */
     if (window.location.pathname.startsWith('/admin')) {
       const stored = getStoredAdminToken()
@@ -498,6 +522,16 @@ export default function App() {
   }, [])
 
   if (view === 'loading') return <RouteLoader />
+
+  /* ── CANLI ÖNBAXIŞ — /preview/live (admin iframe-i) ──
+     Şəbəkəyə sorğu getmir; dəvətnamə datası postMessage ilə gəlir. */
+  if (view === 'live-preview') {
+    return (
+      <Suspense fallback={<RouteLoader />}>
+        <LivePreviewPage />
+      </Suspense>
+    )
+  }
 
   /* ── ŞABLON ÖNBAXIŞI — /demo/template/:id ──
      Yalnız daxili test üçün. Demo datası ilə işləyir, DB-yə toxunmur,

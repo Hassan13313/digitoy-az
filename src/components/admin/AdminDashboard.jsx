@@ -1,3 +1,4 @@
+import { useIsNarrow } from '../../hooks/useIsNarrow'
 import { useState, useEffect } from 'react'
 import { getDashboardStats } from '../../utils/api'
 import { ShoppingBag, CheckCircle, XCircle, Clock, FileText, Image, TrendingUp, RefreshCw } from 'lucide-react'
@@ -90,6 +91,9 @@ function MiniChart({ daily }) {
 const PKG_LABELS = { SADE: 'Sadə (59₼)', VIP: 'VİP (89₼)', PREMIUM: 'Premium (129₼)' }
 
 export default function AdminDashboard() {
+  /* Telefonda 3 sütunlu kartlar 412px-də ~120px-ə düşür — rəqəmlər sıxılır */
+  const narrow = useIsNarrow()
+
   const [stats,   setStats]   = useState(null)
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState('')
@@ -141,20 +145,20 @@ export default function AdminDashboard() {
       )}
 
       {/* Ana stat kartları */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: narrow ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
         <StatCard icon={ShoppingBag} label="Ümumi sifariş"   value={stats?.orders.total}     sub={`Bu gün: ${stats?.orders.today ?? 0}`}     color="oklch(45% 0.07 75)" />
         <StatCard icon={Clock}       label="Gözləyən"         value={stats?.orders.submitted} sub={`Son 7 gün: ${stats?.orders.last7days ?? 0}`} color="oklch(45% 0.08 70)" />
         <StatCard icon={CheckCircle} label="Təsdiqlənmiş"    value={stats?.orders.approved}  color="oklch(38% 0.1 145)" />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 28 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: narrow ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: 12, marginBottom: 28 }}>
         <StatCard icon={XCircle}  label="Rədd edildi"  value={stats?.orders.rejected}  color="oklch(40% 0.12 25)" />
         <StatCard icon={FileText} label="Dəvətnamələr"  value={stats?.invitations}      color="oklch(45% 0.08 210)" />
         <StatCard icon={Image}    label="Fotolar"        value={stats?.photos}           color="oklch(45% 0.08 300)" />
       </div>
 
       {/* Alt bölmə — Paket + mini chart */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: narrow ? '1fr' : '1fr 1fr', gap: 16 }}>
 
         {/* Paket bölgüsü */}
         <div style={{ background: 'white', border: '1px solid oklch(88% 0.02 60)', borderRadius: 6, padding: '20px 24px' }}>

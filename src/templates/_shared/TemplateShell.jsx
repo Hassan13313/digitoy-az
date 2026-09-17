@@ -22,7 +22,7 @@ import { useGallery } from '../../hooks/useGallery'
 import { useMusicPlayer } from '../../hooks/useMusicPlayer'
 import { useMusicPrompt } from '../../hooks/useMusicPrompt'
 import t from '../../data/translations'
-import { applyThemeOverrides, mergeSectionLabels } from '../../data/adminOverrides'
+import { applyThemeOverrides, mergeSectionLabels, withStringOverrides } from '../../data/adminOverrides'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    TEMPLATE SHELL — 13 bölməlik ortaq dəvətnamə skeleti.
@@ -118,7 +118,7 @@ export default function TemplateShell({
      ⚠ Müştəri dəvətnaməsində HEÇ VAXT true olmur — default false. */
   startOpened = false,
 }) {
-  const tr = t[lang] || t.az
+  const rawTr = t[lang] || t.az
   const [opened, setOpened] = useState(startOpened)
 
   /* ⚠ Adı dəyişdirilib: aşağıdakı bütün kod `theme` adını işlədir, ona görə
@@ -126,6 +126,14 @@ export default function TemplateShell({
      `applyThemeOverrides` EYNİ referansı qaytarır. */
   const theme = applyThemeOverrides(rawTheme, adminOverrides)
   const sectionLabels = mergeSectionLabels(rawSectionLabels, adminOverrides)
+
+  /* ── Mətn override-ları (Phase 42.1 · #7) ──────────────────────────────
+     `tr.*` və hook etiketləri ~38 yerdə işlənir. Hər çağırış nöqtəsini əl ilə
+     sarımaq əvəzinə obyektin ÖZÜ nazik Proxy ilə örtülür — çağırışlar
+     olduğu kimi qalır (`tr.inv_location`, `rsvpL.yes`…).
+     ⚠ Override yoxdursa Proxy YARADILMIR, eyni referans qayıdır. */
+  const adminStrings = adminOverrides?.strings || null
+  const tr = withStringOverrides(rawTr, adminStrings, lang)
 
   const D = {
     radius: 16,
@@ -199,6 +207,17 @@ export default function TemplateShell({
   const { inputRef: seatInputRef, ...seating } = useSeating({ seatingPlan: weddingData.seatingPlan, lang })
   const { inputRef: rsvpInputRef, ...rsvp }    = useRsvp({ lang, weddingData })
   const gbook    = useGuestbook({ lang, initialMessages: initialGuestbook })
+
+  /* ⚠ Hook etiketləri `translations.js`-də DEYİL — `useRsvp` öz daxili
+     lüğətini saxlayır, `useSeating`/`useGuestbook` isə öz etiketlərini
+     qurur. Ona görə onların `labels` obyektləri ayrıca, prefiksli açarlarla
+     sarılır (`rsvp.yes`, `gbook.btn`, `seating.title`…).
+     Override yoxdursa hər üçü EYNİ referansı saxlayır. */
+  /* ⚠ Hook-un qaytardığı obyekt MUTASİYA EDİLMİR — ayrıca dəyişənlər.
+     `rsvpL.yes` → `rsvpL.yes` (aşağıda çağırışlar da yeniləndi). */
+  const rsvpL    = withStringOverrides(rsvp.labels,    adminStrings, lang, 'rsvp.')
+  const gbookL   = withStringOverrides(gbook.labels,   adminStrings, lang, 'gbook.')
+  const seatingL = withStringOverrides(seating.labels, adminStrings, lang, 'seating.')
   const gallery  = useGallery({ weddingData, isCouple, isCorp })
   /* ⚠ Autoplay YALNIZ builder-də "Dəvətnamə açılan kimi" seçiləndə (və ya
      musiqi seçilməyib default preset işlədiləndə). Tövsiyə olunan "düymə ilə"
@@ -658,7 +677,7 @@ export default function TemplateShell({
             {canShowSeating && !seating.isEmpty && (
               <section data-section="seating" style={sectionStyle(5)}>
                 <Reveal style={inner}>
-                  <SectionHead kicker={L('seating', 'kicker', 'SEATING')} title={L('seating', 'title', seating.labels.title)} sub={seating.labels.sub} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
+                  <SectionHead kicker={L('seating', 'kicker', 'SEATING')} title={L('seating', 'title', seatingL.title)} sub={seatingL.sub} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
                   {/* ⚠ Təkliflər siyahısı normal document flow-da — overlap olmur */}
                   <Stagger base={55} style={{ textAlign: 'left' }}>
                     <input
@@ -667,7 +686,7 @@ export default function TemplateShell({
                       value={seating.query}
                       onChange={(e) => { seating.setQuery(e.target.value); seating.setActiveIdx(-1); if (seating.selected) seating.setSelected(null) }}
                       onKeyDown={seating.onKeyDown}
-                      placeholder={seating.labels.hint}
+                      placeholder={seatingL.hint}
                       role="combobox"
                       aria-expanded={seating.suggestions.length > 0}
                       aria-controls={`${templateId}-seating-list`}
@@ -777,13 +796,13 @@ export default function TemplateShell({
               <section data-section="rsvp" style={sectionStyle(7)}>
                 <Reveal style={inner}>
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: ACC }}>
-                    <span style={{ width: 22, height: 1, background: alpha(ACC, 0.6) }} />{L('rsvp', 'kicker', 'RSVP')}
+                    <span style={{ width: 22, height: 1, background: alpha(ACC, 0.6) }} />{L('rsvp', 'kicker', tr.inv_rsvp)}
                     <span style={{ width: 22, height: 1, background: alpha(ACC, 0.6) }} />
                   </div>
                   <div style={{ fontFamily: serif, fontStyle: D.headingStyle, fontSize: scaleFont('clamp(22px, 6.5vw, 28px)', theme.headingScale), color: HEAD, marginTop: 12, lineHeight: 1.3 }}>
-                    {L('rsvp', 'title', rsvp.labels.title)}
+                    {L('rsvp', 'title', rsvpL.title)}
                   </div>
-                  <div style={{ fontSize: 12.5, color: theme.muted, margin: '10px 0 20px' }}>{rsvp.labels.subtitle}</div>
+                  <div style={{ fontSize: 12.5, color: theme.muted, margin: '10px 0 20px' }}>{rsvpL.subtitle}</div>
 
                   {rsvp.rsvpClosed && !rsvp.submitted ? (
                     <div style={{ background: card, border: `1px solid ${line}`, borderRadius: D.radius, padding: 22 }}>
@@ -792,13 +811,13 @@ export default function TemplateShell({
                     </div>
                   ) : rsvp.alreadyDone ? (
                     <div style={{ background: card, border: `1px solid ${line}`, borderRadius: D.radius, padding: 22 }}>
-                      <div style={{ fontFamily: serif, fontSize: 18, color: theme.text }}>{rsvp.labels.already_done}</div>
+                      <div style={{ fontFamily: serif, fontSize: 18, color: theme.text }}>{rsvpL.already_done}</div>
                       <div style={{ fontSize: 11, color: theme.muted, marginTop: 6 }}>{rsvp.selected?.full_name}</div>
                     </div>
                   ) : rsvp.submitted ? (
                     <div style={{ background: card, border: `1px solid ${line}`, borderRadius: D.radius, padding: 22 }}>
                       <div style={{ fontFamily: serif, fontStyle: D.headingStyle, fontSize: 20, color: HEAD }}>{rsvp.thanksMsg}</div>
-                      <div style={{ fontSize: 11, color: theme.muted, marginTop: 6 }}>{rsvp.labels.thanks_sub}</div>
+                      <div style={{ fontSize: 11, color: theme.muted, marginTop: 6 }}>{rsvpL.thanks_sub}</div>
                     </div>
                   ) : (
                     <form onSubmit={rsvp.handleSubmit}>
@@ -809,7 +828,7 @@ export default function TemplateShell({
                           value={rsvp.query}
                           onChange={(e) => { rsvp.setQuery(e.target.value); rsvp.setActiveIdx(-1); if (rsvp.selected) rsvp.setSelected(null) }}
                           onKeyDown={rsvp.onKeyDown}
-                          placeholder={rsvp.labels.namePh}
+                          placeholder={rsvpL.namePh}
                           required={!rsvp.useGuestMode}
                           autoComplete="off"
                           style={{ ...inputStyle, textAlign: D.align === 'left' ? 'left' : 'center' }}
@@ -840,15 +859,15 @@ export default function TemplateShell({
                           </ul>
                         )}
                         {rsvp.showNotFound && (
-                          <div style={{ fontSize: 10, color: ACC, marginTop: 6 }}>{rsvp.labels.not_in_list}</div>
+                          <div style={{ fontSize: 10, color: ACC, marginTop: 6 }}>{rsvpL.not_in_list}</div>
                         )}
                       </div>
 
                       <Stagger base={220} style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                         {[
-                          { val: 'yes',   label: rsvp.labels.yes },
-                          { val: 'no',    label: rsvp.labels.no },
-                          { val: 'maybe', label: rsvp.labels.maybe },
+                          { val: 'yes',   label: rsvpL.yes },
+                          { val: 'no',    label: rsvpL.no },
+                          { val: 'maybe', label: rsvpL.maybe },
                         ].map(({ val, label }) => {
                           const active = rsvp.status === val
                           return (
@@ -871,7 +890,7 @@ export default function TemplateShell({
 
                       {rsvp.status === 'yes' && (
                         <div style={{ marginTop: 12, background: card, border: `1px solid ${line}`, borderRadius: D.radius, padding: 20, textAlign: 'center' }}>
-                          <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: theme.muted }}>{rsvp.labels.plusq}</div>
+                          <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: theme.muted }}>{rsvpL.plusq}</div>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 24, marginTop: 16 }}>
                             <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} data-press aria-label="Azalt"
                               style={{ width: 40, height: 40, border: `1px solid ${alpha(theme.accent, 0.3)}`, borderRadius: D.buttonRadius === 0 ? 0 : '50%', background: 'none', color: theme.muted, cursor: 'pointer', opacity: rsvp.plusOne === 0 ? 0.35 : 1 }}>−</button>
@@ -888,7 +907,7 @@ export default function TemplateShell({
                         cursor: rsvp.canSubmit ? 'pointer' : 'not-allowed',
                         fontSize: 11, letterSpacing: '.14em', textTransform: 'uppercase', fontFamily: sans,
                         opacity: rsvp.canSubmit ? 1 : 0.35,
-                      }}>{rsvp.sending ? '…' : rsvp.labels.send}</button>
+                      }}>{rsvp.sending ? '…' : rsvpL.send}</button>
                     </form>
                   )}
 
@@ -903,17 +922,17 @@ export default function TemplateShell({
             {S.guestbook && (
             <section data-section="guestbook" style={sectionStyle(8)}>
               <Reveal style={inner}>
-                <SectionHead kicker={L('guestbook', 'kicker', 'Guestbook')} title={L('guestbook', 'title', gbook.labels.title)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
+                <SectionHead kicker={L('guestbook', 'kicker', 'Guestbook')} title={L('guestbook', 'title', gbookL.title)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
                 <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 18, textAlign: 'left' }}>
-                  <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbook.labels.namePh} style={inputStyle} />
-                  <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbook.labels.msgPh} rows={3}
+                  <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbookL.namePh} style={inputStyle} />
+                  <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbookL.msgPh} rows={3}
                     style={{ ...inputStyle, borderRadius: D.radius, resize: 'none' }} />
                   <button type="submit" disabled={!gbook.canSubmit} data-press style={{
                     minHeight: 46, border: 'none', borderRadius: D.buttonRadius, background: CTA_BG,
                     color: CTA_TXT, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed',
                     fontSize: 10.5, letterSpacing: '.14em', textTransform: 'uppercase', fontFamily: sans,
                     opacity: gbook.canSubmit ? 1 : 0.35,
-                  }}>{gbook.sending ? gbook.labels.sending : gbook.labels.btn}</button>
+                  }}>{gbook.sending ? gbookL.sending : gbookL.btn}</button>
                 </form>
 
                 <Stagger base={110} style={{ display: 'grid', gap: 10, textAlign: 'left' }}>

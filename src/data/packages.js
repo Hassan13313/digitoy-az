@@ -13,10 +13,10 @@ export const PKG_FEATURES = {
   az: {
     SADE: {
       included: ['Açılış animasiyası', 'Geri sayım saatı', 'Google Maps naviqasiya', 'Dress code', 'Toy proqramı', 'Paylaşıla bilən link', '🎵 Dəvətnamənizdəki musiqini şəxsi zövqünüzə uyğun seçin'],
-      locked:   ['İştirak Təsdiqi (RSVP)', 'Oturma Planı', 'QR Foto Paylaşım', 'Qalereya idarəetməsi'],
+      locked:   ['İştirak Təsdiqi', 'Oturma Planı', 'QR Foto Paylaşım', 'Qalereya idarəetməsi'],
     },
     VIP: {
-      included: ['Sadə paketdəki hər şey', 'İştirak Təsdiqi (RSVP)', 'Oturma Planı', 'Qonaq siyahısının idarə olunması'],
+      included: ['Sadə paketdəki hər şey', 'İştirak Təsdiqi', 'Oturma Planı', 'Qonaq siyahısının idarə olunması'],
       locked:   ['QR Foto Paylaşım', 'Qalereya idarəetməsi'],
     },
     PREMIUM: {
@@ -41,10 +41,10 @@ export const PKG_FEATURES = {
   ru: {
     SADE: {
       included: ['Анимация открытия', 'Таймер обратного отсчёта', 'Навигация Google Maps', 'Дресс-код', 'Программа мероприятия', 'Ссылка для отправки', '🎵 Выберите музыку приглашения по своему вкусу'],
-      locked:   ['Подтверждение участия (RSVP)', 'План рассадки', 'QR обмен фото', 'Управление галереей'],
+      locked:   ['Подтверждение участия', 'План рассадки', 'QR обмен фото', 'Управление галереей'],
     },
     VIP: {
-      included: ['Всё из пакета Базовый', 'Подтверждение участия (RSVP)', 'План рассадки', 'Управление списком гостей'],
+      included: ['Всё из пакета Базовый', 'Подтверждение участия', 'План рассадки', 'Управление списком гостей'],
       locked:   ['QR обмен фото', 'Управление галереей'],
     },
     PREMIUM: {

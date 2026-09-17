@@ -60,7 +60,7 @@ export const SECTION_DEFS = [
   {
     id: 'rsvp',
     gate: 'allowRsvp',
-    labels: { az: 'İştirak Təsdiqi',   en: 'RSVP',           ru: 'Подтверждение (RSVP)' },
+    labels: { az: 'İştirak Təsdiqi',   en: 'RSVP',           ru: 'Подтверждение участия' },
     hints:  { az: 'Qonaq gəlib-gəlməyəcəyini bildirir.', en: 'Guests confirm their attendance.', ru: 'Гости подтверждают участие.' },
   },
   {

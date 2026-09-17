@@ -349,14 +349,21 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
                   />
                 </div>
                 <GoldDividerOrnament />
-                <Stagger base={110} className="flex gap-3 mt-4">
+                {/* ⚠ KÖK SƏBƏB (Phase 42.1): əvvəl `flex gap-3` idi və hər düymə
+                    `flex-1` ilə BƏRABƏR bölünürdü. Phase 41-də «Yol göstər»
+                    əlavə olunanda sıra 4 düyməyə çıxdı — mobil ~340px-də
+                    hər düymə ~70px qalır, ikon + mətn sığmır və yerləşmə pozulur.
+                    İndi sıra SARILIR: hər düymə ən azı 128px, ikisi bir sətirdə;
+                    desktopda yenə bir sətirdə düzülür. */}
+                <Stagger base={110} className="flex flex-wrap gap-2.5 mt-4">
                   {dirUrl && (
                     <a
                       data-press
                       href={dirUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 btn-gold text-xs"
+                      className="flex items-center justify-center gap-2 btn-gold text-xs whitespace-nowrap"
+                      style={{ flex: '1 1 128px', minWidth: 0 }}
                     >
                       <Navigation size={13} strokeWidth={1.5} />
                       {tr.inv_directions_btn}
@@ -368,7 +375,8 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
                       href={mapUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`flex-1 flex items-center justify-center gap-2 text-xs ${dirUrl ? 'btn-outline-gold' : 'btn-gold'}`}
+                      className={`flex items-center justify-center gap-2 text-xs whitespace-nowrap ${dirUrl ? 'btn-outline-gold' : 'btn-gold'}`}
+                      style={{ flex: '1 1 128px', minWidth: 0 }}
                     >
                       <MapPin size={13} strokeWidth={1.5} />
                       <span className="hidden sm:inline">Google Maps</span>
@@ -381,7 +389,8 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
                       href={weddingData.wazeUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 btn-outline-gold text-xs"
+                      className="flex items-center justify-center gap-2 btn-outline-gold text-xs whitespace-nowrap"
+                      style={{ flex: '1 1 128px', minWidth: 0 }}
                     >
                       <Navigation size={13} strokeWidth={1.5} />
                       Waze
@@ -393,7 +402,8 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
                       href={weddingData.appleMapsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 btn-outline-gold text-xs"
+                      className="flex items-center justify-center gap-2 btn-outline-gold text-xs whitespace-nowrap"
+                      style={{ flex: '1 1 128px', minWidth: 0 }}
                     >
                       <ExternalLink size={13} strokeWidth={1.5} />
                       Apple Maps

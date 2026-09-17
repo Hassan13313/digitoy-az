@@ -1,12 +1,10 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { X, Check, RotateCcw, Smartphone, Monitor, Type, Palette, Layout, FileText } from 'lucide-react'
 import { getInvitationContent, saveInvitationContent, getInvitation } from '../../utils/api'
-import TemplateRenderer from '../../templates/TemplateRenderer'
-import { hasTemplateComponent } from '../../templates/registry'
 import { getTemplateTheme, getTemplateName, FONT_STACKS } from '../../templates/templateConfig'
 import {
   CONTENT_SECTIONS, THEME_KEYS, THEME_LABELS, FONT_CHOICES,
-  FONT_SCALE_MIN, FONT_SCALE_MAX, safeColor,
+  FONT_SCALE_MIN, FONT_SCALE_MAX, safeColor, STRING_CATALOG,
 } from '../../data/adminOverrides'
 import { SECTION_DEFS } from '../../data/sections'
 
@@ -143,17 +141,37 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
   const [lang, setLang] = useState('az')
   const [device, setDevice] = useState('mobile')
 
+  /* ── Mobil admin (S24 Ultra ≈ 412×915 dp) ──────────────────────────────
+     Redaktor + önbaxış yan-yana ən azı ~880px tələb edir. Telefonda onlar
+     YAN-YANA SIĞMIR, ona görə dar ekranda şaquli yığılır və yuxarıdakı iki
+     nişanla keçid edilir. Eni 900px-dən böyük ekranlarda davranış əvvəlki
+     kimi qalır. */
+  const [isNarrow, setIsNarrow] = useState(
+    typeof window !== 'undefined' ? window.matchMedia('(max-width: 900px)').matches : false,
+  )
+  const [mobileTab, setMobileTab] = useState('edit')
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 900px)')
+    const onChange = (e) => setIsNarrow(e.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+
   /* ── Canlı önbaxış (Phase 43 · ISSUE #5) ──────────────────────────────
      `previewData` hər klaviatura vuruşunda yenidən qurulur; onu BİRBAŞA
      render etsək bütün dəvətnamə ağacı hər simvolda yenidən çəkilir və
      yazmaq «yapışqan» olur. Ona görə 90 ms debounce var — istifadəçi üçün
      dərhal görünür, amma render sayı kəskin azalır. */
-  const scrollBoxRef = useRef(null)
+  const frameRef = useRef(null)
+  /* iframe «hazıram» siqnalı verməmiş postMessage göndərmək mənasızdır */
+  const [frameReady, setFrameReady] = useState(false)
 
   /* Redaktə olunan vəziyyət */
   const [theme, setTheme]       = useState({})
   const [fonts, setFonts]       = useState({})
   const [labels, setLabels]     = useState({})
+  const [strings, setStrings]   = useState({})
   const [sections, setSections] = useState({})
 
   /* Önbaxış üçün real dəvətnamə datası */
@@ -175,6 +193,7 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
         setTheme(a.theme || {})
         setFonts(a.fonts || {})
         setLabels(a.labels || {})
+        setStrings(a.strings || {})
         setSections(content.sections || {})
         /* ⚠ `getInvitation` `{ data, active }` qaytarır — dəvətnamə obyekti
            `data`-dadır. Şablon id-si isə content endpoint-indən gəlir
@@ -204,12 +223,13 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
     if (Object.keys(theme).length)  admin.theme  = theme
     if (Object.keys(fonts).length)  admin.fonts  = fonts
     if (Object.keys(labels).length) admin.labels = labels
+    if (Object.keys(strings).length) admin.strings = strings
     return {
       ...wedding,
       sections: Object.keys(sections).length ? sections : wedding.sections,
       admin: Object.keys(admin).length ? admin : undefined,
     }
-  }, [wedding, theme, fonts, labels, sections])
+  }, [wedding, theme, fonts, labels, strings, sections])
 
   /* ── Debounce (maks. 100 ms tələbi) ───────────────────────────────────
      `previewData` hər klaviatura vuruşunda yeni obyektdir. Onu birbaşa
@@ -218,29 +238,53 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
      sayını kəskin azaldır.
      ⚠ setState `setTimeout` içindədir (sinxron deyil) — kaskad render
      yaratmır. */
-  const [shownData, setShownData] = useState(null)
+  /* ⚠ Datanı React state-i kimi SAXLAMIRIQ — birbaşa iframe-ə göndəririk.
+     Əvvəl önbaxış bu komponentin ağacında render olunurdu və hər simvolda
+     bütün dəvətnamə yenidən çəkilirdi. İndi iframe ayrı sənəddir: valideyn
+     yalnız mesaj göndərir, yazmaq tamamilə rəvan qalır. */
   useEffect(() => {
-    if (!previewData) return undefined
-    const t = setTimeout(() => setShownData(previewData), 90)
+    if (!previewData || !frameReady) return undefined
+    const t = setTimeout(() => {
+      try {
+        frameRef.current?.contentWindow?.postMessage({
+          type: 'digitoy:preview:data',
+          template: templateId,
+          weddingData: previewData,
+          lang,
+        }, window.location.origin)
+      } catch { /* iframe bağlanıb — susuruq */ }
+    }, 90)
     return () => clearTimeout(t)
-  }, [previewData])
+  }, [previewData, frameReady, templateId, lang])
+
+  /* iframe «hazıram» dedikdə ilk datanı göndər */
+  useEffect(() => {
+    const onMsg = (e) => {
+      if (e.origin !== window.location.origin) return
+      if (e.data?.type === 'digitoy:preview:ready') setFrameReady(true)
+    }
+    window.addEventListener('message', onMsg)
+    return () => window.removeEventListener('message', onMsg)
+  }, [])
 
   /**
-   * Redaktə olunan bölməni önbaxışda tapıb yumşaq sürüşdür.
-   * ⚠ `scrollIntoView` İŞLƏMİR: önbaxış `transform: scale(...)` ilə
-   * kiçildilib və brauzer sürüşmə hesabını miqyasdan ƏVVƏLKİ ölçüyə görə
-   * aparır — bölmə yanlış yerə düşür. Ona görə offset əl ilə hesablanır
-   * və miqyasa vurulur.
+   * Redaktə olunan bölməni önbaxışda göstər.
+   * ⚠ DOM-dan sürüşdürmə MÜMKÜN DEYİL — önbaxış artıq ayrı sənəddədir
+   * (iframe). Ona görə sürüşmə əmri mesajla göndərilir; hesablamanı
+   * `LivePreviewPage` öz koordinat sistemində aparır — miqyas düzəlişi
+   * lazım gəlmir.
    */
   const focusSection = useCallback((key) => {
-    const box = scrollBoxRef.current
-    if (!box) return
-    const el = box.querySelector(`[data-section="${key}"]`)
-    if (!el) return
-    const scale = device === 'mobile' ? 0.86 : 0.34
-    const top = el.offsetTop * scale
-    box.scrollTo({ top: Math.max(0, top - 16), behavior: 'smooth' })
-  }, [device])
+    if (!frameReady) return
+    try {
+      frameRef.current?.contentWindow?.postMessage(
+        { type: 'digitoy:preview:scroll', section: key },
+        window.location.origin,
+      )
+    } catch { /* susuruq */ }
+    /* Telefonda redaktor və önbaxış eyni anda görünmür — fokus önbaxışa keçsin */
+    if (isNarrow) setMobileTab('preview')
+  }, [frameReady, isNarrow])
 
   const setLabelField = useCallback((key, field, lg, value) => {
     setLabels((prev) => {
@@ -262,6 +306,18 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
     })
   }, [])
 
+  const setStringField = useCallback((key, lg, value) => {
+    setStrings((prev) => {
+      const entry = { ...(prev[key] || {}) }
+      if (value) entry[lg] = value
+      else delete entry[lg]
+      const next = { ...prev }
+      if (Object.keys(entry).length) next[key] = entry
+      else delete next[key]
+      return next
+    })
+  }, [])
+
   const handleSave = async () => {
     setSaving(true); setError(null); setSaved(false)
     try {
@@ -269,6 +325,7 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
       if (Object.keys(theme).length)  admin.theme  = theme
       if (Object.keys(fonts).length)  admin.fonts  = fonts
       if (Object.keys(labels).length) admin.labels = labels
+      if (Object.keys(strings).length) admin.strings = strings
       const res = await saveInvitationContent(slug, admin, sections)
       setSaved(true)
       onSaved?.(res)
@@ -282,7 +339,7 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
 
   const resetAll = () => {
     if (!window.confirm('Bütün admin düzəlişləri silinsin? Dəvətnamə şablonun öz görünüşünə qayıdacaq.')) return
-    setTheme({}); setFonts({}); setLabels({})
+    setTheme({}); setFonts({}); setLabels({}); setStrings({})
   }
 
   /* ── Panellər ─────────────────────────────────────────────────────── */
@@ -318,6 +375,29 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
                 />
               </div>
             </Row>
+
+            {/* ── Bölmənin bütün mətnləri (Phase 42.1 · #7) ───────────────
+                Əvvəl yalnız başlıq redaktə oluna bilirdi; düymə mətnləri,
+                cavab variantları, boş/uğur halları sabit qalırdı. İndi
+                kataloqdakı hər sətir buradadır. Boş sahə = sistemin öz
+                mətni (heç nə saxlanılmır). */}
+            {(STRING_CATALOG[sec.key] || []).length > 0 && (
+              <div style={{ marginTop: 10, borderTop: `1px solid ${C.hair}`, paddingTop: 9, display: 'grid', gap: 7 }}>
+                {STRING_CATALOG[sec.key].map(([key, name]) => (
+                  <div key={key}>
+                    <div style={label}>{name}</div>
+                    <input
+                      type="text"
+                      value={strings[key]?.[lang] || ''}
+                      placeholder="Sistemin öz mətni"
+                      onChange={(e) => setStringField(key, lang, e.target.value)}
+                      onFocus={() => focusSection(sec.key)}
+                      style={input}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )
       })}
@@ -463,12 +543,18 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
       role="dialog" aria-modal="true" aria-label="Dəvətnamə məzmunu"
       style={{
         position: 'fixed', inset: 0, zIndex: 90, background: 'rgba(20,16,12,.45)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 14,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: isNarrow ? 0 : 14,
       }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
       <div style={{
-        background: 'white', borderRadius: 8, width: 'min(1120px, 100%)', maxHeight: '92vh',
+        /* ⚠ Telefonda (S24 Ultra ≈ 412×915 dp) modal TAM EKRAN olur:
+           kənar boşluq və künc radiusu 412px-də yer itirir. */
+        background: 'white',
+        borderRadius: isNarrow ? 0 : 8,
+        width: isNarrow ? '100%' : 'min(1120px, 100%)',
+        height: isNarrow ? '100%' : undefined,
+        maxHeight: isNarrow ? '100%' : '92vh',
         display: 'flex', flexDirection: 'column', overflow: 'hidden',
         boxShadow: '0 24px 60px rgba(0,0,0,.28)',
       }}>
@@ -491,14 +577,46 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
           </button>
         </div>
 
+        {/* ── Telefonda panel keçidi (S24 Ultra) ──────────────────────────
+            Redaktor və önbaxış yan-yana ~880px tələb edir; 412px-də yalnız
+            biri göstərilir. Sahəyə toxunanda avtomatik önbaxışa keçir
+            (bax `focusSection`), geri qayıtmaq üçün bu nişanlar var. */}
+        {isNarrow && !loading && (
+          <div style={{ display: 'flex', gap: 6, padding: '8px 10px', borderBottom: `1px solid ${C.line}`, flex: '0 0 auto' }}>
+            {[['edit', 'Redaktə'], ['preview', 'Önbaxış']].map(([id, name]) => {
+              const on = mobileTab === id
+              return (
+                <button
+                  key={id} type="button" onClick={() => setMobileTab(id)}
+                  style={{
+                    flex: 1, padding: '9px 8px', borderRadius: 6,
+                    border: `1px solid ${on ? C.gold : C.line}`,
+                    background: on ? C.gold : 'white',
+                    color: on ? 'white' : C.sub,
+                    fontSize: 13, fontFamily: 'inherit', cursor: 'pointer',
+                    /* ⚠ Toxunma hədəfi ən azı 40px — barmaq üçün */
+                    minHeight: 40,
+                  }}
+                >{name}</button>
+              )
+            })}
+          </div>
+        )}
+
         {loading ? (
           <div style={{ padding: 36, textAlign: 'center', fontSize: 12.5, color: C.sub }}>Yüklənir…</div>
         ) : (
-          <div style={{ display: 'flex', minHeight: 0, flex: 1 }}>
+          <div style={{
+            display: 'flex', minHeight: 0, flex: 1,
+            /* Telefonda yan-yana ~880px lazımdır — sığmır, ona görə yığılır */
+            flexDirection: isNarrow ? 'column' : 'row',
+          }}>
             {/* ── Sol: redaktor ── */}
             <div style={{
               flex: '1 1 460px', minWidth: 0, display: 'flex', flexDirection: 'column',
-              borderRight: `1px solid ${C.line}`,
+              borderRight: isNarrow ? 'none' : `1px solid ${C.line}`,
+              /* Dar ekranda yalnız seçilmiş nişan görünür */
+              ...(isNarrow && mobileTab !== 'edit' ? { display: 'none' } : null),
             }}>
               {/* Tablar */}
               <div style={{ display: 'flex', gap: 2, padding: '8px 10px 0', flex: '0 0 auto', flexWrap: 'wrap' }}>
@@ -581,6 +699,7 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
             <div style={{
               flex: '1 1 420px', minWidth: 0, display: 'flex', flexDirection: 'column',
               background: 'oklch(96% 0.005 80)',
+              ...(isNarrow && mobileTab !== 'preview' ? { display: 'none' } : null),
             }}>
               <div style={{
                 display: 'flex', alignItems: 'center', gap: 6, padding: '8px 10px',
@@ -606,43 +725,44 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
                 </div>
               </div>
 
-              <div ref={scrollBoxRef} style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: 12, display: 'flex', justifyContent: 'center' }}>
-                {shownData && templateId && hasTemplateComponent(templateId) ? (
-                  <div style={{
-                    /* ⚠ `zoom` DEYİL, `transform: scale` — zoom Firefox-da yoxdur.
-                       Kiçildilmiş çərçivə şablonun öz responsiv sınaq nöqtələrini
-                       işlədir, ona görə mobil görünüş REAL mobil görünüşdür. */
-                    width: device === 'mobile' ? 390 : 1100,
-                    transform: `scale(${device === 'mobile' ? 0.86 : 0.34})`,
-                    transformOrigin: 'top center',
-                    height: device === 'mobile' ? '116%' : '294%',
-                    border: `1px solid ${C.line}`, background: 'white',
-                    borderRadius: device === 'mobile' ? 12 : 4, overflow: 'hidden', flex: '0 0 auto',
-                  }}>
-                    {/* ⚠ `key` dəyişəndə önbaxış yenidən qurulur — açılış
-                        ekranı hər dəyişiklikdə təkrar oynamasın deyə YALNIZ
-                        şablon/dil dəyişəndə açar dəyişir. */}
-                    <TemplateRenderer
-                      key={`${templateId}-${lang}`}
-                      template={templateId}
-                      isPreview
-                      weddingData={shownData}
-                      lang={lang}
-                      isDemoMode
-                      onBack={() => {}}
-                      setLang={setLang}
-                      /* ⚠ Açılış ekranını atla: yoxsa önbaxış zərfdə ilişir
-                         və admin redaktə etdiyi bölmələri görmür. */
-                      startOpened
-                    />
-                  </div>
-                ) : (
-                  <div style={{ fontSize: 11.5, color: C.faint, alignSelf: 'center', textAlign: 'center', lineHeight: 1.7 }}>
-                    Önbaxış əlçatan deyil.<br />Dəvətnamə məlumatı yüklənmədi.
-                  </div>
-                )}
-              </div>
-            </div>
+              <div style={{
+                flex: 1, minHeight: 0, overflow: 'hidden', padding: isNarrow ? 0 : 12,
+                display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
+                background: 'oklch(94% 0.005 80)',
+              }}>
+                {/* ── CANLI ÖNBAXIŞ — ayrıca sənəd (iframe) ──────────────
+                    ⚠ NƏ ÜÇÜN iframe: şablonlar ölçüləri `clamp(…vw…)` ilə
+                    verir və `vw` KONTEYNERƏ yox, BRAUZER PƏNCƏRƏSİNƏ görə
+                    hesablanır. Adi div-in içində 412px-lik qutu qursaq da
+                    mətn tam ekrana görə ölçülərdi — «telefon görünüşü»
+                    heç vaxt real olmazdı. iframe-də `vw` = iframe eni.
+                    ⚠ Üstəlik iframe öz scroll-unu alır: əvvəlki qutu
+                    `overflow:hidden` idi və aşağı bölmələrə çatmaq olmurdu.
+                    ⚠ Data şəbəkədən YOX, postMessage ilə gəlir → admin
+                    yazdıqca, saxlamadan görünür. */}
+                <div style={{
+                  /* Qabıq miqyaslanmış ÖLÇÜNÜ tutur ki, scroll düzgün işləsin */
+                  width: (device === 'mobile' ? 412 : 1280) * (device === 'mobile' ? 0.82 : 0.32),
+                  height: '100%',
+                  flex: '0 0 auto', overflow: 'hidden',
+                  border: isNarrow ? 'none' : `1px solid ${C.line}`,
+                  borderRadius: isNarrow ? 0 : (device === 'mobile' ? 14 : 4),
+                  background: 'white',
+                }}>
+                  <iframe
+                    ref={frameRef}
+                    title="Dəvətnamə önbaxışı"
+                    src="/preview/live"
+                    style={{
+                      width: device === 'mobile' ? 412 : 1280,
+                      height: device === 'mobile' ? '122%' : '312%',
+                      border: 0, display: 'block',
+                      transform: `scale(${device === 'mobile' ? 0.82 : 0.32})`,
+                      transformOrigin: 'top left',
+                    }}
+                  />
+                </div>
+              </div>            </div>
           </div>
         )}
       </div>
