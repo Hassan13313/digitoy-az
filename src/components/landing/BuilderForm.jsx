@@ -2551,7 +2551,6 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
             music={data.music || null}
             onChange={(m) => set('music', m)}
             lang={lang}
-            uploadSlug={computeSlug()}
           />
         )}
 

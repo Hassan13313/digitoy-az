@@ -115,6 +115,42 @@ function storyReencode(string $src, string $dest, int $maxEdge = STORY_MAX_EDGE)
     return ['ok' => true, 'width' => $nw, 'height' => $nh];
 }
 
+/* ── Builder musiqisi (Phase 44.3) ──────────────────────────────────────────
+   Eyni problem MP3-də də var idi: builder faylı `slug` ilə yükləyirdi, amma
+   dəvətnamə yalnız TƏSDİQDƏ yaranır və slug-a kod əlavə olunur. Phase 37-dən
+   bəri upload_music.php mövcud olmayan slug-u 404 ilə rədd etdiyi üçün builder
+   səssizcə `blob:` URL saxlayırdı — musiqi yalnız müştərinin öz brauzerində
+   səslənirdi. İndi MP3 də sessiya qovluğuna düşür (uploads/_music/<bucket>/).
+   Bucket duzu hekayədən FƏRQLİDİR: iki qovluq bir-birindən çıxarıla bilməz. */
+const MUSIC_MAX_UPLOAD = 20 * 1024 * 1024;   /* MusicStep.MP3_MAX_BYTES ilə eyni */
+/* Bir sessiyada diskə düşə biləcək MP3 sayı — dəvətnamədə bir musiqi olur,
+   ehtiyat müştərinin fikrini bir neçə dəfə dəyişməsi üçündür. */
+const MUSIC_BUCKET_CAP = 6;
+
+function musicBucket(string $sid): string {
+    return substr(hash('sha256', 'digitoy-music|' . $sid), 0, 24);
+}
+
+function musicDir(string $bucket): string {
+    return __DIR__ . '/../uploads/_music/' . $bucket . '/';
+}
+
+function musicPublicPath(string $bucket, string $filename): string {
+    return '/uploads/_music/' . $bucket . '/' . $filename;
+}
+
+function musicBucketCount(string $dir): int {
+    if (!is_dir($dir)) return 0;
+    $files = glob($dir . '*.mp3');
+    return $files === false ? 0 : count($files);
+}
+
+/** Məzmun hash-indən fayl adı — eyni MP3 iki dəfə yüklənsə ikinci nüsxə yaranmır. */
+function musicFileName(string $path): ?string {
+    $hash = @sha1_file($path);
+    return $hash === false ? null : substr($hash, 0, 20) . '.mp3';
+}
+
 /**
  * Yenidən kodlaşdırılmış müvəqqəti faylı məzmun hash-i ilə yerinə qoy.
  * Eyni şəkil artıq varsa müvəqqəti fayl silinir və mövcud ad qaytarılır.

@@ -1,16 +1,37 @@
 <?php
 /* ── Phase 25.3 — Musiqi (MP3) yükləmə endpointi ──
-   upload_photo.php nümunəsində minimal variant:
    • Yalnız MP3 (real məzmuna görə MIME yoxlaması)
    • Maksimum 20 MB
-   • (slug, IP) üzrə saatda 20 yükləmə (flock ilə atomik)
-   • Fayllar: /uploads/music/{slug}/
-   Mövcud DB sxeminə toxunmur — URL formData.music.file kimi saxlanılır. */
+   Mövcud DB sxeminə toxunmur — URL formData.music.file kimi saxlanılır.
+
+   ── Phase 44.3 — İKİ REJİM ──────────────────────────────────────────────
+   1) `sid` (builder sessiyası) — BUILDER HƏMİŞƏ BUNU GÖNDƏRİR.
+      Dəvətnamə yalnız təsdiqdə yaranır və slug-a kod əlavə olunur, ona görə
+      builder-in bildiyi slug serverdə YOXDUR. Fayl sessiya qovluğuna düşür:
+      /uploads/_music/<bucket>/<sha1>.mp3 (bax story_media.php). URL təsdiqdən
+      sonra da dəyişmir — heç bir köçürmə lazım deyil.
+      Sui-istifadəyə qarşı: IP üzrə saatda 12 yükləmə, sessiyada ən çox
+      MUSIC_BUCKET_CAP fayl, eyni fayl ikinci dəfə yazılmır.
+   2) `slug` (mövcud dəvətnamə) — köhnə keşlənmiş frontend üçün saxlanılıb.
+      Phase 37 qaydası dəyişmir: uydurma slug-la yükləmək olmaz.
+      Fayllar: /uploads/music/{slug}/ ; (slug, IP) üzrə saatda 20.
+
+   ⚠ Əvvəl sessiya rejimi yox idi: builder 404 alıb SƏSSİZCƏ `blob:` URL
+   saxlayırdı və təsdiqlənmiş dəvətnamədə musiqi heç kimdə açılmırdı. */
 @ini_set('upload_max_filesize', '25M');
 @ini_set('post_max_size',       '25M');
 @ini_set('max_execution_time',  '120');
 
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/story_media.php';
+
+function musicFail(int $http, string $code, string $message, bool $permanent = true): never {
+    http_response_code($http);
+    echo json_encode([
+        'error' => $code, 'code' => $code, 'message' => $message, 'permanent' => $permanent,
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -18,119 +39,100 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-/* ── Slug validation ── */
-$slug = trim($_POST['slug'] ?? '');
-if (!$slug || !isValidSlug($slug)) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Valid slug required']);
-    exit;
+/* post_max_size aşılanda PHP $_POST və $_FILES-i BOŞ qaytarır — səbəb
+   «sessiya yoxdur» kimi yanıltıcı görünməsin. */
+if (empty($_FILES) && empty($_POST) && (int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > 0) {
+    musicFail(413, 'FILE_TOO_LARGE', 'Fayl 20 MB-dan böyük ola bilməz.');
 }
-/* Phase 37 — uydurma slug-la musiqi yüklənə bilməz (bax upload_photo.php) */
-if (!invitationExists(getDB(), $slug)) {
-    http_response_code(404);
-    echo json_encode(['error' => 'INVITATION_NOT_FOUND', 'message' => 'Bu dəvətnamə tapılmadı.']);
-    exit;
+
+$sid        = (string) ($_POST['sid'] ?? '');
+$useSession = isValidStorySid($sid);
+$slug       = '';
+
+if (!$useSession) {
+    $slug = trim($_POST['slug'] ?? '');
+    if (!$slug || !isValidSlug($slug)) {
+        musicFail(400, 'BAD_SESSION', 'Sessiya tanınmadı. Səhifəni yeniləyin.');
+    }
+    /* Phase 37 — uydurma slug-la musiqi yüklənə bilməz (bax upload_photo.php) */
+    if (!invitationExists(getDB(), $slug)) {
+        musicFail(404, 'INVITATION_NOT_FOUND', 'Bu dəvətnamə tapılmadı.');
+    }
 }
 
 /* ── Eyni requestdə maksimum 1 fayl ── */
-if (count($_FILES) > 1 || (isset($_FILES['music']) && is_array($_FILES['music']['name']))) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Only one file per request allowed']);
-    exit;
+$file = $_FILES['music'] ?? null;
+if (!$file || is_array($file['name'] ?? null) || count($_FILES) !== 1) {
+    musicFail(400, 'BAD_REQUEST', 'Hər sorğuda bir MP3 faylı göndərilməlidir.');
+}
+if (($file['error'] ?? -1) !== UPLOAD_ERR_OK) {
+    $tooBig = in_array($file['error'], [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true);
+    musicFail($tooBig ? 413 : 400, $tooBig ? 'FILE_TOO_LARGE' : 'UPLOAD_ERROR',
+        $tooBig ? 'Fayl 20 MB-dan böyük ola bilməz.' : 'Fayl yüklənmədi. Yenidən cəhd edin.', $tooBig);
+}
+if ((int) $file['size'] <= 0 || (int) $file['size'] > MUSIC_MAX_UPLOAD
+    || !is_uploaded_file($file['tmp_name'])) {
+    musicFail(413, 'FILE_TOO_LARGE', 'Fayl 20 MB-dan böyük ola bilməz.');
 }
 
-if (empty($_FILES['music']) || $_FILES['music']['error'] !== UPLOAD_ERR_OK) {
-    http_response_code(400);
-    echo json_encode(['error' => 'File upload error', 'code' => $_FILES['music']['error'] ?? -1]);
-    exit;
-}
-
-/* ── Rate limit — (slug, IP) üzrə saatda 20, flock ilə atomik ── */
-/* Phase 37: XFF müştərinin göndərdiyi başlıqdır — hər sorğuda dəyişməklə
-   limit tamamilə keçilirdi. clientIp() onu YALNIZ etibarlı proxy-dən
-   qəbul edir, əks halda REMOTE_ADDR işlədir. Limit məntiqi dəyişmir. */
-$ip       = clientIp();
-$rlKey    = hash('sha256', 'music|' . $slug . '|' . $ip);
-$rlFile   = sys_get_temp_dir() . '/digitoy_rl_' . $rlKey . '.json';
-$rlLimit  = 20;
-$rlWindow = 3600;
-
-$rlAllowed = true;
-$fp = @fopen($rlFile, 'c+');
-if ($fp !== false) {
-    if (flock($fp, LOCK_EX)) {
-        $raw    = stream_get_contents($fp);
-        $rlData = $raw ? (json_decode($raw, true) ?: []) : [];
-        $now    = time();
-        $rlData = array_values(array_filter($rlData, fn($t) => ($now - $t) < $rlWindow));
-        if (count($rlData) >= $rlLimit) {
-            $rlAllowed = false;
-        } else {
-            $rlData[] = $now;
-            ftruncate($fp, 0);
-            rewind($fp);
-            fwrite($fp, json_encode($rlData));
-            fflush($fp);
-        }
-        flock($fp, LOCK_UN);
-    }
-    fclose($fp);
-}
-
-if (!$rlAllowed) {
-    http_response_code(429);
-    echo json_encode(['error' => 'Too many uploads. Please try again later.']);
-    exit;
-}
-
-$file = $_FILES['music'];
-
-/* ── Max 20 MB ── */
-if ($file['size'] > 20971520) {
-    http_response_code(413);
-    echo json_encode(['error' => 'File too large (max 20MB)']);
-    exit;
+/* ── Rate limit ──
+   Sessiya rejimində açar IP-dir: sessiya ID-sini dəyişməklə limit keçilməsin.
+   Slug rejimində əvvəlki (slug, IP) açarı — `rateGate` eyni sha256 faylını
+   işlədir, yəni mövcud sayğaclar olduğu kimi davam edir. */
+$ip = clientIp();
+$allowed = $useSession
+    ? rateGate('music:' . $ip, 12, 3600)
+    : rateGate('music|' . $slug . '|' . $ip, 20, 3600);
+if (!$allowed) {
+    musicFail(429, 'RATE_LIMIT', 'Çox sayda fayl yükləndi. Bir az sonra yenidən cəhd edin.', false);
 }
 
 /* ── MIME — real fayl məzmununa görə (Content-Type header-ə güvənmir) ── */
 $mime = mime_content_type($file['tmp_name']);
 if (!in_array($mime, ['audio/mpeg', 'audio/mp3'], true)) {
-    http_response_code(415);
-    echo json_encode(['error' => 'Only MP3 files are allowed', 'mime' => $mime]);
-    exit;
+    musicFail(415, 'NOT_MP3', 'Yalnız MP3 faylı qəbul olunur.');
 }
 
-/* ── Qovluq: /uploads/music/{slug}/ ── */
-$uploadDir = __DIR__ . '/../uploads/music/' . $slug . '/';
-if (!is_dir($uploadDir)) {
-    if (!mkdir($uploadDir, 0755, true) && !is_dir($uploadDir)) {
-        http_response_code(500);
-        echo json_encode(['error' => 'Cannot create upload directory']);
-        exit;
+if ($useSession) {
+    $bucket = musicBucket($sid);
+    $dir    = musicDir($bucket);
+    if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
+        musicFail(500, 'SERVER_STORAGE', 'Serverdə yaddaş xətası. Bir az sonra yenidən cəhd edin.', false);
     }
-}
-if (!is_writable($uploadDir)) {
-    chmod($uploadDir, 0755);
-    if (!is_writable($uploadDir)) {
-        http_response_code(500);
-        echo json_encode(['error' => 'Upload directory not writable']);
-        exit;
+    $filename = musicFileName($file['tmp_name']);
+    if ($filename === null) {
+        musicFail(500, 'SERVER_STORAGE', 'Fayl saxlanılmadı. Yenidən cəhd edin.', false);
     }
+    /* Eyni fayl artıq varsa yenidən yazılmır və limitə sayılmır */
+    if (!is_file($dir . $filename)) {
+        if (musicBucketCount($dir) >= MUSIC_BUCKET_CAP) {
+            musicFail(429, 'BUCKET_FULL', 'Bu sifariş üçün musiqi yükləmə limiti dolub.');
+        }
+        if (!move_uploaded_file($file['tmp_name'], $dir . $filename)) {
+            musicFail(500, 'SERVER_STORAGE', 'Fayl saxlanılmadı. Yenidən cəhd edin.', false);
+        }
+    }
+    $path = musicPublicPath($bucket, $filename);
+} else {
+    $dir = __DIR__ . '/../uploads/music/' . $slug . '/';
+    if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
+        musicFail(500, 'SERVER_STORAGE', 'Serverdə yaddaş xətası. Bir az sonra yenidən cəhd edin.', false);
+    }
+    $filename = time() . '_' . uniqid('', true) . '.mp3';
+    if (!move_uploaded_file($file['tmp_name'], $dir . $filename)) {
+        musicFail(500, 'SERVER_STORAGE', 'Fayl saxlanılmadı. Yenidən cəhd edin.', false);
+    }
+    $path = '/uploads/music/' . $slug . '/' . $filename;
 }
 
-$filename = time() . '_' . uniqid('', true) . '.mp3';
-$destPath = $uploadDir . $filename;
-
-if (!move_uploaded_file($file['tmp_name'], $destPath)) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Could not save file']);
-    exit;
-}
+/* Veb server oxuya bilsin — hissəli video posterlərindəki 403 dərsi
+   (bax media_store.php). move_uploaded_file adətən 0644 verir, bu ehtiyatdır. */
+@chmod($dir . $filename, 0644);
 
 $baseUrl = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
 echo json_encode([
     'ok'       => true,
-    'url'      => $baseUrl . '/uploads/music/' . $slug . '/' . $filename,
+    'url'      => $baseUrl . $path,
     'filename' => $filename,
     'mime'     => $mime,
 ]);

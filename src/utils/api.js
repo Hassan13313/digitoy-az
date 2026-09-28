@@ -600,16 +600,20 @@ export function uploadPhoto(file, slug, opts = {}) {
   })
 }
 
-/* ── Phase 25.3 — Musiqi (MP3) yüklə — public, rate-limitli ── */
-export async function uploadMusic(file, slug) {
+/* ── Phase 25.3 — Musiqi (MP3) yüklə — public, rate-limitli ──
+   ⚠ Phase 44.3: builder SESSİYA ID-si göndərir, slug yox. Dəvətnamə yalnız
+   təsdiqdə yaranır (slug-a kod əlavə olunur), ona görə builder-in bildiyi
+   slug serverdə yoxdur və yükləmə 404 alırdı. Fayl sessiya qovluğuna düşür,
+   URL təsdiqdən sonra da dəyişmir (bax upload_music.php). */
+export async function uploadMusic(file) {
   const fd = new FormData()
   fd.append('music', file)
-  fd.append('slug', slug)
+  fd.append('sid', getStorySessionId())
   const res = await fetch(`${BASE}/upload_music.php`, {
     method: 'POST',
     body: fd,
   })
-  if (!res.ok) throw new Error(`upload_music: ${res.status}`)
+  if (!res.ok) throw await toApiError(res, 'Musiqi yüklənmədi. Yenidən cəhd edin.')
   return res.json() /* { ok, url, filename, mime } */
 }
 

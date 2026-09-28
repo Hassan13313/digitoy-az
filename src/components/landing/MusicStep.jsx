@@ -32,7 +32,8 @@ const MUSIC_UI = {
     uploading: 'Yüklənir…',
     errType: 'Yalnız MP3 faylı qəbul olunur.',
     errSize: 'Fayl 20 MB-dan böyük ola bilməz.',
-    localNote: 'Fayl hazırda yalnız bu brauzerdə önizlənir — sifariş təsdiqində serverə yüklənəcək.',
+    errUpload: 'Musiqi yüklənmədi. İnterneti yoxlayıb yenidən cəhd edin.',
+    localNote: 'Bu fayl serverə yüklənməyib və dəvətnamədə səslənməyəcək. Faylı silib yenidən seçin.',
     playerTitle: 'Audio Önizləmə',
     startTitle: 'Başlanğıc Nöqtəsi',
     startHint: 'Musiqini istədiyiniz hissəyə çəkin və düyməyə basın — dəvətnamə həmin saniyədən başlayacaq.',
@@ -62,7 +63,8 @@ const MUSIC_UI = {
     uploading: 'Uploading…',
     errType: 'Only MP3 files are accepted.',
     errSize: 'File cannot exceed 20 MB.',
-    localNote: 'File is previewed locally — it will be uploaded when the order is approved.',
+    errUpload: 'Music could not be uploaded. Check your connection and try again.',
+    localNote: 'This file was not uploaded and will not play in the invitation. Remove it and choose it again.',
     playerTitle: 'Audio Preview',
     startTitle: 'Start Point',
     startHint: 'Seek to the part you like and press the button — the invitation will start from that second.',
@@ -92,7 +94,8 @@ const MUSIC_UI = {
     uploading: 'Загрузка…',
     errType: 'Принимаются только MP3 файлы.',
     errSize: 'Файл не может превышать 20 МБ.',
-    localNote: 'Файл предпросматривается локально — он будет загружен при подтверждении заказа.',
+    errUpload: 'Не удалось загрузить музыку. Проверьте соединение и попробуйте снова.',
+    localNote: 'Этот файл не загружен и не будет звучать в приглашении. Удалите его и выберите снова.',
     playerTitle: 'Предпрослушивание',
     startTitle: 'Точка начала',
     startHint: 'Перемотайте на нужный фрагмент и нажмите кнопку — приглашение начнётся с этой секунды.',
@@ -313,7 +316,7 @@ function PresetCard({ track, isSelected, isPreviewing, onListen, onSelect, ui })
 }
 
 /* ══ Əsas addım komponenti ══ */
-export default function MusicStep({ music, onChange, lang = 'az', uploadSlug = '' }) {
+export default function MusicStep({ music, onChange, lang = 'az' }) {
   const ui = MUSIC_UI[lang] || MUSIC_UI.az
   const [source, setSource] = useState(music?.provider === MUSIC_PROVIDERS.MP3 ? 'mp3' : 'preset')
   const [dragOver,  setDragOver]  = useState(false)
@@ -346,12 +349,18 @@ export default function MusicStep({ music, onChange, lang = 'az', uploadSlug = '
     setUploading(true)
     const name = file.name.replace(/\.mp3$/i, '')
     try {
-      const result = await uploadMusic(file, uploadSlug || 'davetname')
+      const result = await uploadMusic(file)
       onChange(buildMp3Music({ url: result.url, name, playMode }))
-    } catch {
-      /* Server əlçatmazdırsa (lokal dev) — blob URL ilə lokal önizləmə */
-      const blobUrl = URL.createObjectURL(file)
-      onChange(buildMp3Music({ url: blobUrl, name, playMode, localOnly: true }))
+    } catch (err) {
+      /* ⚠ Phase 44.3: blob URL YALNIZ lokal dev-də. Production-da əvvəl də
+         belə edilirdi — müştəri musiqini öz brauzerində eşidirdi, amma
+         təsdiqlənmiş dəvətnamədə `blob:` ünvanı heç kimdə açılmırdı. */
+      if (import.meta.env.DEV) {
+        const blobUrl = URL.createObjectURL(file)
+        onChange(buildMp3Music({ url: blobUrl, name, playMode, localOnly: true }))
+      } else {
+        setFileError(lang === 'az' && err?.message ? err.message : ui.errUpload)
+      }
     } finally {
       setUploading(false)
     }

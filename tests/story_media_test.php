@@ -114,6 +114,33 @@ file_put_contents($bucketDir . '.tmp_z.jpg', 'x');
 check('müvəqqəti fayllar sayılmır', storyBucketCount($bucketDir) === 1);
 check('olmayan qovluq 0 qaytarır', storyBucketCount($tmpDir . 'yoxdur/') === 0);
 
+echo "\nmusiqi (Phase 44.3)\n";
+$sid = '3f2b8c1e-7a4d-4e2b-9c1a-2b3c4d5e6f70';
+check('musiqi bucket 24 hex', (bool) preg_match('/^[0-9a-f]{24}\z/', musicBucket($sid)));
+check('musiqi bucket sabitdir', musicBucket($sid) === musicBucket($sid));
+check('musiqi bucket hekayədən fərqlidir', musicBucket($sid) !== storyBucket($sid));
+check('musiqi bucket sid-i ifşa etmir', !str_contains(musicBucket($sid), '3f2b8c1e'));
+check('ictimai yol', musicPublicPath('abc', 'x.mp3') === '/uploads/_music/abc/x.mp3');
+check('qovluq _music altındadır', str_ends_with(musicDir('abc'), '/uploads/_music/abc/'));
+check('limit ağlabatandır', MUSIC_BUCKET_CAP >= 3 && MUSIC_BUCKET_CAP <= 10);
+check('ölçü limiti 20 MB', MUSIC_MAX_UPLOAD === 20 * 1024 * 1024);
+
+$musicDir = $tmpDir . 'music/';
+mkdir($musicDir);
+file_put_contents($tmpDir . 'a.mp3', 'ID3-demo-content-A');
+file_put_contents($tmpDir . 'b.mp3', 'ID3-demo-content-B');
+$ma = musicFileName($tmpDir . 'a.mp3');
+check('hash adı .mp3', $ma !== null && (bool) preg_match('/^[0-9a-f]{20}\.mp3\z/', $ma), (string) $ma);
+check('eyni məzmun eyni ad', $ma === musicFileName($tmpDir . 'a.mp3'));
+check('fərqli məzmun fərqli ad', $ma !== musicFileName($tmpDir . 'b.mp3'));
+check('olmayan fayl null', musicFileName($tmpDir . 'yoxdur.mp3') === null);
+copy($tmpDir . 'a.mp3', $musicDir . $ma);
+file_put_contents($musicDir . 'qeyd.txt', 'x');
+check('yalnız .mp3 sayılır', musicBucketCount($musicDir) === 1, (string) musicBucketCount($musicDir));
+check('olmayan musiqi qovluğu 0', musicBucketCount($tmpDir . 'yoxdur/') === 0);
+foreach (glob($musicDir . '*') ?: [] as $f) if (is_file($f)) unlink($f);
+@rmdir($musicDir);
+
 /* Təmizlik */
 foreach (glob($bucketDir . '{,.}*', GLOB_BRACE) ?: [] as $f) if (is_file($f)) unlink($f);
 @rmdir($bucketDir);
