@@ -15,6 +15,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $body        = json_decode(file_get_contents('php://input'), true);
 $guestId     = (int)($body['guest_id'] ?? 0);
+/* ⚠ 2026-09-28: qonaq DƏVƏTNAMƏYƏ bağlanır. Qonaq id-ləri ardıcıl rəqəmdir;
+   əvvəl istənilən id ilə İSTƏNİLƏN toyun cavab verməmiş qonağını
+   «gəlməyəcək» işarələmək və mövcud cavabları (409) oxumaq olurdu. */
+$invId       = trim((string)($body['invitation_id'] ?? ''));
 $status      = strtoupper(trim($body['status'] ?? ''));
 $msg         = isset($body['optional_message']) ? trim($body['optional_message']) : null;
 $extraGuests = min(10, max(0, (int)($body['extra_guests'] ?? 0)));
@@ -22,6 +26,11 @@ $extraGuests = min(10, max(0, (int)($body['extra_guests'] ?? 0)));
 if (!$guestId) {
     http_response_code(422);
     echo json_encode(['error' => 'guest_id required']);
+    exit;
+}
+if ($invId === '' || !isValidSlug($invId)) {
+    http_response_code(422);
+    echo json_encode(['error' => 'invitation_id required']);
     exit;
 }
 
@@ -48,13 +57,21 @@ if (!rateGate('att|' . $guestId, 5, 60)) {
     echo json_encode(['error' => 'RATE_LIMITED', 'message' => 'Çox sayda cəhd. Bir az gözləyin.']);
     exit;
 }
+/* Id-ləri ardıcıl yoxlayan skripti dayandırır: IP + dəvətnamə üzrə
+   10 dəqiqədə 30 cavab. Real qonaqlar cavabı toydan ƏVVƏL, müxtəlif
+   yerlərdən verir, ona görə bu hədd onlara toxunmur. */
+if (!rateGate('att_ip|' . $invId . '|' . clientIp(), 30, 600)) {
+    http_response_code(429);
+    echo json_encode(['error' => 'RATE_LIMITED', 'message' => 'Çox sayda cəhd. Bir az gözləyin.']);
+    exit;
+}
 
 ensureTables();
 $db = getDB();
 
-/* ── Qonağın mövcud olduğunu yoxla ── */
-$check = $db->prepare("SELECT id FROM guests WHERE id = :id LIMIT 1");
-$check->execute([':id' => $guestId]);
+/* ── Qonaq HƏMİN dəvətnaməyə aiddirmi? ── */
+$check = $db->prepare("SELECT id FROM guests WHERE id = :id AND invitation_id = :inv LIMIT 1");
+$check->execute([':id' => $guestId, ':inv' => $invId]);
 if (!$check->fetch()) {
     http_response_code(404);
     echo json_encode(['error' => 'guest_not_found']);

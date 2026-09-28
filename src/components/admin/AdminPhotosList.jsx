@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { RefreshCw, Search, X, Camera, HardDrive, Images, Upload, Link2, Check } from 'lucide-react'
+import { RefreshCw, Search, X, Camera, HardDrive, Images, Upload, Link2, Check, MonitorPlay } from 'lucide-react'
 
 const BASE = import.meta.env.VITE_API_URL || '/api'
 
@@ -120,14 +120,14 @@ export default function AdminPhotosList() {
       ) : (
         <div style={{ background: 'white', border: '1px solid oklch(88% 0.02 60)', borderRadius: 6, overflow: 'hidden' }}>
           {/* Table header */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 80px 160px 72px', gap: 16, padding: '10px 20px', background: 'oklch(95% 0.01 75)', borderBottom: '1px solid oklch(88% 0.02 60)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 80px 160px 136px', gap: 16, padding: '10px 20px', background: 'oklch(95% 0.01 75)', borderBottom: '1px solid oklch(88% 0.02 60)' }}>
             {['Slug', 'Foto', 'Ölçü', 'Son yükləmə', 'Əməliyyat'].map((h, i) => (
               <span key={i} style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'oklch(50% 0.03 60)' }}>{h}</span>
             ))}
           </div>
 
           {albums.map((alb, i) => (
-            <div key={alb.slug} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 80px 160px 72px', gap: 16, padding: '13px 20px', borderBottom: i < albums.length - 1 ? '1px solid oklch(93% 0.01 75)' : 'none', alignItems: 'center' }}>
+            <div key={alb.slug} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 80px 160px 136px', gap: 16, padding: '13px 20px', borderBottom: i < albums.length - 1 ? '1px solid oklch(93% 0.01 75)' : 'none', alignItems: 'center' }}>
               <span style={{ fontFamily: 'monospace', fontSize: 12, fontWeight: 600, color: 'oklch(42% 0.07 75)', letterSpacing: '0.04em' }}>
                 {alb.slug}
               </span>
@@ -196,6 +196,23 @@ export default function AdminPhotosList() {
                   onMouseLeave={e => { e.currentTarget.style.background = 'oklch(94% 0.03 80)' }}
                 >
                   <Images size={13} strokeWidth={1.5} />
+                </a>
+                {/* Phase 43 — zal ekranı üçün slayd şou */}
+                <a
+                  href={`/invite/${alb.slug}/slayd`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Slayd şou (TV/proyektor)"
+                  style={{
+                    width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: 'oklch(94% 0.03 250)', borderRadius: 4,
+                    color: 'oklch(42% 0.1 250)', textDecoration: 'none',
+                    transition: 'background 0.15s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'oklch(88% 0.06 250)' }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'oklch(94% 0.03 250)' }}
+                >
+                  <MonitorPlay size={13} strokeWidth={1.5} />
                 </a>
                 <a
                   href={`/invite/${alb.slug}/foto`}

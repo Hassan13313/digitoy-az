@@ -24,6 +24,11 @@ function nextMarch13() {
 
 export const DEMO_DATE = nextMarch13()
 
+/* Demo hekayə şəkilləri — `demoPhotos` kimi Unsplash-dən (CSP img-src https: icazəlidir) */
+function demoStoryPhoto(id) {
+  return `https://images.unsplash.com/photo-${id}?w=900&q=75&auto=format&fit=crop`
+}
+
 export const demoInvitation = {
   eventType: 'toy',
   brideName:  'Aysel',
@@ -73,6 +78,67 @@ export const demoInvitation = {
     'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=600&h=400&fit=crop&auto=format',
     'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=600&h=400&fit=crop&auto=format',
   ],
+
+  /* ── «Bizim Hekayəmiz» (Phase 44) ──
+     Bölmə DEFAULT BAĞLIDIR (data/sections.js › DEFAULT_OFF), ona görə demoda
+     açıq-aşkar yandırılır. Qalan bölmələr üçün açar yoxdur → hamısı açıq.
+     Fəsillər Claude Design nümunəsinin ardıcıllığındadır: 1 şəkil (böyük
+     çərçivə) · 4 şəkil (kollaj + əlavə kadrlar) · 1 şəkil (əsas forma) ·
+     1 şəkil (mətn + şəkil). Tarixlər ISO-dur ki, EN/RU-da ay adı çevrilsin. */
+  sections: { lovestory: true },
+  loveStory: [
+    {
+      id: 'demo-ls-1', date: '2022-03-12', icon: '☕',
+      title: 'İlk Tanışlıq',
+      text: 'Bir dostun ad günündə, təsadüfən eyni masada oturduq.',
+      caption: 'ilk baxış',
+      photos: [demoStoryPhoto('1621621667797-e06afc217fb0')],
+    },
+    {
+      id: 'demo-ls-2', date: '2022-07', icon: '🌸',
+      title: 'İlk Görüş',
+      text: 'Dənizkənarı bulvarda saatlarla gəzdik, vaxtın necə keçdiyini bilmədik.',
+      caption: 'bulvar',
+      photos: [
+        demoStoryPhoto('1494774157365-9e04c6720e47'),
+        demoStoryPhoto('1520854221256-17451cc331bf'),
+        demoStoryPhoto('1516589178581-6cd7833ae3b2'),
+        demoStoryPhoto('1537633552985-df8429e8048b'),
+      ],
+    },
+    {
+      id: 'demo-ls-3', date: '2025-02-14', icon: '💍',
+      title: '“Bəli” dedi',
+      text: 'Şam işığında, diz çökərək verilən sual — və ən gözəl cavab.',
+      photos: [demoStoryPhoto('1605100804763-247f67b3557e')],
+    },
+    {
+      id: 'demo-ls-4', date: '2026-09', icon: '💌',
+      title: 'Nişan Günü',
+      text: 'Ailələrimizin xeyir-duası ilə üzüklər taxıldı.',
+      caption: 'üzüklər',
+      photos: [demoStoryPhoto('1529634806980-85c3dd6d34ac')],
+    },
+  ],
+  /* Demo EN/RU mətnləri — `resolveWeddingContent` əl ilə tərcüməni üstün tutur */
+  i18n: {
+    en: {
+      loveStory: {
+        0: { title: 'The Day We Met', text: 'At a friend’s birthday party, we happened to sit at the same table.', caption: 'first glance' },
+        1: { title: 'Our First Date', text: 'We walked the seaside boulevard for hours and lost all track of time.', caption: 'the boulevard' },
+        2: { title: 'She Said “Yes”', text: 'A question asked on one knee by candlelight — and the most beautiful answer.' },
+        3: { title: 'Engagement Day', text: 'With our families’ blessing, the rings were exchanged.', caption: 'the rings' },
+      },
+    },
+    ru: {
+      loveStory: {
+        0: { title: 'Знакомство', text: 'На дне рождения друга мы случайно оказались за одним столом.', caption: 'первый взгляд' },
+        1: { title: 'Первое свидание', text: 'Мы часами гуляли по приморскому бульвару и не заметили, как пролетело время.', caption: 'бульвар' },
+        2: { title: 'Она сказала «Да»', text: 'Вопрос при свечах, на одном колене — и самый прекрасный ответ.' },
+        3: { title: 'День помолвки', text: 'С благословения наших семей мы обменялись кольцами.', caption: 'кольца' },
+      },
+    },
+  },
 
   programSteps: [
     { time: '18:00', icon: '🥂', activity: 'Qonaqların Möhtəşəm Qarşılanması' },

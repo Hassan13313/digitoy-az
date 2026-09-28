@@ -63,7 +63,13 @@ if ($_origin !== '') {
         header('Access-Control-Allow-Origin: ' . $_origin);
         header('Vary: Origin');
         header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-        header('Access-Control-Allow-Headers: Content-Type, X-Admin-Token, X-Gallery-Token, Authorization');
+        /* ⚠ `If-None-Match` və `If-Modified-Since` CORS safelist-də DEYİL:
+           preflight tələb edirlər. Onlarsız qalereyanın şərti GET (ETag/304)
+           optimallaşdırması cross-origin rejimdə tamamilə sınırdı. */
+        header('Access-Control-Allow-Headers: Content-Type, X-Admin-Token, X-Gallery-Token, Authorization, If-None-Match, If-Modified-Since');
+        /* Cavab başlıqları cross-origin JS-ə default olaraq GÖRÜNMÜR —
+           `res.headers.get('ETag')` null qaytarır və keş heç vaxt qurulmur. */
+        header('Access-Control-Expose-Headers: ETag, Last-Modified');
     } else {
         http_response_code(403);
         echo json_encode(['error' => 'Origin not allowed']);
@@ -214,6 +220,50 @@ function indexMediaRow(string $slug, string $filename, string $mime, int $size):
     }
 }
 
+/* ── Qalereya hadisə jurnalı (Phase 43) ──
+   Qalereya analitikasının YEGANƏ yazma nöqtəsi: baxış, QR skan, yükləmə.
+   Foto/video SAYLARI burada saxlanılmır — onlar fayl sistemindən oxunur
+   (bax get_photos.php), yəni bu cədvəl boş olsa da qalereya işləyir.
+
+   ⚠ Heç vaxt istisna atmır: jurnal yazıla bilməsə əsas əməliyyat davam edir.
+   ⚠ IP açıq saxlanılmır — yalnız gün ərzində təkrar baxışı ayırmağa imkan
+     verən qısa HMAC. Ertəsi gün eyni IP YENİ hash alır (gündəlik duz),
+     ona görə jurnaldan qonağı izləmək mümkün deyil.
+
+   @param string $type  'visit' | 'qr_scan' | 'upload' | 'slideshow'
+   @param bool   $once  true → həmin IP üçün eyni gün ikinci dəfə yazılmır */
+function galleryEvent(string $slug, string $type, bool $once = false): void {
+    try {
+        $secret = defined('ADMIN_KEY') ? ADMIN_KEY : 'digitoy';
+        $ipHash = substr(hash_hmac('sha256', clientIp() . '|' . gmdate('Y-m-d'), $secret), 0, 16);
+        $db     = getDB();
+
+        if ($once) {
+            $dup = $db->prepare(
+                'SELECT 1 FROM gallery_events
+                  WHERE slug = :s AND event_type = :t AND ip_hash = :h
+                    AND created_at >= :d LIMIT 1'
+            );
+            $dup->execute([
+                ':s' => $slug, ':t' => $type, ':h' => $ipHash,
+                ':d' => gmdate('Y-m-d 00:00:00'),
+            ]);
+            if ($dup->fetchColumn()) return;
+        }
+
+        $st = $db->prepare(
+            'INSERT INTO gallery_events (slug, event_type, ip_hash) VALUES (:s, :t, :h)'
+        );
+        $st->execute([
+            ':s' => substr($slug, 0, 120),
+            ':t' => substr($type, 0, 24),
+            ':h' => $ipHash,
+        ]);
+    } catch (Throwable $e) {
+        /* analitika köməkçidir — qalereya heç vaxt bundan dolayı sınmır */
+    }
+}
+
 /* ── Sürüşən pəncərəli sayğac (paylaşılan) ──
    `upload_photo.php`-dakı flock nümunəsinin ümumiləşdirilmiş variantı.
    TRUE qaytarırsa əməliyyata icazə var və sayğac artırılıb. */
@@ -246,7 +296,7 @@ function rateGate(string $key, int $limit, int $window): bool {
 /* ── Sxem versiyası (Phase 39) ──
    Sütun və ya cədvəl əlavə edəndə BU RƏQƏMİ ARTIR — əks halda miqrasiya
    canlıda işləməz. */
-const SCHEMA_VERSION = 39;
+const SCHEMA_VERSION = 43;
 
 /* ── Cədvəlləri avtomatik yarat ──
    Phase 39 OPTİMİZASİYASI: əvvəl bu funksiya HƏR sorğuda 6 `CREATE TABLE
@@ -471,6 +521,112 @@ function runMigrations(PDO $db): void {
             if (empty($has)) $db->exec("ALTER TABLE `$tbl` ADD INDEX `$name` ($cols)");
         } catch (Throwable $e) {
             /* indeks əlavə edilə bilməsə sorğular işləməyə davam edir */
+        }
+    }
+
+    /* ══════════════════════════════════════════════════
+       PHASE 43 — QALEREYA TƏCRÜBƏSİ (tamamilə ADDITIV)
+
+       Dörd yeni cədvəl + `guests.phone` sütunu. MÖVCUD heç bir cədvələ,
+       sütuna, indeksə və ya sorğuya toxunulmur:
+         • qalereya manifesti (get_photos.php) hələ də fayl sistemindən gəlir;
+         • bu cədvəllər BOŞ olsa da qalereya, dəvətnamə və yükləmə işləyir;
+         • hər oxu try/catch içindədir → cədvəl yoxdursa xüsusiyyət sadəcə
+           görünmür, səhifə sınmır.
+
+       ⚠ ASCII CHARSET: slug (`[a-zA-Z0-9-]`) və fayl adı (`[a-zA-Z0-9_-.]`)
+         onsuz da ASCII-dir. utf8mb4-də (slug 120 + fayl 255) × 4 bayt unikal
+         açarın 767 baytlıq KÖHNƏ InnoDB limitini aşırdı — miqrasiya köhnə
+         MySQL-də sınardı. ASCII ilə cəmi 407 bayt.
+       ⚠ ascii_bin: Linux fayl sistemi hərf registrinə həssasdır, ona görə
+         müqayisə də bayt-bayt olmalıdır (`IMG_1.jpg` ≠ `img_1.jpg`).
+       ⚠ emoji utf8mb4_bin: collation yazılmasa sütun serverin utf8mb4
+         default-unu alır; utf8mb4_general_ci/unicode_ci-də (MariaDB,
+         MySQL 5.7) 😍 👏 🎉 BƏRABƏR sayılır və GROUP BY onları birləşdirir.
+
+       ROLLBACK — ətraflı: docs/PHASE_43_RELEASE.md §2.
+         Əsas yol: yalnız əvvəlki kodu yüklə — sxem qalır, heç nə itmir.
+         Sxemi də silmək lazımdırsa, YALNIZ kod geri qaytarıldıqdan SONRA
+         (Phase 43 kodu canlıdırsa növbəti sorğu cədvəlləri BOŞ yaradır):
+           DROP TABLE media_reactions, media_flags, gallery_events, gallery_config;
+           ALTER TABLE guests DROP COLUMN phone;
+           UPDATE schema_meta SET meta_value = '39' WHERE meta_key = 'version';
+         ⚠ Bu SQL Phase 43-də yaranan reaksiyaları, seçilmişləri, analitikanı,
+           qalereya ayarlarını və idxal olunmuş telefonları QALICI silir.
+    ══════════════════════════════════════════════════ */
+
+    /* Qonaq reaksiyaları — bir qonaq · bir media · BİR reaksiya.
+       UNIQUE açar bunu DB səviyyəsində təmin edir, ona görə paralel iki
+       toxunuş da ikinci sətir yaratmır (ON DUPLICATE KEY → emoji dəyişir). */
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS media_reactions (
+            id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            slug       VARCHAR(120) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+            filename   VARCHAR(255) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+            visitor_id VARCHAR(32)  CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+            emoji      VARCHAR(16)  CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            created_at DATETIME     DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY uq_reaction (slug, filename, visitor_id),
+            INDEX idx_react_media (slug, filename)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ");
+
+    /* Seçilmiş media — qalereyada önə çıxarılanlar.
+       Sətir YALNIZ admin/cütlük bir medianı işarələyəndə yaranır, yəni
+       cədvəl kiçik qalır və işarəsiz media üçün heç nə oxunmur. */
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS media_flags (
+            id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            slug        VARCHAR(120) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+            filename    VARCHAR(255) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+            featured    TINYINT(1)   NOT NULL DEFAULT 0,
+            featured_at DATETIME     DEFAULT NULL,
+            updated_at  DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY uq_flag (slug, filename),
+            INDEX idx_flag_featured (slug, featured)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ");
+
+    /* Qalereya analitikası — baxış / QR skan / yükləmə hadisələri. */
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS gallery_events (
+            id         BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            slug       VARCHAR(120) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+            event_type VARCHAR(24)  CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+            ip_hash    VARCHAR(16)  CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
+            created_at DATETIME     DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_gev_slug_at (slug, created_at),
+            INDEX idx_gev_type    (slug, event_type)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ");
+
+    /* Qalereya ayarları — QR stend dizaynı və üz qapağı mətnləri.
+       JSON blob: sxem dəyişmədən yeni ayar əlavə etmək olur. Sətir yoxdursa
+       frontend öz defaultlarını işlədir (bax utils/api.js::getGalleryConfig). */
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS gallery_config (
+            slug       VARCHAR(120) CHARACTER SET ascii COLLATE ascii_bin NOT NULL PRIMARY KEY,
+            config     MEDIUMTEXT   NOT NULL,
+            updated_at DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ");
+
+    /* ── guests.phone (Phase 43) ──
+       Excel/CSV idxalında telefon SƏRBƏST sütundur. NULL qəbul edir, yəni
+       mövcud bütün qonaq sətirləri toxunulmadan qalır və oturma planı,
+       RSVP, axtarış — hamısı əvvəlki kimi işləyir.
+
+       ⚠ PARALEL SORĞU: deploydan sonrakı ilk anda iki sorğu eyni vaxtda
+       buraya çata bilər — ikisi də SHOW-da sütunu görmür, biri ALTER edir,
+       o biri 1060 (Duplicate column) alır. Nəticə eynidir (sütun var), ona
+       görə YALNIZ 1060 udulur; başqa hər xəta əvvəlki kimi yuxarı ötürülür. */
+    $gpCols = $db->query("SHOW COLUMNS FROM guests LIKE 'phone'")->fetchAll();
+    if (empty($gpCols)) {
+        try {
+            $db->exec("ALTER TABLE guests ADD COLUMN phone VARCHAR(40) DEFAULT NULL");
+        } catch (PDOException $e) {
+            if ((int) ($e->errorInfo[1] ?? 0) !== 1060) throw $e;
         }
     }
 

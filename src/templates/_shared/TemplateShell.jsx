@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { QRCodeSVG } from 'qrcode.react'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
 import DressCodeSection from './DressCodeSection'
+import LoveStorySection from './LoveStorySection'
+import { getStoryTheme } from './loveStoryTheme'
 import MapSection, { MapRings } from './MapSection'
 import { directionsUrl, openMapUrl } from './geo'
 import { OrderCta, MusicStartBubble } from './TemplateActions'
@@ -193,6 +195,20 @@ export default function TemplateShell({
      `sections` sahəsi olmayan KÖHNƏ dəvətnamələrdə hamısı `true` qayıdır,
      yəni davranış Phase 34-dəki ilə eynidir. */
   const S = getSectionVisibility(weddingData, activePkgId)
+
+  /* ── Phase 43 — «Bizim Hekayəmiz» bölməsinin ton sürüşməsi ──
+     `sectionStyle(i)` fonları növbələşdirir (transparent ↔ surface, ya da
+     `design.sectionTones` dövrü). Hekayə geri sayımla məkan arasına girir,
+     ona görə ondan SONRAKI bölmələrin indeksi bir addım sürüşməlidir —
+     əks halda iki qonşu bölmə eyni fonla qalır və ayırıcı itir.
+
+     ⚠ REGRESSİYA YOXDUR: hekayə DEFAULT BAĞLIDIR, yəni `lsShift` mövcud
+     bütün dəvətnamələrdə 0-dır və indekslər Phase 42-dəki kimi qalır. */
+  const showStory = S.lovestory && Array.isArray(weddingData.loveStory)
+                    && weddingData.loveStory.length > 0
+  const lsShift = showStory ? 1 : 0
+  const storyBg = showStory ? getStoryTheme(templateId, adminOverrides?.theme).bg : undefined
+
   const canShowSeating = S.seating
   const canShowGallery = S.gallery
   const canShowRsvp    = S.rsvp
@@ -517,9 +533,33 @@ export default function TemplateShell({
             </section>
             )}
 
+            {/* 05b — BİZİM HEKAYƏMİZ (Phase 43) ────────────────────────
+                Zaman xətti üzrə hekayə blokları. Mətnlər `resolveWeddingContent`
+                tərəfindən ARTIQ seçilmiş dildə gəlir (bax data/contentI18n.js),
+                ona görə burada tərcümə məntiqi YOXDUR.
+                Bölmə boşdursa `showStory` false olur və heç nə render olunmur. */}
+            {/* Phase 44 — Claude Design «Love Story»: başlığı, fonu və fəsil
+                maketlərini bölmə ÖZÜ çəkir (hər şablonun öz çərçivə dili var,
+                bax _shared/loveStoryTheme.js). Şablonun `sectionLabels`-i
+                verilibsə başlıq mətni ondan gəlir. */}
+            {showStory && (
+            <section data-section="lovestory" style={{ ...sectionStyle(2), background: storyBg, paddingTop: 'clamp(48px, 12vw, 64px)', paddingBottom: 'clamp(56px, 14vw, 80px)' }}>
+              <Reveal style={inner}>
+                <LoveStorySection
+                  story={weddingData.loveStory}
+                  templateId={templateId}
+                  lang={lang}
+                  kicker={L('lovestory', 'kicker', null)}
+                  title={L('lovestory', 'title', null)}
+                  adminTheme={adminOverrides?.theme || null}
+                />
+              </Reveal>
+            </section>
+            )}
+
             {/* 06 — LOCATION */}
             {S.venue && (
-            <section data-section="venue" style={sectionStyle(2)}>
+            <section data-section="venue" style={sectionStyle(2 + lsShift)}>
               <Reveal style={inner}>
                 <SectionHead kicker={L('venue', 'kicker', 'LOCATION')} title={L('venue', 'title', tr.inv_location)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
                 <div style={{ borderRadius: D.radius, overflow: 'hidden', border: `1px solid ${line}` }}>
@@ -572,7 +612,7 @@ export default function TemplateShell({
 
             {/* 07 — PROQRAM */}
             {S.program && (
-            <section data-section="program" style={sectionStyle(3)}>
+            <section data-section="program" style={sectionStyle(3 + lsShift)}>
               <Reveal style={inner}>
                 <SectionHead kicker={L('program', 'kicker', 'Schedule')} title={L('program', 'title', timeline.sectionLabel)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
                 {/* ── Proqramın vizual variantı (Phase 41) ────────────────
@@ -655,7 +695,7 @@ export default function TemplateShell({
 
             {/* 08 — DRESS CODE (ortaq komponent) */}
             {S.dresscode && (
-            <section data-section="dresscode" style={sectionStyle(4)}>
+            <section data-section="dresscode" style={sectionStyle(4 + lsShift)}>
               <Reveal style={inner}>
                 <SectionHead kicker={L('dresscode', 'kicker', 'STYLE')} title={L('dresscode', 'title', tr.inv_dresscode)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
                 <DressCodeSection
@@ -675,7 +715,7 @@ export default function TemplateShell({
 
             {/* 09 — OTURMA PLANI */}
             {canShowSeating && !seating.isEmpty && (
-              <section data-section="seating" style={sectionStyle(5)}>
+              <section data-section="seating" style={sectionStyle(5 + lsShift)}>
                 <Reveal style={inner}>
                   <SectionHead kicker={L('seating', 'kicker', 'SEATING')} title={L('seating', 'title', seatingL.title)} sub={seatingL.sub} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
                   {/* ⚠ Təkliflər siyahısı normal document flow-da — overlap olmur */}
@@ -755,7 +795,7 @@ export default function TemplateShell({
 
             {/* 10 — QALEREYA + QR */}
             {canShowGallery && (
-              <section id="gallery-section" data-section="gallery" style={sectionStyle(6)}>
+              <section id="gallery-section" data-section="gallery" style={sectionStyle(6 + lsShift)}>
                 <Reveal style={inner}>
                   <Stagger base={0} style={{ background: card, border: `1px solid ${line}`, borderRadius: D.radius, padding: 'clamp(16px, 5vw, 22px)', textAlign: 'center' }}>
                     <SectionHead kicker={L('gallery', 'kicker', 'Gallery')} title={L('gallery', 'title', tr.inv_gallery)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
@@ -793,7 +833,7 @@ export default function TemplateShell({
 
             {/* 11 — RSVP */}
             {canShowRsvp && (
-              <section data-section="rsvp" style={sectionStyle(7)}>
+              <section data-section="rsvp" style={sectionStyle(7 + lsShift)}>
                 <Reveal style={inner}>
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: ACC }}>
                     <span style={{ width: 22, height: 1, background: alpha(ACC, 0.6) }} />{L('rsvp', 'kicker', tr.inv_rsvp)}
@@ -920,7 +960,7 @@ export default function TemplateShell({
 
             {/* 12 — QONAQ DƏFTƏRİ */}
             {S.guestbook && (
-            <section data-section="guestbook" style={sectionStyle(8)}>
+            <section data-section="guestbook" style={sectionStyle(8 + lsShift)}>
               <Reveal style={inner}>
                 <SectionHead kicker={L('guestbook', 'kicker', 'Guestbook')} title={L('guestbook', 'title', gbookL.title)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
                 <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 18, textAlign: 'left' }}>

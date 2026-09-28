@@ -29,6 +29,7 @@ import { DRESS_CODE_PALETTES, EVENT_TYPES } from '../../data/constants'
 import { resolveDressGenders } from '../../data/dressCode'
 import { PACKAGE_DEFS, getLockedSteps } from '../../data/packages'
 import { listBuilderSections, isSectionOn } from '../../data/sections'
+import LoveStoryStep from './LoveStoryStep'
 import { ACTIVE_PARTNERS } from '../../data/partners'
 import MusicStep from './MusicStep'
 import TemplateSelect from './TemplateSelect'
@@ -1312,13 +1313,16 @@ function SeatingMethodSelector({ seatingPlan, seatingMethod, onPlanChange, onMet
    Phase 35-də iki yeni id əlavə olundu — mövcud 1–8 toxunulmaz qaldı:
      0 — Dizayn seçimi (əvvəl 1-ci addımın içində idi, indi BİRİNCİ addım)
      9 — Dəvətnamə bölmələri (göstər/gizlət)                                */
-const BUILDER_STEP_ORDER = [0, 1, 9, 2, 3, 4, 5, 6, 7, 8]
+/* Phase 43-də bir yeni id əlavə olundu — mövcud 0–9 TOXUNULMAZ qaldı:
+     10 — Bizim Hekayəmiz (zaman xətti üzrə hekayə blokları) */
+const BUILDER_STEP_ORDER = [0, 1, 9, 10, 2, 3, 4, 5, 6, 7, 8]
 
 /* Bölmə → onu dolduran builder addımı. Bölmə söndürüləndə addım da gizlənir
    (müştəri istifadə etməyəcəyi formanı doldurmağa məcbur qalmasın).
    Siyahıda olmayan bölmələrin (geri sayım, RSVP, qonaq dəftəri) ayrıca addımı
    yoxdur — onlar mövcud məlumatdan avtomatik qurulur. */
 const SECTION_STEP_ID = {
+  lovestory: 10,
   venue:     2,
   program:   3,
   dresscode: 4,
@@ -1329,9 +1333,9 @@ const SECTION_STEP_ID = {
 
 /* Addım id → başlıq. `tr` və partnyor UI-dan gələnlər komponentin içindədir. */
 const STEP_EXTRA_TITLES = {
-  az: { 0: 'Dizayn Seçimi', 9: 'Dəvətnamə Bölmələri' },
-  en: { 0: 'Choose Design', 9: 'Invitation Sections' },
-  ru: { 0: 'Выбор дизайна', 9: 'Разделы приглашения' },
+  az: { 0: 'Dizayn Seçimi', 9: 'Dəvətnamə Bölmələri', 10: 'Bizim Hekayəmiz' },
+  en: { 0: 'Choose Design', 9: 'Invitation Sections', 10: 'Our Story' },
+  ru: { 0: 'Выбор дизайна', 9: 'Разделы приглашения', 10: 'Наша история' },
 }
 
 /* Addım id → təsvir (əvvəl massiv idi; artıq id ilə açılır ki, sıra
@@ -1348,6 +1352,7 @@ const STEP_DESCRIPTIONS = {
     7: 'QR kod vasitəsilə xatirə şəkillərini toplayın.',
     8: 'Digitoy tərəfdaşları vasitəsilə xüsusi endirim və üstünlüklərdən yararlana bilərsiniz.',
     9: 'Dəvətnamədə hansı blokların görünəcəyini seçin. Söndürdüyünüz bölmə qonağa göstərilmir.',
+    10: 'Tanışlığınızdan bu günə qədər olan anları zaman xətti kimi yazın. Hər bloka şəkil əlavə edə bilərsiniz — boş bloklar dəvətnamədə görünmür.',
   },
   en: {
     0: 'Start by choosing the look of your invitation — every later step is applied to this design.',
@@ -1360,6 +1365,7 @@ const STEP_DESCRIPTIONS = {
     7: 'Collect memories via QR photo sharing.',
     8: 'Through Digitoy partners you can enjoy special discounts and benefits.',
     9: 'Choose which blocks appear in your invitation. A section you switch off is never shown to guests.',
+    10: 'Write the moments from your first meeting until today as a timeline. Each block can carry a photo — empty blocks are never shown.',
   },
   ru: {
     0: 'Сначала выберите оформление приглашения — все следующие шаги применяются к нему.',
@@ -1372,6 +1378,7 @@ const STEP_DESCRIPTIONS = {
     7: 'Собирайте воспоминания через QR-фотообмен.',
     8: 'Через партнёров Digitoy вы можете получить специальные скидки и преимущества.',
     9: 'Выберите, какие блоки появятся в приглашении. Выключенный раздел гостям не показывается.',
+    10: 'Опишите моменты от знакомства до сегодняшнего дня в виде хронологии. К каждому блоку можно добавить фото — пустые блоки не показываются.',
   },
 }
 
@@ -1416,7 +1423,9 @@ const SECTION_ICONS = {
 function SectionsStep({ lang, pkgId, sections, onToggle, onAllOn }) {
   const ui   = SECTIONS_UI[lang] || SECTIONS_UI.az
   const list = listBuilderSections(pkgId)
-  const anyOff = list.some((s) => !s.locked && sections?.[s.id] === false)
+  /* DEFAULT BAĞLI bölmələr `=== false` yoxlamasına düşmür, ona görə
+     burada da `isSectionOn` işlədilir (bax data/sections.js). */
+  const anyOff = list.some((s) => !s.locked && !isSectionOn({ sections }, s.id))
 
   return (
     <div className="space-y-4">
@@ -1440,7 +1449,10 @@ function SectionsStep({ lang, pkgId, sections, onToggle, onAllOn }) {
           const Icon    = SECTION_ICONS[s.id] || Sparkles
           const label   = s.labels[lang] || s.labels.az
           const hint    = s.hints[lang]  || s.hints.az
-          const checked = !s.locked && sections?.[s.id] !== false
+          /* ⚠ `sections?.[id] !== false` YAZMAQ OLMAZ: Phase 43-dən sonra
+             bəzi bölmələr DEFAULT BAĞLIDIR və o yoxlama onları açıq
+             göstərərdi. `isSectionOn` hər iki qaydanın tək mənbəyidir. */
+          const checked = !s.locked && isSectionOn({ sections }, s.id)
 
           return (
             <label
@@ -1803,6 +1815,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     7: tr.step6_title,
     8: partnerUi.stepLabel,
     9: extraTitles[9],
+    10: tr.step_lovestory_title || extraTitles[10],
   }
   const titleOf = (id) => STEP_TITLES[id] || ''
 
@@ -1817,7 +1830,9 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
       sections: { ...(d.sections || {}), [id]: !isSectionOn(d, id) },
     }))
   }
-  const enableAllSections = () => setData((d) => ({ ...d, sections: {} }))
+  /* ⚠ `lovestory` DEFAULT BAĞLIDIR, ona görə boş obyekt onu AÇMIR —
+     açıq-aşkar `true` yazılır (bax data/sections.js › DEFAULT_OFF). */
+  const enableAllSections = () => setData((d) => ({ ...d, sections: { lovestory: true } }))
 
   const validate = () => {
     const e = {}
@@ -2229,6 +2244,17 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
             sections={sections}
             onToggle={toggleSection}
             onAllOn={enableAllSections}
+          />
+        )}
+
+        {/* STEP 10 — BİZİM HEKAYƏMİZ (Phase 43).
+            Addım YALNIZ bölmə açıq olanda görünür (SECTION_STEP_ID),
+            yəni mövcud axına heç bir əlavə addım gəlmir. */}
+        {actualStep === 10 && (
+          <LoveStoryStep
+            rows={data.loveStory || []}
+            onChange={(rows) => set('loveStory', rows)}
+            lang={lang}
           />
         )}
 

@@ -5,6 +5,7 @@ import AdminOrdersList from './AdminOrdersList'
 import AdminOrderDetail from './AdminOrderDetail'
 import AdminInvitationsList from './AdminInvitationsList'
 import AdminPhotosList from './AdminPhotosList'
+import AdminQrStand from './AdminQrStand'
 import AdminGuestbook from './AdminGuestbook'
 import AdminMaintenance from './AdminMaintenance'
 
@@ -45,6 +46,7 @@ export default function AdminApp({ lang = 'az', setLang }) {
       {section === 'order-detail' && <AdminOrderDetail draftCode={draftCode} onBack={handleBack} lang={lang} />}
       {section === 'invitations'  && <AdminInvitationsList />}
       {section === 'photos'       && <AdminPhotosList />}
+      {section === 'qrstand'      && <AdminQrStand />}
       {section === 'guestbook'    && <AdminGuestbook />}
       {section === 'maintenance'  && <AdminMaintenance />}
     </AdminLayout>

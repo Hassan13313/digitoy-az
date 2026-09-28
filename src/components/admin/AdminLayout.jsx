@@ -1,4 +1,4 @@
-import { ShoppingBag, FileText, Image, LayoutDashboard, MessageSquare, ShieldCheck, LogOut } from 'lucide-react'
+import { ShoppingBag, FileText, Image, LayoutDashboard, MessageSquare, ShieldCheck, LogOut, QrCode } from 'lucide-react'
 import { useIsNarrow } from '../../hooks/useIsNarrow'
 
 const NAV = [
@@ -6,6 +6,8 @@ const NAV = [
   { key: 'orders',      label: 'Sifarişlər',    icon: ShoppingBag },
   { key: 'invitations', label: 'Dəvətnamələr',  icon: FileText },
   { key: 'photos',      label: 'Fotolar',       icon: Image },
+  /* Phase 43 — masaüstü çap stendi (A5 PDF) */
+  { key: 'qrstand',     label: 'QR Stend',      icon: QrCode },
   /* Phase 36 — qonaqların təbrik mesajlarının moderasiyası */
   { key: 'guestbook',   label: 'Təbrik Məktubları', icon: MessageSquare },
   /* Phase 37/39 — backup vəziyyəti, draft təmizləmə, media indeksi, audit */

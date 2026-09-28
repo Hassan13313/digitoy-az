@@ -132,15 +132,23 @@ function storeMedia(string $srcPath, string $mime, string $slug,
         }
 
         /* Video posteri — serverdə ffmpeg yoxdur, kadr client tərəfdə
-           <video>+canvas ilə çıxarılır və könüllü göndərilir. */
+           <video>+canvas ilə çıxarılır və könüllü göndərilir.
+           ⚠ 2026-09-28 (canlıda 23/23 hissəli videonun posteri 403 verirdi):
+           $posterTmp PHP-nin YÜKLƏMƏ müvəqqəti faylıdır və 0600 ilə yaranır.
+           `rename` icazəni saxlayır → veb server faylı oxuya bilmir.
+           `move_uploaded_file` (tək sorğu yolu) icazəni özü düzəldir, bu yol
+           isə düzəltmirdi. Ona görə chmod AÇIQ edilir. */
         if ($posterTmp !== null && is_file($posterTmp) && filesize($posterTmp) > 0
             && filesize($posterTmp) <= 2097152
             && mime_content_type($posterTmp) === 'image/jpeg') {
             if (@rename($posterTmp, $dir . $basename . '_poster.jpg')
                 || @copy($posterTmp, $dir . $basename . '_poster.jpg')) {
                 $posterName = $basename . '_poster.jpg';
+                @chmod($dir . $posterName, 0644);
             }
         }
+        /* Eyni səbəbdən: yığılmış video da `rename` ilə gəlir */
+        if (!$isUploadedFile) @chmod($destPath, 0644);
     }
 
     /* Manifest ETag-i qovluq mtime-inə bağlıdır — açıq tablar yeniliyi görsün */
@@ -149,6 +157,13 @@ function storeMedia(string $srcPath, string $mime, string $slug,
     /* Phase 39 — media indeksi (hissəli yükləmə yolu). Tək mənbə: config.php */
     if (function_exists('indexMediaRow')) {
         indexMediaRow($slug, $filename, $mime, (int) @filesize($destPath));
+    }
+
+    /* Phase 43 — qalereya analitikası: yükləmə hadisəsi (hissəli yol).
+       `function_exists` yoxlaması indexMediaRow ilə eyni səbəbdəndir:
+       bu fayl config.php-dan ASILI DEYİL. */
+    if (function_exists('galleryEvent')) {
+        galleryEvent($slug, 'upload');
     }
 
     return ['ok' => true, 'filename' => $filename, 'thumb' => $thumbName, 'poster' => $posterName];

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Plus, Pencil, Trash2, MoveRight, RefreshCw, Upload, Check, X } from 'lucide-react'
+import { Plus, Pencil, Trash2, MoveRight, RefreshCw, Upload, Check, X, FileSpreadsheet } from 'lucide-react'
 import { getGuests, manageGuest, migrateGuests } from '../../utils/api'
+import GuestImportModal from './GuestImportModal'
 
 const STATUS_DOT = {
   GOING:       '🟢', NOT_GOING: '🔴', MAYBE: '🟡', NO_RESPONSE: '⚪',
@@ -145,6 +146,9 @@ function TableCard({ tableId, guests, allTableIds, onRefresh, slug }) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
                   <span style={{ fontSize: 14 }}>{STATUS_DOT[g.status] || '⚪'}</span>
                   <span style={{ fontSize: 13, color: 'oklch(22% 0.02 60)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{g.full_name}</span>
+                  {/* Phase 43 — Excel idxalından gələn telefon. Sütun yoxdursa
+                      backend `null` qaytarır və heç nə göstərilmir. */}
+                  {g.phone && <span style={{ fontSize: 10, color: 'oklch(52% 0.06 250)', whiteSpace: 'nowrap' }}>{g.phone}</span>}
                   {g.notes && <span style={{ fontSize: 10, color: 'oklch(58% 0.03 60)', fontStyle: 'italic' }}>— {g.notes}</span>}
                 </div>
                 <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
@@ -184,6 +188,8 @@ export default function AdminSeatingPlan({ slug, seatingPlan }) {
   const [migrating, setMigrating] = useState(false)
   const [migrateMsg, setMigrateMsg] = useState('')
   const [newTableName, setNewTableName] = useState('')
+  /* Phase 43 — Excel/CSV idxal modalı */
+  const [importOpen, setImportOpen] = useState(false)
 
   const load = useCallback(() => {
     if (!slug) return
@@ -257,6 +263,13 @@ export default function AdminSeatingPlan({ slug, seatingPlan }) {
               <Upload size={10} strokeWidth={2} />{migrating ? 'Köçürülür...' : 'Mövcud planı import et'}
             </button>
           )}
+          {/* Phase 43 — Excel/CSV idxalı. Mövcud «Mövcud planı import et»
+              düyməsindən AYRIDIR: o, oturma planı MƏTNİNİ köçürür,
+              bu isə xarici fayldan oxuyur. */}
+          <button type="button" onClick={() => setImportOpen(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', background: 'oklch(96% 0.03 145)', border: '1px solid oklch(84% 0.07 145)', borderRadius: 3, cursor: 'pointer', fontSize: 10, fontWeight: 600, color: 'oklch(38% 0.11 145)' }}>
+            <FileSpreadsheet size={10} strokeWidth={2} />Excel / CSV idxalı
+          </button>
           <button type="button" onClick={load}
             style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px', background: 'white', border: '1px solid oklch(85% 0.02 60)', borderRadius: 3, cursor: 'pointer', fontSize: 10, color: 'oklch(50% 0.03 60)' }}>
             <RefreshCw size={10} strokeWidth={1.5} />Yenilə
@@ -328,6 +341,15 @@ export default function AdminSeatingPlan({ slug, seatingPlan }) {
             ))
           )}
         </>
+      )}
+
+      {/* Phase 43 — Excel/CSV idxal modalı */}
+      {importOpen && (
+        <GuestImportModal
+          slug={slug}
+          onClose={() => setImportOpen(false)}
+          onImported={load}
+        />
       )}
     </div>
   )

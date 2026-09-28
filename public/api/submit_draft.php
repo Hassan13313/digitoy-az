@@ -8,7 +8,21 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$body          = json_decode(file_get_contents('php://input'), true);
+/* ── Sui-istifadə qapısı (2026-09-28) — bax save_draft.php ──
+   Sifariş göndərmək nadir əməliyyatdır: IP üzrə saatda 10. */
+$raw = file_get_contents('php://input');
+if (strlen((string) $raw) > 4 * 1024 * 1024) {
+    http_response_code(413);
+    echo json_encode(['error' => 'Payload too large']);
+    exit;
+}
+if (!rateGate('draft_submit|' . clientIp(), 10, 3600)) {
+    http_response_code(429);
+    echo json_encode(['error' => 'RATE_LIMITED', 'message' => 'Çox sayda sifariş göndərildi. Bir az sonra yenidən cəhd edin.'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+$body          = json_decode((string) $raw, true);
 $sessionId     = trim($body['session_id']     ?? '');
 $customerPhone = trim($body['customer_phone'] ?? '');
 $formData      = $body['form_data']            ?? null;

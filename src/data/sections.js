@@ -28,6 +28,18 @@ export const SECTION_DEFS = [
     hints:  { az: 'Tədbirə qalan vaxt saatı.', en: 'Live timer until the event.', ru: 'Таймер до мероприятия.' },
   },
   {
+    /* ── Phase 43 — «Bizim Hekayəmiz» ──
+       ⚠ GERİYƏ UYĞUNLUQ: bu bölmə DEFAULT olaraq BAĞLIDIR — `isSectionOn`
+       qaydasından (açar yoxdursa açıq) QƏSDƏN kənara çıxır, çünki
+       mövcud minlərlə dəvətnamədə `loveStory` məlumatı YOXDUR və bölmə
+       avtomatik açılsa boş blok kimi görünərdi. Bax: `isSectionOn`
+       funksiyasındaki `DEFAULT_OFF` yoxlaması. */
+    id: 'lovestory',
+    gate: null,
+    labels: { az: 'Bizim Hekayəmiz', en: 'Our Story',      ru: 'Наша история' },
+    hints:  { az: 'Tanışlıqdan toya qədər zaman xətti.', en: 'A timeline from first meeting to the wedding.', ru: 'Хронология от знакомства до свадьбы.' },
+  },
+  {
     id: 'venue',
     gate: null,
     labels: { az: 'Məkan və Xəritə',   en: 'Venue & Map',    ru: 'Место и карта' },
@@ -79,8 +91,17 @@ export const SECTION_DEFS = [
 
 export const SECTION_IDS = SECTION_DEFS.map((s) => s.id)
 
+/* ── Default olaraq BAĞLI olan bölmələr (Phase 43) ──
+   Ümumi qayda «açar yoxdursa AÇIQ»-dır və bu, mövcud dəvətnamələri
+   qorumaq üçündür. Amma SONRADAN əlavə edilən, öz məlumatı olmayan
+   bölmə üçün həmin qayda tərsinə işləyir: minlərlə köhnə dəvətnamədə
+   «Bizim Hekayəmiz» birdən-birə BOŞ blok kimi peyda olardı.
+   Ona görə belə bölmələr yalnız AÇIQ-AŞKAR `true` yazıldıqda görünür. */
+const DEFAULT_OFF = new Set(['lovestory'])
+
 /** Bölmə istifadəçi tərəfindən söndürülübmü? (paket kilidini NƏZƏRƏ ALMIR) */
 export function isSectionOn(weddingData, id) {
+  if (DEFAULT_OFF.has(id)) return weddingData?.sections?.[id] === true
   return weddingData?.sections?.[id] !== false
 }
 

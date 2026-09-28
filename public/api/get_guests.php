@@ -1,10 +1,18 @@
 <?php
 /* ══════════════════════════════════════════════════
    GET /api/get_guests.php?invitation_id=SLUG
-   Public: qonaq siyahısı + iştirak statusu + statistika
    Phase 22 — Guest Management Refactor
+
+   ⚠ 2026-09-28 TƏHLÜKƏSİZLİK DÜZƏLİŞİ — İKİ CAVAB REJİMİ:
+   Slug ictimaidir (dəvətnamə linki bütün qonaqlara göndərilir). Əvvəl bu
+   endpoint linki olan HƏR KƏSƏ bütün qonaqların telefonunu, qeydlərini,
+   iştirak cavablarını və mesajlarını verirdi.
+     • Admin tokeni ilə → tam cavab (admin: oturma planı, hesabatlar).
+     • Tokensiz (dəvətnaməyə baxan qonaq) → YALNIZ «masanı tap» və RSVP
+       üçün lazım olan sahələr: id, ad, masa, yer. Statistika da verilmir.
 ══════════════════════════════════════════════════ */
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/auth.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
@@ -24,26 +32,56 @@ ensureTables();
 $db = getDB();
 
 /* ── Bütün qonaqları iştirak statusu ilə gətir ── */
-$st = $db->prepare("
-    SELECT
-        g.id,
-        g.invitation_id,
-        g.table_id,
-        g.full_name,
-        g.seat_number,
-        g.notes,
-        g.created_at,
-        COALESCE(a.status, 'NO_RESPONSE') AS attendance_status,
-        a.submitted_at,
-        a.optional_message,
-        COALESCE(a.extra_guests, 0) AS extra_guests
-    FROM guests g
-    LEFT JOIN attendance a ON a.guest_id = g.id
-    WHERE g.invitation_id = :inv
-    ORDER BY g.table_id ASC, g.id ASC
-");
-$st->execute([':inv' => $invId]);
-$rows = $st->fetchAll();
+/* ── Phase 43: `phone` sütunu (Excel idxalından gəlir) ──
+   ADDITIV: sahə cavaba ƏLAVƏ olunur, mövcud açarların heç biri
+   dəyişmir. Köhnə client onu sadəcə görməzdən gəlir.
+   FAIL-OPEN: miqrasiya hər hansı səbəbdən işləməyibsə sütunlu sorğu
+   42S22 verər və BÜTÜN oturma planı ölərdi — ona görə köhnə sorğuya
+   düşülür və `phone` sadəcə null qalır. */
+function guestQuery(PDO $db, bool $withPhone): string {
+    return "
+        SELECT
+            g.id,
+            g.invitation_id,
+            g.table_id,
+            g.full_name,
+            g.seat_number,
+            g.notes,
+            g.created_at,
+            " . ($withPhone ? "g.phone," : "") . "
+            COALESCE(a.status, 'NO_RESPONSE') AS attendance_status,
+            a.submitted_at,
+            a.optional_message,
+            COALESCE(a.extra_guests, 0) AS extra_guests
+        FROM guests g
+        LEFT JOIN attendance a ON a.guest_id = g.id
+        WHERE g.invitation_id = :inv
+        ORDER BY g.table_id ASC, g.id ASC
+    ";
+}
+
+try {
+    $st = $db->prepare(guestQuery($db, true));
+    $st->execute([':inv' => $invId]);
+    $rows = $st->fetchAll();
+} catch (PDOException $e) {
+    $st = $db->prepare(guestQuery($db, false));
+    $st->execute([':inv' => $invId]);
+    $rows = $st->fetchAll();
+}
+
+if (!isAdminRequest()) {
+    echo json_encode([
+        'ok'     => true,
+        'guests' => array_map(fn($r) => [
+            'id'          => (int)$r['id'],
+            'table_id'    => $r['table_id'],
+            'full_name'   => $r['full_name'],
+            'seat_number' => $r['seat_number'] !== null ? (int)$r['seat_number'] : null,
+        ], $rows),
+    ]);
+    exit;
+}
 
 $guests = array_map(fn($r) => [
     'id'               => (int)$r['id'],
@@ -52,6 +90,8 @@ $guests = array_map(fn($r) => [
     'full_name'        => $r['full_name'],
     'seat_number'      => $r['seat_number'] !== null ? (int)$r['seat_number'] : null,
     'notes'            => $r['notes'],
+    /* Phase 43 — sütun yoxdursa null (bax guestQuery FAIL-OPEN) */
+    'phone'            => $r['phone'] ?? null,
     'created_at'       => $r['created_at'],
     'status'           => $r['attendance_status'],
     'submitted_at'     => $r['submitted_at'],

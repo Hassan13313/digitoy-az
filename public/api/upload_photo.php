@@ -407,6 +407,16 @@ if ($heicTemp) @unlink($heicTemp);
    Qalereya bundan asılı deyil; indeks yalnız dashboard sayğacı üçündür. */
 indexMediaRow($slug, $filename, $mime, (int) @filesize($uploadDir . $filename));
 
+/* Phase 43 — qalereya analitikası: yükləmə hadisəsi.
+   `galleryEvent()` heç vaxt istisna atmır (bax config.php), ona görə
+   jurnal cədvəli olmasa da yükləmə uğurlu sayılır. Sayğac client-dən
+   DEYİL, məhz buradan yazılır — uydurma statistika mümkün deyil.
+   `function_exists`: deploy zamanı bu fayl qısa müddət köhnə config.php
+   ilə işləyə bilər — media ARTIQ saxlanıb, fatal ilə itirilməməlidir. */
+if (function_exists('galleryEvent')) {
+    galleryEvent($slug, 'upload');
+}
+
 /* ── Public URL ── */
 $baseUrl  = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
 $url      = $baseUrl . '/uploads/' . $slug . '/' . $filename;

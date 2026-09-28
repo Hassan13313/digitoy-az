@@ -138,6 +138,7 @@ export function useRsvp({ lang = 'az', weddingData }) {
       if (slug) {
         if (useGuestMode && selected) {
           const result = await submitAttendance({
+            invitationId: slug,
             guestId: selected.id,
             status: status === 'yes' ? 'GOING' : status === 'no' ? 'NOT_GOING' : 'MAYBE',
             optionalMessage: null,

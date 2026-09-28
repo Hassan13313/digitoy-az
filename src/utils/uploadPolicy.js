@@ -135,9 +135,36 @@ export async function compressImage(file) {
   }
 }
 
+/** Canvas-dakı kadrın orta parlaqlığı (0-255). Oxuna bilməsə null. */
+function frameLuma(ctx, w, h) {
+  try {
+    const sw = Math.min(16, w), sh = Math.min(16, h)
+    const probe = document.createElement('canvas')
+    probe.width = sw
+    probe.height = sh
+    const pctx = probe.getContext('2d', { willReadFrequently: true })
+    pctx.drawImage(ctx.canvas, 0, 0, sw, sh)
+    const d = pctx.getImageData(0, 0, sw, sh).data
+    let sum = 0
+    for (let i = 0; i < d.length; i += 4) sum += 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]
+    return sum / (d.length / 4)
+  } catch {
+    return null
+  }
+}
+
+/* Bu parlaqlıqdan aşağı kadr «qara» sayılır (fade-in, qapalı obyektiv…) */
+const DARK_FRAME_LUMA = 16
+
 /**
- * Videonun ilk kadrını JPEG poster kimi çıxar (server tərəfdə ffmpeg yoxdur).
+ * Videodan JPEG poster çıxar (server tərəfdə ffmpeg yoxdur).
  * Uğursuz olarsa null — yükləmə yenə də davam edir.
+ *
+ * ⚠ 2026-09-28 düzəlişi (canlıda qalereyada QARA qapaqlar): kadr əvvəl
+ * `loadeddata`-da çəkilirdi. O hadisə seek BİTMƏMİŞ (bəzən kadr hələ
+ * dekod olunmamış) gəlir və iPhone Safari-də canvas-a qara kadr düşürdü.
+ * İndi kadr yalnız `seeked`-dən SONRA çəkilir, qaranlıq kadr aşkar edilsə
+ * videonun sonrakı nöqtələri sınanır və ən işıqlısı götürülür.
  */
 export function extractVideoPoster(file) {
   return new Promise(resolve => {
@@ -146,46 +173,86 @@ export function extractVideoPoster(file) {
     const url   = URL.createObjectURL(file)
     const video = document.createElement('video')
     let settled = false
+    let best = null          /* { blob, luma } */
+    let attempt = 0
 
     const finish = (value) => {
       if (settled) return
       settled = true
       clearTimeout(timer)
+      video.onseeked = video.onloadedmetadata = video.onerror = null
+      try { video.pause() } catch { /* boş ver */ }
       URL.revokeObjectURL(url)
       video.removeAttribute('src')
+      try { video.load() } catch { /* boş ver */ }
       resolve(value)
     }
 
-    /* Bəzi kodekləri (HEVC və s.) brauzer aça bilmir — sonsuz gözləmə olmasın */
-    const timer = setTimeout(() => finish(null), 6000)
+    /* Bəzi kodekləri (HEVC və s.) brauzer aça bilmir — sonsuz gözləmə olmasın.
+       Vaxt bitəndə ən azı bir kadr alınıbsa o qaytarılır. */
+    const timer = setTimeout(() => finish(best?.blob || null), 9000)
 
     video.muted       = true
     video.playsInline = true
-    video.preload     = 'metadata'
+    video.preload     = 'auto'
+    video.setAttribute('playsinline', '')
+    video.setAttribute('muted', '')
 
-    video.onloadeddata = () => {
-      try {
-        const scale = Math.min(1, 480 / Math.max(video.videoWidth, video.videoHeight))
-        const w = Math.max(1, Math.round(video.videoWidth * scale))
-        const h = Math.max(1, Math.round(video.videoHeight * scale))
-        if (!w || !h) return finish(null)
-
-        const canvas = document.createElement('canvas')
-        canvas.width = w
-        canvas.height = h
-        canvas.getContext('2d').drawImage(video, 0, 0, w, h)
-        canvas.toBlob(b => finish(b || null), 'image/jpeg', 0.75)
-      } catch {
-        finish(null)
-      }
+    /* Sınanacaq nöqtələr: əvvəl ~1 s, qaranlıqdırsa 25% və 50% */
+    const points = () => {
+      const d = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : 2
+      return [Math.min(1, d * 0.1), d * 0.25, d * 0.5]
     }
-    video.onerror = () => finish(null)
+
+    const capture = () => new Promise(res => {
+      const draw = () => {
+        try {
+          const scale = Math.min(1, 480 / Math.max(video.videoWidth, video.videoHeight))
+          const w = Math.max(1, Math.round(video.videoWidth * scale))
+          const h = Math.max(1, Math.round(video.videoHeight * scale))
+          if (!video.videoWidth || !video.videoHeight) return res(null)
+          const canvas = document.createElement('canvas')
+          canvas.width = w
+          canvas.height = h
+          const ctx = canvas.getContext('2d')
+          ctx.drawImage(video, 0, 0, w, h)
+          const luma = frameLuma(ctx, w, h)
+          canvas.toBlob(b => res(b ? { blob: b, luma: luma ?? 255 } : null), 'image/jpeg', 0.8)
+        } catch {
+          res(null)
+        }
+      }
+      /* Kadr ekrana həqiqətən çatandan sonra çək (dəstəklənirsə) */
+      if (typeof video.requestVideoFrameCallback === 'function') {
+        let done = false
+        video.requestVideoFrameCallback(() => { if (!done) { done = true; draw() } })
+        setTimeout(() => { if (!done) { done = true; draw() } }, 250)
+      } else {
+        setTimeout(draw, 60)
+      }
+    })
+
+    video.onseeked = async () => {
+      const shot = await capture()
+      if (settled) return
+      if (shot && (!best || shot.luma > best.luma)) best = shot
+      const pts = points()
+      if ((best && best.luma >= DARK_FRAME_LUMA) || attempt >= pts.length - 1) {
+        return finish(best?.blob || null)
+      }
+      attempt += 1
+      try { video.currentTime = pts[attempt] } catch { finish(best?.blob || null) }
+    }
+
+    video.onloadedmetadata = () => {
+      /* iOS Safari səssiz play/pause olmadan kadrı dekod etməyə bilər */
+      const p = video.play?.()
+      if (p && typeof p.then === 'function') p.then(() => video.pause()).catch(() => {})
+      try { video.currentTime = points()[0] } catch { finish(null) }
+    }
+    video.onerror = () => finish(best?.blob || null)
 
     video.src = url
-    /* İlk kadr qara olmasın deyə bir az irəli sarı */
-    video.onloadedmetadata = () => {
-      try { video.currentTime = Math.min(0.5, (video.duration || 1) / 4) } catch { /* boş ver */ }
-    }
   })
 }
 

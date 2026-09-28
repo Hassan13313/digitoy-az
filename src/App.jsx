@@ -7,6 +7,9 @@ import InvitationPage from './components/invitation/InvitationPage'
    (these routes are all noindex). */
 const PhotoShare       = lazy(() => import('./components/invitation/PhotoShare'))
 const GalleryPage      = lazy(() => import('./components/invitation/GalleryPage'))
+/* Phase 43 — TV/proyektor rejimi. Ayrı chunk: dəvətnaməni açan qonaq
+   bu kodu heç vaxt endirmir. */
+const SlideshowPage    = lazy(() => import('./components/invitation/SlideshowPage'))
 const AdminApp         = lazy(() => import('./components/admin/AdminApp'))
 const AdminLoginGate   = lazy(() => import('./components/admin/AdminLoginGate'))
 const TemplatesPage    = lazy(() => import('./components/landing/TemplatesPage'))
@@ -99,6 +102,10 @@ function getSEOConfig(view, { weddingData, slug } = {}) {
     case 'gallery-page':
       return { title: 'Foto Paylaşımı | DigiToy', description: 'Toy qonaqlarının foto paylaşım səhifəsi.', noindex: true }
 
+    /* Phase 43 — slayd şou: zal ekranı üçündür, indeksləşdirilmir */
+    case 'slideshow':
+      return { title: 'Slayd Şou | DigiToy', description: 'Toy qalereyasının slayd şou rejimi.', noindex: true, nofollow: true }
+
     case 'admin-panel':
     case 'admin-login':
     case 'admin-review':
@@ -118,6 +125,7 @@ function getAnalyticsPath(view, slug) {
     case 'invite':     return slug ? `/invite/${slug}` : null
     case 'photo':      return slug ? `/invite/${slug}/foto` : null
     case 'gallery-page': return slug ? `/invite/${slug}/qalereya-idare` : null
+    case 'slideshow':    return slug ? `/invite/${slug}/slayd` : null
     default: return null
   }
 }
@@ -169,6 +177,9 @@ function routeAfterAuth(
   if (slug) {
     if (sub === 'foto')           { setView('photo');        return }
     if (sub === 'qalereya-idare') { setView('gallery-page'); return }
+    /* Phase 43 — TV/proyektor rejimi. Token tələb etmir: zal ekranını
+       açan şəxs onsuz da slug-u bilir və bu səhifə yalnız OXUYUR. */
+    if (sub === 'slayd')          { setView('slideshow');    return }
 
     const viewParam  = params.get('view')
     const dParam     = params.get('d')
@@ -590,6 +601,8 @@ export default function App() {
   if (view === 'demo') {
     return (
       <div className="min-h-screen bg-cream">
+        {/* SEO (2026-09-28): /demo indekslənən səhifədir, şablonlarda h1 yoxdur */}
+        <h1 className="sr-only">Nümunə rəqəmsal toy dəvətnaməsi — DigiToy</h1>
         <TemplateRenderer
           template={DEMO_TEMPLATE_ID}
           lang={lang} setLang={setLang}
@@ -604,6 +617,7 @@ export default function App() {
 
   if (view === 'photo')        return <Suspense fallback={<RouteLoader />}><PhotoShare /></Suspense>
   if (view === 'gallery-page') return <Suspense fallback={<RouteLoader />}><GalleryPage /></Suspense>
+  if (view === 'slideshow')    return <Suspense fallback={<RouteLoader />}><SlideshowPage /></Suspense>
   if (view === 'admin-panel')  return <Suspense fallback={<RouteLoader />}><AdminApp lang={lang} setLang={setLang} /></Suspense>
   if (view === 'admin-login')  return (
     <Suspense fallback={<RouteLoader />}>

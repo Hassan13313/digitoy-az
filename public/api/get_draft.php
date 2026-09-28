@@ -21,7 +21,13 @@ ensureTables();
 $db = getDB();
 
 if ($draftCode) {
-    /* draft_code üzrə axtarış (admin axını) */
+    /* draft_code üzrə axtarış (admin axını)
+       ⚠ 2026-09-28: yalnız admin. Əvvəl tokensiz idi — sifariş kodunu bilən
+       (və ya DT-XXXXXX-i təxmin edən) hər kəs müştərinin telefonunu və
+       bütün sifariş məlumatını alırdı. Müştərinin öz bərpası session_id
+       ilə gedir (aşağıda) və dəyişmir. */
+    require_once __DIR__ . '/auth.php';
+    requireAdmin();
     if (!preg_match('/^DT-[A-Z0-9]{6}$/', $draftCode)) {
         http_response_code(400);
         echo json_encode(['error' => 'Invalid draft_code format']);

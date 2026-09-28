@@ -32,6 +32,23 @@ const FONT_HREF =
 
 const LINK_ID = 'digitoy-template-fonts'
 
+/* ── «Bizim Hekayəmiz» əl yazısı şrifti (Phase 44) ──
+   Great Vibes yalnız hekayə bölməsinin başlıq/şəkil altı yazılarında işlənir.
+   Ayrı link-dir: bölmə olmayan dəvətnamələr (default bağlıdır) onu HEÇ VAXT
+   yükləmir, simple-luxury-nin yuxarıdakı dəstdən asılı olmaması da qorunur. */
+const SCRIPT_HREF = 'https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap'
+const SCRIPT_LINK_ID = 'digitoy-script-font'
+
+export function ensureScriptFont() {
+  if (typeof document === 'undefined') return
+  if (document.getElementById(SCRIPT_LINK_ID)) return
+  const link = document.createElement('link')
+  link.id   = SCRIPT_LINK_ID
+  link.rel  = 'stylesheet'
+  link.href = SCRIPT_HREF
+  document.head.appendChild(link)
+}
+
 /** Şablon şrift dəstini bir dəfə <head>-ə əlavə edir (idempotent). */
 export function ensureTemplateFonts() {
   if (typeof document === 'undefined') return

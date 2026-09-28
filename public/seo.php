@@ -53,6 +53,7 @@ if ($path === '') $path = '/';
 /* ── Marşruta görə meta ──
    `index` sahəsi YALNIZ ictimai marketinq səhifələri üçün true-dur.
    Google-un crawl büdcəsi şəxsi toy səhifələrinə sərf olunmamalıdır. */
+$seoStatus = 200;
 $meta = [
     'title'  => 'DigiToy — Rəqəmsal Toy Dəvətnaməsi, İştirak Təsdiqi və QR Foto Paylaşımı',
     'desc'   => 'Bir Dəvətnamədən Daha Artığı. İştirak Təsdiqi (RSVP), oturma planı, QR foto paylaşımı və premium rəqəmsal toy dəvətnamələri.',
@@ -72,7 +73,7 @@ if ($path === '/') {
     $meta['title'] = 'Dəvətnamə Şablonları — Rəqəmsal Toy Dəvətnaməsi | DigiToy';
     $meta['desc']  = 'DigiToy-un bütün rəqəmsal dəvətnamə şablonları: klassik qızıl, botanik bağ, modern qara, gecə səması və daha çoxu. Hər birinin canlı önbaxışına baxın.';
     $meta['canon'] = SITE . '/templates';
-} elseif (preg_match('#^/invite/([a-zA-Z0-9\-]{2,120})(?:/(foto|qalereya-idare))?$#', $path, $m)) {
+} elseif (preg_match('#^/invite/([a-zA-Z0-9\-]{2,120})(?:/(foto|qalereya-idare|slayd))?$#', $path, $m)) {
     $slug = $m[1];
     $sub  = $m[2] ?? '';
 
@@ -87,6 +88,9 @@ if ($path === '/') {
     } elseif ($sub === 'qalereya-idare') {
         $meta['title'] = 'Qonaq Şəkilləri | DigiToy';
         $meta['desc']  = 'Qonaqlarınızın paylaşdığı şəkilləri görün və endirin.';
+    } elseif ($sub === 'slayd') {
+        $meta['title'] = 'Slayd Şou | DigiToy';
+        $meta['desc']  = 'Qonaqların paylaşdığı şəkillər canlı slayd şouda.';
     } else {
         /* ── Dəvətnamə önbaxışı ──
            WhatsApp/Telegram/Facebook JS icra ETMİR, ona görə cütlüyün adı
@@ -111,11 +115,24 @@ if ($path === '/') {
         }
     }
 } else {
-    /* Naməlum marşrut (admin, daxili önbaxış, mövcud olmayan səhifə) —
-       indekslənməsin ki, crawl büdcəsi boş yerə xərclənməsin. */
+    /* Daxili marşrut (admin, canlı/şablon önbaxışı) və ya mövcud olmayan
+       səhifə — indekslənməsin ki, crawl büdcəsi boş yerə xərclənməsin. */
     $meta['index'] = false;
     $meta['canon'] = '';
     $meta['title'] = 'DigiToy';
+
+    /* ⚠ 2026-09-28 SEO: mövcud olmayan səhifə əvvəl 200 qaytarırdı («soft
+       404» — Google bunu keyfiyyət problemi kimi qeyd edir). İndi 404
+       STATUSU verilir; gövdə eyni SPA-dır, yəni istifadəçi yenə saytı
+       görür. Siyahı src/App.jsx-dəki marşrutlarla UYĞUN olmalıdır —
+       yeni marşrut əlavə edəndə buraya da yaz. */
+    $isAppRoute = $path === '/preview/live'
+        || preg_match('#^/demo/template/[a-zA-Z0-9\-]{1,60}$#', $path)
+        || preg_match('#^/admin(/[a-zA-Z0-9\-/]*)?$#', $path);
+    if (!$isAppRoute) {
+        $seoStatus = 404;
+        $meta['title'] = 'Səhifə tapılmadı | DigiToy';
+    }
 }
 
 /** Sorğu paylaşım önbaxışı / axtarış botundandırmı? */
@@ -158,9 +175,20 @@ function seoQueryCoupleNames(string $slug): ?string {
             DB_USER, DB_PASS,
             [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_TIMEOUT => 2]
         );
-        $st = $pdo->prepare('SELECT form_data FROM invitations WHERE slug = :s LIMIT 1');
-        $st->execute([':s' => $slug]);
-        $row = $st->fetchColumn();
+        /* ⚠ 2026-09-28: deaktiv dəvətnamənin adları önbaxışda da GİZLİ
+           qalmalıdır (get_invitation.php data-nı onsuz da vermir). */
+        try {
+            $st = $pdo->prepare('SELECT form_data, is_active FROM invitations WHERE slug = :s LIMIT 1');
+            $st->execute([':s' => $slug]);
+            $r = $st->fetch(PDO::FETCH_ASSOC);
+            if (!$r || (int) ($r['is_active'] ?? 1) !== 1) return null;
+            $row = $r['form_data'];
+        } catch (PDOException $e) {
+            /* is_active sütunu yoxdursa (köhnə sxem) — əvvəlki sorğu */
+            $st = $pdo->prepare('SELECT form_data FROM invitations WHERE slug = :s LIMIT 1');
+            $st->execute([':s' => $slug]);
+            $row = $st->fetchColumn();
+        }
         if (!$row) return null;
 
         $d = json_decode((string) $row, true);
@@ -316,6 +344,7 @@ if ($out === null || $count !== 1) {
     seoFallback($__indexFile);
 }
 
+if ($seoStatus !== 200) http_response_code($seoStatus);
 header('Content-Type: text/html; charset=UTF-8');
 /* SPA qabığı qısa müddət keşlənə bilər; meta marşrutdan asılıdır */
 header('Cache-Control: public, max-age=300');

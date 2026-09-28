@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Camera, Images, Video, Check, X, Film, ArrowLeft, Upload, RotateCcw,
 } from 'lucide-react'
-import { uploadPhoto, uploadPhotoChunked } from '../../utils/api'
+import { uploadPhoto, uploadPhotoChunked, trackGalleryEvent } from '../../utils/api'
+import { useGalleryMeta } from '../../hooks/useGalleryMeta'
 import { trackEvent } from '../../utils/analytics'
 import {
   MAX_UPLOAD_LABEL, ACCEPT_IMAGE, ACCEPT_VIDEO, ACCEPT_ANY,
@@ -113,6 +114,20 @@ export default function PhotoShare() {
   const slugMatch = window.location.pathname.match(/\/invite\/([^/?#]+)/)
   const slug = slugMatch?.[1] || 'preview'
   const backHref = slugMatch ? `/invite/${slugMatch[1]}#gallery` : null
+
+  /* ── Phase 43 — canlı sayğaclar və toyun adı ──
+     Bu səhifə QR kodun hədəfidir: qonaq buraya çatanda nə qədər şəkil
+     toplandığını görür. Sayğaclar `gallery_meta.php`-dən gəlir və ETag
+     sayəsində dəyişiklik olmayanda cavab 304-dür.
+     ⚠ Meta yüklənməsə səhifə TAM İŞLƏYİR — yalnız rəqəmlər görünmür. */
+  const meta = useGalleryMeta(slug, { interval: 30000 })
+
+  /* QR skan — bu səhifəyə gəliş praktikada QR kodun skan edilməsidir.
+     Server GÜNDƏ BİR DƏFƏ sayır (ip_hash + tarix), ona görə səhifəni
+     yeniləmək statistikanı şişirtmir. */
+  useEffect(() => {
+    if (slugMatch) trackGalleryEvent(slug, 'qr_scan')
+  }, [slug, slugMatch])
 
   /* Fayllar SEÇİLƏN KİMİ yoxlanılır — limitə uyğun olmayan fayl heç vaxt
      şəbəkəyə çıxmır və istifadəçi səbəbi dərhal görür. */
@@ -275,6 +290,11 @@ export default function PhotoShare() {
 
     if (successCount > 0) trackEvent('gallery_upload', { count: successCount })
 
+    /* Phase 43 — sayğaclar dərhal düzəlsin. `upload` hadisəsini SERVER
+       özü yazır (upload_photo.php / media_store.php), ona görə burada
+       yalnız yenidən oxuyuruq — client uydurma statistika yarada bilmir. */
+    if (successCount > 0) meta.refresh()
+
     setQueue(prev => {
       if (prev.length > 0 && prev.every(q => q.status === 'done')) setDone(true)
       return prev
@@ -341,9 +361,25 @@ export default function PhotoShare() {
           <h1 className="font-serif text-3xl text-ink font-light tracking-tight mb-3">
             Şəkillərini Paylaş
           </h1>
+          {/* Toyun adı — qonaq düzgün qalereyada olduğunu dərhal görür */}
+          {meta.names && (
+            <p className="font-serif text-lg text-brown-muted font-light mb-1.5">
+              {meta.names}
+            </p>
+          )}
           <p className="text-xs text-brown-muted font-light tracking-wide font-sans">
             #{slug}
           </p>
+          {/* Canlı sayğac — «artıq 43 şəkil var» sosial təsviqdir */}
+          {meta.counts.total > 0 && (
+            <p
+              role="status" aria-live="polite"
+              className="mt-3 text-[10px] tracking-[0.2em] uppercase text-gold/85 font-sans font-medium"
+            >
+              {meta.counts.photos} foto
+              {meta.counts.videos > 0 ? ` · ${meta.counts.videos} video` : ''}
+            </p>
+          )}
           <div className="gold-divider mt-8 max-w-[80px] mx-auto" />
         </div>
 
@@ -392,10 +428,30 @@ export default function PhotoShare() {
               }}>
                 #{slug}
               </p>
-              <button data-press onClick={resetAll} className="mt-8 inline-flex items-center gap-2 btn-gold">
-                <Upload size={12} strokeWidth={1.5} />
-                Daha Çox Göndər
-              </button>
+              {/* Phase 43 — yeni ümumi say: qonaq öz töhfəsini ümumi
+                  şəkil sayında görür. */}
+              {meta.counts.total > 0 && (
+                <p className="mt-4 text-[10px] tracking-[0.2em] uppercase text-gold/80 font-sans font-medium">
+                  Qalereyada {meta.counts.total} media
+                </p>
+              )}
+
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                <button data-press onClick={resetAll} className="inline-flex items-center gap-2 btn-gold">
+                  <Upload size={12} strokeWidth={1.5} />
+                  Daha Çox Göndər
+                </button>
+                {slugMatch && (
+                  <a
+                    data-press
+                    href={`/invite/${slug}/qalereya-idare`}
+                    className="inline-flex items-center gap-2 text-[10px] tracking-[0.2em] uppercase text-brown-muted/80 hover:text-gold border border-beige-dark/60 hover:border-gold/45 px-4 py-3 min-h-[44px] transition-colors duration-200 font-sans font-medium touch-manipulation"
+                  >
+                    <Images size={12} strokeWidth={1.5} />
+                    Qalereyaya bax
+                  </a>
+                )}
+              </div>
             </motion.div>
           ) : (
             <motion.div key="upload" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>

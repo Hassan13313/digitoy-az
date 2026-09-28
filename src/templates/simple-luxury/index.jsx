@@ -19,6 +19,8 @@ const DynamicHeroAnimation = lazy(() => import('../../components/invitation/Dyna
 import MapSection, { MapRings } from '../_shared/MapSection'
 import { directionsUrl, openMapUrl } from '../_shared/geo'
 import DressCodeSection from '../_shared/DressCodeSection'
+import LoveStorySection from '../_shared/LoveStorySection'
+import { getStoryTheme } from '../_shared/loveStoryTheme'
 import { OrderCta, MusicStartBubble } from '../_shared/TemplateActions'
 import { Reveal, Stagger, enterDirection } from '../_shared/motion'
 import TemplateOutro from '../_shared/TemplateOutro'
@@ -319,6 +321,26 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
               eventType={weddingData.eventType || 'toy'}
               eventName={weddingData.eventName || ''}
             />}
+
+            {/* ── BİZİM HEKAYƏMİZ (Phase 43) ─────────────────────────────
+                Mətnlər `resolveWeddingContent` tərəfindən artıq seçilmiş
+                dildə gəlir — burada tərcümə məntiqi yoxdur.
+                ⚠ Bölmə DEFAULT BAĞLIDIR (bax data/sections.js › DEFAULT_OFF),
+                yəni mövcud dəvətnamələrdə bu blok heç vaxt görünmür. */}
+            {SECTIONS.lovestory && Array.isArray(weddingData.loveStory)
+              && weddingData.loveStory.length > 0 && (
+              /* Phase 44 — Claude Design «Love Story»: başlıq və fon bölmənin
+                 öz temasındandır (bax _shared/loveStoryTheme.js) */
+              <section className="py-20 px-5" data-section="lovestory" style={{ background: getStoryTheme('simple-luxury').bg }}>
+                <Reveal className="max-w-2xl mx-auto">
+                  <LoveStorySection
+                    story={weddingData.loveStory}
+                    templateId="simple-luxury"
+                    lang={lang}
+                  />
+                </Reveal>
+              </section>
+            )}
 
             {/* ── LOCATION ── */}
             {SECTIONS.venue && <section className="py-28 px-6 bg-cream">

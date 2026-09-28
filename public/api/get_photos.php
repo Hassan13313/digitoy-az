@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/gallery_media.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
@@ -15,8 +16,14 @@ if (!$slug || !isValidSlug($slug)) {
     exit;
 }
 
-$uploadDir = __DIR__ . '/../uploads/' . $slug . '/';
-$baseUrl   = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
+/* ── Phase 43 — sıralama və qonaq kimliyi (İKİSİ DƏ KÖNÜLLÜ) ──
+   Parametr verilməyəndə davranış Phase 39-dakı ilə TAM EYNİDİR:
+   `sort=newest` (yenidən köhnəyə) və reaksiyalarda `mine` sahəsi boş.
+   Yəni keşlənmiş köhnə frontend heç nə hiss etmir. */
+$sort    = strtolower(trim($_GET['sort'] ?? 'newest'));
+if (!in_array($sort, ['newest', 'oldest', 'featured'], true)) $sort = 'newest';
+$visitor = trim($_GET['visitor'] ?? '');
+if (!isValidVisitorId($visitor)) $visitor = '';
 
 /* ── Şərti GET (ETag / Last-Modified) ──
    Qalereya hər 30 saniyədə bir avto-yenilənmə üçün bu endpoint-i sorğulayır
@@ -30,15 +37,27 @@ $baseUrl   = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['H
    tam etibarlıdır. Cache-Control: no-store — brauzerin öz HTTP keşinin
    bizim əl ilə idarə olunan şərti sorğu məntiqi ilə qarışmasının qarşısını
    alır (bax: src/utils/api.js::getPhotos). */
-$dirMtime = is_dir($uploadDir) ? (int) @filemtime($uploadDir) : 0;
+$uploadDir = galleryUploadDir($slug);
+$dirMtime  = is_dir($uploadDir) ? (int) @filemtime($uploadDir) : 0;
 
 /* ETag SƏHİFƏLƏMƏ parametrlərini də əhatə etməlidir — əks halda client
    1-ci səhifənin ETag-i ilə 2-ci səhifəni soruşub 304 alır və 1-ci
    səhifəni təkrar göstərir. */
 $etagLimit  = isset($_GET['limit'])  ? (int) $_GET['limit']  : -1;
 $etagOffset = isset($_GET['offset']) ? (int) $_GET['offset'] : 0;
-$etag       = '"' . md5($slug . '|' . $dirMtime . '|' . $etagLimit . '|' . $etagOffset) . '"';
-$lastMod  = gmdate('D, d M Y H:i:s', $dirMtime) . ' GMT';
+
+/* ── Phase 43: ETag reaksiya/seçim dəyişikliyini də tutmalıdır ──
+   Reaksiya verilməsi fayl YARATMIR, ona görə qovluq mtime-i dəyişmir və
+   köhnə ETag hələ də uyğun gəlirdi: qonaq öz reaksiyasını görürdü, digər
+   qonaqlar isə 30 saniyəlik yeniləmədə 304 alıb köhnə siyahını saxlayırdı.
+   `galleryMetaVersion()` iki kiçik aqreqatdır (COUNT + MAX(updated_at)),
+   indekslənmiş sütunlar üzərində — ucuzdur. Cədvəllər yoxdursa 'na|na'
+   qaytarır, yəni ETag sabit qalır və davranış əvvəlki kimi olur. */
+$metaVer = galleryMetaVersion($slug);
+
+$etag = '"' . md5($slug . '|' . $dirMtime . '|' . $etagLimit . '|' . $etagOffset
+               . '|' . $sort . '|' . $visitor . '|' . $metaVer) . '"';
+$lastMod = gmdate('D, d M Y H:i:s', $dirMtime) . ' GMT';
 
 header('ETag: ' . $etag);
 header('Last-Modified: ' . $lastMod);
@@ -50,57 +69,28 @@ if ($ifNoneMatch !== '' && $ifNoneMatch === $etag) {
     exit;
 }
 
-$photos = [];
-if (is_dir($uploadDir)) {
-    $imgExt   = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic'];
-    $videoExt = ['mp4', 'mov', 'quicktime'];
+/* ── Manifest (fayl sistemi = yeganə həqiqət) ──
+   Skan `gallery_media.php`-ə köçürülüb ki, canlı sayğac, slayd şou və
+   analitika EYNİ siyahını görsün. Qaydalar hərfən eynidir. */
+$scan   = scanGalleryMedia($slug);
+$photos = $scan['items'];
 
-    $allFiles = scandir($uploadDir);
-    $fileSet  = array_flip($allFiles);
+/* ── Phase 43 sahələri — MÖVCUD açarlara ƏLAVƏ, heç biri silinmir ──
+   DB oxunmursa hər ikisi boş massivdir → elementlər `featured: false` və
+   sıfır reaksiya ilə gəlir, qalereya isə tam işləyir. */
+$featured  = galleryFeaturedMap($slug);
+$reactions = galleryReactionMap($slug, $visitor !== '' ? $visitor : null);
 
-    foreach ($allFiles as $file) {
-        if ($file === '.' || $file === '..') continue;
-        /* Törəmə fayllar ayrıca media kimi sayılmır — yalnız orijinala
-           bağlı kiçik təsvirlərdir (_thumb: foto önizləməsi,
-           _poster: videonun ilk kadrı) */
-        if (substr($file, -10) === '_thumb.jpg')  continue;
-        if (substr($file, -11) === '_poster.jpg') continue;
-
-        $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-        if (!in_array($ext, array_merge($imgExt, $videoExt))) continue;
-
-        $isVideo = in_array($ext, $videoExt);
-        $mime    = $isVideo ? ($ext === 'mov' ? 'video/quicktime' : 'video/mp4') : 'image/jpeg';
-        $stat    = stat($uploadDir . $file);
-
-        /* Önizləmə seçimi:
-             foto  → _thumb.jpg (480px)
-             video → _poster.jpg (client tərəfdə çıxarılmış ilk kadr)
-           İkisi də yoxdursa orijinala fallback (bu yeniləmədən əvvəl
-           yüklənmiş köhnə media) — heç nə pozulmur. */
-        $base       = pathinfo($file, PATHINFO_FILENAME);
-        $thumbFile  = $base . '_thumb.jpg';
-        $posterFile = $base . '_poster.jpg';
-        $hasThumb   = isset($fileSet[$thumbFile]);
-        $hasPoster  = isset($fileSet[$posterFile]);
-
-        $preview = $hasThumb ? $thumbFile : ($hasPoster ? $posterFile : $file);
-
-        $photos[] = [
-            'id'         => $file,
-            'url'        => $baseUrl . '/uploads/' . $slug . '/' . $file,
-            'thumbUrl'   => $baseUrl . '/uploads/' . $slug . '/' . $preview,
-            'posterUrl'  => $hasPoster ? ($baseUrl . '/uploads/' . $slug . '/' . $posterFile) : null,
-            'name'       => $file,
-            'type'       => $mime,
-            'size'       => $stat ? (int) $stat['size'] : 0,
-            'uploadedAt' => $stat ? date('Y-m-d H:i:s', $stat['mtime']) : '',
-            'source'     => 'server',
-        ];
-    }
-
-    usort($photos, fn($a, $b) => strcmp($b['uploadedAt'], $a['uploadedAt']));
+foreach ($photos as &$p) {
+    $r = $reactions[$p['id']] ?? null;
+    $p['featured']       = isset($featured[$p['id']]);
+    $p['reactions']      = $r ? $r['counts'] : new stdClass();
+    $p['reactionTotal']  = $r ? $r['total']  : 0;
+    $p['myReaction']     = $r ? $r['mine']   : null;
 }
+unset($p);
+
+$photos = sortGalleryItems($photos, $sort);
 
 /* ── Server tərəfi səhifələmə (könüllü) ──
    Parametrsiz sorğu ƏVVƏLKİ kimi bütün siyahını qaytarır — mövcud
@@ -120,4 +110,12 @@ echo json_encode([
     'total'  => $total,
     'offset' => $offset,
     'photos' => $photos,
+    /* Phase 43 — canlı sayğaclar. Qalereya üz qapağı və admin paneli
+       bunları oxuyur; köhnə client bu açarları sadəcə görməzdən gəlir. */
+    'counts' => [
+        'photos' => $scan['photos'],
+        'videos' => $scan['videos'],
+        'total'  => $scan['photos'] + $scan['videos'],
+    ],
+    'sort'   => $sort,
 ]);

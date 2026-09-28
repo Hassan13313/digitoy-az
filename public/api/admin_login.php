@@ -25,6 +25,16 @@ if ($key === '') {
 
 $adminKey = defined('ADMIN_KEY') ? ADMIN_KEY : '';
 
+/* ── Brute-force qapısı (2026-09-28) ──
+   Yalnız 0.5 s gecikmə paralel sorğularla keçilirdi. İndi IP üzrə
+   15 dəqiqədə 10 cəhd. Uğurlu giriş də sayılır — admin gündə bir neçə
+   dəfə daxil olur, limitə çatmaz. */
+if (!rateGate('admin-login:' . clientIp(), 10, 900)) {
+    http_response_code(429);
+    echo json_encode(['error' => 'Too many attempts', 'message' => 'Çox sayda cəhd. 15 dəqiqə sonra yenidən yoxlayın.'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 if ($adminKey === '' || !hash_equals($adminKey, $key)) {
     /* Brute-force gecikməsi: yanlış key-də 0.5s gözlə */
     usleep(500000);

@@ -1,24 +1,74 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Trash2, CheckSquare, Square, Download,
   ImagePlus, X, Check, RotateCcw, Film, ArrowLeft,
+  Star, MonitorPlay, ArrowDownUp, BarChart3, Settings2,
 } from 'lucide-react'
-import { getPhotos, deletePhoto, storeGalleryKey, canManageGallery } from '../../utils/api'
+import {
+  getPhotos, deletePhoto, storeGalleryKey, canManageGallery,
+  getVisitorId, setMediaFeatured, trackGalleryEvent,
+} from '../../utils/api'
 import { downloadItemsHD, downloadItem } from '../../utils/photoGallery'
 import { trackEvent } from '../../utils/analytics'
+import { useGalleryMeta } from '../../hooks/useGalleryMeta'
+import GalleryCover from './GalleryCover'
+import GalleryStatsPanel from './GalleryStatsPanel'
+import GalleryCoverSettings from './GalleryCoverSettings'
+import GalleryLightbox from './GalleryLightbox'
 
 const PAGE_SIZE = 30
 
+/* ── Sıralama rejimləri (Phase 43) ──
+   ⚠ MÖVCUD SIRALAMA QORUNUR: `newest` serverin defaultudur və Phase 39-dakı
+   davranışın eynisidir. `featured` yalnız seçilmişləri ÖNƏ çıxarır, siyahıdan
+   heç nə çıxarmır. */
+const SORTS = [
+  { id: 'featured', label: 'Seçilmişlər öndə' },
+  { id: 'newest',   label: 'Əvvəlcə yeni' },
+  { id: 'oldest',   label: 'Əvvəlcə köhnə' },
+]
+
+/* ── Poster demək olar tam qaradırmı? ──
+   2026-09-28-dək client kadrı seek bitməmiş çəkirdi (bax uploadPolicy.js ›
+   extractVideoPoster) və serverdə QARA posterlər qalıb. Onlar yüklənəndə
+   12×12-lik nümunənin orta parlaqlığı ölçülür. Cross-origin şəkildə canvas
+   «çirklənir» və oxunmur — o halda poster olduğu kimi saxlanılır. */
+function isNearlyBlack(img) {
+  try {
+    const c = document.createElement('canvas')
+    c.width = 12
+    c.height = 12
+    const ctx = c.getContext('2d', { willReadFrequently: true })
+    ctx.drawImage(img, 0, 0, 12, 12)
+    const d = ctx.getImageData(0, 0, 12, 12).data
+    let sum = 0
+    for (let i = 0; i < d.length; i += 4) sum += 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]
+    return sum / (d.length / 4) < 14
+  } catch {
+    return false
+  }
+}
+
 /* ── Lazy media cell ── */
-function LazyMedia({ item, selected, canManage, onToggle, onDelete, onPreview }) {
+function LazyMedia({ item, selected, canManage, onToggle, onDelete, onPreview, onFeature, featureBusy }) {
   const ref = useRef()
   const [vis, setVis] = useState(false)
   const [hov, setHov] = useState(false)
   const isVideo = item.type?.startsWith('video/')
-  /* Video posteri varsa real kadr göstərilir; yoxdursa (köhnə yükləmələr)
-     əvvəlki kimi Film ikonu. Video HEÇ VAXT preload edilmir. */
+  /* Video posteri varsa real kadr göstərilir. Poster yoxdursa, sınıqdırsa
+     və ya qaradırsa `posterBad` → kadr videonun özündən (yalnız metadata). */
   const poster  = isVideo ? item.posterUrl : null
+  const [posterBad, setPosterBad] = useState(false)
+
+  /* Reaksiya xülasəsi — xanada YALNIZ göstərici (4 düymə 120px-lik xanaya
+     sığmır və toxunuş hədəfləri bir-birinə girərdi). Tam reaksiya çubuğu
+     lightbox-dadır, yəni qonaq şəkli açıb rahat seçir. */
+  const topReaction = useMemo(() => {
+    const entries = Object.entries(item.reactions || {})
+    if (!entries.length) return null
+    return entries.sort((a, b) => b[1] - a[1])[0][0]
+  }, [item.reactions])
 
   useEffect(() => {
     const obs = new IntersectionObserver(
@@ -60,21 +110,38 @@ function LazyMedia({ item, selected, canManage, onToggle, onDelete, onPreview })
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           background: 'rgba(20,16,10,0.88)',
         }}>
-          {poster && (
+          {poster && !posterBad && (
             <img
               src={poster} alt={item.name}
               loading="lazy" decoding="async"
+              onLoad={(e) => { if (isNearlyBlack(e.currentTarget)) setPosterBad(true) }}
+              onError={() => setPosterBad(true)}
               style={{
                 position: 'absolute', inset: 0,
                 width: '100%', height: '100%', objectFit: 'cover',
               }}
             />
           )}
-          {/* Film nişanı posterin üzərində qalır — bunun video olduğu aydın olsun */}
+          {/* Poster yoxdur, açılmır və ya QARADIR (2026-09-28 öncəki yükləmələr) →
+              brauzer kadrı videonun özündən çəkir. Yalnız metadata + bir kadr
+              endirilir; video oynadılmır. `#t=1` iOS Safari-də də kadrı göstərir
+              (1 s-dən qısa videoda brauzer son kadra düşür). */}
+          {(!poster || posterBad) && (
+            <video
+              src={`${item.url}#t=1`}
+              preload="metadata" muted playsInline disablePictureInPicture
+              tabIndex={-1} aria-hidden="true"
+              style={{
+                position: 'absolute', inset: 0,
+                width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none',
+              }}
+            />
+          )}
+          {/* Film nişanı kadrın üzərində qalır — bunun video olduğu aydın olsun */}
           <div style={{
             position: 'relative', width: 38, height: 38, borderRadius: '50%',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: poster ? 'rgba(0,0,0,0.5)' : 'transparent',
+            background: 'rgba(0,0,0,0.5)',
           }}>
             <Film size={22} style={{ color: 'rgba(255,255,255,0.92)' }} strokeWidth={1.2} />
           </div>
@@ -86,6 +153,46 @@ function LazyMedia({ item, selected, canManage, onToggle, onDelete, onPreview })
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
       ))}
+
+      {/* Seçilmiş nişanı — hover-dən ASILI DEYİL, həmişə görünür */}
+      {item.featured && (
+        <div
+          aria-label="Seçilmiş"
+          style={{
+            position: 'absolute', top: 6, right: 6,
+            width: 22, height: 22, borderRadius: '50%',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(197,160,89,0.92)',
+            boxShadow: '0 1px 6px rgba(0,0,0,0.4)',
+          }}
+        >
+          <Star size={12} strokeWidth={2} color="#FFF" fill="#FFF" />
+        </div>
+      )}
+
+      {/* Reaksiya xülasəsi */}
+      {item.reactionTotal > 0 && (
+        <div style={{
+          position: 'absolute', bottom: 6, left: 6,
+          display: 'flex', alignItems: 'center', gap: 3,
+          padding: '2px 7px 2px 5px', borderRadius: 999,
+          background: 'rgba(12,9,6,0.62)',
+          backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
+        }}>
+          <span aria-hidden="true" style={{
+            fontSize: 11,
+            fontFamily: '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif',
+          }}>
+            {topReaction}
+          </span>
+          <span style={{
+            fontSize: 9.5, fontWeight: 600, color: '#FFF',
+            fontVariantNumeric: 'tabular-nums',
+          }}>
+            {item.reactionTotal}
+          </span>
+        </div>
+      )}
 
       {/* Hover overlay — toxunuş cihazlarında onMouseEnter/Leave heç vaxt
           tetiklənmir, ona görə seçilmiş element üçün də göstəririk
@@ -103,6 +210,25 @@ function LazyMedia({ item, selected, canManage, onToggle, onDelete, onPreview })
               padding: 6, gap: 4,
             }}
           >
+            {/* Seçilmiş işarəsi — yalnız idarəetmə səlahiyyəti olanda */}
+            {canManage && (
+            <button
+              onClick={() => onFeature(item.id, !item.featured)}
+              disabled={featureBusy}
+              aria-label={item.featured ? 'Seçilmişdən çıxar' : 'Seçilmiş et'}
+              aria-pressed={!!item.featured}
+              style={{
+                width: 34, height: 34, borderRadius: 2,
+                background: item.featured ? 'rgba(197,160,89,0.95)' : 'rgba(255,255,255,0.22)',
+                border: 'none', cursor: featureBusy ? 'default' : 'pointer',
+                opacity: featureBusy ? 0.5 : 1,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <Star size={14} color="white" strokeWidth={2} fill={item.featured ? 'white' : 'none'} />
+            </button>
+            )}
+
             {/* Silmə yalnız idarəetmə səlahiyyəti olanda görünür — qonaq
                 heç vaxt işləməyəcək düyməyə baxmır (əvvəl 401 alırdı) */}
             {canManage && (
@@ -151,92 +277,6 @@ function LazyMedia({ item, selected, canManage, onToggle, onDelete, onPreview })
         }
       </div>
     </div>
-  )
-}
-
-/* ── Lightbox ── */
-function Lightbox({ item, onClose }) {
-  useEffect(() => {
-    const fn = e => { if (e.key === 'Escape') onClose() }
-    window.addEventListener('keydown', fn)
-    return () => window.removeEventListener('keydown', fn)
-  }, [onClose])
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      transition={{ duration: 0.22 }}
-      style={{
-        position: 'fixed', inset: 0, zIndex: 9999,
-        background: 'rgba(6,4,2,0.82)',
-        backdropFilter: 'blur(18px)',
-        WebkitBackdropFilter: 'blur(18px)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
-      }}
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ scale: 0.88, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.92, opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 240, damping: 26 }}
-        style={{ position: 'relative', maxWidth: '90vw', maxHeight: '90vh' }}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Media */}
-        {item.type?.startsWith('video/') ? (
-          <video
-            src={item.url} controls autoPlay playsInline
-            poster={item.posterUrl || undefined}
-            preload="metadata"
-            style={{
-              maxWidth: '90vw', maxHeight: '82vh', display: 'block',
-              border: '1px solid rgba(197,160,89,0.18)',
-              boxShadow: '0 32px 80px rgba(0,0,0,0.7)',
-            }}
-          />
-        ) : (
-          <img
-            src={item.url} alt={item.name}
-            style={{
-              maxWidth: '90vw', maxHeight: '82vh', objectFit: 'contain', display: 'block',
-              border: '1px solid rgba(197,160,89,0.18)',
-              boxShadow: '0 32px 80px rgba(0,0,0,0.7)',
-            }}
-          />
-        )}
-
-        {/* Premium close button */}
-        <button
-          onClick={onClose}
-          aria-label="Bağla"
-          style={{
-            position: 'absolute', top: -18, right: -18,
-            width: 36, height: 36,
-            background: 'rgba(197,160,89,0.15)',
-            border: '1px solid rgba(197,160,89,0.45)',
-            backdropFilter: 'blur(8px)',
-            cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'background 0.18s, border-color 0.18s',
-          }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(197,160,89,0.32)'; e.currentTarget.style.borderColor = 'rgba(197,160,89,0.75)' }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(197,160,89,0.15)'; e.currentTarget.style.borderColor = 'rgba(197,160,89,0.45)' }}
-        >
-          <X size={15} color="rgba(197,160,89,1)" strokeWidth={2} />
-        </button>
-
-        {/* File name caption */}
-        {item.name && (
-          <p style={{
-            position: 'absolute', bottom: -30, left: 0, right: 0, textAlign: 'center',
-            fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase',
-            color: 'rgba(197,160,89,0.45)',
-            fontFamily: '"Inter",system-ui,sans-serif',
-          }}>
-            {item.name}
-          </p>
-        )}
-      </motion.div>
-    </motion.div>
   )
 }
 
@@ -310,6 +350,20 @@ export default function GalleryPage() {
   const [notice,   setNotice]   = useState(null)   /* { kind:'error'|'ok', text } */
   const sentinelRef = useRef()
 
+  /* ── Phase 43 vəziyyəti ── */
+  const [sort,        setSort]        = useState('featured')
+  const [sortOpen,    setSortOpen]    = useState(false)
+  const [featureBusy, setFeatureBusy] = useState(false)
+  const [statsOpen,   setStatsOpen]   = useState(false)
+  const [coverOpen,   setCoverOpen]   = useState(false)
+
+  /* Qonaq kimliyi — reaksiyaların «bir qonaq · bir səs» qaydası üçün.
+     ŞƏXSİ MƏLUMAT DEYİL (bax utils/api.js › getVisitorId). */
+  const visitor = useMemo(() => getVisitorId(), [])
+
+  /* Üz qapağı + canlı sayğaclar */
+  const meta = useGalleryMeta(slug)
+
   /* Bildirişlər özləri sönür — istifadəçi əl ilə bağlamalı olmasın */
   useEffect(() => {
     if (!notice) return
@@ -321,16 +375,21 @@ export default function GalleryPage() {
   const fetchItems = useCallback(async () => {
     setLoading(true)
     try {
-      const photos = await getPhotos(slug)
+      const photos = await getPhotos(slug, { sort, visitor })
       setItems(photos)
     } catch { /* server əlçatmaz */ }
     finally { setLoading(false) }
-  }, [slug])
+  }, [slug, sort, visitor])
 
   useEffect(() => { fetchItems() }, [fetchItems])
 
   /* Qalereya idarəetmə səhifəsi açıldı — bir dəfə */
-  useEffect(() => { trackEvent('gallery_opened') }, [])
+  useEffect(() => {
+    trackEvent('gallery_opened')
+    /* Phase 43 — server tərəfi analitika. Gündə bir dəfə sayılır
+       (bax gallery_track.php), ona görə açıq tab statistikanı şişirtmir. */
+    trackGalleryEvent(slug, 'visit')
+  }, [slug])
 
   /* ── 30 saniyəlik avtomatik yeniləmə — YALNIZ tab görünəndə (Phase 39) ──
      ƏVVƏL: interval tab arxa planda olsa da işləyirdi. Cavab ETag/304
@@ -391,6 +450,47 @@ export default function GalleryPage() {
   const clearSel  = () => setSelected(new Set())
   const allSelected = items.length > 0 && selected.size === items.length
 
+  /* ── Tək elementi yerində yenilə (reaksiya / seçim) ──
+     Bütün siyahını yenidən çəkmək əvəzinə yalnız dəyişən element əvəz
+     olunur: 500 medialı qalereyada bu, fərqi hiss olunan şəkildə saxlayır.
+     Açıq lightbox da eyni obyekti göstərdiyi üçün onunla sinxronlaşır. */
+  const patchItem = useCallback((id, fields) => {
+    setItems(prev => prev.map(i => (i.id === id ? { ...i, ...fields } : i)))
+    setPreview(p => (p && p.id === id ? { ...p, ...fields } : p))
+  }, [])
+
+  /* ── Lightbox-da növbəti / əvvəlki media ──
+     `navDir` keçid animasiyasının istiqamətidir (sola/sağa sürüşmə). */
+  const [navDir, setNavDir] = useState(0)
+  const previewIndex = preview ? items.findIndex(i => i.id === preview.id) : -1
+  const stepPreview = useCallback((delta) => {
+    const i = preview ? items.findIndex(x => x.id === preview.id) : -1
+    const target = i >= 0 ? items[i + delta] : null
+    if (!target) return
+    setNavDir(delta)
+    setPreview(target)
+  }, [items, preview])
+
+  /* ── Seçilmiş media (Phase 43) ──
+     ⚠ SİLMƏ QAYDASI İLƏ EYNİ PRİNSİP: vəziyyət YALNIZ server təsdiqləyəndən
+     sonra dəyişir. Optimistik göstərmək cütlüyün «işarələdim» görüb refresh-də
+     itirməsinə aparardı. */
+  const handleFeature = useCallback(async (id, featured) => {
+    setFeatureBusy(true)
+    try {
+      const res = await setMediaFeatured(slug, id, featured)
+      patchItem(id, { featured: res.featured })
+      setNotice({
+        kind: 'ok',
+        text: res.featured ? 'Seçilmişlərə əlavə olundu.' : 'Seçilmişlərdən çıxarıldı.',
+      })
+    } catch (e) {
+      setNotice({ kind: 'error', text: e?.message || 'İşarə saxlanılmadı.' })
+    } finally {
+      setFeatureBusy(false)
+    }
+  }, [slug, patchItem])
+
   /* ⚠ SİLMƏ DÜRÜSTLÜYÜ QAYDASI
      Element UI-dan YALNIZ server silinməni təsdiqləyəndən sonra çıxarılır.
      Köhnə kod `catch {}` ilə xətanı udub elementi hər halda çıxarırdı —
@@ -402,12 +502,15 @@ export default function GalleryPage() {
       await deletePhoto(slug, id)
       setItems(prev => prev.filter(i => i.id !== id))
       setSelected(s => { const n = new Set(s); n.delete(id); return n })
+      setPreview(p => (p && p.id === id ? null : p))
       setNotice({ kind: 'ok', text: 'Silindi.' })
+      /* Sayğaclar dərhal düzəlsin — 20 saniyə gözləmək lazım deyil */
+      meta.refresh()
     } catch (e) {
       /* Element QALIR — UI serverlə uyğunsuz vəziyyətə düşmür */
       setNotice({ kind: 'error', text: e?.message || 'Silinmə alınmadı.' })
     }
-  }, [slug])
+  }, [slug, meta])
 
   const handleDeleteSelected = async () => {
     const ids = Array.from(selected)
@@ -425,6 +528,7 @@ export default function GalleryPage() {
     /* Yalnız HƏQİQƏTƏN silinənlər siyahıdan çıxır */
     if (deleted.size) setItems(prev => prev.filter(i => !deleted.has(i.id)))
     setSelected(new Set(ids.filter(id => !deleted.has(id))))
+    if (deleted.size) meta.refresh()
 
     const failed = ids.length - deleted.size
     if (failed === 0) {
@@ -468,6 +572,23 @@ export default function GalleryPage() {
     background: 'linear-gradient(150deg, #FDFAF4 0%, #F8F3E8 100%)',
   }
 
+  const featuredCount = items.filter(i => i.featured).length
+  const sortLabel = SORTS.find(s => s.id === sort)?.label || SORTS[0].label
+
+  /* Qapaq şəkli: cütlüyün seçdiyi fayl adı, data URI, tam ünvan — və ya
+     avtomatik olaraq ilk seçilmiş/ən yeni media. */
+  const coverUrl = useMemo(() => {
+    const raw = meta.config?.coverPhoto
+    if (raw) {
+      if (raw.startsWith('data:') || raw.startsWith('http') || raw.startsWith('/')) return raw
+      const hit = items.find(i => i.id === raw)
+      if (hit) return hit.url
+    }
+    const auto = items.find(i => i.featured && !i.type?.startsWith('video/'))
+              || items.find(i => !i.type?.startsWith('video/'))
+    return auto ? auto.url : null
+  }, [meta.config, items])
+
   return (
     <div className="min-h-screen bg-cream" style={{ fontFamily: '"Inter",system-ui,sans-serif' }}>
 
@@ -503,7 +624,7 @@ export default function GalleryPage() {
             Geri
           </button>
 
-          <div style={{ textAlign: 'center' }}>
+          <div style={{ textAlign: 'center', minWidth: 0 }}>
             <p style={{ fontFamily: '"Cormorant Garamond","Playfair Display",Georgia,serif', fontSize: 17, fontWeight: 300, color: '#1C1610', lineHeight: 1 }}>
               Qonaq Şəkilləri
             </p>
@@ -517,6 +638,54 @@ export default function GalleryPage() {
           </div>
         </div>
       </header>
+
+      {/* ── Üz qapağı (Phase 43) ──
+          `coverEnabled: false` seçilibsə göstərilmir. Meta yüklənməyibsə də
+          qalereya tam işləyir — qapaq sadəcə olmur. */}
+      {meta.config?.coverEnabled !== false && (meta.names || coverUrl) && (
+        <GalleryCover
+          names={meta.config?.coverTitle || meta.names}
+          title={meta.title}
+          date={meta.date}
+          venue={meta.venue}
+          photos={meta.counts.photos}
+          videos={meta.counts.videos}
+          coverUrl={coverUrl}
+          subtitle={meta.config?.coverSubtitle || ''}
+        >
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <a
+              data-press
+              href={`/invite/${slug}/foto`}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 7,
+                minHeight: 42, padding: '0 18px',
+                background: 'rgba(197,160,89,0.95)', color: '#1A1408',
+                textDecoration: 'none', borderRadius: 2,
+                fontSize: 9.5, letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 700,
+              }}
+            >
+              <ImagePlus size={13} strokeWidth={2} />
+              Şəkil göndər
+            </a>
+            <a
+              data-press
+              href={`/invite/${slug}/slayd`}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 7,
+                minHeight: 42, padding: '0 18px',
+                background: 'rgba(255,255,255,0.1)', color: '#FFF',
+                border: '1px solid rgba(197,160,89,0.5)',
+                textDecoration: 'none', borderRadius: 2,
+                fontSize: 9.5, letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 600,
+              }}
+            >
+              <MonitorPlay size={13} strokeWidth={1.8} />
+              Slayd şou
+            </a>
+          </div>
+        </GalleryCover>
+      )}
 
       {/* ── Main content ── */}
       <main style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 24px 80px' }}>
@@ -554,8 +723,8 @@ export default function GalleryPage() {
             background: 'rgba(197,160,89,0.04)',
             fontSize: 12, lineHeight: 1.6, color: 'rgba(110,92,70,0.95)',
           }}>
-            Baxış rejimi — şəkilləri görə və endirə bilərsiniz.
-            Silmək üçün sizə göndərilən <strong>idarəetmə linki</strong> ilə daxil olun.
+            Baxış rejimi — şəkilləri görə, endirə və reaksiya verə bilərsiniz.
+            Silmək və seçilmiş etmək üçün sizə göndərilən <strong>idarəetmə linki</strong> ilə daxil olun.
           </div>
         )}
 
@@ -579,11 +748,57 @@ export default function GalleryPage() {
             <span style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(140,123,107,0.65)' }}>
               {loading ? 'Yüklənir…' : `${items.length} fayl`}
               {selected.size > 0 && <span style={{ color: 'rgba(197,160,89,0.9)' }}> · {selected.size} seçildi</span>}
+              {featuredCount > 0 && <span style={{ color: 'rgba(197,160,89,0.9)' }}> · {featuredCount} ★</span>}
             </span>
             <Btn onClick={fetchItems} disabled={loading}>
               <RotateCcw size={11} strokeWidth={1.5} />
               Yenilə
             </Btn>
+
+            {/* Sıralama seçicisi (Phase 43) */}
+            {items.length > 1 && (
+              <div style={{ position: 'relative' }}>
+                <Btn onClick={() => setSortOpen(o => !o)}>
+                  <ArrowDownUp size={11} strokeWidth={1.5} />
+                  {sortLabel}
+                </Btn>
+                {sortOpen && (
+                  <>
+                    <div
+                      onClick={() => setSortOpen(false)}
+                      style={{ position: 'fixed', inset: 0, zIndex: 60 }}
+                    />
+                    <div style={{
+                      position: 'absolute', top: 'calc(100% + 4px)', left: 0, zIndex: 61,
+                      background: '#FDFAF4', border: '1px solid rgba(197,160,89,0.34)',
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.12)', minWidth: 178,
+                    }}>
+                      {SORTS.map(s => (
+                        <button
+                          key={s.id}
+                          type="button"
+                          onClick={() => { setSort(s.id); setSortOpen(false) }}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 7, width: '100%',
+                            minHeight: 40, padding: '0 13px', border: 'none',
+                            background: sort === s.id ? 'rgba(197,160,89,0.12)' : 'transparent',
+                            cursor: 'pointer', textAlign: 'left',
+                            fontSize: 11, color: 'rgba(90,74,54,0.95)',
+                            fontFamily: '"Inter",system-ui,sans-serif',
+                          }}
+                        >
+                          {sort === s.id
+                            ? <Check size={11} strokeWidth={2.4} style={{ color: 'rgba(160,126,54,1)' }} />
+                            : <span style={{ width: 11 }} />}
+                          {s.label}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
             {items.length > 0 && (
               <Btn onClick={allSelected ? clearSel : selectAll}>
                 {allSelected
@@ -596,6 +811,26 @@ export default function GalleryPage() {
 
           {/* Sağ: əməliyyatlar */}
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+            {/* Slayd şou — hər kəs üçün (yalnız oxuyur) */}
+            <Btn onClick={() => window.open(`/invite/${slug}/slayd`, '_blank', 'noopener')}>
+              <MonitorPlay size={11} strokeWidth={1.5} />
+              Slayd şou
+            </Btn>
+
+            {/* Statistika + qapaq ayarları — yalnız idarəetmə səlahiyyəti ilə */}
+            {canManage && (
+              <>
+                <Btn onClick={() => setStatsOpen(true)}>
+                  <BarChart3 size={11} strokeWidth={1.5} />
+                  Statistika
+                </Btn>
+                <Btn onClick={() => setCoverOpen(true)}>
+                  <Settings2 size={11} strokeWidth={1.5} />
+                  Qapaq
+                </Btn>
+              </>
+            )}
+
             {canManage && selected.size > 0 && !delConfirm && (
               <Btn danger onClick={() => setDelConfirm(true)}>
                 <Trash2 size={11} strokeWidth={1.5} />
@@ -677,6 +912,8 @@ export default function GalleryPage() {
                   onToggle={toggleSelect}
                   onDelete={handleDelete}
                   onPreview={setPreview}
+                  onFeature={handleFeature}
+                  featureBusy={featureBusy}
                 />
               ))}
             </div>
@@ -694,9 +931,45 @@ export default function GalleryPage() {
         )}
       </main>
 
-      {/* Lightbox */}
+      {/* Lightbox — sürüşdürmə ilə bütün siyahı boyunca (grid-in yalnız
+          görünən hissəsi yox: `items` tam siyahıdır, səhifələmə yalnız çəkilişdir) */}
       <AnimatePresence>
-        {preview && <Lightbox item={preview} onClose={() => setPreview(null)} />}
+        {preview && (
+          <GalleryLightbox
+            item={preview}
+            index={previewIndex}
+            total={items.length}
+            dir={navDir}
+            prevItem={previewIndex > 0 ? items[previewIndex - 1] : null}
+            nextItem={previewIndex >= 0 ? items[previewIndex + 1] || null : null}
+            slug={slug}
+            canManage={canManage}
+            onClose={() => setPreview(null)}
+            onPrev={() => stepPreview(-1)}
+            onNext={() => stepPreview(1)}
+            onReaction={patchItem}
+            onFeature={handleFeature}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Statistika paneli */}
+      <AnimatePresence>
+        {statsOpen && <GalleryStatsPanel slug={slug} onClose={() => setStatsOpen(false)} />}
+      </AnimatePresence>
+
+      {/* Qapaq ayarları */}
+      <AnimatePresence>
+        {coverOpen && (
+          <GalleryCoverSettings
+            slug={slug}
+            config={meta.config}
+            items={items}
+            names={meta.names}
+            onClose={() => setCoverOpen(false)}
+            onSaved={() => { meta.refresh(); setNotice({ kind: 'ok', text: 'Qapaq ayarları saxlanıldı.' }) }}
+          />
+        )}
       </AnimatePresence>
 
       <style>{`

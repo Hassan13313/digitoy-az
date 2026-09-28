@@ -116,6 +116,19 @@ try {
     /* indeks köməkçidir */
 }
 
+/* Phase 43 — media ilə birlikdə onun reaksiya və seçim sətirlərini də sil.
+   Orfan sətirlər qalsa `sort=featured` olmayan faylı önə çıxarmağa çalışar
+   və analitikada səhv rəqəm görünər («5 seçilmiş», halbuki 3-ü silinib).
+   Fayl ARTIQ silinib: bu təmizlik uğursuz olsa da silmə UĞURLUDUR. */
+foreach (['media_reactions', 'media_flags'] as $__tbl) {
+    try {
+        $__st = getDB()->prepare("DELETE FROM `$__tbl` WHERE slug = :s AND filename = :f");
+        $__st->execute([':s' => $slug, ':f' => $filename]);
+    } catch (Throwable $e) {
+        /* cədvəl yoxdursa təmizlənəcək heç nə yoxdur */
+    }
+}
+
 mediaLog('delete_completed', [
     'slug'         => $slug,
     'file'         => $filename,

@@ -5,21 +5,28 @@
    validateAdminToken() — HMAC imzasını yoxlayır
 ══════════════════════════════════════════════════ */
 
-function requireAdmin(): void {
-    $token = '';
-
+/** Sorğudakı admin tokeni (yoxdursa ''). */
+function adminTokenFromRequest(): string {
     /* X-Admin-Token header (əsas üsul) */
     if (!empty($_SERVER['HTTP_X_ADMIN_TOKEN'])) {
-        $token = $_SERVER['HTTP_X_ADMIN_TOKEN'];
+        return (string) $_SERVER['HTTP_X_ADMIN_TOKEN'];
     }
     /* Authorization: Bearer TOKEN (ehtiyat üsul) */
-    elseif (!empty($_SERVER['HTTP_AUTHORIZATION'])) {
-        if (preg_match('/^Bearer\s+(.+)$/i', $_SERVER['HTTP_AUTHORIZATION'], $m)) {
-            $token = trim($m[1]);
-        }
+    if (!empty($_SERVER['HTTP_AUTHORIZATION'])
+        && preg_match('/^Bearer\s+(.+)$/i', $_SERVER['HTTP_AUTHORIZATION'], $m)) {
+        return trim($m[1]);
     }
+    return '';
+}
 
-    if ($token === '' || !validateAdminToken($token)) {
+/** Admin sorğusudurmu? — dayandırmır (ictimai + admin cavabı olan endpointlər üçün). */
+function isAdminRequest(): bool {
+    $token = adminTokenFromRequest();
+    return $token !== '' && validateAdminToken($token);
+}
+
+function requireAdmin(): void {
+    if (!isAdminRequest()) {
         http_response_code(401);
         echo json_encode(['error' => 'Admin authorization required']);
         exit;

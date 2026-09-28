@@ -251,6 +251,29 @@ export function buildAutoI18n(source) {
       if (auto) { bucket[key] = auto; metaBucket[key] = 'auto' }
     }
 
+    /* Phase 43 — hekayə blokları (başlıq + mətn).
+       Lüğət toy terminlərinə köklənib, hekayə isə sərbəst mətndir:
+       `pickField` uyğun tərcümə tapmasa ORİJİNALI saxlayır, yəni
+       heç vaxt yarımçıq/uydurma tərcümə çıxmır. */
+    if (Array.isArray(source.loveStory) && source.loveStory.length) {
+      const story = {}
+      const storyMeta = {}
+      source.loveStory.forEach((row, i) => {
+        if (!row || typeof row !== 'object') return
+        const cell = {}
+        for (const field of STORY_TEXT_FIELDS) {
+          if (typeof row[field] === 'string' && row[field].trim()) {
+            cell[field] = translatePhrase(row[field], lang)
+          }
+        }
+        if (Object.keys(cell).length) { story[i] = cell; storyMeta[i] = 'auto' }
+      })
+      if (Object.keys(story).length) {
+        bucket.loveStory = story
+        metaBucket.loveStory = storyMeta
+      }
+    }
+
     if (Array.isArray(source.programSteps)) {
       const steps = {}
       const stepsMeta = {}
@@ -269,6 +292,10 @@ export function buildAutoI18n(source) {
 
   return Object.keys(i18n).length ? { i18n, i18nMeta: meta } : null
 }
+
+/* Hekayə blokunun tərcümə olunan sahələri. `caption` — Phase 44 şəkil altı
+   yazısı; tarix, ikon və şəkillər TOXUNULMUR. */
+const STORY_TEXT_FIELDS = ['title', 'text', 'caption']
 
 /** Sahə üçün yekun mətn: əl ilə tərcümə → lüğət → orijinal */
 function pickField(original, manual, lang) {
@@ -321,6 +348,32 @@ export function resolveWeddingContent(weddingData, lang) {
       return { ...row, activity: value }
     })
     if (stepsChanged) { out.programSteps = steps; changed = true }
+  }
+
+  /* ── Phase 43 — «Bizim Hekayəmiz» blokları ──
+     `i18n[lang].loveStory` indeksə görə obyektdir: { 0: { title, text } }.
+     TARİX, İKON və ŞƏKİL TOXUNULMUR — yalnız iki mətn sahəsi.
+     `programSteps` ilə TAM eyni model, ona görə admin tərcümə redaktoru
+     da eyni şəkildə işləyir. */
+  if (Array.isArray(weddingData.loveStory) && weddingData.loveStory.length) {
+    const ml = manual.loveStory || {}
+    let storyChanged = false
+    const story = weddingData.loveStory.map((row, i) => {
+      if (!row || typeof row !== 'object') return row
+      const mi = ml[i] !== undefined ? ml[i] : ml[String(i)]
+      const next = { ...row }
+      let touched = false
+      for (const field of STORY_TEXT_FIELDS) {
+        const original = row[field]
+        if (typeof original !== 'string' || !original.trim()) continue
+        const value = pickField(original, mi && typeof mi === 'object' ? mi[field] : undefined, lang)
+        if (value !== original) { next[field] = value; touched = true }
+      }
+      if (!touched) return row
+      storyChanged = true
+      return next
+    })
+    if (storyChanged) { out.loveStory = story; changed = true }
   }
 
   /* ── Geyim kodu kartlarının fərdi adları: { [paletteId]: 'Black Tie' } ── */

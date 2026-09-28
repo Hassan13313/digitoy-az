@@ -8,7 +8,24 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$body        = json_decode(file_get_contents('php://input'), true);
+/* ── Sui-istifadə qapısı (2026-09-28) ──
+   İctimai endpoint idi və heç bir limit yox idi: skript cədvəli sonsuz
+   draftla doldura bilərdi. Autosave 800 ms debounce ilə gəlir — aktiv
+   yazan istifadəçi 10 dəqiqədə 240-a yaxınlaşmır. Gövdə tavanı 4 MB:
+   Phase 44-dən şəkillər fayldır, köhnə data URI-li draftlar da sığır. */
+$raw = file_get_contents('php://input');
+if (strlen((string) $raw) > 4 * 1024 * 1024) {
+    http_response_code(413);
+    echo json_encode(['error' => 'Payload too large']);
+    exit;
+}
+if (!rateGate('draft_save|' . clientIp(), 240, 600)) {
+    http_response_code(429);
+    echo json_encode(['error' => 'RATE_LIMITED']);
+    exit;
+}
+
+$body        = json_decode((string) $raw, true);
 $sessionId   = trim($body['session_id']   ?? '');
 $formData    = $body['form_data']          ?? null;
 $package     = trim($body['package']      ?? 'SADE');

@@ -45,10 +45,12 @@ function Constellation({ theme }) {
      onu nəhəngləşdirir, ona görə eni 400px-ə bağlanıb və mərkəzə alınıb. */
   return (
     <svg
-      viewBox="0 0 370 380" width="100%" height="auto" fill="none" aria-hidden="true"
+      /* `height="auto"` SVG atributu kimi ETİBARSIZDIR (konsol xətası verirdi) —
+         hündürlük CSS-də `auto`-dur, viewBox nisbətindən hesablanır. */
+      viewBox="0 0 370 380" width="100%" fill="none" aria-hidden="true"
       style={{
         position: 'absolute', left: '50%', top: 0, transform: 'translateX(-50%)',
-        width: 'min(100%, 400px)', pointerEvents: 'none',
+        width: 'min(100%, 400px)', height: 'auto', pointerEvents: 'none',
       }}
     >
       <path

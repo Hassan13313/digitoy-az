@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { QRCodeSVG } from 'qrcode.react'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
 import DressCodeSection from '../_shared/DressCodeSection'
+import LoveStorySection from '../_shared/LoveStorySection'
+import { getStoryTheme } from '../_shared/loveStoryTheme'
 import MapSection, { MapRings } from '../_shared/MapSection'
 import { directionsUrl, openMapUrl } from '../_shared/geo'
 import { OrderCta, MusicStartBubble } from '../_shared/TemplateActions'
@@ -657,6 +659,18 @@ export default function FloralGardenTemplate({
                     </div>
                   ))}
                 </Stagger>
+              </Reveal>
+            </section>
+            )}
+
+            {/* 05b — BİZİM HEKAYƏMİZ (Phase 44 · Claude Design)
+                Bölmə DEFAULT BAĞLIDIR (data/sections.js › DEFAULT_OFF) — mövcud
+                dəvətnamələrdə görünmür. Başlıq, fon və çərçivələr bölmənin öz
+                temasındandır (bax _shared/loveStoryTheme.js). */}
+            {S.lovestory && Array.isArray(weddingData.loveStory) && weddingData.loveStory.length > 0 && (
+            <section data-section="lovestory" style={{ padding: 'clamp(48px,12vw,64px) 22px clamp(56px,14vw,80px)', background: getStoryTheme('floral-garden').bg }}>
+              <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
+                <LoveStorySection story={weddingData.loveStory} templateId="floral-garden" lang={lang} />
               </Reveal>
             </section>
             )}

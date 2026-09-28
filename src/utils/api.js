@@ -415,6 +415,81 @@ export async function uploadPhotoChunked(file, slug, opts = {}) {
   throw e
 }
 
+/* ══════════════════════════════════════════════════
+   «BİZİM HEKAYƏMİZ» ŞƏKİLLƏRİ (Phase 44)
+
+   Builder-də şəkil seçilən kimi serverə fayl kimi gedir (story_upload.php);
+   formda yalnız qaytarılan qısa yol saxlanılır. Slug hələ yoxdur, ona görə
+   qovluq builder sessiyasına bağlıdır.
+══════════════════════════════════════════════════ */
+const STORY_SID_KEY = 'digitoy_story_sid'
+
+/** Draft sessiyası varsa onu, yoxdursa (admin rejimi) tab-a məxsus ID. */
+export function getStorySessionId() {
+  const valid = (v) => typeof v === 'string' && /^[A-Za-z0-9-]{16,64}$/.test(v)
+  try {
+    const sid = localStorage.getItem('digitoy_session_id')
+    if (valid(sid)) return sid
+  } catch { /* private mode */ }
+  try {
+    let sid = sessionStorage.getItem(STORY_SID_KEY)
+    if (!valid(sid)) {
+      sid = (typeof crypto !== 'undefined' && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : Math.random().toString(36).slice(2) + Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
+      sessionStorage.setItem(STORY_SID_KEY, sid)
+    }
+    return sid
+  } catch {
+    return 'story-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 12)
+  }
+}
+
+/**
+ * Hekayə şəklini yüklə.
+ * @param {Blob} blob  artıq kiçildilmiş JPEG (bax utils/imageResize.js › resizeToBlob)
+ * @returns {Promise<{url: string, width: number, height: number}>}
+ */
+export async function uploadStoryPhoto(blob) {
+  const fd = new FormData()
+  fd.append('sid', getStorySessionId())
+  fd.append('photo', blob, 'story.jpg')
+
+  let res
+  try {
+    res = await fetch(`${BASE}/story_upload.php`, { method: 'POST', body: fd })
+  } catch {
+    const e = new Error('İnternet bağlantısı kəsildi. Yenidən cəhd edin.'); e.code = 'NETWORK'; throw e
+  }
+  let data = null
+  try { data = await res.json() } catch { /* JSON deyil */ }
+  if (res.ok && data?.ok && typeof data.url === 'string') return data
+
+  const e = new Error(data?.message || 'Şəkil yüklənmədi. Yenidən cəhd edin.')
+  e.code = data?.code || 'HTTP_' + res.status
+  throw e
+}
+
+/**
+ * Hekayə şəklinin göstəriləcək ünvanı.
+ * Serverdəki şəkil `form_data`-da domensiz saxlanılır (`/uploads/_story/…`):
+ * production-da API ilə sayt eyni origin-dədir, lokal dev-də isə API ayrı
+ * portdadır — o halda ünvan API origin-inə bağlanır.
+ * Yalnız təhlükəsiz sxemlər qəbul edilir; qalanı üçün null.
+ */
+export function storyPhotoSrc(src) {
+  if (typeof src !== 'string' || !src) return null
+  if (/^data:image\/(jpeg|png|webp);base64,/i.test(src)) return src
+  if (/^https:\/\//i.test(src)) return src
+  if (src.startsWith('/uploads/')) {
+    if (/^https?:\/\//i.test(BASE)) {
+      try { return new URL(src, BASE).href } catch { return src }
+    }
+    return src
+  }
+  return null
+}
+
 /* ── Media yüklə (qonaq — public) ──
    fetch() YÜKLƏMƏ progress-i verə bilmir, ona görə XMLHttpRequest
    istifadə olunur: qonaq 60 MB video göndərəndə faizi real görür.
@@ -545,15 +620,35 @@ export async function uploadMusic(file, slug) {
    və biz əvvəlki nəticəni geri veririk (eyni array referansı ilə — React
    setState bu halda re-render-i atlayır). cache:'no-store' brauzerin öz
    HTTP keşinin bu əl ilə idarə olunan məntiqlə qarışmasının qarşısını alır. */
-const _photoCache = new Map() // slug -> { etag, lastModified, photos }
+/* ⚠ Phase 43: keş açarı artıq `slug|sort|visitor`-dur.
+   ƏVVƏL yalnız `slug` idi. Sıralama rejimi dəyişəndə (ya da qonaq
+   kimliyi qoşulanda) server BAŞQA siyahı qaytarır, amma köhnə açar
+   eyni qalırdı: client öz keşindəki ETag-i göndərib 304 alır və
+   ƏVVƏLKİ sıra ilə göstərməyə davam edirdi. */
+const _photoCache = new Map() // key -> { etag, lastModified, photos, meta }
 
-export async function getPhotos(slug) {
-  const cached = _photoCache.get(slug)
+/**
+ * Qalereya manifesti.
+ * @param {string} slug
+ * @param {{sort?: "newest"|"oldest"|"featured", visitor?: string|null}} [opts]
+ *   Parametrsiz çağırış Phase 39 davranışını SAXLAYIR (sort=newest,
+ *   qonaq kimliyi göndərilmir) — mövcud çağıranlar dəyişmir.
+ */
+export async function getPhotos(slug, opts = {}) {
+  const sort    = opts.sort || 'newest'
+  const visitor = opts.visitor || null
+
+  const key     = `${slug}|${sort}|${visitor || ''}`
+  const cached  = _photoCache.get(key)
   const headers = {}
   if (cached?.etag)         headers['If-None-Match']     = cached.etag
   if (cached?.lastModified) headers['If-Modified-Since'] = cached.lastModified
 
-  const res = await fetch(`${BASE}/get_photos.php?slug=${encodeURIComponent(slug)}`, {
+  const qs = new URLSearchParams({ slug })
+  if (sort !== 'newest') qs.set('sort', sort)
+  if (visitor) qs.set('visitor', visitor)
+
+  const res = await fetch(`${BASE}/get_photos.php?${qs}`, {
     headers,
     cache: 'no-store',
   })
@@ -563,7 +658,13 @@ export async function getPhotos(slug) {
 
   const json   = await res.json()
   const photos = json.photos ?? []
-  _photoCache.set(slug, {
+  /* Sayğaclar manifestin ÖZÜ ilə gəlir — ayrıca sorğu lazım deyil.
+     Massivə yazılır ki, `getPhotos` imzası (array qaytarır) dəyişməsin:
+     mövcud bütün çağıranlar olduğu kimi işləyir. */
+  Object.defineProperty(photos, 'counts', {
+    value: json.counts || null, enumerable: false, configurable: true,
+  })
+  _photoCache.set(key, {
     etag:         res.headers.get('ETag') || null,
     lastModified: res.headers.get('Last-Modified') || null,
     photos,
@@ -639,7 +740,8 @@ export async function getDraft(sessionId) {
 
 /* ── Draft: draft_code üzrə yüklə (admin axını) ── */
 export async function getDraftByCode(draftCode) {
-  const res = await fetch(`${BASE}/get_draft.php?draft_code=${encodeURIComponent(draftCode)}`)
+  /* ⚠ Server yalnız admin tokeni ilə cavab verir (2026-09-28) */
+  const res = await fetch(`${BASE}/get_draft.php?draft_code=${encodeURIComponent(draftCode)}`, { headers: adminHeaders() })
   if (res.status === 404) return null
   if (!res.ok) throw new Error(`get_draft_by_code: ${res.status}`)
   return res.json()
@@ -732,9 +834,11 @@ export async function getMediaAudit(slug) {
    Phase 22 — Guest Management API
 ══════════════════════════════════════════════════ */
 
-/* ── Qonaqları + iştirak statusunu + statistikanı gətir (public) ── */
+/* ── Qonaqlar ──
+   Admin tokeni varsa tam siyahı (telefon, status, statistika); yoxdursa
+   server yalnız ad + masa verir (dəvətnamədəki «masanı tap», RSVP). */
 export async function getGuests(invitationId) {
-  const res = await fetch(`${BASE}/get_guests.php?invitation_id=${encodeURIComponent(invitationId)}`)
+  const res = await fetch(`${BASE}/get_guests.php?invitation_id=${encodeURIComponent(invitationId)}`, { headers: adminHeaders() })
   if (!res.ok) throw new Error(`get_guests: ${res.status}`)
   return res.json()
 }
@@ -751,11 +855,13 @@ export async function manageGuest(action, data) {
 }
 
 /* ── İştirak cavabı göndər (public) ── */
-export async function submitAttendance({ guestId, status, optionalMessage, extraGuests = 0, website }) {
+export async function submitAttendance({ invitationId, guestId, status, optionalMessage, extraGuests = 0, website }) {
   const res = await fetch(`${BASE}/submit_attendance.php`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
+      /* ⚠ Server qonağın bu dəvətnaməyə aid olduğunu yoxlayır (2026-09-28) */
+      invitation_id:    invitationId,
       guest_id:         guestId,
       status,
       optional_message: optionalMessage || null,
@@ -796,4 +902,137 @@ export async function exportGuestsCsv(invitationId, mode = 'tables') {
   a.download = `qonaqlar-${invitationId}-${mode}-${today}.csv`
   a.click()
   URL.revokeObjectURL(url)
+}
+
+/* ══════════════════════════════════════════════════
+   PHASE 43 — QALEREYA TƏCRÜBƏSİ
+
+   Hamısı YENİ funksiyalardır: mövcud heç bir imza, URL və ya davranış
+   dəyişmir. Serverdə uyğun endpoint yoxdursa (köhnə backend) hər biri
+   xəta atır və çağıran tərəf xüsusiyyəti sadəcə göstərmir.
+══════════════════════════════════════════════════ */
+
+/* ── Qonaq kimliyi ──
+   Reaksiyaların «bir qonaq · bir səs» qaydası üçün lazımdır. Qalereyada
+   hesab sistemi YOXDUR (qonaq QR skan edib gəlir), ona görə brauzerdə
+   təsadüfi hex saxlanılır. ŞƏXSİ MƏLUMAT DEYİL: heç bir ada, telefona
+   və ya IP-yə bağlanmır, yalnız öz reaksiyasını geri tanımağa xidmət edir.
+   Private rejimdə localStorage bağlıdırsa sessiyaya məxsus id qaytarılır —
+   reaksiya işləyir, sadəcə tab bağlananda yadda qalmır. */
+const VISITOR_KEY = 'digitoyVisitorId'
+let _memVisitor = null
+
+export function getVisitorId() {
+  try {
+    let v = localStorage.getItem(VISITOR_KEY)
+    if (!v || !/^[a-f0-9]{8,32}$/.test(v)) {
+      v = randomHex(16)
+      localStorage.setItem(VISITOR_KEY, v)
+    }
+    return v
+  } catch {
+    if (!_memVisitor) _memVisitor = randomHex(16)
+    return _memVisitor
+  }
+}
+
+function randomHex(bytes) {
+  try {
+    const a = new Uint8Array(bytes)
+    crypto.getRandomValues(a)
+    return Array.from(a, b => b.toString(16).padStart(2, '0')).join('')
+  } catch {
+    /* crypto yoxdursa (çox köhnə brauzer) — kifayət qədər unikal fallback */
+    return (Date.now().toString(16) + Math.random().toString(16).slice(2)).slice(0, bytes * 2).padEnd(bytes * 2, '0')
+  }
+}
+
+/* ── Dəvətnamə siyahısı (admin) ── */
+export async function getInvitationsList({ search = '', limit = 50, offset = 0 } = {}) {
+  const p = new URLSearchParams({ limit: String(limit), offset: String(offset) })
+  if (search) p.set('search', search)
+  const res = await fetch(`${BASE}/get_invitations_list.php?${p}`, { headers: adminHeaders() })
+  if (!res.ok) throw await toApiError(res, 'Dəvətnamə siyahısı yüklənmədi.')
+  return res.json()
+}
+
+/* ── Qalereya metası: adlar, tarix, sayğaclar, cütlüyün ayarları (public) ── */
+export async function getGalleryMeta(slug) {
+  const res = await fetch(`${BASE}/gallery_meta.php?slug=${encodeURIComponent(slug)}`, {
+    cache: 'no-store',
+  })
+  if (!res.ok) throw new Error(`gallery_meta: ${res.status}`)
+  return res.json()
+}
+
+/* ── Qalereya ayarlarını saxla — admin VƏ YA qalereya tokeni ── */
+export async function saveGallerySettings(slug, config) {
+  const res = await fetch(`${BASE}/gallery_settings.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminHeaders(), ...galleryHeaders(slug) },
+    body: JSON.stringify({ slug, config }),
+  })
+  if (!res.ok) throw await toApiError(res, 'Ayarlar saxlanıla bilmədi.')
+  return res.json()
+}
+
+/* ── Reaksiya ver / geri al (public) ──
+   `emoji: ''` reaksiyanı GERİ ALIR. Cavab həqiqi sayğacları qaytarır,
+   ona görə UI optimistik dəyəri onunla əvəz edir. */
+export async function reactToMedia(slug, id, emoji) {
+  const res = await fetch(`${BASE}/media_react.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slug, id, emoji: emoji || '', visitor: getVisitorId() }),
+  })
+  if (!res.ok) throw await toApiError(res, 'Reaksiya göndərilmədi.')
+  return res.json() /* { ok, id, counts, total, mine } */
+}
+
+/* ── Medianı seçilmiş işarələ — admin VƏ YA qalereya tokeni ── */
+export async function setMediaFeatured(slug, id, featured) {
+  const res = await fetch(`${BASE}/media_feature.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminHeaders(), ...galleryHeaders(slug) },
+    body: JSON.stringify({ slug, id, featured: !!featured }),
+  })
+  if (!res.ok) throw await toApiError(res, 'İşarə saxlanıla bilmədi.')
+  return res.json() /* { ok, id, featured, featuredCount } */
+}
+
+/* ── Qalereya hadisəsini qeyd et (public, «atıb-get») ──
+   ⚠ HEÇ VAXT XƏTA ATMIR: analitika qonağın axınını dayandırmamalıdır.
+   ⚠ `keepalive` — səhifə dərhal başqa ünvana keçsə də sorğu çatır. */
+export function trackGalleryEvent(slug, event) {
+  try {
+    fetch(`${BASE}/gallery_track.php`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slug, event }),
+      keepalive: true,
+    }).catch(() => {})
+  } catch { /* analitika heç vaxt bloklamır */ }
+}
+
+/* ── Qalereya analitikası ──
+   slug verilibsə qalereya/admin tokeni, verilməyibsə yalnız admin. */
+export async function getGalleryAnalytics(slug = null, days = 30) {
+  const qs = new URLSearchParams(slug ? { slug, days: String(days) } : {})
+  const res = await fetch(`${BASE}/gallery_analytics.php?${qs}`, {
+    headers: { ...adminHeaders(), ...(slug ? galleryHeaders(slug) : {}) },
+  })
+  if (!res.ok) throw await toApiError(res, 'Analitika yüklənmədi.')
+  return res.json()
+}
+
+/* ── Qonaqları topluca idxal et (admin) ──
+   `dryRun: true` heç nə yazmır — yalnız yoxlama hesabatı qaytarır. */
+export async function importGuests(invitationId, rows, dryRun = false) {
+  const res = await fetch(`${BASE}/import_guests.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminHeaders() },
+    body: JSON.stringify({ invitation_id: invitationId, rows, dry_run: dryRun }),
+  })
+  if (!res.ok) throw await toApiError(res, 'İdxal alınmadı.')
+  return res.json()
 }

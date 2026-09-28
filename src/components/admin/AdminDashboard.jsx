@@ -1,6 +1,7 @@
 import { useIsNarrow } from '../../hooks/useIsNarrow'
 import { useState, useEffect } from 'react'
 import { getDashboardStats } from '../../utils/api'
+import AdminGalleryAnalytics from './AdminGalleryAnalytics'
 import { ShoppingBag, CheckCircle, XCircle, Clock, FileText, Image, TrendingUp, RefreshCw } from 'lucide-react'
 
 function StatCard({ icon: Icon, label, value, sub, color = 'oklch(45% 0.07 75)' }) {
@@ -184,6 +185,13 @@ export default function AdminDashboard() {
           <MiniChart daily={stats?.daily} />
         </div>
       </div>
+
+      {/* ── Phase 43 — qalereya analitikası ──
+          Mövcud sifariş statistikasından AYRI bölmədir: bu blok xəta
+          verərsə yuxarıdaki kartlar olduğu kimi işləməyə davam edir. */}
+      <AdminGalleryAnalytics
+        onOpenAlbum={(slug) => window.open(`/invite/${slug}/qalereya-idare`, '_blank', 'noopener')}
+      />
     </div>
   )
 }

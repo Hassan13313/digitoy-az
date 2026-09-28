@@ -28,3 +28,13 @@ RedirectMatch 404 ^/api/_logs/
 <Files "media_store.php">
     Require all denied
 </Files>
+
+# Phase 43 — qalereya media qati yalniz include edilir (birbaxa cagirilmamalidir)
+<Files "gallery_media.php">
+    Require all denied
+</Files>
+
+# Phase 44 — hekaye sekillerinin saxlama komekcileri (yalniz include)
+<Files "story_media.php">
+    Require all denied
+</Files>
