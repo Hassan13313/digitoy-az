@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { ArrowLeft, Package, User, Users, Calendar, MapPin, Shirt, ExternalLink, MessageCircle, CheckCircle, XCircle, Trash2, Copy, Link2, LayoutTemplate } from 'lucide-react'
 import { getTemplateName, DEFAULT_TEMPLATE_ID } from '../../templates/templateConfig'
-import { getDraftByCode, approveDraft, rejectDraft, deleteDraft } from '../../utils/api'
+import { getDraftByCode, approveDraft, rejectDraft, deleteDraft, saveInvitation } from '../../utils/api'
+import { computeInviteSlug } from '../../utils/inviteSlug'
 import AdminSeatingPlan from './AdminSeatingPlan'
 import AdminGuestReports from './AdminGuestReports'
 import { useIsNarrow } from '../../hooks/useIsNarrow'
@@ -21,8 +22,10 @@ const STATUS_LABELS = {
   deleted: 'Silinmiş', draft: 'Qaralama',
 }
 
-function InviteLinkBlock({ draftCode, approvedSlug, status, onEdit }) {
+function InviteLinkBlock({ draftCode, approvedSlug, status, onEdit, onCreate }) {
   const [copied, setCopied] = useState(false)
+  const [creating, setCreating] = useState(false)
+  const [createError, setCreateError] = useState('')
   const inviteUrl = approvedSlug ? `https://digitoy.az/invite/${approvedSlug}` : null
 
   const handleCopy = () => {
@@ -112,8 +115,28 @@ function InviteLinkBlock({ draftCode, approvedSlug, status, onEdit }) {
             Dəvətnamə linki tapılmadı
           </p>
           <p style={{ fontSize: 11, color: 'oklch(52% 0.03 60)', margin: '0 0 12px', lineHeight: 1.5 }}>
-            Linki əldə etmək üçün sifarişi yenidən açıb saxla.
+            Sifariş təsdiqlənib, amma dəvətnaməsi yaradılmayıb. «Dəvətnaməni yarat» onu sifarişin
+            məlumatları ilə indi yaradır (builder-in «Sifarişi təsdiqlə» düyməsi ilə eyni).
           </p>
+          {/* Phase 46 — sinxron: sifarişdən birbaşa dəvətnamə */}
+          <button
+            type="button"
+            disabled={creating}
+            onClick={async () => {
+              setCreating(true)
+              setCreateError('')
+              try { await onCreate() } catch (e) { setCreateError(e?.message || 'Yaradılmadı.') } finally { setCreating(false) }
+            }}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6, marginRight: 8, marginBottom: 6,
+              padding: '8px 16px', background: 'oklch(38% 0.1 145)',
+              border: 'none', borderRadius: 3, cursor: 'pointer',
+              fontSize: 10, fontWeight: 700, letterSpacing: '0.1em',
+              textTransform: 'uppercase', color: 'white', opacity: creating ? 0.6 : 1,
+            }}
+          >
+            {creating ? 'Yaradılır…' : 'Dəvətnaməni yarat'}
+          </button>
           <button
             type="button"
             onClick={onEdit}
@@ -125,8 +148,9 @@ function InviteLinkBlock({ draftCode, approvedSlug, status, onEdit }) {
               textTransform: 'uppercase', color: 'white',
             }}
           >
-            Sifarişi yenidən aç və saxla
+            Builder-də aç
           </button>
+          {createError && <p role="alert" style={{ fontSize: 11, color: 'oklch(48% 0.16 25)', margin: '8px 0 0' }}>{createError}</p>}
         </div>
       )}
     </div>
@@ -195,13 +219,25 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
     window.location.href = `/?draft=${draftCode}`
   }
 
+  /* Phase 46 — SİNXRON: təsdiq dəvətnaməni də yaradır. Əvvəl yalnız sifarişin
+     statusu dəyişirdi — Sifarişlərdə «təsdiqlənmiş», Dəvətnamələrdə isə heç nə
+     görünürdü. Builder-in «Sifarişi təsdiqlə» düyməsi ilə eyni ardıcıllıq:
+     save_invitation (slug sifariş koduna bağlanır) → approve_draft. */
+  const createInvitation = async () => {
+    const fd = draft?.form_data
+    if (!fd) throw new Error('Sifarişin məlumatı tapılmadı.')
+    const saved = await saveInvitation(computeInviteSlug(fd), fd, draftCode)
+    const slug = saved?.slug || ''
+    await approveDraft(draftCode, slug)
+    setDraft(prev => ({ ...prev, status: 'approved', approved_slug: slug || prev.approved_slug }))
+  }
+
   const handleApprove = async () => {
     if (!isAdminTokenValid()) { setSessionError(true); return }
-    if (!window.confirm('Bu sifarişi TƏSDİQLƏYİRSİNİZ?')) return
+    if (!window.confirm('Bu sifarişi TƏSDİQLƏYİRSİNİZ? Dəvətnamə də yaradılacaq.')) return
     setActionLoading(true)
     try {
-      await approveDraft(draftCode)
-      setDraft(prev => ({ ...prev, status: 'approved' }))
+      await createInvitation()
       setActionDone('approved')
     } catch {
       alert('Xəta: təsdiq edilmədi.')
@@ -597,7 +633,7 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
       )}
 
       {/* ── Sifariş Kodu + Dəvətnamə Linki bloku ── */}
-      <InviteLinkBlock draftCode={draftCode} approvedSlug={draft.approved_slug} status={draft.status} onEdit={handleEdit} />
+      <InviteLinkBlock draftCode={draftCode} approvedSlug={draft.approved_slug} status={draft.status} onEdit={handleEdit} onCreate={createInvitation} />
 
       {/* ── Qonaq Məlumatları — yalnız approved + slug varsa ── */}
       {draft.status === 'approved' && draft.approved_slug && (

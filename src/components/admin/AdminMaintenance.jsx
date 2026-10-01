@@ -165,15 +165,16 @@ export default function AdminMaintenance() {
             </span>
           </div>
           <Stat label="Son backup" value={b.last_at ? formatDateTime(b.last_at) : 'Məlum deyil'}
-                hint={b.age_hours != null ? `${b.age_hours} saat əvvəl · ${b.files} fayl` : null} />
+                hint={b.newest_file
+                  ? `${b.newest_file}${b.size ? ` · ${(b.size / 1048576).toFixed(0)} MB` : ''} · ${b.files} fayl`
+                  : null} />
           <p style={{ margin: 0, fontSize: 12.5, color: C.sub, lineHeight: 1.5 }}>{b.message}</p>
-          {b.status === 'unknown' && (
-            <p style={{ margin: 0, fontSize: 12, color: C.danger, lineHeight: 1.5 }}>
-              Media və baza üçün avtomatik arxiv qurulmayıbsa, disk nasazlığında
-              bütün toy şəkilləri itər. Bu panel yalnız xəbərdarlıq edir — arxivi
-              hostinq tərəfdən qurmaq lazımdır.
-            </p>
-          )}
+          {/* Phase 46 — DirectAdmin backup-ı da tanınır (/home/<user>/backups, .tar.zst) */}
+          <p style={{ margin: 0, fontSize: 12, color: b.status === 'ok' ? C.sub : C.danger, lineHeight: 1.5 }}>
+            {b.status === 'ok'
+              ? 'Backup eyni serverdədir — disk nasazlığından qorumaq üçün DirectAdmin › Create/Restore Backups bölməsindən kompüterə də endirin.'
+              : 'Yeni backup: DirectAdmin › Create/Restore Backups › «Create Backup» (sayt + bazalar). Həftədə bir dəfə edin və kompüterə endirin.'}
+          </p>
         </div>
 
         {/* ── DRAFT TƏMİZLƏMƏ ── */}

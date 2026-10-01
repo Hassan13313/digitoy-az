@@ -34,6 +34,7 @@ import { ACTIVE_PARTNERS } from '../../data/partners'
 import MusicStep from './MusicStep'
 import TemplateSelect from './TemplateSelect'
 import { resolveBuilderTemplateId } from '../../templates/templateConfig'
+import { computeInviteSlug } from '../../utils/inviteSlug'
 import { defaultWedding } from '../../data/defaultWedding'
 import { buildShortLiveLink } from '../../utils/whatsappOrder'
 import { formatFullDateByLang } from '../../utils/dateFormat'
@@ -768,12 +769,7 @@ function GalleryAdminStep({ data, isCouple, isCorp, isAdmin = false, canonicalSl
      dəvətnamə hələ saxlanılmayıbkı önizləmə üçündür — QR kodu ondan
      çap etmək iki eyni adlı toyu eyni `uploads/<slug>/` qovluğuna
      yönəldərdi (bir toyun qonaqları digərinin qalereyasına yükləyər). */
-  let slug = canonicalSlug
-  if (!slug) {
-    if (isCouple) slug = `${toSlug(data.brideName || '')}-ve-${toSlug(data.groomName || '')}`
-    else if (isCorp) slug = toSlug(data.eventName || 'tedbir')
-    else slug = toSlug(data.brideName || 'davetname')
-  }
+  const slug = canonicalSlug || computeInviteSlug(data)
 
   const photoShareUrl = slug
     ? `${window.location.origin}/invite/${slug}/foto`
@@ -1091,18 +1087,6 @@ function GalleryAdminStep({ data, isCouple, isCorp, isAdmin = false, canonicalSl
 /* ══════════════════════════════════════════════════
    Əsas Builder Formu
 ══════════════════════════════════════════════════ */
-/* ── Ad → URL slug çevricisi ── */
-function toSlug(str = '') {
-  const MAP = {
-    ə:'e',ə:'e',Ə:'e',ğ:'g',Ğ:'g',ı:'i',İ:'i',ö:'o',Ö:'o',ü:'u',Ü:'u',ş:'s',Ş:'s',ç:'c',Ç:'c',
-    á:'a',é:'e',í:'i',ó:'o',ú:'u',ñ:'n',ä:'a',ü:'u',ö:'o',
-  }
-  return str
-    .split('').map(c => MAP[c] || c).join('')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-}
 
 /* ── URL-safe Base64 decode ── */
 function decodeDataLocal(token) {
@@ -1917,15 +1901,6 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     }
   }
 
-  /* ── Slug hesablama ── */
-  const computeSlug = () => {
-    const isC = COUPLE_TYPES.includes(data.eventType)
-    const isP = CORP_TYPES.includes(data.eventType)
-    if (isC) return `${toSlug(data.brideName)}-ve-${toSlug(data.groomName)}`
-    if (isP) return toSlug(data.eventName || 'tedbir')
-    return toSlug(data.brideName || 'davetname')
-  }
-
   /* ── Draft sıfırlama: yeni session_id + boş form ── */
   const handleNewDraft = function() {
     const newSid = (typeof crypto !== 'undefined' && crypto.randomUUID)
@@ -1943,7 +1918,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
   /* ── Admin Təsdiqi: DB-yə yaz, draft approve et, sonra modal aç ── */
   const handleApproveAndGenerateLink = async () => {
     if (approving) return
-    const slug = computeSlug()
+    const slug = computeInviteSlug(data)
     setApproving(true)
     setApproveError('')
     try {

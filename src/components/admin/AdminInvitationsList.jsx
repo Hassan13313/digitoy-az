@@ -2,9 +2,10 @@ import { useState, useEffect, useRef } from 'react'
 import TemplateCell from './TemplateCell'
 import AdminTranslations from './AdminTranslations'
 import AdminContentManager from './AdminContentManager'
+import PurgeInvitationDialog from './PurgeInvitationDialog'
 import { useIsNarrow } from '../../hooks/useIsNarrow'
 import { setInvitationActive } from '../../utils/api'
-import { RefreshCw, Search, X, ExternalLink, Languages, Power, SlidersHorizontal } from 'lucide-react'
+import { RefreshCw, Search, X, ExternalLink, Languages, Power, SlidersHorizontal, Trash2 } from 'lucide-react'
 import { azDate, pagePadding } from './adminFormat'
 
 const BASE = import.meta.env.VITE_API_URL || '/api'
@@ -54,7 +55,7 @@ const EVENT_LABELS = {
 }
 
 /* Sütun şəbəkəsi bir yerdə — başlıq və sətirlər HƏMİŞƏ eyni qalsın deyə */
-const GRID = '118px 1fr 92px 70px 92px 84px 78px 78px'
+const GRID = '118px 1fr 92px 70px 92px 84px 78px 100px'
 
 export default function AdminInvitationsList() {
   /* ── Telefon rejimi ───────────────────────────────────────────────────
@@ -78,6 +79,8 @@ export default function AdminInvitationsList() {
      önbaxış göstərir. İkisi eyni `form_data`-nın FƏRQLİ açarlarına
      yazır (`i18n` ↔ `admin`), ona görə bir-birini üstələmir. */
   const [cmSlug,      setCmSlug]      = useState(null)   /* açıq məzmun meneceri */
+  /* Phase 46 — birdəfəlik silmə pəncərəsi ({ slug, names }) */
+  const [purgeInv,    setPurgeInv]    = useState(null)
   const debounceRef = useRef(null)
 
   const load = (q = '') => {
@@ -173,7 +176,7 @@ export default function AdminInvitationsList() {
             display: narrow ? 'none' : 'grid',
             gridTemplateColumns: GRID, gap: 10, padding: '10px 20px',
             background: 'oklch(95% 0.01 75)', borderBottom: '1px solid oklch(88% 0.02 60)',
-            minWidth: 860,
+            minWidth: 880,
           }}>
             {['Slug', 'Ad', 'Şablon', 'Növ', 'Məkan', 'Yaradılma', 'Status', 'Əməliyyat'].map((h, i) => (
               <span key={i} style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'oklch(50% 0.03 60)' }}>{h}</span>
@@ -252,6 +255,7 @@ export default function AdminInvitationsList() {
                         <ActionBtn icon={Languages} label="Tərcümə" onClick={() => setTrSlug(inv.slug)} active={hasTr} color={hasTr ? 'oklch(42% 0.1 150)' : undefined} />
                         <ActionBtn icon={Power} label={active ? 'Bağla' : 'Aç'} onClick={() => setConfirmSlug(inv.slug)} color={active ? 'oklch(48% 0.13 25)' : 'oklch(45% 0.1 150)'} />
                         <ActionBtn icon={ExternalLink} label="Bax" href={`/invite/${inv.slug}`} />
+                        <ActionBtn icon={Trash2} label="Sil" onClick={() => setPurgeInv({ slug: inv.slug, names: inv.names })} color="oklch(48% 0.16 25)" />
                       </>
                     )}
                   </div>
@@ -264,7 +268,7 @@ export default function AdminInvitationsList() {
                 display: 'grid',
                 gridTemplateColumns: narrow ? '1fr' : GRID,
                 gap: narrow ? 6 : 10,
-                minWidth: narrow ? 0 : 860,
+                minWidth: narrow ? 0 : 880,
                 padding: '13px 20px',
                 borderBottom: i < items.length - 1 ? '1px solid oklch(93% 0.01 75)' : 'none',
                 alignItems: 'center',
@@ -370,6 +374,13 @@ export default function AdminInvitationsList() {
                       >
                         <ExternalLink size={13} strokeWidth={1.5} />
                       </a>
+                      <button
+                        type="button" onClick={() => setPurgeInv({ slug: inv.slug, names: inv.names })}
+                        title="Birdəfəlik sil (geri qaytarılmır)" aria-label="Birdəfəlik sil"
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, display: 'flex', color: 'oklch(48% 0.16 25)' }}
+                      >
+                        <Trash2 size={13} strokeWidth={1.6} />
+                      </button>
                     </>
                   )}
                 </div>
@@ -377,6 +388,20 @@ export default function AdminInvitationsList() {
             )
           })}
         </div>
+      )}
+
+      {purgeInv && (
+        <PurgeInvitationDialog
+          key={purgeInv.slug}
+          slug={purgeInv.slug}
+          names={purgeInv.names}
+          onClose={() => setPurgeInv(null)}
+          onDone={(slug) => {
+            setItems(prev => prev.filter(x => x.slug !== slug))
+            setTotal(t => Math.max(0, t - 1))
+            setPurgeInv(null)
+          }}
+        />
       )}
 
       {cmSlug && (

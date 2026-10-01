@@ -9,6 +9,8 @@
    GA4 or PostHog. Never pass names, phone numbers, dates, venues, guest
    names or message text into trackEvent().                                */
 
+import { createEventBuffer } from './eventBuffer'
+
 const GA_ID         = import.meta.env.VITE_GA_MEASUREMENT_ID || ''
 const POSTHOG_KEY   = import.meta.env.VITE_POSTHOG_KEY || ''
 const POSTHOG_HOST  = import.meta.env.VITE_POSTHOG_HOST || 'https://app.posthog.com'
@@ -17,6 +19,9 @@ const ANALYTICS_ENABLED = import.meta.env.PROD
 
 let gaReady   = false
 let posthog   = null
+/* posthog-js asinxron yüklənir — o vaxta qədərki hadisələr (ilk $pageview,
+   landing_view) burada gözləyir, əks halda atılırdı (Phase 46.1) */
+const phBuffer = createEventBuffer()
 let initDone  = false
 
 /* Yalnız bu açarlar göndərilə bilər — istənilən başqa sahə susdurulur.
@@ -66,7 +71,9 @@ async function loadPostHog() {
       persistence: 'localStorage+cookie',
     })
     posthog = ph
+    phBuffer.attach(ph)
   } catch {
+    phBuffer.drop()
     /* PostHog yüklənmədi (şəbəkə/CDN problemi) — sayt analitika olmadan davam edir */
   }
 }
@@ -86,8 +93,8 @@ export function trackPageView(path) {
   if (gaReady && window.gtag) {
     window.gtag('event', 'page_view', { page_path: path })
   }
-  if (posthog) {
-    posthog.capture('$pageview', { $current_url: `${window.location.origin}${path}` })
+  if (POSTHOG_KEY) {
+    phBuffer.capture('$pageview', { $current_url: `${window.location.origin}${path}` })
   }
 }
 
@@ -98,7 +105,7 @@ export function trackEvent(name, properties = {}) {
   if (gaReady && window.gtag) {
     window.gtag('event', name, safe)
   }
-  if (posthog) {
-    posthog.capture(name, safe)
+  if (POSTHOG_KEY) {
+    phBuffer.capture(name, safe)
   }
 }

@@ -296,7 +296,7 @@ function rateGate(string $key, int $limit, int $window): bool {
 /* ── Sxem versiyası (Phase 39) ──
    Sütun və ya cədvəl əlavə edəndə BU RƏQƏMİ ARTIR — əks halda miqrasiya
    canlıda işləməz. */
-const SCHEMA_VERSION = 43;
+const SCHEMA_VERSION = 46;
 
 /* ── Cədvəlləri avtomatik yarat ──
    Phase 39 OPTİMİZASİYASI: əvvəl bu funksiya HƏR sorğuda 6 `CREATE TABLE
@@ -630,6 +630,25 @@ function runMigrations(PDO $db): void {
         }
     }
 
+    /* ── Phase 46.1: sifarişin soft delete-i (delete_draft.php) ──
+       delete_draft.php status='deleted' + deleted_at yazır, amma yuxarıdakı
+       CREATE TABLE nə 'deleted'-i, nə deleted_at-ı yaradırdı — canlıda sxem
+       əllə düzəldilib, təzə DB-də «Sil» 500 verirdi. ADDITIVE: mövcud ENUM
+       dəyərləri saxlanılır, yalnız 'deleted' əlavə olunur; sütun NULL qəbul edir.
+       ROLLBACK lazım deyil (köhnə kod 'deleted'-i elə işlədirdi). */
+    $stCol = $db->query("SHOW COLUMNS FROM draft_invitations LIKE 'status'")->fetch();
+    if ($stCol && ($enum = draftStatusEnumWithDeleted((string) $stCol['Type'])) !== null) {
+        $def = $stCol['Default'] !== null ? $db->quote((string) $stCol['Default']) : "'draft'";
+        $db->exec("ALTER TABLE draft_invitations MODIFY status $enum NOT NULL DEFAULT $def");
+    }
+    if (empty($db->query("SHOW COLUMNS FROM draft_invitations LIKE 'deleted_at'")->fetchAll())) {
+        try {
+            $db->exec("ALTER TABLE draft_invitations ADD COLUMN deleted_at DATETIME DEFAULT NULL");
+        } catch (PDOException $e) {
+            if ((int) ($e->errorInfo[1] ?? 0) !== 1060) throw $e;   /* paralel sorğu artıq əlavə edib */
+        }
+    }
+
     /* ── Sxem versiyasını qeyd et ──
        Bu sətir olmasa ensureTables() hər sorğuda tam miqrasiya işlədər. */
     $db->exec("
@@ -644,4 +663,14 @@ function runMigrations(PDO $db): void {
          ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)"
     );
     $st->execute([':v' => (string) SCHEMA_VERSION]);
+}
+
+/** SHOW COLUMNS «Type» → 'deleted' əlavə olunmuş ENUM tərifi; dəyişiklik
+    lazım deyilsə (artıq var / ENUM deyil) null. Mövcud dəyərlər itmir. */
+function draftStatusEnumWithDeleted(string $type): ?string {
+    if (!preg_match("/^enum\((.*)\)$/i", trim($type), $m)) return null;
+    preg_match_all("/'([^']*)'/", $m[1], $vals);
+    if (in_array('deleted', $vals[1], true)) return null;
+    $vals[1][] = 'deleted';
+    return "ENUM('" . implode("','", $vals[1]) . "')";
 }

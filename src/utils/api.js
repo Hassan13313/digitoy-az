@@ -811,6 +811,18 @@ export async function deleteDraft(draftCode) {
   return res.json()
 }
 
+/* ── Phase 46: BİRDƏFƏLİK silmə (admin_purge.php) — GERİ QAYTARILMIR ──
+   action: 'preview' | 'invitation' (slug, confirm) | 'order' (draft_code) | 'deleted_orders' */
+export async function adminPurge(payload) {
+  const res = await fetch(`${BASE}/admin_purge.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminHeaders() },
+    body: JSON.stringify(payload),
+  })
+  if (!res.ok) throw await toApiError(res, 'Silinmədi')
+  return res.json()
+}
+
 /* ── Draft-ı rədd et (status = 'rejected') ── */
 export async function rejectDraft(draftCode, reason = '') {
   const res = await fetch(`${BASE}/reject_draft.php`, {

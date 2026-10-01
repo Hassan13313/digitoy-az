@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import TemplateCell from './TemplateCell'
 import { listTemplates } from '../../templates/templateConfig'
-import { getOrdersList } from '../../utils/api'
-import { RefreshCw, ChevronRight, Search, X } from 'lucide-react'
+import { getOrdersList, adminPurge } from '../../utils/api'
+import { RefreshCw, ChevronRight, Search, X, Trash2 } from 'lucide-react'
 import { useIsNarrow } from '../../hooks/useIsNarrow'
 import { azDate, pagePadding } from './adminFormat'
 
@@ -45,6 +45,35 @@ export default function AdminOrdersList({ onSelectOrder }) {
   /* Phase 4 — şablon filtri ('' = hamısı) */
   const [templateFilter, setTemplateFilter] = useState('')
   const debounceRef = useRef(null)
+  /* Phase 46 — «Silinmiş» tabında birdəfəlik silmə (iki addımlı təsdiq) */
+  const [confirmCode, setConfirmCode] = useState(null)
+  const [confirmAll,  setConfirmAll]  = useState(false)
+  const [purgeBusy,   setPurgeBusy]   = useState(false)
+  const [purgeError,  setPurgeError]  = useState('')
+  const trash = statusTab === 'deleted'
+
+  const purge = async (payload, after) => {
+    setPurgeBusy(true)
+    setPurgeError('')
+    try {
+      await adminPurge(payload)
+      after()
+    } catch (e) {
+      setPurgeError(e?.message || 'Silinmədi.')
+    } finally {
+      setPurgeBusy(false)
+    }
+  }
+  const purgeOne = (code) => purge({ action: 'order', draft_code: code }, () => {
+    setOrders(prev => prev.filter(o => o.draft_code !== code))
+    setTotal(t => Math.max(0, t - 1))
+    setConfirmCode(null)
+  })
+  const purgeAll = () => purge({ action: 'deleted_orders' }, () => {
+    setOrders([])
+    setTotal(0)
+    setConfirmAll(false)
+  })
 
   const fetchOrders = (status, q = '', tpl = templateFilter) => {
     setLoading(true)
@@ -187,6 +216,31 @@ export default function AdminOrdersList({ onSelectOrder }) {
         ))}
       </div>
 
+      {/* Phase 46 — Silinmiş: hamısını birdəfəlik sil */}
+      {trash && !loading && orders.length > 0 && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 14,
+          padding: '11px 14px', background: 'oklch(97% 0.015 25)', border: '1px solid oklch(88% 0.04 25)', borderRadius: 8,
+        }}>
+          <span style={{ fontSize: 12.5, color: 'oklch(40% 0.05 25)', flex: '1 1 220px' }}>
+            Silinmiş sifarişlər buradan birdəfəlik silinə bilər — bir daha heç yerdə görünməyəcək.
+          </span>
+          {confirmAll ? (
+            <>
+              <button type="button" disabled={purgeBusy} onClick={purgeAll} style={purgeBtn(true)}>
+                {purgeBusy ? 'Silinir…' : `Bəli, ${total} sifarişi sil`}
+              </button>
+              <button type="button" disabled={purgeBusy} onClick={() => setConfirmAll(false)} style={purgeBtn(false)}>Ləğv et</button>
+            </>
+          ) : (
+            <button type="button" onClick={() => setConfirmAll(true)} style={purgeBtn(true)}>
+              <Trash2 size={13} /> Hamısını birdəfəlik sil ({total})
+            </button>
+          )}
+          {purgeError && <span role="alert" style={{ flexBasis: '100%', fontSize: 12, color: 'oklch(48% 0.16 25)' }}>{purgeError}</span>}
+        </div>
+      )}
+
       {/* Table */}
       {loading ? (
         <div style={{ padding: '48px 0', textAlign: 'center', color: 'oklch(60% 0.03 60)', fontSize: 13 }}>
@@ -206,8 +260,8 @@ export default function AdminOrdersList({ onSelectOrder }) {
            və kartın sağ tərəfi (status nişanı) kəsilirdi. */
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 10 }}>
           {orders.map((order, i) => (
+            <div key={order.draft_code || i} style={{ display: 'grid', gap: 6 }}>
             <button
-              key={order.draft_code || i}
               type="button"
               onClick={() => onSelectOrder(order.draft_code)}
               style={{
@@ -236,6 +290,11 @@ export default function AdminOrdersList({ onSelectOrder }) {
               </div>
               <ChevronRight size={18} strokeWidth={1.5} style={{ color: 'oklch(70% 0.02 60)', flexShrink: 0 }} />
             </button>
+            {trash && order.draft_code && (
+              <RowPurge code={order.draft_code} confirming={confirmCode === order.draft_code} busy={purgeBusy}
+                onAsk={() => setConfirmCode(order.draft_code)} onYes={() => purgeOne(order.draft_code)} onNo={() => setConfirmCode(null)} />
+            )}
+            </div>
           ))}
         </div>
       ) : (
@@ -260,8 +319,8 @@ export default function AdminOrdersList({ onSelectOrder }) {
 
           {/* Rows */}
           {orders.map((order, i) => (
+            <div key={order.draft_code || i}>
             <div
-              key={order.draft_code || i}
               onClick={() => onSelectOrder(order.draft_code)}
               style={{
                 display: 'grid',
@@ -291,11 +350,53 @@ export default function AdminOrdersList({ onSelectOrder }) {
                 {order.draft_code || '—'}
               </span>
               <StatusBadge status={order.status} />
-              <ChevronRight size={14} strokeWidth={1.5} style={{ color: 'oklch(75% 0.02 60)' }} />
+              {trash && order.draft_code ? (
+                <button type="button" title="Birdəfəlik sil" aria-label="Birdəfəlik sil"
+                  onClick={e => { e.stopPropagation(); setConfirmCode(order.draft_code) }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, display: 'flex', color: 'oklch(48% 0.16 25)' }}>
+                  <Trash2 size={14} strokeWidth={1.6} />
+                </button>
+              ) : (
+                <ChevronRight size={14} strokeWidth={1.5} style={{ color: 'oklch(75% 0.02 60)' }} />
+              )}
+            </div>
+            {trash && confirmCode === order.draft_code && (
+              <div style={{ padding: '0 20px 12px' }}>
+                <RowPurge code={order.draft_code} confirming busy={purgeBusy}
+                  onYes={() => purgeOne(order.draft_code)} onNo={() => setConfirmCode(null)} />
+              </div>
+            )}
             </div>
           ))}
         </div>
       )}
+    </div>
+  )
+}
+
+/* ── Phase 46 — sətir üçün birdəfəlik silmə (iki addımlı) ── */
+function purgeBtn(danger) {
+  return {
+    display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 36, padding: '7px 13px',
+    borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: 'inherit',
+    border: danger ? 'none' : '1px solid oklch(85% 0.02 60)',
+    background: danger ? 'oklch(48% 0.16 25)' : 'white', color: danger ? 'white' : 'oklch(40% 0.03 60)',
+  }
+}
+
+function RowPurge({ code, confirming, busy, onAsk, onYes, onNo }) {
+  if (!confirming) {
+    return (
+      <button type="button" onClick={onAsk} style={{ ...purgeBtn(false), justifyContent: 'center', color: 'oklch(48% 0.16 25)' }}>
+        <Trash2 size={13} /> Birdəfəlik sil
+      </button>
+    )
+  }
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', padding: '8px 10px', background: 'oklch(97% 0.015 25)', borderRadius: 8 }}>
+      <span style={{ fontSize: 12.5, color: 'oklch(40% 0.05 25)', flex: '1 1 160px' }}>{code} birdəfəlik silinsin?</span>
+      <button type="button" disabled={busy} onClick={onYes} style={purgeBtn(true)}>{busy ? 'Silinir…' : 'Bəli, sil'}</button>
+      <button type="button" disabled={busy} onClick={onNo} style={purgeBtn(false)}>Ləğv et</button>
     </div>
   )
 }

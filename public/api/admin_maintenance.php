@@ -50,29 +50,35 @@ function metaSet(PDO $db, string $k, string $v): void {
    Bilinən yerlərdə arxiv faylı axtarır və ƏN YENİSİNİN tarixini qaytarır.
    Heç nə tapılmazsa dürüst cavab: 'unknown' — «backup var» iddiası etmirik.
    ══════════════════════════════════════════════════ */
-function backupStatus(PDO $db): array {
-    $candidates = [
-        __DIR__ . '/../../backups',      /* public_html-dən kənar (tövsiyə olunan) */
-        __DIR__ . '/../../backup',
-        __DIR__ . '/../backups',
-    ];
-    $exts   = ['zip', 'gz', 'tgz', 'sql', 'tar'];
-    $newest = 0;
-    $found  = null;
-    $count  = 0;
-
-    foreach ($candidates as $dir) {
+/** Qovluqlarda ən yeni arxiv faylını tap (saf funksiya — tests/backup_scan_test.php).
+    @return array{mtime:int,file:?string,size:int,count:int} */
+function backupScanDirs(array $dirs): array {
+    $exts = ['zip', 'gz', 'tgz', 'sql', 'tar', 'zst'];   /* .zst — DirectAdmin backup-ı */
+    $out  = ['mtime' => 0, 'file' => null, 'size' => 0, 'count' => 0];
+    foreach ($dirs as $dir) {
         if (!is_dir($dir)) continue;
         foreach ((array) @scandir($dir) as $f) {
             if ($f === '.' || $f === '..') continue;
             $path = $dir . '/' . $f;
             if (!is_file($path)) continue;
             if (!in_array(strtolower(pathinfo($f, PATHINFO_EXTENSION)), $exts, true)) continue;
-            $count++;
+            $out['count']++;
             $m = (int) @filemtime($path);
-            if ($m > $newest) { $newest = $m; $found = $f; }
+            if ($m > $out['mtime']) { $out = ['mtime' => $m, 'file' => $f, 'size' => (int) @filesize($path), 'count' => $out['count']]; }
         }
     }
+    return $out;
+}
+
+function backupStatus(PDO $db): array {
+    $scan = backupScanDirs([
+        __DIR__ . '/../../../../backups',  /* DirectAdmin: /home/<user>/backups (Create/Restore Backups) */
+        __DIR__ . '/../../backups',        /* public_html-dən kənar (tövsiyə olunan) */
+        __DIR__ . '/../../backup',
+        __DIR__ . '/../backups',
+    ]);
+    $newest = $scan['mtime'];
+    $found  = $scan['file'];
 
     /* Xarici backup prosesi bu faylı yeniləyə bilər (əl ilə də olar) */
     $marker = __DIR__ . '/backup_state.json';
@@ -86,20 +92,23 @@ function backupStatus(PDO $db): array {
             'status'  => 'unknown',
             'message' => 'Backup tapılmadı. Avtomatik arxiv qurulmayıbsa, '
                        . 'media və baza qorunmur.',
-            'last_at' => null, 'age_hours' => null, 'files' => 0, 'newest_file' => null,
+            'last_at' => null, 'age_hours' => null, 'files' => 0, 'newest_file' => null, 'size' => 0,
         ];
     }
 
+    /* Həftəlik əl ilə backup üçün 8 gün (192 saat) — bundan köhnəsi xəbərdarlıqdır */
     $ageH = (int) floor((time() - $newest) / 3600);
+    $ok   = $ageH <= 192;
+    $when = $ageH < 48 ? $ageH . ' saat əvvəl' : (int) floor($ageH / 24) . ' gün əvvəl';
     return [
-        'status'      => $ageH <= 48 ? 'ok' : 'stale',
-        'message'     => $ageH <= 48
-                       ? 'Son backup ' . $ageH . ' saat əvvəl.'
-                       : 'Son backup ' . (int) floor($ageH / 24) . ' gün əvvəl — köhnəlmiş sayılır.',
+        'status'      => $ok ? 'ok' : 'stale',
+        'message'     => $ok ? 'Son backup ' . $when . '.'
+                             : 'Son backup ' . $when . ' — köhnəlmiş sayılır, yenisini yaradın.',
         'last_at'     => gmdate('c', $newest),
         'age_hours'   => $ageH,
-        'files'       => $count,
+        'files'       => $scan['count'],
         'newest_file' => $found,
+        'size'        => $found === $scan['file'] ? $scan['size'] : 0,
     ];
 }
 
