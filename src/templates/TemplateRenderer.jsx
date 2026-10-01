@@ -6,7 +6,7 @@ import { DEFAULT_TEMPLATE_ID, resolveTemplateId } from './templateConfig'
 import { ensureTemplateFonts } from './fonts'
 import { trackTemplateView, trackTemplateFallback } from './templateAnalytics'
 import { resolveWeddingContent } from '../data/contentI18n'
-import { readOverrides } from '../data/adminOverrides'
+import { readOverrides, applyStoryOverrides } from '../data/adminOverrides'
 
 /* Şablon chunk-ı yüklənənə qədər krem fon (yalnız lazy şablonlarda görünür —
    simple-luxury statik import olduğu üçün heç vaxt bu vəziyyətə düşmür). */
@@ -78,7 +78,17 @@ export default function TemplateRenderer({ template, isPreview = false, weddingD
     [localizedWedding],
   )
 
-  const localizedProps = { ...restProps, lang, weddingData: localizedWedding, adminOverrides }
+  /* ── Phase 45: HEKAYƏ OVERRIDE-LARI ──
+     Admin-in fəsil düzəlişləri (mətn, tarix, stiker, şəkillər, gizlətmə,
+     yeni fəsillər) BURADA `loveStory`-yə tətbiq olunur — 16 şablonun hamısı
+     eyni `weddingData`-nı alır, heç birinin faylında ayrıca məntiq yoxdur.
+     ⚠ `admin.story` yoxdursa EYNİ referans qayıdır (davranış dəyişmir). */
+  const renderWedding = useMemo(
+    () => applyStoryOverrides(localizedWedding, adminOverrides?.story || null, lang, weddingData),
+    [localizedWedding, adminOverrides, lang, weddingData],
+  )
+
+  const localizedProps = { ...restProps, lang, weddingData: renderWedding, adminOverrides }
 
   /* createElement — komponent registry-dən (modul səviyyəsində sabit obyekt)
      gəlir, render zamanı yaradılmır; JSX yazılışı linter-i yanlış xəbərdarlığa

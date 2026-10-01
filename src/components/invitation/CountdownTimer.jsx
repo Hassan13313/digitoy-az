@@ -24,14 +24,15 @@ function TimeBox({ value, label, pop = false }) {
   )
 }
 
-export default function CountdownTimer({ date, time, lang, eventType = 'toy', eventName = '' }) {
+/* Phase 45 — `kicker`/`title`: admin «Mətnlər». Verilməyəndə əvvəlki mətn. */
+export default function CountdownTimer({ date, time, lang, eventType = 'toy', eventName = '', kicker = null, title = null }) {
   const timeLeft = useCountdown({ date, time, lang, eventType, eventName })
-  const { title, labels: tl } = timeLeft
+  const { labels: tl } = timeLeft
   return (
     <section className="py-24 px-6 bg-beige">
       <Reveal className="max-w-lg mx-auto text-center">
-        <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">Countdown</p>
-        <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-12">{title}</h2>
+        <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">{kicker || 'Countdown'}</p>
+        <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-12">{title || timeLeft.title}</h2>
 
         <div className="gold-divider mb-12 max-w-[120px] mx-auto" />
 

@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { RefreshCw, Search, X, Trash2, ExternalLink, MessageSquare } from 'lucide-react'
 import { getAdminGuestbook, deleteGuestbookMessage } from '../../utils/api'
+import { useIsNarrow } from '../../hooks/useIsNarrow'
+import { azDate, pagePadding } from './adminFormat'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    TƏBRİK MƏKTUBLARI — admin moderasiyası (Phase 36).
@@ -28,16 +30,14 @@ const C = {
   danger: 'oklch(48% 0.15 25)',
 }
 
+/* ⚠ `toLocaleString('az-AZ')` Chrome-da «M06» verirdi — bax adminFormat */
 function formatDateTime(iso) {
-  if (!iso) return '—'
-  const d = new Date(iso.replace(' ', 'T'))
-  if (Number.isNaN(d.getTime())) return iso
-  return d.toLocaleString('az-AZ', {
-    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
-  })
+  return azDate(iso, { time: true })
 }
 
 export default function AdminGuestbook() {
+  /* Telefonda 5 sütunlu cədvəl sığmırdı (mətn və «Sil» ekrandan kənarda idi) */
+  const narrow = useIsNarrow()
   const [items,     setItems]     = useState([])
   const [total,     setTotal]     = useState(0)
   const [loading,   setLoading]   = useState(true)
@@ -85,7 +85,7 @@ export default function AdminGuestbook() {
   }
 
   return (
-    <div style={{ padding: '32px 36px' }}>
+    <div style={{ padding: pagePadding(narrow) }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <h1 style={{
@@ -99,15 +99,15 @@ export default function AdminGuestbook() {
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', width: narrow ? '100%' : undefined }}>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flex: narrow ? 1 : undefined, minWidth: 0 }}>
             <Search size={13} strokeWidth={1.5} style={{ position: 'absolute', left: 10, color: C.faint, pointerEvents: 'none' }} />
             <input
               type="text" placeholder="Ad, mətn, slug axtar..."
               value={searchVal} onChange={(e) => handleSearch(e.target.value)}
               style={{
-                padding: '8px 32px 8px 30px', border: `1px solid ${'oklch(85% 0.02 60)'}`, borderRadius: 4,
-                fontSize: 12, color: 'oklch(30% 0.02 60)', background: 'white', outline: 'none', width: 220,
+                padding: narrow ? '11px 36px 11px 32px' : '8px 32px 8px 30px', border: `1px solid ${'oklch(85% 0.02 60)'}`, borderRadius: narrow ? 8 : 4,
+                fontSize: narrow ? 15 : 12, color: 'oklch(30% 0.02 60)', background: 'white', outline: 'none', width: narrow ? '100%' : 220,
               }}
             />
             {searchVal && (
@@ -118,8 +118,9 @@ export default function AdminGuestbook() {
           </div>
           <button type="button" onClick={() => load(search)} style={{
             display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'white',
-            border: '1px solid oklch(85% 0.02 60)', borderRadius: 4, cursor: 'pointer',
+            border: '1px solid oklch(85% 0.02 60)', borderRadius: narrow ? 8 : 4, cursor: 'pointer',
             fontSize: 11, color: 'oklch(45% 0.03 60)', letterSpacing: '0.06em', textTransform: 'uppercase',
+            minHeight: narrow ? 44 : undefined, flex: '0 0 auto',
           }}>
             <RefreshCw size={12} strokeWidth={1.5} />
             Yenilə
@@ -139,6 +140,55 @@ export default function AdminGuestbook() {
         <div style={{ padding: '56px 0', textAlign: 'center', color: C.faint, fontSize: 13 }}>
           <MessageSquare size={20} strokeWidth={1.2} style={{ opacity: 0.5, marginBottom: 10 }} />
           <div>Təbrik mesajı yoxdur.</div>
+        </div>
+      ) : narrow ? (
+        /* ── Telefon: hər mesaj bir kart ── */
+        <div style={{ display: 'grid', gap: 10 }}>
+          {items.map((m) => (
+            <div key={m.id} style={{
+              background: confirmId === m.id ? 'oklch(97% 0.02 25)' : 'white',
+              border: `1px solid ${C.line}`, borderRadius: 10, padding: '12px 14px',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 }}>
+                <span style={{ fontSize: 14.5, color: C.text, fontWeight: 600, overflowWrap: 'anywhere' }}>{m.name || '—'}</span>
+                <span style={{ fontSize: 11.5, color: C.faint, flex: '0 0 auto' }}>{formatDateTime(m.created_at)}</span>
+              </div>
+              <a
+                href={`/invite/${m.slug}`} target="_blank" rel="noopener noreferrer"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 4, fontFamily: 'monospace', fontSize: 11.5, color: C.gold, textDecoration: 'none', overflowWrap: 'anywhere' }}
+              >
+                {m.slug}<ExternalLink size={11} strokeWidth={1.6} style={{ flexShrink: 0 }} />
+              </a>
+              <div style={{ fontSize: 14, color: C.text, lineHeight: 1.6, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', marginTop: 8 }}>
+                {m.text}
+                {m.has_rsvp && (
+                  <span style={{
+                    marginLeft: 8, padding: '1px 6px', borderRadius: 3, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase',
+                    border: '1px solid oklch(80% 0.05 150)', color: 'oklch(45% 0.09 150)', whiteSpace: 'nowrap',
+                  }}>İştirak</span>
+                )}
+              </div>
+              <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                {confirmId === m.id ? (
+                  <>
+                    <button type="button" disabled={busyId === m.id} onClick={() => handleDelete(m.id)}
+                      style={{ flex: 2, minHeight: 44, borderRadius: 8, border: 'none', cursor: 'pointer', background: C.danger, color: 'white', fontSize: 13, fontFamily: 'inherit', opacity: busyId === m.id ? 0.6 : 1 }}>
+                      {busyId === m.id ? '…' : 'Bəli, sil'}
+                    </button>
+                    <button type="button" onClick={() => setConfirmId(null)}
+                      style={{ flex: 1, minHeight: 44, borderRadius: 8, border: `1px solid ${C.line}`, background: 'white', cursor: 'pointer', fontSize: 13, color: C.sub, fontFamily: 'inherit' }}>
+                      Ləğv et
+                    </button>
+                  </>
+                ) : (
+                  <button type="button" onClick={() => setConfirmId(m.id)}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 40, padding: '0 14px', borderRadius: 8, border: `1px solid ${C.line}`, background: 'white', cursor: 'pointer', fontSize: 13, color: C.danger, fontFamily: 'inherit' }}>
+                    <Trash2 size={14} strokeWidth={1.6} /> Sil
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       ) : (
         <div style={{ background: 'white', border: `1px solid ${C.line}`, borderRadius: 6, overflow: 'hidden' }}>

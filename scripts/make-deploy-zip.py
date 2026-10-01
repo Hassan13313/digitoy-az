@@ -52,6 +52,11 @@ def is_junk(rel: str) -> bool:
     # api/api kimi təsadüfi iç-içə kopyalar
     if len(parts) >= 2 and parts[0] == 'api' and parts[1] == 'api':
         return True
+    # uploads/ — yalnız .htaccess (Phase 45). Sənəddə yazılmışdı, amma kodda
+    # yox idi: lokal sınaqda yüklənən şəkillər (public/uploads → dist/uploads)
+    # ZIP-ə düşürdü. Canlı media serverdədir, ZIP ona toxunmamalıdır.
+    if parts[0] == 'uploads' and name != '.htaccess':
+        return True
     # Uzantısı olmayan 0 baytlıq fayllar — pozulmuş shell əmrlərinin qalığı
     full = os.path.join(DIST, rel)
     if '.' not in name and os.path.isfile(full) and os.path.getsize(full) == 0:

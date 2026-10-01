@@ -17,7 +17,7 @@
         mətn/rəng şablonun (və ya sistemin) öz dəyərində qalır.
    ───────────────────────────────────────────────────────────────────────── */
 import {
-  normalizeOverrides, applyThemeOverrides, mergeSectionLabels, readOverrides,
+  normalizeOverrides, applyThemeOverrides, mergeSectionLabels, readOverrides, makeLabelResolver, sectionHead,
   safeColor, safeFont, safeScale, safeText,
   THEME_KEYS, FONT_SCALE_MIN, FONT_SCALE_MAX,
 } from '../src/data/adminOverrides.js'
@@ -115,6 +115,31 @@ ok('şablonun kicker-i qorunur', merged.program.kicker === 'SCHEDULE')
 /* Şablonun heç bir adı olmasa da admin-inki tətbiq olunur */
 const onlyAdmin = mergeSectionLabels(null, { labels: { hero: { title: { az: 'Salam' } } } })
 ok('şablon adsız olsa da admin işləyir', onlyAdmin.hero.title.az === 'Salam')
+
+/* ── 5. Bölmə adı həlledicisi (Phase 45 — 3 xüsusi şablon da işlədir) ──── */
+{
+  const none = makeLabelResolver(mergeSectionLabels(null, null), 'en')
+  ok('override yoxdursa fallback (əvvəlki mətn) qayıdır', none('hero', 'title', 'Default') === 'Default')
+  ok('override yoxdursa null fallback null qalır', none('footer', 'kicker', null) === null)
+
+  const admin = normalizeOverrides({ labels: {
+    hero:   { kicker: 'bizim gün', title: { az: 'Ayxan və Leyla', ru: 'Айхан и Лейла' } },
+    footer: { title: { az: 'Sağ olun!' } },
+  } })
+  const Lru = makeLabelResolver(mergeSectionLabels(null, admin), 'ru')
+  const Len = makeLabelResolver(mergeSectionLabels(null, admin), 'en')
+  ok('kicker hər dildə eynidir (böyük hərflə)', Lru('hero', 'kicker', 'X') === 'BİZİM GÜN' && Len('hero', 'kicker', 'X') === 'BİZİM GÜN')
+  ok('aktiv dilin başlığı', Lru('hero', 'title', 'X') === 'Айхан и Лейла')
+  ok('dil yazılmayıbsa AZ-a düşür', Len('hero', 'title', 'X') === 'Ayxan və Leyla')
+  ok('footer başlığı tətbiq olunur', Len('footer', 'title', null) === 'Sağ olun!')
+  ok('doldurulmayan sahə fallback-da qalır', Len('footer', 'kicker', 'Made') === 'Made')
+  ok('toxunulmayan bölmə fallback-da qalır', Len('venue', 'title', 'Məkan') === 'Məkan')
+
+  const empty = sectionHead(none, 'footer')
+  ok('sectionHead: override yoxdursa hər iki sahə null', empty.kicker === null && empty.title === null)
+  const foot = sectionHead(Len, 'footer')
+  ok('sectionHead: yalnız yazılan sahə dolur', foot.title === 'Sağ olun!' && foot.kicker === null)
+}
 
 console.log(fail === 0
   ? 'Admin override qatı: bütün yoxlamalar keçdi (geriyə uyğunluq + təhlükəsizlik)'

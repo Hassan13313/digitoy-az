@@ -23,6 +23,7 @@ import { getInvitation, adminLogin, getDraftByCode } from './utils/api'
 import { unlockAudio } from './utils/audioUnlock'
 import ScrollProgress from './components/ui/ScrollProgress'
 import { useSEO } from './hooks/useSEO'
+import { inviteSeoMeta } from './utils/inviteSeo'
 import { initAnalytics, trackPageView, trackEvent } from './utils/analytics'
 import './App.css'
 
@@ -69,15 +70,10 @@ function getSEOConfig(view, { weddingData, slug } = {}) {
       }
 
     case 'invite': {
-      const bride = weddingData?.brideName || ''
-      const groom = weddingData?.groomName || ''
-      /* Phase 27.1: göstərim sırası BƏY → GƏLİN (slug toxunulmur) */
-      const names = [groom, bride].filter(Boolean).join(' & ')
-      const title = names ? `${names} — Toy Dəvətnaməsi | DigiToy` : 'Toy Dəvətnaməsi | DigiToy'
-      const venue = weddingData?.venueName ? ` ${weddingData.venueName} məkanında` : ''
-      const description = names
-        ? `${names} sizi toy mərasiminə dəvət edir.${venue} Rəqəmsal dəvətnaməyə baxın, İştirak Təsdiqi göndərin.`
-        : HOME_DESC
+      /* Phase 45.2: mətn tədbir növünə görədir (bax utils/inviteSeo.js) */
+      const seo = inviteSeoMeta(weddingData)
+      const title = seo.title
+      const description = seo.description || HOME_DESC
       /* Müştəri tarixi/məkan/ad kimi şəxsi məlumatlar daşıyır — axtarış
          nəticələrində görünməsin (noindex), amma WhatsApp/Telegram
          paylaşım önbaxışları üçün OG/Twitter meta-ları aktiv qalsın
@@ -561,7 +557,8 @@ export default function App() {
           fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase',
           pointerEvents: 'none', backdropFilter: 'blur(6px)',
         }}>
-          Önbaxış · {previewConfig?.name || previewTemplateId} · {previewTemplateId}
+          {/* `lang="en"` — ingiliscə ad AZ səhifədə «BOARDİNG PASS» olmasın */}
+          Önbaxış · <span lang="en">{previewConfig?.name || previewTemplateId} · {previewTemplateId}</span>
         </div>
         <TemplateRenderer
           template={previewTemplateId}

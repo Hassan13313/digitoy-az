@@ -41,16 +41,15 @@ const KEYFRAMES = `
 `
 
 function Opening(props) {
-  const { theme, weddingData, isCouple } = props
-
-  const dateStr = String(weddingData.date || '').split('-').reverse().join(' · ')
+  const { theme, weddingData, isCouple, ot } = props
 
   return (
     <OpeningFrame
       {...props}
       exit="fade"
       duration={900}
-      label="Dəvətnaməni aç"
+      label={ot.text('cta')}
+      hint={ot.text('hint')}
       ctaDelay={4.0}
       hintDelay={4.5}
       orbs="none"
@@ -114,6 +113,7 @@ function Opening(props) {
         <div style={{ position: 'absolute', left: 0, right: 0, top: '7%', padding: '0 14px' }}>
           <NameRow
             theme={theme} weddingData={weddingData} isCouple={isCouple}
+            text={ot.override('title')}
             delay={2.4} step={0.2} stacked
             size="clamp(17px, 5.6vw, 22px)" ampSize="clamp(12px, 4vw, 15px)"
             font={DISP} color={theme.accent} ampColor={theme.secondary}
@@ -130,16 +130,20 @@ function Opening(props) {
         }} />
       </div>
 
-      <Kicker text="Dəvətnamə" color={alpha(theme.muted, 0.95)} lineColor={alpha(theme.primary, 0.5)} delay={3.2} style={{ marginTop: 26 }} />
+      {ot.show('kicker') && (
+        <Kicker text={ot.text('kicker')} color={alpha(theme.muted, 0.95)} lineColor={alpha(theme.primary, 0.5)} delay={3.2} style={{ marginTop: 26 }} />
+      )}
 
       <Ornament color={theme.primary} mark="dot" delay={3.6} width={30} style={{ marginTop: 15 }} />
 
-      <OpeningMeta
-        text={[dateStr, weddingData.venueName].filter(Boolean).join(' · ')}
-        color={alpha(theme.muted, 0.95)}
-        delay={3.8}
-        style={{ marginTop: 13, letterSpacing: '.24em' }}
-      />
+      {ot.show('meta') && (
+        <OpeningMeta
+          text={ot.text('meta')}
+          color={alpha(theme.muted, 0.95)}
+          delay={3.8}
+          style={{ marginTop: 13, letterSpacing: '.24em' }}
+        />
+      )}
     </OpeningFrame>
   )
 }

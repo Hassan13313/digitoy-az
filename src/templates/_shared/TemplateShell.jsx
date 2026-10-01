@@ -24,7 +24,8 @@ import { useGallery } from '../../hooks/useGallery'
 import { useMusicPlayer } from '../../hooks/useMusicPlayer'
 import { useMusicPrompt } from '../../hooks/useMusicPrompt'
 import t from '../../data/translations'
-import { applyThemeOverrides, mergeSectionLabels, withStringOverrides } from '../../data/adminOverrides'
+import { applyThemeOverrides, mergeSectionLabels, withStringOverrides, makeLabelResolver, sectionHead } from '../../data/adminOverrides'
+import { makeOpeningText } from './openingSpec'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    TEMPLATE SHELL — 13 bölməlik ortaq dəvətnamə skeleti.
@@ -166,12 +167,7 @@ export default function TemplateShell({
    * ⚠ Fallback ZƏNCİRİ: şablonun aktiv dili → şablonun AZ-ı → sistemin öz
    * tərcüməsi. Beləliklə yarımçıq tərcümə boş başlıq yaratmır.
    */
-  const L = (key, field, fallback) => {
-    const v = sectionLabels?.[key]?.[field]
-    if (!v) return fallback
-    if (typeof v === 'string') return v
-    return v[lang] || v.az || fallback
-  }
+  const L = makeLabelResolver(sectionLabels, lang)
 
   /* Location: naviqasiya linkləri tək mənbədən (MapSection) gəlir —
      hədəf yoxdursa `null` olur və düymə render edilmir. */
@@ -187,6 +183,15 @@ export default function TemplateShell({
     other: weddingData.eventName || tr.event_other,
   }
   const eventLabel = eventLabels[weddingData.eventType] || tr.event_toy
+
+  /* ── Açılış ekranının mətnləri və monoqramı (Phase 45) ──
+     Defoltlar `openingSpec`-dədir (AZ/EN/RU); admin override-ı varsa üstünə
+     qoyulur. Override yoxdursa açılış əvvəlki kimi görünür. */
+  const ot = makeOpeningText(
+    templateId,
+    { weddingData, lang, isCouple, isCorp, eventLabel },
+    adminOverrides?.opening || null,
+  )
 
   const activePkgId = isDemoMode ? 'PREMIUM' : (weddingData.package || 'SADE')
 
@@ -308,6 +313,8 @@ export default function TemplateShell({
   const names = isCouple
     ? `${weddingData.groomName || ''}\n${weddingData.brideName || ''}`
     : (weddingData.eventName || weddingData.brideName || '')
+  /* Admin «Hero › Başlıq» — adlar sətrinin əvəzi (yoxdursa null) */
+  const heroTitle = L('hero', 'title', null)
 
   return (
     <div
@@ -352,7 +359,7 @@ export default function TemplateShell({
       {!opened && Opening && (
         <Opening
           theme={theme} weddingData={weddingData} isCouple={isCouple} isCorp={isCorp}
-          eventLabel={eventLabel} lang={lang}
+          eventLabel={eventLabel} lang={lang} ot={ot}
           onOpen={() => setOpened(true)}
           onOpenStart={autoPlay ? music.play : undefined}
         />
@@ -447,11 +454,14 @@ export default function TemplateShell({
               <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} accent={ACC} radius={D.buttonRadius} />
             </header>
 
-            {/* 04 — HERO */}
+            {/* 04 — HERO
+                ⚠ Phase 45: admin «Mətnlər › Hero» sahələri (üst etiket, başlıq)
+                əvvəl heç yerdə tətbiq olunmurdu. İndi üst etiket tədbir adını,
+                başlıq isə adlar sətrini əvəz edir; boşdursa əvvəlki kimi. */}
             <section data-section="hero" style={{ ...sectionStyle(0), padding: 'clamp(40px, 10vw, 56px) clamp(18px, 6vw, 28px) clamp(34px, 8vw, 48px)' }}>
               <div style={heroInner}>
                 <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: ACC, marginBottom: 12 }}>
-                  {eventLabel}
+                  {L('hero', 'kicker', eventLabel)}
                 </div>
                 <div style={{ fontFamily: serif, fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', color: theme.muted }}>
                   {tr.inv_join}
@@ -463,7 +473,7 @@ export default function TemplateShell({
                   textTransform: D.headingTransform,
                   letterSpacing: D.headingTransform === 'uppercase' ? '-.02em' : 'normal',
                 }}>
-                  {isCouple ? (
+                  {heroTitle ? heroTitle : isCouple ? (
                     <>
                       {weddingData.groomName}
                       <span style={{ display: 'block', fontSize: '.5em', color: ACC, margin: '2px 0', fontStyle: 'italic' }}>{tr.inv_and}</span>
@@ -552,6 +562,7 @@ export default function TemplateShell({
                   kicker={L('lovestory', 'kicker', null)}
                   title={L('lovestory', 'title', null)}
                   adminTheme={adminOverrides?.theme || null}
+                  copyOverrides={adminOverrides?.story?.text || null}
                 />
               </Reveal>
             </section>
@@ -785,7 +796,7 @@ export default function TemplateShell({
                           marginTop: 6, background: 'none', border: 'none', cursor: 'pointer',
                           fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase',
                           color: ACC, fontFamily: sans, minHeight: 44, padding: '0 8px 0 0',
-                        }}>Yenidən axtar</button>
+                        }}>{seatingL.again || 'Yenidən axtar'}</button>
                       </div>
                     )}
                   </Stagger>
@@ -973,6 +984,7 @@ export default function TemplateShell({
                     fontSize: 10.5, letterSpacing: '.14em', textTransform: 'uppercase', fontFamily: sans,
                     opacity: gbook.canSubmit ? 1 : 0.35,
                   }}>{gbook.sending ? gbookL.sending : gbookL.btn}</button>
+                  {gbook.error && <p role="alert" style={{ margin: 0, fontSize: 12, textAlign: 'center', color: theme.text, fontFamily: sans }}>⚠ {gbookL.error}</p>}
                 </form>
 
                 <Stagger base={110} style={{ display: 'grid', gap: 10, textAlign: 'left' }}>
@@ -1009,6 +1021,7 @@ export default function TemplateShell({
               theme={theme} weddingData={weddingData} lang={lang}
               isDemoMode={isDemoMode} isCouple={isCouple} isCorp={isCorp}
               eventLabel={eventLabel} serif={serif}
+              footer={sectionHead(L, 'footer')}
             />
           </motion.div>
         )}

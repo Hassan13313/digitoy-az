@@ -4,16 +4,17 @@ import { Reveal, Stagger } from '../../templates/_shared/motion'
 /* Proqram məntiqi (standart şablonlar + istifadəçi addımları) artıq
    `hooks/useTimeline.js`-dədir — bu fayl yalnız simple-luxury UI qatıdır. */
 
-export default function EventTimeline({ lang, eventType, programSteps }) {
+/* Phase 45 — `kicker`/`title`: admin «Mətnlər». Verilməyəndə əvvəlki mətn. */
+export default function EventTimeline({ lang, eventType, programSteps, kicker = null, title = null }) {
   const { events, sectionLabel } = useTimeline({ lang, eventType, programSteps })
 
   return (
     <section className="py-28 px-6 bg-cream">
       <Reveal className="max-w-lg mx-auto">
         <div className="text-center mb-16">
-          <p className="text-[9px] tracking-[0.38em] uppercase text-gold mb-5 font-medium font-sans">Schedule</p>
+          <p className="text-[9px] tracking-[0.38em] uppercase text-gold mb-5 font-medium font-sans">{kicker || 'Schedule'}</p>
           <h2 className="font-serif text-3xl text-ink font-light tracking-tight">
-            {sectionLabel}
+            {title || sectionLabel}
           </h2>
           <div className="gold-divider mt-8 max-w-[100px] mx-auto" />
         </div>

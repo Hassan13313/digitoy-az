@@ -77,11 +77,18 @@ function Field({ label, value, delay = 0, align = 'left' }) {
   )
 }
 
+/* Biletdəki qısa ay adları — dilə görə (əvvəl EN/RU-da da «NOY» yazılırdı) */
+const TICKET_MONTHS = {
+  az: ['YAN', 'FEV', 'MAR', 'APR', 'MAY', 'İYN', 'İYL', 'AVQ', 'SEN', 'OKT', 'NOY', 'DEK'],
+  en: ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'],
+  ru: ['ЯНВ', 'ФЕВ', 'МАР', 'АПР', 'МАЙ', 'ИЮН', 'ИЮЛ', 'АВГ', 'СЕН', 'ОКТ', 'НОЯ', 'ДЕК'],
+}
+
 function Opening(props) {
-  const { theme, weddingData, isCouple } = props
+  const { theme, weddingData, isCouple, ot } = props
 
   /* Tarix biletdəki kimi qısa mono formatda: «21 NOY 2026» */
-  const MONTHS = ['YAN', 'FEV', 'MAR', 'APR', 'MAY', 'İYN', 'İYL', 'AVQ', 'SEN', 'OKT', 'NOY', 'DEK']
+  const MONTHS = TICKET_MONTHS[ot.lang] || TICKET_MONTHS.az
   const [y, m, d] = String(weddingData.date || '').split('-')
   const dateStr = y ? `${d} ${MONTHS[Number(m) - 1] || ''} ${y}` : ''
 
@@ -92,7 +99,8 @@ function Opening(props) {
       {...props}
       exit="up"
       duration={950}
-      label="Check-in et"
+      label={ot.text('cta')}
+      hint={ot.text('hint')}
       ctaDelay={3.9}
       hintDelay={4.4}
       orbs="none"
@@ -127,28 +135,33 @@ function Opening(props) {
         }}>
           <span style={{
             fontFamily: MONO, fontSize: 8, letterSpacing: '.24em', color: '#5E7078',
-          }}>DIGITOY AIR</span>
+          }}>{ot.text('brand')}</span>
           <span style={{
             fontFamily: MONO, fontSize: 8, letterSpacing: '.24em', color: theme.primary,
-          }}>BOARDING PASS</span>
+          }}>{ot.text('pass')}</span>
         </div>
 
         {/* Marşrut */}
-        <div style={{
-          padding: '16px 12px 12px', textAlign: 'center',
-          animation: 'tpl-rise .8s ease-out 1.5s both',
-        }}>
+        {ot.show('route') && (
           <div style={{
-            fontFamily: DISP, fontWeight: 700, fontSize: 'clamp(22px, 7.4vw, 28px)',
-            letterSpacing: '.02em', color: TICKET_INK, lineHeight: 1,
+            padding: '16px 12px 12px', textAlign: 'center',
+            animation: 'tpl-rise .8s ease-out 1.5s both',
           }}>
-            GYD <span style={{ color: theme.primary }}>→</span> ♥
+            <div style={{
+              fontFamily: DISP, fontWeight: 700, fontSize: 'clamp(22px, 7.4vw, 28px)',
+              letterSpacing: '.02em', color: TICKET_INK, lineHeight: 1,
+            }}>
+              {ot.custom('route')
+                ? ot.text('route')
+                : <>GYD <span style={{ color: theme.primary }}>→</span> ♥</>}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Adlar */}
         <NameRow
           theme={theme} weddingData={weddingData} isCouple={isCouple}
+          text={ot.override('title')}
           delay={1.9} step={0.18}
           size="clamp(15px, 5vw, 18px)" ampSize="clamp(13px, 4.2vw, 15px)"
           font={DISP} color={TICKET_INK} ampColor={theme.primary}
@@ -168,16 +181,20 @@ function Opening(props) {
         {/* Qoparma talonu — sahələr + barkod */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px' }}>
           <div style={{ flex: 1, display: 'grid', gap: 9 }}>
-            <Field label="Tarix"  value={dateStr} delay={2.8} />
-            <Field label="Saat"   value={weddingData.time || ''} delay={2.95} />
-            <Field label="Qapı"   value={weddingData.venueName || ''} delay={3.1} />
+            {ot.show('fDate') && <Field label={ot.text('fDate')} value={dateStr} delay={2.8} />}
+            {ot.show('fTime') && <Field label={ot.text('fTime')} value={weddingData.time || ''} delay={2.95} />}
+            {ot.show('fGate') && <Field label={ot.text('fGate')} value={weddingData.venueName || ''} delay={3.1} />}
           </div>
           <Barcode delay={3.1} color={TICKET_INK} />
         </div>
       </div>
 
-      <Kicker text="Dəvətnamə" color={alpha(theme.muted, 0.95)} lineColor={alpha(theme.primary, 0.5)} delay={3.5} style={{ marginTop: 24 }} />
-      <OpeningMeta text={weddingData.venueName || ''} color={alpha(theme.muted, 0.9)} delay={3.7} style={{ marginTop: 10, letterSpacing: '.26em' }} />
+      {ot.show('kicker') && (
+        <Kicker text={ot.text('kicker')} color={alpha(theme.muted, 0.95)} lineColor={alpha(theme.primary, 0.5)} delay={3.5} style={{ marginTop: 24 }} />
+      )}
+      {ot.show('meta') && (
+        <OpeningMeta text={ot.text('meta')} color={alpha(theme.muted, 0.9)} delay={3.7} style={{ marginTop: 10, letterSpacing: '.26em' }} />
+      )}
     </OpeningFrame>
   )
 }
@@ -215,19 +232,19 @@ export default function BoardingPassTemplate(props) {
          `title` isə {az,en,ru} obyektidir. */
       sectionLabels={{
         countdown: { kicker: 'BOARDING',
-                    title: { az: 'Boarding başlayır', en: 'Boarding begins', ru: 'Посадка начнётся' } },
+                    title: { az: 'BOARDING başlayır', en: 'Boarding begins', ru: 'Посадка начнётся' } },
         venue:     { kicker: 'GATE',
                     title: { az: 'Gate · təyinat', en: 'Gate · destination', ru: 'Гейт · пункт назначения' } },
         program:   { kicker: 'SCHEDULE',
                     title: { az: 'Uçuş cədvəli', en: 'Flight schedule', ru: 'Расписание рейса' } },
         dresscode: { kicker: 'ATTIRE',
-                    title: { az: 'Cabin attire · geyim', en: 'Cabin attire', ru: 'Дресс-код салона' } },
+                    title: { az: 'CABIN ATTIRE · geyim', en: 'Cabin attire', ru: 'Дресс-код салона' } },
         seating:   { kicker: 'SEAT',
-                    title: { az: 'Seat assignment', en: 'Seat assignment', ru: 'Ваше место' } },
+                    title: { az: 'SEAT ASSIGNMENT', en: 'Seat assignment', ru: 'Ваше место' } },
         gallery:   { kicker: 'ALBUM',
-                    title: { az: 'In-flight album', en: 'In-flight album', ru: 'Бортовой альбом' } },
+                    title: { az: 'IN-FLIGHT ALBUM', en: 'In-flight album', ru: 'Бортовой альбом' } },
         rsvp:      { kicker: 'CHECK-IN',
-                    title: { az: 'Check-in · İştirak təsdiqi', en: 'Check-in · RSVP', ru: 'Регистрация · Подтверждение' } },
+                    title: { az: 'CHECK-IN · İştirak təsdiqi', en: 'Check-in · RSVP', ru: 'Регистрация · Подтверждение' } },
         guestbook: { kicker: 'NOTES',
                     title: { az: 'Sərnişin qeydləri', en: 'Passenger notes', ru: 'Записи пассажиров' } },
       }}

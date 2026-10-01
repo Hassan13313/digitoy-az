@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Search, X, RefreshCw, Download, LayoutList, AlignLeft, Printer } from 'lucide-react'
 import { getGuests, exportGuestsCsv } from '../../utils/api'
+import { azDate } from './adminFormat'
+import { useIsNarrow } from '../../hooks/useIsNarrow'
 
 const STATUS_DOT = { GOING: '🟢', NOT_GOING: '🔴', MAYBE: '🟡', NO_RESPONSE: '⚪' }
 const STATUS_AZ  = { GOING: 'Gələcək', NOT_GOING: 'Gəlməyəcək', MAYBE: 'Bəlkə', NO_RESPONSE: 'Cavab yoxdur' }
@@ -32,16 +34,43 @@ function StatusBadge({ status }) {
 }
 
 function StatCard({ label, value, color, highlight }) {
+  /* Telefonda 4 kart bir sırada ~84px-dir: 14px yan boşluqla «GƏLMƏYƏCƏK»
+     sözü kartdan çıxırdı — dar ekranda boşluq azalır. */
+  const narrow = useIsNarrow()
   return (
-    <div style={{ flex: 1, minWidth: 80, background: highlight ? 'oklch(96% 0.03 80)' : 'white', border: `1px solid ${highlight ? 'oklch(78% 0.1 80)' : 'oklch(88% 0.02 60)'}`, borderRadius: 5, padding: '12px 14px', textAlign: 'center' }}>
+    <div style={{ flex: 1, minWidth: 80, background: highlight ? 'oklch(96% 0.03 80)' : 'white', border: `1px solid ${highlight ? 'oklch(78% 0.1 80)' : 'oklch(88% 0.02 60)'}`, borderRadius: 5, padding: narrow ? '12px 4px' : '12px 14px', textAlign: 'center' }}>
       <div style={{ fontSize: 24, fontWeight: 300, color, lineHeight: 1, fontFamily: '"Cormorant Garamond",serif' }}>{value}</div>
-      <div style={{ fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'oklch(55% 0.03 60)', marginTop: 4 }}>{label}</div>
+      <div style={{ fontSize: 9, letterSpacing: narrow ? '0.05em' : '0.1em', textTransform: 'uppercase', color: 'oklch(55% 0.03 60)', marginTop: 4 }}>{label}</div>
+    </div>
+  )
+}
+
+/* ── Telefon sətri (Phase 45) ──
+   5 sütunlu şəbəkə 384px-də ad sütununu ~3px-ə sıxırdı. Telefonda ad + status
+   yuxarıda, əlavə qonaq / masa / qeyd / tarix alt sətirdədir. */
+function GuestLine({ g, showTable = false }) {
+  const meta = [
+    g.extra_guests > 0 ? `+${g.extra_guests} qonaq` : null,
+    showTable ? g.table_id : null,
+    g.notes || null,
+    g.submitted_at ? azDate(g.submitted_at, { year: false }) : null,
+  ].filter(Boolean)
+  return (
+    <div style={{ padding: '10px 14px', borderBottom: '1px solid oklch(94% 0.01 60)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontSize: 14, color: 'oklch(22% 0.02 60)', overflowWrap: 'anywhere', minWidth: 0 }}>{g.full_name}</span>
+        <span style={{ flex: '0 0 auto' }}><StatusBadge status={g.status} /></span>
+      </div>
+      {meta.length > 0 && (
+        <div style={{ fontSize: 12, color: 'oklch(52% 0.03 60)', marginTop: 4, overflowWrap: 'anywhere' }}>{meta.join(' · ')}</div>
+      )}
     </div>
   )
 }
 
 /* ── Mode A: Masalara görə ── */
 function ByTablesView({ guests, tableIds }) {
+  const narrow = useIsNarrow()
   const byTable = {}
   for (const tid of tableIds) byTable[tid] = []
   for (const g of guests) {
@@ -61,13 +90,16 @@ function ByTablesView({ guests, tableIds }) {
               {byTable[tid].filter(g => g.status !== 'NO_RESPONSE').length}/{byTable[tid].length} cavab
             </span>
           </div>
+          {narrow && byTable[tid].map(g => <GuestLine key={g.id} g={g} />)}
           {/* Column header for this table group */}
+          {!narrow && (
           <div style={{ display: 'grid', gridTemplateColumns: COLS, gap: 8, padding: '5px 16px', background: 'oklch(97% 0.005 75)', borderBottom: '1px solid oklch(91% 0.01 75)' }}>
             {['Ad', 'Status', 'Əlavə', 'Qeyd', 'Tarix'].map((h, i) => (
               <span key={i} style={COL_HDR}>{h}</span>
             ))}
           </div>
-          {byTable[tid].map(g => (
+          )}
+          {!narrow && byTable[tid].map(g => (
             <div key={g.id} style={{ display: 'grid', gridTemplateColumns: COLS, gap: 8, padding: '8px 16px', alignItems: 'center', borderBottom: '1px solid oklch(94% 0.01 60)' }}>
               <span style={{ fontSize: 13, color: 'oklch(22% 0.02 60)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{g.full_name}</span>
               <StatusBadge status={g.status} />
@@ -78,7 +110,7 @@ function ByTablesView({ guests, tableIds }) {
                 {g.notes || ''}
               </span>
               <span style={{ fontSize: 11, color: 'oklch(58% 0.03 60)' }}>
-                {g.submitted_at ? new Date(g.submitted_at).toLocaleDateString('az-AZ', { day: '2-digit', month: 'short' }) : '—'}
+                {g.submitted_at ? azDate(g.submitted_at, { year: false }) : '—'}
               </span>
             </div>
           ))}
@@ -90,6 +122,7 @@ function ByTablesView({ guests, tableIds }) {
 
 /* ── Mode B: Statuslara görə ── */
 function ByStatusView({ guests }) {
+  const narrow = useIsNarrow()
   const order = ['GOING', 'MAYBE', 'NOT_GOING', 'NO_RESPONSE']
   const byStatus = {}
   for (const s of order) byStatus[s] = []
@@ -102,7 +135,16 @@ function ByStatusView({ guests }) {
 
   return (
     <div>
-      {order.filter(s => byStatus[s]?.length).map(s => (
+      {order.filter(s => byStatus[s]?.length).map(s => narrow ? (
+        <div key={s} style={{ marginBottom: 18 }}>
+          <div style={{ padding: '8px 14px', background: STATUS_META[s]?.bg || 'oklch(95% 0.01 75)', borderBottom: '1px solid oklch(88% 0.02 60)' }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: STATUS_META[s]?.color || 'oklch(30% 0.02 60)' }}>
+              {STATUS_DOT[s]} {STATUS_AZ[s]} — {byStatus[s].length} nəfər
+            </span>
+          </div>
+          {byStatus[s].map(g => <GuestLine key={g.id} g={g} showTable />)}
+        </div>
+      ) : (
         <div key={s} style={{ marginBottom: 18 }}>
           <div style={{ padding: '8px 14px', background: STATUS_META[s]?.bg || 'oklch(95% 0.01 75)', borderBottom: '1px solid oklch(88% 0.02 60)' }}>
             <span style={{ fontSize: 12, fontWeight: 700, color: STATUS_META[s]?.color || 'oklch(30% 0.02 60)' }}>
@@ -126,7 +168,7 @@ function ByStatusView({ guests }) {
                 {g.notes || ''}
               </span>
               <span style={{ fontSize: 11, color: 'oklch(58% 0.03 60)' }}>
-                {g.submitted_at ? new Date(g.submitted_at).toLocaleDateString('az-AZ', { day: '2-digit', month: 'short' }) : '—'}
+                {g.submitted_at ? azDate(g.submitted_at, { year: false }) : '—'}
               </span>
             </div>
           ))}
@@ -209,7 +251,7 @@ function buildPrintHtml({ guests, stats, names, dateStr }) {
   <div class="sbox hi"><div class="sval a">${stats.real_attendance || 0}</div><div class="slbl">Real iştirak</div></div>
 </div>
 ${tableHtml}
-<div class="footer">${new Date().toLocaleDateString('az-AZ')} &nbsp;&middot;&nbsp; DigiToy.az</div>
+<div class="footer">${azDate(new Date(), { long: true })} &nbsp;&middot;&nbsp; DigiToy.az</div>
 <script>window.onload=function(){window.print();};<\/script>
 </body>
 </html>`

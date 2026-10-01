@@ -33,7 +33,7 @@ import LoveStoryStep from './LoveStoryStep'
 import { ACTIVE_PARTNERS } from '../../data/partners'
 import MusicStep from './MusicStep'
 import TemplateSelect from './TemplateSelect'
-import { builderDefaultTemplateId } from '../../templates/templateConfig'
+import { resolveBuilderTemplateId } from '../../templates/templateConfig'
 import { defaultWedding } from '../../data/defaultWedding'
 import { buildShortLiveLink } from '../../utils/whatsappOrder'
 import { formatFullDateByLang } from '../../utils/dateFormat'
@@ -59,7 +59,7 @@ const DRESS_CODE_OPTIONS = [
 const calendarTranslations = {
   az: {
     weekDays: ['B.', 'B.E.', 'Ç.A.', 'Ç.', 'C.A.', 'C.', 'Ş.'],
-    months: ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'İyun', 'İyul', 'Avqust', 'Sentyabr', 'Oktabr', 'Noyabr', 'Dekabr'],
+    months: ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'İyun', 'İyul', 'Avqust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr'],
   },
   ru: {
     weekDays: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
@@ -1138,9 +1138,41 @@ function serializeTableTexts(tables) {
   }).join('; ')
 }
 
-const DIGITORY_FORMATS = ['Excel', 'PDF', 'Word', 'Screenshot', 'Şəkil']
+/* Phase 45 — bu addım EN/RU builder-də də Azərbaycanca qalırdı (`lang` gəlirdi,
+   amma işlədilmirdi). AZ mətnlər əvvəlki ilə eynidir (yalnız «sisteme» → «sistemə»). */
+const SEATING_UI = {
+  az: {
+    selfTitle: 'Özüm dolduracağam', selfDesc: 'Masa sayını bildirin, qonaqları özünüz daxil edin',
+    svcTitle: 'DigiToy doldursun', svcDesc: 'Qonaq siyahısını göndərin, biz sistemə yerləşdirərik',
+    svcName: 'DigiToy Xidməti',
+    svcLong: 'Qonaq siyahısını Excel, PDF, Word, screenshot və ya şəkil kimi göndərin. Oturma planını sizin üçün sistemə yerləşdirəcəyik.',
+    svcNote: 'Sifariş tamamlandıqdan sonra qonaq siyahınızı WhatsApp vasitəsilə bizə göndərin.',
+    change: 'Dəyiş', countPh: 'Masa sayı (məs: 15)', create: 'Yarat', guests: 'qonaq',
+    addTable: 'Masa əlavə et', table: 'Masa', photo: 'Şəkil',
+  },
+  en: {
+    selfTitle: 'I will fill it in myself', selfDesc: 'Set the number of tables and add your guests yourself',
+    svcTitle: 'Let DigiToy fill it in', svcDesc: 'Send us your guest list and we will add it to the system',
+    svcName: 'DigiToy service',
+    svcLong: 'Send your guest list as Excel, PDF, Word, a screenshot or a photo. We will set up the seating plan for you.',
+    svcNote: 'Once your order is complete, send us your guest list via WhatsApp.',
+    change: 'Change', countPh: 'Number of tables (e.g. 15)', create: 'Create', guests: 'guests',
+    addTable: 'Add table', table: 'Table', photo: 'Photo',
+  },
+  ru: {
+    selfTitle: 'Заполню сам(а)', selfDesc: 'Укажите число столов и добавьте гостей самостоятельно',
+    svcTitle: 'Пусть заполнит DigiToy', svcDesc: 'Пришлите список гостей — мы внесём его в систему',
+    svcName: 'Услуга DigiToy',
+    svcLong: 'Отправьте список гостей в Excel, PDF, Word, скриншотом или фото. Мы сами внесём план рассадки.',
+    svcNote: 'После оформления заказа отправьте нам список гостей через WhatsApp.',
+    change: 'Изменить', countPh: 'Число столов (напр. 15)', create: 'Создать', guests: 'гостей',
+    addTable: 'Добавить стол', table: 'Стол', photo: 'Фото',
+  },
+}
 
-function SeatingMethodSelector({ seatingPlan, seatingMethod, onPlanChange, onMethodChange }) {
+function SeatingMethodSelector({ seatingPlan, seatingMethod, onPlanChange, onMethodChange, lang = 'az' }) {
+  const ui = SEATING_UI[lang] || SEATING_UI.az
+  const DIGITORY_FORMATS = ['Excel', 'PDF', 'Word', 'Screenshot', ui.photo]
   const [tables, setTables] = useState(() => parseTableTexts(seatingPlan))
   const [tableCount, setTableCount] = useState('')
 
@@ -1152,7 +1184,7 @@ function SeatingMethodSelector({ seatingPlan, seatingMethod, onPlanChange, onMet
     const cur = tables.length
     if (n <= cur) { commit(tables.slice(0, n)); return }
     const extra = Array.from({ length: n - cur }, (_, i) => ({
-      id: `t${cur + i}_${Date.now()}`, name: `Masa ${cur + i + 1}`, text: '',
+      id: `t${cur + i}_${Date.now()}`, name: `${ui.table} ${cur + i + 1}`, text: '',
     }))
     commit([...tables, ...extra])
   }
@@ -1184,8 +1216,8 @@ function SeatingMethodSelector({ seatingPlan, seatingMethod, onPlanChange, onMet
             <User size={15} strokeWidth={1.5} style={{ color: 'rgba(197,160,89,0.85)' }} />
           </div>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#1a1a1a', marginBottom: 3 }}>Özüm dolduracağam</div>
-            <div style={{ fontSize: 11, color: 'rgba(140,123,107,0.7)', lineHeight: 1.5 }}>Masa sayını bildirin, qonaqları özünüz daxil edin</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#1a1a1a', marginBottom: 3 }}>{ui.selfTitle}</div>
+            <div style={{ fontSize: 11, color: 'rgba(140,123,107,0.7)', lineHeight: 1.5 }}>{ui.selfDesc}</div>
           </div>
         </button>
 
@@ -1199,10 +1231,10 @@ function SeatingMethodSelector({ seatingPlan, seatingMethod, onPlanChange, onMet
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-              <span style={{ fontSize: 13, fontWeight: 500, color: '#1a1a1a' }}>DigiToy doldursun</span>
+              <span style={{ fontSize: 13, fontWeight: 500, color: '#1a1a1a' }}>{ui.svcTitle}</span>
               <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', background: 'rgba(197,160,89,0.18)', border: '1px solid rgba(197,160,89,0.55)', color: 'rgba(160,118,30,1)', padding: '2px 7px' }}>+15 AZN</span>
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(140,123,107,0.7)', lineHeight: 1.5 }}>Qonaq siyahısını göndərin, biz sisteme yerləşdirərik</div>
+            <div style={{ fontSize: 11, color: 'rgba(140,123,107,0.7)', lineHeight: 1.5 }}>{ui.svcDesc}</div>
           </div>
         </button>
       </div>
@@ -1217,14 +1249,14 @@ function SeatingMethodSelector({ seatingPlan, seatingMethod, onPlanChange, onMet
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 8 }}>
               <Sparkles size={14} strokeWidth={1.5} style={{ color: 'rgba(197,160,89,1)' }} />
-              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(197,160,89,1)' }}>DigiToy Xidməti</span>
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(197,160,89,1)' }}>{ui.svcName}</span>
               <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', background: 'rgba(197,160,89,0.18)', border: '1px solid rgba(197,160,89,0.55)', color: 'rgba(160,118,30,1)', padding: '2px 9px' }}>+15 AZN</span>
             </div>
             <p style={{ fontSize: 12, color: 'rgba(60,50,40,0.8)', lineHeight: 1.7, margin: 0, maxWidth: 380 }}>
-              Qonaq siyahısını Excel, PDF, Word, screenshot və ya şəkil kimi göndərin. Oturma planını sizin üçün sistemə yerləşdirəcəyik.
+              {ui.svcLong}
             </p>
           </div>
-          <button type="button" onClick={() => onMethodChange(null)} style={s.changeBtn}>Dəyiş</button>
+          <button type="button" onClick={() => onMethodChange(null)} style={s.changeBtn}>{ui.change}</button>
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 16 }}>
           {DIGITORY_FORMATS.map(fmt => (
@@ -1234,7 +1266,7 @@ function SeatingMethodSelector({ seatingPlan, seatingMethod, onPlanChange, onMet
           ))}
         </div>
         <p style={{ fontSize: 10, color: 'rgba(140,123,107,0.65)', lineHeight: 1.6, margin: '14px 0 0' }}>
-          Sifariş tamamlandıqdan sonra qonaq siyahınızı WhatsApp vasitəsilə bizə göndərin.
+          {ui.svcNote}
         </p>
       </div>
     )
@@ -1244,8 +1276,8 @@ function SeatingMethodSelector({ seatingPlan, seatingMethod, onPlanChange, onMet
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'rgba(253,250,244,0.7)', border: '1px solid rgba(197,160,89,0.22)' }}>
-        <span style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(140,123,107,0.65)' }}>Özüm dolduracağam</span>
-        <button type="button" onClick={() => onMethodChange(null)} style={s.changeBtn}>Dəyiş</button>
+        <span style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(140,123,107,0.65)' }}>{ui.selfTitle}</span>
+        <button type="button" onClick={() => onMethodChange(null)} style={s.changeBtn}>{ui.change}</button>
       </div>
 
       {/* Table count generator */}
@@ -1255,7 +1287,7 @@ function SeatingMethodSelector({ seatingPlan, seatingMethod, onPlanChange, onMet
           value={tableCount}
           onChange={e => setTableCount(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && generateTables()}
-          placeholder="Masa sayı (məs: 15)"
+          placeholder={ui.countPh}
           style={{ flex: 1, minHeight: 44, padding: '0 14px', border: '1px solid rgba(197,160,89,0.35)', background: 'rgba(253,250,244,0.85)', outline: 'none', fontFamily: 'inherit', fontSize: 13, color: '#1a1a1a' }}
         />
         <button type="button" onClick={generateTables}
@@ -1263,7 +1295,7 @@ function SeatingMethodSelector({ seatingPlan, seatingMethod, onPlanChange, onMet
           onMouseEnter={e => e.currentTarget.style.background = 'rgba(197,160,89,0.18)'}
           onMouseLeave={e => e.currentTarget.style.background = 'rgba(197,160,89,0.08)'}
         >
-          Yarat
+          {ui.create}
         </button>
       </div>
 
@@ -1289,17 +1321,17 @@ function SeatingMethodSelector({ seatingPlan, seatingMethod, onPlanChange, onMet
             style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', background: 'transparent', border: 'none', outline: 'none', resize: 'vertical', fontFamily: 'inherit', fontSize: 12, fontWeight: 300, color: '#1a1a1a', lineHeight: 1.7 }}
           />
           <div style={{ padding: '4px 14px 8px', fontSize: 9, color: 'rgba(140,123,107,0.45)', letterSpacing: '0.06em' }}>
-            {table.text.split('\n').filter(g => g.trim()).length} qonaq
+            {table.text.split('\n').filter(g => g.trim()).length} {ui.guests}
           </div>
         </div>
       ))}
 
-      <button type="button" onClick={() => commit([...tables, { id: `t${Date.now()}`, name: `Masa ${tables.length + 1}`, text: '' }])} style={s.addBtn}
+      <button type="button" onClick={() => commit([...tables, { id: `t${Date.now()}`, name: `${ui.table} ${tables.length + 1}`, text: '' }])} style={s.addBtn}
         onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(197,160,89,0.7)'}
         onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(197,160,89,0.4)'}
       >
         <Plus size={11} strokeWidth={1.5} />
-        Masa əlavə et
+        {ui.addTable}
       </button>
     </div>
   )
@@ -1343,7 +1375,7 @@ const STEP_EXTRA_TITLES = {
 const STEP_DESCRIPTIONS = {
   az: {
     0: 'Əvvəlcə dəvətnamənizin dizaynını seçin — qalan addımlar bu görünüşə tətbiq olunacaq.',
-    1: 'Toyunuz haqqında əsas məlumatları daxil edin.',
+    1: 'Tədbiriniz haqqında əsas məlumatları daxil edin.',
     2: 'Tədbirinizin keçiriləcəyi məkanı xəritədə tapın.',
     3: 'Günün əsas anları üçün proqram cədvəli yaradın.',
     4: 'Qonaqlar üçün geyim tərzi seçin.',
@@ -1704,12 +1736,12 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
   /* ── Şablon seçimi (Phase 4 — DB inteqrasiyası) ──
      Artıq `data.templateId` sahəsindədir: autosave → draft → submit → approve
      → invitations.form_data zəncirinin hamısından keçir və reload-dan sonra
-     bərpa olunur. Dəyər yoxdursa default şablon (simple-luxury). */
-  /* ⚠ builderDefaultTemplateId() — DEFAULT_TEMPLATE_ID DEYİL. Bax
-     templateConfig: simple-luxury render fallback-ı olaraq qalır, amma
-     builder-də ilk seçili gələn dizayn siyahının birincisidir. */
-  const selectedTemplate = data.templateId || builderDefaultTemplateId()
+     bərpa olunur. Boş dəyər: bax templateConfig › resolveBuilderTemplateId. */
+  const selectedTemplate = resolveBuilderTemplateId(data.templateId, { isAdmin })
   const setSelectedTemplate = (id) => set('templateId', id)
+  /* Phase 45.1 — builder-dən çıxan data (autosave draft, önbaxış → sifariş)
+     `templateId: selectedTemplate` daşıyır: boş dəyər server-də simple-luxury
+     olurdu, müştəri isə Royal Gold-u «Seçildi» görürdü. */
 
   const sessionIdRef   = useRef(null)
   const autosaveTimer  = useRef(null)
@@ -1786,10 +1818,10 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     clearTimeout(autosaveTimer.current)
     autosaveTimer.current = setTimeout(function() {
       const pkg = data.package || data.selectedPackage || pkgId || 'SADE'
-      saveDraft(sessionIdRef.current, data, pkg, step).catch(function() {})
+      saveDraft(sessionIdRef.current, { ...data, templateId: selectedTemplate }, pkg, step).catch(function() {})
     }, 800)
     return function() { clearTimeout(autosaveTimer.current) }
-  }, [data, step, isHydrated, isAdmin])
+  }, [data, step, isHydrated, isAdmin, selectedTemplate])
 
   const set = (key, val) => {
     setData((d) => ({ ...d, [key]: val }))
@@ -1876,7 +1908,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     if (!validate()) return
     setSubmitLoading(true)
     try {
-      await onSubmit(data)
+      await onSubmit({ ...data, templateId: selectedTemplate })
       trackEvent('builder_completed', { lang, package: pkgId, step: VISIBLE_TOTAL })
     } catch {
       /* üst komponent xətaları idarə edir */

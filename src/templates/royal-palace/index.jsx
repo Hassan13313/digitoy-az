@@ -1,5 +1,5 @@
 import TemplateShell, { alpha } from '../_shared/TemplateShell'
-import OpeningFrame, { Kicker, NameRow, Ornament, OpeningMeta } from '../_shared/OpeningFrame'
+import OpeningFrame, { Kicker, NameRow, Ornament, OpeningMeta, MonoContent } from '../_shared/OpeningFrame'
 import { Ambient, RotRing, Particles } from '../_shared/motion'
 import { getTemplateTheme } from '../templateConfig'
 
@@ -33,9 +33,8 @@ const KEYFRAMES = `
 `
 
 function Opening(props) {
-  const { theme, weddingData, isCouple } = props
-
-  const dateStr = String(weddingData.date || '').split('-').reverse().join(' · ')
+  const { theme, weddingData, isCouple, ot } = props
+  const monoImg = ot.mono.kind === 'image'
 
   /* Çərçivə xətti — `tpl-drawx`/`tpl-drawy` OpeningFrame-də elan olunub */
   const lineH = (delay, extra) => ({
@@ -54,7 +53,8 @@ function Opening(props) {
       {...props}
       exit="curtain"
       duration={950}
-      label="Dəvətnaməni aç"
+      label={ot.text('cta')}
+      hint={ot.text('hint')}
       ctaDelay={4.1}
       hintDelay={4.6}
       orbs="halo"
@@ -105,27 +105,36 @@ function Opening(props) {
           animation: 'rp-shock 4.2s ease-out 2.9s infinite backwards',
         }} />
 
-        {/* Romb möhür — baş hərflər */}
+        {/* Romb möhür — baş hərflər (korporativ/digər tədbirdə ♛).
+            Şəkil rombun içində dik durur: möhür onu öz formasında kəsir. */}
         <span style={{
           width: 76, height: 76, border: `1px solid ${alpha(theme.primary, 0.85)}`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
+          overflow: monoImg ? 'hidden' : undefined,
           animation: 'rp-seal 1s cubic-bezier(.2,.9,.25,1) 2.2s both',
         }}>
-          <span style={{
-            transform: 'rotate(-45deg)', fontFamily: DISP,
-            fontSize: 'clamp(15px, 5vw, 19px)', letterSpacing: '.08em', color: theme.secondary,
-          }}>
-            {[weddingData.groomName, weddingData.brideName]
-              .map((n) => String(n || '').trim().charAt(0).toUpperCase())
-              .filter(Boolean).join(' ') || '♛'}
-          </span>
+          {monoImg ? (
+            <span style={{ flex: '0 0 auto', width: 108, height: 108, transform: 'rotate(-45deg)' }}>
+              <MonoContent mono={ot.mono} />
+            </span>
+          ) : (
+            <span style={{
+              transform: 'rotate(-45deg)', fontFamily: DISP,
+              fontSize: 'clamp(15px, 5vw, 19px)', letterSpacing: '.08em', color: theme.secondary,
+            }}>
+              <MonoContent mono={ot.mono} />
+            </span>
+          )}
         </span>
       </div>
 
-      <Kicker text="Dəvətnamə" color={alpha(theme.muted, 0.95)} lineColor={alpha(theme.primary, 0.55)} delay={3.0} style={{ marginTop: 28 }} />
+      {ot.show('kicker') && (
+        <Kicker text={ot.text('kicker')} color={alpha(theme.muted, 0.95)} lineColor={alpha(theme.primary, 0.55)} delay={3.0} style={{ marginTop: 28 }} />
+      )}
 
       <NameRow
         theme={theme} weddingData={weddingData} isCouple={isCouple}
+        text={ot.override('title')}
         delay={3.3} step={0.2}
         size="clamp(21px, 7.2vw, 28px)" ampSize="clamp(16px, 5.4vw, 20px)"
         font={DISP} color={theme.accent} ampColor={theme.primary}
@@ -134,7 +143,9 @@ function Opening(props) {
 
       <Ornament color={theme.primary} mark="rhomb" delay={3.8} width={32} style={{ marginTop: 16 }} />
 
-      <OpeningMeta text={dateStr} color={alpha(theme.muted, 0.95)} delay={4.0} style={{ marginTop: 13, letterSpacing: '.28em' }} />
+      {ot.show('meta') && (
+        <OpeningMeta text={ot.text('meta')} color={alpha(theme.muted, 0.95)} delay={4.0} style={{ marginTop: 13, letterSpacing: '.28em' }} />
+      )}
     </OpeningFrame>
   )
 }

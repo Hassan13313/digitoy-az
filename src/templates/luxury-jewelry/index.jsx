@@ -1,5 +1,5 @@
 import TemplateShell, { alpha } from '../_shared/TemplateShell'
-import OpeningFrame, { Kicker, NameRow, Ornament, OpeningMeta } from '../_shared/OpeningFrame'
+import OpeningFrame, { Kicker, NameRow, Ornament, OpeningMeta, EmblemSlot } from '../_shared/OpeningFrame'
 import { Ambient, RotRing, Particles } from '../_shared/motion'
 import { getTemplateTheme } from '../templateConfig'
 
@@ -87,16 +87,15 @@ function Gem({ delay = 0 }) {
 }
 
 function Opening(props) {
-  const { theme, weddingData, isCouple } = props
-
-  const dateStr = String(weddingData.date || '').split('-').reverse().join(' · ')
+  const { theme, weddingData, isCouple, ot } = props
 
   return (
     <OpeningFrame
       {...props}
       exit="zoom"
       duration={950}
-      label="Qutunu aç"
+      label={ot.text('cta')}
+      hint={ot.text('hint')}
       ctaDelay={4.1}
       hintDelay={4.6}
       orbs="none"
@@ -131,9 +130,15 @@ function Opening(props) {
           animation: 'lj-shadow 1s ease-out 2.3s both',
         }} />
 
-        {/* Daş */}
+        {/* Daş — admin onu mətn/stiker/şəkillə əvəz edə və ya gizlədə bilər */}
         <div style={{ position: 'relative', paddingBottom: 12 }}>
-          <Gem delay={2.1} />
+          <EmblemSlot
+            mono={ot.mono} size={78} delay={2.1}
+            border={`1px solid ${alpha(theme.primary, 0.55)}`} background="#0C201B"
+            color={theme.accent} font={DISP}
+          >
+            <Gem delay={2.1} />
+          </EmblemSlot>
         </div>
 
         {/* Qutunun gövdəsi */}
@@ -159,10 +164,13 @@ function Opening(props) {
         </div>
       </div>
 
-      <Kicker text="Dəvətnamə" color={alpha(theme.muted, 0.95)} lineColor={alpha(theme.primary, 0.5)} delay={3.3} style={{ marginTop: 28 }} />
+      {ot.show('kicker') && (
+        <Kicker text={ot.text('kicker')} color={alpha(theme.muted, 0.95)} lineColor={alpha(theme.primary, 0.5)} delay={3.3} style={{ marginTop: 28 }} />
+      )}
 
       <NameRow
         theme={theme} weddingData={weddingData} isCouple={isCouple}
+        text={ot.override('title')}
         delay={3.5} step={0.2}
         size="clamp(22px, 7.6vw, 30px)" ampSize="clamp(16px, 5.4vw, 21px)"
         font={DISP} color={theme.accent} ampColor={theme.primary}
@@ -171,7 +179,9 @@ function Opening(props) {
 
       <Ornament color={theme.primary} mark="rhomb" delay={3.9} width={30} style={{ marginTop: 15 }} />
 
-      <OpeningMeta text={dateStr} color={alpha(theme.muted, 0.95)} delay={4.05} style={{ marginTop: 13, letterSpacing: '.28em' }} />
+      {ot.show('meta') && (
+        <OpeningMeta text={ot.text('meta')} color={alpha(theme.muted, 0.95)} delay={4.05} style={{ marginTop: 13, letterSpacing: '.28em' }} />
+      )}
     </OpeningFrame>
   )
 }

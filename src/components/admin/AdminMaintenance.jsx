@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { RefreshCw, ShieldCheck, ShieldAlert, HardDrive, Trash2, Database, ScrollText } from 'lucide-react'
 import { getMaintenanceStatus, cleanupDrafts, reindexMedia, getAdminAudit } from '../../utils/api'
+import { useIsNarrow } from '../../hooks/useIsNarrow'
+import { azDate } from './adminFormat'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    BAXIM — Phase 37/39.
@@ -31,13 +33,9 @@ const C = {
   danger: 'oklch(48% 0.15 25)',
 }
 
+/* ⚠ `toLocaleString('az-AZ')` Chrome-da «2026 M09 07» verirdi — bax adminFormat */
 function formatDateTime(iso) {
-  if (!iso) return '—'
-  const d = new Date(String(iso).replace(' ', 'T'))
-  if (Number.isNaN(d.getTime())) return String(iso)
-  return d.toLocaleString('az-AZ', {
-    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
-  })
+  return azDate(iso, { time: true })
 }
 
 const card = {
@@ -64,6 +62,8 @@ function Stat({ label, value, hint }) {
 }
 
 export default function AdminMaintenance() {
+  /* Telefonda məzmun ekranın kənarına yapışırdı (yan boşluq 0 idi) */
+  const narrow = useIsNarrow()
   const [data,    setData]    = useState(null)
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState('')
@@ -130,7 +130,7 @@ export default function AdminMaintenance() {
   const BackupIcon = b.status === 'ok' ? ShieldCheck : ShieldAlert
 
   return (
-    <div style={{ padding: '4px 0 40px' }}>
+    <div style={{ padding: narrow ? '16px 14px 28px' : '4px 0 40px' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 4 }}>
         <h2 style={{ margin: 0, fontSize: 21, fontWeight: 700, color: C.ink }}>Baxım</h2>
         <span style={{ fontSize: 12, color: C.sub }}>sxem v{data?.schema_version ?? '—'}</span>

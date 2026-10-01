@@ -25,9 +25,12 @@ import TemplateRenderer from '../../templates/TemplateRenderer'
 const MSG_DATA   = 'digitoy:preview:data'
 const MSG_SCROLL = 'digitoy:preview:scroll'
 const MSG_READY  = 'digitoy:preview:ready'
+/* Phase 45 — «Açılış» redaktoru: açılış ekranını yenidən oynat */
+const MSG_REPLAY = 'digitoy:preview:replay'
 
 export default function LivePreviewPage() {
   const [payload, setPayload] = useState(null)
+  const [replay, setReplay] = useState(0)
 
   useEffect(() => {
     /* Axtarış motorları bu səhifəni indeksləməsin */
@@ -44,7 +47,16 @@ export default function LivePreviewPage() {
       if (!d || typeof d !== 'object') return
 
       if (d.type === MSG_DATA) {
-        setPayload({ template: d.template, weddingData: d.weddingData, lang: d.lang })
+        setPayload({
+          template: d.template, weddingData: d.weddingData, lang: d.lang,
+          /* 'opening' — admin açılış ekranını redaktə edir, önbaxış onu göstərir */
+          view: d.view === 'opening' ? 'opening' : 'content',
+        })
+        return
+      }
+
+      if (d.type === MSG_REPLAY) {
+        setReplay((n) => n + 1)
         return
       }
 
@@ -80,8 +92,13 @@ export default function LivePreviewPage() {
     )
   }
 
+  const openingView = payload.view === 'opening'
+
   return (
     <TemplateRenderer
+      /* Rejim dəyişəndə (və ya «yenidən oynat»da) ağac yenidən qurulur —
+         açılış vəziyyəti şablonun daxilindədir, başqa yolla sıfırlanmır. */
+      key={`${payload.view}-${replay}`}
       template={payload.template}
       isPreview
       weddingData={payload.weddingData}
@@ -89,9 +106,10 @@ export default function LivePreviewPage() {
       isDemoMode
       onBack={() => {}}
       setLang={() => {}}
-      /* ⚠ Açılış ekranı atlanır: admin redaktə etdiyi bölmələri dərhal
-         görməlidir, zərf animasiyasını hər dəyişiklikdə izləməməlidir. */
-      startOpened
+      /* ⚠ Adi rejimdə açılış ekranı atlanır: admin redaktə etdiyi bölmələri
+         dərhal görməlidir. «Açılış» redaktorunda isə məhz açılış göstərilir. */
+      startOpened={!openingView}
+      openingPreview={openingView}
     />
   )
 }

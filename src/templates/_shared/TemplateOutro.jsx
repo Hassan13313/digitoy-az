@@ -84,10 +84,14 @@ function SocialIcons({ color, border }) {
  * @param {boolean} isCorp      korporativ ad
  * @param {string}  eventLabel  tədbir adı (korporativ fallback)
  * @param {string}  serif       başlıq şrifti
+ * @param {{kicker?: string|null, title?: string|null}} footer
+ *        Phase 45 — admin «Mətnlər › Alt hissə»: `title` adlar sətrini,
+ *        `kicker` alt imza sətrini əvəz edir. Verilməyəndə əvvəlki kimi.
  */
 export default function TemplateOutro({
   theme, weddingData, lang = 'az', isDemoMode = false,
   isCouple = true, isCorp = false, eventLabel = '', serif,
+  footer = null,
 }) {
   const tr  = t[lang] || t.az
   const cta = CTA[lang] || CTA.az
@@ -171,7 +175,7 @@ export default function TemplateOutro({
           fontSize: 'clamp(16px, 4.5vw, 18px)', letterSpacing: '.04em',
           color: theme.primary, marginBottom: 12,
         }}>
-          {names.length === 2 ? (
+          {footer?.title ? footer.title : names.length === 2 ? (
             <>
               {names[0]}
               <span style={{ color: alpha(footerText, 0.28), margin: '0 12px', fontStyle: 'italic' }}>&</span>
@@ -196,7 +200,7 @@ export default function TemplateOutro({
           fontSize: 10, letterSpacing: '.26em', textTransform: 'uppercase',
           color: alpha(footerText, 0.4), margin: '0 0 20px', fontWeight: 300,
         }}>
-          {tr.footer_made}
+          {footer?.kicker || tr.footer_made}
         </p>
 
         <SocialIcons color={iconCol} border={iconBorder} />

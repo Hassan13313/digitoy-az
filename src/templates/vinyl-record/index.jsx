@@ -1,5 +1,5 @@
 import TemplateShell, { alpha } from '../_shared/TemplateShell'
-import OpeningFrame, { Kicker, OpeningMeta } from '../_shared/OpeningFrame'
+import OpeningFrame, { Kicker, OpeningMeta, MonoContent } from '../_shared/OpeningFrame'
 import { Ambient } from '../_shared/motion'
 import { getTemplateTheme } from '../templateConfig'
 
@@ -16,7 +16,7 @@ import { getTemplateTheme } from '../templateConfig'
    ⚠ Fırlanma `transform: rotate` ilədir (kompozitor qatında) — layout
    yenidən hesablanmır, ona görə uzunmüddətli infinite animasiya təhlükəsizdir.
    ⚠ Etiket mətni adların BAŞ HƏRFLƏRİDİR: uzun ad etiketə sığmır, ona görə
-   `initials()` yalnız ilk hərfləri götürür.
+   yalnız ilk hərflər götürülür (openingSpec › autoMonogram).
    ───────────────────────────────────────────────────────────────────────── */
 
 const TH = getTemplateTheme('vinyl-record')
@@ -44,27 +44,20 @@ const KEYFRAMES = `
 @keyframes vr-dust   { 0%,100% { opacity:.06 } 50% { opacity:.16 } }
 `
 
-/** Adların baş hərfləri — etiketə sığan qısa forma («N&R») */
-function initials(weddingData, isCouple) {
-  const cut = (s) => String(s || '').trim().charAt(0).toUpperCase()
-  if (isCouple) {
-    const a = cut(weddingData.groomName), b = cut(weddingData.brideName)
-    return [a, b].filter(Boolean).join('&') || '♥'
-  }
-  return cut(weddingData.eventName || weddingData.brideName) || '♥'
-}
+/* Etiketdəki baş hərflər («N&R») `openingSpec › autoMonogram`-dadır — admin
+   panelinin «Avtomatik» önizləməsi ilə eyni mənbə. Korporativ/digər tədbirdə
+   hərf əvəzinə ♪ işarəsi göstərilir (Phase 45). */
 
 function Opening(props) {
-  const { theme, weddingData, isCouple } = props
-
-  const dateStr = String(weddingData.date || '').split('-').reverse().join(' · ')
+  const { theme, weddingData, isCouple, ot } = props
 
   return (
     <OpeningFrame
       {...props}
       exit="zoom"
       duration={950}
-      label="Plyonkanı işə sal"
+      label={ot.text('cta')}
+      hint={ot.text('hint')}
       ctaDelay={4.0}
       hintDelay={4.5}
       orbs="none"
@@ -117,10 +110,14 @@ function Opening(props) {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             animation: 'tpl-cta .9s cubic-bezier(.2,.9,.25,1) 1.9s both',
           }}>
-            <span style={{
-              fontFamily: DISP, fontWeight: 700, fontSize: 'clamp(13px, 4.6vw, 17px)',
-              color: theme.accent, letterSpacing: '.02em',
-            }}>{initials(weddingData, isCouple)}</span>
+            {ot.mono.kind === 'image' ? (
+              <span style={{ position: 'absolute', inset: 0 }}><MonoContent mono={ot.mono} /></span>
+            ) : (
+              <span style={{
+                fontFamily: DISP, fontWeight: 700, fontSize: 'clamp(13px, 4.6vw, 17px)',
+                color: theme.accent, letterSpacing: '.02em',
+              }}><MonoContent mono={ot.mono} stickerScale={1.3} /></span>
+            )}
 
             {/* Etiketin üzərindən keçən işıq */}
             <span aria-hidden="true" style={{
@@ -158,19 +155,30 @@ function Opening(props) {
         </span>
       </div>
 
-      <Kicker text="Side A" color={alpha(theme.muted, 0.95)} lineColor={alpha(theme.primary, 0.5)} delay={3.2} style={{ marginTop: 28 }} />
+      {ot.show('kicker') && (
+        <Kicker
+          text={ot.text('kicker')} lang={ot.custom('kicker') ? undefined : 'en'}
+          color={alpha(theme.muted, 0.95)} lineColor={alpha(theme.primary, 0.5)} delay={3.2} style={{ marginTop: 28 }}
+        />
+      )}
 
-      <div style={{
-        fontFamily: DISP, fontWeight: 500, fontSize: 'clamp(17px, 5.6vw, 22px)',
-        letterSpacing: '.1em', textTransform: 'uppercase', color: theme.accent,
-        marginTop: 14, animation: 'tpl-rise .8s ease-out 3.4s both',
-      }}>
-        {isCouple
-          ? [weddingData.groomName, weddingData.brideName].filter(Boolean).join(' & ')
-          : (weddingData.eventName || weddingData.brideName || '')}
-      </div>
+      {ot.show('title') && (
+        <div style={{
+          fontFamily: DISP, fontWeight: 500, fontSize: 'clamp(17px, 5.6vw, 22px)',
+          letterSpacing: '.1em', textTransform: 'uppercase', color: theme.accent,
+          marginTop: 14, animation: 'tpl-rise .8s ease-out 3.4s both',
+        }}>
+          {ot.custom('title')
+            ? ot.text('title')
+            : (isCouple
+              ? [weddingData.groomName, weddingData.brideName].filter(Boolean).join(' & ')
+              : (weddingData.eventName || weddingData.brideName || ''))}
+        </div>
+      )}
 
-      <OpeningMeta text={dateStr} color={alpha(theme.muted, 0.9)} delay={3.7} style={{ marginTop: 12, letterSpacing: '.28em', fontFamily: MONO }} />
+      {ot.show('meta') && (
+        <OpeningMeta text={ot.text('meta')} color={alpha(theme.muted, 0.9)} delay={3.7} style={{ marginTop: 12, letterSpacing: '.28em', fontFamily: MONO }} />
+      )}
     </OpeningFrame>
   )
 }
@@ -219,7 +227,7 @@ export default function VinylRecordTemplate(props) {
         venue:     { kicker: 'STUDIO',
                     title: { az: 'Studiya · məkan', en: 'Studio · venue', ru: 'Студия · место' } },
         program:   { kicker: 'TRACKLIST',
-                    title: { az: 'Tracklist · Side A', en: 'Tracklist · Side A', ru: 'Трек-лист · Сторона A' } },
+                    title: { az: 'TRACKLIST · SIDE A', en: 'Tracklist · Side A', ru: 'Трек-лист · Сторона A' } },
         dresscode: { kicker: 'STAGE',
                     title: { az: 'Səhnə geyimi', en: 'Stage outfit', ru: 'Сценический образ' } },
         seating:   { kicker: 'SEATING',
@@ -229,7 +237,7 @@ export default function VinylRecordTemplate(props) {
         rsvp:      { kicker: 'SESSİYA',
                     title: { az: 'Sessiyaya qoşulun', en: 'RSVP · join the session', ru: 'Присоединяйтесь' } },
         guestbook: { kicker: 'LINER NOTES',
-                    title: { az: 'Liner notes', en: 'Liner notes', ru: 'Заметки на конверте' } },
+                    title: { az: 'LINER NOTES', en: 'Liner notes', ru: 'Заметки на конверте' } },
       }}
       design={{
         /* ── Vizual şəxsiyyət (Phase 42) ─────────────────────────────

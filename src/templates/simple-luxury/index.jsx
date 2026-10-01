@@ -33,6 +33,8 @@ import { useGallery } from '../../hooks/useGallery'
 import { useMusicPrompt } from '../../hooks/useMusicPrompt'
 import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
 import t from '../../data/translations'
+import { mergeSectionLabels, withStringOverrides, makeLabelResolver, sectionHead } from '../../data/adminOverrides'
+import { makeOpeningText } from '../_shared/openingSpec'
 
 /* Ortaq komponentlər (sifariş CTA / musiqi bubble) theme token-ləri ilə işləyir */
 const TH = getTemplateTheme('simple-luxury')
@@ -75,14 +77,26 @@ const SL_MAP_THEME = {
   surface:    '#F2EAD6',
 }
 
-export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBack, isDemoMode = false, initialGuestbook }) {
-  const tr = t[lang]
+export default function SimpleLuxuryTemplate({
+  lang, setLang, weddingData, onBack, isDemoMode = false, initialGuestbook,
+  /* Phase 45 — admin override-ları (açılış afişasının mətnləri, hekayə
+     başlığı) və admin önbaxışında açılış videosunu atlamaq. Verilməyəndə
+     davranış əvvəlki kimidir. */
+  adminOverrides = null, startOpened = false, openingPreview = false,
+}) {
+  /* Phase 45 — admin «Mətnlər»: sətir override-ları nazik Proxy ilə (yoxdursa
+     EYNİ obyekt), bölmə adları `L()` ilə — TemplateShell-in eyni qaydası.
+     Bölmə komponentlərinə `kicker`/`title`/`adminStrings` kimi ötürülür. */
+  const adminStrings = adminOverrides?.strings || null
+  const tr = withStringOverrides(t[lang], adminStrings, lang)
+  const L = makeLabelResolver(mergeSectionLabels(null, adminOverrides), lang)
+  const heroTitle = L('hero', 'title', null)
 
   /* Naviqasiya linkləri tək mənbədən (MapSection) — hədəf yoxdursa null,
      onda düymə render edilmir (əvvəlki `href="#"` ölü düyməsi aradan qalxdı). */
   const dirUrl = directionsUrl(weddingData)
   const mapUrl = openMapUrl(weddingData)
-  const [envelopeOpened, setEnvelopeOpened] = useState(false)
+  const [envelopeOpened, setEnvelopeOpened] = useState(startOpened)
   const musicRef = useRef(null)
 
   /* Bubble: açılışdan 1.8s sonra çıxır, İLK SCROLL-da və ya ona toxunanda
@@ -147,6 +161,11 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
     birthday: tr.event_birthday, corporate: tr.event_corporate,
     other: weddingData.eventName || tr.event_other,
   }
+  const ot = makeOpeningText(
+    'simple-luxury',
+    { weddingData, lang, isCouple, isCorp, eventLabel: eventLabels[weddingData.eventType] || tr.event_toy },
+    adminOverrides?.opening || null,
+  )
 
   /* Qalereya/QR məntiqi — hooks/useGallery.js.
      `downloadTableCard` Phase 27-də bütün şablonlardan çıxarıldı; hook-da
@@ -170,21 +189,26 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
       /* Basma/hover işığı — qızıl aksent (bax index.css › [data-press]) */
       style={{ '--tpl-glow': 'rgba(197,160,89,0.34)' }}
     >
-      {/* Opening video — manages its own lifecycle, fades into invitation */}
-      <OpeningVideo
-        onComplete={() => {
-          setEnvelopeOpened(true)
-          /* Musiqi dəvətnamə açılan kimi başlayır.
-             ⚠ Video ÖZÜ bitəndə ortada istifadəçi jesti olmur → brauzer
-             bloklaya bilər; o halda `useMusicPlayer` qonağın növbəti
-             toxunuşunda təkrar cəhd edir, bubble isə açıq qalır.
-             "Keç" düyməsi ilə keçiləndə bu çağırış birbaşa klik hadisəsinin
-             içindədir və dərhal işləyir. */
-          if (autoPlay) musicRef.current?.play()
-        }}
-        weddingData={weddingData}
-        lang={lang}
-      />
+      {/* Opening video — manages its own lifecycle, fades into invitation.
+          Admin önbaxışında (`startOpened`) video göstərilmir. */}
+      {!startOpened && (
+        <OpeningVideo
+          onComplete={() => {
+            setEnvelopeOpened(true)
+            /* Musiqi dəvətnamə açılan kimi başlayır.
+               ⚠ Video ÖZÜ bitəndə ortada istifadəçi jesti olmur → brauzer
+               bloklaya bilər; o halda `useMusicPlayer` qonağın növbəti
+               toxunuşunda təkrar cəhd edir, bubble isə açıq qalır.
+               "Keç" düyməsi ilə keçiləndə bu çağırış birbaşa klik hadisəsinin
+               içindədir və dərhal işləyir. */
+            if (autoPlay) musicRef.current?.play()
+          }}
+          weddingData={weddingData}
+          lang={lang}
+          ot={ot}
+          posterOnly={openingPreview}
+        />
+      )}
 
       {/* Music control — root level so position:fixed is viewport-relative, not transform-relative */}
       <MusicToggle ref={musicRef} lang={lang} music={invMusic} visible={envelopeOpened} autoPlay={autoPlay} />
@@ -238,7 +262,7 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
 
               <div className="animate-fade-in w-full">
                 <p className="text-[9px] tracking-[0.45em] uppercase text-gold mb-8 font-medium">
-                  {eventLabels[weddingData.eventType] || tr.event_toy}
+                  {L('hero', 'kicker', eventLabels[weddingData.eventType] || tr.event_toy)}
                 </p>
 
                 <p className="font-serif italic text-[15px] sm:text-base text-brown-dark/90 mb-6 font-normal tracking-wide leading-relaxed max-w-xs mx-auto">
@@ -247,7 +271,9 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
 
                 {/* Names */}
                 <h1 className="font-serif leading-none mb-3">
-                  {isCouple ? (
+                  {heroTitle ? (
+                    <span className="block text-5xl sm:text-6xl md:text-7xl text-ink font-light tracking-tight">{heroTitle}</span>
+                  ) : isCouple ? (
                     <>
                       <span className="block text-5xl sm:text-6xl md:text-7xl text-ink font-light tracking-tight">{weddingData.groomName}</span>
                       <span className="block text-3xl sm:text-4xl text-gold font-light italic my-3">{tr.inv_and}</span>
@@ -320,6 +346,7 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
               lang={lang}
               eventType={weddingData.eventType || 'toy'}
               eventName={weddingData.eventName || ''}
+              {...sectionHead(L, 'countdown')}
             />}
 
             {/* ── BİZİM HEKAYƏMİZ (Phase 43) ─────────────────────────────
@@ -337,6 +364,7 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
                     story={weddingData.loveStory}
                     templateId="simple-luxury"
                     lang={lang}
+                    copyOverrides={adminOverrides?.story?.text || null}
                   />
                 </Reveal>
               </section>
@@ -345,8 +373,8 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
             {/* ── LOCATION ── */}
             {SECTIONS.venue && <section className="py-28 px-6 bg-cream">
               <Reveal className="max-w-lg mx-auto text-center">
-                <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">LOCATION</p>
-                <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-4">{tr.inv_location}</h2>
+                <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">{L('venue', 'kicker', 'LOCATION')}</p>
+                <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-4">{L('venue', 'title', tr.inv_location)}</h2>
                 {/* mb-10 konteynerə keçdi → qeyd olmayanda boşluq əvvəlki kimi qalır */}
                 <div className="mb-10">
                   <p className="text-brown-muted text-sm font-light tracking-wide leading-relaxed">{weddingData.venueName}</p>
@@ -436,13 +464,13 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
             </section>}
 
             {/* ── EVENT TIMELINE (Program) ── */}
-            {SECTIONS.program && <EventTimeline lang={lang} eventType={weddingData.eventType} programSteps={weddingData.programSteps} />}
+            {SECTIONS.program && <EventTimeline lang={lang} eventType={weddingData.eventType} programSteps={weddingData.programSteps} {...sectionHead(L, 'program')} />}
 
             {/* ── DRESS CODE ── */}
             {SECTIONS.dresscode && <section className="py-28 px-6 bg-beige">
               <Reveal className="max-w-lg mx-auto text-center">
-                <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">Style</p>
-                <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-10">{tr.inv_dresscode}</h2>
+                <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">{L('dresscode', 'kicker', 'Style')}</p>
+                <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-10">{L('dresscode', 'title', tr.inv_dresscode)}</h2>
 
                 {/* 9 şablonun ORTAQ geyim tərzi bölməsi — layihədə yeganə
                     dress code görünüşü (Claude Design siluetləri). */}
@@ -463,14 +491,14 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
 
             {/* ── SEATING — lüks axtarış UI ── */}
             {weddingData.seatingPlan && canShowSeating && (
-              <SeatingSearch seatingPlan={weddingData.seatingPlan} lang={lang} />
+              <SeatingSearch seatingPlan={weddingData.seatingPlan} lang={lang} adminStrings={adminStrings} {...sectionHead(L, 'seating')} />
             )}
 
             {/* ── GALLERY ── */}
             {canShowGallery && <section id="gallery-section" className="py-28 px-6 bg-cream">
               <Reveal className="max-w-lg mx-auto text-center">
-                <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">{tr.f_gallery}</p>
-                <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-5">{tr.inv_gallery}</h2>
+                <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">{L('gallery', 'kicker', tr.f_gallery)}</p>
+                <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-5">{L('gallery', 'title', tr.inv_gallery)}</h2>
                 <GoldDividerOrnament />
 
                 {/* Demo sample photos grid */}
@@ -530,10 +558,10 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
             </section>}
 
             {/* ── RSVP — yalnız VIP/PREMIUM paketlərdə ── */}
-            {canShowRsvp && <RSVPSection lang={lang} weddingData={weddingData} />}
+            {canShowRsvp && <RSVPSection lang={lang} weddingData={weddingData} adminStrings={adminStrings} {...sectionHead(L, 'rsvp')} />}
 
             {/* ── GUESTBOOK ── */}
-            {SECTIONS.guestbook && <Guestbook lang={lang} initialMessages={initialGuestbook} />}
+            {SECTIONS.guestbook && <Guestbook lang={lang} initialMessages={initialGuestbook} adminStrings={adminStrings} {...sectionHead(L, 'guestbook')} />}
 
             {/* ── SİFARİŞ CTA — Phase 27: 9 şablonun ortaq komponenti.
                 Görünmə şərti (!pageSlug && !isDemoMode) komponentin içindədir. ── */}
@@ -551,6 +579,7 @@ export default function SimpleLuxuryTemplate({ lang, setLang, weddingData, onBac
               theme={TH} weddingData={weddingData} lang={lang}
               isDemoMode={isDemoMode} isCouple={isCouple} isCorp={isCorp}
               eventLabel={eventLabels[weddingData.eventType]} serif={TH.fonts?.heading}
+              footer={sectionHead(L, 'footer')}
             />
           </motion.div>
         )}

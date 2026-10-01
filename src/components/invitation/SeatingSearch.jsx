@@ -3,18 +3,22 @@ import { Search, X } from 'lucide-react'
 import { useSeating } from '../../hooks/useSeating'
 import { Reveal } from '../../templates/_shared/motion'
 import t from '../../data/translations'
+import { withStringOverrides } from '../../data/adminOverrides'
 
 /* Axtarış/normalizasiya/masa yoldaşı məntiqi artıq `hooks/useSeating.js`-dədir —
    bu fayl yalnız simple-luxury UI qatıdır. */
 
-export default function SeatingSearch({ seatingPlan, lang }) {
-  const tr = t[lang] || t.az
+/* Phase 45 — admin «Mətnlər»: `kicker`/`title` bölmə adlarını, `adminStrings`
+   sətir override-larını verir. Verilməyəndə çıxış əvvəlki ilə EYNİDİR. */
+export default function SeatingSearch({ seatingPlan, lang, adminStrings = null, kicker = null, title = null }) {
+  const tr = withStringOverrides(t[lang] || t.az, adminStrings, lang)
   const {
     suggestions, selected, tablemates,
     query, setQuery, activeIdx, setActiveIdx, setSelected,
     isEmpty, showNotFound, pick, reset, onKeyDown, inputRef,
-    labels: L, statusMap: STATUS_DOT,
+    labels: rawL, statusMap: STATUS_DOT,
   } = useSeating({ seatingPlan, lang })
+  const L = withStringOverrides(rawL, adminStrings, lang, 'seating.')
 
   if (isEmpty) return null
 
@@ -24,8 +28,8 @@ export default function SeatingSearch({ seatingPlan, lang }) {
 
         {/* Header */}
         <div className="text-center mb-12">
-          <p className="text-[9px] tracking-[0.38em] uppercase text-gold mb-5 font-medium font-sans">SEATING</p>
-          <h2 className="font-serif text-3xl text-ink font-light tracking-tight">{L.title}</h2>
+          <p className="text-[9px] tracking-[0.38em] uppercase text-gold mb-5 font-medium font-sans">{kicker || 'SEATING'}</p>
+          <h2 className="font-serif text-3xl text-ink font-light tracking-tight">{title || L.title}</h2>
           <p className="text-brown-muted text-xs mt-3 tracking-wide font-light font-sans">{L.sub}</p>
           <div className="gold-divider mt-8 max-w-[100px] mx-auto" />
         </div>
@@ -171,7 +175,7 @@ export default function SeatingSearch({ seatingPlan, lang }) {
                       {selected.table_id}
                     </p>
                   </div>
-                  <button onClick={reset} data-press aria-label="Yenidən axtar"
+                  <button onClick={reset} data-press aria-label={L.again || 'Yenidən axtar'}
                     style={{ flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', padding: 6 }}>
                     <X size={15} strokeWidth={1.5} style={{ color: 'rgba(140,123,107,0.55)' }} />
                   </button>

@@ -2,23 +2,27 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Send } from 'lucide-react'
 import { useGuestbook } from '../../hooks/useGuestbook'
 import { Reveal } from '../../templates/_shared/motion'
+import { withStringOverrides } from '../../data/adminOverrides'
 
 /* Mesaj yükləmə/göndərmə məntiqi artıq `hooks/useGuestbook.js`-dədir —
    bu fayl yalnız simple-luxury UI qatıdır. */
 
-export default function Guestbook({ lang, initialMessages }) {
+/* Phase 45 — admin «Mətnlər»: `kicker`/`title` bölmə adlarını, `adminStrings`
+   sətir override-larını verir. Verilməyəndə çıxış əvvəlki ilə EYNİDİR. */
+export default function Guestbook({ lang, initialMessages, adminStrings = null, kicker = null, title = null }) {
   const {
-    messages, name, setName, text, setText, sending,
-    handleAdd, canSubmit, labels: L, formatDate,
+    messages, name, setName, text, setText, sending, error,
+    handleAdd, canSubmit, labels: rawL, formatDate,
   } = useGuestbook({ lang, initialMessages })
+  const L = withStringOverrides(rawL, adminStrings, lang, 'gbook.')
   return (
     <section className="py-28 px-6 bg-beige">
       <Reveal className="max-w-[680px] mx-auto px-6">
         <div className="text-center mb-12">
           <p className="text-[9px] tracking-[0.38em] uppercase text-gold mb-5 font-medium font-sans">
-            Guestbook
+            {kicker || 'Guestbook'}
           </p>
-          <h2 className="font-serif text-3xl text-ink font-light tracking-tight">{L.title}</h2>
+          <h2 className="font-serif text-3xl text-ink font-light tracking-tight">{title || L.title}</h2>
           <p className="text-brown-muted text-xs mt-3 tracking-wide font-light font-sans">{L.sub}</p>
           <div className="gold-divider mt-8 max-w-[100px] mx-auto" />
         </div>
@@ -48,6 +52,7 @@ export default function Guestbook({ lang, initialMessages }) {
             <Send size={12} strokeWidth={1.5} />
             {sending ? L.sending : L.btn}
           </button>
+          {error && <p role="alert" className="text-[12px] text-center text-espresso font-sans">⚠ {L.error}</p>}
         </form>
 
         {/* Messages */}

@@ -105,14 +105,7 @@ if ($path === '/') {
            HƏR dəvətnamə açılışı PDO timeout-u qədər (saniyələrlə)
            gözləyərdi. Ölçüldü: DB əlçatmaz olanda bu yol 2013 ms sürür.
            İndi bu xərci yalnız botlar ödəyir, o da keşlənir. */
-        $names = seoIsCrawler() ? seoLookupCoupleNames($slug) : null;
-        if ($names !== null) {
-            $meta['title'] = $names . ' — Toy Dəvətnaməsi | DigiToy';
-            $meta['desc']  = $names . ' sizi toy mərasiminə dəvət edir. Rəqəmsal dəvətnaməyə baxın, İştirak Təsdiqi göndərin.';
-        } else {
-            $meta['title'] = 'Toy Dəvətnaməsi | DigiToy';
-            $meta['desc']  = 'Sizi toy mərasiminə dəvət edirik. Rəqəmsal dəvətnaməyə baxın, İştirak Təsdiqi göndərin.';
-        }
+        [$meta['title'], $meta['desc']] = seoInviteMeta(seoIsCrawler() ? seoLookupInvite($slug) : null);
     }
 } else {
     /* Daxili marşrut (admin, canlı/şablon önbaxışı) və ya mövcud olmayan
@@ -147,22 +140,48 @@ function seoIsCrawler(): bool {
     );
 }
 
-/** Cütlüyün adlarını DB-dən oxu (BƏY & GƏLİN sırası ilə). Alınmasa null.
+/** Önbaxış mətni — tədbir növünə görə (Phase 45.2). Əvvəl korporativ/digər/
+    ad günü dəvətnaməsi də «Toy Dəvətnaməsi» yazırdı; toy mətni dəyişməyib.
+    ⚠ Brauzer tərəfi eyni mətnləri src/utils/inviteSeo.js-də qurur.
+    @param ?array $d  seoLookupInvite() nəticəsi; null → köhnə ümumi mətn */
+function seoInviteMeta(?array $d): array {
+    $tail = 'Rəqəmsal dəvətnaməyə baxın, İştirak Təsdiqi göndərin.';
+    if ($d === null) return ['Toy Dəvətnaməsi | DigiToy', "Sizi toy mərasiminə dəvət edirik. $tail"];
+
+    $kinds = [
+        'toy'      => ['Toy Dəvətnaməsi',     'toy mərasiminə'],
+        'nishan'   => ['Nişan Dəvətnaməsi',   'nişan mərasiminə'],
+        'birthday' => ['Ad Günü Dəvətnaməsi', 'ad gününə'],
+    ];
+    $kind = $kinds[($d['type'] ?? '') !== '' ? $d['type'] : 'toy'] ?? null;
+    if ($kind !== null) {
+        /* Göstərim sırası BƏY → GƏLİN; ad günündə yalnız bride dolur */
+        $names = implode(' & ', array_filter([$d['groom'] ?? '', $d['bride'] ?? ''], fn($v) => $v !== ''));
+        if ($names === '') return [$kind[0] . ' | DigiToy', "Sizi {$kind[1]} dəvət edirik. $tail"];
+        return ["$names — {$kind[0]} | DigiToy", "$names sizi {$kind[1]} dəvət edir. $tail"];
+    }
+    $event = $d['event'] ?? '';
+    if ($event === '') return ['Dəvətnamə | DigiToy', "Sizi dəvət edirik. $tail"];
+    return ["$event — Dəvətnamə | DigiToy", "Sizi «{$event}» tədbirinə dəvət edirik. $tail"];
+}
+
+/** Dəvətnamənin önbaxış üçün məlumatı (növ + adlar). Alınmasa null.
     Nəticə qısa müddət keşlənir — eyni link təkrar paylaşılanda DB-yə
-    yenidən getmirik. Keş həm TAPILAN, həm də TAPILMAYAN nəticəni saxlayır. */
-function seoLookupCoupleNames(string $slug): ?string {
-    $cacheFile = sys_get_temp_dir() . '/digitoy_seo_' . hash('sha256', $slug) . '.txt';
+    yenidən getmirik. Keş həm TAPILAN, həm də TAPILMAYAN nəticəni saxlayır.
+    ⚠ Keş faylının adı Phase 45.2-də dəyişib (köhnə .txt yalnız adı saxlayırdı). */
+function seoLookupInvite(string $slug): ?array {
+    $cacheFile = sys_get_temp_dir() . '/digitoy_seo2_' . hash('sha256', $slug) . '.json';
     if (is_file($cacheFile) && (time() - (int) @filemtime($cacheFile)) < 3600) {
-        $c = (string) @file_get_contents($cacheFile);
-        return $c === '' ? null : $c;
+        $c = json_decode((string) @file_get_contents($cacheFile), true);
+        return is_array($c) && $c ? $c : null;
     }
 
-    $result = seoQueryCoupleNames($slug);
-    @file_put_contents($cacheFile, (string) $result, LOCK_EX);
+    $result = seoQueryInvite($slug);
+    @file_put_contents($cacheFile, json_encode($result ?? [], JSON_UNESCAPED_UNICODE), LOCK_EX);
     return $result;
 }
 
-function seoQueryCoupleNames(string $slug): ?string {
+function seoQueryInvite(string $slug): ?array {
     try {
         $cfg = __DIR__ . '/api/config.production.php';
         if (!is_file($cfg)) $cfg = __DIR__ . '/api/config.local.php';
@@ -194,17 +213,12 @@ function seoQueryCoupleNames(string $slug): ?string {
         $d = json_decode((string) $row, true);
         if (!is_array($d)) return null;
 
-        /* Göstərim sırası BƏY → GƏLİN (mövcud davranışla eyni) */
-        $parts = array_values(array_filter([
-            trim((string) ($d['groomName'] ?? '')),
-            trim((string) ($d['brideName'] ?? '')),
-        ], fn($v) => $v !== ''));
-
-        if (!$parts) {
-            $ev = trim((string) ($d['eventName'] ?? ''));
-            return $ev !== '' ? $ev : null;
-        }
-        return implode(' & ', $parts);
+        return [
+            'type'  => trim((string) ($d['eventType'] ?? '')),
+            'groom' => trim((string) ($d['groomName'] ?? '')),
+            'bride' => trim((string) ($d['brideName'] ?? '')),
+            'event' => trim((string) ($d['eventName'] ?? '')),
+        ];
     } catch (Throwable $e) {
         return null;   /* DB sönsə belə səhifə açılır */
     }

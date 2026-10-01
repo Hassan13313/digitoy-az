@@ -5,6 +5,7 @@ import {
   STORY_FONTS as F, OCT, getStoryTheme, getStoryCopy, chapterLabel,
   frameStyle, heroStyle, chapterLayout, chapterAnchors, formatStoryDate, storyPhotos,
 } from './loveStoryTheme'
+import { storyCopyWithOverrides } from '../../data/adminOverrides'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    LOVE STORY — «Bizim Hekayəmiz» bölməsi (Phase 44 · Claude Design)
@@ -55,6 +56,9 @@ function Framed({ t, rot, ratio, src, alt, caption, tapeStyle, wrapStyle, record
 export default function LoveStorySection({
   story, templateId = 'simple-luxury', lang = 'az',
   kicker: kickerOverride = null, title: titleOverride = null, adminTheme = null,
+  /* Phase 45 — admin panelindən bölmənin öz mətnləri (`admin.story.text`).
+     Şablonun `sectionLabels`-indən (kicker/title propları) ÜSTÜNDÜR. */
+  copyOverrides = null,
 }) {
   const chapters = useMemo(() => (
     (Array.isArray(story) ? story : [])
@@ -63,7 +67,15 @@ export default function LoveStorySection({
   ), [story])
 
   const t = useMemo(() => getStoryTheme(templateId, adminTheme), [templateId, adminTheme])
-  const copy = getStoryCopy(templateId, lang)
+  const baseCopy = getStoryCopy(templateId, lang)
+  const copy = storyCopyWithOverrides(baseCopy, copyOverrides, lang)
+  /* Başlıq: admin yazıbsa o → şablonun öz adı (sectionLabels) → defolt */
+  const adminHead = (key) => {
+    const e = copyOverrides && copyOverrides[key]
+    return (e && (e[lang] || e.az)) || null
+  }
+  const headKicker = adminHead('kicker') || kickerOverride || baseCopy.kicker
+  const headTitle  = adminHead('title')  || titleOverride  || baseCopy.title
 
   useEffect(() => { if (t.usesScript) ensureScriptFont() }, [t.usesScript])
 
@@ -246,8 +258,8 @@ export default function LoveStorySection({
   return (
     <div lang={lang} style={{ position: 'relative', overflow: 'hidden', maxWidth: 440, margin: '0 auto', color: t.ink, textAlign: 'left', padding: '8px 0 12px' }}>
       <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, position: 'relative', padding: '0 8px' }}>
-        <p style={s.kickerHead}>{kickerOverride || copy.kicker}</p>
-        <h2 style={s.title}>{titleOverride || copy.title}</h2>
+        <p style={s.kickerHead}>{headKicker}</p>
+        <h2 style={s.title}>{headTitle}</h2>
         <p style={s.sub}>{copy.sub}</p>
         <div aria-hidden="true" style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 8 }}>
           <div style={s.rule} /><Heart color={t.hi} /><div style={s.rule} />

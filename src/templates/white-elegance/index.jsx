@@ -1,5 +1,5 @@
 import TemplateShell, { alpha } from '../_shared/TemplateShell'
-import OpeningFrame, { Gleam, NameRow, OpeningMeta } from '../_shared/OpeningFrame'
+import OpeningFrame, { Gleam, NameRow, OpeningMeta, MonoContent } from '../_shared/OpeningFrame'
 import { Ambient, Blob, Particles } from '../_shared/motion'
 import { getTemplateTheme } from '../templateConfig'
 
@@ -27,20 +27,17 @@ const KEYFRAMES = `
 `
 
 function Opening(props) {
-  const { theme, weddingData, isCouple } = props
-  const initials = isCouple
-    ? `${(weddingData.groomName || '?')[0]}&${(weddingData.brideName || '?')[0]}`.toLocaleUpperCase('az')
-    : ((weddingData.eventName || weddingData.brideName || '·')[0] || '·').toLocaleUpperCase('az')
+  const { theme, weddingData, isCouple, ot } = props
 
-  /* Design t4 tarixi rəqəmlərlə, nöqtə ayırıcı ilə verir: «21 · 11 · 2026» */
-  const dateStr = (weddingData.date || '').split('-').reverse().join(' · ')
+  /* Design t4 tarixi rəqəmlərlə, nöqtə ayırıcı ilə verir: «21 · 11 · 2026»
+     (defolt `openingSpec`-dədir — admin panelinin placeholder-ı ilə eyni) */
 
   return (
     <OpeningFrame
       {...props}
       exit="fade"
       duration={850}
-      hint="toxunun"
+      hint={ot.text('hint')}
       hintDelay={4.1}
       orbs="none"
       veil={theme.background}
@@ -74,7 +71,15 @@ function Opening(props) {
           fontSize: 'clamp(19px, 6vw, 22px)', letterSpacing: '.1em', color: theme.accent,
           animation: 'we-mono 1.3s cubic-bezier(.22,.61,.36,1) 1.5s both',
         }}>
-          {initials}
+          {ot.mono.kind === 'image' ? (
+            /* Şəkil — qabartma kartın üstündə kiçik dairəvi medalyon */
+            <span style={{
+              display: 'block', width: 64, height: 64, margin: '0 auto', borderRadius: '50%', overflow: 'hidden',
+              border: `1px solid ${alpha(theme.accent, 0.35)}`,
+            }}>
+              <MonoContent mono={ot.mono} />
+            </span>
+          ) : <MonoContent mono={ot.mono} />}
         </div>
 
         <span style={{
@@ -83,37 +88,44 @@ function Opening(props) {
           animation: 'tpl-drawx .9s ease-out 2.1s both',
         }} />
 
-        <div style={{
-          position: 'relative', fontSize: 'clamp(9px, 2.5vw, 9.5px)', letterSpacing: '.4em',
-          textTransform: 'uppercase', color: alpha(theme.muted, 0.85),
-          animation: 'tpl-rise .9s ease-out 2.3s both',
-        }}>
-          Dəvətnamə
-        </div>
+        {ot.show('sub') && (
+          <div style={{
+            position: 'relative', fontSize: 'clamp(9px, 2.5vw, 9.5px)', letterSpacing: '.4em',
+            textTransform: 'uppercase', color: alpha(theme.muted, 0.85),
+            animation: 'tpl-rise .9s ease-out 2.3s both',
+          }}>
+            {ot.text('sub')}
+          </div>
+        )}
 
         <NameRow
           theme={theme} weddingData={weddingData} isCouple={isCouple}
+          text={ot.override('title')}
           stacked delay={2.6} step={0.2}
           size="clamp(24px, 8vw, 30px)" ampSize="clamp(16px, 5vw, 20px)"
           color={theme.text} ampColor={theme.accent}
           style={{ position: 'relative', marginTop: 20 }}
         />
 
-        <OpeningMeta
-          text={dateStr} delay={3.3} color={alpha(theme.muted, 0.85)}
-          style={{ position: 'relative', marginTop: 22, letterSpacing: '.26em' }}
-        />
+        {ot.show('meta') && (
+          <OpeningMeta
+            text={ot.text('meta')} delay={3.3} color={alpha(theme.muted, 0.85)}
+            style={{ position: 'relative', marginTop: 22, letterSpacing: '.26em' }}
+          />
+        )}
 
         {/* CTA — design-də düz künclü çərçivə, kartın enində */}
-        <div style={{
-          position: 'relative', overflow: 'hidden', marginTop: 30,
-          border: `1px solid ${alpha(theme.accent, 0.45)}`, padding: '13px 8px',
-          fontSize: 10, letterSpacing: '.24em', textTransform: 'uppercase', color: theme.text,
-          animation: 'tpl-cta .9s cubic-bezier(.22,.61,.36,1) 3.6s both',
-        }}>
-          <Gleam delay={4.8} width="38%" color={alpha(theme.accent, 0.2)} />
-          <span style={{ position: 'relative' }}>Dəvətnaməni aç</span>
-        </div>
+        {ot.show('cta') && (
+          <div style={{
+            position: 'relative', overflow: 'hidden', marginTop: 30,
+            border: `1px solid ${alpha(theme.accent, 0.45)}`, padding: '13px 8px',
+            fontSize: 10, letterSpacing: '.24em', textTransform: 'uppercase', color: theme.text,
+            animation: 'tpl-cta .9s cubic-bezier(.22,.61,.36,1) 3.6s both',
+          }}>
+            <Gleam delay={4.8} width="38%" color={alpha(theme.accent, 0.2)} />
+            <span style={{ position: 'relative' }}>{ot.text('cta')}</span>
+          </div>
+        )}
       </div>
     </OpeningFrame>
   )

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { getGuests, submitAttendance, submitGuestResponse } from '../utils/api'
 import { trackEvent } from '../utils/analytics'
-import { formatFullDateByLang } from '../utils/dateFormat'
+import { formatFullDateByLang, formatDayMonthYear } from '../utils/dateFormat'
 import { normalizeAz, getInviteSlug } from './useSeating'
 import { useHoneypot } from '../utils/honeypot'
 
@@ -19,7 +19,8 @@ export function buildRsvpLabels(lang, weddingData) {
   const labels = {
     az: {
       title: 'İştirak edəcəksinizmi?',
-      subtitle: weddingData?.date ? `Zəhmət olmasa ${formatFullDateByLang(weddingData.date, 'az')}-a qədər cavablandırın` : 'Cavabınızı bildirin',
+      /* Phase 45: əvvəl «…2026, Bazar-a qədər» çıxırdı (həftə gününə şəkilçi) */
+      subtitle: weddingData?.date ? `Zəhmət olmasa ${formatDayMonthYear(weddingData.date, 'az')} tarixinədək cavablandırın` : 'Cavabınızı bildirin',
       namePh: 'Adınızı yazın…',
       yes: 'Gələcəyəm', maybe: 'Hələ dəqiq deyil', no: 'Gəlməyəcəyəm',
       plusq: 'Əlavə qonaq gətirəcəksiniz?', send: 'Göndər',
@@ -47,7 +48,7 @@ export function buildRsvpLabels(lang, weddingData) {
     },
     ru: {
       title: 'Вы придёте?',
-      subtitle: weddingData?.date ? `Пожалуйста, ответьте до ${formatFullDateByLang(weddingData.date, 'ru')}` : 'Дайте нам знать',
+      subtitle: weddingData?.date ? `Пожалуйста, ответьте до ${formatDayMonthYear(weddingData.date, 'ru')}` : 'Дайте нам знать',
       namePh: 'Введите имя…',
       yes: 'Приду', maybe: 'Пока не уверен', no: 'Не смогу прийти',
       plusq: 'Возьмёте гостя с собой?', send: 'Отправить',

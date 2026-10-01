@@ -47,10 +47,12 @@ export function parseSeatingText(text) {
   })
 }
 
+/* `again` (Phase 45) — nəticədən sonrakı «Yenidən axtar» düyməsi. Əvvəl
+   şablonlarda sabit Azərbaycanca yazılmışdı və EN/RU-da da belə qalırdı. */
 export const SEATING_LABELS = {
-  az: { title: 'Masa Axtarışı',  sub: 'Adınızı yazın, masanızı tapın',       hint: 'Məsələn: Araz Hüseynov' },
-  en: { title: 'Find Your Seat', sub: 'Type your name to find your table',   hint: 'E.g: Araz Huseynov' },
-  ru: { title: 'Поиск столика',  sub: 'Введите имя, чтобы найти стол',       hint: 'Например: Араз Гусейнов' },
+  az: { title: 'Masa Axtarışı',  sub: 'Adınızı yazın, masanızı tapın',       hint: 'Məsələn: Araz Hüseynov', again: 'Yenidən axtar' },
+  en: { title: 'Find Your Seat', sub: 'Type your name to find your table',   hint: 'E.g: Araz Huseynov',     again: 'Search again' },
+  ru: { title: 'Поиск столика',  sub: 'Введите имя, чтобы найти стол',       hint: 'Например: Араз Гусейнов', again: 'Искать снова' },
 }
 
 export function useSeating({ seatingPlan, lang = 'az' }) {

@@ -225,6 +225,28 @@ export async function saveInvitationContent(slug, admin, sections = null) {
   return res.json() /* { ok, admin, sections } */
 }
 
+/* ── Phase 45: admin şəkli (açılış monoqramı, hekayə fəsli) ──
+   Admin tokeni tələb olunur; fayl `uploads/_admin/<slug>/` qovluğuna düşür.
+   @param {Blob} blob  artıq hazırlanmış şəkil (bax imageResize › prepareAdminImage)
+   @returns {Promise<{url: string, width: number, height: number}>} */
+export async function uploadAdminMedia(slug, blob, filename = 'admin.jpg') {
+  const fd = new FormData()
+  fd.append('slug', slug)
+  fd.append('photo', blob, filename)
+  let res
+  try {
+    res = await fetch(`${BASE}/admin_media_upload.php`, { method: 'POST', headers: adminHeaders(), body: fd })
+  } catch {
+    const e = new Error('İnternet bağlantısı kəsildi. Yenidən cəhd edin.'); e.code = 'NETWORK'; throw e
+  }
+  let data = null
+  try { data = await res.json() } catch { /* JSON deyil */ }
+  if (res.ok && data?.ok && typeof data.url === 'string') return data
+  const e = new Error(data?.message || (res.status === 401 ? 'Admin sessiyası bitib — yenidən daxil olun.' : 'Şəkil yüklənmədi.'))
+  e.code = data?.code || 'HTTP_' + res.status
+  throw e
+}
+
 /* ══════════════════════════════════════════════════
    HİSSƏLİ / DAVAM ETDİRİLƏ BİLƏN YÜKLƏMƏ
 

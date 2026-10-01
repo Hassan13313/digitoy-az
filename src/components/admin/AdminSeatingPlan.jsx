@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Plus, Pencil, Trash2, MoveRight, RefreshCw, Upload, Check, X, FileSpreadsheet } from 'lucide-react'
 import { getGuests, manageGuest, migrateGuests } from '../../utils/api'
 import GuestImportModal from './GuestImportModal'
+import { useIsNarrow } from '../../hooks/useIsNarrow'
 
 const STATUS_DOT = {
   GOING:       '🟢', NOT_GOING: '🔴', MAYBE: '🟡', NO_RESPONSE: '⚪',
@@ -58,6 +59,14 @@ function GuestForm({ tableId, allTableIds, existingGuest, onSave, onCancel }) {
 
 /* ── Masa kartı ── */
 function TableCard({ tableId, guests, allTableIds, onRefresh, slug }) {
+  /* Telefonda (Phase 45) əməliyyat düymələri ~24px idi — barmaq üçün 36px,
+     düymələr adın altına keçir. */
+  const narrow = useIsNarrow()
+  const iconBtn = (border) => ({
+    padding: narrow ? 0 : '3px 7px', width: narrow ? 38 : undefined, height: narrow ? 36 : undefined,
+    background: 'none', border: `1px solid ${border}`, borderRadius: narrow ? 6 : 3, cursor: 'pointer',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+  })
   const [addMode,    setAddMode]    = useState(false)
   const [editGuest,  setEditGuest]  = useState(null)
   const [moveGuest,  setMoveGuest]  = useState(null)
@@ -142,8 +151,8 @@ function TableCard({ tableId, guests, allTableIds, onRefresh, slug }) {
                 </button>
               </div>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: narrow ? 'wrap' : 'nowrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: narrow ? '1 1 100%' : 1, minWidth: 0, flexWrap: narrow ? 'wrap' : 'nowrap' }}>
                   <span style={{ fontSize: 14 }}>{STATUS_DOT[g.status] || '⚪'}</span>
                   <span style={{ fontSize: 13, color: 'oklch(22% 0.02 60)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{g.full_name}</span>
                   {/* Phase 43 — Excel idxalından gələn telefon. Sütun yoxdursa
@@ -151,19 +160,19 @@ function TableCard({ tableId, guests, allTableIds, onRefresh, slug }) {
                   {g.phone && <span style={{ fontSize: 10, color: 'oklch(52% 0.06 250)', whiteSpace: 'nowrap' }}>{g.phone}</span>}
                   {g.notes && <span style={{ fontSize: 10, color: 'oklch(58% 0.03 60)', fontStyle: 'italic' }}>— {g.notes}</span>}
                 </div>
-                <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
-                  <span style={{ fontSize: 9, color: 'oklch(52% 0.03 60)', whiteSpace: 'nowrap' }}>{STATUS_AZ[g.status] || g.status}</span>
-                  <button type="button" onClick={() => { setEditGuest(g); setMoveGuest(null) }} title="Redaktə et"
-                    style={{ padding: '3px 7px', background: 'none', border: '1px solid oklch(86% 0.02 60)', borderRadius: 3, cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                    <Pencil size={10} strokeWidth={1.5} style={{ color: 'oklch(50% 0.05 75)' }} />
+                <div style={{ display: 'flex', gap: narrow ? 6 : 4, flexShrink: 0, alignItems: 'center', marginLeft: narrow ? 'auto' : undefined }}>
+                  <span style={{ fontSize: narrow ? 11 : 9, color: 'oklch(52% 0.03 60)', whiteSpace: 'nowrap' }}>{STATUS_AZ[g.status] || g.status}</span>
+                  <button type="button" onClick={() => { setEditGuest(g); setMoveGuest(null) }} title="Redaktə et" aria-label="Redaktə et"
+                    style={iconBtn('oklch(86% 0.02 60)')}>
+                    <Pencil size={narrow ? 15 : 10} strokeWidth={1.5} style={{ color: 'oklch(50% 0.05 75)' }} />
                   </button>
-                  <button type="button" onClick={() => { setMoveGuest(g); setEditGuest(null); setMoveTarget('') }} title="Masanı dəyiş"
-                    style={{ padding: '3px 7px', background: 'none', border: '1px solid oklch(86% 0.02 60)', borderRadius: 3, cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                    <MoveRight size={10} strokeWidth={1.5} style={{ color: 'oklch(50% 0.07 225)' }} />
+                  <button type="button" onClick={() => { setMoveGuest(g); setEditGuest(null); setMoveTarget('') }} title="Masanı dəyiş" aria-label="Masanı dəyiş"
+                    style={iconBtn('oklch(86% 0.02 60)')}>
+                    <MoveRight size={narrow ? 15 : 10} strokeWidth={1.5} style={{ color: 'oklch(50% 0.07 225)' }} />
                   </button>
-                  <button type="button" onClick={() => handleDelete(g.id)} disabled={busy} title="Sil"
-                    style={{ padding: '3px 7px', background: 'none', border: '1px solid oklch(88% 0.04 25)', borderRadius: 3, cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                    <Trash2 size={10} strokeWidth={1.5} style={{ color: 'oklch(45% 0.12 25)' }} />
+                  <button type="button" onClick={() => handleDelete(g.id)} disabled={busy} title="Sil" aria-label="Sil"
+                    style={iconBtn('oklch(88% 0.04 25)')}>
+                    <Trash2 size={narrow ? 15 : 10} strokeWidth={1.5} style={{ color: 'oklch(45% 0.12 25)' }} />
                   </button>
                 </div>
               </div>

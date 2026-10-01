@@ -738,6 +738,17 @@ export function builderDefaultTemplateId() {
   return listTemplates({ onlySelectable: true })[0]?.id || DEFAULT_TEMPLATE_ID
 }
 
+/**
+ * Builder-in həqiqi şablonu (Phase 45.1). Boş `templateId` əvvəl UI-da Royal
+ * Gold kimi «Seçildi» görünür, amma önbaxış/server onu simple-luxury edirdi.
+ *   • müştəri → builderDefaultTemplateId() (gördüyü dizayn)
+ *   • admin   → DEFAULT_TEMPLATE_ID (köhnə sifariş necə render olunurdusa)
+ */
+export function resolveBuilderTemplateId(templateId, { isAdmin = false } = {}) {
+  if (templateId) return templateId
+  return isAdmin ? DEFAULT_TEMPLATE_ID : builderDefaultTemplateId()
+}
+
 /** Reyestrdə mövcud olan bütün kateqoriyalar (təkrarsız). */
 export function listCategories() {
   return [...new Set(TEMPLATES.map((tpl) => tpl.category).filter(Boolean))]

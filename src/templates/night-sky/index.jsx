@@ -1,9 +1,7 @@
 import TemplateShell, { alpha } from '../_shared/TemplateShell'
 import OpeningFrame, { Kicker, NameRow, Ornament, OpeningMeta } from '../_shared/OpeningFrame'
 import { Ambient, Blob, Particles } from '../_shared/motion'
-import { parseLatLon } from '../_shared/geo'
 import { getTemplateTheme } from '../templateConfig'
-import { formatFullDateByLang } from '../../utils/dateFormat'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    NIGHT SKY ROMANCE — Claude Design · t5
@@ -73,23 +71,18 @@ function Constellation({ theme }) {
 }
 
 function Opening(props) {
-  const { theme, weddingData, isCouple, lang } = props
+  const { theme, weddingData, isCouple, ot } = props
 
-  /* Koordinatlar məkanın xəritə linkindən oxunur; link yoxdursa Bakı. */
-  const ll = parseLatLon(weddingData)
-  const dms = (v, pos, neg) => {
-    const d = Math.floor(Math.abs(v))
-    const m = Math.round((Math.abs(v) - d) * 60)
-    return `${d}°${String(m).padStart(2, '0')}′${v >= 0 ? pos : neg}`
-  }
-  const coords = ll ? `${dms(ll[0], 'N', 'S')} · ${dms(ll[1], 'E', 'W')}` : '40°23′N · 49°52′E'
+  /* Tarix + koordinatlar (məkanın xəritə linkindən; link yoxdursa Bakı) —
+     hesablama `openingSpec`-dədir ki, admin placeholder-ı da eyni olsun. */
 
   return (
     <OpeningFrame
       {...props}
       exit="zoom"
       duration={1100}
-      label="Dəvətnaməni aç"
+      label={ot.text('cta')}
+      hint={ot.text('hint')}
       ctaDelay={5.2}
       hintDelay={5.7}
       ctaStyle={{
@@ -112,10 +105,13 @@ function Opening(props) {
       <Constellation theme={theme} />
 
       <div style={{ position: 'relative' }}>
-        <Kicker text="O gecə göy belə görünürdü" color={theme.muted} delay={3.6} />
+        {ot.show('kicker') && (
+          <Kicker text={ot.text('kicker')} color={theme.muted} delay={3.6} />
+        )}
 
         <NameRow
           theme={theme} weddingData={weddingData} isCouple={isCouple}
+          text={ot.override('title')}
           delay={4} step={0.2}
           size="clamp(28px, 10vw, 38px)" ampSize="clamp(18px, 6vw, 24px)"
           color={theme.text} ampColor={alpha(theme.accent, 0.85)}
@@ -124,10 +120,9 @@ function Opening(props) {
 
         <Ornament color={alpha(theme.accent, 0.7)} mark="glow" delay={4.7} width={32} style={{ marginTop: 18 }} />
 
-        <OpeningMeta
-          text={`${formatFullDateByLang(weddingData.date, lang)} · ${coords}`}
-          color={theme.muted} delay={4.9} style={{ marginTop: 14 }}
-        />
+        {ot.show('meta') && (
+          <OpeningMeta text={ot.text('meta')} color={theme.muted} delay={4.9} style={{ marginTop: 14 }} />
+        )}
       </div>
     </OpeningFrame>
   )

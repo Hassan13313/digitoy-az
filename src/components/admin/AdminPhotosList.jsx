@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { RefreshCw, Search, X, Camera, HardDrive, Images, Upload, Link2, Check, MonitorPlay } from 'lucide-react'
+import { useIsNarrow } from '../../hooks/useIsNarrow'
+import { azDate, pagePadding } from './adminFormat'
 
 const BASE = import.meta.env.VITE_API_URL || '/api'
 
@@ -37,12 +39,21 @@ async function getPhotosSummary(search = '', limit = 50, offset = 0) {
   return res.json()
 }
 
+/* ⚠ `toLocaleDateString('az-AZ')` Chrome-da «M06» verirdi — bax adminFormat */
 function formatDate(iso) {
-  if (!iso) return '—'
-  return new Date(iso).toLocaleDateString('az-AZ', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+  return azDate(iso, { time: true })
 }
 
+/* Telefon kartının düyməsi — ikon + yazı, ≥ 44px */
+const cardBtn = (bg, color) => ({
+  flex: '1 1 0', minWidth: 0, minHeight: 44, display: 'flex', flexDirection: 'column', alignItems: 'center',
+  justifyContent: 'center', gap: 3, borderRadius: 8, border: 'none', background: bg, color,
+  textDecoration: 'none', fontSize: 10.5, fontFamily: 'inherit', cursor: 'pointer',
+})
+
 export default function AdminPhotosList() {
+  /* Telefonda 5 sütunlu cədvəl sığmırdı — albomlar karta çevrilir */
+  const narrow = useIsNarrow()
   const [albums,    setAlbums]    = useState([])
   const [total,     setTotal]     = useState(0)
   const [loading,   setLoading]   = useState(true)
@@ -74,10 +85,34 @@ export default function AdminPhotosList() {
   const totalPhotos = albums.reduce((s, a) => s + a.photo_count, 0)
   const totalMb     = albums.reduce((s, a) => s + (a.total_mb || 0), 0).toFixed(1)
 
+  /* Cütlüyə göndəriləcək idarəetmə linkini kopyala (masaüstü və telefon eyni) */
+  const copyLink = async (slug) => {
+    let url
+    try {
+      url = (await fetchGalleryLink(slug)).url
+    } catch {
+      window.alert('Link yaradıla bilmədi. Sessiya bitibsə yenidən giriş edin.')
+      return
+    }
+    /* Clipboard API HTTPS/icazə tələb edir və köhnə Safari-də
+       yoxdur. Alınmasa link HƏR HALDA göstərilir — admin
+       linksiz qalmamalıdır. */
+    try {
+      await navigator.clipboard.writeText(url)
+      setLinkCopied(slug)
+      setTimeout(() => setLinkCopied(''), 2500)
+    } catch {
+      window.prompt('Bu linki kopyalayıb cütlüyə göndərin:', url)
+    }
+  }
+
   return (
-    <div style={{ padding: '32px 36px' }}>
+    <div style={{ padding: pagePadding(narrow) }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+      <div style={{
+        display: 'flex', alignItems: narrow ? 'stretch' : 'center', justifyContent: 'space-between', marginBottom: 16,
+        flexDirection: narrow ? 'column' : 'row', gap: narrow ? 12 : 0,
+      }}>
         <div>
           <h1 style={{
             fontFamily: '"Cormorant Garamond","Playfair Display",serif',
@@ -91,12 +126,16 @@ export default function AdminPhotosList() {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flex: narrow ? 1 : undefined, minWidth: 0 }}>
             <Search size={13} strokeWidth={1.5} style={{ position: 'absolute', left: 10, color: 'oklch(60% 0.03 60)', pointerEvents: 'none' }} />
             <input
               type="text" placeholder="Slug axtar..."
               value={searchVal} onChange={e => handleSearch(e.target.value)}
-              style={{ padding: '8px 32px 8px 30px', border: '1px solid oklch(85% 0.02 60)', borderRadius: 4, fontSize: 12, color: 'oklch(30% 0.02 60)', background: 'white', outline: 'none', width: 180 }}
+              style={{
+                padding: narrow ? '11px 36px 11px 32px' : '8px 32px 8px 30px', border: '1px solid oklch(85% 0.02 60)',
+                borderRadius: narrow ? 8 : 4, fontSize: narrow ? 15 : 12, color: 'oklch(30% 0.02 60)', background: 'white',
+                outline: 'none', width: narrow ? '100%' : 180,
+              }}
             />
             {searchVal && (
               <button type="button" onClick={clearSearch} style={{ position: 'absolute', right: 8, background: 'none', border: 'none', cursor: 'pointer', color: 'oklch(60% 0.03 60)', display: 'flex', alignItems: 'center' }}>
@@ -104,7 +143,7 @@ export default function AdminPhotosList() {
               </button>
             )}
           </div>
-          <button type="button" onClick={() => load(search)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'white', border: '1px solid oklch(85% 0.02 60)', borderRadius: 4, cursor: 'pointer', fontSize: 11, color: 'oklch(45% 0.03 60)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+          <button type="button" onClick={() => load(search)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', minHeight: narrow ? 44 : undefined, flex: '0 0 auto', background: 'white', border: '1px solid oklch(85% 0.02 60)', borderRadius: narrow ? 8 : 4, cursor: 'pointer', fontSize: 11, color: 'oklch(45% 0.03 60)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
             <RefreshCw size={12} strokeWidth={1.5} />
             Yenilə
           </button>
@@ -117,6 +156,36 @@ export default function AdminPhotosList() {
         <div style={{ padding: '48px 0', textAlign: 'center', color: 'oklch(45% 0.1 25)', fontSize: 13 }}>{error}</div>
       ) : albums.length === 0 ? (
         <div style={{ padding: '48px 0', textAlign: 'center', color: 'oklch(60% 0.03 60)', fontSize: 13 }}>Foto yoxdur.</div>
+      ) : narrow ? (
+        /* ── Telefon: hər albom bir kart, düymələr yazılı ── */
+        <div style={{ display: 'grid', gap: 10 }}>
+          {albums.map((alb) => (
+            <div key={alb.slug} style={{ background: 'white', border: '1px solid oklch(88% 0.02 60)', borderRadius: 10, padding: '12px 12px 12px 14px' }}>
+              <div style={{ fontFamily: 'monospace', fontSize: 13, fontWeight: 600, color: 'oklch(42% 0.07 75)', overflowWrap: 'anywhere' }}>{alb.slug}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginTop: 6, fontSize: 12.5, color: 'oklch(45% 0.03 60)' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Camera size={13} strokeWidth={1.5} /> {alb.photo_count}</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><HardDrive size={13} strokeWidth={1.5} /> {alb.total_mb} MB</span>
+                <span style={{ color: 'oklch(60% 0.03 60)' }}>{formatDate(alb.last_upload)}</span>
+              </div>
+              <div style={{ display: 'flex', gap: 6, marginTop: 10 }}>
+                <button type="button" onClick={() => copyLink(alb.slug)}
+                  style={cardBtn(linkCopied === alb.slug ? 'oklch(88% 0.09 145)' : 'oklch(94% 0.03 300)', linkCopied === alb.slug ? 'oklch(38% 0.12 145)' : 'oklch(45% 0.09 300)')}>
+                  {linkCopied === alb.slug ? <Check size={16} strokeWidth={2} /> : <Link2 size={16} strokeWidth={1.6} />}
+                  {linkCopied === alb.slug ? 'Kopyalandı' : 'Link'}
+                </button>
+                <a href={`/invite/${alb.slug}/qalereya-idare`} target="_blank" rel="noopener noreferrer" style={cardBtn('oklch(94% 0.03 80)', 'oklch(45% 0.08 75)')}>
+                  <Images size={16} strokeWidth={1.6} />İdarə
+                </a>
+                <a href={`/invite/${alb.slug}/slayd`} target="_blank" rel="noopener noreferrer" style={cardBtn('oklch(94% 0.03 250)', 'oklch(42% 0.1 250)')}>
+                  <MonitorPlay size={16} strokeWidth={1.6} />Slayd
+                </a>
+                <a href={`/invite/${alb.slug}/foto`} target="_blank" rel="noopener noreferrer" style={cardBtn('oklch(94% 0.03 145)', 'oklch(38% 0.1 145)')}>
+                  <Upload size={16} strokeWidth={1.6} />Yüklə
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
       ) : (
         <div style={{ background: 'white', border: '1px solid oklch(88% 0.02 60)', borderRadius: 6, overflow: 'hidden' }}>
           {/* Table header */}
@@ -150,25 +219,7 @@ export default function AdminPhotosList() {
                 <button
                   type="button"
                   title="Cütlüyə göndəriləcək idarəetmə linkini kopyala"
-                  onClick={async () => {
-                    let url
-                    try {
-                      url = (await fetchGalleryLink(alb.slug)).url
-                    } catch {
-                      window.alert('Link yaradıla bilmədi. Sessiya bitibsə yenidən giriş edin.')
-                      return
-                    }
-                    /* Clipboard API HTTPS/icazə tələb edir və köhnə Safari-də
-                       yoxdur. Alınmasa link HƏR HALDA göstərilir — admin
-                       linksiz qalmamalıdır. */
-                    try {
-                      await navigator.clipboard.writeText(url)
-                      setLinkCopied(alb.slug)
-                      setTimeout(() => setLinkCopied(''), 2500)
-                    } catch {
-                      window.prompt('Bu linki kopyalayıb cütlüyə göndərin:', url)
-                    }
-                  }}
+                  onClick={() => copyLink(alb.slug)}
                   style={{
                     width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
                     background: linkCopied === alb.slug ? 'oklch(88% 0.09 145)' : 'oklch(94% 0.03 300)',

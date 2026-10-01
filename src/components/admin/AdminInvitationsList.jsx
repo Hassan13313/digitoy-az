@@ -5,6 +5,7 @@ import AdminContentManager from './AdminContentManager'
 import { useIsNarrow } from '../../hooks/useIsNarrow'
 import { setInvitationActive } from '../../utils/api'
 import { RefreshCw, Search, X, ExternalLink, Languages, Power, SlidersHorizontal } from 'lucide-react'
+import { azDate, pagePadding } from './adminFormat'
 
 const BASE = import.meta.env.VITE_API_URL || '/api'
 
@@ -28,9 +29,24 @@ async function getInvitationsList(search = '', limit = 50, offset = 0) {
   return res.json()
 }
 
+/* ⚠ `toLocaleDateString('az-AZ')` Chrome-da «2026 M06 29» verirdi — bax adminFormat */
 function formatDate(iso) {
-  if (!iso) return '—'
-  return new Date(iso).toLocaleDateString('az-AZ', { day: '2-digit', month: 'short', year: 'numeric' })
+  return azDate(iso)
+}
+
+/* Telefon kartındakı əməliyyat düyməsi — ikon + yazı, ≥ 42px (barmaq üçün) */
+function ActionBtn({ icon: Icon, label, onClick, href, color, active }) {
+  const style = {
+    flex: '1 1 0', minWidth: 0, minHeight: 42, display: 'flex', flexDirection: 'column',
+    alignItems: 'center', justifyContent: 'center', gap: 3, padding: '6px 4px',
+    border: '1px solid oklch(90% 0.015 70)', borderRadius: 8, textDecoration: 'none',
+    background: active ? 'oklch(97% 0.02 150)' : 'white', color: color || 'oklch(40% 0.03 60)',
+    fontSize: 10.5, fontFamily: 'inherit', cursor: 'pointer', lineHeight: 1.1,
+  }
+  const inner = <><Icon size={16} strokeWidth={1.6} /><span style={{ whiteSpace: 'nowrap' }}>{label}</span></>
+  return href
+    ? <a href={href} target="_blank" rel="noopener noreferrer" style={style}>{inner}</a>
+    : <button type="button" onClick={onClick} style={style}>{inner}</button>
 }
 
 const EVENT_LABELS = {
@@ -101,7 +117,7 @@ export default function AdminInvitationsList() {
   }
 
   return (
-    <div style={{ padding: '32px 36px' }}>
+    <div style={{ padding: pagePadding(narrow) }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div>
@@ -116,15 +132,15 @@ export default function AdminInvitationsList() {
             {total} dəvətnamə{search ? ` — "${search}"` : ''}
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', width: narrow ? '100%' : undefined }}>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flex: narrow ? 1 : undefined, minWidth: 0 }}>
             <Search size={13} strokeWidth={1.5} style={{ position: 'absolute', left: 10, color: 'oklch(60% 0.03 60)', pointerEvents: 'none' }} />
             <input
               type="text" placeholder="Slug, ad axtar..."
               value={searchVal} onChange={e => handleSearch(e.target.value)}
               style={{
-                padding: '8px 32px 8px 30px', border: '1px solid oklch(85% 0.02 60)', borderRadius: 4,
-                fontSize: 12, color: 'oklch(30% 0.02 60)', background: 'white', outline: 'none', width: 200,
+                padding: narrow ? '11px 36px 11px 32px' : '8px 32px 8px 30px', border: '1px solid oklch(85% 0.02 60)', borderRadius: narrow ? 8 : 4,
+                fontSize: narrow ? 15 : 12, color: 'oklch(30% 0.02 60)', background: 'white', outline: 'none', width: narrow ? '100%' : 200,
               }}
             />
             {searchVal && (
@@ -133,7 +149,7 @@ export default function AdminInvitationsList() {
               </button>
             )}
           </div>
-          <button type="button" onClick={() => load(search)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'white', border: '1px solid oklch(85% 0.02 60)', borderRadius: 4, cursor: 'pointer', fontSize: 11, color: 'oklch(45% 0.03 60)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+          <button type="button" onClick={() => load(search)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', minHeight: narrow ? 44 : undefined, background: 'white', border: '1px solid oklch(85% 0.02 60)', borderRadius: narrow ? 8 : 4, cursor: 'pointer', fontSize: 11, color: 'oklch(45% 0.03 60)', letterSpacing: '0.06em', textTransform: 'uppercase', flex: '0 0 auto' }}>
             <RefreshCw size={12} strokeWidth={1.5} />
             Yenilə
           </button>
@@ -169,6 +185,80 @@ export default function AdminInvitationsList() {
             const active = inv.is_active !== false
             const confirming = confirmSlug === inv.slug
             const busy = busySlug === inv.slug
+
+            /* ── Telefon kartı (Phase 45) ──
+               Əvvəl 13px-lik ikonlar 3px boşluqla idi (≈19px toxunma sahəsi) —
+               barmaqla səhv düyməyə basılırdı. İndi hər əməliyyat yazılı, 42px. */
+            if (narrow) {
+              const hasTr = inv.has_i18n?.en || inv.has_i18n?.ru
+              return (
+                <div key={inv.slug} style={{
+                  padding: '14px 14px 12px',
+                  borderBottom: i < items.length - 1 ? '1px solid oklch(93% 0.01 75)' : 'none',
+                  background: confirming ? 'oklch(97% 0.02 25)' : 'transparent',
+                }}>
+                  <div style={{ opacity: active ? 1 : 0.62 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: 15, fontWeight: 600, color: 'oklch(25% 0.02 60)', overflowWrap: 'anywhere' }}>{inv.names || '—'}</div>
+                        <div style={{ fontFamily: 'monospace', fontSize: 11.5, color: 'oklch(45% 0.07 75)', marginTop: 3, overflowWrap: 'anywhere' }}>{inv.slug}</div>
+                      </div>
+                      <span style={{
+                        flex: '0 0 auto', display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 8px', borderRadius: 3,
+                        fontSize: 9.5, letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 600,
+                        border: `1px solid ${active ? 'oklch(80% 0.06 150)' : 'oklch(82% 0.04 25)'}`,
+                        color: active ? 'oklch(45% 0.1 150)' : 'oklch(48% 0.13 25)',
+                        background: active ? 'oklch(97% 0.02 150)' : 'oklch(97% 0.02 25)',
+                      }}>
+                        <span style={{ width: 5, height: 5, borderRadius: '50%', background: active ? 'oklch(58% 0.14 150)' : 'oklch(58% 0.16 25)' }} />
+                        {active ? 'Aktiv' : 'Deaktiv'}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginTop: 8, fontSize: 12, color: 'oklch(52% 0.03 60)' }}>
+                      <TemplateCell templateId={inv.template_id} />
+                      <span aria-hidden="true">·</span>
+                      <span>{EVENT_LABELS[inv.event_type] || inv.event_type || '—'}</span>
+                      <span aria-hidden="true">·</span>
+                      <span>{formatDate(inv.created_at)}</span>
+                    </div>
+                    {inv.venue && (
+                      <div style={{ fontSize: 12, color: 'oklch(55% 0.03 60)', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{inv.venue}</div>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 6, marginTop: 11 }}>
+                    {confirming ? (
+                      <>
+                        <button
+                          type="button" disabled={busy} onClick={() => toggleActive(inv.slug, !active)}
+                          style={{
+                            flex: 2, minHeight: 44, borderRadius: 8, border: 'none', cursor: 'pointer',
+                            background: active ? 'oklch(48% 0.15 25)' : 'oklch(45% 0.1 150)', color: 'white',
+                            fontSize: 13, fontFamily: 'inherit', opacity: busy ? 0.6 : 1,
+                          }}
+                        >
+                          {busy ? '…' : (active ? 'Bəli, linki bağla' : 'Bəli, linki aç')}
+                        </button>
+                        <button
+                          type="button" onClick={() => setConfirmSlug(null)}
+                          style={{ flex: 1, minHeight: 44, borderRadius: 8, border: '1px solid oklch(88% 0.02 60)', background: 'white', cursor: 'pointer', fontSize: 13, color: 'oklch(45% 0.03 60)', fontFamily: 'inherit' }}
+                        >
+                          Ləğv et
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <ActionBtn icon={SlidersHorizontal} label="Məzmun" onClick={() => setCmSlug(inv.slug)} color="oklch(40% 0.07 75)" />
+                        <ActionBtn icon={Languages} label="Tərcümə" onClick={() => setTrSlug(inv.slug)} active={hasTr} color={hasTr ? 'oklch(42% 0.1 150)' : undefined} />
+                        <ActionBtn icon={Power} label={active ? 'Bağla' : 'Aç'} onClick={() => setConfirmSlug(inv.slug)} color={active ? 'oklch(48% 0.13 25)' : 'oklch(45% 0.1 150)'} />
+                        <ActionBtn icon={ExternalLink} label="Bax" href={`/invite/${inv.slug}`} />
+                      </>
+                    )}
+                  </div>
+                </div>
+              )
+            }
+
             return (
               <div key={inv.slug} style={{
                 display: 'grid',

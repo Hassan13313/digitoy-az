@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import t from '../data/translations'
+import { countdownLabels } from '../utils/countdownLabels'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    useCountdown — geri sayım məntiqi (UI-sız).
@@ -49,12 +50,8 @@ export function useCountdown({ date, time, lang = 'az', eventType = 'toy', event
   return {
     ...timeLeft,
     title: countdownTitle(tr, eventType, eventName),
-    labels: {
-      days:    tr.inv_days,
-      hours:   tr.inv_hours,
-      minutes: tr.inv_minutes,
-      seconds: tr.inv_seconds,
-    },
+    /* Phase 45.2 — RU/EN etiketi saya görə («72 ДНЯ», «1 DAY») */
+    labels: countdownLabels(lang, timeLeft),
   }
 }
 

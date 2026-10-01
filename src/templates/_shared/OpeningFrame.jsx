@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { unlockAudio } from '../../utils/audioUnlock'
 import { formatFullDateByLang } from '../../utils/dateFormat'
 import { alpha } from './TemplateShell'
+import { phrase } from './openingSpec'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    OPENING FRAME — zərf açılışının ortaq davranış qatı.
@@ -56,7 +57,10 @@ export default function OpeningFrame({
   exit = 'fade',               /* fade | up | zoom | curtain | iris          */
   duration = 950,
   hint = 'toxunun',
-  ariaLabel = 'Dəvətnaməni aç',
+  ariaLabel,
+  /* Phase 45 — açılış mətnlərinin köməkçisi (bax openingSpec › makeOpeningText).
+     Burada yalnız ekran oxuyucu etiketinin DİLİ üçün lazımdır. */
+  ot = null,
   /* ── «Açılış Ekranı düzəliş V1» əlavələri ────────────────────────────────
      veil      — pərdə rəngi. Verilsə, ekran bu rənglə örtülü başlayır və
                  pərdə əriyir; qatlar ardıcıl açıldığı üçün kökün ümumi
@@ -117,7 +121,7 @@ export default function OpeningFrame({
       role="button"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); start() } }}
-      aria-label={ariaLabel}
+      aria-label={ariaLabel || label || phrase('open', ot?.lang)}
       data-tpl-opening={opening ? '' : undefined}
       animate={opening ? EXITS[exit] : {}}
       transition={{ duration: duration / 1000, ease: [0.65, 0, 0.35, 1] }}
@@ -240,7 +244,9 @@ export function Gleam({ delay = 0, duration = 4.6, width = '38%', color = 'rgba(
 }
 
 /** İki yan xətt arasında kiçik caps başlıq (design: «Toy Dəvətnaməsi»). */
-export function Kicker({ text, color, lineColor, delay = 0, gap = 12, lineWidth = 22, style = {} }) {
+/* `lang` — ingilis mətni (məs. «Side A») Azərbaycan səhifəsində böyük hərfə
+   çevriləndə «SİDE A» olmasın deyə mətnin öz dili verilir (Phase 45). */
+export function Kicker({ text, color, lineColor, delay = 0, gap = 12, lineWidth = 22, style = {}, lang }) {
   const line = lineColor && (
     <span style={{ width: lineWidth, height: 1, background: lineColor, flex: '0 0 auto' }} />
   )
@@ -250,7 +256,7 @@ export function Kicker({ text, color, lineColor, delay = 0, gap = 12, lineWidth 
       animation: `tpl-rise .9s cubic-bezier(.22,.61,.36,1) ${delay}s both`, ...style,
     }}>
       {line}
-      <span style={{ fontSize: 'clamp(9px, 2.5vw, 9.5px)', letterSpacing: '.4em', textTransform: 'uppercase', color, whiteSpace: 'nowrap' }}>
+      <span lang={lang} style={{ fontSize: 'clamp(9px, 2.5vw, 9.5px)', letterSpacing: '.4em', textTransform: 'uppercase', color, whiteSpace: 'nowrap' }}>
         {text}
       </span>
       {line}
@@ -267,6 +273,9 @@ export function NameRow({
   delay = 0, step = 0.2, stacked = false,
   size = 'clamp(26px, 9vw, 36px)', ampSize = 'clamp(18px, 6vw, 23px)',
   ampColor, color, font, style = {},
+  /* Phase 45 — admin açılışdakı adları öz mətni ilə əvəz edibsə (bax
+     openingSpec › ot.override). `undefined` = dəyişiklik yoxdur, '' = gizli. */
+  text,
 }) {
   const first = isCouple
     ? (weddingData.groomName || '')
@@ -277,6 +286,19 @@ export function NameRow({
     display: 'inline-block',
     animation: `tpl-letter .95s cubic-bezier(.22,.61,.36,1) ${(delay + i * step).toFixed(2)}s both`,
   })
+
+  if (text !== undefined) {
+    if (!text) return null
+    return (
+      <div style={{
+        fontFamily: font || theme.fonts?.heading, fontWeight: 300,
+        fontSize: size, color: color || theme.accent, lineHeight: 1.15,
+        overflowWrap: 'anywhere', ...style,
+      }}>
+        <span style={rise(0)}>{text}</span>
+      </div>
+    )
+  }
 
   return (
     <div style={{
@@ -330,3 +352,7 @@ export function OpeningMeta({ text, color, delay = 0, style = {} }) {
     </div>
   )
 }
+
+/* Monoqram köməkçiləri ayrıca fayldadır (bax MonoContent.jsx) — açılış
+   şablonları rahatlıq üçün onları buradan da idxal edə bilir. */
+export { MonoContent, EmblemSlot } from './MonoContent'

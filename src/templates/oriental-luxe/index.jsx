@@ -1,8 +1,7 @@
 import TemplateShell, { alpha } from '../_shared/TemplateShell'
-import OpeningFrame, { Kicker, NameRow, Ornament, OpeningMeta } from '../_shared/OpeningFrame'
+import OpeningFrame, { Kicker, NameRow, Ornament, OpeningMeta, MonoContent } from '../_shared/OpeningFrame'
 import { Ambient, Blob, Particles, RotRing } from '../_shared/motion'
 import { getTemplateTheme } from '../templateConfig'
-import { formatFullDateByLang } from '../../utils/dateFormat'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    ORIENTAL LUXE — Claude Design · t6
@@ -57,13 +56,19 @@ function GirihStar({ size, color, duration, delay }) {
   )
 }
 
-function Opening(props) {
-  const { theme, weddingData, isCouple, lang } = props
-  const initials = isCouple
-    ? `${(weddingData.groomName || '?')[0]}&${(weddingData.brideName || '?')[0]}`.toLocaleUpperCase('az')
-    : ((weddingData.eventName || weddingData.brideName || '·')[0] || '·').toLocaleUpperCase('az')
+/* Korporativ/digər tədbirdə monoqramın içi — baş hərf əvəzinə kiçik girih
+   ulduzu (Phase 45). Tədbir adının ilk hərfi mənasız idi: «Əliyev…» → «Ə». */
+function GirihMark({ color }) {
+  return (
+    <svg viewBox="0 0 32 32" width="22" height="22" fill="none" stroke={color} strokeWidth="1.2" aria-hidden="true">
+      <path d="M16 2 L22 10 L30 16 L22 22 L16 30 L10 22 L2 16 L10 10 Z" />
+      <path d="M16 9 L19.5 13.5 L24 16 L19.5 18.5 L16 23 L12.5 18.5 L8 16 L12.5 13.5 Z" />
+    </svg>
+  )
+}
 
-  const place = weddingData.venueName ? String(weddingData.venueName).split(',').pop().trim() : ''
+function Opening(props) {
+  const { theme, weddingData, isCouple, ot } = props
 
   /* Mehrab tağı — yuxarısı yarımdairə, aşağısı düz künc */
   const arch = (w, h, r, border, delay) => ({
@@ -78,7 +83,8 @@ function Opening(props) {
       {...props}
       exit="iris"
       duration={950}
-      label="Dəvətnaməni aç"
+      label={ot.text('cta')}
+      hint={ot.text('hint')}
       ctaDelay={4.3}
       hintDelay={4.8}
       ctaStyle={{
@@ -129,14 +135,22 @@ function Opening(props) {
             fontFamily: theme.fonts?.heading, fontSize: 17, lineHeight: 1, color: theme.text,
             animation: 'tpl-cta 1s ease-out 2.6s both',
           }}>
-            {initials}
+            {/* Şəkil/loqo çərçivənin içində, xəttə toxunmadan (48px) oturur */}
+            <MonoContent
+              mono={ot.mono}
+              ornament={<GirihMark color={theme.text} />}
+              imgStyle={{ width: 48, height: 48 }}
+            />
           </span>
         </div>
 
-        <Kicker text={props.eventLabel} color={theme.muted} delay={2.8} style={{ marginTop: 30 }} />
+        {ot.show('kicker') && (
+          <Kicker text={ot.text('kicker')} color={theme.muted} delay={2.8} style={{ marginTop: 30 }} />
+        )}
 
         <NameRow
           theme={theme} weddingData={weddingData} isCouple={isCouple}
+          text={ot.override('title')}
           delay={3.1} step={0.2}
           size="clamp(26px, 9.5vw, 36px)" ampSize="clamp(17px, 6vw, 23px)"
           color={theme.text} ampColor={theme.accent}
@@ -145,10 +159,9 @@ function Opening(props) {
 
         <Ornament color={theme.accent} mark="rhomb" delay={3.8} width={26} gap={8} style={{ marginTop: 18 }} />
 
-        <OpeningMeta
-          text={[formatFullDateByLang(weddingData.date, lang), place].filter(Boolean).join(' · ')}
-          color={theme.muted} delay={4} style={{ marginTop: 14 }}
-        />
+        {ot.show('meta') && (
+          <OpeningMeta text={ot.text('meta')} color={theme.muted} delay={4} style={{ marginTop: 14 }} />
+        )}
       </div>
     </OpeningFrame>
   )

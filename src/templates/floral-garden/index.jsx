@@ -12,7 +12,7 @@ import TemplateOutro from '../_shared/TemplateOutro'
 import { getTemplateTheme } from '../templateConfig'
 import { buildPresetMusic, PRESET_TRACKS, MUSIC_PLAY_MODES, shouldAutoPlay } from '../../data/music'
 import { getSectionVisibility } from '../../data/sections'
-import { formatAzDate, formatFullDateByLang, formatTime24 } from '../../utils/dateFormat'
+import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
 import { unlockAudio } from '../../utils/audioUnlock'
 import { trackEvent } from '../../utils/analytics'
 import { Reveal, Stagger, Parallax, PopDigit, enterDirection, AmbientLayer } from '../_shared/motion'
@@ -26,6 +26,9 @@ import { useGallery } from '../../hooks/useGallery'
 import { useMusicPlayer } from '../../hooks/useMusicPlayer'
 import { useMusicPrompt } from '../../hooks/useMusicPrompt'
 import t from '../../data/translations'
+import { mergeSectionLabels, withStringOverrides, makeLabelResolver, sectionHead } from '../../data/adminOverrides'
+import { makeOpeningText, phrase } from '../_shared/openingSpec'
+import { EmblemSlot } from '../_shared/MonoContent'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    FLORAL GARDEN ROMANCE — Claude Design "Digitoy Templates.dc.html" · t2
@@ -211,12 +214,16 @@ function BloomFlower({ delay = 1.5 }) {
   )
 }
 
-function GardenOpening({ weddingData, isCouple, isCorp, eventLabel, onOpen, onOpenStart }) {
+function GardenOpening({ weddingData, isCouple, ot, onOpen, onOpenStart }) {
   const [opening, setOpening] = useState(false)
   const [gone, setGone] = useState(false)
 
-  const first = isCouple ? (weddingData.groomName || '') : (weddingData.eventName || weddingData.brideName || '')
-  const second = isCouple ? (weddingData.brideName || '') : ''
+  /* Admin adları öz mətni ilə əvəz edibsə tək sətir (bax openingSpec) */
+  const titleOv = ot.override('title')
+  const first = titleOv !== undefined
+    ? titleOv
+    : (isCouple ? (weddingData.groomName || '') : (weddingData.eventName || weddingData.brideName || ''))
+  const second = titleOv !== undefined ? '' : (isCouple ? (weddingData.brideName || '') : '')
 
   const start = () => {
     if (opening) return
@@ -244,7 +251,7 @@ function GardenOpening({ weddingData, isCouple, isCorp, eventLabel, onOpen, onOp
       role="button"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); start() } }}
-      aria-label="Dəvətnaməni aç"
+      aria-label={ot.text('cta') || phrase('open', ot.lang)}
       data-fg
       animate={opening ? { opacity: 0, scale: 1.04 } : {}}
       transition={{ duration: 0.95, ease: [0.65, 0, 0.35, 1] }}
@@ -293,34 +300,49 @@ function GardenOpening({ weddingData, isCouple, isCorp, eventLabel, onOpen, onOp
 
       <div style={{ position: 'relative' }}>
         {/* Kicker — yanlarda adaçayı xətləri */}
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
-          animation: 'fg-rise .9s cubic-bezier(.22,.61,.36,1) 1.1s both',
-        }}>
-          <span style={{ width: 20, height: 1, background: `${TH.primary}B3` }} />
-          <span style={{ fontSize: 9.5, letterSpacing: '.4em', textTransform: 'uppercase', color: TH.muted, whiteSpace: 'nowrap' }}>
-            {eventLabel}
-          </span>
-          <span style={{ width: 20, height: 1, background: `${TH.primary}B3` }} />
-        </div>
+        {ot.show('kicker') && (
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
+            animation: 'fg-rise .9s cubic-bezier(.22,.61,.36,1) 1.1s both',
+          }}>
+            <span style={{ width: 20, height: 1, background: `${TH.primary}B3` }} />
+            <span style={{ fontSize: 9.5, letterSpacing: '.4em', textTransform: 'uppercase', color: TH.muted, whiteSpace: 'nowrap' }}>
+              {ot.text('kicker')}
+            </span>
+            <span style={{ width: 20, height: 1, background: `${TH.primary}B3` }} />
+          </div>
+        )}
 
-        <div style={{ marginTop: 32 }}>
-          <BloomFlower delay={1.5} />
-        </div>
+        {/* Çiçək — admin onu mətn/stiker/şəkillə əvəz edə və ya gizlədə bilər */}
+        {ot.mono.kind !== 'none' && (
+          <div style={{ marginTop: 32 }}>
+            <EmblemSlot
+              mono={ot.mono} size={96} delay={1.5}
+              border={`1px solid ${TH.accent}8C`} background="rgba(255,255,255,.7)"
+              color="#7A5C55" font={serif}
+              style={{ animation: 'fg-bloom 1.7s cubic-bezier(.2,.9,.25,1) 1.5s both' }}
+            >
+              <BloomFlower delay={1.5} />
+            </EmblemSlot>
+          </div>
+        )}
 
-        {/* Adlar — hər söz ayrıca qalxır */}
-        <div style={{
-          display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 11, marginTop: 28,
-          fontFamily: serif, fontSize: 'clamp(28px, 10vw, 36px)', color: '#4A3B37', lineHeight: 1,
-        }}>
-          <span style={{ display: 'inline-block', animation: 'fg-letter 1s cubic-bezier(.22,.61,.36,1) 2.9s both' }}>{first}</span>
-          {second && (
-            <>
-              <span style={{ display: 'inline-block', fontSize: 'clamp(18px, 6.5vw, 23px)', color: TH.accent, animation: 'fg-letter 1s cubic-bezier(.22,.61,.36,1) 3.1s both' }}>&amp;</span>
-              <span style={{ display: 'inline-block', animation: 'fg-letter 1s cubic-bezier(.22,.61,.36,1) 3.3s both' }}>{second}</span>
-            </>
-          )}
-        </div>
+        {/* Adlar — hər söz ayrıca qalxır (admin gizlədibsə sətir yoxdur) */}
+        {titleOv !== '' && (
+          <div style={{
+            display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 11, marginTop: 28,
+            fontFamily: serif, fontSize: 'clamp(28px, 10vw, 36px)', color: '#4A3B37', lineHeight: 1,
+            flexWrap: titleOv !== undefined ? 'wrap' : undefined,
+          }}>
+            <span style={{ display: 'inline-block', animation: 'fg-letter 1s cubic-bezier(.22,.61,.36,1) 2.9s both' }}>{first}</span>
+            {second && (
+              <>
+                <span style={{ display: 'inline-block', fontSize: 'clamp(18px, 6.5vw, 23px)', color: TH.accent, animation: 'fg-letter 1s cubic-bezier(.22,.61,.36,1) 3.1s both' }}>&amp;</span>
+                <span style={{ display: 'inline-block', animation: 'fg-letter 1s cubic-bezier(.22,.61,.36,1) 3.3s both' }}>{second}</span>
+              </>
+            )}
+          </div>
+        )}
 
         {/* Ornament — solub gedən xətlər və ortada qızılgül nöqtəsi */}
         <div style={{
@@ -332,39 +354,45 @@ function GardenOpening({ weddingData, isCouple, isCorp, eventLabel, onOpen, onOp
           <span style={{ width: 30, height: 1, background: `linear-gradient(90deg, ${TH.accent}, transparent)` }} />
         </div>
 
-        <div style={{
-          fontSize: 10.5, letterSpacing: '.24em', textTransform: 'uppercase', color: TH.muted, marginTop: 14,
-          animation: 'fg-rise .8s ease-out 3.8s both',
-        }}>
-          {formatFullDateByLang(weddingData.date, 'az')}
-        </div>
+        {ot.show('meta') && (
+          <div style={{
+            fontSize: 10.5, letterSpacing: '.24em', textTransform: 'uppercase', color: TH.muted, marginTop: 14,
+            animation: 'fg-rise .8s ease-out 3.8s both',
+          }}>
+            {ot.text('meta')}
+          </div>
+        )}
 
         {/* CTA — ağ, üzərindən işıq keçir */}
-        <div style={{
-          position: 'relative', overflow: 'hidden', marginTop: 38,
-          display: 'inline-flex', alignItems: 'center', gap: 10,
-          border: `1px solid ${TH.accent}8C`, borderRadius: 100, padding: '14px 26px',
-          fontSize: 10, letterSpacing: '.24em', textTransform: 'uppercase',
-          color: '#7A5C55', background: 'rgba(255,255,255,.7)',
-          animation: 'fg-cta .9s cubic-bezier(.22,.61,.36,1) 4.1s both',
-        }}>
-          <span aria-hidden="true" style={{
-            position: 'absolute', top: 0, bottom: 0, left: 0, width: '38%',
-            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,.9), transparent)',
-            animation: 'fg-gleam 4.6s ease-in-out 5.3s infinite',
-          }} />
-          <span style={{ position: 'relative' }}>{isCorp ? 'Tədbirə daxil olun' : 'Dəvətnaməyə daxil olun'}</span>
-          <span style={{ position: 'relative' }}>→</span>
-        </div>
+        {ot.show('cta') && (
+          <div style={{
+            position: 'relative', overflow: 'hidden', marginTop: 38,
+            display: 'inline-flex', alignItems: 'center', gap: 10,
+            border: `1px solid ${TH.accent}8C`, borderRadius: 100, padding: '14px 26px',
+            fontSize: 10, letterSpacing: '.24em', textTransform: 'uppercase',
+            color: '#7A5C55', background: 'rgba(255,255,255,.7)',
+            animation: 'fg-cta .9s cubic-bezier(.22,.61,.36,1) 4.1s both',
+          }}>
+            <span aria-hidden="true" style={{
+              position: 'absolute', top: 0, bottom: 0, left: 0, width: '38%',
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,.9), transparent)',
+              animation: 'fg-gleam 4.6s ease-in-out 5.3s infinite',
+            }} />
+            <span style={{ position: 'relative' }}>{ot.text('cta')}</span>
+            <span style={{ position: 'relative' }}>→</span>
+          </div>
+        )}
       </div>
 
-      <div style={{
-        position: 'absolute', left: 0, right: 0, bottom: 32, textAlign: 'center',
-        fontSize: 10.5, letterSpacing: '.2em', color: '#9C8B84',
-        animation: 'fg-rise .8s ease-out 4.6s both, fg-hint 2.8s ease-in-out 5.4s infinite',
-      }}>
-        toxunun
-      </div>
+      {ot.show('hint') && (
+        <div style={{
+          position: 'absolute', left: 0, right: 0, bottom: 32, textAlign: 'center',
+          fontSize: 10.5, letterSpacing: '.2em', color: '#9C8B84',
+          animation: 'fg-rise .8s ease-out 4.6s both, fg-hint 2.8s ease-in-out 5.4s infinite',
+        }}>
+          {ot.text('hint')}
+        </div>
+      )}
     </motion.div>
   )
 }
@@ -435,9 +463,16 @@ function GardenMusic({ lang, music, playerRef, visible = false, autoPlay = false
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function FloralGardenTemplate({
   lang, setLang, weddingData, onBack, isDemoMode = false, initialGuestbook,
+  /* Phase 45 — admin override-ları və admin önbaxışında açılışı atlamaq.
+     Verilməyəndə davranış əvvəlki kimidir. */
+  adminOverrides = null, startOpened = false,
 }) {
-  const tr = t[lang] || t.az
-  const [opened, setOpened] = useState(false)
+  /* Phase 45 — admin «Mətnlər»: sətir override-ları nazik Proxy ilə (yoxdursa
+     EYNİ obyekt), bölmə adları `L()` ilə — TemplateShell-in eyni qaydası. */
+  const adminStrings = adminOverrides?.strings || null
+  const tr = withStringOverrides(t[lang] || t.az, adminStrings, lang)
+  const L = makeLabelResolver(mergeSectionLabels(null, adminOverrides), lang)
+  const [opened, setOpened] = useState(startOpened)
   const musicRef = useRef(null)
 
   const isCouple = ['toy', 'nishan'].includes(weddingData.eventType)
@@ -453,6 +488,9 @@ export default function FloralGardenTemplate({
     other: weddingData.eventName || tr.event_other,
   }
   const eventLabel = eventLabels[weddingData.eventType] || tr.event_toy
+  const ot = makeOpeningText(
+    'floral-garden', { weddingData, lang, isCouple, isCorp, eventLabel }, adminOverrides?.opening || null,
+  )
 
   /* Paket gating — simple-luxury ilə eyni məntiq */
   const activePkgId = isDemoMode ? 'PREMIUM' : (weddingData.package || 'SADE')
@@ -478,6 +516,9 @@ export default function FloralGardenTemplate({
   const { inputRef: rsvpInputRef, ...rsvp } = useRsvp({ lang, weddingData })
   const gbook    = useGuestbook({ lang, initialMessages: initialGuestbook })
   const gallery  = useGallery({ weddingData, isCouple, isCorp })
+  const rsvpL    = withStringOverrides(rsvp.labels,    adminStrings, lang, 'rsvp.')
+  const gbookL   = withStringOverrides(gbook.labels,   adminStrings, lang, 'gbook.')
+  const seatingL = withStringOverrides(seating.labels, adminStrings, lang, 'seating.')
 
   /* Dəvətnamə açıldı — demo/preview sayılmır */
   useEffect(() => {
@@ -485,9 +526,12 @@ export default function FloralGardenTemplate({
   }, [])
 
   const { formattedDate, dayName } = formatAzDate(weddingData.date, lang)
-  const names = isCouple
+  const names = L('hero', 'title', null) || (isCouple
     ? `${weddingData.groomName || ''}\n& ${weddingData.brideName || ''}`
-    : (weddingData.eventName || weddingData.brideName || '')
+    : (weddingData.eventName || weddingData.brideName || ''))
+  /* Kartın başlıq yeri məkan adıdır; admin başlıq yazıbsa o başlıq olur və
+     məkan adı altında ikinci sətir kimi qalır (itmir). */
+  const venueTitle = L('venue', 'title', null)
 
 
   return (
@@ -510,8 +554,7 @@ export default function FloralGardenTemplate({
         <GardenOpening
           weddingData={weddingData}
           isCouple={isCouple}
-          isCorp={isCorp}
-          eventLabel={eventLabel}
+          ot={ot}
           onOpen={() => setOpened(true)}
           onOpenStart={autoPlay ? () => musicRef.current?.play() : undefined}
         />
@@ -583,7 +626,7 @@ export default function FloralGardenTemplate({
               />
               <div style={{ position: 'relative', maxWidth: 560, margin: '0 auto', textAlign: 'center' }}>
                 <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.primary, marginBottom: 12 }}>
-                  {eventLabel}
+                  {L('hero', 'kicker', eventLabel)}
                 </div>
                 <div style={{ fontFamily: serif, fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.muted }}>
                   {tr.inv_join}
@@ -637,7 +680,7 @@ export default function FloralGardenTemplate({
             {S.countdown && (
             <section style={{ padding: '30px 28px', background: TH.surface }}>
               <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
-                <SectionHead kicker="Countdown" title={cd.title} />
+                <SectionHead kicker={L('countdown', 'kicker', 'Countdown')} title={L('countdown', 'title', cd.title)} />
                 <Stagger base={55} style={{ display: 'flex', gap: 18, flexWrap: 'wrap' }}>
                   {[
                     { v: cd.days, l: cd.labels.days },
@@ -670,7 +713,10 @@ export default function FloralGardenTemplate({
             {S.lovestory && Array.isArray(weddingData.loveStory) && weddingData.loveStory.length > 0 && (
             <section data-section="lovestory" style={{ padding: 'clamp(48px,12vw,64px) 22px clamp(56px,14vw,80px)', background: getStoryTheme('floral-garden').bg }}>
               <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
-                <LoveStorySection story={weddingData.loveStory} templateId="floral-garden" lang={lang} />
+                <LoveStorySection
+                  story={weddingData.loveStory} templateId="floral-garden" lang={lang}
+                  copyOverrides={adminOverrides?.story?.text || null}
+                />
               </Reveal>
             </section>
             )}
@@ -708,10 +754,15 @@ export default function FloralGardenTemplate({
                     />
                   </div>
                   <div style={{ padding: 18, background: '#FFFFFF' }}>
-                    <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.primary }}>LOCATION</div>
+                    <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.primary }}>{L('venue', 'kicker', 'LOCATION')}</div>
                     <div style={{ fontFamily: serif, fontSize: 20, color: TH.text, marginTop: 6 }}>
-                      {weddingData.venueName || tr.inv_location}
+                      {venueTitle || weddingData.venueName || tr.inv_location}
                     </div>
+                    {venueTitle && weddingData.venueName && (
+                      <div style={{ fontFamily: serif, fontSize: 16, color: TH.text, marginTop: 4 }}>
+                        {weddingData.venueName}
+                      </div>
+                    )}
                     {/* Məkan qeydi (zal/mərtəbə) — YALNIZ doludursa */}
                     {weddingData.venueNote && (
                       <div style={{ fontSize: 12.5, color: TH.muted, marginTop: 5, lineHeight: 1.5 }}>
@@ -736,7 +787,7 @@ export default function FloralGardenTemplate({
             {S.program && (
             <section style={{ padding: '34px 28px' }}>
               <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
-                <SectionHead kicker="Schedule" title={timeline.sectionLabel} />
+                <SectionHead kicker={L('program', 'kicker', 'Schedule')} title={L('program', 'title', timeline.sectionLabel)} />
                 <Stagger base={55}>
                   {timeline.events.map((ev, i) => (
                     <div key={i} style={{
@@ -773,8 +824,8 @@ export default function FloralGardenTemplate({
               <Reveal>
                 <DressCodeSection
                   theme={TH}
-                  title={tr.inv_dresscode}
-                  kicker="STYLE"
+                  title={L('dresscode', 'title', tr.inv_dresscode)}
+                  kicker={L('dresscode', 'kicker', 'STYLE')}
                   paletteId={weddingData.dressCodePalette}
                   customLabels={weddingData.dressCodeLabels}
                   customGenders={weddingData.dressCodeGenders}
@@ -792,7 +843,7 @@ export default function FloralGardenTemplate({
             {canShowSeating && !seating.isEmpty && (
               <section style={{ padding: '34px 28px' }}>
                 <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
-                  <SectionHead kicker="SEATING" title={seating.labels.title} />
+                  <SectionHead kicker={L('seating', 'kicker', 'SEATING')} title={L('seating', 'title', seatingL.title)} />
 
                   {/* ⚠ Təkliflər siyahısı QƏSDƏN normal document flow-dadır
                       (position:absolute DEYİL) — açılanda aşağıdakı bölmələri
@@ -805,7 +856,7 @@ export default function FloralGardenTemplate({
                       value={seating.query}
                       onChange={(e) => { seating.setQuery(e.target.value); seating.setActiveIdx(-1); if (seating.selected) seating.setSelected(null) }}
                       onKeyDown={seating.onKeyDown}
-                      placeholder={seating.labels.hint}
+                      placeholder={seatingL.hint}
                       role="combobox"
                       aria-expanded={seating.suggestions.length > 0}
                       aria-controls="fg-seating-list"
@@ -873,7 +924,7 @@ export default function FloralGardenTemplate({
                           minHeight: 44, padding: '0 8px 0 0',
                         }}
                       >
-                        Yenidən axtar
+                        {seatingL.again || 'Yenidən axtar'}
                       </button>
                     </div>
                   )}
@@ -889,7 +940,7 @@ export default function FloralGardenTemplate({
                     background: '#FFFFFF', border: `1px solid ${TH.primary}38`, borderRadius: 18,
                     padding: 22, textAlign: 'center',
                   }}>
-                    <SectionHead kicker="Gallery" title={tr.inv_gallery} align="center" />
+                    <SectionHead kicker={L('gallery', 'kicker', 'Gallery')} title={L('gallery', 'title', tr.inv_gallery)} align="center" />
 
                     {gallery.demoPhotos.length > 0 && (
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 6, marginBottom: 18 }}>
@@ -932,13 +983,13 @@ export default function FloralGardenTemplate({
                     {/* ⚠ SABİT «RSVP» DEYİL: AZ-da «İştirak Təsdiqi» görünməlidir
                         (bax translations.js › inv_rsvp). Bu şablon TemplateShell
                         işlətmir, ona görə düzəliş burada ayrıca edilir. */}
-                    <span style={{ width: 22, height: 1, background: `${TH.primary}99` }} />{tr.inv_rsvp}
+                    <span style={{ width: 22, height: 1, background: `${TH.primary}99` }} />{L('rsvp', 'kicker', tr.inv_rsvp)}
                     <span style={{ width: 22, height: 1, background: `${TH.primary}99` }} />
                   </div>
                   <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 'clamp(24px,7vw,28px)', color: TH.text, marginTop: 12, lineHeight: 1.3 }}>
-                    {rsvp.labels.title}
+                    {L('rsvp', 'title', rsvpL.title)}
                   </div>
-                  <div style={{ fontSize: 12.5, color: TH.muted, margin: '10px 0 20px' }}>{rsvp.labels.subtitle}</div>
+                  <div style={{ fontSize: 12.5, color: TH.muted, margin: '10px 0 20px' }}>{rsvpL.subtitle}</div>
 
                   {rsvp.rsvpClosed && !rsvp.submitted ? (
                     <div style={{ background: '#FFFFFF', border: `1px solid ${TH.primary}33`, borderRadius: 16, padding: 24, textAlign: 'center' }}>
@@ -947,13 +998,13 @@ export default function FloralGardenTemplate({
                     </div>
                   ) : rsvp.alreadyDone ? (
                     <div style={{ background: '#FFFFFF', border: `1px solid ${TH.accent}4D`, borderRadius: 16, padding: 24, textAlign: 'center' }}>
-                      <div style={{ fontFamily: serif, fontSize: 18, color: TH.text }}>{rsvp.labels.already_done}</div>
+                      <div style={{ fontFamily: serif, fontSize: 18, color: TH.text }}>{rsvpL.already_done}</div>
                       <div style={{ fontSize: 11, color: TH.muted, marginTop: 6 }}>{rsvp.selected?.full_name}</div>
                     </div>
                   ) : rsvp.submitted ? (
                     <div style={{ background: '#FFFFFF', border: `1px solid ${TH.primary}4D`, borderRadius: 16, padding: 24, textAlign: 'center' }}>
                       <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 20, color: TH.text }}>{rsvp.thanksMsg}</div>
-                      <div style={{ fontSize: 11, color: TH.muted, marginTop: 6 }}>{rsvp.labels.thanks_sub}</div>
+                      <div style={{ fontSize: 11, color: TH.muted, marginTop: 6 }}>{rsvpL.thanks_sub}</div>
                     </div>
                   ) : (
                     <form onSubmit={rsvp.handleSubmit}>
@@ -965,7 +1016,7 @@ export default function FloralGardenTemplate({
                           value={rsvp.query}
                           onChange={(e) => { rsvp.setQuery(e.target.value); rsvp.setActiveIdx(-1); if (rsvp.selected) rsvp.setSelected(null) }}
                           onKeyDown={rsvp.onKeyDown}
-                          placeholder={rsvp.labels.namePh}
+                          placeholder={rsvpL.namePh}
                           required={!rsvp.useGuestMode}
                           autoComplete="off"
                           style={{
@@ -1001,16 +1052,16 @@ export default function FloralGardenTemplate({
                           </ul>
                         )}
                         {rsvp.showNotFound && (
-                          <div style={{ fontSize: 10, color: TH.accent, marginTop: 6 }}>{rsvp.labels.not_in_list}</div>
+                          <div style={{ fontSize: 10, color: TH.accent, marginTop: 6 }}>{rsvpL.not_in_list}</div>
                         )}
                       </div>
 
                       {/* Status düymələri */}
                       <Stagger base={220} style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                         {[
-                          { val: 'yes',   label: rsvp.labels.yes,   bg: TH.accent },
-                          { val: 'no',    label: rsvp.labels.no,    bg: null },
-                          { val: 'maybe', label: rsvp.labels.maybe, bg: null },
+                          { val: 'yes',   label: rsvpL.yes,   bg: TH.accent },
+                          { val: 'no',    label: rsvpL.no,    bg: null },
+                          { val: 'maybe', label: rsvpL.maybe, bg: null },
                         ].map(({ val, label, bg }) => {
                           const active = rsvp.status === val
                           return (
@@ -1041,7 +1092,7 @@ export default function FloralGardenTemplate({
                           borderRadius: 16, padding: 20, textAlign: 'center',
                         }}>
                           <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.muted }}>
-                            {rsvp.labels.plusq}
+                            {rsvpL.plusq}
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 26, marginTop: 16 }}>
                             <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} data-press aria-label="Azalt"
@@ -1070,7 +1121,7 @@ export default function FloralGardenTemplate({
                           opacity: rsvp.canSubmit ? 1 : .35,
                         }}
                       >
-                        {rsvp.sending ? '…' : rsvp.labels.send}
+                        {rsvp.sending ? '…' : rsvpL.send}
                       </button>
                     </form>
                   )}
@@ -1086,14 +1137,14 @@ export default function FloralGardenTemplate({
             {S.guestbook && (
             <section style={{ padding: '34px 28px' }}>
               <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
-                <SectionHead kicker="Guestbook" title={gbook.labels.title} />
+                <SectionHead kicker={L('guestbook', 'kicker', 'Guestbook')} title={L('guestbook', 'title', gbookL.title)} />
 
                 <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 18 }}>
                   <input
                     type="text"
                     value={gbook.name}
                     onChange={(e) => gbook.setName(e.target.value)}
-                    placeholder={gbook.labels.namePh}
+                    placeholder={gbookL.namePh}
                     style={{
                       background: '#FFFFFF', border: `1px solid ${TH.primary}40`, borderRadius: 100,
                       padding: '13px 18px', fontSize: 13, color: TH.text, fontFamily: sans, outline: 'none',
@@ -1102,7 +1153,7 @@ export default function FloralGardenTemplate({
                   <textarea
                     value={gbook.text}
                     onChange={(e) => gbook.setText(e.target.value)}
-                    placeholder={gbook.labels.msgPh}
+                    placeholder={gbookL.msgPh}
                     rows={3}
                     style={{
                       background: '#FFFFFF', border: `1px dashed ${TH.primary}66`, borderRadius: 16,
@@ -1121,8 +1172,9 @@ export default function FloralGardenTemplate({
                       opacity: gbook.canSubmit ? 1 : .35,
                     }}
                   >
-                    {gbook.sending ? gbook.labels.sending : gbook.labels.btn}
+                    {gbook.sending ? gbookL.sending : gbookL.btn}
                   </button>
+                  {gbook.error && <p role="alert" style={{ margin: 0, fontSize: 12, textAlign: 'center', color: TH.text, fontFamily: sans }}>⚠ {gbookL.error}</p>}
                 </form>
 
                 <Stagger base={110} style={{ display: 'grid', gap: 10 }}>
@@ -1156,6 +1208,7 @@ export default function FloralGardenTemplate({
               theme={TH} weddingData={weddingData} lang={lang}
               isDemoMode={isDemoMode} isCouple={isCouple} isCorp={isCorp}
               eventLabel={eventLabel} serif={serif}
+              footer={sectionHead(L, 'footer')}
             />
           </motion.div>
         )}

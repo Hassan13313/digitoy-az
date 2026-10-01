@@ -30,6 +30,7 @@
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/admin_content_rules.php';
 
 requireAdmin();
 
@@ -49,10 +50,14 @@ const LABEL_KEYS = [
     'seating', 'gallery', 'rsvp', 'guestbook', 'footer',
 ];
 
-/* `src/data/sections.js` ilə eyni açarlar (Phase 35) */
+/* `src/data/sections.js` ilə eyni açarlar (Phase 35).
+   ⚠ Phase 45: 'lovestory' əlavə edildi. Əvvəl siyahıda YOX idi və admin
+   paneldə «Bölmələr» saxlananda `sections` obyekti bu siyahı ilə yenidən
+   qurulurdu — müştərinin açdığı «Bizim Hekayəmiz» (`lovestory: true`)
+   SƏSSİZCƏ silinir, hekayə dəvətnamədən itirdi; admin onu aça da bilmirdi. */
 const SECTION_KEYS = [
     'venue', 'countdown', 'program', 'dresscode',
-    'seating', 'gallery', 'rsvp', 'guestbook', 'music',
+    'seating', 'gallery', 'rsvp', 'guestbook', 'music', 'lovestory',
 ];
 
 const SCALE_MIN = 0.85;
@@ -124,7 +129,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$body = json_decode(file_get_contents('php://input') ?: '', true);
+$rawBody = file_get_contents('php://input') ?: '';
+/* Hekayə mətnləri ilə gövdə böyüyə bilər, amma 512 KB-dan çox olmamalıdır */
+if (strlen($rawBody) > 524288) {
+    http_response_code(413);
+    echo json_encode(['error' => 'Body too large']);
+    exit;
+}
+$body = json_decode($rawBody, true);
 if (!is_array($body)) {
     http_response_code(400);
     echo json_encode(['error' => 'JSON body required']);
@@ -216,6 +228,13 @@ if (is_array($inAdmin['strings'] ?? null)) {
     if ($S) $clean['strings'] = $S;
 }
 
+/* ── Təmizləmə: açılış ekranı və «Bizim Hekayəmiz» (Phase 45) ──
+   Qaydalar admin_content_rules.php-dədir (müştəri tərəfi ilə eyni). */
+$opening = acrOpening($inAdmin['opening'] ?? null);
+if ($opening !== null) $clean['opening'] = $opening;
+$story = acrStory($inAdmin['story'] ?? null);
+if ($story !== null) $clean['story'] = $story;
+
 /* ── Təmizləmə: bölmə görünürlüyü (Phase 35 açarı) ── */
 $cleanSections = null;
 if (is_array($inSections)) {
@@ -257,7 +276,12 @@ try {
     if ($clean) $fd['admin'] = $clean;
     else        unset($fd['admin']);
 
-    if ($cleanSections !== null) $fd['sections'] = $cleanSections;
+    /* ⚠ BİRLƏŞDİRMƏ, əvəzləmə yox (Phase 45): siyahıda olmayan açar (gələcək
+       bölmə, köhnə frontend-in bilmədiyi açar) mövcud dəyərini saxlayır. */
+    if ($cleanSections !== null) {
+        $prev = (isset($fd['sections']) && is_array($fd['sections'])) ? $fd['sections'] : [];
+        $fd['sections'] = array_merge($prev, $cleanSections);
+    }
 
     $enc = json_encode($fd, JSON_UNESCAPED_UNICODE);
     if ($enc === false) {
@@ -277,13 +301,15 @@ try {
         'fonts'    => isset($clean['fonts'])  ? array_keys($clean['fonts'])  : [],
         'labels'   => isset($clean['labels']) ? array_keys($clean['labels']) : [],
         'strings'  => isset($clean['strings']) ? count($clean['strings']) : 0,
+        'opening'  => isset($clean['opening']),
+        'story'    => isset($clean['story']),
         'sections' => $cleanSections !== null,
     ], JSON_UNESCAPED_UNICODE));
 
     echo json_encode([
         'ok'       => true,
         'admin'    => $clean ?: new stdClass(),
-        'sections' => $cleanSections ?? new stdClass(),
+        'sections' => ($cleanSections !== null ? $fd['sections'] : null) ?? new stdClass(),
     ], JSON_UNESCAPED_UNICODE);
 
 } catch (Throwable $e) {

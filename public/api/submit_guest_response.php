@@ -65,7 +65,7 @@ if (!invitationExists($db, $invId)) {
      2) (toy, IP) cütü üçün saatda 60 mesaj — real toy üçün əlçatmaz
         yüksək, skript üçün isə divar. */
 $ip = clientIp();
-if (!rateGate('gb_dup|' . $invId . '|' . $ip . '|' . mb_strtolower($name), 1, 60)) {
+if (!rateGate(guestDupKey($invId, $ip, $name, $status), 1, 60)) {
     http_response_code(429);
     echo json_encode(['error' => 'TOO_SOON', 'message' => 'Mesajınız az öncə göndərildi.']);
     exit;
@@ -92,3 +92,12 @@ $st->execute([
 ]);
 
 echo json_encode(['ok' => true, 'id' => $db->lastInsertId()]);
+
+/* ── Phase 45.2: təkrar-göndəriş açarı NÖVÜ də daşıyır ──
+   RSVP və təbrik eyni endpointə gəlir. Əvvəl açar ortaq idi: qonaq RSVP-dən
+   sonra 60 saniyə ərzində eyni adla təbrik yazanda 429 alır, mesaj bazaya
+   düşmürdü. İndi hər növün öz qapısı var; eyni növün təkrarı yenə bloklanır. */
+function guestDupKey(string $invId, string $ip, string $name, ?string $status): string {
+    $kind = $status !== null ? 'rsvp' : 'gb';
+    return 'gb_dup|' . $kind . '|' . $invId . '|' . $ip . '|' . mb_strtolower($name);
+}

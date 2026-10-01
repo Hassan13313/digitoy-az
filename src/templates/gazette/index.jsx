@@ -52,7 +52,7 @@ function Column({ widths, delay, color }) {
 }
 
 function Opening(props) {
-  const { theme, weddingData, isCouple } = props
+  const { theme, weddingData, isCouple, ot } = props
 
   const dateStr = String(weddingData.date || '').split('-').reverse().join('.')
 
@@ -61,7 +61,8 @@ function Opening(props) {
       {...props}
       exit="up"
       duration={900}
-      label="Buraxılışı oxu"
+      label={ot.text('cta')}
+      hint={ot.text('hint')}
       ctaDelay={3.9}
       hintDelay={4.4}
       orbs="none"
@@ -88,16 +89,18 @@ function Opening(props) {
           fontSize: 7, letterSpacing: '.18em', textTransform: 'uppercase', color: theme.muted,
           animation: 'tpl-rise .6s ease-out 1.1s both',
         }}>
-          <span>Xüsusi buraxılış</span>
+          <span>{ot.text('edition')}</span>
           <span>{dateStr}</span>
         </div>
 
         {/* MASTHEAD */}
-        <div style={{
-          fontFamily: DISP, fontWeight: 700, fontSize: 'clamp(16px, 5.6vw, 21px)',
-          letterSpacing: '-.02em', color: theme.accent, textAlign: 'center', marginTop: 7,
-          animation: 'tpl-rise .8s ease-out 1.3s both',
-        }}>THE GAZETTE</div>
+        {ot.show('masthead') && (
+          <div style={{
+            fontFamily: DISP, fontWeight: 700, fontSize: 'clamp(16px, 5.6vw, 21px)',
+            letterSpacing: '-.02em', color: theme.accent, textAlign: 'center', marginTop: 7,
+            animation: 'tpl-rise .8s ease-out 1.3s both',
+          }}>{ot.text('masthead')}</div>
+        )}
 
         {/* Qalın qayda xətti */}
         <span aria-hidden="true" style={{
@@ -109,16 +112,19 @@ function Opening(props) {
           transformOrigin: 'left', animation: 'tpl-drawx .7s cubic-bezier(.22,.61,.36,1) 1.85s both',
         }} />
 
-        {/* Klişe qırmızısı ilə rubrika */}
-        <div style={{
-          fontSize: 7.5, letterSpacing: '.24em', textTransform: 'uppercase',
-          color: theme.primary, textAlign: 'center', marginBottom: 9,
-          animation: 'tpl-rise .6s ease-out 2.0s both',
-        }}>Toy elanı · Bakı</div>
+        {/* Klişe qırmızısı ilə rubrika — tədbir növünə görə (bax openingSpec) */}
+        {ot.show('sub') && (
+          <div style={{
+            fontSize: 7.5, letterSpacing: '.24em', textTransform: 'uppercase',
+            color: theme.primary, textAlign: 'center', marginBottom: 9,
+            animation: 'tpl-rise .6s ease-out 2.0s both',
+          }}>{ot.text('sub')}</div>
+        )}
 
         {/* ƏSAS XƏBƏR BAŞLIĞI — adlar */}
         <NameRow
           theme={theme} weddingData={weddingData} isCouple={isCouple}
+          text={ot.override('title')}
           delay={2.3} step={0.2} stacked
           size="clamp(19px, 6.6vw, 25px)" ampSize="clamp(14px, 4.8vw, 18px)"
           font={DISP} color={theme.accent} ampColor={theme.primary}
@@ -143,15 +149,17 @@ function Opening(props) {
         <div style={{
           fontFamily: DISP, fontSize: 9, color: theme.secondary, textAlign: 'center',
           animation: 'tpl-rise .6s ease-out 3.6s both',
-        }}>{weddingData.venueName || ''}</div>
+        }}>{ot.text('venue')}</div>
       </div>
 
-      <OpeningMeta
-        text={weddingData.time ? `Saat ${weddingData.time}` : ''}
-        color={alpha(theme.muted, 0.95)}
-        delay={3.8}
-        style={{ marginTop: 20, letterSpacing: '.26em' }}
-      />
+      {ot.show('meta') && (
+        <OpeningMeta
+          text={ot.text('meta')}
+          color={alpha(theme.muted, 0.95)}
+          delay={3.8}
+          style={{ marginTop: 20, letterSpacing: '.26em' }}
+        />
+      )}
     </OpeningFrame>
   )
 }

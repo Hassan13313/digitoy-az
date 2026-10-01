@@ -8,13 +8,15 @@ import { useHoneypot } from '../utils/honeypot'
    useGuestbook — qonaq dəftəri məntiqi (UI-sız).
 
    Guestbook.jsx-dən çıxarılıb: serverdən mesajlar, optimistic göndərmə,
-   analytics. Şəbəkə xətasında optimistic mesaj silinmir (mövcud davranış).
+   analytics. Phase 45.2: server mesajı qəbul etməsə optimistic mesaj geri
+   götürülür, yazı sahələrə qayıdır və `error` qonağa göstərilir — əvvəl
+   mesaj ekranda qalırdı, bazada isə yox idi.
    ───────────────────────────────────────────────────────────────────────── */
 
 export const GUESTBOOK_LABELS = {
-  az: { title: 'Təbrik Kitabı',      sub: 'Xoş arzularınızı bizimlə bölüşün', namePh: 'Adınız',    msgPh: 'Ürək sözləriniz...', btn: 'Paylaş',    sending: 'Göndərilir...' },
-  en: { title: 'Guestbook',          sub: 'Share your warm wishes with us',   namePh: 'Your name', msgPh: 'Your message...',    btn: 'Share',     sending: 'Sending...' },
-  ru: { title: 'Книга пожеланий',    sub: 'Поделитесь тёплыми словами',       namePh: 'Ваше имя',  msgPh: 'Ваше пожелание...',  btn: 'Отправить', sending: 'Отправка...' },
+  az: { title: 'Təbrik Kitabı',      sub: 'Xoş arzularınızı bizimlə bölüşün', namePh: 'Adınız',    msgPh: 'Ürək sözləriniz...', btn: 'Paylaş',    sending: 'Göndərilir...', error: 'Mesaj göndərilmədi. Bir az sonra yenidən cəhd edin.' },
+  en: { title: 'Guestbook',          sub: 'Share your warm wishes with us',   namePh: 'Your name', msgPh: 'Your message...',    btn: 'Share',     sending: 'Sending...',    error: 'Your message was not sent. Please try again shortly.' },
+  ru: { title: 'Книга пожеланий',    sub: 'Поделитесь тёплыми словами',       namePh: 'Ваше имя',  msgPh: 'Ваше пожелание...',  btn: 'Отправить', sending: 'Отправка...',   error: 'Сообщение не отправлено. Попробуйте ещё раз чуть позже.' },
 }
 
 /** "14 · 08 · 2026" formatı */
@@ -41,6 +43,7 @@ export function useGuestbook({ lang = 'az', initialMessages }) {
   const [name,     setName]     = useState('')
   const [text,     setText]     = useState('')
   const [sending,  setSending]  = useState(false)
+  const [error,    setError]    = useState(false)
   const readHoneypot            = useHoneypot()   /* Phase 39 — spam qorunması */
 
   /* Serverdən mövcud mesajları çək */
@@ -59,6 +62,7 @@ export function useGuestbook({ lang = 'az', initialMessages }) {
     setMessages((prev) => [optimistic, ...prev])
     setName('')
     setText('')
+    setError(false)
     setSending(true)
 
     try {
@@ -72,14 +76,17 @@ export function useGuestbook({ lang = 'az', initialMessages }) {
         trackEvent('guestbook_message_sent')
       }
     } catch {
-      /* Şəbəkə xətasında optimistic mesaj qalır — istifadəçini narahat etmirik */
+      setMessages((prev) => prev.filter((m) => m !== optimistic))
+      setName(optimistic.name)
+      setText(optimistic.text)
+      setError(true)
     } finally {
       setSending(false)
     }
   }
 
   return {
-    messages, name, setName, text, setText, sending,
+    messages, name, setName, text, setText, sending, error,
     handleAdd,
     canSubmit: !!name.trim() && !!text.trim() && !sending,
     labels: L,

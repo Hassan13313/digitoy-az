@@ -24,6 +24,7 @@ const FemaleGownIcon = () => (
 )
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import t from '../../data/translations'
+import { countdownLabels } from '../../utils/countdownLabels'
 import BlurFade from '../ui/BlurFade'
 import AnimatedShinyText from '../ui/AnimatedShinyText'
 import SparklesText from '../ui/SparklesText'
@@ -273,7 +274,7 @@ function MusicPlayer({ tr }) {
   )
 }
 
-function FeatureContent({ featureKey, tr }) {
+function FeatureContent({ featureKey, tr, lang }) {
   const [seatingName, setSeatingName] = useState('')
   /* ⚠ SABİT TARİX YAZILMIR: keçəndə sayğac sıfırlanıb «0 gün» göstərərdi.
      Demo ilə eyni mənbə (həmişə növbəti 13 mart) — bax data/demoInvitation.js */
@@ -291,11 +292,12 @@ function FeatureContent({ featureKey, tr }) {
   }, [featureKey])
 
   if (featureKey === 'countdown') {
+    const cl = countdownLabels(lang, timeLeft)
     const units = [
-      { v: String(timeLeft.days).padStart(2, '0'),    l: tr.inv_days },
-      { v: String(timeLeft.hours).padStart(2, '0'),   l: tr.inv_hours },
-      { v: String(timeLeft.minutes).padStart(2, '0'), l: tr.inv_minutes },
-      { v: String(timeLeft.seconds).padStart(2, '0'), l: tr.inv_seconds },
+      { v: String(timeLeft.days).padStart(2, '0'),    l: cl.days },
+      { v: String(timeLeft.hours).padStart(2, '0'),   l: cl.hours },
+      { v: String(timeLeft.minutes).padStart(2, '0'), l: cl.minutes },
+      { v: String(timeLeft.seconds).padStart(2, '0'), l: cl.seconds },
     ]
     return (
       <div className="text-center space-y-4">
@@ -591,7 +593,7 @@ export default function Hero({ lang, onStart, onDemo }) {
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.28, ease: [0.32, 0, 0.68, 1] }}
                 >
-                  <FeatureContent featureKey={activeFeature} tr={tr} />
+                  <FeatureContent featureKey={activeFeature} tr={tr} lang={lang} />
                 </motion.div>
               </AnimatePresence>
             </div>
@@ -876,7 +878,7 @@ export function FeaturesSection({ lang = 'az' }) {
                       boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.8)',
                     }}
                   >
-                    <FeatureContent featureKey={activeFeature} tr={tr} />
+                    <FeatureContent featureKey={activeFeature} tr={tr} lang={lang} />
                   </div>
                 </div>
               </div>

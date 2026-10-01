@@ -1,12 +1,18 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
-import { X, Check, RotateCcw, Smartphone, Monitor, Type, Palette, Layout, FileText } from 'lucide-react'
+import { X, Check, RotateCcw, Smartphone, Monitor, Type, Palette, Layout, FileText, Sparkles, BookHeart, Play } from 'lucide-react'
 import { getInvitationContent, saveInvitationContent, getInvitation } from '../../utils/api'
 import { getTemplateTheme, getTemplateName, FONT_STACKS } from '../../templates/templateConfig'
 import {
   CONTENT_SECTIONS, THEME_KEYS, THEME_LABELS, FONT_CHOICES,
   FONT_SCALE_MIN, FONT_SCALE_MAX, safeColor, STRING_CATALOG,
 } from '../../data/adminOverrides'
-import { SECTION_DEFS } from '../../data/sections'
+import { SECTION_DEFS, isSectionOn } from '../../data/sections'
+import OpeningEditor from './content/OpeningEditor'
+import StoryEditor from './content/StoryEditor'
+import translations from '../../data/translations'
+import { buildRsvpLabels } from '../../hooks/useRsvp'
+import { GUESTBOOK_LABELS } from '../../hooks/useGuestbook'
+import { SEATING_LABELS } from '../../hooks/useSeating'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    INVITATION CONTENT MANAGER (Phase 42) — admin panel modalı.
@@ -53,12 +59,19 @@ const LANGS = [
   { id: 'ru', label: 'RU' },
 ]
 
+/* Phase 45 — «Açılış» (zərf/açılış ekranı) və «Love Story» tabları əlavə
+   edildi; mövcud dörd tab olduğu kimi qalır, default tab yenə «Mətnlər»-dir. */
 const TABS = [
-  { id: 'content',  icon: FileText, az: 'Mətnlər' },
-  { id: 'theme',    icon: Palette,  az: 'Rənglər' },
-  { id: 'type',     icon: Type,     az: 'Tipoqrafiya' },
-  { id: 'sections', icon: Layout,   az: 'Bölmələr' },
+  { id: 'content',  icon: FileText,  az: 'Mətnlər' },
+  { id: 'opening',  icon: Sparkles,  az: 'Açılış' },
+  { id: 'story',    icon: BookHeart, az: 'Love Story' },
+  { id: 'theme',    icon: Palette,   az: 'Rənglər' },
+  { id: 'type',     icon: Type,      az: 'Tipoqrafiya' },
+  { id: 'sections', icon: Layout,    az: 'Bölmələr' },
 ]
+
+/* Dil seçimi (AZ/EN/RU) bu tablarda görünür — mətn olan tablar */
+const LANG_TABS = new Set(['content', 'opening', 'story'])
 
 const input = {
   width: '100%', padding: '7px 9px', border: `1px solid ${C.line}`, borderRadius: 4,
@@ -173,6 +186,9 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
   const [labels, setLabels]     = useState({})
   const [strings, setStrings]   = useState({})
   const [sections, setSections] = useState({})
+  /* Phase 45 — açılış ekranı və «Bizim Hekayəmiz» override-ları */
+  const [opening, setOpening]   = useState({})
+  const [story, setStory]       = useState({})
 
   /* Önbaxış üçün real dəvətnamə datası */
   const [wedding, setWedding]     = useState(null)
@@ -194,6 +210,8 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
         setFonts(a.fonts || {})
         setLabels(a.labels || {})
         setStrings(a.strings || {})
+        setOpening(a.opening || {})
+        setStory(a.story || {})
         setSections(content.sections || {})
         /* ⚠ `getInvitation` `{ data, active }` qaytarır — dəvətnamə obyekti
            `data`-dadır. Şablon id-si isə content endpoint-indən gəlir
@@ -217,19 +235,27 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
      ⚠ `admin` açarı məhz render qatının gözlədiyi formadadır, yəni önbaxış
      saxlanılmış dəvətnamə ilə EYNİ yolu keçir — «önbaxışda başqa, canlıda
      başqa» problemi yaranmır. */
+  /* Saxlanılacaq / önbaxışa gedəcək `admin` obyekti — boş açarlar düşmür */
+  const buildAdmin = useCallback(() => {
+    const admin = {}
+    if (Object.keys(theme).length)   admin.theme   = theme
+    if (Object.keys(fonts).length)   admin.fonts   = fonts
+    if (Object.keys(labels).length)  admin.labels  = labels
+    if (Object.keys(strings).length) admin.strings = strings
+    if (Object.keys(opening).length) admin.opening = opening
+    if (Object.keys(story).length)   admin.story   = story
+    return admin
+  }, [theme, fonts, labels, strings, opening, story])
+
   const previewData = useMemo(() => {
     if (!wedding) return null
-    const admin = {}
-    if (Object.keys(theme).length)  admin.theme  = theme
-    if (Object.keys(fonts).length)  admin.fonts  = fonts
-    if (Object.keys(labels).length) admin.labels = labels
-    if (Object.keys(strings).length) admin.strings = strings
+    const admin = buildAdmin()
     return {
       ...wedding,
       sections: Object.keys(sections).length ? sections : wedding.sections,
       admin: Object.keys(admin).length ? admin : undefined,
     }
-  }, [wedding, theme, fonts, labels, strings, sections])
+  }, [wedding, sections, buildAdmin])
 
   /* ── Debounce (maks. 100 ms tələbi) ───────────────────────────────────
      `previewData` hər klaviatura vuruşunda yeni obyektdir. Onu birbaşa
@@ -242,6 +268,9 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
      Əvvəl önbaxış bu komponentin ağacında render olunurdu və hər simvolda
      bütün dəvətnamə yenidən çəkilirdi. İndi iframe ayrı sənəddir: valideyn
      yalnız mesaj göndərir, yazmaq tamamilə rəvan qalır. */
+  /* «Açılış» tabında önbaxış açılış ekranını göstərir (Phase 45) */
+  const previewView = tab === 'opening' ? 'opening' : 'content'
+
   useEffect(() => {
     if (!previewData || !frameReady) return undefined
     const t = setTimeout(() => {
@@ -251,11 +280,20 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
           template: templateId,
           weddingData: previewData,
           lang,
+          view: previewView,
         }, window.location.origin)
       } catch { /* iframe bağlanıb — susuruq */ }
     }, 90)
     return () => clearTimeout(t)
-  }, [previewData, frameReady, templateId, lang])
+  }, [previewData, frameReady, templateId, lang, previewView])
+
+  /* Açılış animasiyasını əvvəldən oynat */
+  const replayOpening = useCallback(() => {
+    try {
+      frameRef.current?.contentWindow?.postMessage({ type: 'digitoy:preview:replay' }, window.location.origin)
+    } catch { /* susuruq */ }
+    if (isNarrow) setMobileTab('preview')
+  }, [isNarrow])
 
   /* iframe «hazıram» dedikdə ilk datanı göndər */
   useEffect(() => {
@@ -282,9 +320,20 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
         window.location.origin,
       )
     } catch { /* susuruq */ }
-    /* Telefonda redaktor və önbaxış eyni anda görünmür — fokus önbaxışa keçsin */
-    if (isNarrow) setMobileTab('preview')
-  }, [frameReady, isNarrow])
+    /* ⚠ Phase 45: telefonda fokus artıq önbaxışa KEÇMİR. Əvvəl sahəyə
+       toxunan kimi «Önbaxış» nişanı açılırdı və yazılan sahə gözdən itirdi —
+       telefonda heç nə yazmaq olmurdu. İndi önbaxış arxada həmin bölməyə
+       sürüşür; admin «Önbaxış» nişanına keçəndə onu hazır görür. */
+  }, [frameReady])
+
+  /* «Love Story» tabı açılanda önbaxış hekayə bölməsinə sürüşsün.
+     ⚠ Gecikmə: «Açılış»dan gələndə önbaxış ağacı yenidən qurulur, bölmə
+     bir neçə kadr sonra yaranır. */
+  useEffect(() => {
+    if (tab !== 'story' || !frameReady) return undefined
+    const tm = setTimeout(() => focusSection('lovestory'), 450)
+    return () => clearTimeout(tm)
+  }, [tab, frameReady, focusSection])
 
   const setLabelField = useCallback((key, field, lg, value) => {
     setLabels((prev) => {
@@ -321,11 +370,7 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
   const handleSave = async () => {
     setSaving(true); setError(null); setSaved(false)
     try {
-      const admin = {}
-      if (Object.keys(theme).length)  admin.theme  = theme
-      if (Object.keys(fonts).length)  admin.fonts  = fonts
-      if (Object.keys(labels).length) admin.labels = labels
-      if (Object.keys(strings).length) admin.strings = strings
+      const admin = buildAdmin()
       const res = await saveInvitationContent(slug, admin, sections)
       setSaved(true)
       onSaved?.(res)
@@ -339,10 +384,26 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
 
   const resetAll = () => {
     if (!window.confirm('Bütün admin düzəlişləri silinsin? Dəvətnamə şablonun öz görünüşünə qayıdacaq.')) return
-    setTheme({}); setFonts({}); setLabels({}); setStrings({})
+    setTheme({}); setFonts({}); setLabels({}); setStrings({}); setOpening({}); setStory({})
   }
 
   /* ── Panellər ─────────────────────────────────────────────────────── */
+
+  /* Telefonda sahələr barmaq ölçüsündə (15px yazı, ≥ 42px hündürlük) —
+     masaüstü görünüşü dəyişmir. */
+  const inp = isNarrow ? { ...input, fontSize: 15, padding: '10px 11px', minHeight: 42, borderRadius: 6 } : input
+
+  /* Placeholder-da dəvətnamədə HAZIRDA görünən sistem mətni (Phase 45) —
+     admin nəyi dəyişdiyini görsün. Açar formatı kataloqdakı kimidir. */
+  const systemText = (key) => {
+    const dot = key.indexOf('.')
+    if (dot < 0) return (translations[lang] || translations.az)[key] || ''
+    const [prefix, sub] = [key.slice(0, dot), key.slice(dot + 1)]
+    if (prefix === 'rsvp')    return buildRsvpLabels(lang, wedding)[sub] || ''
+    if (prefix === 'gbook')   return (GUESTBOOK_LABELS[lang] || GUESTBOOK_LABELS.az)[sub] || ''
+    if (prefix === 'seating') return (SEATING_LABELS[lang] || SEATING_LABELS.az)[sub] || ''
+    return ''
+  }
 
   const contentPanel = (
     <div style={{ display: 'grid', gap: 14 }}>
@@ -354,7 +415,10 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
         const entry = labels[sec.key] || {}
         return (
           <div key={sec.key} style={{ border: `1px solid ${C.hair}`, borderRadius: 6, padding: 10 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: C.ink, marginBottom: 8 }}>{sec.az}</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: C.ink, marginBottom: sec.hint ? 3 : 8 }}>{sec.az}</div>
+            {sec.hint && (
+              <div style={{ fontSize: 10.5, color: C.faint, lineHeight: 1.5, marginBottom: 8 }}>{sec.hint}</div>
+            )}
             <Row>
               <div style={{ flex: '0 0 130px' }}>
                 <div style={label}>Üst etiket</div>
@@ -362,7 +426,7 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
                   type="text" value={entry.kicker || ''} placeholder="—"
                   onChange={(e) => setLabelField(sec.key, 'kicker', null, e.target.value)}
                   onFocus={() => focusSection(sec.key)}
-                  style={{ ...input, textTransform: 'uppercase' }}
+                  style={{ ...inp, textTransform: 'uppercase' }}
                 />
               </div>
               <div style={{ flex: '1 1 220px' }}>
@@ -371,7 +435,7 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
                   type="text" value={entry.title?.[lang] || ''} placeholder="Şablonun öz mətni"
                   onChange={(e) => setLabelField(sec.key, 'title', lang, e.target.value)}
                   onFocus={() => focusSection(sec.key)}
-                  style={input}
+                  style={inp}
                 />
               </div>
             </Row>
@@ -389,10 +453,10 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
                     <input
                       type="text"
                       value={strings[key]?.[lang] || ''}
-                      placeholder="Sistemin öz mətni"
+                      placeholder={systemText(key) || 'Sistemin öz mətni'}
                       onChange={(e) => setStringField(key, lang, e.target.value)}
                       onFocus={() => focusSection(sec.key)}
-                      style={input}
+                      style={inp}
                     />
                   </div>
                 ))}
@@ -449,8 +513,9 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
           border: `1px solid ${C.warn}`, background: 'oklch(97% 0.03 85)', borderRadius: 6,
           padding: '9px 11px', fontSize: 11.5, color: C.text, lineHeight: 1.6,
         }}>
-          Bu şablonda şrift dəyişikliyi qismən işləyir (başlıq ailəsi), ölçü
-          əmsalları tətbiq olunmur.
+          <b>«{getTemplateName(templateId)}» şablonunda şrift dəyişikliyi işləmir.</b><br />
+          Şriftlər bu şablonun kodundadır. Mətn düzəlişləri və bölmə
+          görünürlüyü isə normal işləyir.
         </div>
       )}
       <Row gap={10}>
@@ -465,7 +530,7 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
                 else delete next[k]
                 return next
               })}
-              style={{ ...input, cursor: 'pointer' }}
+              style={{ ...inp, cursor: 'pointer' }}
             >
               <option value="">Şablonun öz şrifti</option>
               {FONT_CHOICES.map((f) => (
@@ -511,9 +576,12 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
       </p>
       {SECTION_DEFS.map((def) => {
         /* ⚠ Açar YOXDURSA bölmə AÇIQdır — Phase 35 qaydası (`isSectionOn`).
-           Ona görə `!== false` yazılır, `=== true` yox: köhnə dəvətnamələrdə
-           `sections` ümumiyyətlə olmaya bilər və hamısı açıq görünməlidir. */
-        const on = sections[def.id] !== false
+           Köhnə dəvətnamələrdə `sections` ümumiyyətlə olmaya bilər və hamısı
+           açıq görünməlidir.
+           ⚠ Phase 45: qayda artıq `isSectionOn`-un ÖZÜNDƏN oxunur. Əvvəl
+           burada `!== false` yazılmışdı və «Bizim Hekayəmiz» (default BAĞLI
+           bölmə) dəvətnamədə görünmədiyi halda panel onu AÇIQ göstərirdi. */
+        const on = isSectionOn({ sections }, def.id)
         return (
           <div key={def.id} style={{
             display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
@@ -534,7 +602,43 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
     </div>
   )
 
-  const panels = { content: contentPanel, theme: themePanel, type: typePanel, sections: sectionsPanel }
+  /* ── Phase 45: açılış ekranı və «Bizim Hekayəmiz» ── */
+  const effectiveSections = Object.keys(sections).length ? sections : (wedding?.sections || {})
+  const storyOn = isSectionOn({ sections: effectiveSections }, 'lovestory')
+
+  const openingPanel = (
+    <OpeningEditor
+      templateId={templateId} wedding={wedding} lang={lang}
+      opening={opening} setOpening={setOpening}
+      slug={slug} narrow={isNarrow}
+    />
+  )
+
+  const storyPanel = (
+    <StoryEditor
+      templateId={templateId} wedding={wedding} lang={lang}
+      story={story} setStory={setStory}
+      slug={slug} narrow={isNarrow}
+      sectionOn={storyOn}
+      onEnableSection={() => {
+        setSections((prev) => ({ ...(Object.keys(prev).length ? prev : (wedding?.sections || {})), lovestory: true }))
+        focusSection('lovestory')
+      }}
+      onFocusPreview={() => focusSection('lovestory')}
+    />
+  )
+
+  const panels = {
+    content: contentPanel, opening: openingPanel, story: storyPanel,
+    theme: themePanel, type: typePanel, sections: sectionsPanel,
+  }
+
+  /* Önbaxış çərçivəsi: masaüstündə əvvəlki kimi (412×0.82 / 1280×0.32).
+     Telefonda «mobil» miqyassız tam en, «desktop» isə ekrana sığacaq qədər. */
+  const frameW = device === 'mobile' ? 412 : 1280
+  const frameScale = isNarrow
+    ? (device === 'mobile' ? 1 : Math.min(0.32, Math.max(0.2, ((typeof window !== 'undefined' ? window.innerWidth : 384) - 8) / 1280)))
+    : (device === 'mobile' ? 0.82 : 0.32)
 
   /* ── Render ───────────────────────────────────────────────────────── */
 
@@ -613,39 +717,69 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
           }}>
             {/* ── Sol: redaktor ── */}
             <div style={{
-              flex: '1 1 460px', minWidth: 0, display: 'flex', flexDirection: 'column',
+              /* ⚠ `minHeight: 0` MƏCBURİDİR: telefonda sütunlar şaquli
+                 düzülür və onsuz sütun məzmunun tam hündürlüyünü alırdı —
+                 panel sürüşmürdü, «Saxla» düyməsi isə ekrandan kənarda qalırdı. */
+              flex: '1 1 460px', minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column',
               borderRight: isNarrow ? 'none' : `1px solid ${C.line}`,
               /* Dar ekranda yalnız seçilmiş nişan görünür */
               ...(isNarrow && mobileTab !== 'edit' ? { display: 'none' } : null),
             }}>
-              {/* Tablar */}
-              <div style={{ display: 'flex', gap: 2, padding: '8px 10px 0', flex: '0 0 auto', flexWrap: 'wrap' }}>
-                {TABS.map((t) => {
-                  const Icon = t.icon
-                  const on = tab === t.id
-                  return (
-                    <button
-                      key={t.id} type="button" onClick={() => setTab(t.id)}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 5, padding: '6px 10px',
-                        border: `1px solid ${on ? C.gold : 'transparent'}`,
-                        borderRadius: 5, background: on ? 'oklch(97% 0.02 85)' : 'transparent',
-                        color: on ? C.ink : C.sub, fontSize: 11.5, cursor: 'pointer', fontFamily: 'inherit',
-                      }}
-                    >
-                      <Icon size={12} strokeWidth={1.6} />{t.az}
-                    </button>
-                  )
-                })}
-                {tab === 'content' && (
-                  <div style={{ display: 'flex', gap: 2, marginLeft: 'auto' }}>
+              {/* Tablar
+                  ⚠ Telefonda 6 tab bir sətrə sığmır: lent üfüqi sürüşür, düymələr
+                  barmaq ölçüsündədir (≥ 40px) və dil seçimi ayrıca sətirdədir. */}
+              <div style={{ flex: '0 0 auto', padding: isNarrow ? '8px 0 0' : '8px 10px 0' }}>
+                <div style={{
+                  display: 'flex', gap: isNarrow ? 4 : 2, alignItems: 'center',
+                  flexWrap: isNarrow ? 'nowrap' : 'wrap',
+                  overflowX: isNarrow ? 'auto' : 'visible',
+                  padding: isNarrow ? '0 10px 8px' : 0,
+                  WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none',
+                }}>
+                  {TABS.map((t) => {
+                    const Icon = t.icon
+                    const on = tab === t.id
+                    return (
+                      <button
+                        key={t.id} type="button" onClick={() => setTab(t.id)} aria-pressed={on}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 5,
+                          padding: isNarrow ? '9px 12px' : '6px 10px', minHeight: isNarrow ? 40 : undefined,
+                          flex: '0 0 auto', whiteSpace: 'nowrap',
+                          border: `1px solid ${on ? C.gold : (isNarrow ? C.hair : 'transparent')}`,
+                          borderRadius: isNarrow ? 20 : 5, background: on ? 'oklch(97% 0.02 85)' : (isNarrow ? 'white' : 'transparent'),
+                          color: on ? C.ink : C.sub, fontSize: isNarrow ? 13 : 11.5, cursor: 'pointer', fontFamily: 'inherit',
+                        }}
+                      >
+                        <Icon size={isNarrow ? 14 : 12} strokeWidth={1.6} />{t.az}
+                      </button>
+                    )
+                  })}
+                  {!isNarrow && LANG_TABS.has(tab) && (
+                    <div style={{ display: 'flex', gap: 2, marginLeft: 'auto' }}>
+                      {LANGS.map((l) => (
+                        <button
+                          key={l.id} type="button" onClick={() => setLang(l.id)} aria-pressed={lang === l.id}
+                          style={{
+                            padding: '5px 9px', border: `1px solid ${lang === l.id ? C.gold : C.line}`,
+                            borderRadius: 4, background: lang === l.id ? C.gold : 'white',
+                            color: lang === l.id ? 'white' : C.sub, fontSize: 10.5, cursor: 'pointer',
+                            fontFamily: 'inherit', letterSpacing: '.06em',
+                          }}
+                        >{l.label}</button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {isNarrow && LANG_TABS.has(tab) && (
+                  <div style={{ display: 'flex', gap: 6, padding: '0 10px 8px' }}>
                     {LANGS.map((l) => (
                       <button
-                        key={l.id} type="button" onClick={() => setLang(l.id)}
+                        key={l.id} type="button" onClick={() => setLang(l.id)} aria-pressed={lang === l.id}
                         style={{
-                          padding: '5px 9px', border: `1px solid ${lang === l.id ? C.gold : C.line}`,
-                          borderRadius: 4, background: lang === l.id ? C.gold : 'white',
-                          color: lang === l.id ? 'white' : C.sub, fontSize: 10.5, cursor: 'pointer',
+                          flex: 1, minHeight: 38, border: `1px solid ${lang === l.id ? C.gold : C.line}`,
+                          borderRadius: 6, background: lang === l.id ? C.gold : 'white',
+                          color: lang === l.id ? 'white' : C.sub, fontSize: 13, cursor: 'pointer',
                           fontFamily: 'inherit', letterSpacing: '.06em',
                         }}
                       >{l.label}</button>
@@ -667,12 +801,13 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
                 <button
                   type="button" onClick={resetAll}
                   style={{
-                    display: 'flex', alignItems: 'center', gap: 5, padding: '6px 10px',
+                    display: 'flex', alignItems: 'center', gap: 5, padding: isNarrow ? '9px 12px' : '6px 10px',
+                    minHeight: isNarrow ? 42 : undefined,
                     border: `1px solid ${C.line}`, borderRadius: 5, background: 'white',
-                    color: C.sub, fontSize: 11.5, cursor: 'pointer', fontFamily: 'inherit',
+                    color: C.sub, fontSize: isNarrow ? 13 : 11.5, cursor: 'pointer', fontFamily: 'inherit',
                   }}
                 >
-                  <RotateCcw size={12} strokeWidth={1.6} />Hamısını sıfırla
+                  <RotateCcw size={12} strokeWidth={1.6} />{isNarrow ? 'Sıfırla' : 'Hamısını sıfırla'}
                 </button>
 
                 {error && <span style={{ fontSize: 11.5, color: C.danger }}>{error}</span>}
@@ -685,8 +820,9 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
                 <button
                   type="button" onClick={handleSave} disabled={saving}
                   style={{
-                    marginLeft: 'auto', padding: '7px 16px', border: 'none', borderRadius: 5,
-                    background: C.gold, color: 'white', fontSize: 12, cursor: saving ? 'wait' : 'pointer',
+                    marginLeft: 'auto', padding: isNarrow ? '10px 22px' : '7px 16px', border: 'none', borderRadius: 5,
+                    minHeight: isNarrow ? 42 : undefined,
+                    background: C.gold, color: 'white', fontSize: isNarrow ? 14 : 12, cursor: saving ? 'wait' : 'pointer',
                     fontFamily: 'inherit', opacity: saving ? 0.7 : 1,
                   }}
                 >
@@ -697,7 +833,7 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
 
             {/* ── Sağ: canlı önbaxış (PART 7) ── */}
             <div style={{
-              flex: '1 1 420px', minWidth: 0, display: 'flex', flexDirection: 'column',
+              flex: '1 1 420px', minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column',
               background: 'oklch(96% 0.005 80)',
               ...(isNarrow && mobileTab !== 'preview' ? { display: 'none' } : null),
             }}>
@@ -706,8 +842,22 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
                 borderBottom: `1px solid ${C.line}`, flex: '0 0 auto',
               }}>
                 <span style={{ fontSize: 10.5, letterSpacing: '.08em', textTransform: 'uppercase', color: C.faint }}>
-                  Canlı önbaxış
+                  {tab === 'opening' ? 'Açılış ekranı' : 'Canlı önbaxış'}
                 </span>
+                {tab === 'opening' && (
+                  <button
+                    type="button" onClick={replayOpening}
+                    title="Açılış animasiyasını əvvəldən göstər"
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 4, marginLeft: 6,
+                      padding: isNarrow ? '7px 10px' : '4px 8px', minHeight: isNarrow ? 34 : undefined,
+                      border: `1px solid ${C.gold}`, borderRadius: 4, background: 'oklch(97% 0.02 85)',
+                      color: C.ink, fontSize: 11, cursor: 'pointer', fontFamily: 'inherit',
+                    }}
+                  >
+                    <Play size={11} strokeWidth={1.8} />Yenidən oynat
+                  </button>
+                )}
                 <div style={{ display: 'flex', gap: 2, marginLeft: 'auto' }}>
                   {[['mobile', Smartphone], ['desktop', Monitor]].map(([id, Icon]) => (
                     <button
@@ -741,8 +891,11 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
                     ⚠ Data şəbəkədən YOX, postMessage ilə gəlir → admin
                     yazdıqca, saxlamadan görünür. */}
                 <div style={{
-                  /* Qabıq miqyaslanmış ÖLÇÜNÜ tutur ki, scroll düzgün işləsin */
-                  width: (device === 'mobile' ? 412 : 1280) * (device === 'mobile' ? 0.82 : 0.32),
+                  /* Qabıq miqyaslanmış ÖLÇÜNÜ tutur ki, scroll düzgün işləsin.
+                     ⚠ Telefonda «mobil» önbaxış ekranın ÖZ enindədir (miqyassız) —
+                     telefon onsuz da telefondur; 412px-lik kiçildilmiş qutu
+                     384px-lik ekranda kənarlarda boşluq qoyurdu. */
+                  width: isNarrow ? '100%' : frameW * frameScale,
                   height: '100%',
                   flex: '0 0 auto', overflow: 'hidden',
                   border: isNarrow ? 'none' : `1px solid ${C.line}`,
@@ -754,15 +907,16 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
                     title="Dəvətnamə önbaxışı"
                     src="/preview/live"
                     style={{
-                      width: device === 'mobile' ? 412 : 1280,
-                      height: device === 'mobile' ? '122%' : '312%',
+                      width: isNarrow && device === 'mobile' ? '100%' : frameW,
+                      height: isNarrow ? `${Math.round(100 / frameScale)}%` : (device === 'mobile' ? '122%' : '312%'),
                       border: 0, display: 'block',
-                      transform: `scale(${device === 'mobile' ? 0.82 : 0.32})`,
+                      transform: frameScale === 1 ? undefined : `scale(${frameScale})`,
                       transformOrigin: 'top left',
                     }}
                   />
                 </div>
-              </div>            </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

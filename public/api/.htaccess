@@ -21,6 +21,9 @@
 # Struktur media loglari — slug/olcu/xeta melumatlari sizmasin
 RedirectMatch 404 ^/api/_logs/
 
+# Phase 45.3 — sxem SQL fayllari (cedvel strukturu) HTTP ile acilmasin
+RedirectMatch 404 ^/api/migrations/
+
 <Files "slug_alloc.php">
     Require all denied
 </Files>
@@ -36,5 +39,15 @@ RedirectMatch 404 ^/api/_logs/
 
 # Phase 44 — hekaye sekillerinin saxlama komekcileri (yalniz include)
 <Files "story_media.php">
+    Require all denied
+</Files>
+
+# Phase 45 — acilis/hekaye override-larinin yoxlama qaydalari (yalniz include)
+<Files "admin_content_rules.php">
+    Require all denied
+</Files>
+
+# Phase 45 — admin sekillerinin saxlama komekcileri (yalniz include)
+<Files "admin_media.php">
     Require all denied
 </Files>

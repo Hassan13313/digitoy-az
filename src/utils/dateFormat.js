@@ -4,7 +4,7 @@ const RU_DAYS = ['Воскресенье', 'Понедельник', 'Вторн
 
 const AZ_MONTHS = [
   'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'İyun',
-  'İyul', 'Avqust', 'Sentyabr', 'Oktabr', 'Noyabr', 'Dekabr',
+  'İyul', 'Avqust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr',
 ]
 
 const DAY_NAMES = { az: AZ_DAYS, en: EN_DAYS, ru: RU_DAYS }
@@ -32,7 +32,7 @@ export function formatAzDate(dateString, lang = 'az') {
 
 const DATE_DICT = {
   az: {
-    months: ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'İyun', 'İyul', 'Avqust', 'Sentyabr', 'Oktabr', 'Noyabr', 'Dekabr'],
+    months: ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'İyun', 'İyul', 'Avqust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr'],
     days: ['Bazar', 'Bazar ertəsi', 'Çərşənbə axşamı', 'Çərşənbə', 'Cümə axşamı', 'Cümə', 'Şənbə'],
   },
   ru: {
@@ -65,6 +65,24 @@ export function formatFullDateByLang(dateString, lang = 'az') {
   if (lang === 'en') return `${dayName}, ${monthName} ${dd}, ${yyyy}`
   if (lang === 'ru') return `${dd} ${monthName} ${yyyy}, ${dayName}`
   return `${dd} ${monthName} ${yyyy}, ${dayName}`
+}
+
+/**
+ * Həftə günü OLMADAN tarix — cümlənin içində işlədilir (Phase 45).
+ * az → "11 Oktyabr 2026" | ru → "11 октября 2026" | en → "October 11, 2026"
+ * ⚠ `formatFullDateByLang` həftə gününü də yazır; cümləyə şəkilçi ilə
+ * qoşulanda «2026, Bazar-a qədər» kimi səhv qrammatika yaranırdı.
+ */
+export function formatDayMonthYear(dateString, lang = 'az') {
+  if (!dateString) return ''
+  const date = new Date(dateString + 'T00:00:00')
+  if (isNaN(date.getTime())) return dateString
+  const dict = DATE_DICT[lang] || DATE_DICT.az
+  const month = dict.months[date.getMonth()]
+  if (lang === 'en') return `${month} ${date.getDate()}, ${date.getFullYear()}`
+  /* Rus dilində ay adı cümlənin ortasında kiçik hərflə yazılır */
+  if (lang === 'ru') return `${date.getDate()} ${month.toLocaleLowerCase('ru')} ${date.getFullYear()}`
+  return `${date.getDate()} ${month} ${date.getFullYear()}`
 }
 
 /** @deprecated Use formatFullDateByLang instead */

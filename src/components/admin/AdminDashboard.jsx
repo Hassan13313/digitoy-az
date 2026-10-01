@@ -3,13 +3,14 @@ import { useState, useEffect } from 'react'
 import { getDashboardStats } from '../../utils/api'
 import AdminGalleryAnalytics from './AdminGalleryAnalytics'
 import { ShoppingBag, CheckCircle, XCircle, Clock, FileText, Image, TrendingUp, RefreshCw } from 'lucide-react'
+import { azWeekdayShort, pagePadding } from './adminFormat'
 
-function StatCard({ icon: Icon, label, value, sub, color = 'oklch(45% 0.07 75)' }) {
+function StatCard({ icon: Icon, label, value, sub, color = 'oklch(45% 0.07 75)', compact = false }) {
   return (
     <div style={{
       background: 'white', border: '1px solid oklch(88% 0.02 60)',
-      borderRadius: 6, padding: '20px 24px',
-      display: 'flex', alignItems: 'flex-start', gap: 14,
+      borderRadius: compact ? 10 : 6, padding: compact ? '14px 12px' : '20px 24px',
+      display: 'flex', alignItems: 'flex-start', gap: compact ? 10 : 14, minWidth: 0,
     }}>
       <div style={{
         width: 36, height: 36, borderRadius: 6,
@@ -64,12 +65,13 @@ function MiniChart({ daily }) {
     </div>
   )
   const max = Math.max(...daily.map(d => d.cnt), 1)
-  const days = ['B', 'Ç.A', 'Ç', 'C.A', 'C', 'Ş', 'B']
   return (
     <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end', height: 70, paddingTop: 8 }}>
       {daily.map((d, i) => {
         const h = Math.max(Math.round((d.cnt / max) * 54), 4)
-        const dayLabel = new Date(d.day).toLocaleDateString('az-AZ', { weekday: 'short' })
+        /* ⚠ `toLocaleDateString('az-AZ', {weekday})` Chrome-da ingiliscə
+           («Thu, Fri») qaytarırdı — Azərbaycan qısaltmaları əl ilə */
+        const dayLabel = azWeekdayShort(d.day)
         return (
           <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
             <div style={{
@@ -112,8 +114,8 @@ export default function AdminDashboard() {
   const pkgMax = stats ? Math.max(...Object.values(stats.packages || {}), 1) : 1
 
   return (
-    <div style={{ padding: '32px 36px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
+    <div style={{ padding: pagePadding(narrow) }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: narrow ? 18 : 28 }}>
         <div>
           <h1 style={{
             fontFamily: '"Cormorant Garamond","Playfair Display",serif',
@@ -145,18 +147,33 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* Ana stat kartları */}
-      <div style={{ display: 'grid', gridTemplateColumns: narrow ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
-        <StatCard icon={ShoppingBag} label="Ümumi sifariş"   value={stats?.orders.total}     sub={`Bu gün: ${stats?.orders.today ?? 0}`}     color="oklch(45% 0.07 75)" />
-        <StatCard icon={Clock}       label="Gözləyən"         value={stats?.orders.submitted} sub={`Son 7 gün: ${stats?.orders.last7days ?? 0}`} color="oklch(45% 0.08 70)" />
-        <StatCard icon={CheckCircle} label="Təsdiqlənmiş"    value={stats?.orders.approved}  color="oklch(38% 0.1 145)" />
-      </div>
+      {/* Ana stat kartları
+          ⚠ Telefonda altı kart TƏK şəbəkədədir (3 × 2). Əvvəl iki ayrı 3-lük
+          şəbəkə 2 sütuna düşürdü və hər birində bir kart tək qalırdı. */}
+      {narrow ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10, marginBottom: 20 }}>
+          <StatCard compact icon={ShoppingBag} label="Ümumi sifariş" value={stats?.orders.total}     sub={`Bu gün: ${stats?.orders.today ?? 0}`}     color="oklch(45% 0.07 75)" />
+          <StatCard compact icon={Clock}       label="Gözləyən"       value={stats?.orders.submitted} sub={`Son 7 gün: ${stats?.orders.last7days ?? 0}`} color="oklch(45% 0.08 70)" />
+          <StatCard compact icon={CheckCircle} label="Təsdiqlənmiş"  value={stats?.orders.approved}  color="oklch(38% 0.1 145)" />
+          <StatCard compact icon={XCircle}     label="Rədd edildi"   value={stats?.orders.rejected}  color="oklch(40% 0.12 25)" />
+          <StatCard compact icon={FileText}    label="Dəvətnamələr"  value={stats?.invitations}      color="oklch(45% 0.08 210)" />
+          <StatCard compact icon={Image}       label="Fotolar"       value={stats?.photos}           color="oklch(45% 0.08 300)" />
+        </div>
+      ) : (
+        <>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
+            <StatCard icon={ShoppingBag} label="Ümumi sifariş"   value={stats?.orders.total}     sub={`Bu gün: ${stats?.orders.today ?? 0}`}     color="oklch(45% 0.07 75)" />
+            <StatCard icon={Clock}       label="Gözləyən"         value={stats?.orders.submitted} sub={`Son 7 gün: ${stats?.orders.last7days ?? 0}`} color="oklch(45% 0.08 70)" />
+            <StatCard icon={CheckCircle} label="Təsdiqlənmiş"    value={stats?.orders.approved}  color="oklch(38% 0.1 145)" />
+          </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: narrow ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: 12, marginBottom: 28 }}>
-        <StatCard icon={XCircle}  label="Rədd edildi"  value={stats?.orders.rejected}  color="oklch(40% 0.12 25)" />
-        <StatCard icon={FileText} label="Dəvətnamələr"  value={stats?.invitations}      color="oklch(45% 0.08 210)" />
-        <StatCard icon={Image}    label="Fotolar"        value={stats?.photos}           color="oklch(45% 0.08 300)" />
-      </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 28 }}>
+            <StatCard icon={XCircle}  label="Rədd edildi"  value={stats?.orders.rejected}  color="oklch(40% 0.12 25)" />
+            <StatCard icon={FileText} label="Dəvətnamələr"  value={stats?.invitations}      color="oklch(45% 0.08 210)" />
+            <StatCard icon={Image}    label="Fotolar"        value={stats?.photos}           color="oklch(45% 0.08 300)" />
+          </div>
+        </>
+      )}
 
       {/* Alt bölmə — Paket + mini chart */}
       <div style={{ display: 'grid', gridTemplateColumns: narrow ? '1fr' : '1fr 1fr', gap: 16 }}>

@@ -1,5 +1,5 @@
 import TemplateShell, { alpha } from '../_shared/TemplateShell'
-import OpeningFrame, { Kicker, NameRow, Ornament, OpeningMeta } from '../_shared/OpeningFrame'
+import OpeningFrame, { Kicker, NameRow, Ornament, OpeningMeta, EmblemSlot } from '../_shared/OpeningFrame'
 import { Ambient } from '../_shared/motion'
 import { getTemplateTheme } from '../templateConfig'
 
@@ -109,17 +109,18 @@ function Diamond() {
 }
 
 function Opening(props) {
-  const { theme, weddingData, isCouple } = props
+  const { theme, weddingData, isCouple, ot } = props
 
-  /* Design t8 tarixi rəqəmlərlə, nöqtə ayırıcı ilə verir: «21 · 11 · 2026» */
-  const dateStr = (weddingData.date || '').split('-').reverse().join(' · ')
+  /* Design t8 tarixi rəqəmlərlə, nöqtə ayırıcı ilə verir: «21 · 11 · 2026»
+     (defolt mətnlər `openingSpec`-dədir) */
 
   return (
     <OpeningFrame
       {...props}
       exit="zoom"
       duration={900}
-      label="Dəvətnaməni aç"
+      label={ot.text('cta')}
+      hint={ot.text('hint')}
       ctaDelay={4.1}
       hintDelay={4.6}
       ctaStyle={{
@@ -171,12 +172,21 @@ function Opening(props) {
       }} />
 
       <div style={{ position: 'relative' }}>
-        <Diamond />
+        <EmblemSlot
+          mono={ot.mono} size={88} delay={2.1}
+          border={`1px solid ${alpha(ICE, 0.55)}`} background="rgba(255,255,255,.6)"
+          color={INK} font={theme.fonts?.heading}
+        >
+          <Diamond />
+        </EmblemSlot>
 
-        <Kicker text="Dəvətnamə" color="#7A8B99" delay={2.5} style={{ marginTop: 28 }} />
+        {ot.show('kicker') && (
+          <Kicker text={ot.text('kicker')} color="#7A8B99" delay={2.5} style={{ marginTop: 28 }} />
+        )}
 
         <NameRow
           theme={theme} weddingData={weddingData} isCouple={isCouple}
+          text={ot.override('title')}
           delay={2.9} step={0.2}
           size="clamp(24px, 8.5vw, 34px)" ampSize="clamp(24px, 8.5vw, 34px)"
           color={INK} ampColor={ICE}
@@ -185,7 +195,9 @@ function Opening(props) {
 
         <Ornament color={ICE} mark="rhomb" delay={3.6} width={30} style={{ marginTop: 18 }} />
 
-        <OpeningMeta text={dateStr} color="#7A8B99" delay={3.8} style={{ marginTop: 14, letterSpacing: '.26em' }} />
+        {ot.show('meta') && (
+          <OpeningMeta text={ot.text('meta')} color="#7A8B99" delay={3.8} style={{ marginTop: 14, letterSpacing: '.26em' }} />
+        )}
       </div>
     </OpeningFrame>
   )

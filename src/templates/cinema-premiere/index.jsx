@@ -38,17 +38,17 @@ const KEYFRAMES = `
 `
 
 function Opening(props) {
-  const { theme, weddingData, isCouple } = props
+  const { theme, weddingData, isCouple, ot } = props
 
-  /* Premyera afişası tarixi nöqtə ilə verir: «21.11.2026» */
-  const dateStr = String(weddingData.date || '').split('-').reverse().join('.')
+  /* Premyera afişası tarixi nöqtə ilə verir: «21.11.2026» (bax openingSpec) */
 
   return (
     <OpeningFrame
       {...props}
       exit="fade"
       duration={900}
-      label="Premyeranı aç"
+      label={ot.text('cta')}
+      hint={ot.text('hint')}
       ctaDelay={4.0}
       hintDelay={4.5}
       orbs="none"
@@ -91,17 +91,20 @@ function Opening(props) {
         {/* Titr — adlar */}
         <NameRow
           theme={theme} weddingData={weddingData} isCouple={isCouple}
+          text={ot.override('title')}
           delay={1.9} step={0.2}
           size="clamp(24px, 8.4vw, 34px)" ampSize="clamp(18px, 6vw, 24px)"
           font={DISP} color={theme.accent} ampColor={theme.primary}
           style={{ letterSpacing: '.03em', textTransform: 'uppercase', lineHeight: 1, padding: '0 14px' }}
         />
 
-        <div style={{
-          fontFamily: BODY, fontSize: 'clamp(6.5px, 2.1vw, 8px)', letterSpacing: '.3em',
-          textTransform: 'uppercase', color: theme.primary, marginTop: 8,
-          animation: 'tpl-rise .8s ease-out 2.7s both',
-        }}>bir ömürlük film</div>
+        {ot.show('sub') && (
+          <div style={{
+            fontFamily: BODY, fontSize: 'clamp(6.5px, 2.1vw, 8px)', letterSpacing: '.3em',
+            textTransform: 'uppercase', color: theme.primary, marginTop: 8,
+            animation: 'tpl-rise .8s ease-out 2.7s both',
+          }}>{ot.text('sub')}</div>
+        )}
 
         {/* Proyektor işığı kadrın üstündən keçir */}
         <span aria-hidden="true" style={{
@@ -111,16 +114,20 @@ function Opening(props) {
         }} />
       </div>
 
-      <Kicker text="Premyera" color={alpha(theme.muted, 0.95)} lineColor={alpha(theme.primary, 0.5)} delay={3.1} style={{ marginTop: 26 }} />
+      {ot.show('kicker') && (
+        <Kicker text={ot.text('kicker')} color={alpha(theme.muted, 0.95)} lineColor={alpha(theme.primary, 0.5)} delay={3.1} style={{ marginTop: 26 }} />
+      )}
 
       <Ornament color={theme.primary} mark="dot" delay={3.5} width={30} style={{ marginTop: 16 }} />
 
-      <OpeningMeta
-        text={[dateStr, weddingData.venueName].filter(Boolean).join(' · ')}
-        color={alpha(theme.muted, 0.95)}
-        delay={3.7}
-        style={{ marginTop: 14, letterSpacing: '.26em' }}
-      />
+      {ot.show('meta') && (
+        <OpeningMeta
+          text={ot.text('meta')}
+          color={alpha(theme.muted, 0.95)}
+          delay={3.7}
+          style={{ marginTop: 14, letterSpacing: '.26em' }}
+        />
+      )}
     </OpeningFrame>
   )
 }

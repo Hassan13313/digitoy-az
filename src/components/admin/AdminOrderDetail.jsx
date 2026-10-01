@@ -4,6 +4,11 @@ import { getTemplateName, DEFAULT_TEMPLATE_ID } from '../../templates/templateCo
 import { getDraftByCode, approveDraft, rejectDraft, deleteDraft } from '../../utils/api'
 import AdminSeatingPlan from './AdminSeatingPlan'
 import AdminGuestReports from './AdminGuestReports'
+import { useIsNarrow } from '../../hooks/useIsNarrow'
+import { azDate, pagePadding } from './adminFormat'
+
+/* Tədbir növü — əvvəl xam açar («corporate») göstərilirdi */
+const EVENT_LABELS = { toy: 'Toy', nishan: 'Nişan', birthday: 'Ad günü', corporate: 'Korporativ', other: 'Digər' }
 
 const PKG_LABEL = { SADE: 'Sadə (59₼)', VIP: 'VİP (89₼)', PREMIUM: 'Premium (129₼)' }
 const STATUS_COLOR = {
@@ -161,6 +166,8 @@ function redirectToLogin() {
 }
 
 export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
+  /* Telefonda başlıq + 4 düymə bir sətrə sığmırdı, modallar 400px-lik idi */
+  const narrow = useIsNarrow()
   const [draft,         setDraft]         = useState(null)
   const [loading,       setLoading]       = useState(true)
   const [error,         setError]         = useState('')
@@ -285,18 +292,27 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
     ? `${fd.brideName || ''} & ${fd.groomName || ''}`.trim()
     : isCorp ? (fd.eventName || '') : (fd.brideName || '')
 
-  const dateStr = fd.date ? new Date(fd.date).toLocaleDateString('az-AZ', { day: '2-digit', month: 'long', year: 'numeric' }) : ''
+  const dateStr = fd.date ? azDate(fd.date, { long: true }) : ''
   const timeStr = fd.time || ''
 
+  /* Telefonda modal ekrandan kənara çıxmasın */
+  const modalBox = (w) => ({
+    background: 'white', borderRadius: 8, padding: narrow ? '22px 18px' : '32px 36px',
+    width: narrow ? 'calc(100vw - 28px)' : w, maxWidth: w, boxSizing: 'border-box',
+  })
+
   return (
-    <div style={{ padding: '32px 36px', maxWidth: 640 }}>
+    <div style={{ padding: pagePadding(narrow), maxWidth: 640 }}>
       {/* Header */}
       <button type="button" onClick={onBack}
-        style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: 'oklch(55% 0.04 70)', fontSize: 12, marginBottom: 28, letterSpacing: '0.04em' }}>
+        style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: 'oklch(55% 0.04 70)', fontSize: narrow ? 14 : 12, marginBottom: narrow ? 16 : 28, letterSpacing: '0.04em', minHeight: narrow ? 40 : undefined, padding: 0 }}>
         <ArrowLeft size={13} strokeWidth={1.5} /> Sifarişlərə qayıt
       </button>
 
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 28 }}>
+      <div style={{
+        display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 28,
+        flexDirection: narrow ? 'column' : 'row', gap: narrow ? 14 : 0,
+      }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
             <span style={{ fontFamily: 'monospace', fontSize: 14, fontWeight: 700, color: 'oklch(45% 0.07 75)', letterSpacing: '0.06em' }}>
@@ -307,7 +323,7 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
               color: STATUS_COLOR[draft.status] || STATUS_COLOR.draft,
               background: 'oklch(95% 0.02 80)', padding: '2px 8px', borderRadius: 3,
             }}>
-              {draft.status}
+              {STATUS_LABELS[draft.status] || draft.status}
             </span>
             {actionDone === 'approved' && (
               <span style={{ fontSize: 11, color: 'oklch(38% 0.1 145)', fontWeight: 600 }}>✓ Təsdiqləndi</span>
@@ -325,8 +341,8 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
           </h1>
         </div>
 
-        {/* Action buttons */}
-        <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+        {/* Action buttons — telefonda tam en, sətirə sığmayanda aşağı keçir */}
+        <div style={{ display: 'flex', gap: 8, flexShrink: 0, flexWrap: narrow ? 'wrap' : 'nowrap', width: narrow ? '100%' : undefined }}>
           {/* Approve — yalnız submitted vəziyyətdə */}
           {draft.status === 'submitted' && (
             <button
@@ -334,7 +350,8 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
               onClick={handleApprove}
               disabled={actionLoading}
               style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                flex: narrow ? '1 1 40%' : undefined, minHeight: narrow ? 46 : undefined,
                 padding: '10px 18px', background: 'oklch(38% 0.1 145)',
                 border: 'none', borderRadius: 3, cursor: actionLoading ? 'not-allowed' : 'pointer',
                 fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase',
@@ -356,7 +373,8 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
               onClick={() => setRejectModal(true)}
               disabled={actionLoading}
               style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                flex: narrow ? '1 1 40%' : undefined, minHeight: narrow ? 46 : undefined,
                 padding: '10px 18px', background: 'white',
                 border: '1px solid oklch(75% 0.08 25)', borderRadius: 3,
                 cursor: actionLoading ? 'not-allowed' : 'pointer',
@@ -377,7 +395,8 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
             type="button"
             onClick={handleEdit}
             style={{
-              display: 'inline-flex', alignItems: 'center', gap: 7,
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+              flex: narrow ? '1 1 40%' : undefined, minHeight: narrow ? 46 : undefined,
               padding: '10px 18px', background: 'oklch(72% 0.12 80)',
               border: 'none', borderRadius: 3, cursor: 'pointer',
               fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase',
@@ -398,7 +417,8 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
               onClick={() => setDeleteModal(true)}
               disabled={actionLoading}
               style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                minHeight: narrow ? 46 : undefined, minWidth: narrow ? 52 : undefined,
                 padding: '10px 14px', background: 'white',
                 border: '1px solid oklch(80% 0.04 25)', borderRadius: 3,
                 cursor: actionLoading ? 'not-allowed' : 'pointer',
@@ -421,10 +441,7 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
         }}>
-          <div style={{
-            background: 'white', borderRadius: 8, padding: '32px 36px',
-            width: 400, boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
-          }}>
+          <div style={{ ...modalBox(400), boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
               <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'oklch(95% 0.03 25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Trash2 size={14} strokeWidth={1.5} style={{ color: 'oklch(45% 0.1 25)' }} />
@@ -466,10 +483,7 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           zIndex: 1000,
         }}>
-          <div style={{
-            background: 'white', borderRadius: 8, padding: '32px 36px',
-            width: 420, boxShadow: '0 20px 60px rgba(0,0,0,0.18)',
-          }}>
+          <div style={{ ...modalBox(420), boxShadow: '0 20px 60px rgba(0,0,0,0.18)' }}>
             <h2 style={{
               fontFamily: '"Cormorant Garamond",serif', fontSize: 20, fontWeight: 400,
               margin: '0 0 8px', color: 'oklch(20% 0.02 60)',
@@ -525,13 +539,13 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
       {/* Details card */}
       <div style={{
         background: 'white', border: '1px solid oklch(88% 0.02 60)',
-        borderRadius: 6, padding: '24px 28px',
-        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 32px',
+        borderRadius: 6, padding: narrow ? '18px 16px 8px' : '24px 28px',
+        display: 'grid', gridTemplateColumns: narrow ? '1fr' : '1fr 1fr', gap: narrow ? '4px 0' : '8px 32px',
       }}>
         <InfoRow icon={Package}  label="Paket"  value={PKG_LABEL[draft.package] || draft.package} />
         {/* Phase 4 — şablon adı metadata-dan (hardcode yox) */}
         <InfoRow icon={LayoutTemplate} label="Şablon" value={getTemplateName(fd.templateId || draft.template_id || DEFAULT_TEMPLATE_ID)} />
-        <InfoRow icon={User}     label="Hadisə" value={fd.eventType} />
+        <InfoRow icon={User}     label="Hadisə" value={EVENT_LABELS[fd.eventType] || fd.eventType} />
         <InfoRow icon={Calendar} label="Tarix"  value={[dateStr, timeStr].filter(Boolean).join(', ')} />
         <InfoRow icon={MapPin}   label="Məkan"  value={[fd.venueName, fd.venueNote].filter(Boolean).join(' — ')} />
         <InfoRow icon={Shirt}    label="Dress Code" value={[fd.dressCodePalette, (fd.dressCodeLabels?.[fd.dressCodePalette] || '').trim()].filter(Boolean).join(' — ')} />
@@ -578,7 +592,7 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
       {/* Submitted at */}
       {draft.submitted_at && (
         <p style={{ fontSize: 11, color: 'oklch(60% 0.03 60)', marginTop: 16, letterSpacing: '0.04em' }}>
-          Göndərilmə tarixi: {new Date(draft.submitted_at).toLocaleString('az-AZ')}
+          Göndərilmə tarixi: {azDate(draft.submitted_at, { time: true, long: true })}
         </p>
       )}
 

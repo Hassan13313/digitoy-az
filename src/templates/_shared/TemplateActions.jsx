@@ -90,7 +90,8 @@ export function OrderCta({ theme, weddingData, lang = 'az', pageSlug, isDemoMode
       }} />
 
       <div style={{ maxWidth: 520, margin: '0 auto', position: 'relative' }}>
-        <div style={{
+        {/* `lang="en"` — «Digitoy.az · Premium» AZ səhifədə «DİGİTOY.AZ · PREMİUM» olmasın */}
+        <div lang="en" style={{
           fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase',
           color: kickerColor, fontWeight: 600, marginBottom: 18,
         }}>

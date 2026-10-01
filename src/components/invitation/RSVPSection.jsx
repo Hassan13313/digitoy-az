@@ -3,11 +3,14 @@ import { Check, X, Minus, Plus, Send, Search, AlertCircle } from 'lucide-react'
 import { useRsvp } from '../../hooks/useRsvp'
 import { Reveal, Stagger } from '../../templates/_shared/motion'
 import t from '../../data/translations'
+import { withStringOverrides } from '../../data/adminOverrides'
 
 /* Qonaq siyahısı, autocomplete və göndərmə məntiqi artıq
    `hooks/useRsvp.js`-dədir — bu fayl yalnız simple-luxury UI qatıdır. */
 
-export default function RSVPSection({ lang, weddingData }) {
+/* Phase 45 — admin «Mətnlər»: `kicker`/`title` bölmə adlarını, `adminStrings`
+   sətir override-larını verir. Verilməyəndə çıxış əvvəlki ilə EYNİDİR. */
+export default function RSVPSection({ lang, weddingData, adminStrings = null, kicker = null, title = null }) {
   const {
     suggestions, selected, useGuestMode,
     query, setQuery, setActiveIdx, activeIdx, setSelected,
@@ -15,10 +18,11 @@ export default function RSVPSection({ lang, weddingData }) {
     rsvpClosed, showNotFound, canSubmit, thanksMsg,
     chooseStatus, incPlusOne, decPlusOne,
     pick, resetGuest, onKeyDown, handleSubmit, inputRef,
-    labels: L, maxExtraGuests,
+    labels: rawL, maxExtraGuests,
   } = useRsvp({ lang, weddingData })
 
-  const tr = t[lang] || t.az
+  const L  = withStringOverrides(rawL, adminStrings, lang, 'rsvp.')
+  const tr = withStringOverrides(t[lang] || t.az, adminStrings, lang)
 
   return (
     <section className="py-28 px-6 bg-cream">
@@ -29,10 +33,10 @@ export default function RSVPSection({ lang, weddingData }) {
             {/* ⚠ SABİT AZ MƏTN DEYİL: əvvəl «İştirak Təsdiqi» hardcoded idi və
                 EN/RU seçiləndə də azərbaycanca qalırdı. İndi tərcümədəndir
                 (AZ «İştirak Təsdiqi» · EN «RSVP» · RU «Подтверждение участия»). */}
-            {tr.inv_rsvp}
+            {kicker || tr.inv_rsvp}
             <span className="w-[22px] h-px bg-gold opacity-60" />
           </div>
-          <h2 className="font-serif font-normal text-espresso mt-3 mb-2.5" style={{ fontSize: 'clamp(32px, 4vw, 48px)' }}>{L.title}</h2>
+          <h2 className="font-serif font-normal text-espresso mt-3 mb-2.5" style={{ fontSize: 'clamp(32px, 4vw, 48px)' }}>{title || L.title}</h2>
           {L.subtitle && (
             <p className="text-brown-dark text-[15px] leading-[1.6] mb-7">{L.subtitle}</p>
           )}

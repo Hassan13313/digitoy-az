@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { X, Languages, Wand2, Check } from 'lucide-react'
 import { getInvitationTranslations, saveInvitationTranslations } from '../../utils/api'
 import { TRANSLATABLE_FIELDS, translatePhrase } from '../../data/contentI18n'
+import { useIsNarrow } from '../../hooks/useIsNarrow'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    MƏZMUN TƏRCÜMƏSİ REDAKTORU (Phase 36) — admin panel modalı.
@@ -141,6 +142,9 @@ function seedAuto(savedI18n, savedMeta, source) {
 }
 
 export default function AdminTranslations({ slug, onClose, onSaved }) {
+  /* Telefonda modal tam ekran olur, sahələr barmaq ölçüsündə (Phase 45) */
+  const narrow = useIsNarrow()
+  const field = narrow ? { ...inputStyle, fontSize: 15, padding: '10px 11px', minHeight: 44, borderRadius: 6 } : inputStyle
   const [lang,    setLang]    = useState('en')
   const [source,  setSource]  = useState(null)   /* form_data */
   const [draft,   setDraft]   = useState({ en: {}, ru: {} })
@@ -233,12 +237,13 @@ export default function AdminTranslations({ slug, onClose, onSaved }) {
       style={{
         position: 'fixed', inset: 0, zIndex: 400,
         background: 'oklch(20% 0.02 60 / 0.42)', backdropFilter: 'blur(3px)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: narrow ? 0 : 16,
       }}
     >
       <div style={{
-        width: '100%', maxWidth: 720, maxHeight: '88vh', background: 'white',
-        border: `1px solid ${C.line}`, borderRadius: 8, display: 'flex', flexDirection: 'column',
+        width: '100%', maxWidth: narrow ? '100%' : 720, maxHeight: narrow ? '100%' : '88vh',
+        height: narrow ? '100%' : undefined, background: 'white',
+        border: narrow ? 'none' : `1px solid ${C.line}`, borderRadius: narrow ? 0 : 8, display: 'flex', flexDirection: 'column',
         boxShadow: '0 24px 60px oklch(20% 0.02 60 / 0.22)',
       }}>
         {/* Başlıq */}
@@ -323,7 +328,7 @@ export default function AdminTranslations({ slug, onClose, onSaved }) {
                     value={readValue(draft, lang, f.key)}
                     onChange={(e) => setField(f.key, e.target.value)}
                     placeholder={lang === 'en' ? 'English translation…' : 'Перевод на русский…'}
-                    style={inputStyle}
+                    style={field}
                   />
                 </div>
               ))}
@@ -346,7 +351,7 @@ export default function AdminTranslations({ slug, onClose, onSaved }) {
                         value={readValue(draft, lang, null, r.i)}
                         onChange={(e) => setField(null, e.target.value, r.i)}
                         placeholder={lang === 'en' ? 'English translation…' : 'Перевод на русский…'}
-                        style={inputStyle}
+                        style={field}
                       />
                     </div>
                   ))}

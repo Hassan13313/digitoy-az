@@ -2,6 +2,7 @@ import { DRESS_CODE_PALETTES } from '../data/constants'
 import { ACTIVE_PARTNERS } from '../data/partners'
 import { formatAzDate, formatTime24 } from './dateFormat'
 import t from '../data/translations'
+import { waChatUrl } from './waLink'
 
 /* ── URL-safe Base64 encode ── */
 export function encodeData(data) {
@@ -107,7 +108,7 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '', draftCode = '
   return encodeURIComponent(lines.join('\n'))
 }
 
-/* ── WhatsApp URL ── */
+/* ── WhatsApp URL ── (wa.me YOX — emojiləri sındırır, bax utils/waLink.js) */
 export function buildWhatsAppUrl(data, lang = 'az', waNumber = '994992133696', slug = '', draftCode = '') {
-  return `https://wa.me/${waNumber}?text=${buildWhatsAppMessage(data, lang, slug, draftCode)}`
+  return waChatUrl(waNumber, buildWhatsAppMessage(data, lang, slug, draftCode))
 }

@@ -146,6 +146,46 @@ export async function resizeToBlob(file, preset = 'story') {
 }
 
 /**
+ * Admin şəkli (Phase 45 — açılış monoqramı, hekayə fəsli) üçün hazırlıq.
+ *
+ * PNG/WEBP loqonun ŞƏFFAFLIĞI qorunur: kətan şəffaf qalır və PNG kimi
+ * ixrac olunur (server də şəffaf pikseli görüb PNG saxlayır). Qalan
+ * formatlar `storyUpload` presetindəki kimi JPEG-ə kiçildilir.
+ * ⚠ Telefon kamerası 50–200 MP şəkil çəkir — server 40 MP-dan böyüyünü
+ * rədd edir, ona görə kiçiltmə burada MƏCBURİDİR.
+ *
+ * @returns {Promise<{blob: Blob, name: string}>}
+ */
+export async function prepareAdminImage(file, maxEdge = 1400) {
+  if (!file) { const e = new Error('NO_FILE'); e.code = 'NO_FILE'; throw e }
+  const alphaCapable = file.type === 'image/png' || file.type === 'image/webp'
+  if (!alphaCapable) {
+    const { blob } = await resizeToBlob(file, 'storyUpload')
+    return { blob, name: 'admin.jpg' }
+  }
+  if (file.size > 25 * 1024 * 1024) { const e = new Error('TOO_LARGE'); e.code = 'TOO_LARGE'; throw e }
+
+  let src
+  try { src = await decode(file) } catch {
+    const e = new Error('DECODE_FAILED'); e.code = 'DECODE_FAILED'; throw e
+  }
+  const ratio = Math.min(1, maxEdge / Math.max(src.width || 1, src.height || 1))
+  const w = Math.max(1, Math.round((src.width || 1) * ratio))
+  const h = Math.max(1, Math.round((src.height || 1) * ratio))
+  const canvas = document.createElement('canvas')
+  canvas.width = w
+  canvas.height = h
+  const ctx = canvas.getContext('2d')
+  ctx.imageSmoothingQuality = 'high'
+  ctx.drawImage(src, 0, 0, w, h)
+  src.close?.()
+  const blob = await new Promise((resolve, reject) => {
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('ENCODE_FAILED'))), 'image/png')
+  })
+  return { blob, name: 'admin.png' }
+}
+
+/**
  * Şəkli kiçildib data URI qaytar (qalereya qapağı, QR stend).
  * @returns {Promise<{dataUrl: string, bytes: number, width: number, height: number}>}
  */

@@ -38,9 +38,14 @@ const KEYFRAMES = `
 const mono = { fontFamily: TH.fonts?.heading }
 
 function Opening(props) {
-  const { theme, weddingData, isCouple } = props
-  const nameA = isCouple ? weddingData.groomName : (weddingData.eventName || weddingData.brideName)
-  const nameB = isCouple ? weddingData.brideName : ''
+  const { theme, weddingData, isCouple, ot } = props
+  /* Admin adları öz mətni ilə əvəz edibsə — tək böyük sətir (sağdakı ad yoxdur) */
+  const titleOv = ot.override('title')
+  const nameA = titleOv !== undefined
+    ? titleOv
+    : (isCouple ? weddingData.groomName : (weddingData.eventName || weddingData.brideName))
+  const nameB = titleOv !== undefined ? '' : (isCouple ? weddingData.brideName : '')
+  const metaOv = ot.override('meta')
   const dateStr = (weddingData.date || '').split('-').reverse().join('.')
   const place = weddingData.venueName
     ? String(weddingData.venueName).split(',').pop().trim().toLocaleUpperCase('az')
@@ -65,7 +70,6 @@ function Opening(props) {
       duration={800}
       hint={false}
       orbs="none"
-      ariaLabel="Dəvətnaməni aç"
       background="#060606"
     >
       {/* Texniki şəbəkə — 46px tile, fona güclə sezilən qalınlıqda hopur */}
@@ -95,7 +99,8 @@ function Opening(props) {
           color: alpha(theme.muted, 0.9),
           animation: 'mb-unmask 1s cubic-bezier(.16,1,.3,1) 1.1s both',
         }}>
-          <span>Digitoy</span><span style={{ color: GOLD }}>№ 012</span>
+          {/* «Digitoy» brend adıdır — AZ səhifədə böyük hərfə «DİGİTOY» çevrilməsin */}
+          <span lang={ot.custom('brand') ? undefined : 'en'}>{ot.text('brand')}</span><span style={{ color: GOLD }}>{ot.text('no')}</span>
         </div>
 
         {/* Tipoqrafik nüvə */}
@@ -108,14 +113,16 @@ function Opening(props) {
             color: alpha(theme.muted, 1),
             animation: 'mb-track 1.2s cubic-bezier(.16,1,.3,1) 1.6s both',
           }}>
-            {props.eventLabel}
+            {ot.text('kicker')}
           </div>
 
           <div style={{ ...rule(1.9, '0'), margin: '18px 0 22px' }} />
 
-          <div style={{ ...bigName, animation: 'mb-unmask 1.1s cubic-bezier(.16,1,.3,1) 2.2s both' }}>
-            {nameA}
-          </div>
+          {nameA && (
+            <div style={{ ...bigName, animation: 'mb-unmask 1.1s cubic-bezier(.16,1,.3,1) 2.2s both' }}>
+              {nameA}
+            </div>
+          )}
 
           {nameB && (
             <>
@@ -124,7 +131,7 @@ function Opening(props) {
                 animation: 'tpl-rise .9s ease-out 2.5s both',
               }}>
                 <span style={{ flex: 1, height: 1, background: alpha(GOLD, 0.5) }} />
-                <span style={{ ...mono, fontSize: 11, letterSpacing: '.3em', color: GOLD }}>VƏ</span>
+                <span style={{ ...mono, fontSize: 11, letterSpacing: '.3em', color: GOLD }}>{ot.text('and')}</span>
                 <span style={{ flex: 1, height: 1, background: alpha(GOLD, 0.5) }} />
               </div>
               <div style={{
@@ -138,49 +145,59 @@ function Opening(props) {
 
           <div style={{ ...rule(3.1, '100%'), margin: '24px 0 18px' }} />
 
-          <div style={{
-            display: 'flex', justifyContent: 'space-between', gap: 12,
-            ...mono, fontSize: 10, letterSpacing: '.26em', textTransform: 'uppercase',
-            color: alpha(theme.muted, 1),
-            animation: 'tpl-rise .9s ease-out 3.4s both',
-          }}>
-            <span>{dateStr}</span>
-            {(place || timeStr) && (
-              <span style={{ color: GOLD }}>{[place, timeStr].filter(Boolean).join(' · ')}</span>
-            )}
-          </div>
+          {metaOv !== '' && (
+            <div style={{
+              display: 'flex', justifyContent: 'space-between', gap: 12,
+              ...mono, fontSize: 10, letterSpacing: '.26em', textTransform: 'uppercase',
+              color: alpha(theme.muted, 1),
+              animation: 'tpl-rise .9s ease-out 3.4s both',
+            }}>
+              {metaOv !== undefined ? <span>{metaOv}</span> : (
+                <>
+                  <span>{dateStr}</span>
+                  {(place || timeStr) && (
+                    <span style={{ color: GOLD }}>{[place, timeStr].filter(Boolean).join(' · ')}</span>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Açma zolağı — radius 0, yanında döyünən üç cizgi */}
-        <div style={{
-          position: 'absolute', left: 'clamp(20px, 6vw, 24px)', right: 'clamp(20px, 6vw, 24px)',
-          bottom: 34, display: 'flex', alignItems: 'center', gap: 14,
-        }}>
+        {ot.show('cta') && (
           <div style={{
-            position: 'relative', flex: '1 1 auto', overflow: 'hidden',
-            border: `1px solid ${alpha(theme.accent, 0.2)}`, padding: '15px 0', textAlign: 'center',
-            ...mono, fontSize: 10, letterSpacing: '.24em', textTransform: 'uppercase',
-            color: theme.accent, whiteSpace: 'nowrap',
-            animation: 'tpl-cta .9s cubic-bezier(.16,1,.3,1) 3.7s both',
+            position: 'absolute', left: 'clamp(20px, 6vw, 24px)', right: 'clamp(20px, 6vw, 24px)',
+            bottom: 34, display: 'flex', alignItems: 'center', gap: 14,
           }}>
-            <Gleam delay={5} width="36%" color={alpha(GOLD, 0.34)} />
-            <span style={{ position: 'relative' }}>Dəvəti aç</span>
+            <div style={{
+              position: 'relative', flex: '1 1 auto', overflow: 'hidden',
+              border: `1px solid ${alpha(theme.accent, 0.2)}`, padding: '15px 0', textAlign: 'center',
+              ...mono, fontSize: 10, letterSpacing: '.24em', textTransform: 'uppercase',
+              color: theme.accent, whiteSpace: 'nowrap',
+              animation: 'tpl-cta .9s cubic-bezier(.16,1,.3,1) 3.7s both',
+            }}>
+              <Gleam delay={5} width="36%" color={alpha(GOLD, 0.34)} />
+              <span style={{ position: 'relative' }}>{ot.text('cta')}</span>
+            </div>
+            <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column', gap: 3, animation: 'tpl-rise .8s ease-out 4s both' }}>
+              {[0, 0.3, 0.6].map((d) => (
+                <span key={d} style={{ width: 16, height: 1, background: GOLD, animation: `mb-tick 2.2s ease-in-out ${d}s infinite` }} />
+              ))}
+            </div>
           </div>
-          <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column', gap: 3, animation: 'tpl-rise .8s ease-out 4s both' }}>
-            {[0, 0.3, 0.6].map((d) => (
-              <span key={d} style={{ width: 16, height: 1, background: GOLD, animation: `mb-tick 2.2s ease-in-out ${d}s infinite` }} />
-            ))}
-          </div>
-        </div>
+        )}
 
-        <div style={{
-          position: 'absolute', left: 'clamp(20px, 6vw, 24px)', bottom: 16,
-          ...mono, fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase',
-          color: alpha(theme.muted, 0.95),
-          animation: 'tpl-rise .8s ease-out 4.3s both, tpl-hint 2.8s ease-in-out 5.2s infinite',
-        }}>
-          toxunun
-        </div>
+        {ot.show('hint') && (
+          <div style={{
+            position: 'absolute', left: 'clamp(20px, 6vw, 24px)', bottom: 16,
+            ...mono, fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase',
+            color: alpha(theme.muted, 0.95),
+            animation: 'tpl-rise .8s ease-out 4.3s both, tpl-hint 2.8s ease-in-out 5.2s infinite',
+          }}>
+            {ot.text('hint')}
+          </div>
+        )}
       </div>
     </OpeningFrame>
   )

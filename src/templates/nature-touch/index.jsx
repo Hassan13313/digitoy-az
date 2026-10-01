@@ -1,8 +1,7 @@
 import TemplateShell, { alpha } from '../_shared/TemplateShell'
-import OpeningFrame, { NameRow, OpeningMeta } from '../_shared/OpeningFrame'
+import OpeningFrame, { NameRow, OpeningMeta, MonoContent } from '../_shared/OpeningFrame'
 import { Ambient, Blob } from '../_shared/motion'
 import { getTemplateTheme } from '../templateConfig'
-import { formatFullDateByLang } from '../../utils/dateFormat'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    NATURE TOUCH — Claude Design · t7
@@ -81,15 +80,16 @@ function Undergrowth() {
 }
 
 function Opening(props) {
-  const { theme, weddingData, isCouple, lang } = props
-  const place = weddingData.venueName ? String(weddingData.venueName).split(',').pop().trim() : ''
+  const { theme, weddingData, isCouple, ot } = props
+  const badge = ot.mono.kind   /* auto → yarpaq; none → nişan gizli; qalanı → admin məzmunu */
 
   return (
     <OpeningFrame
       {...props}
       exit="curtain"
       duration={850}
-      label="Dəvətnaməni aç"
+      label={ot.text('cta')}
+      hint={ot.text('hint')}
       ctaDelay={3.6}
       hintDelay={4.1}
       ctaStyle={{
@@ -126,18 +126,27 @@ function Opening(props) {
           transformOrigin: '50% 0', animation: 'tpl-drawy 1.2s cubic-bezier(.22,.61,.36,1) 1s both',
         }} />
 
-        {/* Yarpaq nişanı — dairənin içində yellənir */}
-        <div style={{
-          width: 44, height: 44, marginTop: 14, marginInline: 'auto', borderRadius: '50%',
-          border: `1px solid ${alpha(theme.background, 0.45)}`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          animation: 'tpl-cta 1.1s cubic-bezier(.2,.9,.25,1) 1.6s both',
-        }}>
-          <Leaf w={12} h={20} color="rgba(213,224,196,.75)" style={{ transformOrigin: '0 100%', animation: 'nt-sway 5.5s ease-in-out 2.4s infinite' }} />
-        </div>
+        {/* Yarpaq nişanı — dairənin içində yellənir. Admin onu mətn/stiker/
+            şəkillə əvəz edibsə dairə böyüyür (şəkil 44px-də görünməzdi). */}
+        {badge !== 'none' && (
+          <div style={{
+            width: badge === 'auto' ? 44 : 64, height: badge === 'auto' ? 44 : 64,
+            marginTop: 14, marginInline: 'auto', borderRadius: '50%',
+            overflow: badge === 'auto' ? undefined : 'hidden',
+            border: `1px solid ${alpha(theme.background, 0.45)}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: DUSK.light, fontFamily: theme.fonts?.heading, fontSize: 20, lineHeight: 1,
+            animation: 'tpl-cta 1.1s cubic-bezier(.2,.9,.25,1) 1.6s both',
+          }}>
+            {badge === 'auto'
+              ? <Leaf w={12} h={20} color="rgba(213,224,196,.75)" style={{ transformOrigin: '0 100%', animation: 'nt-sway 5.5s ease-in-out 2.4s infinite' }} />
+              : <MonoContent mono={ot.mono} />}
+          </div>
+        )}
 
         <NameRow
           theme={theme} weddingData={weddingData} isCouple={isCouple}
+          text={ot.override('title')}
           delay={2.4} step={0.2}
           size="clamp(28px, 10vw, 38px)" ampSize="clamp(18px, 6vw, 24px)"
           color={DUSK.light} ampColor={DUSK.sage}
@@ -155,10 +164,9 @@ function Opening(props) {
         </div>
 
         {/* Design t7-də əvvəl YER, sonra tarix gəlir — açıq havada toyun vurğusu */}
-        <OpeningMeta
-          text={[place, formatFullDateByLang(weddingData.date, lang)].filter(Boolean).join(' · ')}
-          color={DUSK.mute} delay={3.3} style={{ marginTop: 14 }}
-        />
+        {ot.show('meta') && (
+          <OpeningMeta text={ot.text('meta')} color={DUSK.mute} delay={3.3} style={{ marginTop: 14 }} />
+        )}
       </div>
     </OpeningFrame>
   )

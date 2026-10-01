@@ -25,7 +25,10 @@ const OPEN_FALLBACK_MS = 3000
 /* If a playing video stops advancing (mid-stream stall/buffer), enter anyway. */
 const STALL_CHECK_MS   = 2500
 
-export default function OpeningVideo({ onComplete, weddingData, lang = 'az' }) {
+/* `posterOnly` — YALNIZ admin panelinin «Açılış» önbaxışı üçün: video
+   yüklənmir, taymerlər işləmir, afişa (adlar + şüar) sabit qalır ki, admin
+   dəyişdirdiyi mətni görə bilsin. Qonaq dəvətnaməsində heç vaxt true deyil. */
+export default function OpeningVideo({ onComplete, weddingData, lang = 'az', ot = null, posterOnly = false }) {
   const videoRef        = useRef(null)
   const onCompleteRef   = useRef(onComplete)
   const triggeredRef    = useRef(false)
@@ -39,7 +42,7 @@ export default function OpeningVideo({ onComplete, weddingData, lang = 'az' }) {
   const [gone,       setGone]       = useState(false)
   const [crossfaded, setCrossfaded] = useState(false)
   const [posterDone, setPosterDone] = useState(false)
-  const [showPoster, setShowPoster] = useState(false)
+  const [showPoster, setShowPoster] = useState(posterOnly)
 
   onCompleteRef.current = onComplete
 
@@ -139,7 +142,12 @@ export default function OpeningVideo({ onComplete, weddingData, lang = 'az' }) {
   const groomName  = weddingData?.groomName  || ''
   const eventName  = weddingData?.eventName  || ''
   const displayAnd = tr.inv_and || '&'
-  const tagline    = tr.opening_tagline || 'Bir Dəvətnamədən Daha Artığı'
+  /* Phase 45 — admin açılış mətnlərini dəyişibsə (bax openingSpec). `ot`
+     verilməyəndə (köhnə çağırış) hər şey əvvəlki kimidir. */
+  const tagline    = ot ? ot.text('sub') : (tr.opening_tagline || 'Bir Dəvətnamədən Daha Artığı')
+  const brand      = ot ? ot.text('brand') : 'Digitoy.az'
+  const skipLabel  = ot ? ot.text('skip') : (tr.opening_skip || 'Keç →')
+  const titleOv    = ot ? ot.override('title') : undefined
 
   if (gone) return null
 
@@ -157,20 +165,22 @@ export default function OpeningVideo({ onComplete, weddingData, lang = 'az' }) {
       }}
     >
       {/* Video — hidden behind poster until crossfade */}
-      <video
-        ref={videoRef}
-        src="/digitoy-opening.mp4"
-        muted
-        playsInline
-        preload="auto"
-        style={{
-          position: 'absolute', inset: 0,
-          width: '100%', height: '100%',
-          objectFit: 'cover', display: 'block',
-          opacity: crossfaded ? 1 : 0,
-          transition: `opacity ${CROSSFADE_MS}ms ease-out`,
-        }}
-      />
+      {!posterOnly && (
+        <video
+          ref={videoRef}
+          src="/digitoy-opening.mp4"
+          muted
+          playsInline
+          preload="auto"
+          style={{
+            position: 'absolute', inset: 0,
+            width: '100%', height: '100%',
+            objectFit: 'cover', display: 'block',
+            opacity: crossfaded ? 1 : 0,
+            transition: `opacity ${CROSSFADE_MS}ms ease-out`,
+          }}
+        />
+      )}
 
       {/* Poster — shown only on slow connections (video not ready within 200ms) */}
       {showPoster && !posterDone && (
@@ -194,18 +204,32 @@ export default function OpeningVideo({ onComplete, weddingData, lang = 'az' }) {
           }} />
 
           {/* Wordmark */}
-          <p style={{
-            fontFamily: '"Inter", system-ui, sans-serif',
-            fontSize: 9, letterSpacing: '0.45em',
-            textTransform: 'uppercase',
-            color: 'rgba(197,160,89,0.72)',
-            fontWeight: 500, margin: '0 0 32px',
-          }}>
-            Digitoy.az
-          </p>
+          {brand && (
+            /* Brend adı — AZ səhifədə böyük hərfə «DİGİTOY» çevrilməsin */
+            <p lang={ot?.custom('brand') ? undefined : 'en'} style={{
+              fontFamily: '"Inter", system-ui, sans-serif',
+              fontSize: 9, letterSpacing: '0.45em',
+              textTransform: 'uppercase',
+              color: 'rgba(197,160,89,0.72)',
+              fontWeight: 500, margin: '0 0 32px',
+            }}>
+              {brand}
+            </p>
+          )}
 
           {/* Names */}
-          {isCouple ? (
+          {titleOv !== undefined ? (
+            titleOv && (
+              <p style={{
+                fontFamily: '"Cormorant Garamond", Georgia, serif',
+                fontSize: 'clamp(32px, 9vw, 60px)',
+                fontWeight: 300, letterSpacing: '-0.01em',
+                color: '#1A140C', lineHeight: 1.1, margin: 0,
+              }}>
+                {titleOv}
+              </p>
+            )
+          ) : isCouple ? (
             <div>
               <p style={{
                 fontFamily: '"Cormorant Garamond", Georgia, serif',
@@ -252,24 +276,28 @@ export default function OpeningVideo({ onComplete, weddingData, lang = 'az' }) {
           }} />
 
           {/* Tagline */}
-          <p style={{
-            fontFamily: '"Inter", system-ui, sans-serif',
-            fontSize: 8, letterSpacing: '0.42em',
-            textTransform: 'uppercase',
-            color: 'rgba(140,123,107,0.52)',
-            fontWeight: 500, margin: 0,
-          }}>
-            {tagline}
-          </p>
+          {tagline && (
+            <p style={{
+              fontFamily: '"Inter", system-ui, sans-serif',
+              fontSize: 8, letterSpacing: '0.42em',
+              textTransform: 'uppercase',
+              color: 'rgba(140,123,107,0.52)',
+              fontWeight: 500, margin: 0,
+            }}>
+              {tagline}
+            </p>
+          )}
         </div>
       )}
 
-      {/* Skip — həm demo, həm real dəvətnamədə. startFade ikili icranı bloklayır. */}
+      {/* Skip — həm demo, həm real dəvətnamədə. startFade ikili icranı bloklayır.
+          ⚠ Admin «Keç» mətnini gizlətsə də düymə QALIR (yalnız ox işarəsi) —
+          video işləməyən cihazda qonaq ilişib qalmasın. */}
       {!fading && (
         <button
           type="button"
           onClick={startFade}
-          aria-label={tr.opening_skip || 'Animasiyanı keç'}
+          aria-label={skipLabel || tr.opening_skip || 'Animasiyanı keç'}
           style={{
             position: 'absolute',
             bottom: 'max(22px, env(safe-area-inset-bottom, 22px))',
@@ -286,7 +314,7 @@ export default function OpeningVideo({ onComplete, weddingData, lang = 'az' }) {
             color: 'rgba(253,250,244,0.92)', fontWeight: 500,
           }}
         >
-          {tr.opening_skip || 'Keç →'}
+          {skipLabel || '→'}
         </button>
       )}
     </motion.div>
