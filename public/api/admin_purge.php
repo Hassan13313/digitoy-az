@@ -10,6 +10,7 @@
                                               upload faylları
      order          { draft_code }          → «Silinmiş» statusdakı BİR sifariş
      deleted_orders {}                      → «Silinmiş» statusdakı BÜTÜN sifarişlər
+                                              (canlı dəvətnaməyə bağlılar saxlanılır → kept)
 
    ⚠ GERİ QAYTARILMIR. Hər əməliyyat admin_audit-ə yazılır.
    ⚠ Fayl silmə yalnız uploads/ kökünün İÇİNDƏ, yalnız bu slug-un öz
@@ -33,22 +34,32 @@ ensureTables();
 $db      = getDB();
 $uploads = __DIR__ . '/../uploads';
 
-/* ── Silinmiş sifarişlər ── */
-if ($action === 'deleted_orders') {
-    $n = $db->exec("DELETE FROM draft_invitations WHERE status = 'deleted'");
-    adminAuditLog('purge_deleted_orders', null, 'count=' . (int) $n);
-    purgeJson(200, ['ok' => true, 'deleted' => (int) $n]);
-}
+/* ── Silinmiş sifarişlər ──
+   Yalnız «Silinmiş» statusdakılar. CANLI dəvətnaməyə bağlı sifariş SİLİNMİR:
+   soft delete «geri alına bilər» deyir; belə sifariş dəvətnamə ilə birlikdə
+   «Dəvətnamələr»dən silinir. Silinənlərin öz hekayə/musiqi faylları da gedir. */
+if ($action === 'deleted_orders' || $action === 'order') {
+    $sql  = "SELECT id, draft_code, approved_slug, form_data FROM draft_invitations WHERE status = 'deleted'";
+    $args = [];
+    $code = '';
+    if ($action === 'order') {
+        $code = strtoupper(trim((string) ($body['draft_code'] ?? '')));
+        if (!preg_match('/^DT-[A-Z0-9]{4,12}$/', $code)) purgeJson(400, ['error' => 'Valid draft_code required']);
+        $sql .= ' AND draft_code = :c';
+        $args[':c'] = $code;
+    }
+    $st = $db->prepare($sql);
+    $st->execute($args);
+    $rows = $st->fetchAll();
+    if ($action === 'order' && !$rows) purgeJson(404, ['error' => 'NOT_IN_TRASH', 'message' => 'Sifariş «Silinmiş» bölməsində tapılmadı.']);
 
-if ($action === 'order') {
-    $code = strtoupper(trim((string) ($body['draft_code'] ?? '')));
-    if (!preg_match('/^DT-[A-Z0-9]{4,12}$/', $code)) purgeJson(400, ['error' => 'Valid draft_code required']);
-    /* Yalnız «Silinmiş» statusdakı sifariş — aktiv sifariş səhvən itməsin */
-    $st = $db->prepare("DELETE FROM draft_invitations WHERE draft_code = :c AND status = 'deleted'");
-    $st->execute([':c' => $code]);
-    if ($st->rowCount() === 0) purgeJson(404, ['error' => 'NOT_IN_TRASH', 'message' => 'Sifariş «Silinmiş» bölməsində tapılmadı.']);
-    adminAuditLog('purge_order', null, $code);
-    purgeJson(200, ['ok' => true, 'deleted' => 1]);
+    $res = purgeOrders($db, $uploads, $rows);
+    if ($action === 'order' && $res['deleted'] === 0) {
+        purgeJson(409, ['error' => 'LINKED_INVITATION', 'message' => 'Bu sifariş aktiv dəvətnaməyə bağlıdır — əvvəlcə dəvətnaməni «Dəvətnamələr»dən silin.']);
+    }
+    adminAuditLog($action === 'order' ? 'purge_order' : 'purge_deleted_orders', null,
+        trim($code . ' ' . json_encode($res, JSON_UNESCAPED_UNICODE)));
+    purgeJson(200, ['ok' => true] + $res);
 }
 
 if ($action !== 'preview' && $action !== 'invitation') {
@@ -80,18 +91,7 @@ $count = function (string $sql) use ($db, $slug): int {
 };
 
 /* Hekayə/musiqi faylları — başqa dəvətnamə və ya sifariş də işlədirsə SAXLANILIR */
-$ownRefs = [];
-foreach (purgeReferencedFiles($fd) as $rel) {
-    $pat = purgeLikePattern($rel);
-    $q = $db->prepare("SELECT COUNT(*) FROM invitations WHERE slug <> :s AND form_data LIKE :p ESCAPE '!'");
-    $q->execute([':s' => $slug, ':p' => $pat]);
-    $shared = (int) $q->fetchColumn();
-    $excl = $orderIds ? ' AND id NOT IN (' . implode(',', $orderIds) . ')' : '';
-    $q = $db->prepare("SELECT COUNT(*) FROM draft_invitations WHERE form_data LIKE :p ESCAPE '!'" . $excl);
-    $q->execute([':p' => $pat]);
-    $shared += (int) $q->fetchColumn();
-    if ($shared === 0) $ownRefs[] = $rel;
-}
+$ownRefs = purgeOwnRefs($db, $fd, $slug, $orderIds);
 
 $targets = [];
 foreach (purgeSlugDirs($uploads, $slug) as $dir) {
@@ -180,6 +180,66 @@ function purgeReferencedFiles(array $fd): array {
     };
     $walk($fd);
     return array_keys($out);
+}
+
+/** form_data-dakı _story/_music fayllarından başqa HEÇ BİR dəvətnamənin ($exclSlug
+    xaric) və sifarişin ($exclOrderIds xaric) işlətmədikləri — yalnız bunlar silinə bilər. */
+function purgeOwnRefs(PDO $db, array $fd, string $exclSlug, array $exclOrderIds): array {
+    $excl = $exclOrderIds ? ' AND id NOT IN (' . implode(',', array_map('intval', $exclOrderIds)) . ')' : '';
+    $inv  = $db->prepare("SELECT COUNT(*) FROM invitations WHERE slug <> :s AND form_data LIKE :p ESCAPE '!'");
+    $drf  = $db->prepare("SELECT COUNT(*) FROM draft_invitations WHERE form_data LIKE :p ESCAPE '!'" . $excl);
+    $own  = [];
+    foreach (purgeReferencedFiles($fd) as $rel) {
+        $pat = purgeLikePattern($rel);
+        $inv->execute([':s' => $exclSlug, ':p' => $pat]);
+        $shared = (int) $inv->fetchColumn();
+        $drf->execute([':p' => $pat]);
+        $shared += (int) $drf->fetchColumn();
+        if ($shared === 0) $own[] = $rel;
+    }
+    return $own;
+}
+
+/** Hələ CANLI dəvətnaməyə bağlı sifarişlər (approved_slug və ya draft_code ilə) → [id => slug] */
+function purgeLinkedOrders(PDO $db, array $orders): array {
+    $q   = $db->prepare("SELECT slug FROM invitations WHERE slug = :s OR (draft_code = :c AND :c2 <> '') LIMIT 1");
+    $out = [];
+    foreach ($orders as $o) {
+        $c = (string) ($o['draft_code'] ?? '');
+        $q->execute([':s' => (string) ($o['approved_slug'] ?? ''), ':c' => $c, ':c2' => $c]);
+        if (($slug = $q->fetchColumn()) !== false) $out[(int) $o['id']] = (string) $slug;
+        $q->closeCursor();
+    }
+    return $out;
+}
+
+/** «Silinmiş» sifarişləri birdəfəlik sil. Canlı dəvətnaməyə bağlılar SAXLANILIR (kept);
+    silinənlərin başqa heç yerdə işlənməyən _story/_music faylları DB-dən SONRA silinir. */
+function purgeOrders(PDO $db, string $uploads, array $orders): array {
+    $linked = purgeLinkedOrders($db, $orders);
+    $kept = []; $go = [];
+    foreach ($orders as $o) {
+        if (isset($linked[(int) $o['id']])) $kept[] = (string) $o['draft_code'];
+        else $go[(int) $o['id']] = $o;
+    }
+    if (!$go) return ['deleted' => 0, 'files' => 0, 'kept' => $kept];
+
+    $ids  = array_keys($go);
+    $refs = [];
+    foreach ($go as $o) {
+        foreach (purgeOwnRefs($db, json_decode((string) $o['form_data'], true) ?: [], '', $ids) as $rel) $refs[$rel] = true;
+    }
+    $st = $db->prepare("DELETE FROM draft_invitations WHERE status = 'deleted' AND id IN (" . implode(',', $ids) . ')');
+    $st->execute();
+    $n = $st->rowCount();
+
+    $files = 0;
+    if ($n === count($ids)) {   /* arada biri bərpa olunubsa fayllara toxunma */
+        foreach (array_keys($refs) as $rel) {
+            if (($p = purgeSafePath($uploads, $rel)) !== null) $files += purgeRmTree($p, false)[0];
+        }
+    }
+    return ['deleted' => $n, 'files' => $files, 'kept' => $kept];
 }
 
 /** form_data-da bu faylı tapan LIKE nümunəsi (ESCAPE '!'). Seqmentlər % ilə

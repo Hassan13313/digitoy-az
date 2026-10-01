@@ -56,10 +56,10 @@ export default function AdminOrdersList({ onSelectOrder }) {
     setPurgeBusy(true)
     setPurgeError('')
     try {
-      await adminPurge(payload)
-      after()
+      after(await adminPurge(payload))
     } catch (e) {
       setPurgeError(e?.message || 'Silinmədi.')
+      setConfirmCode(null)
     } finally {
       setPurgeBusy(false)
     }
@@ -69,10 +69,15 @@ export default function AdminOrdersList({ onSelectOrder }) {
     setTotal(t => Math.max(0, t - 1))
     setConfirmCode(null)
   })
-  const purgeAll = () => purge({ action: 'deleted_orders' }, () => {
-    setOrders([])
-    setTotal(0)
+  /* Canlı dəvətnaməyə bağlı sifarişləri server saxlayır (kept) — siyahıda qalırlar */
+  const purgeAll = () => purge({ action: 'deleted_orders' }, (res) => {
+    const kept = res?.kept || []
+    setOrders(prev => prev.filter(o => kept.includes(o.draft_code)))
+    setTotal(kept.length)
     setConfirmAll(false)
+    if (kept.length) {
+      setPurgeError(`${kept.length} sifariş aktiv dəvətnaməyə bağlı olduğu üçün saxlanıldı — onları dəvətnamə ilə birlikdə «Dəvətnamələr»dən silin.`)
+    }
   })
 
   const fetchOrders = (status, q = '', tpl = templateFilter) => {

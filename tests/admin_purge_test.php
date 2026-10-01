@@ -23,7 +23,8 @@ function ok(string $label, bool $cond): void {
 }
 
 $src = file_get_contents(__DIR__ . '/../public/api/admin_purge.php');
-foreach (['purgeSlugDirs', 'purgeReferencedFiles', 'purgeSafePath', 'purgeLikePattern'] as $fn) {
+foreach (['purgeSlugDirs', 'purgeReferencedFiles', 'purgeSafePath', 'purgeLikePattern', 'purgeRmTree',
+          'purgeOwnRefs', 'purgeLinkedOrders', 'purgeOrders'] as $fn) {
     if (!preg_match('/\nfunction ' . $fn . '\(.*?\n\}/s', $src, $m)) {
         echo "FAIL: `$fn` admin_purge.php-də tapılmadı\n";
         exit(1);
@@ -92,6 +93,46 @@ ok('../ ilə çıxış → null', purgeSafePath($root, '../' . basename($outside
 
 @unlink($root . '/_story/b1/p.jpg'); @rmdir($root . '/_story/b1'); @rmdir($root . '/_story'); @rmdir($root . '/slug-a'); @rmdir($root);
 ok('kənar fayl toxunulmayıb', is_file($outside)); @unlink($outside);
+
+/* ── 4. «Silinmiş» sifarişlərin birdəfəlik silinməsi (ultrareview, PR #1) ──
+   a) CANLI dəvətnaməyə bağlı sifariş SİLİNMİR (soft delete «geri alına bilər» deyir);
+   b) silinən sifarişin öz _story/_music faylları da silinir, ortaqlar qalır.
+   Real SQL — SQLite yaddaşda (LIKE … ESCAPE '!' eyni işləyir). */
+$db = new PDO('sqlite::memory:', null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]);
+$db->exec("CREATE TABLE invitations (slug TEXT, draft_code TEXT, form_data TEXT)");
+$db->exec("CREATE TABLE draft_invitations (id INTEGER PRIMARY KEY, draft_code TEXT, status TEXT, approved_slug TEXT, form_data TEXT)");
+$enc = fn ($a) => json_encode($a, JSON_UNESCAPED_UNICODE);   /* DB-dəki forma: «\/» */
+$own = '_story/aaaa1111/own1.jpg'; $shr = '_story/aaaa1111/shared1.jpg'; $mus = '_music/bbbb2222/song1.mp3';
+$db->exec("INSERT INTO invitations VALUES ('canli-toy-ab12cd', 'DT-LIVE01', " . $db->quote($enc(['p' => '/uploads/' . $shr])) . ")");
+$ins = $db->prepare('INSERT INTO draft_invitations VALUES (:i, :c, :s, :a, :f)');
+$ins->execute([':i' => 1, ':c' => 'DT-GONE01', ':s' => 'deleted', ':a' => null,               ':f' => $enc(['s' => ['/uploads/' . $own, '/uploads/' . $shr], 'm' => 'https://digitoy.az/uploads/' . $mus])]);
+$ins->execute([':i' => 2, ':c' => 'DT-LIVE01', ':s' => 'deleted', ':a' => 'canli-toy-ab12cd', ':f' => $enc([])]);   /* təsdiqlənib, sonra soft delete */
+$ins->execute([':i' => 3, ':c' => 'DT-OTHER1', ':s' => 'deleted', ':a' => 'canli-toy-ab12cd', ':f' => $enc([])]);   /* yalnız approved_slug ilə bağlı */
+$ins->execute([':i' => 4, ':c' => 'DT-ACTIV1', ':s' => 'submitted', ':a' => null,             ':f' => $enc(['s' => ['/uploads/' . $mus]])]);
+
+$all = $db->query("SELECT id, draft_code, approved_slug, form_data FROM draft_invitations WHERE status = 'deleted' ORDER BY id")->fetchAll();
+$linked = purgeLinkedOrders($db, $all);
+ok('canlı dəvətnaməyə bağlılar tapılır (draft_code və approved_slug)', $linked === [2 => 'canli-toy-ab12cd', 3 => 'canli-toy-ab12cd']);
+
+$root = sys_get_temp_dir() . '/dt_purge_orders_' . getmypid();
+@mkdir($root . '/_story/aaaa1111', 0777, true); @mkdir($root . '/_music/bbbb2222', 0777, true);
+foreach ([$own, $shr, $mus] as $rel) file_put_contents($root . '/' . $rel, 'x');
+
+$res = purgeOrders($db, $root, $all);
+$left = $db->query("SELECT draft_code FROM draft_invitations ORDER BY id")->fetchAll(PDO::FETCH_COLUMN);
+ok('yalnız bağlı olmayan sifariş silinir', $res['deleted'] === 1 && $left === ['DT-LIVE01', 'DT-OTHER1', 'DT-ACTIV1']);
+ok('saxlananlar kodla qaytarılır', $res['kept'] === ['DT-LIVE01', 'DT-OTHER1']);
+ok('sifarişin öz hekayə şəkli silinir', !is_file($root . '/' . $own) && $res['files'] === 1);
+ok('canlı dəvətnamənin ortaq şəkli qalır', is_file($root . '/' . $shr));
+ok('aktiv sifarişin musiqisi qalır', is_file($root . '/' . $mus));
+
+$one = $db->query("SELECT id, draft_code, approved_slug, form_data FROM draft_invitations WHERE draft_code = 'DT-LIVE01'")->fetchAll();
+$r1 = purgeOrders($db, $root, $one);
+ok('tək bağlı sifariş də silinmir', $r1['deleted'] === 0 && $r1['kept'] === ['DT-LIVE01']);
+ok('boş siyahı → heç nə', purgeOrders($db, $root, []) === ['deleted' => 0, 'files' => 0, 'kept' => []]);
+
+foreach ([$shr, $mus] as $rel) @unlink($root . '/' . $rel);
+@rmdir($root . '/_story/aaaa1111'); @rmdir($root . '/_music/bbbb2222'); @rmdir($root . '/_story'); @rmdir($root . '/_music'); @rmdir($root);
 
 echo "\n$passed ok, $failed FAIL\n";
 exit($failed ? 1 : 0);

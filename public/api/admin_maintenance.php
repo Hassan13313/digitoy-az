@@ -226,31 +226,38 @@ if ($method === 'POST' && $action === 'reindex_media') {
          VALUES (:s, :u, :f, :m, :z, :t)'
     );
 
+    /* Fayl sistemi gəzintisi tranzaksiyadan KƏNARDA: uzun disk I/O zamanı
+       qonaq yükləmələri `photos` cədvəlində kilid gözləməsin (ultrareview). */
+    $rows = [];
+    foreach ((array) glob($base . '*', GLOB_ONLYDIR) as $albumDir) {
+        $slug = basename($albumDir);
+        if (!isValidSlug($slug)) continue;      /* `music` kimi xidməti qovluqlar */
+        foreach ((array) glob($albumDir . '/*') as $file) {
+            if (!is_file($file)) continue;
+            $fn  = basename($file);
+            $ext = strtolower(pathinfo($fn, PATHINFO_EXTENSION));
+            if (!in_array($ext, $mediaExts, true)) continue;
+            /* törəmələr sayılmır — dashboard onları da saymırdı */
+            if (substr($fn, -10) === '_thumb.jpg' || substr($fn, -11) === '_poster.jpg') continue;
+            if (isset($known[$slug . '/' . $fn])) continue;
+
+            $rows[] = [
+                ':s' => $slug,
+                ':u' => '/uploads/' . $slug . '/' . $fn,
+                ':f' => $fn,
+                ':m' => $mimeMap[$ext] ?? 'application/octet-stream',
+                ':z' => (int) @filesize($file),
+                ':t' => date('Y-m-d H:i:s', (int) @filemtime($file) ?: time()),
+            ];
+        }
+    }
+
     $indexed = 0;
     $db->beginTransaction();
     try {
-        foreach ((array) glob($base . '*', GLOB_ONLYDIR) as $albumDir) {
-            $slug = basename($albumDir);
-            if (!isValidSlug($slug)) continue;      /* `music` kimi xidməti qovluqlar */
-            foreach ((array) glob($albumDir . '/*') as $file) {
-                if (!is_file($file)) continue;
-                $fn  = basename($file);
-                $ext = strtolower(pathinfo($fn, PATHINFO_EXTENSION));
-                if (!in_array($ext, $mediaExts, true)) continue;
-                /* törəmələr sayılmır — dashboard onları da saymırdı */
-                if (substr($fn, -10) === '_thumb.jpg' || substr($fn, -11) === '_poster.jpg') continue;
-                if (isset($known[$slug . '/' . $fn])) continue;
-
-                $ins->execute([
-                    ':s' => $slug,
-                    ':u' => '/uploads/' . $slug . '/' . $fn,
-                    ':f' => $fn,
-                    ':m' => $mimeMap[$ext] ?? 'application/octet-stream',
-                    ':z' => (int) @filesize($file),
-                    ':t' => date('Y-m-d H:i:s', (int) @filemtime($file) ?: time()),
-                ]);
-                $indexed++;
-            }
+        foreach ($rows as $row) {
+            $ins->execute($row);
+            $indexed++;
         }
         $db->commit();
     } catch (Throwable $e) {
