@@ -160,6 +160,17 @@ export async function cleanupDrafts() {
   return res.json()
 }
 
+/* Phase 47 — avtomatik təmizləmə. dry=true → heç nə silinmir, yalnız sayılır. */
+export async function runRetention(dry) {
+  const res = await fetch(`${BASE}/admin_maintenance.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminHeaders() },
+    body: JSON.stringify({ action: 'retention_run', dry: !!dry }),
+  })
+  if (!res.ok) throw await toApiError(res, 'Təmizləmə alınmadı')
+  return res.json()
+}
+
 export async function reindexMedia() {
   const res = await fetch(`${BASE}/admin_maintenance.php`, {
     method: 'POST',

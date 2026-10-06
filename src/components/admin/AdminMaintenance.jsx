@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { RefreshCw, ShieldCheck, ShieldAlert, HardDrive, Trash2, Database, ScrollText } from 'lucide-react'
-import { getMaintenanceStatus, cleanupDrafts, reindexMedia, getAdminAudit } from '../../utils/api'
+import { RefreshCw, ShieldCheck, ShieldAlert, HardDrive, Trash2, Database, ScrollText, Eraser } from 'lucide-react'
+import { getMaintenanceStatus, cleanupDrafts, reindexMedia, getAdminAudit, runRetention } from '../../utils/api'
 import { useIsNarrow } from '../../hooks/useIsNarrow'
 import { azDate } from './adminFormat'
 
@@ -15,8 +15,12 @@ import { azDate } from './adminFormat'
    iddiası edilmir, çünki yanlış təhlükəsizlik hissi backup-ın olmamasından
    da pisdir.
 
-   ⚠ DRAFT TƏMİZLƏMƏ yalnız `status='draft'` və vaxtı keçmiş sətirləri silir.
-   Sifariş (submitted / approved / rejected) HEÇ VAXT silinmir.
+   ⚠ DRAFT TƏMİZLƏMƏ yalnız `status='draft'`, 30 gün toxunulmamış sətirləri
+   və onların öz fayllarını silir. Sifariş (submitted / approved / rejected)
+   HEÇ VAXT silinmir.
+
+   Phase 47 — MƏLUMAT SAXLAMA: retention.php gündə bir dəfə özü işləyir
+   (dashboard açılanda). Əl ilə işlətmək üçün əvvəl önizləmə (dry run) lazımdır.
    ───────────────────────────────────────────────────────────────────────── */
 
 const C = {
@@ -51,6 +55,20 @@ const btn = (tone = 'gold') => ({
   fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap',
 })
 
+/** retention.php nəticəsi → oxunaqlı sətirlər */
+function retentionLines(r) {
+  if (!r) return []
+  const n = (v) => (typeof v === 'number' ? v : v === 'error' ? 'xəta' : 0)
+  const verb = r.dry ? 'silinəcək' : 'silindi'
+  return [
+    `Audit jurnalında ${n(r.audit_ip)} köhnə IP ${verb}`,
+    `Qalereya statistikasında ${n(r.gallery_ip)} IP izi ${verb}`,
+    `${n(r.temp_files)} müvəqqəti fayl, ${n(r.media_logs)} köhnə log ${verb}`,
+    `${n(r.drafts?.drafts)} tərk edilmiş draft (${n(r.drafts?.files)} fayl) ${verb}`,
+    r.orphans?.buckets ? `Sahibsiz ${r.orphans.buckets} qovluq (${r.orphans.mb} MB) — yalnız hesabat, silinmir` : null,
+  ].filter(Boolean)
+}
+
 function Stat({ label, value, hint }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
@@ -67,9 +85,10 @@ export default function AdminMaintenance() {
   const [data,    setData]    = useState(null)
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState('')
-  const [busy,    setBusy]    = useState('')      /* 'drafts' | 'media' */
+  const [busy,    setBusy]    = useState('')      /* 'drafts' | 'media' | 'ret-dry' | 'ret' */
   const [result,  setResult]  = useState('')
   const [audit,   setAudit]   = useState(null)
+  const [preview, setPreview] = useState(null)    /* son dry run nəticəsi */
 
   const load = () => {
     setLoading(true); setError('')
@@ -103,6 +122,17 @@ export default function AdminMaintenance() {
     } finally { setBusy('') }
   }
 
+  const runRetentionStep = async (dry) => {
+    setBusy(dry ? 'ret-dry' : 'ret'); setResult('')
+    try {
+      const r = await runRetention(dry)
+      if (dry) setPreview(r.result)
+      else { setPreview(null); setResult('Təmizləmə tamamlandı: ' + retentionLines(r.result).join('; ') + '.'); load() }
+    } catch (e) {
+      setResult(e?.message || 'Təmizləmə alınmadı.')
+    } finally { setBusy('') }
+  }
+
   const loadAudit = async () => {
     try {
       const r = await getAdminAudit(50)
@@ -125,6 +155,8 @@ export default function AdminMaintenance() {
   const b  = data?.backup || {}
   const dr = data?.drafts || {}
   const md = data?.media  || {}
+  const rt = data?.retention || {}
+  const rp = rt.periods || {}
 
   const backupTone = b.status === 'ok' ? C.ok : b.status === 'stale' ? C.warn : C.danger
   const BackupIcon = b.status === 'ok' ? ShieldCheck : ShieldAlert
@@ -188,9 +220,9 @@ export default function AdminMaintenance() {
             <Stat label="Cəmi draft" value={dr.total ?? 0} />
           </div>
           <p style={{ margin: 0, fontSize: 12.5, color: C.sub, lineHeight: 1.5 }}>
-            Builder-i yarımçıq qoyan ziyarətçilərin qeydləri. Yalnız vaxtı keçmiş
-            <b> qaralamalar</b> silinir — sifarişlərə (göndərilmiş, təsdiqlənmiş,
-            rədd edilmiş) toxunulmur.
+            Builder-i yarımçıq qoyan ziyarətçilərin qeydləri. Yalnız {rp.draft_days} gün
+            toxunulmamış <b>qaralamalar</b> və onların öz şəkil/musiqi faylları silinir —
+            sifarişlərə (göndərilmiş, təsdiqlənmiş, rədd edilmiş) toxunulmur.
           </p>
           <div>
             <button type="button" style={btn(dr.expired > 0 ? 'danger' : 'gold')}
@@ -198,6 +230,35 @@ export default function AdminMaintenance() {
               <Trash2 size={14} />
               {busy === 'drafts' ? 'Silinir…' : dr.expired > 0 ? `${dr.expired} draft-ı sil` : 'Təmizlənəcək draft yoxdur'}
             </button>
+          </div>
+        </div>
+
+        {/* ── MƏLUMAT SAXLAMA (Phase 47) ── */}
+        <div style={card}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+            <Eraser size={17} color={C.gold} />
+            <h3 style={{ margin: 0, fontSize: 15.5, fontWeight: 700, color: C.ink }}>Məlumat saxlama</h3>
+          </div>
+          <Stat label="Son avtomatik təmizləmə" value={rt.last?.at ? formatDateTime(rt.last.at) : 'Hələ işləməyib'} />
+          <p style={{ margin: 0, fontSize: 12.5, color: C.sub, lineHeight: 1.5 }}>
+            Gündə bir dəfə özü işləyir: audit IP-ləri {rp.audit_ip_days} gün, qalereya IP izləri {rp.gallery_ip_days} gün,
+            loglar {rp.media_log_days} gün, tərk edilmiş draft-lar {rp.draft_days} gün saxlanılır.
+            Məxfilik siyasətindəki müddətlərlə eynidir.
+          </p>
+          {preview && (
+            <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12.5, color: C.text, lineHeight: 1.6 }}>
+              {retentionLines(preview).map((l) => <li key={l}>{l}</li>)}
+            </ul>
+          )}
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button type="button" style={btn()} onClick={() => runRetentionStep(true)} disabled={!!busy}>
+              <Eraser size={14} /> {busy === 'ret-dry' ? 'Hesablanır…' : 'Önizlə (heç nə silinmir)'}
+            </button>
+            {preview && (
+              <button type="button" style={btn('danger')} onClick={() => runRetentionStep(false)} disabled={!!busy}>
+                <Trash2 size={14} /> {busy === 'ret' ? 'Təmizlənir…' : 'Təsdiqlə və indi işlət'}
+              </button>
+            )}
           </div>
         </div>
 

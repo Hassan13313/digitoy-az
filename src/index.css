@@ -329,3 +329,8 @@ button, [role="button"], a, label, select {
    Atribut JS-dən qoyulur, çünki React inline style-ı hər render-də silərdi.
    ═══════════════════════════════════════════════════════════════════════════ */
 [data-photo-failed] { display: none !important; }
+
+/* Phase 47 — kuki banneri: tək giriş animasiyası (ConsentBanner.jsx) */
+@keyframes dt-consent-in { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
+.dt-consent { animation: dt-consent-in 320ms cubic-bezier(.22, 1, .36, 1) both }
+@media (prefers-reduced-motion: reduce) { .dt-consent { animation: none } }

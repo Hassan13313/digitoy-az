@@ -4,6 +4,7 @@ import { buildWhatsAppUrl } from '../../utils/whatsappOrder'
 import { WHATSAPP_NUMBER } from '../../data/constants'
 import { submitDraft } from '../../utils/api'
 import { alpha, readableOn } from './geo'
+import OrderLegalNote from '../../components/legal/OrderLegalNote'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    TEMPLATE ACTIONS — bütün şablonların paylaşdığı 3 hərəkət elementi.
@@ -148,6 +149,8 @@ export function OrderCta({ theme, weddingData, lang = 'az', pageSlug, isDemoMode
         }}>
           {t.orderNote}
         </div>
+        {/* Phase 47 — sifarişin hüquqi qeydi (linklər yeni tabda) */}
+        <OrderLegalNote lang={lang} color={bodyColor} linkColor={kickerColor} />
 
         <div style={{
           width: 60, height: 1, margin: '26px auto 0',

@@ -22,15 +22,11 @@ function ok(string $label, bool $cond): void {
     else       { $failed++; echo "  FAIL $label\n"; }
 }
 
-$src = file_get_contents(__DIR__ . '/../public/api/admin_purge.php');
-foreach (['purgeSlugDirs', 'purgeReferencedFiles', 'purgeSafePath', 'purgeLikePattern', 'purgeRmTree',
-          'purgeOwnRefs', 'purgeLinkedOrders', 'purgeOrders'] as $fn) {
-    if (!preg_match('/\nfunction ' . $fn . '\(.*?\n\}/s', $src, $m)) {
-        echo "FAIL: `$fn` admin_purge.php-də tapılmadı\n";
-        exit(1);
-    }
-    eval($m[0]);
-}
+/* Phase 47: köməkçilər purge_lib.php-yə köçdü (yan təsirsiz, birbaşa yüklənir) */
+require_once __DIR__ . '/../public/api/purge_lib.php';
+$ep = file_get_contents(__DIR__ . '/../public/api/admin_purge.php');
+ok('admin_purge.php purge_lib.php-ni qoşur', strpos($ep, "require_once __DIR__ . '/purge_lib.php';") !== false);
+ok('admin_purge.php-də köməkçi təkrarı yoxdur', strpos($ep, 'function purgeOwnRefs') === false);
 
 /* ── 1. Slug qovluqları ── */
 $dirs = purgeSlugDirs('/srv/up', 'aysel-ve-tural-ab12cd');
@@ -130,6 +126,16 @@ $one = $db->query("SELECT id, draft_code, approved_slug, form_data FROM draft_in
 $r1 = purgeOrders($db, $root, $one);
 ok('tək bağlı sifariş də silinmir', $r1['deleted'] === 0 && $r1['kept'] === ['DT-LIVE01']);
 ok('boş siyahı → heç nə', purgeOrders($db, $root, []) === ['deleted' => 0, 'files' => 0, 'kept' => []]);
+
+/* ── 5. purgeUnsharedRefs: adı verilən fayllar (retention.php bucket skanı üçün) ── */
+$db->exec("INSERT INTO invitations VALUES ('ikinci-toy-cd34ef', '', " . $db->quote($enc(['m' => 'https://digitoy.az/uploads/' . $mus])) . ")");
+$rels = [$shr, $mus, '_story/aaaa1111/tek.jpg'];
+ok('ortaq olmayanlar qaytarılır (\\/ formasında da)', purgeUnsharedRefs($db, $rels, '', []) === ['_story/aaaa1111/tek.jpg']);
+ok('istisna slug sayılmır', purgeUnsharedRefs($db, [$shr], 'canli-toy-ab12cd', []) === [$shr]);
+ok('istisna sifariş sayılmır', purgeUnsharedRefs($db, [$mus], 'ikinci-toy-cd34ef', [4]) === [$mus]);
+ok('boş siyahı → boş', purgeUnsharedRefs($db, [], '', []) === []);
+ok('purgeOwnRefs eyni nəticəni verir',
+   purgeOwnRefs($db, ['x' => '/uploads/' . $shr, 'y' => '/uploads/_story/aaaa1111/tek.jpg'], '', []) === ['_story/aaaa1111/tek.jpg']);
 
 foreach ([$shr, $mus] as $rel) @unlink($root . '/' . $rel);
 @rmdir($root . '/_story/aaaa1111'); @rmdir($root . '/_music/bbbb2222'); @rmdir($root . '/_story'); @rmdir($root . '/_music'); @rmdir($root);

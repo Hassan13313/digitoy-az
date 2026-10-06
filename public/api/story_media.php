@@ -159,7 +159,8 @@ function storyCommit(string $tmp, string $dir): ?string {
     $hash = sha1_file($tmp);
     if ($hash === false) { @unlink($tmp); return null; }
     $name = substr($hash, 0, 20) . '.jpg';
-    if (is_file($dir . $name)) { @unlink($tmp); return $name; }
+    /* Mövcud fayl yenidən seçilib → «təzə» say (retention.php köhnə faylları silir) */
+    if (is_file($dir . $name)) { @unlink($tmp); @touch($dir . $name); return $name; }
     if (!@rename($tmp, $dir . $name)) { @unlink($tmp); return null; }
     /* Veb server oxuya bilsin — hissəli video posterlərindəki 403 dərsi
        (bax media_store.php). GD faylı umask ilə yaradır, bu ehtiyatdır. */

@@ -1,0 +1,7 @@
+# DigiToy — təhlükəsizlik problemi tapmısınızsa, zəhmət olmasa bizə yazın.
+# If you found a security issue, please contact us.
+Contact: mailto:digitoyy@gmail.com
+Contact: https://wa.me/994992133696
+Expires: 2027-10-01T00:00:00.000Z
+Preferred-Languages: az, en, ru
+Canonical: https://digitoy.az/.well-known/security.txt

@@ -7,6 +7,7 @@ import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
 import { buildWhatsAppUrl, buildShortLiveLink } from '../../utils/whatsappOrder'
 import { saveInvitation, submitDraft } from '../../utils/api'
 import { trackEvent } from '../../utils/analytics'
+import OrderLegalNote from '../legal/OrderLegalNote'
 import t from '../../data/translations'
 import { SECTION_DEFS, isSectionOn } from '../../data/sections'
 
@@ -347,6 +348,9 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
           {tr.preview_view}
         </motion.button>
       </div>
+
+      {/* Phase 47 — sifarişin hüquqi qeydi */}
+      <OrderLegalNote lang={lang} color="#5C4A3A" style={{ margin: '0 auto 6px' }} />
 
       {/* Edit link */}
       <button

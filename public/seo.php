@@ -49,6 +49,7 @@ const SITE = 'https://digitoy.az';
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $path = rtrim($path, '/');
 if ($path === '') $path = '/';
+$legal = seoLegalPages()[$path] ?? null;   /* Phase 47: [title, description] və ya null */
 
 /* ── Marşruta görə meta ──
    `index` sahəsi YALNIZ ictimai marketinq səhifələri üçün true-dur.
@@ -73,6 +74,10 @@ if ($path === '/') {
     $meta['title'] = 'Dəvətnamə Şablonları — Rəqəmsal Toy Dəvətnaməsi | DigiToy';
     $meta['desc']  = 'DigiToy-un bütün rəqəmsal dəvətnamə şablonları: klassik qızıl, botanik bağ, modern qara, gecə səması və daha çoxu. Hər birinin canlı önbaxışına baxın.';
     $meta['canon'] = SITE . '/templates';
+} elseif ($legal) {
+    /* Phase 47 — hüquqi səhifələr: ictimai, indekslənir */
+    [$meta['title'], $meta['desc']] = $legal;
+    $meta['canon'] = SITE . $path;
 } elseif (preg_match('#^/invite/([a-zA-Z0-9\-]{2,120})(?:/(foto|qalereya-idare|slayd))?$#', $path, $m)) {
     $slug = $m[1];
     $sub  = $m[2] ?? '';
@@ -119,13 +124,27 @@ if ($path === '/') {
        STATUSU verilir; gövdə eyni SPA-dır, yəni istifadəçi yenə saytı
        görür. Siyahı src/App.jsx-dəki marşrutlarla UYĞUN olmalıdır —
        yeni marşrut əlavə edəndə buraya da yaz. */
-    $isAppRoute = $path === '/preview/live'
-        || preg_match('#^/demo/template/[a-zA-Z0-9\-]{1,60}$#', $path)
-        || preg_match('#^/admin(/[a-zA-Z0-9\-/]*)?$#', $path);
-    if (!$isAppRoute) {
+    if (!seoIsAppRoute($path)) {
         $seoStatus = 404;
         $meta['title'] = 'Səhifə tapılmadı | DigiToy';
     }
+}
+
+/** Phase 47 — hüquqi səhifələr: path → [title, description].
+    ⚠ src/data/legal/docs.js ilə HƏRFBƏHƏRF eyni (tests/site_routes_test.mjs). */
+function seoLegalPages(): array {
+    return [
+        '/mexfilik'      => ['Məxfilik Siyasəti | DigiToy', 'DigiToy hansı məlumatları toplayır, nə üçün istifadə edir, kimlərlə paylaşır və nə qədər saxlayır — kukilər və hüquqlarınız daxil.'],
+        '/sertler'       => ['İstifadə Şərtləri və Public Oferta | DigiToy', 'DigiToy rəqəmsal dəvətnamə xidmətindən istifadə qaydaları: sifariş, qiymət, linkin müddəti, məzmun və tərəflərin məsuliyyəti.'],
+        '/geri-qaytarma' => ['Ödəniş və Geri Qaytarma Qaydaları | DigiToy', 'DigiToy-da ödəniş nə vaxt edilir və hansı hallarda pul qaytarılır — fərdi rəqəmsal xidmət üçün aydın qaydalar.'],
+    ];
+}
+
+/** İndekslənməyən, amma MÖVCUD SPA marşrutu (404 deyil). ⚠ src/App.jsx ilə uyğun. */
+function seoIsAppRoute(string $path): bool {
+    return $path === '/preview/live'
+        || (bool) preg_match('#^/demo/template/[a-zA-Z0-9\-]{1,60}$#', $path)
+        || (bool) preg_match('#^/admin(/[a-zA-Z0-9\-/]*)?$#', $path);
 }
 
 /** Sorğu paylaşım önbaxışı / axtarış botundandırmı? */
@@ -329,8 +348,9 @@ if ($path === '/') {
         ],
     ];
 
-} elseif ($path === '/templates' || $path === '/demo') {
-    $label = $path === '/templates' ? 'Dəvətnamə Şablonları' : 'Nümunə Dəvətnamə';
+} elseif ($path === '/templates' || $path === '/demo' || $legal) {
+    $label = $path === '/templates' ? 'Dəvətnamə Şablonları'
+           : ($path === '/demo' ? 'Nümunə Dəvətnamə' : explode(' | ', $legal[0])[0]);
     $jsonld[] = [
         '@context'        => 'https://schema.org',
         '@type'           => 'BreadcrumbList',

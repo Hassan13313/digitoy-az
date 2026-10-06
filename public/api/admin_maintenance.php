@@ -3,7 +3,8 @@
    DIGITOY.AZ — Phase 37/39: Admin baxım endpointi
 
    GET  ?action=status            → backup vəziyyəti + draft/indeks sayğacları
-   POST { action: 'cleanup_drafts' }  → vaxtı keçmiş draft-ları sil
+   POST { action: 'cleanup_drafts' }  → 30 gün toxunulmamış draft-ları öz faylları ilə sil
+   POST { action: 'retention_run', dry } → avtomatik təmizləmə (dry → yalnız say)
    POST { action: 'reindex_media' }   → `photos` indeksini fayl sistemindən qur
    GET  ?action=audit&limit=N     → son admin əməliyyatları
 
@@ -17,6 +18,7 @@
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/retention.php';
 
 requireAdmin();
 ensureTables();
@@ -135,14 +137,9 @@ if ($method === 'GET' && $action === 'audit') {
 }
 
 if ($method === 'GET' && $action === 'status') {
-    /* Vaxtı keçmiş draft sayı — silinmir, yalnız sayılır */
+    /* Silinə bilən draft sayı (retention.php ilə eyni qayda) — silinmir, yalnız sayılır */
     $expired = 0;
-    try {
-        $expired = (int) $db->query(
-            "SELECT COUNT(*) FROM draft_invitations
-             WHERE status = 'draft' AND expires_at < NOW()"
-        )->fetchColumn();
-    } catch (Throwable $e) { /* sxem köhnədirsə 0 qalır */ }
+    try { $expired = retentionDraftCount($db); } catch (Throwable $e) { /* sxem köhnədirsə 0 qalır */ }
 
     $draftTotal  = (int) $db->query("SELECT COUNT(*) FROM draft_invitations")->fetchColumn();
     $photoRows   = (int) $db->query("SELECT COUNT(*) FROM photos")->fetchColumn();
@@ -162,38 +159,45 @@ if ($method === 'GET' && $action === 'status') {
             'indexed_at'    => metaGet($db, 'media_indexed_at'),
             'uploads'       => uploadsSummary(),
         ],
+        'retention'      => retentionStatus($db),
         'schema_version' => (int) (metaGet($db, 'version') ?? 0),
     ]);
     exit;
 }
 
 if ($method === 'POST' && $action === 'cleanup_drafts') {
-    /* ── Vaxtı keçmiş draft-ları sil ──
-       ⚠ YALNIZ `status='draft'` olanlar. `submitted`, `approved`, `rejected`
-       sifarişlər HEÇ VAXT silinmir — onlar biznes qeydidir.
-       Partiya ilə (max 2000) ki, böyük cədvəldə uzun kilid tutmasın. */
-    $st = $db->prepare(
-        "DELETE FROM draft_invitations
-         WHERE status = 'draft' AND expires_at < NOW()
-         LIMIT 2000"
-    );
-    $st->execute();
-    $deleted = $st->rowCount();
-
-    $remaining = (int) $db->query(
-        "SELECT COUNT(*) FROM draft_invitations WHERE status = 'draft' AND expires_at < NOW()"
-    )->fetchColumn();
-
-    adminAuditLog('drafts_cleanup', null, "deleted={$deleted} remaining={$remaining}");
+    /* ── Tərk edilmiş draft-ları sil (Phase 47: retention.php ilə eyni qayda) ──
+       ⚠ YALNIZ `status='draft'`, 30 gün toxunulmamış VƏ vaxtı keçmiş olanlar.
+       `submitted`, `approved`, `rejected` sifarişlər HEÇ VAXT silinmir.
+       Öz hekayə/musiqi faylları da gedir; başqa sifariş/dəvətnamənin işlətdiyi
+       fayl SAXLANILIR. Partiya ilə (max RET_MAX_DRAFTS). */
+    $r = retentionPurgeDraftsNow($db);
+    $remaining = retentionDraftCount($db);
+    adminAuditLog('drafts_cleanup', null, "deleted={$r['drafts']} files={$r['files']} remaining={$remaining}");
 
     echo json_encode([
         'ok'        => true,
-        'deleted'   => $deleted,
+        'deleted'   => $r['drafts'],
+        'files'     => $r['files'],
         'remaining' => $remaining,
         'message'   => $remaining > 0
-                     ? "{$deleted} draft silindi. Daha {$remaining} qalıb — düyməni yenidən basın."
-                     : "{$deleted} draft silindi. Təmizləmə tamamlandı.",
+                     ? "{$r['drafts']} draft ({$r['files']} fayl) silindi. Daha {$remaining} qalıb — düyməni yenidən basın."
+                     : "{$r['drafts']} draft ({$r['files']} fayl) silindi. Təmizləmə tamamlandı.",
     ]);
+    exit;
+}
+
+if ($method === 'POST' && $action === 'retention_run') {
+    /* dry → heç nə dəyişmir (kilid və jurnal yoxdur); əks halda 24 saat gözlənilmir,
+       amma eyni anda iki iş başlaya bilməz (kilid itirilsə → 409). */
+    $dry = !empty($body['dry']);
+    $res = maybeRunRetention($db, $dry ? ['dry' => true] : ['force' => true]);
+    if ($res === null) {
+        http_response_code(409);
+        echo json_encode(['error' => 'BUSY', 'message' => 'Təmizləmə artıq işləyir. Bir az sonra yenidən baxın.']);
+        exit;
+    }
+    echo json_encode(['ok' => true, 'result' => $res, 'retention' => retentionStatus($db)], JSON_UNESCAPED_UNICODE);
     exit;
 }
 

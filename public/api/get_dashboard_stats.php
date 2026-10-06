@@ -11,6 +11,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
+/* Phase 47: avtomatik təmizləmə — gündə bir dəfə, cavab göndəriləndən SONRA */
+require_once __DIR__ . '/retention.php';
+retentionScheduleAfterResponse();
+
 $db = getDB();
 
 /* Sifariş statistikaları */

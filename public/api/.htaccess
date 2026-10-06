@@ -51,3 +51,12 @@ RedirectMatch 404 ^/api/migrations/
 <Files "admin_media.php">
     Require all denied
 </Files>
+
+# Phase 47 — silme komekcileri ve avtomatik temizleme (yalniz include)
+<Files "purge_lib.php">
+    Require all denied
+</Files>
+
+<Files "retention.php">
+    Require all denied
+</Files>

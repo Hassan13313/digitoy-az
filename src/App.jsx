@@ -13,6 +13,8 @@ const SlideshowPage    = lazy(() => import('./components/invitation/SlideshowPag
 const AdminApp         = lazy(() => import('./components/admin/AdminApp'))
 const AdminLoginGate   = lazy(() => import('./components/admin/AdminLoginGate'))
 const TemplatesPage    = lazy(() => import('./components/landing/TemplatesPage'))
+/* Phase 47 — hüquqi səhifələr: mətnlər də ayrıca chunk-dadır */
+const LegalPage        = lazy(() => import('./components/legal/LegalPage'))
 /* Template Engine — InvitationPage onsuz da statik import edir,
    preview marşrutu üçün ayrıca chunk yaratmağa ehtiyac yoxdur. */
 import TemplateRenderer from './templates/TemplateRenderer'
@@ -22,6 +24,11 @@ import { DEFAULT_TEMPLATE_ID, getTemplateConfig, resolveTemplateId } from './tem
 import { getInvitation, adminLogin, getDraftByCode } from './utils/api'
 import { unlockAudio } from './utils/audioUnlock'
 import ScrollProgress from './components/ui/ScrollProgress'
+import StatusPage from './components/ui/StatusPage'
+import { matchLegalRoute, isKnownSpaPath } from './utils/siteRoutes'
+import { legalDoc as findLegalDoc } from './data/legal/docs'
+import { legalUi } from './data/legal/ui'
+import { consent } from './utils/consent'
 import { useSEO } from './hooks/useSEO'
 import { inviteSeoMeta } from './utils/inviteSeo'
 import { initAnalytics, trackPageView, trackEvent } from './utils/analytics'
@@ -38,8 +45,19 @@ const HOME_TITLE = 'DigiToy — Rəqəmsal Toy Dəvətnaməsi, İştirak Təsdiq
 const HOME_DESC  = 'Bir Dəvətnamədən Daha Artığı. İştirak Təsdiqi, oturma planı, QR foto paylaşımı və premium rəqəmsal toy dəvətnamələri.'
 
 /* ── view → SEO konfiqurasiyası (title/description/canonical/OG/Twitter) ── */
-function getSEOConfig(view, { weddingData, slug } = {}) {
+function getSEOConfig(view, { weddingData, slug, legalDoc } = {}) {
   switch (view) {
+    /* Phase 47 — hüquqi səhifələr (seo.php ilə eyni mətn, bax data/legal/docs.js) */
+    case 'legal': {
+      const doc = findLegalDoc(legalDoc)
+      if (doc) return { title: doc.title, description: doc.description, path: doc.path, type: 'website' }
+      return { title: HOME_TITLE, description: HOME_DESC, path: '/', type: 'website' }
+    }
+
+    /* Ümumi 404 — seo.php eyni yola HTTP 404 və eyni başlığı verir */
+    case 'not-found':
+      return { title: 'Səhifə tapılmadı | DigiToy', description: 'Axtardığınız səhifə mövcud deyil.', noindex: true }
+
     case 'landing':
     case 'invitation':
       return { title: HOME_TITLE, description: HOME_DESC, path: '/', type: 'website' }
@@ -231,6 +249,13 @@ function routeAfterAuth(
     return
   }
 
+  /* Phase 47: naməlum yol → 404 ekranı (əvvəl səssizcə landing açılırdı;
+     server onsuz da 404 statusu verir — seo.php). */
+  if (!isKnownSpaPath(window.location.pathname)) {
+    setView('not-found')
+    return
+  }
+
   /* Kök URL-də admin ── data varsa decode, admin-review hər halda açılır */
   if (hasAdminAccess) {
     const rootDataParam = params.get('data')
@@ -268,10 +293,14 @@ export default function App() {
      içində sinxron çağırılması kaskad render yaradardı.
      ⚠ Bu səhifə admin token TƏLƏB ETMİR — heç nə oxumur, datanı valideyn
      pəncərə postMessage ilə verir. */
-  const [view,        setView]        = useState(
-    typeof window !== 'undefined' && window.location.pathname === '/preview/live'
-      ? 'live-preview'
-      : 'loading',
+  /* Phase 47: hüquqi səhifə də URL-dən asılı SAF qərardır → ilkin state-də */
+  const [view,        setView]        = useState(() => {
+    if (typeof window === 'undefined') return 'loading'
+    if (window.location.pathname === '/preview/live') return 'live-preview'
+    return matchLegalRoute(window.location.pathname) ? 'legal' : 'loading'
+  })
+  const [legalDoc,    setLegalDoc]    = useState(
+    () => (typeof window !== 'undefined' ? matchLegalRoute(window.location.pathname) : null),
   )
   const [lang,        setLang]        = useState('az')
   const [weddingData, setWeddingData] = useState(defaultWedding)
@@ -286,7 +315,7 @@ export default function App() {
   const [packagesIntent, setPackagesIntent] = useState(false)
 
   /* Hər view dəyişəndə <head> meta-larını yenilə (title, description, OG, Twitter, canonical) */
-  useSEO(getSEOConfig(view, { weddingData, slug: adminSlug || parseInviteSlug().slug }))
+  useSEO(getSEOConfig(view, { weddingData, slug: adminSlug || parseInviteSlug().slug, legalDoc }))
 
   /* ⚠ KRİTİK LOCALE DÜZƏLİŞİ (Phase 27): `<html lang>` statik olaraq "az" idi və
      dil dəyişəndə yenilənmirdi. CSS `text-transform: uppercase` element dilinə
@@ -297,6 +326,10 @@ export default function App() {
 
   /* Analitika: GA4/PostHog-u bir dəfə işə sal (yalnız production + env dəyişənləri varsa) */
   useEffect(() => { initAnalytics() }, [])
+
+  /* Phase 47: kuki banneri harada çıxsın və hansı dildə — utils/consent.js.
+     page_view effektindən ƏVVƏL: dəvətnamədə razılıq yoxdursa hadisə atılsın. */
+  useEffect(() => { consent.setContext({ view, lang }) }, [view, lang])
 
   /* Spesifikasiyada göstərilən 5 marşrut üçün SPA page_view izləməsi */
   useEffect(() => {
@@ -371,6 +404,13 @@ export default function App() {
     setTimeout(tick, 220)
   }, [])
 
+  /* Ana səhifəyə qayıdış (hüquqi səhifə, 404, deaktiv dəvətnamə) */
+  const goHome = useCallback(() => {
+    window.history.pushState({}, '', '/')
+    setView('landing')
+    window.scrollTo(0, 0)
+  }, [])
+
   /* Landing-in builder blokuna keçid (şablon vitrinindəki "Dəvətnaməni hazırla") */
   const goToBuilder = useCallback(() => {
     window.history.pushState({}, '', '/')
@@ -415,7 +455,9 @@ export default function App() {
   /* ⚠ Brauzerin öz GERİ/İRƏLİ düymələri (Phase 27.3).
      Əvvəl `popstate` dinlənilmirdi: pushState ilə açılan önbaxışdan geri
      basanda URL dəyişir, ekran isə önbaxışda qalırdı. İndi URL-ə uyğun
-     view bərpa olunur. */
+     view bərpa olunur.
+     Phase 47: footer/sifariş qeydi linkləri (siteRoutes.navigateSpa) EYNİ
+     yoldan keçir — pushState, sonra URL-ə uyğun view. Hash (#kuki) qalır. */
   useEffect(() => {
     const onPop = () => {
       const path = window.location.pathname
@@ -432,9 +474,23 @@ export default function App() {
       if (path === '/preview/live') { setView('live-preview'); return }
       if (path === '/demo') { setView('demo'); return }
       if (path === '/') { setView('landing'); return }
+      const legal = matchLegalRoute(path)
+      if (legal) { setLegalDoc(legal); setView('legal'); return }
+      if (!isKnownSpaPath(path)) setView('not-found')
+    }
+    const onNavigate = (e) => {
+      const path = String(e?.detail?.path || '')
+      if (!path) return
+      window.history.pushState({}, '', path)
+      onPop()
+      window.scrollTo(0, 0)
     }
     window.addEventListener('popstate', onPop)
-    return () => window.removeEventListener('popstate', onPop)
+    window.addEventListener('digitoy:navigate', onNavigate)
+    return () => {
+      window.removeEventListener('popstate', onPop)
+      window.removeEventListener('digitoy:navigate', onNavigate)
+    }
   }, [])
 
   useEffect(() => {
@@ -445,6 +501,8 @@ export default function App() {
        ⚠ Burada `setView` ÇAĞIRILMIR — yalnız çıxış, ona görə kaskad render
        xəbərdarlığı da yaranmır. */
     if (window.location.pathname === '/preview/live') return
+    /* Hüquqi səhifə ilkin state-də həll olunub (yuxarıya bax) */
+    if (matchLegalRoute(window.location.pathname)) return
 
     /* Admin Panel — /admin/* route-ları */
     if (window.location.pathname.startsWith('/admin')) {
@@ -580,7 +638,7 @@ export default function App() {
       <Suspense fallback={<RouteLoader />}>
         <TemplatesPage
           lang={lang} setLang={setLang}
-          onBack={() => { window.history.pushState({}, '', '/'); setView('landing'); window.scrollTo(0, 0) }}
+          onBack={goHome}
           onPreview={(tpl) => {
             window.history.pushState({}, '', `/demo/template/${tpl.id}`)
             setPreviewTemplateId(tpl.id)
@@ -591,6 +649,20 @@ export default function App() {
         />
       </Suspense>
     )
+  }
+
+  /* ── Phase 47: hüquqi səhifələr — /mexfilik, /sertler, /geri-qaytarma ── */
+  if (view === 'legal') {
+    return (
+      <Suspense fallback={<RouteLoader />}>
+        <LegalPage doc={legalDoc} lang={lang} setLang={setLang} onBack={goHome} />
+      </Suspense>
+    )
+  }
+
+  if (view === 'not-found') {
+    const t = legalUi(lang).notFound
+    return <StatusPage code="404" title={t.title} text={t.text} homeLabel={t.home} onHome={goHome} />
   }
 
   /* ── /demo — Phase 27: nümunə dəvətnamə artıq FLORAL GARDEN şablonudur.
@@ -653,64 +725,22 @@ export default function App() {
      Məzmun serverdən ümumiyyətlə gəlmir (get_invitation.php `data: null`
      qaytarır), ona görə burada cütlüyün adı/tarixi/məkanı sızmır. */
   if (view === 'invite-disabled') {
-    const goHome = () => { window.history.pushState({}, '', '/'); setView('landing') }
     return (
-      <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 text-center relative overflow-hidden">
-        <div style={{
-          position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: 'radial-gradient(ellipse 55% 35% at 50% 38%, rgba(197,160,89,0.07) 0%, transparent 65%)',
-        }} />
-        <div className="relative" style={{ maxWidth: 420 }}>
-          <div style={{ width: 48, height: 1, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.6), transparent)', margin: '0 auto 28px' }} />
-          <p className="font-mono text-[10px] tracking-[0.38em] uppercase text-gold mb-7">Digitoy.az</p>
-          <h1 className="font-serif text-2xl sm:text-3xl text-ink font-light tracking-tight mb-4 leading-snug">
-            Bu dəvətnamə deaktiv edilmişdir.
-          </h1>
-          <p className="text-brown-muted text-sm font-light leading-relaxed mb-10">
-            Əlavə məlumat üçün təşkilatçı ilə əlaqə saxlayın.
-          </p>
-          <button
-            onClick={goHome}
-            className="inline-flex items-center gap-2.5 btn-gold"
-            style={{ textDecoration: 'none' }}
-          >
-            Ana səhifəyə qayıt
-            <span style={{ fontSize: 14 }}>→</span>
-          </button>
-          <div style={{ width: 48, height: 1, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.4), transparent)', margin: '40px auto 0' }} />
-        </div>
-      </div>
+      <StatusPage
+        title="Bu dəvətnamə deaktiv edilmişdir."
+        text="Əlavə məlumat üçün təşkilatçı ilə əlaqə saxlayın."
+        homeLabel="Ana səhifəyə qayıt" onHome={goHome}
+      />
     )
   }
 
   if (view === 'invite-not-found') {
-    const goHome = () => { window.history.pushState({}, '', '/'); setView('landing') }
     return (
-      <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 text-center relative overflow-hidden">
-        {/* Ambient gold glow */}
-        <div style={{
-          position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: 'radial-gradient(ellipse 55% 35% at 50% 38%, rgba(197,160,89,0.08) 0%, transparent 65%)',
-        }} />
-        <div className="relative">
-          <div style={{ width: 48, height: 1, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.6), transparent)', margin: '0 auto 28px' }} />
-          <p className="font-mono text-[10px] tracking-[0.38em] uppercase text-gold mb-6">Digitoy.az</p>
-          <p className="font-serif text-gold/35 font-light leading-none mb-4" style={{ fontSize: 'clamp(56px, 16vw, 96px)' }}>404</p>
-          <h1 className="font-serif text-2xl sm:text-3xl text-ink font-light tracking-tight mb-4">Bu dəvətnamə tapılmadı.</h1>
-          <p className="text-brown-muted text-sm font-light leading-relaxed max-w-xs mx-auto mb-10">
-            Link köhnəlmiş və ya yanlış ola bilər. Zəhmət olmasa dəvətnamə sahibindən yeni link tələb edin.
-          </p>
-          <button
-            onClick={goHome}
-            className="inline-flex items-center gap-2.5 btn-gold"
-            style={{ textDecoration: 'none' }}
-          >
-            Ana səhifəyə qayıt
-            <span style={{ fontSize: 14 }}>→</span>
-          </button>
-          <div style={{ width: 48, height: 1, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.4), transparent)', margin: '40px auto 0' }} />
-        </div>
-      </div>
+      <StatusPage
+        code="404" title="Bu dəvətnamə tapılmadı."
+        text="Link köhnəlmiş və ya yanlış ola bilər. Zəhmət olmasa dəvətnamə sahibindən yeni link tələb edin."
+        homeLabel="Ana səhifəyə qayıt" onHome={goHome}
+      />
     )
   }
 

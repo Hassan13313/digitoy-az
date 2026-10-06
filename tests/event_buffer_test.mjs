@@ -27,11 +27,29 @@ const fakeTarget = () => { const sent = []; return { sent, capture: (n, p) => se
   const buf = createEventBuffer(3)
   for (let i = 0; i < 10; i++) buf.capture('e' + i, {})
   ok('limit — yaddaş sonsuz böyümür', buf.size === 3)
-  buf.drop()
+  buf.block()
   ok('yükləmə alınmasa növbə atılır', buf.size === 0)
   const t = fakeTarget()
   buf.attach(t)
   ok('atılmış növbə sonradan göndərilmir', t.sent.length === 0)
+}
+
+/* Phase 47 — razılıq: imtina və ya dəvətnamədə razılıq yoxdursa hadisələr ATILIR */
+{
+  const buf = createEventBuffer()
+  buf.capture('a', {})
+  buf.block()
+  ok('block növbəni boşaldır', buf.size === 0 && buf.blocked)
+  buf.capture('b', {})
+  ok('bloklu ikən növbəyə düşmür', buf.size === 0)
+  const t = fakeTarget()
+  buf.attach(t)
+  ok('bloklu ikən qoşulma heç nə göndərmir', t.sent.length === 0)
+  buf.capture('c', {})
+  ok('hədəf qoşulu olsa da bloklu hadisə getmir', t.sent.length === 0)
+  buf.unblock()
+  buf.capture('d', {})
+  ok('unblock-dan sonra birbaşa gedir', t.sent.length === 1 && t.sent[0][0] === 'd' && !buf.blocked)
 }
 
 console.log(`\n${passed} ok, ${failed} FAIL`)

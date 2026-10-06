@@ -111,6 +111,8 @@ if ($useSession) {
         if (!move_uploaded_file($file['tmp_name'], $dir . $filename)) {
             musicFail(500, 'SERVER_STORAGE', 'Fayl saxlanılmadı. Yenidən cəhd edin.', false);
         }
+    } else {
+        @touch($dir . $filename);   /* yenidən seçilib → «təzə» say (retention.php) */
     }
     $path = musicPublicPath($bucket, $filename);
 } else {

@@ -142,3 +142,6 @@ export const SOCIAL_LINKS = {
   tiktok:    'https://www.tiktok.com/@digitoy.az',
   whatsapp:  `https://wa.me/${WHATSAPP_NUMBER}`,
 }
+
+/* Phase 47 — hüquqi səhifələrdəki əlaqə e-poçtu (security.txt və index.html JSON-LD statikdir — orada da dəyiş) */
+export const CONTACT_EMAIL = 'digitoyy@gmail.com'

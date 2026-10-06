@@ -106,8 +106,11 @@ check('müvəqqəti fayl qalmır', !is_file($a));
 
 $b = $bucketDir . '.tmp_b.jpg';
 copy($tmpDir . 'out_jpeg.jpg', $b);
+touch($bucketDir . $n1, time() - 40 * 86400);
 $n2 = storyCommit($b, $bucketDir);
 check('eyni şəkil eyni ad alır', $n1 === $n2);
+clearstatcache();
+check('yenidən seçilən fayl təzələnir (retention silməsin)', time() - filemtime($bucketDir . $n1) < 60);
 check('ikinci nüsxə yaranmır', storyBucketCount($bucketDir) === 1, (string) storyBucketCount($bucketDir));
 
 file_put_contents($bucketDir . '.tmp_z.jpg', 'x');

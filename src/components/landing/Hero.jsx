@@ -29,6 +29,7 @@ import BlurFade from '../ui/BlurFade'
 import AnimatedShinyText from '../ui/AnimatedShinyText'
 import SparklesText from '../ui/SparklesText'
 import AnimatedNumber from '../ui/AnimatedNumber'
+import FooterLegalLinks from '../legal/FooterLegalLinks'
 import ShimmerButton from '../ui/ShimmerButton'
 
 const featureKeys = ['countdown', 'maps', 'dresscode', 'seating', 'gallery', 'music', 'rsvp', 'timeline', 'guestbook']
@@ -772,7 +773,8 @@ export function HeroFooter({ lang = 'az' }) {
             </a>
           </div>
         </div>
-        <p className="text-center text-white/20 text-[10px] tracking-[0.25em] mt-7 uppercase font-light">
+        <div className="mt-7"><FooterLegalLinks lang={lang} tone="dark" /></div>
+        <p className="text-center text-white/20 text-[10px] tracking-[0.25em] mt-5 uppercase font-light">
           © {new Date().getFullYear()} Digitoy.az. {tr.footer_rights}
         </p>
       </div>
