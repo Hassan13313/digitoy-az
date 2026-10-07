@@ -25,7 +25,7 @@ export function buildRsvpLabels(lang, weddingData) {
       namePh: 'Adınızı yazın…',
       yes: 'Gələcəyəm', maybe: 'Hələ dəqiq deyil', no: 'Gəlməyəcəyəm',
       plusq: 'Əlavə qonaq gətirəcəksiniz?', send: 'Göndər',
-      thanks_yes: 'Görüşmək üçün səbirsizlənir',
+      thanks_yes: 'Görüşmək üçün səbirsizlənirik',
       thanks_maybe: 'Bildirdiniz, əlavə məlumat göndərəcəyik',
       thanks_no: 'Anlayışla qarşıladıq',
       thanks_sub: 'Cavabınız qeydə alındı',
