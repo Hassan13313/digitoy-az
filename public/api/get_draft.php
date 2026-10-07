@@ -1,6 +1,7 @@
 <?php
 /* ── get_draft.php — session_id YA DA draft_code üzrə draft-ı qaytar ── */
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/order_link.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
@@ -25,7 +26,8 @@ if ($draftCode) {
        ⚠ 2026-09-28: yalnız admin. Əvvəl tokensiz idi — sifariş kodunu bilən
        (və ya DT-XXXXXX-i təxmin edən) hər kəs müştərinin telefonunu və
        bütün sifariş məlumatını alırdı. Müştərinin öz bərpası session_id
-       ilə gedir (aşağıda) və dəyişmir. */
+       ilə gedir (aşağıda) və dəyişmir.
+       Phase 48: müddətə (expires_at) baxılmır — siyahı da baxmır. */
     require_once __DIR__ . '/auth.php';
     requireAdmin();
     if (!preg_match('/^DT-[A-Z0-9]{6}$/', $draftCode)) {
@@ -33,14 +35,7 @@ if ($draftCode) {
         echo json_encode(['error' => 'Invalid draft_code format']);
         exit;
     }
-    $stmt = $db->prepare("
-        SELECT id, draft_code, package, current_step, status, form_data,
-               customer_phone, submitted_at, approved_slug
-        FROM draft_invitations
-        WHERE draft_code = :code
-          AND expires_at > NOW()
-        LIMIT 1");
-    $stmt->execute([':code' => $draftCode]);
+    $row = orderByCode($db, $draftCode);
 } else {
     /* session_id üzrə axtarış (autosave restore axını) */
     if (!preg_match('/^[a-zA-Z0-9\-]{8,64}$/', $sessionId)) {
@@ -57,30 +52,13 @@ if ($draftCode) {
         ORDER BY updated_at DESC
         LIMIT 1");
     $stmt->execute([':sid' => $sessionId]);
+    $row = $stmt->fetch() ?: null;
 }
-
-$row = $stmt->fetch();
 
 if (!$row) {
     http_response_code(404);
     echo json_encode(['found' => false]);
     exit;
-}
-
-/* approved_slug NULL + status approved → invitations cədvəlindən əldə etməyə çalış */
-$approvedSlug = $row['approved_slug'] ?? null;
-if (!$approvedSlug && $row['status'] === 'approved' && !empty($row['form_data'])) {
-    $fd        = json_decode($row['form_data'], true);
-    $searchKey = $fd['brideName'] ?? ($fd['groomName'] ?? ($fd['eventName'] ?? ''));
-    if ($searchKey !== '') {
-        $safeKey = addcslashes($searchKey, '%_\\');
-        $lu = $db->prepare(
-            "SELECT slug FROM invitations WHERE form_data LIKE :q ORDER BY created_at DESC LIMIT 1"
-        );
-        $lu->execute([':q' => '%"' . $safeKey . '"%']);
-        $found = $lu->fetchColumn();
-        if ($found) $approvedSlug = $found;
-    }
 }
 
 echo json_encode([
@@ -92,5 +70,5 @@ echo json_encode([
     'form_data'      => $row['form_data'] ? json_decode($row['form_data'], true) : null,
     'customer_phone' => $row['customer_phone'] ?? null,
     'submitted_at'   => $row['submitted_at']   ?? null,
-    'approved_slug'  => $approvedSlug,
+    'approved_slug'  => orderInvitationSlug($db, $row['approved_slug'], $row['draft_code']),
 ]);

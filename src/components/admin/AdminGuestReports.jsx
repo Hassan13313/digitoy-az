@@ -33,7 +33,7 @@ function StatusBadge({ status }) {
   )
 }
 
-function StatCard({ label, value, color, highlight }) {
+export function StatCard({ label, value, color, highlight }) {
   /* Telefonda 4 kart bir sırada ~84px-dir: 14px yan boşluqla «GƏLMƏYƏCƏK»
      sözü kartdan çıxırdı — dar ekranda boşluq azalır. */
   const narrow = useIsNarrow()

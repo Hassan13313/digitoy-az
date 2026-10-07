@@ -5,12 +5,15 @@
    YALNIZ include edilir (api/.htaccess-də birbaşa giriş bağlıdır).
    Əvvəl admin_purge.php-nin sonunda idi; o fayl yüklənən kimi requireAdmin()
    işlətdiyi üçün avtomatik təmizləmə (retention.php) onları götürə bilmirdi.
-   Davranış DƏYİŞMƏYİB — tests/admin_purge_test.php.
+   tests/admin_purge_test.php. Phase 48: sifariş əlaqəsi order_link.php-dən.
 ══════════════════════════════════════════════════ */
+
+require_once __DIR__ . '/order_link.php';
 
 /** Bu slug-un öz upload qovluqları. Təhlükəli/rezerv ad → BOŞ siyahı. */
 function purgeSlugDirs(string $root, string $slug): array {
-    if (!preg_match('/^[A-Za-z0-9][A-Za-z0-9-]{0,119}$/', $slug)) return [];
+    /* Phase 48: tire ilə BAŞLAYA bilər (adsız dəvətnamə «-ve--xlcn9k»), amma ən azı bir hərf/rəqəm */
+    if (!preg_match('/^(?=-*[A-Za-z0-9])[A-Za-z0-9-]{1,120}$/', $slug)) return [];
     if (in_array(strtolower($slug), ['music'], true)) return [];   /* uploads/music — köhnə musiqi KÖKÜ */
     return [$root . '/' . $slug, $root . '/_admin/' . $slug, $root . '/music/' . $slug];
 }
@@ -53,15 +56,12 @@ function purgeUnsharedRefs(PDO $db, array $rels, string $exclSlug, array $exclOr
     return $own;
 }
 
-/** Hələ CANLI dəvətnaməyə bağlı sifarişlər (approved_slug və ya draft_code ilə) → [id => slug] */
+/** Hələ CANLI dəvətnaməyə bağlı sifarişlər → [id => slug] */
 function purgeLinkedOrders(PDO $db, array $orders): array {
-    $q   = $db->prepare("SELECT slug FROM invitations WHERE slug = :s OR (draft_code = :c AND :c2 <> '') LIMIT 1");
     $out = [];
     foreach ($orders as $o) {
-        $c = (string) ($o['draft_code'] ?? '');
-        $q->execute([':s' => (string) ($o['approved_slug'] ?? ''), ':c' => $c, ':c2' => $c]);
-        if (($slug = $q->fetchColumn()) !== false) $out[(int) $o['id']] = (string) $slug;
-        $q->closeCursor();
+        $slug = orderInvitationSlug($db, $o['approved_slug'] ?? null, $o['draft_code'] ?? null);
+        if ($slug !== null) $out[(int) $o['id']] = $slug;
     }
     return $out;
 }

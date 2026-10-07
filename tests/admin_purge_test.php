@@ -31,7 +31,10 @@ ok('admin_purge.php-də köməkçi təkrarı yoxdur', strpos($ep, 'function purg
 /* ── 1. Slug qovluqları ── */
 $dirs = purgeSlugDirs('/srv/up', 'aysel-ve-tural-ab12cd');
 ok('3 qovluq qaytarılır', $dirs === ['/srv/up/aysel-ve-tural-ab12cd', '/srv/up/_admin/aysel-ve-tural-ab12cd', '/srv/up/music/aysel-ve-tural-ab12cd']);
-foreach (['', '..', '../x', 'a/b', '_admin', '.hidden', 'a..b/c', 'music', 'MUSIC', '_music', '_story'] as $bad) {
+/* Phase 48 — adsız dəvətnamə «-ve--xlcn9k» (prod) tire ilə başlayır: isValidSlug onu
+   qəbul edir, amma silmə 400 verirdi və dəvətnamə heç cür silinə bilmirdi */
+ok('tire ilə başlayan slug da silinə bilir', purgeSlugDirs('/srv/up', '-ve--xlcn9k') === ['/srv/up/-ve--xlcn9k', '/srv/up/_admin/-ve--xlcn9k', '/srv/up/music/-ve--xlcn9k']);
+foreach (['', '..', '../x', 'a/b', '_admin', '.hidden', 'a..b/c', 'music', 'MUSIC', '_music', '_story', '-', '--', '-.', 'a\\b'] as $bad) {
     ok('təhlükəli slug rədd: ' . var_export($bad, true), purgeSlugDirs('/srv/up', $bad) === []);
 }
 

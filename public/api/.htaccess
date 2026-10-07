@@ -60,3 +60,8 @@ RedirectMatch 404 ^/api/migrations/
 <Files "retention.php">
     Require all denied
 </Files>
+
+# Phase 48 — sifaris <-> devetname elaqesinin tek qaydasi (yalniz include)
+<Files "order_link.php">
+    Require all denied
+</Files>

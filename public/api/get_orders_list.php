@@ -2,6 +2,7 @@
 /* ── get_orders_list.php — Admin: submitted/all draft siyahısı ── */
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/order_link.php';
 
 requireAdmin();
 
@@ -58,7 +59,7 @@ $cntStmt->execute($params);
 $total = (int)$cntStmt->fetchColumn();
 
 /* Siyahı */
-$sql  = "SELECT id, draft_code, package, status, customer_phone, submitted_at, form_data, template_id
+$sql  = "SELECT id, draft_code, package, status, customer_phone, submitted_at, form_data, template_id, approved_slug
          FROM draft_invitations $where
          ORDER BY submitted_at DESC
          LIMIT :lim OFFSET :off";
@@ -96,6 +97,9 @@ foreach ($rows as $row) {
         'submitted_at'   => $row['submitted_at'],
         'event_type'     => $eventType,
         'names'          => $names ?: '—',
+        /* Phase 48 — təsdiqlənmişin CANLI dəvətnaməsi (detal və silmə ilə eyni qayda) */
+        'invitation_slug' => $row['status'] === 'approved'
+            ? orderInvitationSlug($db, $row['approved_slug'], $row['draft_code']) : null,
         'template_id'    => !empty($fd['templateId']) ? $fd['templateId'] : ($row['template_id'] ?? DEFAULT_TEMPLATE_ID),
     ];
 }

@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
 import { RefreshCw, Users, Search, X, Download, Printer } from 'lucide-react'
 import { getRsvpResponses } from '../../utils/api'
+import { useIsNarrow } from '../../hooks/useIsNarrow'
+import { azDate } from './adminFormat'
+import { StatCard } from './AdminGuestReports'   /* telefona uyğunlaşdırılmış (Phase 45) */
 
 const STATUS_AZ = { yes: 'Gələcək', maybe: 'Bəlkə', no: 'Gəlməyəcək' }
 
@@ -46,9 +49,12 @@ function exportCSV(responses, slug) {
   URL.revokeObjectURL(url)
 }
 
+/* Qonaq adı İCTİMAİ formadan gəlir — çap pəncərəsinə HTML kimi yazılmamalıdır */
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+
 /* ── Print Window ── */
 function handlePrint(data, names, slug) {
-  const today    = new Date().toLocaleDateString('az-AZ', { day: '2-digit', month: 'long', year: 'numeric' })
+  const today    = azDate(new Date(), { long: true })
   const total    = (data?.stats?.yes ?? 0) + (data?.stats?.guests ?? 0)
   const responses = data?.responses ?? []
 
@@ -62,7 +68,7 @@ function handlePrint(data, names, slug) {
 
   const tableRows = responses.map(r => `
     <tr>
-      <td>${r.name ?? '—'}</td>
+      <td>${esc(r.name || '—')}</td>
       <td>${STATUS_AZ[r.status] ?? r.status}</td>
       <td>${r.extra_guests > 0 ? '+' + r.extra_guests : '—'}</td>
       <td>${r.created_at ? r.created_at.slice(0, 10) : '—'}</td>
@@ -73,7 +79,7 @@ function handlePrint(data, names, slug) {
 <html lang="az">
 <head>
   <meta charset="utf-8">
-  <title>İştirak Təsdiqi — ${slug}</title>
+  <title>İştirak Təsdiqi — ${esc(slug)}</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: Georgia, "Times New Roman", serif; color: #2a2a2a; padding: 36px 48px; font-size: 13px; }
@@ -100,7 +106,7 @@ function handlePrint(data, names, slug) {
 <body>
   <div class="header">
     <h1>Digitoy İştirak Təsdiqi Hesabatı</h1>
-    <h2>${names || slug}</h2>
+    <h2>${esc(names || slug)}</h2>
     <p>Tarix: ${today}</p>
   </div>
 
@@ -127,23 +133,13 @@ function handlePrint(data, names, slug) {
 </html>`
 
   const win = window.open('', '_blank', 'width=900,height=700')
+  if (!win) return   /* popup bloklanıb */
   win.document.write(html)
   win.document.close()
 }
 
 /* ── Sub-components ── */
-function StatCard({ label, value, color, highlight }) {
-  return (
-    <div style={{
-      flex: 1, background: highlight ? 'oklch(96% 0.03 80)' : 'white',
-      border: `1px solid ${highlight ? 'oklch(78% 0.1 80)' : 'oklch(88% 0.02 60)'}`,
-      borderRadius: 5, padding: '14px 16px', textAlign: 'center',
-    }}>
-      <div style={{ fontSize: 26, fontFamily: '"Cormorant Garamond",serif', fontWeight: 300, color, lineHeight: 1 }}>{value}</div>
-      <div style={{ fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'oklch(55% 0.03 60)', marginTop: 5 }}>{label}</div>
-    </div>
-  )
-}
+const WIDE_COLS = '1fr 140px 60px 110px'
 
 function StatusBadge({ status }) {
   const m = STATUS_META[status] || { label: status, bg: 'oklch(93% 0.02 60)', color: 'oklch(45% 0.03 60)' }
@@ -155,12 +151,12 @@ function StatusBadge({ status }) {
 }
 
 function formatDate(iso) {
-  if (!iso) return '—'
-  return new Date(iso).toLocaleDateString('az-AZ', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+  return azDate(iso, { time: true, year: false })
 }
 
 /* ── Main component ── */
 export default function AdminRSVPBlock({ slug, names }) {
+  const narrow = useIsNarrow()
   const [data,         setData]         = useState(null)
   const [loading,      setLoading]      = useState(true)
   const [error,        setError]        = useState('')
@@ -195,7 +191,7 @@ export default function AdminRSVPBlock({ slug, names }) {
   return (
     <div style={{ marginTop: 24 }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
           <Users size={13} strokeWidth={1.5} style={{ color: 'oklch(55% 0.06 75)' }} />
           <span style={{ fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'oklch(45% 0.03 60)', fontWeight: 600 }}>
@@ -246,7 +242,7 @@ export default function AdminRSVPBlock({ slug, names }) {
       ) : (
         <>
           {/* Stat kartlar — 2 sıra: 4 + 1 */}
-          <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
             <StatCard label="Gələcək"      value={data?.stats?.yes    ?? 0} color="oklch(35% 0.1 145)" />
             <StatCard label="Bəlkə"        value={data?.stats?.maybe  ?? 0} color="oklch(42% 0.08 70)" />
             <StatCard label="Gəlməyəcək"  value={data?.stats?.no     ?? 0} color="oklch(38% 0.12 25)" />
@@ -294,17 +290,28 @@ export default function AdminRSVPBlock({ slug, names }) {
             </div>
           ) : (
             <div style={{ background: 'white', border: '1px solid oklch(88% 0.02 60)', borderRadius: 5, overflow: 'hidden' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px 60px 110px', gap: 12, padding: '8px 16px', background: 'oklch(95% 0.01 75)', borderBottom: '1px solid oklch(88% 0.02 60)' }}>
-                {['Ad', 'Status', 'Qonaq', 'Tarix'].map((h, i) => (
-                  <span key={i} style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'oklch(50% 0.03 60)' }}>{h}</span>
-                ))}
-              </div>
+              {!narrow && (
+                <div style={{ display: 'grid', gridTemplateColumns: WIDE_COLS, gap: 12, padding: '8px 16px', background: 'oklch(95% 0.01 75)', borderBottom: '1px solid oklch(88% 0.02 60)' }}>
+                  {['Ad', 'Status', 'Qonaq', 'Tarix'].map((h, i) => (
+                    <span key={i} style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'oklch(50% 0.03 60)' }}>{h}</span>
+                  ))}
+                </div>
+              )}
+              {/* Telefonda (≈384px) 4 sütun sığmır: ad/status yuxarıda, tarix/qonaq altda */}
               {visible.map((r, i) => (
-                <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 140px 60px 110px', gap: 12, padding: '11px 16px', alignItems: 'center', borderBottom: i < visible.length - 1 ? '1px solid oklch(93% 0.01 75)' : 'none' }}>
-                  <span style={{ fontSize: 13, color: 'oklch(22% 0.02 60)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name || '—'}</span>
-                  <StatusBadge status={r.status} />
-                  <span style={{ fontSize: 13, color: 'oklch(40% 0.03 60)', fontWeight: 500 }}>{r.extra_guests > 0 ? `+${r.extra_guests}` : '—'}</span>
-                  <span style={{ fontSize: 11, color: 'oklch(58% 0.03 60)' }}>{formatDate(r.created_at)}</span>
+                <div key={i} style={{
+                  display: 'grid', alignItems: 'center',
+                  gridTemplateColumns: narrow ? 'minmax(0, 1fr) auto' : WIDE_COLS,
+                  gridTemplateAreas: narrow ? '"name status" "date extra"' : '"name status extra date"',
+                  gap: narrow ? '4px 10px' : 12, padding: narrow ? '11px 14px' : '11px 16px',
+                  borderBottom: i < visible.length - 1 ? '1px solid oklch(93% 0.01 75)' : 'none',
+                }}>
+                  <span style={{ gridArea: 'name', fontSize: narrow ? 14 : 13, color: 'oklch(22% 0.02 60)', fontWeight: 500, overflowWrap: 'anywhere' }}>{r.name || '—'}</span>
+                  <span style={{ gridArea: 'status' }}><StatusBadge status={r.status} /></span>
+                  <span style={{ gridArea: 'extra', fontSize: narrow ? 12 : 13, color: 'oklch(40% 0.03 60)', fontWeight: 500, textAlign: narrow ? 'right' : 'left' }}>
+                    {r.extra_guests > 0 ? `+${r.extra_guests}${narrow ? ' qonaq' : ''}` : (narrow ? '' : '—')}
+                  </span>
+                  <span style={{ gridArea: 'date', fontSize: 11, color: 'oklch(58% 0.03 60)' }}>{formatDate(r.created_at)}</span>
                 </div>
               ))}
             </div>

@@ -4,13 +4,14 @@ import { trackEvent } from '../utils/analytics'
 import { formatFullDateByLang, formatDayMonthYear } from '../utils/dateFormat'
 import { normalizeAz, getInviteSlug } from './useSeating'
 import { useHoneypot } from '../utils/honeypot'
+import { rsvpTarget } from '../utils/rsvpTarget'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    useRsvp — İştirak Təsdiqi məntiqi (UI-sız).
 
-   RSVPSection.jsx-dən çıxarılıb. İki rejim:
-     • qonaq siyahısı rejimi (API-də qonaq varsa) → autocomplete + submitAttendance
-     • sərbəst mətn rejimi (fallback)             → submitGuestResponse
+   RSVPSection.jsx-dən çıxarılıb. Siyahı varsa autocomplete göstərilir; cavabın
+   kimin adına (siyahıdakı qonaq və ya yazılan ad) gedəcəyini utils/rsvpTarget.js
+   həll edir — siyahı olmasa da, ad orada olmasa da göndərmək olur (Phase 48).
 
    Şəbəkə xətasında optimistic state saxlanılır (mövcud davranış).
    ───────────────────────────────────────────────────────────────────────── */
@@ -30,7 +31,7 @@ export function buildRsvpLabels(lang, weddingData) {
       thanks_sub: 'Cavabınız qeydə alındı',
       already_done: 'Cavabınız artıq qeydə alınıb',
       select_guest: 'Siyahıdan adınızı seçin',
-      not_in_list: 'Adınız siyahıda tapılmadı — tam adınızı yazın',
+      not_in_list: 'Siyahıda tapılmadı — adınızla göndərə bilərsiniz',
     },
     en: {
       title: 'Will you attend?',
@@ -44,7 +45,7 @@ export function buildRsvpLabels(lang, weddingData) {
       thanks_sub: 'Your response has been recorded',
       already_done: 'Your response has already been recorded',
       select_guest: 'Please select your name from the list',
-      not_in_list: 'Name not found — try your full name',
+      not_in_list: 'Not on the list — you can still send your reply',
     },
     ru: {
       title: 'Вы придёте?',
@@ -58,7 +59,7 @@ export function buildRsvpLabels(lang, weddingData) {
       thanks_sub: 'Ваш ответ записан',
       already_done: 'Ваш ответ уже записан',
       select_guest: 'Выберите своё имя из списка',
-      not_in_list: 'Имя не найдено — напишите полное имя',
+      not_in_list: 'Нет в списке — вы всё равно можете отправить ответ',
     },
   }
   return labels[lang] || labels.az
@@ -127,20 +128,22 @@ export function useRsvp({ lang = 'az', weddingData }) {
     else if (e.key === 'Escape')  resetGuest()
   }
 
+  const target = useMemo(() => rsvpTarget({ guestList, selected, query }), [guestList, selected, query])
+
   const handleSubmit = async (e) => {
     if (e?.preventDefault) e.preventDefault()
-    if (sending || !status || rsvpClosed) return
-    if (useGuestMode && !selected) return
+    if (sending || !status || rsvpClosed || !target) return
+    if (target.kind === 'guest' && !selected) setSelected(target.guest)   /* «artıq qeydə alınıb» adı */
 
     setSending(true)
     setSubmitted(true)
 
     try {
       if (slug) {
-        if (useGuestMode && selected) {
+        if (target.kind === 'guest') {
           const result = await submitAttendance({
             invitationId: slug,
-            guestId: selected.id,
+            guestId: target.guest.id,
             status: status === 'yes' ? 'GOING' : status === 'no' ? 'NOT_GOING' : 'MAYBE',
             optionalMessage: null,
             extraGuests: status === 'yes' ? plusOne : 0,
@@ -153,10 +156,10 @@ export function useRsvp({ lang = 'az', weddingData }) {
             return
           }
         } else {
-          /* Fallback: qonaq siyahısı yoxdursa köhnə üsul */
+          /* Siyahı yoxdur və ya ad orada yoxdur → yazılan adla sərbəst cavab */
           await submitGuestResponse({
             invitationId: slug,
-            guestName: query.trim() || '—',
+            guestName: target.name,
             attendanceStatus: status,
             extraGuests: status === 'yes' ? plusOne : 0,
             website: readHoneypot(),
@@ -187,7 +190,7 @@ export function useRsvp({ lang = 'az', weddingData }) {
 
   const thanksMsg   = status === 'yes' ? L.thanks_yes : status === 'maybe' ? L.thanks_maybe : L.thanks_no
   const showNotFound = useGuestMode && !selected && query.trim().length >= 2 && suggestions.length === 0
-  const canSubmit    = !!status && !(useGuestMode && !selected) && !sending
+  const canSubmit    = !!status && !!target && !sending
 
   return {
     /* data */

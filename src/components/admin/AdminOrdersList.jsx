@@ -27,6 +27,17 @@ function StatusBadge({ status }) {
   )
 }
 
+/* Phase 48 — təsdiqlənmiş, amma dəvətnaməsi silinmiş/yaradılmamış sifariş.
+   `null` = server yoxladı və tapmadı (köhnə API-də sahə yoxdur → göstərilmir). */
+function NoInviteNote({ order }) {
+  if (order.status !== 'approved' || order.invitation_slug !== null) return null
+  return (
+    <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.04em', color: 'oklch(48% 0.14 40)' }}>
+      Dəvətnamə yoxdur
+    </span>
+  )
+}
+
 /* ⚠ `toLocaleDateString('az-AZ')` Chrome-da «M06 29» verirdi — bax adminFormat */
 function formatDate(iso) {
   return azDate(iso, { time: true, year: false })
@@ -292,6 +303,7 @@ export default function AdminOrdersList({ onSelectOrder }) {
                 <span style={{ fontFamily: 'monospace', fontSize: 12, fontWeight: 600, color: 'oklch(45% 0.06 75)', letterSpacing: '0.04em' }}>
                   {order.draft_code || '—'}
                 </span>
+                <NoInviteNote order={order} />
               </div>
               <ChevronRight size={18} strokeWidth={1.5} style={{ color: 'oklch(70% 0.02 60)', flexShrink: 0 }} />
             </button>
@@ -341,8 +353,9 @@ export default function AdminOrdersList({ onSelectOrder }) {
               <span style={{ fontSize: 11, color: 'oklch(55% 0.03 60)' }}>
                 {formatDate(order.submitted_at)}
               </span>
-              <span style={{ fontSize: 13, color: 'oklch(25% 0.02 60)', fontWeight: 500 }}>
+              <span style={{ display: 'grid', gap: 2, fontSize: 13, color: 'oklch(25% 0.02 60)', fontWeight: 500 }}>
                 {order.names}
+                <NoInviteNote order={order} />
               </span>
               <span style={{ fontSize: 11, color: 'oklch(50% 0.04 75)' }}>
                 {order.package_label}

@@ -79,10 +79,8 @@ if (!$inv) purgeJson(404, ['error' => 'INVITATION_NOT_FOUND']);
 $fd   = json_decode((string) $inv['form_data'], true) ?: [];
 $code = (string) ($inv['draft_code'] ?? '');
 
-/* Bağlı sifariş(lər): təsdiqdə yazılan approved_slug və ya dəvətnamənin sifariş kodu */
-$st = $db->prepare('SELECT id, draft_code FROM draft_invitations WHERE approved_slug = :s OR (draft_code = :c AND :c2 <> \'\')');
-$st->execute([':s' => $slug, ':c' => $code, ':c2' => $code]);
-$orders   = $st->fetchAll();
+/* Bağlı sifariş(lər) — Sifarişlər bölməsi ilə eyni qayda (order_link.php) */
+$orders   = invitationOrders($db, $slug, $code);
 $orderIds = array_map('intval', array_column($orders, 'id'));
 
 $count = function (string $sql) use ($db, $slug): int {

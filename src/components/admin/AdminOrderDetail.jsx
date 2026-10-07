@@ -5,6 +5,7 @@ import { getDraftByCode, approveDraft, rejectDraft, deleteDraft, saveInvitation 
 import { computeInviteSlug } from '../../utils/inviteSlug'
 import AdminSeatingPlan from './AdminSeatingPlan'
 import AdminGuestReports from './AdminGuestReports'
+import AdminRSVPBlock from './AdminRSVPBlock'
 import { useIsNarrow } from '../../hooks/useIsNarrow'
 import { azDate, pagePadding } from './adminFormat'
 
@@ -650,12 +651,15 @@ function GuestDataTabs({ slug, names, seatingPlan, dateStr }) {
   const TABS = [
     { key: 'seating',  label: '🪑 Oturma Planı' },
     { key: 'reports',  label: '📊 Qonaq Hesabatı' },
+    /* Phase 48 — siyahısız (adını yazıb) verilən cavablar; hesabat yalnız siyahını oxuyur */
+    { key: 'rsvp',     label: '✅ İştirak Təsdiqi' },
   ]
 
   return (
     <div style={{ marginTop: 28 }}>
       {/* Tab header */}
-      <div style={{ display: 'flex', gap: 0, borderBottom: '2px solid oklch(88% 0.02 60)', marginBottom: 0 }}>
+      {/* 3 tab telefona (≈384px) sığmır — sonuncu alt sətrə keçir, səhifə enlənmir */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 0, borderBottom: '2px solid oklch(88% 0.02 60)', marginBottom: 0 }}>
         {TABS.map(({ key, label }) => {
           const active = activeTab === key
           return (
@@ -665,6 +669,7 @@ function GuestDataTabs({ slug, names, seatingPlan, dateStr }) {
               onClick={() => setActiveTab(key)}
               style={{
                 padding: '9px 18px', background: 'none', border: 'none', cursor: 'pointer',
+                whiteSpace: 'nowrap', flexShrink: 0,
                 fontSize: 12, fontWeight: active ? 700 : 400,
                 color: active ? 'oklch(30% 0.04 70)' : 'oklch(55% 0.03 60)',
                 borderBottom: active ? '2px solid oklch(60% 0.12 75)' : '2px solid transparent',
@@ -679,6 +684,7 @@ function GuestDataTabs({ slug, names, seatingPlan, dateStr }) {
 
       {activeTab === 'seating' && <AdminSeatingPlan slug={slug} seatingPlan={seatingPlan} />}
       {activeTab === 'reports' && <AdminGuestReports slug={slug} names={names} dateStr={dateStr} />}
+      {activeTab === 'rsvp'     && <AdminRSVPBlock slug={slug} names={names} />}
     </div>
   )
 }

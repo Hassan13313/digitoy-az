@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { getGuests } from '../utils/api'
 import { trackEvent } from '../utils/analytics'
+import { normalizeAz } from '../utils/normalizeAz'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    useSeating — oturma planı axtarışı (UI-sız).
@@ -10,15 +11,8 @@ import { trackEvent } from '../utils/analytics'
    naviqasiyası, masa yoldaşları və analytics — hamısı burada.
    ───────────────────────────────────────────────────────────────────────── */
 
-/* Azərbaycan hərfi normalizasiyası — YALNIZ axtarış üçün, DB toxunulmur */
-const AZ_MAP = { ş: 's', ə: 'e', ö: 'o', ü: 'u', ğ: 'g', ç: 'c', ı: 'i' }
-export function normalizeAz(str) {
-  return (str || '')
-    .toLocaleLowerCase('az')
-    .replace(/[şəöüğçı]/g, (ch) => AZ_MAP[ch] || ch)
-    .replace(/\s+/g, ' ')
-    .trim()
-}
+/* Azərbaycan hərfi normalizasiyası — utils/normalizeAz.js (köhnə import yolu qalır) */
+export { normalizeAz }
 
 /* İştirak statusu vizualizasiyası — şablonlar öz rənglərini verə bilər */
 export const GUEST_STATUS = {
