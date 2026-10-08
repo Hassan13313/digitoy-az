@@ -57,7 +57,7 @@ export default function Hero({ lang = 'az', onStart, onDemo, demoHref = '/demo' 
       </div>
 
       <Container className="relative pb-16 pt-28 sm:pt-32 lg:pb-24 lg:pt-36 xl:pt-40">
-        <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-12 xl:gap-16">
+        <div className="grid grid-cols-[minmax(0,1fr)] items-center gap-14 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-12 xl:gap-16">
           {/* ── Sol: mətn ───────────────────────────────────────── */}
           <div className="text-left">
             <motion.p

@@ -67,11 +67,11 @@ export function SectionHeading({ eyebrow, title, subtitle, align = 'center', as:
 }
 
 const base =
-  'group relative inline-flex select-none items-center whitespace-nowrap justify-center gap-2.5 overflow-hidden rounded-full font-sans font-semibold uppercase transition-[transform,box-shadow,background-color,color,border-color] duration-300 ease-luxe focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep focus-visible:ring-offset-2 focus-visible:ring-offset-cream disabled:pointer-events-none disabled:opacity-50';
+  'group relative inline-flex select-none items-center whitespace-normal text-center sm:whitespace-nowrap justify-center gap-2.5 overflow-hidden rounded-full font-sans font-semibold uppercase transition-[transform,box-shadow,background-color,color,border-color] duration-300 ease-luxe focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep focus-visible:ring-offset-2 focus-visible:ring-offset-cream disabled:pointer-events-none disabled:opacity-50';
 
 const sizes = {
-  md: 'h-11 px-6 text-[11px] tracking-label',
-  lg: 'h-14 px-8 text-xs tracking-label sm:text-[13px]',
+  md: 'min-h-11 py-2.5 px-6 text-[11px] tracking-label',
+  lg: 'min-h-14 py-3.5 px-8 text-xs tracking-label sm:text-[13px]',
 };
 
 const variants = {
