@@ -1,3 +1,5 @@
+import { LANDING_COPY } from './landingCopy.js'
+
 const t = {
   az: {
     app_name: 'Digitoy.az',
@@ -753,5 +755,8 @@ const t = {
     opening_tagline: 'БОЛЬШЕ, ЧЕМ ПРИГЛАШЕНИЕ',
   },
 }
+
+/* UI redesign (2026-10) — yeni landing mətnləri hər dilə birləşdirilir (açar toqquşması yoxdur) */
+for (const lang of Object.keys(LANDING_COPY)) Object.assign(t[lang], LANDING_COPY[lang])
 
 export default t

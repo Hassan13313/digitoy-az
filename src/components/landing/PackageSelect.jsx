@@ -2,62 +2,8 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { PACKAGE_DEFS, PKG_FEATURES } from '../../data/packages'
 import { getPartner } from '../../data/partners'
+import { PKG_LABELS, UI, PKG_SUBTITLES, VAGZALI_LINE, VAGZALI_NOTE, PKG_BADGES, isDifferentiator } from '../../data/packageCopy'
 import BlurFade from '../ui/BlurFade'
-
-const PKG_LABELS = {
-  az: { SADE: 'SADƏ', VIP: 'VİP', PREMIUM: 'PREMIUM' },
-  en: { SADE: 'BASIC', VIP: 'VIP', PREMIUM: 'PREMIUM' },
-  ru: { SADE: 'БАЗОВЫЙ', VIP: 'VIP', PREMIUM: 'ПРЕМИУМ' },
-}
-
-const UI = {
-  az: { title: 'Paketinizi Seçin', subtitle: 'Toyunuza ən uyğun paketi seçin — dəyər zərif detallarda yaşayır.', popular: '★ ƏN ÇOX SEÇİLƏN', btn: 'SEÇİM ET', pricing: 'PRICING' },
-  en: { title: 'Choose Your Package', subtitle: 'Select the best package for your event.', popular: '★ MOST POPULAR', btn: 'GET STARTED', pricing: 'PRICING' },
-  ru: { title: 'Выберите пакет', subtitle: 'Выберите лучший пакет для вашего мероприятия.', popular: '★ САМЫЙ ПОПУЛЯРНЫЙ', btn: 'НАЧАТЬ', pricing: 'PRICING' },
-}
-
-/* Phase 18 — paket adı altında dəyər mesajı (funksiya siyahısı yox, nəticə) */
-const PKG_SUBTITLES = {
-  az: {
-    SADE:    'Toyunuz üçün zərif və premium rəqəmsal dəvətnamə.',
-    VIP:     'Qonaqların iştirakını və oturma planını rahat idarə edin.',
-    PREMIUM: 'Toy gününüzün bütün xatirələrini bir yerdə toplayın.',
-  },
-  en: {
-    SADE:    'An elegant, premium digital invitation for your wedding.',
-    VIP:     'Manage guest attendance and seating with ease.',
-    PREMIUM: 'Bring every memory of your wedding day together in one place.',
-  },
-  ru: {
-    SADE:    'Элегантное премиальное цифровое приглашение для вашей свадьбы.',
-    VIP:     'Удобно управляйте подтверждением гостей и планом рассадки.',
-    PREMIUM: 'Соберите все воспоминания свадебного дня в одном месте.',
-  },
-}
-
-/* Phase 25.2 — Vagzali.az tərəfdaş endirimi: hər kartın siyahısının sonunda bir sətir */
-const VAGZALI_LINE = {
-  az: (pct) => `Vagzali.az-da gəlinlik və digər xidmətlər üçün ${pct}-dək xüsusi endirim`,
-  en: (pct) => `Up to ${pct} special discount on bridal and other services at Vagzali.az`,
-  ru: (pct) => `Специальная скидка до ${pct} на свадебные платья и другие услуги на Vagzali.az`,
-}
-const VAGZALI_NOTE = {
-  az: 'Digitoy müştəriləri Vagzali.az tərəfdaş üstünlüklərindən yararlana bilərlər.',
-  en: 'Digitoy customers can enjoy Vagzali.az partner benefits.',
-  ru: 'Клиенты Digitoy могут воспользоваться партнёрскими преимуществами Vagzali.az.',
-}
-
-/* PREMIUM nişanı — VIP "Ən Çox Seçilən" ilə eyni vizual dildə, fərqli ton */
-const PKG_BADGES = {
-  az: { PREMIUM: 'ƏN TAM PAKET' },
-  en: { PREMIUM: 'THE COMPLETE PACKAGE' },
-  ru: { PREMIUM: 'ПОЛНЫЙ ПАКЕТ' },
-}
-
-/* QR Foto Paylaşım + Qalereya — Premium-un əsas fərqləndiricisi.
-   Bu açar sözləri ehtiva edən sətirlər kartda vurğulanır (3 dildə). */
-const isDifferentiator = (text) => /qr|qalereya|gallery|галере|zip/i.test(text)
-
 
 export default function PackageSelect({ lang, onSelect }) {
   const ui        = UI[lang]            || UI.az
