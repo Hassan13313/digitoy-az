@@ -3,10 +3,10 @@ import { Reorder, useDragControls } from 'framer-motion'
 import {
   Heart, Diamond, Cake, Briefcase, Sparkles,
   ChevronRight, ChevronLeft, Check, Crown, Shirt, Calendar, User, MapPin, Search,
-  Download, QrCode, Archive, Minus, Plus, X, GripVertical, MessageCircle,
+  Download, Archive, Minus, X, GripVertical, MessageCircle,
   Martini, Palette,
   /* Phase 35 — bölmələr addımı + şablon addımı ikonları */
-  Clock, ListOrdered, Users, Image as ImageIcon, UserCheck, Music, Lock,
+  Clock, ListOrdered, Users, Image as ImageIcon, UserCheck, Music,
 } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 /* Google Maps JS API — singleton promise, script injected once */
@@ -41,6 +41,11 @@ import { formatFullDateByLang } from '../../utils/dateFormat'
 import { saveDraft, getDraft, submitDraft, saveInvitation, approveDraft } from '../../utils/api'
 import { saveBuilderSnapshot, readBuilderSnapshot } from '../../utils/builderSession'
 import t from '../../data/translations'
+import BuilderShell, { StepCard, GhostButton } from '../builder/BuilderShell'
+import { ChoiceGroup, SelectCard, AddButton } from '../builder/fields'
+import { SectionToggleRow, ToggleList, OptionCard, PaletteCard, PartnerCard as PartnerOfferCard, QrShareCard } from '../builder/choices'
+import { Notice, NoticeButton, ConfirmDialog } from '../builder/feedback'
+import { inputBase, ringState, labelClass, hintClass } from '../builder/styles'
 import { trackEvent } from '../../utils/analytics'
 
 const EVENT_ICONS = { toy: Heart, nishan: Diamond, birthday: Cake, corporate: Briefcase, other: Sparkles }
@@ -196,21 +201,21 @@ function VenueSearchInput({ value, onSelect, lang, tr }) {
   return (
     <div className="relative">
       <div className="relative">
-        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gold/50 pointer-events-none" />
+        <Search size={18} strokeWidth={1.6} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gold-deep" />
         <input
           ref={inputRef}
           type="text"
           defaultValue={value || ''}
           placeholder={tr.venue_search_placeholder}
-          className="w-full pl-9 pr-4 py-3 bg-[#1a1a1a]/60 border border-gold/20 text-white/90 text-sm placeholder-white/25 rounded-full focus:outline-none focus:border-gold/50 transition-colors"
+          className={`${inputBase} ${ringState(false)} h-14 pl-11 pr-4`}
         />
       </div>
       {success && (
-        <p className="mt-2 text-[11px] tracking-[0.12em] text-gold font-medium flex items-center gap-1.5">
-          <MapPin size={11} /> {tr.venue_search_success}
+        <p className="mt-2 flex items-center gap-1.5 text-[13px] font-medium text-olive">
+          <MapPin size={13} /> {tr.venue_search_success}
         </p>
       )}
-      <div style={{ marginTop: 16, border: '1px solid rgba(197,160,89,0.22)', position: 'relative', overflow: 'hidden' }}>
+      <div className="relative mt-4 overflow-hidden rounded-2xl ring-1 ring-gold/25">
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, zIndex: 2, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.5) 40%, rgba(197,160,89,0.7) 50%, rgba(197,160,89,0.5) 60%, transparent)' }} />
         <div ref={mapDivRef} style={{ height: 240, width: '100%', zIndex: 1 }} />
         <p style={{ position: 'absolute', bottom: 6, left: '50%', transform: 'translateX(-50%)', fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(197,160,89,0.8)', fontFamily: '"Inter",system-ui,sans-serif', background: 'rgba(10,10,10,0.85)', backdropFilter: 'blur(4px)', padding: '2px 10px', pointerEvents: 'none', zIndex: 10, whiteSpace: 'nowrap' }}>
@@ -263,19 +268,20 @@ function IconPickerBtn({ value, onSelect }) {
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className="w-10 h-10 flex items-center justify-center border border-gold/25 bg-cream hover:border-gold/50 hover:bg-gold/5 transition-colors rounded-lg text-xl"
+        className="grid h-11 w-11 place-items-center rounded-[12px] bg-gold-mist/60 text-xl ring-1 ring-inset ring-gold/30 transition-colors hover:bg-gold-mist"
         title="İkon seç"
+        aria-label="İkon seç"
       >
         {value || '✨'}
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 z-[120] bg-cream border border-beige-dark/60 shadow-xl rounded-lg w-52 p-2.5 grid grid-cols-5 gap-1.5">
+        <div className="absolute right-0 top-full z-[120] mt-1.5 grid w-56 grid-cols-5 gap-1.5 rounded-2xl bg-white p-2.5 shadow-luxe ring-1 ring-gold/25">
           {PROGRAM_ICONS.map((ic) => (
             <button
               key={ic}
               type="button"
               onClick={() => { onSelect(ic); setOpen(false) }}
-              className={`w-9 h-9 flex items-center justify-center text-xl rounded-lg transition-colors ${value === ic ? 'bg-gold/10 border border-gold/40' : 'hover:bg-beige border border-transparent'}`}
+              className={`grid h-9 w-9 place-items-center rounded-[10px] text-xl transition-colors ${value === ic ? 'bg-gold-mist ring-1 ring-inset ring-gold' : 'hover:bg-cream'}`}
             >
               {ic}
             </button>
@@ -300,7 +306,7 @@ function DragHandle({ controls }) {
       type="button"
       aria-label="Sıralamaq üçün sürüklə"
       onPointerDown={(e) => controls.start(e)}
-      className="flex-shrink-0 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-brown-muted/40 hover:text-gold transition-colors rounded cursor-grab active:cursor-grabbing"
+      className="grid h-11 w-11 flex-shrink-0 cursor-grab place-items-center rounded-full text-brown-muted transition-colors hover:bg-gold-mist/60 hover:text-gold-deep active:cursor-grabbing"
       style={{ touchAction: 'none' }}
     >
       <GripVertical size={16} strokeWidth={1.5} />
@@ -317,7 +323,7 @@ function ProgramRow({ row, update, removeRow, activityRefs, tr }) {
       dragListener={false}
       dragControls={controls}
       as="div"
-      className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-beige/50 border border-beige-dark/50 rounded-lg p-3 sm:p-2.5"
+      className="flex flex-col gap-2 rounded-2xl bg-white p-3 ring-1 ring-inset ring-beige-dark sm:flex-row sm:items-center sm:gap-3 sm:p-2.5"
       style={{ position: 'relative' }}
       whileDrag={{ scale: 1.015, boxShadow: '0 10px 28px rgba(0,0,0,0.14)', zIndex: 5 }}
     >
@@ -328,11 +334,11 @@ function ProgramRow({ row, update, removeRow, activityRefs, tr }) {
           onChange={(v) => update(row.id, 'time', v)}
           onComplete={() => activityRefs.current[row.id]?.focus()}
           placeholder="19:00"
-          className="w-[84px] sm:w-[90px] flex-shrink-0 text-center p-2.5 border border-beige-dark/60 rounded bg-cream font-mono text-sm focus:outline-none focus:border-gold/60 transition-colors"
+          className="h-12 w-[88px] flex-shrink-0 rounded-[12px] bg-cream text-center text-[16px] font-medium tabular-nums text-ink ring-1 ring-inset ring-beige-dark focus:outline-none focus:ring-2 focus:ring-gold-deep sm:w-[92px]"
         />
         <div className="flex items-center gap-1 ml-auto sm:hidden">
           <IconPickerBtn value={row.icon} onSelect={(ic) => update(row.id, 'icon', ic)} />
-          <button type="button" onClick={() => removeRow(row.id)} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-brown-muted/40 hover:text-red-400 transition-colors rounded touch-manipulation" aria-label="Sil">
+          <button type="button" onClick={() => removeRow(row.id)} className="grid h-11 w-11 place-items-center rounded-full text-brown-muted transition-colors hover:bg-rust-mist hover:text-rust touch-manipulation" aria-label="Sil">
             <DeleteIcon />
           </button>
           <DragHandle controls={controls} />
@@ -345,12 +351,12 @@ function ProgramRow({ row, update, removeRow, activityRefs, tr }) {
         value={row.activity}
         onChange={(e) => update(row.id, 'activity', e.target.value)}
         placeholder={tr.program_step_activity_placeholder}
-        className="w-full sm:flex-1 sm:min-w-0 p-2.5 border border-beige-dark/50 rounded bg-cream text-sm focus:outline-none focus:border-gold/60 transition-colors"
+        className="h-12 w-full rounded-[12px] bg-cream px-3.5 text-[16px] text-ink ring-1 ring-inset ring-beige-dark placeholder:text-brown-muted/80 focus:outline-none focus:ring-2 focus:ring-gold-deep sm:min-w-0 sm:flex-1"
       />
       {/* Desktop-da ikon+sil+tutacaq */}
       <div className="hidden sm:flex items-center gap-1 flex-shrink-0">
         <IconPickerBtn value={row.icon} onSelect={(ic) => update(row.id, 'icon', ic)} />
-        <button type="button" onClick={() => removeRow(row.id)} className="flex-shrink-0 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-brown-muted/40 hover:text-red-400 transition-colors rounded" aria-label="Sil">
+        <button type="button" onClick={() => removeRow(row.id)} className="grid h-11 w-11 flex-shrink-0 place-items-center rounded-full text-brown-muted transition-colors hover:bg-rust-mist hover:text-rust" aria-label="Sil">
           <DeleteIcon />
         </button>
         <DragHandle controls={controls} />
@@ -390,14 +396,8 @@ function ProgramStepEditor({ rows, onChange, tr }) {
           />
         ))}
       </Reorder.Group>
-      <button
-        type="button"
-        onClick={addRow}
-        className="text-[11px] tracking-[0.16em] uppercase text-gold/80 hover:text-gold border border-gold/25 hover:border-gold/50 px-4 py-3 min-h-[44px] transition-all duration-200 flex items-center gap-2 touch-manipulation"
-      >
-        {tr.program_add_row}
-      </button>
-      <p className="text-[11px] text-brown-muted/60 font-light tracking-wide">{tr.program_hint}</p>
+      <AddButton onClick={addRow}>{String(tr.program_add_row || '').replace(/^\+\s*/, '')}</AddButton>
+      <p className={hintClass}>{tr.program_hint}</p>
     </div>
   )
 }
@@ -462,8 +462,8 @@ function ProgramStepWithTemplates({ rows, onChange, tr, lang }) {
     return (
       <div className="space-y-4">
         <div className="text-center mb-2">
-          <p className="text-[10px] tracking-[0.28em] uppercase text-gold font-medium mb-1">{ui.title}</p>
-          <p className="text-xs text-brown-muted/70 font-light">{ui.sub}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-label text-gold-deep">{ui.title}</p>
+          <p className="mt-1 text-[14px] text-brown-dark/85">{ui.sub}</p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {TPL_KEYS.map(key => (
@@ -471,17 +471,17 @@ function ProgramStepWithTemplates({ rows, onChange, tr, lang }) {
               key={key}
               type="button"
               onClick={() => applyTemplate(key)}
-              className="flex flex-col items-center gap-2 py-4 px-3 rounded-xl border border-gold/20 bg-cream hover:border-gold/50 hover:bg-gold/5 transition-all duration-200 touch-manipulation"
+              className="flex flex-col items-center gap-2 rounded-2xl bg-white px-3 py-5 ring-1 ring-inset ring-beige-dark transition-[transform,box-shadow] duration-300 ease-luxe hover:-translate-y-0.5 hover:shadow-soft hover:ring-gold/60 touch-manipulation"
             >
               <span className="text-2xl leading-none">{TPL_ICONS[key]}</span>
-              <span className="text-[11px] font-medium text-ink tracking-wide">{ui.labels[key]}</span>
+              <span className="text-[13px] font-semibold text-ink">{ui.labels[key]}</span>
             </button>
           ))}
         </div>
         <button
           type="button"
           onClick={() => { onChange([{ time:'', icon:'', activity:'' }]); setShowSelector(false) }}
-          className="w-full py-3 text-[11px] tracking-[0.18em] uppercase text-brown-muted/55 hover:text-gold border border-dashed border-beige-dark/50 hover:border-gold/30 rounded-lg transition-all duration-200"
+          className="min-h-[48px] w-full rounded-2xl border border-dashed border-gold/50 text-[12px] font-semibold uppercase tracking-label text-gold-deep transition-colors hover:bg-gold-mist/40"
         >
           ✏️ {ui.own}
         </button>
@@ -495,7 +495,7 @@ function ProgramStepWithTemplates({ rows, onChange, tr, lang }) {
         <button
           type="button"
           onClick={() => setShowSelector(true)}
-          className="text-[10px] tracking-[0.16em] uppercase text-gold/60 hover:text-gold border border-gold/20 hover:border-gold/40 px-4 py-2.5 min-h-[44px] rounded transition-all duration-200 touch-manipulation flex items-center gap-1.5"
+          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full bg-white px-4 text-[11.5px] font-semibold uppercase tracking-label text-gold-deep ring-1 ring-inset ring-gold/40 transition-colors hover:bg-gold-mist/60 touch-manipulation"
         >
           ↺ {ui.change}
         </button>
@@ -606,27 +606,31 @@ function AzCalendar({ value, onChange, hasError, lang = 'az' }) {
   return (
     <div ref={wrapRef} className="relative">
       {/* yazıla bilən + ikonlu trigger */}
-      <div className={`flex items-center border-0 border-b ${hasError ? 'border-b-red-300' : 'border-beige-dark'} focus-within:border-gold transition-colors duration-300`}>
+      <div className={`flex h-14 items-center rounded-2xl bg-white pl-4 pr-1.5 ring-1 ring-inset transition-shadow duration-300 focus-within:ring-2 ${hasError ? 'ring-rust/70 focus-within:ring-rust' : 'ring-beige-dark hover:ring-gold/60 focus-within:ring-gold-deep'}`}>
         <input
           type="text"
+          inputMode="numeric"
           value={inputValue}
           onChange={handleInputChange}
           placeholder="GG.AA.YYYY"
           maxLength={10}
-          className="flex-1 bg-transparent text-ink text-sm py-3 focus:outline-none placeholder:text-brown-muted/40"
+          aria-invalid={hasError || undefined}
+          className="min-w-0 flex-1 bg-transparent text-[16px] tabular-nums text-ink placeholder:text-brown-muted/80 focus:outline-none"
         />
         <button
           type="button"
           onClick={() => setOpen(o => !o)}
-          className="pl-2 py-3 text-brown-muted/50 hover:text-gold transition-colors duration-200"
+          aria-label="Təqvimi aç"
+          aria-expanded={open}
+          className="grid h-11 w-11 place-items-center rounded-full text-gold-deep transition-colors hover:bg-gold-mist/70"
         >
-          <Calendar size={14} strokeWidth={1.5} />
+          <Calendar size={18} strokeWidth={1.6} />
         </button>
       </div>
 
       {/* canlı tarix mətni */}
       {value && (
-        <p className="mt-2 text-[10px] tracking-[0.14em] text-gold/80 font-light">
+        <p className="mt-2 font-serif text-[16px] italic text-gold-deep">
           {formatFullDateByLang(value, lang)}
         </p>
       )}
@@ -634,20 +638,20 @@ function AzCalendar({ value, onChange, hasError, lang = 'az' }) {
       {/* təqvim paneli — absolute, z-[9999] */}
       {open && (
         <div
-          className="absolute left-0 top-full mt-1 w-full max-w-[340px] bg-[#1a1a1a]/95 backdrop-blur-md border border-amber-500/20 rounded-xl p-4 shadow-2xl"
+          className="absolute left-0 top-full mt-2 w-full max-w-[340px] rounded-2xl bg-white p-4 shadow-luxe ring-1 ring-gold/25"
           style={{ zIndex: 9999 }}
         >
           {/* başlıq */}
           <div className="flex items-center justify-between mb-4">
-            <button type="button" onClick={prevMonth}
-              className="w-7 h-7 flex items-center justify-center text-amber-400/70 hover:text-amber-400 transition-colors rounded-full hover:bg-white/5">
+            <button type="button" onClick={prevMonth} aria-label="Əvvəlki ay"
+              className="grid h-10 w-10 place-items-center rounded-full text-gold-deep transition-colors hover:bg-gold-mist/70">
               <ChevronLeft size={14} strokeWidth={1.5} />
             </button>
-            <span className="text-[11px] tracking-[0.22em] uppercase text-amber-200/80 font-medium">
+            <span className="text-[12px] font-semibold uppercase tracking-label text-ink">
               {calLang.months[viewMonth]} {viewYear}
             </span>
-            <button type="button" onClick={nextMonth}
-              className="w-7 h-7 flex items-center justify-center text-amber-400/70 hover:text-amber-400 transition-colors rounded-full hover:bg-white/5">
+            <button type="button" onClick={nextMonth} aria-label="Növbəti ay"
+              className="grid h-10 w-10 place-items-center rounded-full text-gold-deep transition-colors hover:bg-gold-mist/70">
               <ChevronRight size={14} strokeWidth={1.5} />
             </button>
           </div>
@@ -655,7 +659,7 @@ function AzCalendar({ value, onChange, hasError, lang = 'az' }) {
           {/* həftə günləri */}
           <div className="grid grid-cols-7 gap-1 mb-2">
             {calLang.weekDays.map((d) => (
-              <div key={d} className="text-center text-[9px] text-amber-500/50 font-medium tracking-wide py-1">{d}</div>
+              <div key={d} className="py-1 text-center text-[10.5px] font-semibold text-brown-muted">{d}</div>
             ))}
           </div>
 
@@ -667,12 +671,12 @@ function AzCalendar({ value, onChange, hasError, lang = 'az' }) {
                 key={day}
                 type="button"
                 onClick={(e) => handleDay(e, day)}
-                className={`h-8 w-full flex items-center justify-center text-[11px] rounded-md transition-all duration-150 font-light ${
+                className={`grid h-9 w-full place-items-center rounded-full text-[13px] tabular-nums transition-colors duration-150 ${
                   isSelected(day)
-                    ? 'bg-amber-500 text-white font-medium'
+                    ? 'bg-espresso font-semibold text-gold-light'
                     : isToday(day)
-                    ? 'border border-amber-500/40 text-amber-400'
-                    : 'text-white/70 hover:bg-white/10 hover:text-white'
+                    ? 'text-gold-deep ring-1 ring-inset ring-gold'
+                    : 'text-ink hover:bg-gold-mist/70'
                 }`}
               >
                 {day}
@@ -680,9 +684,6 @@ function AzCalendar({ value, onChange, hasError, lang = 'az' }) {
             ))}
           </div>
 
-          <p className="mt-3 text-center text-[9px] text-amber-500/30 tracking-widest uppercase">
-            {calLang.months[viewMonth]} {viewYear}
-          </p>
         </div>
       )}
     </div>
@@ -718,14 +719,16 @@ function TimeInputAz({ value, onChange }) {
   }
 
   return (
-    <div className={`flex items-center border-0 border-b border-beige-dark focus-within:border-gold transition-colors duration-300`}>
+    <div className="flex h-14 items-center rounded-2xl bg-white px-4 ring-1 ring-inset ring-beige-dark transition-shadow duration-300 hover:ring-gold/60 focus-within:ring-2 focus-within:ring-gold-deep">
+      <Clock size={18} strokeWidth={1.6} className="mr-3 shrink-0 text-gold-deep" aria-hidden="true" />
       <input
         type="text"
+        inputMode="numeric"
         value={timeInputValue}
         onChange={handleTimeInputChange}
         placeholder="19:00"
         maxLength={5}
-        className="flex-1 bg-transparent text-ink text-sm py-3 focus:outline-none placeholder:text-brown-muted/40"
+        className="min-w-0 flex-1 bg-transparent text-[16px] tabular-nums text-ink placeholder:text-brown-muted/80 focus:outline-none"
       />
     </div>
   )
@@ -734,16 +737,24 @@ function TimeInputAz({ value, onChange }) {
 /* ══════════════════════════════════════════════════
    Sadə köməkçi komponentlər
 ══════════════════════════════════════════════════ */
+/* UI redesign (2026-10): görünüş builder/styles.js-dən — yeni komponentlərlə eyni */
 function Label({ children, required }) {
   return (
-    <label className="block text-[10px] tracking-[0.22em] uppercase text-brown-muted mb-3 font-medium">
-      {children} {required && <span className="text-gold">*</span>}
+    <label className={labelClass}>
+      {children}
+      {required && <span className="ml-1 text-gold-deep" aria-hidden="true">*</span>}
     </label>
   )
 }
 
-function Input({ className = '', ...props }) {
-  return <input {...props} className={`luxury-input ${className}`} />
+function Input({ className = '', invalid = false, ...props }) {
+  return (
+    <input
+      {...props}
+      aria-invalid={invalid || undefined}
+      className={`${inputBase} ${ringState(invalid)} h-14 px-4 ${className}`}
+    />
+  )
 }
 
 function Textarea({ ...props }) {
@@ -751,7 +762,7 @@ function Textarea({ ...props }) {
     <textarea
       {...props}
       rows={5}
-      className="w-full border-0 border-b border-beige-dark bg-transparent text-ink text-sm px-0 py-3 focus:outline-none focus:border-gold transition-colors duration-300 placeholder:text-brown-muted/40 resize-none rounded-none"
+      className={`${inputBase} ${ringState(false)} min-h-[140px] resize-y px-4 py-3.5 leading-relaxed`}
     />
   )
 }
@@ -894,192 +905,64 @@ function GalleryAdminStep({ data, isCouple, isCorp, isAdmin = false, canonicalSl
     URL.revokeObjectURL(url)
   }, [data, slug, photoShareUrl, isCouple, isCorp])
 
-  const BLOCK_STYLE = {
-    border: '1px solid rgba(197,160,89,0.2)',
-    background: 'linear-gradient(150deg, #FDFAF4 0%, #F8F3E8 100%)',
-    padding: '28px',
-    position: 'relative',
-  }
-
   return (
-    <div className="space-y-0">
+    <div className="space-y-4">
       {/* Gizli export QR — 150×150, tam vector, DOM-da mövcuddur */}
       <div ref={qrExportRef} style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', top: -9999, left: -9999 }}>
         <QRCodeSVG value={photoShareUrl} size={150} bgColor="white" fgColor="#1A140C" level="M" />
       </div>
 
-      <div style={BLOCK_STYLE}>
-        {/* Üst qızıl xətt ornament */}
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: 1,
-          background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.7) 40%, rgba(197,160,89,0.9) 50%, rgba(197,160,89,0.7) 60%, transparent)',
-        }} />
+      <QrShareCard
+        qr={<QRCodeSVG value={photoShareUrl} size={140} bgColor="transparent" fgColor="rgba(26,20,12,0.88)" level="M" />}
+        url={photoShareUrl}
+        features={['QR paylaşım', 'Şəxsi qalereya', 'HD yükləmə', 'ZIP export']}
+        title="Qonaqlar bu QR vasitəsilə şəkil göndərəcək"
+        text="Masa kartlarına bu QR kodu yapışdırın. Qonaqlar skan edərək toy şəkillərini birbaşa sistemə yükləyəcəklər."
+      />
 
-        {/* Başlıq */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-          <div style={{
-            width: 38, height: 38, flexShrink: 0,
-            border: '1px solid rgba(197,160,89,0.3)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'rgba(197,160,89,0.05)',
-          }}>
-            <QrCode size={18} strokeWidth={1.5} style={{ color: 'rgba(197,160,89,0.8)' }} />
-          </div>
-          <div>
-            <p style={{ fontSize: 8, letterSpacing: '0.32em', textTransform: 'uppercase', color: 'rgba(197,160,89,0.85)', fontFamily: '"Inter",system-ui,sans-serif', fontWeight: 600, marginBottom: 4 }}>
-              Foto Paylaşım Sistemi
+      {/* Admin: SVG masa kartı + müştərinin qalereya idarəetmə linki */}
+      {isAdmin && (
+        <div className="space-y-4">
+          <button
+            type="button"
+            onClick={downloadQR}
+            className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full bg-white px-5 text-center text-[11.5px] font-semibold uppercase tracking-label text-gold-deep ring-1 ring-inset ring-gold/45 transition-colors hover:bg-gold-mist/50"
+          >
+            <Download size={15} strokeWidth={1.6} />
+            Masa Kartını HD (SVG) Endir — Mətbəə Keyfiyyəti
+          </button>
+
+          <div className="rounded-2xl bg-gold-mist/40 p-4 ring-1 ring-inset ring-gold/25 sm:p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-label text-gold-deep">
+              Müştərinin Şəxsi Qalereya İdarəetmə Linki
             </p>
-            <p style={{ fontFamily: '"Cormorant Garamond","Playfair Display",Georgia,serif', fontSize: 17, fontWeight: 300, color: '#1C1610', lineHeight: 1.2 }}>
-              Qonaqlar bu QR vasitəsilə şəkil göndərəcək
+            <p className="mt-1.5 text-[13.5px] leading-relaxed text-brown-dark">
+              Aşağıdakı linki müştəriyə göndər — buradan qonaqların yüklədiyi şəkilləri görə, seçə və .zip endirə biləcək:
             </p>
+            <div className="mt-3 flex items-center gap-2 rounded-2xl bg-white p-1.5 pl-4 ring-1 ring-inset ring-beige-dark">
+              <input
+                readOnly
+                value={galeryaIdareUrl}
+                onClick={e => e.target.select()}
+                aria-label="Qalereya idarəetmə linki"
+                className="min-w-0 flex-1 truncate bg-transparent font-mono text-[12px] text-brown-dark focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={copyGaleryaLink}
+                className={`inline-flex h-10 shrink-0 items-center gap-1.5 rounded-[12px] px-3.5 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors ${
+                  copied ? 'bg-olive text-white' : 'bg-espresso text-cream hover:bg-espresso-soft'
+                }`}
+              >
+                {copied
+                  ? <><Check size={13} strokeWidth={2} /> Kopyalandı</>
+                  : <><Archive size={13} strokeWidth={1.6} /> Linki Kopyala</>
+                }
+              </button>
+            </div>
           </div>
         </div>
-
-        {/* QR + izah — mobildə şaquli yığılır (QR yuxarıda sol, mətn altda tam en) */}
-        <div className="flex flex-col items-stretch sm:flex-row sm:items-center" style={{ gap: 24 }}>
-          {/* QR preview */}
-          <div className="self-start sm:self-auto" style={{
-            padding: 12,
-            border: '1px solid rgba(197,160,89,0.22)',
-            background: 'white',
-            flexShrink: 0,
-            position: 'relative',
-          }}>
-            {/* Künc ornamentləri */}
-            {[['top:4px','left:4px','borderLeft','borderTop'],['top:4px','right:4px','borderRight','borderTop'],
-              ['bottom:4px','left:4px','borderLeft','borderBottom'],['bottom:4px','right:4px','borderRight','borderBottom']
-            ].map(([t, lr, b1, b2], i) => (
-              <div key={i} style={{
-                position: 'absolute',
-                [t.split(':')[0]]: t.split(':')[1],
-                [lr.split(':')[0]]: lr.split(':')[1],
-                width: 10, height: 10,
-                [b1]: '1px solid rgba(197,160,89,0.55)',
-                [b2]: '1px solid rgba(197,160,89,0.55)',
-              }} />
-            ))}
-            <QRCodeSVG value={photoShareUrl} size={100} bgColor="transparent" fgColor="rgba(26,20,12,0.88)" level="M" />
-          </div>
-
-          {/* Mətn */}
-          <div style={{ flex: 1 }}>
-            <p style={{ fontSize: 11, color: 'rgba(60,50,40,0.75)', fontFamily: '"Inter",system-ui,sans-serif', lineHeight: 1.7, marginBottom: 12 }}>
-              Masa kartlarına bu QR kodu yapışdırın. Qonaqlar skan edərək toy şəkillərini birbaşa sistemə yükləyəcəklər.
-            </p>
-            {/* Benefits grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 14px', marginBottom: 12 }}>
-              {['QR paylaşım', 'Şəxsi qalereya', 'HD yükləmə', 'ZIP export'].map(b => (
-                <div key={b} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <Check size={10} strokeWidth={2.5} style={{ color: 'rgba(197,160,89,0.85)', flexShrink: 0 }} />
-                  <span style={{ fontSize: 10, color: 'rgba(60,50,40,0.7)', fontFamily: '"Inter",system-ui,sans-serif', letterSpacing: '0.03em' }}>{b}</span>
-                </div>
-              ))}
-            </div>
-            <p style={{
-              fontSize: 9, letterSpacing: '0.04em', color: 'rgba(197,160,89,0.8)',
-              fontFamily: '"Inter",system-ui,sans-serif', wordBreak: 'break-all',
-              padding: '6px 10px', background: 'rgba(197,160,89,0.07)',
-              border: '1px solid rgba(197,160,89,0.18)',
-            }}>
-              {photoShareUrl}
-            </p>
-          </div>
-        </div>
-
-        {/* Admin: SVG masa kartı endirme düyməsi */}
-        {isAdmin && (
-          <>
-            <button
-              type="button"
-              onClick={downloadQR}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                marginTop: 20, width: '100%', padding: '13px 18px',
-                border: '1px solid rgba(197,160,89,0.4)',
-                background: 'rgba(197,160,89,0.07)',
-                cursor: 'pointer',
-                fontSize: 9, letterSpacing: '0.28em', textTransform: 'uppercase',
-                color: 'rgba(197,160,89,0.95)', fontFamily: '"Inter",system-ui,sans-serif', fontWeight: 600,
-                transition: 'background 0.2s, border-color 0.2s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(197,160,89,0.14)'; e.currentTarget.style.borderColor = 'rgba(197,160,89,0.65)' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(197,160,89,0.07)'; e.currentTarget.style.borderColor = 'rgba(197,160,89,0.4)' }}
-            >
-              <Download size={13} strokeWidth={1.5} />
-              Masa Kartını HD (SVG) Endir — Mətbəə Keyfiyyəti
-            </button>
-
-            {/* Müştəri üçün qalereya idarəetmə linki */}
-            <div style={{
-              marginTop: 16,
-              padding: '18px 18px 16px',
-              border: '1px solid rgba(197,160,89,0.22)',
-              background: 'rgba(197,160,89,0.04)',
-              position: 'relative',
-            }}>
-              {/* Üst ornament xətti */}
-              <div style={{
-                position: 'absolute', top: 0, left: 0, right: 0, height: 1,
-                background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.45) 40%, rgba(197,160,89,0.6) 50%, rgba(197,160,89,0.45) 60%, transparent)',
-              }} />
-              <p style={{
-                fontSize: 8, letterSpacing: '0.3em', textTransform: 'uppercase',
-                color: 'rgba(197,160,89,0.8)', fontFamily: '"Inter",system-ui,sans-serif',
-                fontWeight: 600, marginBottom: 6,
-              }}>
-                Müştərinin Şəxsi Qalereya İdarəetmə Linki
-              </p>
-              <p style={{
-                fontSize: 10, color: 'rgba(80,68,58,0.65)', fontFamily: '"Inter",system-ui,sans-serif',
-                lineHeight: 1.6, marginBottom: 12,
-              }}>
-                Aşağıdakı linki müştəriyə göndər — buradan qonaqların yüklədiyи şəkilləri görə, seçə və .zip endirə biləcək:
-              </p>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <input
-                  readOnly
-                  value={galeryaIdareUrl}
-                  onClick={e => e.target.select()}
-                  style={{
-                    flex: 1,
-                    padding: '9px 12px',
-                    fontSize: 9, letterSpacing: '0.04em',
-                    fontFamily: '"Inter",system-ui,sans-serif',
-                    color: 'rgba(197,160,89,0.85)',
-                    background: 'rgba(197,160,89,0.06)',
-                    border: '1px solid rgba(197,160,89,0.22)',
-                    outline: 'none',
-                    wordBreak: 'break-all',
-                    cursor: 'text',
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={copyGaleryaLink}
-                  style={{
-                    flexShrink: 0,
-                    padding: '9px 14px',
-                    border: `1px solid ${copied ? 'rgba(197,160,89,0.7)' : 'rgba(197,160,89,0.4)'}`,
-                    background: copied ? 'rgba(197,160,89,0.18)' : 'rgba(197,160,89,0.09)',
-                    cursor: 'pointer',
-                    fontSize: 8, letterSpacing: '0.22em', textTransform: 'uppercase',
-                    color: copied ? 'rgba(197,160,89,1)' : 'rgba(197,160,89,0.85)',
-                    fontFamily: '"Inter",system-ui,sans-serif', fontWeight: 700,
-                    display: 'flex', alignItems: 'center', gap: 6,
-                    transition: 'all 0.18s',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {copied
-                    ? <><Check size={12} strokeWidth={2} /> Kopyalandı</>
-                    : <><Archive size={11} strokeWidth={1.5} /> Linki Kopyala</>
-                  }
-                </button>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
+      )}
     </div>
   )
 }
@@ -1173,150 +1056,103 @@ function SeatingMethodSelector({ seatingPlan, seatingMethod, onPlanChange, onMet
     commit([...tables, ...extra])
   }
 
-  const s = {
-    changeBtn: {
-      background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-      fontSize: 10, color: 'rgba(197,160,89,0.85)', letterSpacing: '0.1em',
-      textDecoration: 'underline', textUnderlineOffset: 3, flexShrink: 0,
-    },
-    addBtn: {
-      minHeight: 44, border: '1px dashed rgba(197,160,89,0.4)', background: 'transparent',
-      color: 'rgba(197,160,89,0.85)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase',
-      fontFamily: 'inherit', cursor: 'pointer',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-    },
-  }
+  /* UI redesign: iki seçim kartı — seçilən kartın içində öz məzmunu açılır.
+     Üsulu dəyişmək = digər karta toxunmaq (köhnə «Dəyiş» düyməsinin işi). */
+  const fieldCls = `${inputBase} ${ringState(false)} h-12 px-4`
+  const guestCount = (text) => text.split('\n').filter(g => g.trim()).length
 
-  /* ── Method not chosen ── */
-  if (!seatingMethod) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <button type="button" onClick={() => onMethodChange('self')}
-          style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '18px 20px', textAlign: 'left', border: '1px solid rgba(197,160,89,0.35)', background: 'rgba(253,250,244,0.85)', cursor: 'pointer', transition: 'border-color 0.2s' }}
-          onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(197,160,89,0.7)'}
-          onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(197,160,89,0.35)'}
-        >
-          <div style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid rgba(197,160,89,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <User size={15} strokeWidth={1.5} style={{ color: 'rgba(197,160,89,0.85)' }} />
+  return (
+    <div className="space-y-3">
+      <OptionCard
+        name="seating-method"
+        value="self"
+        selected={seatingMethod === 'self'}
+        onSelect={() => onMethodChange('self')}
+        icon={User}
+        title={ui.selfTitle}
+        description={ui.selfDesc}
+        lang={lang}
+      >
+        <div className="space-y-3">
+          {/* Masa sayı generatoru */}
+          <div className="flex gap-2">
+            <input
+              type="number" min="1" max="200"
+              value={tableCount}
+              onChange={e => setTableCount(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && generateTables()}
+              placeholder={ui.countPh}
+              aria-label={ui.countPh}
+              className={`${fieldCls} min-w-0 flex-1`}
+            />
+            <button
+              type="button"
+              onClick={generateTables}
+              className="inline-flex h-12 shrink-0 items-center rounded-full bg-espresso px-5 text-[11.5px] font-semibold uppercase tracking-label text-cream transition-colors hover:bg-espresso-soft"
+            >
+              {ui.create}
+            </button>
           </div>
-          <div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#1a1a1a', marginBottom: 3 }}>{ui.selfTitle}</div>
-            <div style={{ fontSize: 11, color: 'rgba(140,123,107,0.7)', lineHeight: 1.5 }}>{ui.selfDesc}</div>
-          </div>
-        </button>
 
-        <button type="button" onClick={() => onMethodChange('digitory')}
-          style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '18px 20px', textAlign: 'left', border: '1.5px solid rgba(197,160,89,0.65)', background: 'linear-gradient(135deg, rgba(253,250,244,0.95) 0%, rgba(250,243,220,0.95) 100%)', cursor: 'pointer', transition: 'border-color 0.2s, box-shadow 0.2s' }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(197,160,89,1)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(197,160,89,0.15)' }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(197,160,89,0.65)'; e.currentTarget.style.boxShadow = 'none' }}
-        >
-          <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(197,160,89,0.15)', border: '1px solid rgba(197,160,89,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Sparkles size={15} strokeWidth={1.5} style={{ color: 'rgba(197,160,89,1)' }} />
-          </div>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-              <span style={{ fontSize: 13, fontWeight: 500, color: '#1a1a1a' }}>{ui.svcTitle}</span>
-              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', background: 'rgba(197,160,89,0.18)', border: '1px solid rgba(197,160,89,0.55)', color: 'rgba(160,118,30,1)', padding: '2px 7px' }}>+15 AZN</span>
+          {/* Masa kartları */}
+          {tables.map((table) => (
+            <div key={table.id} className="overflow-hidden rounded-2xl bg-white ring-1 ring-inset ring-beige-dark">
+              <div className="flex items-center gap-2 border-b border-gold/15 py-1.5 pl-4 pr-1.5">
+                <input
+                  type="text" value={table.name}
+                  onChange={e => commit(tables.map(t => t.id === table.id ? { ...t, name: e.target.value } : t))}
+                  aria-label={ui.table}
+                  className="min-h-[40px] min-w-0 flex-1 bg-transparent text-[15px] font-semibold text-ink focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => commit(tables.filter(t => t.id !== table.id))}
+                  aria-label={`${table.name} — sil`}
+                  className="grid h-10 w-10 place-items-center rounded-full text-brown-muted transition-colors hover:bg-rust-mist hover:text-rust"
+                >
+                  <X size={15} strokeWidth={1.6} />
+                </button>
+              </div>
+              <textarea
+                value={table.text}
+                onChange={e => commit(tables.map(t => t.id === table.id ? { ...t, text: e.target.value } : t))}
+                placeholder={'Murad Əliyev\nLeyla Məmmədova\nNicat Həsənov'}
+                rows={4}
+                className="block w-full resize-y bg-transparent px-4 py-3 text-[15px] leading-relaxed text-ink placeholder:text-brown-muted/70 focus:outline-none"
+              />
+              <div className="px-4 pb-2.5 text-[12px] tabular-nums text-brown-dark/75">
+                {guestCount(table.text)} {ui.guests}
+              </div>
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(140,123,107,0.7)', lineHeight: 1.5 }}>{ui.svcDesc}</div>
-          </div>
-        </button>
-      </div>
-    )
-  }
+          ))}
 
-  /* ── DigiToy service card ── */
-  if (seatingMethod === 'digitory') {
-    return (
-      <div style={{ border: '1.5px solid rgba(197,160,89,0.65)', background: 'linear-gradient(135deg, rgba(253,250,244,0.95) 0%, rgba(250,243,220,0.95) 100%)', padding: '22px 20px' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 8 }}>
-              <Sparkles size={14} strokeWidth={1.5} style={{ color: 'rgba(197,160,89,1)' }} />
-              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(197,160,89,1)' }}>{ui.svcName}</span>
-              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', background: 'rgba(197,160,89,0.18)', border: '1px solid rgba(197,160,89,0.55)', color: 'rgba(160,118,30,1)', padding: '2px 9px' }}>+15 AZN</span>
-            </div>
-            <p style={{ fontSize: 12, color: 'rgba(60,50,40,0.8)', lineHeight: 1.7, margin: 0, maxWidth: 380 }}>
-              {ui.svcLong}
-            </p>
-          </div>
-          <button type="button" onClick={() => onMethodChange(null)} style={s.changeBtn}>{ui.change}</button>
+          <AddButton block onClick={() => commit([...tables, { id: `t${Date.now()}`, name: `${ui.table} ${tables.length + 1}`, text: '' }])}>
+            {ui.addTable}
+          </AddButton>
         </div>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 16 }}>
+      </OptionCard>
+
+      <OptionCard
+        name="seating-method"
+        value="digitory"
+        selected={seatingMethod === 'digitory'}
+        onSelect={() => onMethodChange('digitory')}
+        icon={Sparkles}
+        title={ui.svcTitle}
+        description={ui.svcDesc}
+        badge="+15 AZN"
+        lang={lang}
+      >
+        <p className="text-[14px] leading-relaxed text-brown-dark">{ui.svcLong}</p>
+        <div className="mt-3 flex flex-wrap gap-1.5">
           {DIGITORY_FORMATS.map(fmt => (
-            <span key={fmt} style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.08em', border: '1px solid rgba(197,160,89,0.4)', color: 'rgba(140,100,30,0.9)', padding: '5px 12px', background: 'rgba(253,250,244,0.9)' }}>
+            <span key={fmt} className="rounded-full bg-white px-3 py-1 text-[12px] font-medium text-gold-deep ring-1 ring-inset ring-gold/35">
               {fmt}
             </span>
           ))}
         </div>
-        <p style={{ fontSize: 10, color: 'rgba(140,123,107,0.65)', lineHeight: 1.6, margin: '14px 0 0' }}>
-          {ui.svcNote}
-        </p>
-      </div>
-    )
-  }
-
-  /* ── Self mode ── */
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'rgba(253,250,244,0.7)', border: '1px solid rgba(197,160,89,0.22)' }}>
-        <span style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(140,123,107,0.65)' }}>{ui.selfTitle}</span>
-        <button type="button" onClick={() => onMethodChange(null)} style={s.changeBtn}>{ui.change}</button>
-      </div>
-
-      {/* Table count generator */}
-      <div style={{ display: 'flex', gap: 8 }}>
-        <input
-          type="number" min="1" max="200"
-          value={tableCount}
-          onChange={e => setTableCount(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && generateTables()}
-          placeholder={ui.countPh}
-          style={{ flex: 1, minHeight: 44, padding: '0 14px', border: '1px solid rgba(197,160,89,0.35)', background: 'rgba(253,250,244,0.85)', outline: 'none', fontFamily: 'inherit', fontSize: 13, color: '#1a1a1a' }}
-        />
-        <button type="button" onClick={generateTables}
-          style={{ minHeight: 44, padding: '0 18px', border: '1px solid rgba(197,160,89,0.55)', background: 'rgba(197,160,89,0.08)', color: 'rgba(160,118,30,1)', fontSize: 10, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'inherit', cursor: 'pointer', flexShrink: 0, transition: 'background 0.2s' }}
-          onMouseEnter={e => e.currentTarget.style.background = 'rgba(197,160,89,0.18)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'rgba(197,160,89,0.08)'}
-        >
-          {ui.create}
-        </button>
-      </div>
-
-      {/* Table cards */}
-      {tables.map((table) => (
-        <div key={table.id} style={{ border: '1px solid rgba(197,160,89,0.25)', background: 'rgba(253,250,244,0.9)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderBottom: '1px solid rgba(197,160,89,0.18)' }}>
-            <input
-              type="text" value={table.name}
-              onChange={e => commit(tables.map(t => t.id === table.id ? { ...t, name: e.target.value } : t))}
-              style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontFamily: 'inherit', fontSize: 12, fontWeight: 600, letterSpacing: '0.06em', color: '#1a1a1a', minHeight: 36 }}
-            />
-            <button type="button" onClick={() => commit(tables.filter(t => t.id !== table.id))}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 28, minHeight: 28, border: 'none', background: 'transparent', cursor: 'pointer', color: 'rgba(140,123,107,0.5)' }}>
-              <X size={13} strokeWidth={1.5} />
-            </button>
-          </div>
-          <textarea
-            value={table.text}
-            onChange={e => commit(tables.map(t => t.id === table.id ? { ...t, text: e.target.value } : t))}
-            placeholder={'Murad Əliyev\nLeyla Məmmədova\nNicat Həsənov'}
-            rows={4}
-            style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', background: 'transparent', border: 'none', outline: 'none', resize: 'vertical', fontFamily: 'inherit', fontSize: 12, fontWeight: 300, color: '#1a1a1a', lineHeight: 1.7 }}
-          />
-          <div style={{ padding: '4px 14px 8px', fontSize: 9, color: 'rgba(140,123,107,0.45)', letterSpacing: '0.06em' }}>
-            {table.text.split('\n').filter(g => g.trim()).length} {ui.guests}
-          </div>
-        </div>
-      ))}
-
-      <button type="button" onClick={() => commit([...tables, { id: `t${Date.now()}`, name: `${ui.table} ${tables.length + 1}`, text: '' }])} style={s.addBtn}
-        onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(197,160,89,0.7)'}
-        onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(197,160,89,0.4)'}
-      >
-        <Plus size={11} strokeWidth={1.5} />
-        {ui.addTable}
-      </button>
+        <p className="mt-3 text-[13px] leading-relaxed text-brown-dark/80">{ui.svcNote}</p>
+      </OptionCard>
     </div>
   )
 }
@@ -1444,83 +1280,36 @@ function SectionsStep({ lang, pkgId, sections, onToggle, onAllOn }) {
   const anyOff = list.some((s) => !s.locked && !isSectionOn({ sections }, s.id))
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <p className="text-[11.5px] text-brown-muted/60 font-sans font-light leading-relaxed flex-1 min-w-[180px]">
-          {ui.note}
-        </p>
-        {anyOff && (
-          <button
-            type="button"
-            onClick={onAllOn}
-            className="shrink-0 min-h-[38px] px-4 border border-beige-dark/55 text-brown-muted/70 hover:border-gold/50 hover:text-gold transition-colors duration-200 text-[9px] tracking-[0.18em] uppercase font-sans font-medium touch-manipulation"
-          >
-            {ui.allOn}
-          </button>
-        )}
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <p className="min-w-[200px] flex-1 text-[14px] leading-relaxed text-brown-dark/90">{ui.note}</p>
+        {anyOff && <GhostButton onClick={onAllOn}>{ui.allOn}</GhostButton>}
       </div>
 
-      <div role="group" className="divide-y divide-beige-dark/25 border-y border-beige-dark/25">
+      <ToggleList>
         {list.map((s) => {
-          const Icon    = SECTION_ICONS[s.id] || Sparkles
-          const label   = s.labels[lang] || s.labels.az
-          const hint    = s.hints[lang]  || s.hints.az
+          const Icon  = SECTION_ICONS[s.id] || Sparkles
+          const label = s.labels[lang] || s.labels.az
+          const hint  = s.hints[lang]  || s.hints.az
           /* ⚠ `sections?.[id] !== false` YAZMAQ OLMAZ: Phase 43-dən sonra
-             bəzi bölmələr DEFAULT BAĞLIDIR və o yoxlama onları açıq
-             göstərərdi. `isSectionOn` hər iki qaydanın tək mənbəyidir. */
+             bəzi bölmələr DEFAULT BAĞLIDIR. `isSectionOn` hər iki qaydanın tək mənbəyidir. */
           const checked = !s.locked && isSectionOn({ sections }, s.id)
-
           return (
-            <label
+            <SectionToggleRow
               key={s.id}
-              className={`flex items-center gap-3 sm:gap-4 py-4 min-h-[56px] ${
-                s.locked ? 'opacity-45 cursor-not-allowed' : 'cursor-pointer group'
-              }`}
-            >
-              <span className={`shrink-0 w-9 h-9 flex items-center justify-center border transition-colors duration-200 ${
-                checked ? 'border-gold/45 text-gold bg-gold/[0.05]' : 'border-beige-dark/50 text-brown-muted/45'
-              }`}>
-                {s.locked ? <Lock size={14} strokeWidth={1.5} /> : <Icon size={15} strokeWidth={1.4} />}
-              </span>
-
-              <span className="flex-1 min-w-0">
-                <span className={`block text-[12.5px] font-sans font-medium leading-tight ${checked ? 'text-ink' : 'text-brown-muted/60'}`}>
-                  {label}
-                </span>
-                <span className="block mt-0.5 text-[10.5px] text-brown-muted/50 font-sans font-light leading-snug">
-                  {s.locked ? ui.locked : hint}
-                </span>
-                {/* Bu bölmənin builder-də öz addımı var → bağlananda addım da çıxır */}
-                {!s.locked && !checked && SECTION_STEP_ID[s.id] != null && (
-                  <span className="block mt-1 text-[10px] text-gold/55 font-sans font-light italic leading-snug">
-                    {ui.skips}
-                  </span>
-                )}
-              </span>
-
-              {/* Switch — 44px toxunma hədəfi, qızıl dizayn dili */}
-              <input
-                type="checkbox"
-                className="sr-only"
-                checked={checked}
-                disabled={s.locked}
-                onChange={() => onToggle(s.id)}
-                aria-label={label}
-              />
-              <span
-                aria-hidden="true"
-                className={`shrink-0 relative w-[46px] h-[26px] rounded-full transition-colors duration-250 ${
-                  checked ? 'bg-gold shadow-[0_2px_10px_rgba(197,160,89,0.32)]' : 'bg-beige-dark/45'
-                } ${s.locked ? '' : 'group-hover:opacity-90'}`}
-              >
-                <span className={`absolute top-[3px] w-5 h-5 rounded-full bg-cream shadow-[0_1px_3px_rgba(0,0,0,0.18)] transition-transform duration-250 ${
-                  checked ? 'translate-x-[23px]' : 'translate-x-[3px]'
-                }`} />
-              </span>
-            </label>
+              icon={Icon}
+              title={label}
+              description={hint}
+              checked={checked}
+              onChange={() => onToggle(s.id)}
+              locked={s.locked}
+              /* Bu bölmənin builder-də öz addımı var → bağlananda addım da çıxır */
+              note={!s.locked && !checked && SECTION_STEP_ID[s.id] != null ? ui.skips : undefined}
+              lang={lang}
+            />
           )
         })}
-      </div>
+      </ToggleList>
     </div>
   )
 }
@@ -1561,88 +1350,30 @@ const PARTNER_UI = {
   },
 }
 
-/* lucide-react v1-də brend ikonları yoxdur — Instagram glifi lucide üslubunda inline SVG */
-function InstagramIcon({ size = 13, strokeWidth = 1.6 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-    </svg>
-  )
-}
-
-/* Bir partnyor kartı — glass + gold border, mövcud design system sinifləri */
-function PartnerCard({ partner, lang, pkgId, ui }) {
-  const pct = partner.discounts[pkgId] || partner.discounts.SADE
-  const desc = partner.description[lang] || partner.description.az
-  return (
-    <div
-      className="glass border border-gold/30 rounded-[26px] px-6 sm:px-10 py-8 sm:py-9"
-      style={{ boxShadow: '0 12px 36px rgba(44,26,14,0.08), inset 0 1px 0 rgba(255,255,255,0.55)' }}
-    >
-      {/* Logo (gələcək) + partnyor adı */}
-      <div className="flex items-center gap-3.5 mb-1.5">
-        {partner.logo ? (
-          <img src={partner.logo} alt={partner.name} className="w-11 h-11 rounded-full object-cover border border-gold/30 flex-shrink-0" />
-        ) : (
-          /* Logo placeholder — partnyor loqosu əlavə olunana qədər baş hərf */
-          <div className="w-11 h-11 rounded-full grid place-items-center flex-shrink-0 border border-gold/35"
-            style={{ background: 'linear-gradient(135deg, rgba(197,160,89,0.14), rgba(197,160,89,0.05))' }}>
-            <span className="font-serif text-lg text-gold-dark font-light">{partner.name.charAt(0)}</span>
-          </div>
-        )}
-        <p className="font-serif text-xl text-espresso font-light tracking-tight">{partner.name}</p>
-      </div>
-      <p className="text-[12.5px] text-brown-muted/75 font-light leading-relaxed mb-5">{desc}</p>
-
-      {/* Paketə uyğun endirim — badge */}
-      <div className="inline-flex items-center gap-2.5 border border-gold/45 bg-gold/[0.06] rounded-full px-5 py-2.5 mb-4">
-        <span className="font-mono text-[9px] tracking-[0.24em] uppercase text-gold-dark font-semibold">{ui.badgeLabel}</span>
-        <span className="text-[13px] text-espresso font-medium">{ui.badgeValue(pct)}</span>
-      </div>
-
-      <p className="text-[11.5px] text-brown-muted/65 font-light leading-relaxed mb-5">{ui.claim}</p>
-
-      {/* CTA — istifadəçiyə nə edəcəyini aydın göstərən vurğulanmış məlumat qutusu */}
-      <div className="border border-gold/30 bg-gold/[0.05] rounded-xl px-4 sm:px-5 py-3.5 mb-6">
-        <p className="text-[12px] text-espresso font-light leading-relaxed">{ui.cta}</p>
-      </div>
-
-      {/* Əlaqə düymələri */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-5">
-        {partner.instagram && (
-          <a href={partner.instagram} target="_blank" rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-2 btn-outline-gold min-h-[46px] text-[10px] tracking-[0.22em] uppercase touch-manipulation">
-            <InstagramIcon size={13} strokeWidth={1.6} />
-            Instagram
-          </a>
-        )}
-        {partner.whatsapp && (
-          <a href={partner.whatsapp} target="_blank" rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-2 btn-outline-gold min-h-[46px] text-[10px] tracking-[0.22em] uppercase touch-manipulation">
-            <MessageCircle size={13} strokeWidth={1.6} />
-            WhatsApp
-          </a>
-        )}
-      </div>
-
-      {/* Kartın sonunda kiçik qeyd */}
-      <p className="text-[10.5px] text-brown-muted/55 font-light leading-relaxed">{ui.footNote(partner.name)}</p>
-    </div>
-  )
-}
-
 /* Partnyorlar addımının məzmunu — bütün aktiv partnyorları dinamik render edir */
 function PartnersStep({ lang, pkgId }) {
   const ui = PARTNER_UI[lang] || PARTNER_UI.az
   if (ACTIVE_PARTNERS.length === 0) return null
   return (
     <div className="space-y-4">
-      {ACTIVE_PARTNERS.map(p => (
-        <PartnerCard key={p.id} partner={p} lang={lang} pkgId={pkgId} ui={ui} />
-      ))}
+      {ACTIVE_PARTNERS.map((p) => {
+        const pct = p.discounts[pkgId] || p.discounts.SADE
+        return (
+          <PartnerOfferCard
+            key={p.id}
+            lang={lang}
+            name={p.name}
+            logo={p.logo ? <img src={p.logo} alt="" className="h-full w-full object-cover" /> : undefined}
+            description={p.description[lang] || p.description.az}
+            discount={ui.badgeValue(pct)}
+            packageLabel={ui.badgeLabel.replace(/:\s*$/, '')}
+            howTo={`${ui.claim} ${ui.cta.replace(/^📌\s*/, '')}`}
+            instagramUrl={p.instagram}
+            whatsappUrl={p.whatsapp}
+            disclaimer={ui.footNote(p.name)}
+          />
+        )
+      })}
     </div>
   )
 }
@@ -1703,6 +1434,8 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
   const step = clampStep(stepRaw)
 
   const [errors, setErrors] = useState({})
+  /* Addım keçidi animasiyasının istiqaməti (1 irəli, -1 geri) — yalnız görünüş */
+  const [dir, setDir] = useState(1)
   /* Serverin təyin etdiyi KANONİK slug (aytekin-ve-ferid-abc234).
      QR və qalereya linkləri adlardan yenidən hesablanmamalıdır — əks
      halda eyni adlı iki cütlük eyni foto qovluğunu paylaşar. */
@@ -1877,12 +1610,14 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
   const next = (e) => {
     if (e) { e.preventDefault(); e.stopPropagation() }
     if (validate()) {
+      setDir(1)
       setStep(Math.min(step + 1, VISIBLE_TOTAL))
       scrollToTop()
     }
   }
   const prev = (e) => {
     if (e) { e.preventDefault(); e.stopPropagation() }
+    setDir(-1)
     setStep(Math.max(step - 1, 1))
     scrollToTop()
   }
@@ -1964,111 +1699,20 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
   }
 
   return (
-    <div id="builder-top" className="max-w-2xl mx-auto">
+    <div id="builder-top" className="mx-auto w-full max-w-[1040px]">
 
-      {/* ── Draft Restore Banner ── */}
-      {draftRestored && !isAdmin && (
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '10px 16px', marginBottom: 16,
-          background: 'linear-gradient(135deg, oklch(97% 0.02 85) 0%, oklch(95% 0.035 80) 100%)',
-          border: '1px solid oklch(82% 0.07 80)',
-          borderRadius: 4,
-          gap: 12,
-        }}>
-          <span style={{
-            fontSize: 11, letterSpacing: '0.04em',
-            color: 'oklch(35% 0.04 60)', fontFamily: '"Inter",system-ui,sans-serif',
-            display: 'flex', alignItems: 'center', gap: 6,
-          }}>
-            <span style={{ fontSize: 13 }}>↩</span>
-            Əvvəlki dəvətnaməniz yükləndi
-          </span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-            <button
-              type="button"
-              onClick={() => setShowResetConfirm(true)}
-              style={{
-                fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase',
-                color: 'oklch(55% 0.09 60)', fontFamily: '"Inter",system-ui,sans-serif',
-                fontWeight: 600, background: 'none', border: 'none',
-                cursor: 'pointer', padding: '2px 6px',
-                borderBottom: '1px solid oklch(72% 0.07 80)',
-                transition: 'color 0.15s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.color = 'oklch(35% 0.08 60)' }}
-              onMouseLeave={e => { e.currentTarget.style.color = 'oklch(55% 0.09 60)' }}
-            >
-              Yeni Başlat
-            </button>
-            <button
-              type="button"
-              onClick={() => setDraftRestored(false)}
-              style={{
-                background: 'none', border: 'none', cursor: 'pointer',
-                color: 'oklch(65% 0.04 60)', lineHeight: 1, padding: '2px 4px',
-                fontSize: 14, display: 'flex', alignItems: 'center',
-              }}
-              aria-label="Bağla"
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── Sıfırlama Təsdiq Modalı ── */}
-      {showResetConfirm && (
-        <div
-          className="fixed inset-0 flex items-center justify-center z-[200] px-4"
-          style={{ background: 'rgba(15,10,5,0.6)', backdropFilter: 'blur(6px)' }}
-          onClick={e => { if (e.target === e.currentTarget) setShowResetConfirm(false) }}
-        >
-          <div
-            className="bg-cream shadow-2xl max-w-sm w-full"
-            style={{
-              border: '1px solid rgba(197,160,89,0.35)',
-              position: 'relative',
-            }}
-          >
-            <div style={{ height: 1, background: 'linear-gradient(to right,transparent,rgba(197,160,89,0.9) 30%,rgba(197,160,89,1) 50%,rgba(197,160,89,0.9) 70%,transparent)' }} />
-            <div className="px-8 py-8 text-center">
-              <button
-                onClick={() => setShowResetConfirm(false)}
-                className="absolute top-4 right-4 text-brown-muted/40 hover:text-gold transition-colors"
-              >
-                <X size={14} strokeWidth={1.5} />
-              </button>
-              <p className="font-mono text-[9px] tracking-[0.32em] uppercase text-gold mb-4">
-                Yeni Dəvətnamə
-              </p>
-              <p className="font-serif text-lg text-ink font-light tracking-tight mb-2">
-                Əminsiniz?
-              </p>
-              <p className="text-brown-muted text-sm font-light leading-relaxed mb-7 max-w-xs mx-auto">
-                Cari qaralama silinəcək. Yeni dəvətnaməyə başlamaq istəyirsiniz?
-              </p>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={handleNewDraft}
-                  className="flex-1 btn-gold text-xs py-3"
-                >
-                  Bəli, başla
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowResetConfirm(false)}
-                  className="flex-1 btn-outline-gold text-xs py-3"
-                >
-                  Ləğv et
-                </button>
-              </div>
-            </div>
-            <div style={{ height: 1, background: 'linear-gradient(to right,transparent,rgba(197,160,89,0.6) 40%,rgba(197,160,89,0.8) 50%,rgba(197,160,89,0.6) 60%,transparent)' }} />
-          </div>
-        </div>
-      )}
+      {/* ── Sıfırlama Təsdiq Pəncərəsi ── */}
+      <ConfirmDialog
+        open={showResetConfirm}
+        lang={lang}
+        title="Əminsiniz?"
+        description="Cari qaralama silinəcək. Yeni dəvətnaməyə başlamaq istəyirsiniz?"
+        confirmLabel="Bəli, başla"
+        cancelLabel="Ləğv et"
+        destructive
+        onConfirm={handleNewDraft}
+        onCancel={() => setShowResetConfirm(false)}
+      />
 
       {/* ── Təsdiq Modalı ── */}
       {showApproveModal && (
@@ -2077,7 +1721,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
           style={{ background: 'rgba(15,10,5,0.65)', backdropFilter: 'blur(6px)' }}
           onClick={e => { if (e.target === e.currentTarget) setShowApproveModal(false) }}
         >
-          <div className="bg-cream border border-beige-dark/60 shadow-2xl max-w-lg w-full animate-fade-up" style={{ position: 'relative' }}>
+          <div className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-luxe ring-1 ring-gold/25 animate-fade-up">
             {/* Üst qızıl xətt */}
             <div style={{ height: 1, background: 'linear-gradient(to right,transparent,rgba(197,160,89,0.9) 30%,rgba(197,160,89,1) 50%,rgba(197,160,89,0.9) 70%,transparent)' }} />
 
@@ -2103,7 +1747,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
               </div>
 
               {/* Link qutusu */}
-              <div className="bg-beige border border-beige-dark/60 px-5 py-4 mb-6">
+              <div className="mb-6 rounded-2xl bg-cream px-5 py-4 ring-1 ring-inset ring-beige-dark">
                 <p className="text-[9px] tracking-[0.22em] uppercase text-brown-muted/60 mb-2 font-medium">
                   🔗 Müştəri Dəvətnamə Linki
                 </p>
@@ -2137,99 +1781,38 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
         </div>
       )}
 
-      {/* ── Addım göstəricisi ─────────────────────────────────────────────
-          Phase 35: addım sayı 8-dən 10-a qalxdı, ona görə iki variant var.
-
-          < md  → «Addım X / Y · BAŞLIQ» + seqmentli qızıl relslər.
-                  Nə kəsilir, nə sətirdən çıxır, nə də nömrələr üst-üstə
-                  düşür — seqment sayı nə olursa olsun eni 100%-dir.
-          ≥ md  → köhnə nömrəli/etiketli rels olduğu kimi qalır.
-          ────────────────────────────────────────────────────────────── */}
-
-      {/* Mobil / tablet: kompakt başlıq + seqmentli rels */}
-      <div className="md:hidden mb-8">
-        <div className="flex items-baseline justify-between gap-3 mb-2.5">
-          <span className="shrink-0 text-[9px] tracking-[0.28em] uppercase text-gold font-medium font-sans tabular-nums">
-            {step} / {VISIBLE_TOTAL}
-          </span>
-          <span className="text-[9px] tracking-[0.14em] uppercase text-brown-muted/60 font-sans truncate text-right">
-            {titleOf(actualStep)}
-          </span>
-        </div>
-        <div className="flex items-center gap-1 w-full" role="tablist" aria-label={titleOf(actualStep)}>
-          {visibleSteps.map((actualN, i) => {
-            const n = i + 1
-            const done = n < step
-            const active = n === step
-            return (
-              <button
-                key={actualN}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                aria-label={`${n}. ${titleOf(actualN)}`}
-                onClick={() => setStep(n)}
-                /* Görünən zolaq 3px-dir; toxunma hədəfi şəffaf padding ilə 44px */
-                className="flex-1 min-w-0 py-[21px] -my-[21px] focus:outline-none touch-manipulation"
-              >
-                <span className={`block h-[3px] w-full transition-colors duration-400 ${
-                  done ? 'bg-gold/55' : active ? 'bg-gold shadow-[0_1px_6px_rgba(197,160,89,0.5)]' : 'bg-beige-dark/40'
-                }`} />
-              </button>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Masaüstü: nömrəli rels + etiketlər */}
-      <div className="hidden md:flex items-start mb-12">
-        {visibleSteps.map((actualN, i) => {
-          const n = i + 1
-          const done = n < step
-          const active = n === step
-          const title = titleOf(actualN)
-          return (
-            /* ⚠ `items-start` + birləşdirici xəttin sabit `mt-4`-ü: etiketi bir
-               sətir olan addımların dairəsi 5px aşağı sürüşürdü (10 addımda
-               nəzərə çarpırdı). İndi bütün dairələr eyni xətdədir. */
-            <div key={actualN} className="flex items-start flex-1 last:flex-none last:flex-initial">
-              <button
-                type="button"
-                onClick={() => setStep(n)}
-                className="flex flex-col items-center gap-2.5 focus:outline-none group min-w-[44px] min-h-[48px] touch-manipulation"
-              >
-                <div className={`w-8 h-8 flex items-center justify-center transition-all duration-250 ${
-                  done
-                    ? 'bg-gold shadow-[0_2px_10px_rgba(197,160,89,0.35)] group-hover:opacity-80'
-                    : active
-                    ? 'border-2 border-gold bg-cream shadow-[0_0_0_4px_rgba(197,160,89,0.08)]'
-                    : 'border border-beige-dark/50 bg-transparent group-hover:border-gold/40'
-                }`}>
-                  {done
-                    ? <Check size={12} strokeWidth={2.5} className="text-white" />
-                    : <span className={`text-[11px] font-medium font-sans ${active ? 'text-gold' : 'text-brown-muted/38 group-hover:text-brown-muted/60'}`}>{n}</span>
-                  }
-                </div>
-                <span className={`block text-[8.5px] tracking-[0.14em] uppercase text-center max-w-[56px] lg:max-w-[68px] leading-tight font-sans font-medium transition-colors duration-200 ${
-                  done ? 'text-brown-muted/45' : active ? 'text-gold' : 'text-brown-muted/28 group-hover:text-brown-muted/45'
-                }`}>
-                  {title}
-                </span>
-              </button>
-              {i < visibleSteps.length - 1 && (
-                <div className={`flex-1 min-w-0 h-px mt-4 mx-1.5 lg:mx-3 transition-colors duration-500 ${done ? 'step-line-active' : 'bg-beige-dark/35'}`} />
-              )}
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Step content */}
-      <div className="bg-cream border border-beige-dark/40 shadow-[0_1px_4px_rgba(0,0,0,0.04),0_8px_32px_rgba(197,160,89,0.04)] px-6 sm:px-12 py-10 sm:py-14 overflow-visible">
-        <div className="mb-8 pb-6 border-b border-beige-dark/25">
-          <h3 className="font-serif text-2xl text-ink font-light tracking-tight mb-2">{actualStep === 8 ? partnerUi.title : actualStep === 5 ? `🎵 ${titleOf(5)}` : titleOf(actualStep)}</h3>
-          <p className="text-[11.5px] text-brown-muted/60 font-sans font-light leading-relaxed">{(STEP_DESCRIPTIONS[lang] || STEP_DESCRIPTIONS.az)[actualStep]}</p>
-        </div>
+      {/* ── Builder çərçivəsi (UI redesign 2026-10) ──
+          Addım siyahısı, keçid, validasiya, avtomatik saxlama — hamısı yuxarıdakı
+          state/funksiyalardadır; BuilderShell yalnız görünüşdür.
+          `allowJump` — köhnə builder kimi istənilən addıma keçmək olur. */}
+      <BuilderShell
+        lang={lang}
+        hideHeader
+        allowJump
+        steps={visibleSteps.map((id) => ({ id: String(id), label: titleOf(id) }))}
+        current={step - 1}
+        direction={dir}
+        onStepClick={(i) => { setDir(i + 1 >= step ? 1 : -1); setStep(i + 1) }}
+        onPrev={prev}
+        onNext={step < VISIBLE_TOTAL ? next : handleSubmit}
+        isLast={step === VISIBLE_TOTAL}
+        nextLoading={submitLoading}
+        nextLabel={step < VISIBLE_TOTAL ? tr.btn_next : tr.btn_create}
+        notice={draftRestored && !isAdmin ? (
+          <Notice
+            variant="draft"
+            lang={lang}
+            onDismiss={() => setDraftRestored(false)}
+            action={<NoticeButton onClick={() => setShowResetConfirm(true)}>Yeni Başlat</NoticeButton>}
+          >
+            Əvvəlki dəvətnaməniz yükləndi
+          </Notice>
+        ) : null}
+      >
+      <StepCard
+        title={actualStep === 8 ? partnerUi.title.replace(/^🤝\s*/, '') : titleOf(actualStep)}
+        subtitle={(STEP_DESCRIPTIONS[lang] || STEP_DESCRIPTIONS.az)[actualStep]}
+      >
 
         {/* STEP 0 — DİZAYN SEÇİMİ (Phase 35: builderin İLK addımı).
             Əvvəl 1-ci addımın altında bir blok idi; funksionallıq eynidir,
@@ -2269,33 +1852,20 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
         {actualStep === 1 && (
           <div className="space-y-8 pb-10">
             {/* Tədbir növü */}
-            <div>
-              <Label>{tr.event_type || 'Tədbir növü'}</Label>
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mt-2">
-                {EVENT_TYPES.map(({ id }) => {
-                  const Icon = EVENT_ICONS[id]
-                  const label = tr[`event_${id}`]
-                  const selected = data.eventType === id
-                  return (
-                    <button
-                      key={id}
-                      type="button"
-                      onClick={() => set('eventType', id)}
-                      className={`flex flex-col items-center gap-3 py-7 border transition-all duration-200 group touch-manipulation ${
-                        selected
-                          ? 'border-gold bg-gold/[0.05] text-gold shadow-[0_4px_20px_rgba(197,160,89,0.12)]'
-                          : 'border-beige-dark/55 text-brown-muted/55 hover:border-gold/45 hover:text-gold/80 hover:bg-gold/[0.02] hover:shadow-[0_2px_12px_rgba(197,160,89,0.07)]'
-                      }`}
-                    >
-                      <div className={`transition-transform duration-200 ${selected ? '' : 'group-hover:scale-110'}`}>
-                        <Icon size={22} strokeWidth={1.4} />
-                      </div>
-                      <span className="text-[9.5px] tracking-[0.16em] uppercase font-sans font-medium">{label}</span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
+            <ChoiceGroup legend={tr.event_type || 'Tədbir növü'} className="grid grid-cols-3 gap-2.5 sm:grid-cols-5">
+              {EVENT_TYPES.map(({ id }) => (
+                <SelectCard
+                  key={id}
+                  name="eventType"
+                  value={id}
+                  checked={data.eventType === id}
+                  onChange={(v) => set('eventType', v)}
+                  icon={EVENT_ICONS[id]}
+                  label={tr[`event_${id}`]}
+                  lang={lang}
+                />
+              ))}
+            </ChoiceGroup>
 
             {/* Korporativ / Digər — Tədbirin Adı + Təşkilatçı */}
             {isCorp ? (
@@ -2306,7 +1876,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
                     value={data.eventName || ''}
                     onChange={(e) => set('eventName', e.target.value)}
                     placeholder={tr.event_name_label}
-                    className={errors.eventName ? 'border-b-red-300' : ''}
+                    invalid={!!errors.eventName}
                   />
                 </div>
                 <div>
@@ -2329,7 +1899,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
                     value={data.groomName}
                     onChange={(e) => set('groomName', e.target.value)}
                     placeholder="Məs: Murad"
-                    className={errors.groomName ? 'border-b-red-300' : ''}
+                    invalid={!!errors.groomName}
                   />
                 </div>
                 <div>
@@ -2338,7 +1908,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
                     value={data.brideName}
                     onChange={(e) => set('brideName', e.target.value)}
                     placeholder="Məs: Leyla"
-                    className={errors.brideName ? 'border-b-red-300' : ''}
+                    invalid={!!errors.brideName}
                   />
                 </div>
               </div>
@@ -2350,7 +1920,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
                   value={data.brideName}
                   onChange={(e) => set('brideName', e.target.value)}
                   placeholder={tr.person_name_label}
-                  className={errors.brideName ? 'border-b-red-300' : ''}
+                  invalid={!!errors.brideName}
                 />
               </div>
             )}
@@ -2429,114 +1999,48 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
             <div>
               <Label>{tr.dresscode_type_label}</Label>
               {/* Kartların adının dəyişdirilə bildiyini bildirən qısa izah */}
-              <p className="text-[10.5px] text-brown-muted/60 font-light -mt-1 mb-1">{tr.dresscode_custom_label}</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
+              <p className={`${hintClass} -mt-1 mb-3`}>{tr.dresscode_custom_label}</p>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {DRESS_CODE_OPTIONS.map(({ id, icon: DressIcon, colors }) => {
-                  /* Kartın adı fərdiləşdirilə bilər. Boşdursa standart ad qalır
-                     → bu sahəsi olmayan köhnə sifarişlər eyni görünür. */
+                  /* Kartın adı və kişi/qadın mətnləri fərdiləşdirilə bilər. Boşdursa
+                     standart qalır → bu sahəsi olmayan köhnə sifarişlər eyni görünür. */
                   const defaultLabel = tr[`dresscode_${id}_label`] || id
-                  const custom = (data.dressCodeLabels?.[id] || '').trim()
-                  const label = custom || defaultLabel
-                  /* Kişi/qadın mətnləri də fərdiləşdirilə bilər. Kartın alt
-                     sətri (`sub`) həmin iki mətndən qurulur ki, builder-də
-                     görünən dəvətnamədəki ilə eyni olsun. */
-                  const gDef  = resolveDressGenders(id, lang)
-                  const gCur  = resolveDressGenders(id, lang, data.dressCodeGenders)
-                  const sub   = [gCur.male, gCur.female].filter(Boolean).join(' · ')
-                  const isActive = data.dressCodePalette === id
+                  const gDef = resolveDressGenders(id, lang)
+                  const genders = data.dressCodeGenders || {}
+                  const setGender = (sex, v) => set('dressCodeGenders', {
+                    ...genders,
+                    [id]: { ...(genders[id] || {}), [sex]: v },
+                  })
                   return (
-                    <div key={id} className="flex flex-col">
-                    <button
-                      type="button"
-                      onClick={() => set('dressCodePalette', id)}
-                      aria-pressed={isActive}
-                      className={`group relative text-left p-5 min-h-[88px] flex-1 rounded-xl border transition-all duration-250 touch-manipulation ${
-                        isActive
-                          ? 'border-gold shadow-[0_8px_28px_rgba(197,160,89,0.18)]'
-                          : 'border-beige-dark/55 hover:border-gold/50 hover:-translate-y-[2px] hover:shadow-[0_6px_22px_rgba(197,160,89,0.12)]'
-                      }`}
-                      style={{
-                        background: isActive
-                          ? 'linear-gradient(150deg, rgba(255,255,255,0.72) 0%, rgba(197,160,89,0.08) 100%)'
-                          : 'linear-gradient(150deg, rgba(255,255,255,0.55) 0%, rgba(253,250,244,0.35) 100%)',
-                        backdropFilter: 'blur(10px)',
-                        WebkitBackdropFilter: 'blur(10px)',
-                      }}
+                    <PaletteCard
+                      key={id}
+                      name="dresscode"
+                      value={id}
+                      selected={data.dressCodePalette === id}
+                      onSelect={(v) => set('dressCodePalette', v)}
+                      icon={DressIcon}
+                      title={defaultLabel}
+                      subtitle={[gDef.male, gDef.female].filter(Boolean).join(' · ')}
+                      colors={colors}
+                      customTitle={data.dressCodeLabels?.[id] || ''}
+                      onCustomTitleChange={(v) => set('dressCodeLabels', { ...(data.dressCodeLabels || {}), [id]: v })}
+                      styleA={genders[id]?.male || ''}
+                      onStyleAChange={(v) => setGender('male', v)}
+                      styleB={genders[id]?.female || ''}
+                      onStyleBChange={(v) => setGender('female', v)}
+                      lang={lang}
                     >
-                      {/* Seçilmiş nişan */}
-                      {isActive && (
-                        <span className="absolute top-3 right-3 w-5 h-5 rounded-full bg-gold flex items-center justify-center shadow-[0_2px_8px_rgba(197,160,89,0.4)]">
-                          <Check size={10} strokeWidth={3} className="text-white" />
+                      <div className="flex gap-5 text-[13px] text-brown-dark">
+                        <span className="inline-flex items-center gap-2">
+                          <User size={15} className="text-gold-deep" strokeWidth={1.5} />
+                          {tr.dresscode_groom_icon}
                         </span>
-                      )}
-                      <div className="flex items-start gap-3.5">
-                        {/* İkon */}
-                        <div className={`w-11 h-11 min-w-[44px] rounded-full flex items-center justify-center border transition-all duration-250 ${
-                          isActive
-                            ? 'border-gold/55 bg-gold/[0.12]'
-                            : 'border-beige-dark/55 bg-cream group-hover:border-gold/40 group-hover:scale-105'
-                        }`}>
-                          <DressIcon size={17} strokeWidth={1.4} className={isActive ? 'text-gold' : 'text-brown-muted/60 group-hover:text-gold/80'} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          {/* Başlıq */}
-                          <p className={`text-[13px] font-medium tracking-wide mb-0.5 ${isActive ? 'text-gold-dark' : 'text-ink'}`}>{label}</p>
-                          {/* Qısa açıqlama */}
-                          <p className="text-[10.5px] text-brown-muted/65 font-light leading-relaxed mb-2.5">{sub}</p>
-                          {/* Rəng palitrası */}
-                          <div className="flex items-center gap-1.5">
-                            {colors.map((c) => (
-                              <span
-                                key={c}
-                                className="w-3.5 h-3.5 rounded-full border border-black/10 shadow-sm inline-block flex-shrink-0"
-                                style={{ backgroundColor: c }}
-                              />
-                            ))}
-                          </div>
-                        </div>
+                        <span className="inline-flex items-center gap-2">
+                          <Sparkles size={15} className="text-gold-deep" strokeWidth={1.5} />
+                          {tr.dresscode_bride_icon}
+                        </span>
                       </div>
-                      {isActive && (
-                        <div className="flex gap-5 mt-4 pt-3.5 border-t border-gold/20">
-                          <div className="flex items-center gap-2">
-                            <User size={14} className="text-amber-700/80" strokeWidth={1.4} />
-                            <span className="text-[9.5px] text-brown-muted">{tr.dresscode_groom_icon}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Sparkles size={14} className="text-amber-700/80" strokeWidth={1.4} />
-                            <span className="text-[9.5px] text-brown-muted">{tr.dresscode_bride_icon}</span>
-                          </div>
-                        </div>
-                      )}
-                    </button>
-                    {/* Fərdi mətnlər — ⚠ `<button>`-un İÇİNDƏ deyil, altındadır:
-                        input-u button-un içinə qoymaq həm etibarsız HTML-dir,
-                        həm də hər klik kartı seçərdi. */}
-                    <input
-                      type="text"
-                      value={data.dressCodeLabels?.[id] || ''}
-                      onChange={(e) => set('dressCodeLabels', { ...(data.dressCodeLabels || {}), [id]: e.target.value })}
-                      placeholder={defaultLabel}
-                      aria-label={`${defaultLabel} — ${tr.dresscode_custom_label}`}
-                      className="mt-1.5 w-full border-0 border-b border-beige-dark/60 bg-transparent text-ink text-[12px] px-1 py-1.5 focus:outline-none focus:border-gold transition-colors duration-300 placeholder:text-brown-muted/40 rounded-none"
-                    />
-                    {/* İkonların altındakı kişi / qadın mətnləri */}
-                    <div className="grid grid-cols-2 gap-2">
-                      {['male', 'female'].map((sex) => (
-                        <input
-                          key={sex}
-                          type="text"
-                          value={data.dressCodeGenders?.[id]?.[sex] || ''}
-                          onChange={(e) => set('dressCodeGenders', {
-                            ...(data.dressCodeGenders || {}),
-                            [id]: { ...(data.dressCodeGenders?.[id] || {}), [sex]: e.target.value },
-                          })}
-                          placeholder={gDef[sex]}
-                          aria-label={`${defaultLabel} — ${sex === 'male' ? tr.dresscode_male_label : tr.dresscode_female_label}`}
-                          className="mt-1 w-full border-0 border-b border-beige-dark/40 bg-transparent text-brown-muted text-[11px] px-1 py-1 focus:outline-none focus:border-gold transition-colors duration-300 placeholder:text-brown-muted/35 rounded-none"
-                        />
-                      ))}
-                    </div>
-                    </div>
+                    </PaletteCard>
                   )
                 })}
               </div>
@@ -2586,41 +2090,12 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
         {actualStep === 8 && (
           <PartnersStep lang={lang} pkgId={pkgId} />
         )}
-      </div>
-
-      {/* Navigation */}
-      {/* ⚠ Phase 35 mobil audit: 320px-də «Dəvətnaməni Yarat» düyməsi kartdan
-          6px çıxırdı. Kiçik ekranda hərf ölçüsü/aralığı və padding azalır —
-          sm-dən yuxarı görünüş dəyişmir. */}
-      <div className="flex items-center justify-between gap-3 mt-8 sm:mt-10">
-        <button
-          type="button"
-          onClick={prev}
-          disabled={step === 1}
-          className="flex items-center gap-1.5 sm:gap-2 shrink-0 px-4 sm:px-8 py-3 sm:py-3.5 min-h-[46px] text-[10px] sm:text-[10px] tracking-[0.12em] sm:tracking-[0.22em] border border-beige-dark/55 text-brown-muted/70 text-[10px] tracking-[0.22em] uppercase font-sans font-medium hover:border-gold/55 hover:text-gold hover:bg-gold/[0.02] transition-all duration-200 active:scale-[0.97] disabled:opacity-20 disabled:cursor-not-allowed touch-manipulation"
-        >
-          <ChevronLeft size={12} strokeWidth={2} />
-          {tr.btn_prev}
-        </button>
-
-        {step < VISIBLE_TOTAL ? (
-          <button type="button" onClick={next} className="flex items-center gap-2 sm:gap-2.5 btn-gold min-h-[46px] px-5 sm:px-9 text-[10px] sm:text-xs tracking-[0.12em] sm:tracking-[0.18em] shadow-[0_4px_18px_rgba(197,160,89,0.2)] touch-manipulation">
-            {tr.btn_next}
-            <ChevronRight size={12} strokeWidth={2} />
-          </button>
-        ) : (
-          <button type="button" onClick={handleSubmit} disabled={submitLoading} className="btn-gold min-h-[46px] min-w-0 px-5 sm:px-9 text-[10px] sm:text-xs tracking-[0.12em] sm:tracking-[0.18em] leading-tight shadow-[0_4px_18px_rgba(197,160,89,0.2)] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed">
-            {submitLoading ? '…' : tr.btn_create}
-          </button>
-        )}
-      </div>
+      </StepCard>
+      </BuilderShell>
 
       {/* ── Admin İdarəetmə Paneli ── */}
       {(isAdmin || adminMode) && (
-        <div
-          className="mt-8 border border-emerald-600/25"
-          style={{ background: 'linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%)' }}
-        >
+        <div className="mx-auto mt-8 max-w-[780px] overflow-hidden rounded-3xl bg-olive-mist/70 ring-1 ring-inset ring-olive/25">
           <div style={{ height: 1, background: 'linear-gradient(to right,transparent,rgba(16,185,129,0.6) 40%,rgba(16,185,129,0.8) 50%,rgba(16,185,129,0.6) 60%,transparent)' }} />
           <div className="px-8 py-7 text-center">
             <p className="text-[10px] tracking-[0.28em] uppercase text-emerald-700 font-semibold mb-2">
@@ -2633,7 +2108,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
               type="button"
               onClick={handleApproveAndGenerateLink}
               disabled={approving}
-              className="inline-flex items-center gap-2.5 px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed text-white text-[11px] tracking-[0.2em] uppercase font-semibold transition-colors duration-200 shadow-md"
+              className="inline-flex min-h-[48px] items-center gap-2.5 rounded-full bg-olive px-8 text-[12px] font-semibold uppercase tracking-label text-white shadow-soft transition-[filter] duration-200 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Check size={13} strokeWidth={2.5} />
               {approving ? 'Saxlanılır...' : 'Sifarişi Təsdiqlə'}

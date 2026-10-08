@@ -10,12 +10,14 @@
    Provider arxitekturası genişlənə biləndir — bax: src/data/music.js
 ══════════════════════════════════════════════════ */
 import { useState, useRef, useCallback } from 'react'
-import { Music, Play, Pause, Upload, Check, X, ChevronRight } from 'lucide-react'
+import { Music, Play, Pause, Upload, X, ChevronRight } from 'lucide-react'
 import {
   PRESET_TRACKS, MUSIC_PROVIDERS, MUSIC_PLAY_MODES, DEFAULT_PLAY_MODE,
   MP3_MAX_BYTES, buildPresetMusic, buildMp3Music, formatSeconds, parseTimeInput,
 } from '../../data/music'
 import { uploadMusic } from '../../utils/api'
+import { MusicTrackRow } from '../builder/media'
+import { OptionCard } from '../builder/choices'
 
 const MUSIC_UI = {
   az: {
@@ -152,8 +154,7 @@ function PreviewPlayer({ file, startTime, onSetStartTime, ui, autoPlay = false }
   const startPct = duration ? Math.min(100, (startTime / duration) * 100) : 0
 
   return (
-    <div className="border border-gold/25 bg-cream rounded-xl overflow-hidden"
-      style={{ boxShadow: '0 6px 24px rgba(197,160,89,0.08)' }}>
+    <div className="overflow-hidden rounded-2xl bg-white shadow-soft ring-1 ring-gold/25">
       <div style={{ height: 1, background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.55) 40%, rgba(197,160,89,0.7) 50%, rgba(197,160,89,0.55) 60%, transparent)' }} />
 
       {/* Gizli audio elementi */}
@@ -172,7 +173,7 @@ function PreviewPlayer({ file, startTime, onSetStartTime, ui, autoPlay = false }
       />
 
       <div className="px-5 sm:px-6 py-5">
-        <p className="text-[9px] tracking-[0.3em] uppercase text-gold font-semibold mb-4">{ui.playerTitle}</p>
+        <p className="mb-4 text-[11px] font-semibold uppercase tracking-label text-gold-deep">{ui.playerTitle}</p>
 
         {/* Player row */}
         <div className="flex items-center gap-4">
@@ -180,7 +181,7 @@ function PreviewPlayer({ file, startTime, onSetStartTime, ui, autoPlay = false }
             type="button"
             onClick={toggle}
             aria-label={playing ? 'Pause' : 'Play'}
-            className="w-12 h-12 min-w-[48px] rounded-full flex items-center justify-center bg-gold text-white shadow-[0_4px_18px_rgba(197,160,89,0.35)] hover:opacity-90 active:scale-95 transition-all touch-manipulation"
+            className="grid h-12 w-12 min-w-[48px] place-items-center rounded-full bg-espresso text-gold-light shadow-lift ring-1 ring-inset ring-gold/30 transition-transform active:scale-95 touch-manipulation"
           >
             {playing ? <Pause size={16} strokeWidth={2} /> : <Play size={16} strokeWidth={2} className="ml-0.5" />}
           </button>
@@ -207,26 +208,26 @@ function PreviewPlayer({ file, startTime, onSetStartTime, ui, autoPlay = false }
               <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-gold shadow pointer-events-none" style={{ left: `${pct}%` }} />
             </div>
             <div className="flex justify-between mt-0.5">
-              <span className="font-mono text-[10px] text-brown-muted/70">{formatSeconds(current)}</span>
-              <span className="font-mono text-[10px] text-brown-muted/50">{duration ? formatSeconds(duration) : '–:––'}</span>
+              <span className="text-[12px] tabular-nums text-brown-dark/85">{formatSeconds(current)}</span>
+              <span className="text-[12px] tabular-nums text-brown-dark/70">{duration ? formatSeconds(duration) : '–:––'}</span>
             </div>
           </div>
         </div>
 
         {/* Başlanğıc nöqtəsi */}
-        <div className="mt-5 pt-5 border-t border-beige-dark/30">
-          <p className="text-[9px] tracking-[0.3em] uppercase text-gold font-semibold mb-1.5">{ui.startTitle}</p>
-          <p className="text-[11px] text-brown-muted/65 font-light leading-relaxed mb-3.5">{ui.startHint}</p>
+        <div className="mt-5 border-t border-gold/15 pt-5">
+          <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-label text-gold-deep">{ui.startTitle}</p>
+          <p className="mb-3.5 text-[13.5px] leading-relaxed text-brown-dark/85">{ui.startHint}</p>
           <div className="flex flex-wrap items-center gap-2.5">
             <button
               type="button"
               onClick={() => onSetStartTime(Math.floor(current))}
-              className="inline-flex items-center gap-2 px-4 py-2.5 min-h-[44px] border border-gold/45 bg-gold/[0.06] hover:bg-gold/[0.12] text-gold-dark text-[10px] tracking-[0.18em] uppercase font-semibold rounded-lg transition-colors touch-manipulation"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-4 text-[11.5px] font-semibold uppercase tracking-label text-gold-deep ring-1 ring-inset ring-gold/45 transition-colors hover:bg-gold-mist/60 touch-manipulation"
             >
               <ChevronRight size={12} strokeWidth={2.5} />
               {ui.setStart}
             </button>
-            <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-gold/[0.08] border border-gold/25 font-mono text-[11px] text-gold-dark">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-gold-mist/70 px-3 py-2 text-[12px] font-medium tabular-nums text-gold-deep">
               {ui.startAt}: {formatSeconds(startTime)}
             </span>
             <div className="flex items-center gap-1.5">
@@ -238,78 +239,19 @@ function PreviewPlayer({ file, startTime, onSetStartTime, ui, autoPlay = false }
                 onKeyDown={(e) => e.key === 'Enter' && applyManual()}
                 placeholder="1:23"
                 aria-label={ui.manualLabel}
-                className="w-[74px] min-h-[44px] text-center font-mono text-xs bg-cream border border-beige-dark/60 rounded-lg focus:outline-none focus:border-gold/60 transition-colors placeholder:text-brown-muted/35"
+                className="h-11 w-[80px] rounded-[12px] bg-cream text-center text-[16px] tabular-nums text-ink ring-1 ring-inset ring-beige-dark placeholder:text-brown-muted/70 focus:outline-none focus:ring-2 focus:ring-gold-deep"
               />
               <button
                 type="button"
                 onClick={applyManual}
                 disabled={parseTimeInput(manual) === null}
-                className="min-h-[44px] px-3.5 border border-beige-dark/60 hover:border-gold/50 text-brown-muted/70 hover:text-gold text-[10px] tracking-[0.14em] uppercase font-medium rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed touch-manipulation"
+                className="h-11 rounded-full px-4 text-[11.5px] font-semibold uppercase tracking-label text-brown-dark ring-1 ring-inset ring-beige-dark transition-colors hover:ring-gold disabled:cursor-not-allowed disabled:opacity-40 touch-manipulation"
               >
                 OK
               </button>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  )
-}
-
-/* ══ Preset kartı ══ */
-function PresetCard({ track, isSelected, isPreviewing, onListen, onSelect, ui }) {
-  return (
-    <div
-      className={`group relative flex items-center gap-4 p-4 rounded-xl border transition-all duration-250 ${
-        isSelected
-          ? 'border-gold bg-gold/[0.06] shadow-[0_6px_24px_rgba(197,160,89,0.16)]'
-          : 'border-beige-dark/50 bg-cream hover:border-gold/45 hover:shadow-[0_4px_18px_rgba(197,160,89,0.1)] hover:-translate-y-[1px]'
-      }`}
-    >
-      {/* Cover placeholder */}
-      <div
-        className="w-14 h-14 min-w-[56px] rounded-lg flex items-center justify-center relative overflow-hidden"
-        style={{ background: `linear-gradient(135deg, ${track.accent}26 0%, ${track.accent}0D 60%), linear-gradient(135deg, rgba(197,160,89,0.16), rgba(197,160,89,0.04))`, border: '1px solid rgba(197,160,89,0.3)' }}
-      >
-        <Music size={20} strokeWidth={1.4} style={{ color: track.accent }} />
-        {isPreviewing && (
-          <span className="absolute inset-0 rounded-lg animate-pulse" style={{ background: 'rgba(197,160,89,0.14)' }} />
-        )}
-      </div>
-
-      {/* Ad + ifaçı */}
-      <div className="flex-1 min-w-0">
-        <p className={`text-[13.5px] font-medium tracking-tight truncate ${isSelected ? 'text-gold-dark' : 'text-ink'}`}>{track.title}</p>
-        <p className="text-[11px] text-brown-muted/65 font-light truncate">{track.artist}</p>
-        <p className="font-mono text-[9.5px] text-brown-muted/40 mt-0.5">{track.duration ? formatSeconds(track.duration) : ''}</p>
-      </div>
-
-      {/* Əməliyyatlar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 flex-shrink-0">
-        <button
-          type="button"
-          onClick={() => onListen(track)}
-          className={`inline-flex items-center justify-center gap-1.5 px-3.5 min-h-[44px] rounded-lg border text-[9.5px] tracking-[0.16em] uppercase font-semibold transition-colors touch-manipulation ${
-            isPreviewing
-              ? 'border-gold/60 bg-gold/[0.1] text-gold-dark'
-              : 'border-beige-dark/60 text-brown-muted/70 hover:border-gold/50 hover:text-gold'
-          }`}
-        >
-          {isPreviewing ? <Pause size={11} strokeWidth={2} /> : <Play size={11} strokeWidth={2} />}
-          {ui.listen}
-        </button>
-        <button
-          type="button"
-          onClick={() => onSelect(track)}
-          className={`inline-flex items-center justify-center gap-1.5 px-3.5 min-h-[44px] rounded-lg text-[9.5px] tracking-[0.16em] uppercase font-semibold transition-all touch-manipulation ${
-            isSelected
-              ? 'bg-gold text-white shadow-[0_3px_14px_rgba(197,160,89,0.35)]'
-              : 'border border-gold/40 text-gold-dark hover:bg-gold/[0.08]'
-          }`}
-        >
-          {isSelected ? <Check size={11} strokeWidth={2.5} /> : null}
-          {isSelected ? ui.selected : ui.select}
-        </button>
       </div>
     </div>
   )
@@ -380,47 +322,40 @@ export default function MusicStep({ music, onChange, lang = 'az' }) {
   return (
     <div className="space-y-6">
       {/* ── Mənbə seçimi ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {[
           { id: 'preset', icon: Music,  title: ui.sourcePreset, sub: ui.sourcePresetSub },
           { id: 'mp3',    icon: Upload, title: ui.sourceMp3,    sub: ui.sourceMp3Sub },
-        ].map(({ id, icon: Icon, title, sub }) => {
-          const active = source === id
-          return (
-            <button
-              key={id}
-              type="button"
-              onClick={() => { setSource(id); setPreviewTrack(null) }}
-              className={`flex items-center gap-3.5 p-4 min-h-[64px] rounded-xl border text-left transition-all duration-200 touch-manipulation ${
-                active
-                  ? 'border-gold bg-gold/[0.05] shadow-[0_4px_20px_rgba(197,160,89,0.14)]'
-                  : 'border-beige-dark/55 hover:border-gold/40 hover:bg-gold/[0.02]'
-              }`}
-            >
-              <div className={`w-10 h-10 min-w-[40px] rounded-full flex items-center justify-center border ${active ? 'border-gold/50 bg-gold/[0.1]' : 'border-beige-dark/60 bg-cream'}`}>
-                <Icon size={15} strokeWidth={1.5} className={active ? 'text-gold' : 'text-brown-muted/60'} />
-              </div>
-              <div>
-                <p className={`text-[12.5px] font-medium tracking-wide ${active ? 'text-gold-dark' : 'text-ink'}`}>{title}</p>
-                <p className="text-[10px] text-brown-muted/60 font-light mt-0.5">{sub}</p>
-              </div>
-            </button>
-          )
-        })}
+        ].map(({ id, icon, title, sub }) => (
+          <OptionCard
+            key={id}
+            name="music-source"
+            value={id}
+            selected={source === id}
+            onSelect={() => { setSource(id); setPreviewTrack(null) }}
+            icon={icon}
+            title={title}
+            description={sub}
+            lang={lang}
+          />
+        ))}
       </div>
 
       {/* ── A) Hazır musiqilər ── */}
       {source === 'preset' && (
         <div className="space-y-2.5">
           {PRESET_TRACKS.map(track => (
-            <PresetCard
+            <MusicTrackRow
               key={track.id}
-              track={track}
-              isSelected={music?.provider === MUSIC_PROVIDERS.PRESET && music?.id === track.id}
-              isPreviewing={previewTrack?.id === track.id}
-              onListen={listenPreset}
-              onSelect={(t) => { setPreviewTrack(null); selectPreset(t) }}
-              ui={ui}
+              title={track.title}
+              artist={track.artist}
+              duration={track.duration ? formatSeconds(track.duration) : undefined}
+              tint={track.accent}
+              playing={previewTrack?.id === track.id}
+              onTogglePlay={() => listenPreset(track)}
+              selected={music?.provider === MUSIC_PROVIDERS.PRESET && music?.id === track.id}
+              onSelect={() => { setPreviewTrack(null); selectPreset(track) }}
+              lang={lang}
             />
           ))}
         </div>
@@ -430,23 +365,22 @@ export default function MusicStep({ music, onChange, lang = 'az' }) {
       {source === 'mp3' && (
         <div>
           {music?.provider === MUSIC_PROVIDERS.MP3 ? (
-            <div className="flex items-center gap-4 p-4 rounded-xl border border-gold bg-gold/[0.05]">
-              <div className="w-12 h-12 min-w-[48px] rounded-lg flex items-center justify-center border border-gold/35"
-                style={{ background: 'linear-gradient(135deg, rgba(197,160,89,0.16), rgba(197,160,89,0.05))' }}>
-                <Music size={18} strokeWidth={1.4} className="text-gold" />
+            <div className="flex items-center gap-4 rounded-2xl bg-gold-mist/55 p-4 shadow-soft ring-2 ring-espresso">
+              <div className="grid h-12 w-12 min-w-[48px] place-items-center rounded-[12px] bg-espresso text-gold-light">
+                <Music size={18} strokeWidth={1.5} />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[9px] tracking-[0.24em] uppercase text-gold font-semibold mb-0.5">{ui.yourFile}</p>
-                <p className="text-[13px] text-ink font-medium truncate">{music.title}</p>
+              <div className="min-w-0 flex-1">
+                <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-label text-gold-deep">{ui.yourFile}</p>
+                <p className="truncate text-[15px] font-medium text-ink">{music.title}</p>
                 {music.localOnly && (
-                  <p className="text-[10px] text-amber-700/80 font-light mt-1 leading-snug">{ui.localNote}</p>
+                  <p className="mt-1 text-[12.5px] leading-snug text-rust">{ui.localNote}</p>
                 )}
               </div>
               <button
                 type="button"
                 onClick={removeMusic}
                 aria-label="Sil"
-                className="w-11 h-11 min-w-[44px] flex items-center justify-center rounded-lg text-brown-muted/45 hover:text-red-400 hover:bg-red-50 transition-colors touch-manipulation"
+                className="grid h-11 w-11 min-w-[44px] place-items-center rounded-full text-brown-muted transition-colors hover:bg-rust-mist hover:text-rust touch-manipulation"
               >
                 <X size={15} strokeWidth={1.5} />
               </button>
@@ -456,24 +390,24 @@ export default function MusicStep({ music, onChange, lang = 'az' }) {
               onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
               onDragLeave={() => setDragOver(false)}
               onDrop={(e) => { e.preventDefault(); setDragOver(false); handleFile(e.dataTransfer.files?.[0]) }}
-              className={`flex flex-col items-center justify-center text-center px-6 py-10 rounded-xl border-2 border-dashed transition-all duration-200 ${
-                dragOver ? 'border-gold bg-gold/[0.07] scale-[1.005]' : 'border-beige-dark/60 bg-beige/30 hover:border-gold/40'
+              className={`flex flex-col items-center justify-center rounded-3xl border-2 border-dashed px-6 py-10 text-center transition-[background-color,border-color] duration-200 ${
+                dragOver ? 'border-gold-deep bg-gold-mist/60' : 'border-gold/45 bg-white/60 hover:border-gold-deep'
               }`}
             >
-              <div className="w-12 h-12 rounded-full border border-gold/35 bg-gold/[0.07] flex items-center justify-center mb-4">
-                <Upload size={17} strokeWidth={1.5} className="text-gold" />
+              <div className="mb-4 grid h-14 w-14 place-items-center rounded-full bg-gold-mist text-gold-deep">
+                <Upload size={20} strokeWidth={1.5} />
               </div>
-              <p className="text-[13px] text-ink font-light mb-1">{ui.dropTitle}</p>
-              <p className="text-[10px] tracking-[0.14em] uppercase text-brown-muted/50 mb-4">{ui.dropOr}</p>
+              <p className="mb-1 text-[15px] font-medium text-ink">{ui.dropTitle}</p>
+              <p className="mb-4 text-[12px] uppercase tracking-label text-brown-dark/70">{ui.dropOr}</p>
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="btn-outline-gold min-h-[46px] px-8 text-[10px] tracking-[0.2em] uppercase disabled:opacity-50 touch-manipulation"
+                className="inline-flex min-h-[48px] items-center rounded-full bg-espresso px-8 text-[11.5px] font-semibold uppercase tracking-label text-cream shadow-lift ring-1 ring-inset ring-gold/30 transition-colors hover:bg-espresso-soft disabled:opacity-50 touch-manipulation"
               >
                 {uploading ? ui.uploading : ui.chooseFile}
               </button>
-              <p className="font-mono text-[9.5px] text-brown-muted/45 mt-4">MP3 · ≤ 20 MB</p>
+              <p className="mt-4 text-[12px] tabular-nums text-brown-dark/70">MP3 · ≤ 20 MB</p>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -483,7 +417,7 @@ export default function MusicStep({ music, onChange, lang = 'az' }) {
               />
             </div>
           )}
-          {fileError && <p className="mt-2.5 text-[11px] text-red-400/90 font-medium">{fileError}</p>}
+          {fileError && <p role="alert" className="mt-2.5 text-[13px] font-medium text-rust">{fileError}</p>}
         </div>
       )}
 
@@ -510,45 +444,30 @@ export default function MusicStep({ music, onChange, lang = 'az' }) {
       {/* ── Başlama rejimi ── */}
       {music && (
         <div>
-          <p className="text-[9px] tracking-[0.3em] uppercase text-gold font-semibold mb-3">{ui.modeTitle}</p>
+          <p className="mb-3 text-[11px] font-semibold uppercase tracking-label text-gold-deep">{ui.modeTitle}</p>
           <div className="space-y-2.5">
             {[
               { id: MUSIC_PLAY_MODES.AUTO,   label: ui.modeAuto,   sub: ui.modeAutoSub,   badge: null },
               { id: MUSIC_PLAY_MODES.BUTTON, label: ui.modeButton, sub: ui.modeButtonSub, badge: ui.recommended },
-            ].map(({ id, label, sub, badge }) => {
-              const active = playMode === id
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => setMode(id)}
-                  className={`w-full flex items-start gap-3.5 p-4 min-h-[56px] rounded-xl border text-left transition-all duration-200 touch-manipulation ${
-                    active
-                      ? 'border-gold bg-gold/[0.05] shadow-[0_4px_18px_rgba(197,160,89,0.12)]'
-                      : 'border-beige-dark/55 hover:border-gold/40'
-                  }`}
-                >
-                  <span className={`mt-0.5 w-[18px] h-[18px] min-w-[18px] rounded-full border-2 flex items-center justify-center transition-colors ${active ? 'border-gold' : 'border-beige-dark'}`}>
-                    {active && <span className="w-2 h-2 rounded-full bg-gold" />}
-                  </span>
-                  <span className="flex-1">
-                    <span className="flex items-center gap-2 flex-wrap">
-                      <span className={`text-[12.5px] font-medium ${active ? 'text-gold-dark' : 'text-ink'}`}>{label}</span>
-                      {badge && (
-                        <span className="text-[8.5px] tracking-[0.16em] uppercase font-bold text-gold-dark bg-gold/[0.12] border border-gold/40 rounded-full px-2.5 py-0.5">{badge}</span>
-                      )}
-                    </span>
-                    <span className="block text-[10.5px] text-brown-muted/60 font-light mt-0.5">{sub}</span>
-                  </span>
-                </button>
-              )
-            })}
+            ].map(({ id, label, sub, badge }) => (
+              <OptionCard
+                key={id}
+                name="music-mode"
+                value={id}
+                selected={playMode === id}
+                onSelect={() => setMode(id)}
+                title={label}
+                description={sub}
+                badge={badge || undefined}
+                lang={lang}
+              />
+            ))}
           </div>
 
           <button
             type="button"
             onClick={removeMusic}
-            className="mt-4 text-[10px] tracking-[0.14em] uppercase text-brown-muted/50 hover:text-red-400 underline underline-offset-4 decoration-brown-muted/25 hover:decoration-red-300 transition-colors py-2 touch-manipulation"
+            className="mt-4 inline-flex min-h-[44px] items-center text-[13px] font-medium text-rust underline decoration-rust/40 underline-offset-4 transition-colors hover:decoration-rust touch-manipulation"
           >
             {ui.remove}
           </button>

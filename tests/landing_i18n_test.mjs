@@ -1,14 +1,14 @@
 /* ─────────────────────────────────────────────────────────────────────────────
-   YENİ LANDİNG TƏRCÜMƏ TESTİ (UI redesign 2026-10)
+   YENİ UI TƏRCÜMƏ TESTİ (UI redesign 2026-10) — landing + builder
 
-   NƏ ÜÇÜN VAR: yeni landing komponentləri mətnləri `t[lang].key ?? 'AZ'`
-   qaydası ilə oxuyur. Açar EN/RU-da yoxdursa, xəta OLMUR — sadəcə ingilis və
-   rus ziyarətçi Azərbaycanca mətn görür. Bu səssiz «sızma»nı test tutur.
+   NƏ ÜÇÜN VAR: yeni komponentlər mətnləri `t[lang].key ?? 'AZ'` qaydası ilə
+   oxuyur. Açar EN/RU-da yoxdursa, xəta OLMUR — sadəcə ingilis və rus
+   ziyarətçi Azərbaycanca mətn görür. Bu səssiz «sızma»nı test tutur.
 
    Yoxlayır:
-     1. src/components/landing/v2/*.jsx-də işlənən hər `x.açar` 3 dildə var
+     1. landing/v2 və builder/ fayllarında işlənən hər `x.açar` 3 dildə var
         (props ilə gələn paket/FAQ/rəy açarları istisnadır — aşağıda SKIP)
-     2. LANDING_COPY-də 3 dilin açar dəstləri eynidir, heç biri boş deyil
+     2. Hər mətn faylında (LANDING_COPY, BUILDER_COPY) 3 dilin açarları eynidir
      3. EN və RU mətnləri AZ ilə eyni deyil (tərcümə unudulmayıb),
         brend/termin olanlar istisna (EQUAL_OK)
      4. Paket kartları, FAQ və rəylər 3 dildə tam qurulur
@@ -16,6 +16,7 @@
 import { readFileSync, readdirSync } from 'node:fs'
 import t from '../src/data/translations.js'
 import { LANDING_COPY } from '../src/data/landingCopy.js'
+import { BUILDER_COPY } from '../src/data/builderCopy.js'
 import { buildPricingPackages } from '../src/data/packageCopy.js'
 import { getFaqItems } from '../src/data/faq.js'
 import { getReviews } from '../src/data/testimonials.js'
@@ -31,28 +32,34 @@ const LANGS = ['az', 'en', 'ru']
 /* Props ilə gələn açarlar (data/packageCopy.js, data/faq.js, data/testimonials.js) */
 const SKIP = /^(pkg(Simple|Vip|Premium|Opening|Countdown|Maps|Dress|Program|Link|Music|Rsvp|Seating|Qr|GalleryMgmt|AllSimple|AllVip|GuestList|GuestGallery|Zip|QrCard|QrSystem|Priority)\w*|pricing(Title|Subtitle|Partner|Templates)|faq|reviews)$/
 /* 3 dildə eyni ola bilən mətnlər (brend, termin, rəqəm) */
-const EQUAL_OK = new Set(['faqEyebrow', 'heroTrust2', 'dcStyle', 'featLoveStory', 'currencyName', 'musicArtist'])
+const EQUAL_OK = new Set(['faqEyebrow', 'heroTrust2', 'dcStyle', 'featLoveStory', 'currencyName', 'musicArtist', 'builderEyebrow', 'summaryConsentC'])
+/* Boş ola bilən (cümlənin sonu dildən asılıdır: «…qəbul edirəm» / EN-də yoxdur) */
+const EMPTY_OK = new Set(['summaryConsentC'])
 
 /* ── 1. Komponentlərdə işlənən açarlar ── */
-const dir = new URL('../src/components/landing/v2/', import.meta.url)
 const used = new Set()
-for (const f of readdirSync(dir).filter((n) => n.endsWith('.jsx'))) {
-  const src = readFileSync(new URL(f, dir), 'utf8')
-  for (const m of src.matchAll(/\bx\.([A-Za-z0-9_]+)/g)) if (!SKIP.test(m[1])) used.add(m[1])
+for (const rel of ['../src/components/landing/v2/', '../src/components/builder/']) {
+  const dir = new URL(rel, import.meta.url)
+  for (const f of readdirSync(dir).filter((n) => n.endsWith('.jsx'))) {
+    const src = readFileSync(new URL(f, dir), 'utf8')
+    for (const m of src.matchAll(/\bx\.([A-Za-z0-9_]+)/g)) if (!SKIP.test(m[1])) used.add(m[1])
+  }
 }
-ok('ən azı 100 açar tapıldı', used.size >= 100, `(${used.size})`)
+ok('ən azı 200 açar tapıldı', used.size >= 200, `(${used.size})`)
 for (const k of used) {
-  for (const l of LANGS) ok(`${l}.${k} mövcuddur`, typeof t[l][k] === 'string' && t[l][k].trim() !== '')
+  for (const l of LANGS) {
+    ok(`${l}.${k} mövcuddur`, typeof t[l][k] === 'string' && (EMPTY_OK.has(k) || t[l][k].trim() !== ''))
+  }
 }
 
-/* ── 2. LANDING_COPY: eyni açar dəstləri ── */
-const azKeys = Object.keys(LANDING_COPY.az).sort().join(',')
-for (const l of ['en', 'ru']) ok(`${l} açar dəsti AZ ilə eynidir`, Object.keys(LANDING_COPY[l]).sort().join(',') === azKeys)
-
-/* ── 3. Tərcümə unudulmayıb ── */
-for (const k of Object.keys(LANDING_COPY.az)) {
-  if (EQUAL_OK.has(k)) continue
-  for (const l of ['en', 'ru']) ok(`${l}.${k} AZ-dan fərqlidir`, LANDING_COPY[l][k] !== LANDING_COPY.az[k], JSON.stringify(LANDING_COPY[l][k]))
+/* ── 2–3. Hər mətn faylı ── */
+for (const [name, COPY] of [['LANDING_COPY', LANDING_COPY], ['BUILDER_COPY', BUILDER_COPY]]) {
+  const azKeys = Object.keys(COPY.az).sort().join(',')
+  for (const l of ['en', 'ru']) ok(`${name}: ${l} açar dəsti AZ ilə eynidir`, Object.keys(COPY[l]).sort().join(',') === azKeys)
+  for (const k of Object.keys(COPY.az)) {
+    if (EQUAL_OK.has(k)) continue
+    for (const l of ['en', 'ru']) ok(`${name}: ${l}.${k} AZ-dan fərqlidir`, COPY[l][k] !== COPY.az[k], JSON.stringify(COPY[l][k]))
+  }
 }
 
 /* ── 4. Props ilə gələn məzmun ── */
@@ -69,6 +76,6 @@ for (const l of LANGS) {
 }
 
 console.log(fail === 0
-  ? `Landing tərcümələri: ${used.size} açar × 3 dil, ${checks} yoxlama — hamısı keçdi`
+  ? `UI tərcümələri: ${used.size} açar × 3 dil, ${checks} yoxlama — hamısı keçdi`
   : `\n${fail} yoxlama SINDI`)
 process.exit(fail === 0 ? 0 : 1)

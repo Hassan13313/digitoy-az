@@ -301,7 +301,7 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
               />
             </motion.div>
           ) : (
-            <motion.div key="builder" className="mx-auto max-w-6xl px-4 sm:px-6" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.4, ease: [0.32, 0, 0.68, 1] }}>
+            <motion.div key="builder" className="mx-auto max-w-6xl px-5 sm:px-6" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.4, ease: [0.32, 0, 0.68, 1] }}>
               <BuilderForm
                 lang={lang}
                 initialData={formData}

@@ -1,9 +1,11 @@
 import { useEffect } from 'react'
-import { Check, Lock, Eye } from 'lucide-react'
-import { listTemplates, isTemplateSelectable, getStatusMeta, getTemplateTheme } from '../../templates/templateConfig'
+import { Check, Lock } from 'lucide-react'
+import { listTemplates, isTemplateSelectable, getTemplateTheme } from '../../templates/templateConfig'
 import { DEMO_DATE } from '../../data/demoInvitation'
 import { trackTemplateSelected, trackTemplatePreviewed } from '../../templates/templateAnalytics'
 import { ensureTemplateFonts } from '../../templates/fonts'
+import { TemplateCard } from '../builder/choices'
+import { templateImage } from '../../data/templateImages'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    DİZAYN SEÇ — builder-in şablon seçimi bloku.
@@ -186,30 +188,6 @@ const THUMBS = {
   ),
 }
 
-/* Status badge — rəng/mətn tamamilə metadata-dan (getStatusMeta) */
-const TONE_STYLES = {
-  positive: { color: '#3F7A46', background: 'rgba(63,122,70,0.10)', border: '1px solid rgba(63,122,70,0.28)' },
-  info:     { color: '#8A6A2E', background: 'rgba(197,160,89,0.14)', border: '1px solid rgba(197,160,89,0.35)' },
-  muted:    { color: '#8C7B6B', background: 'rgba(140,123,107,0.10)', border: '1px solid rgba(140,123,107,0.22)' },
-}
-
-function StatusBadge({ badge }) {
-  const tone = TONE_STYLES[badge.tone] || TONE_STYLES.muted
-  return (
-    <span
-      style={{
-        ...tone,
-        display: 'inline-flex', alignItems: 'center', gap: 3,
-        padding: '2px 6px', borderRadius: 3,
-        fontSize: 7.5, letterSpacing: '0.16em', textTransform: 'uppercase', fontWeight: 600,
-      }}
-    >
-      {badge.status === 'coming_soon' && <Lock size={7} strokeWidth={2.4} />}
-      {badge.label}
-    </span>
-  )
-}
-
 function TemplateThumbnail({ tpl, selected, locked }) {
   /* ⚠ Əl ilə yazılmış art ÜSTÜNDÜR (ilk 9 şablonun öz kompozisiyası var),
      amma olmayanda BOŞ QALMIR — metadata-dan qurulan miniatür göstərilir. */
@@ -262,16 +240,17 @@ export default function TemplateSelect({ value, onChange, lang = 'az', hideHeadi
         </div>
       )}
 
+      {/* UI redesign (2026-10): yeni TemplateCard — real şablon şəkli (data/templateImages.js);
+          şəkli olmayan şablon üçün metadata-dan qurulan miniatür qalır. Seçim/önbaxış/analitika eynidir. */}
       <div
         role="radiogroup"
         aria-label={ui.title}
-        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3"
+        className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4"
       >
         {templates.map((tpl) => {
           const selected  = value === tpl.id
           /* Seçilə bilmə YALNIZ statusdan gəlir — hardcode yoxdur */
           const available = isTemplateSelectable(tpl.id)
-          const badge     = getStatusMeta(tpl.status, lang)
 
           const handleSelect = () => {
             if (!available) return
@@ -284,7 +263,7 @@ export default function TemplateSelect({ value, onChange, lang = 'az', hideHeadi
              yenidən soruşulurdu). Qayıdış konteksti sessionStorage-a yazılır;
              `App.goToBuilder` onu oxuyub builder-i paket seçmədən bərpa edir. */
           const handlePreview = (e) => {
-            e.stopPropagation()
+            e?.stopPropagation?.()
             trackTemplatePreviewed(tpl.id, { source: 'builder' })
             try {
               sessionStorage.setItem('digitoy_preview_return', JSON.stringify({
@@ -298,67 +277,21 @@ export default function TemplateSelect({ value, onChange, lang = 'az', hideHeadi
           }
 
           return (
-            <div
+            <TemplateCard
               key={tpl.id}
-              className={`group relative border transition-all duration-250 ${
-                selected
-                  ? 'border-gold shadow-[0_8px_28px_rgba(197,160,89,0.18)]'
-                  : available
-                    ? 'border-beige-dark/55 hover:border-gold/45 hover:shadow-[0_4px_18px_rgba(197,160,89,0.1)]'
-                    : 'border-beige-dark/40'
-              }`}
-            >
-              <button
-                type="button"
-                role="radio"
-                aria-checked={selected}
-                aria-disabled={!available}
-                disabled={!available}
-                title={available ? tpl.description : `${tpl.name} — ${badge.label}`}
-                onClick={handleSelect}
-                className={`block w-full text-left touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40 ${
-                  available ? '' : 'cursor-not-allowed'
-                }`}
-              >
-                {/* Thumbnail rəngləri həmişə həqiqi qalır — kilid vəziyyəti
-                    opacity ilə deyil, künc nişanı ilə bildirilir. */}
-                <TemplateThumbnail tpl={tpl} selected={selected} locked={!available} />
-
-                {/* Başlıq zolağı — bütün mətnlər metadata-dan */}
-                <div className="px-2.5 pt-2.5 bg-cream border-t border-beige-dark/35">
-                  <p className={`font-serif text-[13px] leading-tight truncate ${selected ? 'text-gold' : 'text-ink/80'}`}>
-                    {tpl.name}
-                  </p>
-                  <p className="mt-0.5 text-[8.5px] text-brown-muted/45 font-sans truncate">
-                    {tpl.shortDescription?.[lang] || tpl.shortDescription?.az || tpl.tagline}
-                  </p>
-
-                  <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
-                    {/* ⚠ Phase 27.1: "Premium" nişanı tamamilə silindi —
-                        müştəriyə yalnız status göstərilir (Canlı/Beta/Tezliklə). */}
-                    <StatusBadge badge={badge} />
-                    {selected && (
-                      <span className="text-[7.5px] tracking-[0.16em] uppercase font-sans font-semibold text-gold">
-                        · {ui.selected}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </button>
-
-              {/* Önbaxış — metadata-dakı mövcud /demo/template/:id route-u */}
-              <div className="px-2.5 pb-2.5 pt-1.5 bg-cream">
-                <button
-                  type="button"
-                  onClick={handlePreview}
-                  className="w-full flex items-center justify-center gap-1 min-h-[38px] border border-beige-dark/50 hover:border-gold/50 hover:text-gold text-brown-muted/70 transition-colors duration-200 text-[8.5px] tracking-[0.18em] uppercase font-sans font-medium touch-manipulation"
-                  title={`${tpl.name} — ${ui.preview}`}
-                >
-                  <Eye size={9} strokeWidth={1.8} />
-                  {ui.preview}
-                </button>
-              </div>
-            </div>
+              name="template"
+              value={tpl.id}
+              title={tpl.name}
+              description={tpl.shortDescription?.[lang] || tpl.shortDescription?.az || tpl.tagline}
+              selected={selected}
+              onSelect={handleSelect}
+              imageSrc={templateImage(tpl.id) || undefined}
+              preview={<TemplateThumbnail tpl={tpl} selected={false} locked={false} />}
+              live={tpl.status === 'live'}
+              locked={!available}
+              onPreview={handlePreview}
+              lang={lang}
+            />
           )
         })}
       </div>

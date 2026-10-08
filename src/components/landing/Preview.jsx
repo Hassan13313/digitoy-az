@@ -146,7 +146,7 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
       value: (
         <span className="flex flex-col gap-0.5">
           <span>{dateDisplay}</span>
-          <span className="text-brown-muted/60 text-xs">{timeStr}</span>
+          <span className="text-[13px] tabular-nums text-brown-dark/75">{timeStr}</span>
         </span>
       ),
     },
@@ -157,7 +157,7 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
         ? (
           <span className="flex flex-col gap-0.5">
             <span>{data.venueName || '—'}</span>
-            <span className="text-brown-muted/60 text-xs">{data.venueNote}</span>
+            <span className="text-[13px] text-brown-dark/75">{data.venueNote}</span>
           </span>
         )
         : (data.venueName || '—'),
@@ -167,8 +167,8 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
       value: (
         <span className="flex flex-col gap-1">
           {data.programSteps.filter(r => r.time || r.activity).map((row, i) => (
-            <span key={i} className="flex items-center gap-2 text-xs font-light">
-              {row.time && <span className="text-gold/80 font-medium w-10 flex-shrink-0">{row.time}</span>}
+            <span key={i} className="flex items-center gap-2 text-[14px]">
+              {row.time && <span className="w-11 flex-shrink-0 font-semibold tabular-nums text-gold-deep">{row.time}</span>}
               {row.icon && <span className="text-sm leading-none">{row.icon}</span>}
               <span>{row.activity}</span>
             </span>
@@ -191,25 +191,16 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
         const colors  = palette?.colors || DRESS_COLORS[id] || []
         const DCIcon  = DRESS_ICONS[id] || Shirt
         return (
-          <div
-            className="flex items-start gap-3 rounded-xl px-3.5 py-3 -ml-1"
-            style={{
-              background: 'linear-gradient(150deg, rgba(255,255,255,0.6) 0%, rgba(197,160,89,0.06) 100%)',
-              border: '1px solid rgba(197,160,89,0.32)',
-              backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)',
-              boxShadow: '0 4px 16px rgba(197,160,89,0.08)',
-            }}
-          >
-            <span className="w-9 h-9 min-w-[36px] rounded-full flex items-center justify-center border border-gold/40 bg-gold/[0.08] mt-0.5">
-              <DCIcon size={14} strokeWidth={1.5} className="text-gold" />
+          <div className="-ml-1 flex items-start gap-3 rounded-2xl bg-gold-mist/40 px-3.5 py-3 ring-1 ring-inset ring-gold/25">
+            <span className="mt-0.5 grid h-10 w-10 min-w-[40px] place-items-center rounded-full bg-espresso text-gold-light">
+              <DCIcon size={15} strokeWidth={1.5} />
             </span>
-            <span className="flex flex-col gap-1 min-w-0">
-              <span className="text-[13px] font-medium text-espresso tracking-wide">{label}</span>
-              {sub && <span className="text-[10.5px] text-brown-muted/65 font-light leading-relaxed">{sub}</span>}
-              <span className="flex items-center gap-1.5 mt-0.5">
+            <span className="flex min-w-0 flex-col gap-1">
+              <span className="text-[15px] font-semibold text-ink">{label}</span>
+              {sub && <span className="text-[13px] leading-relaxed text-brown-dark/85">{sub}</span>}
+              <span className="mt-0.5 flex items-center gap-1.5">
                 {colors.map(c => (
-                  <span key={c} className="w-3 h-3 rounded-full border border-beige-dark/40 shadow-sm inline-block flex-shrink-0" style={{ backgroundColor: c }} />
+                  <span key={c} className="inline-block h-4 w-4 flex-shrink-0 rounded-full ring-1 ring-inset ring-black/10" style={{ backgroundColor: c }} />
                 ))}
               </span>
             </span>
@@ -225,15 +216,15 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
         return (
           <span className="flex flex-col gap-1">
             <span className="font-light">
-              {m.title}{m.artist ? <span className="text-brown-muted/60"> — {m.artist}</span> : null}
+              {m.title}{m.artist ? <span className="text-brown-dark/70"> — {m.artist}</span> : null}
             </span>
             <span className="flex items-center gap-1.5 flex-wrap">
               {m.startTime > 0 && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9.5px] font-mono text-gold-dark bg-gold/[0.08] border border-gold/25">
+                <span className="inline-flex items-center rounded-full bg-gold-mist/70 px-2.5 py-0.5 text-[12px] font-medium tabular-nums text-gold-deep">
                   {ml.start}: {fmtSec(m.startTime)}
                 </span>
               )}
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9.5px] text-brown-muted/70 bg-beige border border-beige-dark/40">
+              <span className="inline-flex items-center rounded-full bg-beige px-2.5 py-0.5 text-[12px] text-brown-dark ring-1 ring-inset ring-beige-dark">
                 {m.playMode === 'auto' ? ml.auto : ml.button}
               </span>
             </span>
@@ -255,38 +246,31 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
   ]
 
   return (
-    <div className="max-w-2xl mx-auto animate-fade-up">
+    <div className="mx-auto max-w-[780px] animate-fade-up">
       {/* Section header */}
-      <div className="text-center mb-10">
-        <p className="font-mono text-[10px] tracking-[0.42em] uppercase text-gold-dark mb-3">Preview</p>
-        <h2 className="font-serif text-2xl text-espresso font-light tracking-tight">{tr.preview_title}</h2>
-        <div className="flex items-center justify-center gap-3 mt-5 max-w-[140px] mx-auto">
-          <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.55))' }} />
-          <div className="w-1.5 h-1.5 border border-gold/60 rotate-45" />
-          <div className="flex-1 h-px" style={{ background: 'linear-gradient(to left, transparent, rgba(197,160,89,0.55))' }} />
+      <div className="mb-10 text-center">
+        <h2 className="font-serif text-[30px] font-medium leading-tight text-ink sm:text-[34px]">{tr.preview_title}</h2>
+        <div aria-hidden="true" className="mx-auto mt-5 flex max-w-[140px] items-center justify-center gap-3">
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent to-gold/70" />
+          <div className="h-2.5 w-2.5 rotate-45 border border-gold" />
+          <div className="h-px flex-1 bg-gradient-to-l from-transparent to-gold/70" />
         </div>
       </div>
 
       {/* ── Luxury receipt card ── */}
-      <div
-        className="rounded-2xl overflow-hidden mb-6"
-        style={{
-          background: 'linear-gradient(160deg, #FDFCF9 0%, #F8F5EF 100%)',
-          boxShadow: '0 20px 60px rgba(44,26,14,0.08), 0 6px 20px rgba(44,26,14,0.05), inset 0 1px 0 rgba(255,255,255,0.9)',
-          border: '1px solid rgba(221,213,200,0.55)',
-        }}
-      >
+      <div className="relative mb-6 overflow-hidden rounded-[28px] bg-white/90 shadow-luxe ring-1 ring-gold/15">
+        <span aria-hidden="true" className="absolute inset-x-12 top-0 h-px bg-gold-line" />
         {/* Name header */}
         <div className="px-8 pt-8 pb-7 text-center">
-          <p className="font-mono text-[9px] tracking-[0.34em] uppercase text-brown-muted/70 mb-3">
+          <p className="mb-3 text-[11px] font-semibold uppercase tracking-eyebrow text-gold-deep">
             {eventLabels[data.eventType] || tr.event_other}
           </p>
-          <h3 className="font-serif text-[28px] text-espresso font-light tracking-tight leading-tight">
+          <h3 className="font-serif text-[32px] font-medium leading-tight text-ink sm:text-[36px]">
             {/* ⚠ Phase 27: göstərim sırası BƏY → GƏLİN (data açarları dəyişmir) */}
             {isCouple ? (
               <>
                 {data.groomName || '—'}
-                <span className="text-gold mx-3 font-serif italic font-light">&amp;</span>
+                <span className="mx-3 font-serif font-normal italic text-gold-rich">&amp;</span>
                 {data.brideName || '—'}
               </>
             ) : (
@@ -296,28 +280,26 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
         </div>
 
         {/* Gold hairline divider */}
-        <div className="mx-8 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.45) 30%, rgba(197,160,89,0.45) 70%, transparent)' }} />
+        <div aria-hidden="true" className="mx-8 h-px bg-gold-line opacity-70" />
 
         {/* Data rows */}
-        <div className="px-8 py-7 space-y-5">
+        <div className="space-y-5 px-6 py-7 sm:px-8">
           {rows.map(({ icon: Icon, label, value }) => {
             const isEmpty = typeof value === 'string' && (value === tr.seating_no || value === tr.gallery_no || value === '—')
             return (
               <div key={label} className="flex items-start gap-4">
                 {/* Frameless icon marker */}
-                <div className="w-8 h-8 flex items-center justify-center flex-shrink-0 mt-0.5 rounded-lg"
-                  style={{ background: 'rgba(197,160,89,0.07)' }}>
-                  <Icon size={13} className="text-gold" strokeWidth={1.4} />
+                <div className="mt-0.5 grid h-10 w-10 flex-shrink-0 place-items-center rounded-full bg-gold-mist/70 text-gold-deep">
+                  <Icon size={16} strokeWidth={1.5} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-mono text-[9px] tracking-[0.28em] uppercase text-brown-muted/65 mb-1 font-semibold">{label}</p>
+                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-label text-brown-dark/80">{label}</p>
                   {isEmpty ? (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] italic text-brown-muted/50 font-light"
-                      style={{ background: 'rgba(139,107,91,0.06)', border: '1px solid rgba(139,107,91,0.12)' }}>
+                    <span className="inline-flex items-center rounded-full bg-beige px-2.5 py-0.5 text-[12px] italic text-brown-dark/70">
                       —
                     </span>
                   ) : (
-                    <div className="text-[13.5px] text-espresso font-light leading-snug">{value}</div>
+                    <div className="text-[15px] leading-snug text-ink">{value}</div>
                   )}
                 </div>
               </div>
@@ -333,14 +315,14 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleWaClick}
-          className="flex-1 flex items-center justify-center gap-2.5 btn-gold min-h-[52px]"
+          className="inline-flex min-h-[56px] flex-1 items-center justify-center gap-2.5 rounded-full bg-espresso-grad px-6 text-center text-[12px] font-semibold uppercase tracking-label text-cream shadow-lift ring-1 ring-inset ring-gold/30 transition-[transform,box-shadow] duration-300 ease-luxe hover:-translate-y-0.5 hover:shadow-luxe"
         >
-          <MessageCircle size={14} strokeWidth={1.5} />
+          <MessageCircle size={16} strokeWidth={1.6} className="text-gold-light" />
           {tr.preview_whatsapp}
         </a>
         <motion.button
           onClick={onView}
-          className="flex-1 flex items-center justify-center gap-2.5 btn-outline-gold min-h-[52px]"
+          className="inline-flex min-h-[56px] flex-1 items-center justify-center gap-2.5 rounded-full border border-gold/55 bg-cream/40 px-6 text-center text-[12px] font-semibold uppercase tracking-label text-gold-deep transition-colors hover:border-gold hover:bg-gold-mist/60"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
         >
@@ -355,7 +337,7 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
       {/* Edit link */}
       <button
         onClick={onEdit}
-        className="group w-full flex items-center justify-center gap-2 text-[10px] tracking-[0.18em] uppercase text-brown-muted hover:text-gold transition-colors duration-200 py-3"
+        className="group flex min-h-[48px] w-full items-center justify-center gap-2 py-3 text-[12px] font-semibold uppercase tracking-label text-brown-dark transition-colors duration-200 hover:text-gold-deep"
       >
         <Edit2 size={11} strokeWidth={1.5} />
         <span className="relative">

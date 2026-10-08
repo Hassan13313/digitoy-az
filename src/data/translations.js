@@ -1,4 +1,5 @@
 import { LANDING_COPY } from './landingCopy.js'
+import { BUILDER_COPY } from './builderCopy.js'
 
 const t = {
   az: {
@@ -757,6 +758,6 @@ const t = {
 }
 
 /* UI redesign (2026-10) — yeni landing mətnləri hər dilə birləşdirilir (açar toqquşması yoxdur) */
-for (const lang of Object.keys(LANDING_COPY)) Object.assign(t[lang], LANDING_COPY[lang])
+for (const lang of Object.keys(LANDING_COPY)) Object.assign(t[lang], LANDING_COPY[lang], BUILDER_COPY[lang])
 
 export default t

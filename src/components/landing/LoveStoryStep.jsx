@@ -4,6 +4,7 @@ import { GripVertical, Trash2, ImagePlus, X, Loader2 } from 'lucide-react'
 import { resizeToBlob, resizeErrorText } from '../../utils/imageResize'
 import { uploadStoryPhoto, storyPhotoSrc } from '../../utils/api'
 import t from '../../data/translations'
+import { AddButton } from '../builder/fields'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    «BİZİM HEKAYƏMİZ» addımı — builder redaktoru (Phase 43 → 44)
@@ -104,9 +105,9 @@ function IconPicker({ value, onSelect, label, noneLabel, onOpenChange }) {
         aria-label={label}
         aria-expanded={open}
         title={label}
-        className="w-11 h-11 flex items-center justify-center border border-beige-dark/55 rounded bg-cream hover:border-gold/50 transition-colors text-[22px] leading-none touch-manipulation"
+        className="grid h-12 w-12 place-items-center rounded-[12px] bg-gold-mist/60 text-[22px] leading-none ring-1 ring-inset ring-gold/30 transition-colors hover:bg-gold-mist touch-manipulation"
       >
-        {value || <span className="text-brown-muted/50 text-base">+</span>}
+        {value || <span className="text-base text-gold-deep">+</span>}
       </button>
       {open && (
         <>
@@ -115,15 +116,15 @@ function IconPicker({ value, onSelect, label, noneLabel, onOpenChange }) {
           <div
             role="dialog"
             aria-label={label}
-            className="absolute z-50 top-[52px] left-0 w-[244px] p-2.5 grid grid-cols-5 gap-1.5 bg-white border border-beige-dark rounded-lg shadow-[0_14px_36px_rgba(40,30,20,0.2)]"
+            className="absolute left-0 top-[56px] z-50 grid w-[244px] grid-cols-5 gap-1.5 rounded-2xl bg-white p-2.5 shadow-luxe ring-1 ring-gold/25"
           >
             {ICONS.map(ic => (
               <button
                 key={ic} type="button"
                 onClick={() => { onSelect(ic); setOpen(false) }}
                 aria-pressed={value === ic}
-                className={`w-10 h-10 flex items-center justify-center rounded-md text-[22px] leading-none touch-manipulation transition-colors ${
-                  value === ic ? 'bg-gold/15 ring-1 ring-gold/60' : 'hover:bg-gold/10'}`}
+                className={`grid h-10 w-10 place-items-center rounded-[10px] text-[22px] leading-none transition-colors touch-manipulation ${
+                  value === ic ? 'bg-gold-mist ring-1 ring-inset ring-gold' : 'hover:bg-cream'}`}
               >
                 {ic}
               </button>
@@ -132,7 +133,7 @@ function IconPicker({ value, onSelect, label, noneLabel, onOpenChange }) {
               <button
                 type="button"
                 onClick={() => { onSelect(''); setOpen(false) }}
-                className="col-span-5 mt-1 h-9 flex items-center justify-center gap-1.5 rounded-md text-[11px] tracking-wide text-brown-muted hover:bg-beige/70 touch-manipulation"
+                className="col-span-5 mt-1 flex h-10 items-center justify-center gap-1.5 rounded-[10px] text-[12.5px] font-medium text-rust hover:bg-rust-mist touch-manipulation"
               >
                 <X size={12} strokeWidth={2} /> {noneLabel}
               </button>
@@ -157,13 +158,13 @@ function StoryBlock({ row, update, removeRow, tr, ui, onFiles, pending, canAddPh
       dragListener={false}
       dragControls={controls}
       as="div"
-      className="bg-beige/50 border border-beige-dark/50 rounded-lg p-3 sm:p-4"
+      className="rounded-3xl bg-white p-4 shadow-soft ring-1 ring-inset ring-gold/20 sm:p-5"
       /* Stiker paneli açıq olanda blok qonşularının ÜSTÜNDƏ qalmalıdır */
       style={{ position: 'relative', zIndex: pickerOpen ? 30 : undefined }}
       whileDrag={{ scale: 1.012, boxShadow: '0 10px 28px rgba(0,0,0,0.14)', zIndex: 5 }}
     >
       {/* Üst sətir: stiker + tarix + (sağda) sil/tutacaq */}
-      <div className="flex items-center gap-2 mb-2.5">
+      <div className="mb-3 flex items-center gap-2">
         <IconPicker
           value={row.icon}
           onSelect={(ic) => update(row.id, 'icon', ic)}
@@ -177,13 +178,13 @@ function StoryBlock({ row, update, removeRow, tr, ui, onFiles, pending, canAddPh
           onChange={(e) => update(row.id, 'date', e.target.value)}
           placeholder={tr.lovestory_date_placeholder}
           aria-label={tr.lovestory_date_label}
-          className="flex-1 min-w-0 p-2.5 border border-beige-dark/50 rounded bg-cream text-sm focus:outline-none focus:border-gold/60 transition-colors"
+          className="h-12 rounded-[12px] bg-cream px-3.5 text-[16px] text-ink ring-1 ring-inset ring-beige-dark placeholder:text-brown-muted/80 focus:outline-none focus:ring-2 focus:ring-gold-deep min-w-0 flex-1"
         />
         <button
           type="button"
           onClick={() => removeRow(row.id)}
           aria-label={ui.remove}
-          className="shrink-0 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-brown-muted/40 hover:text-red-400 transition-colors rounded touch-manipulation"
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-brown-muted transition-colors hover:bg-rust-mist hover:text-rust touch-manipulation"
         >
           <Trash2 size={15} strokeWidth={1.5} />
         </button>
@@ -191,7 +192,7 @@ function StoryBlock({ row, update, removeRow, tr, ui, onFiles, pending, canAddPh
           type="button"
           onPointerDown={(e) => controls.start(e)}
           aria-label="Sırala"
-          className="shrink-0 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-brown-muted/40 hover:text-gold transition-colors rounded cursor-grab active:cursor-grabbing touch-manipulation"
+          className="grid h-11 w-11 shrink-0 cursor-grab place-items-center rounded-full text-brown-muted transition-colors hover:bg-gold-mist/60 hover:text-gold-deep active:cursor-grabbing touch-manipulation"
           style={{ touchAction: 'none' }}
         >
           <GripVertical size={16} strokeWidth={1.5} />
@@ -204,7 +205,7 @@ function StoryBlock({ row, update, removeRow, tr, ui, onFiles, pending, canAddPh
         onChange={(e) => update(row.id, 'title', e.target.value)}
         placeholder={tr.lovestory_title_placeholder}
         aria-label={tr.lovestory_title_label}
-        className="w-full p-2.5 mb-2.5 border border-beige-dark/50 rounded bg-cream text-sm focus:outline-none focus:border-gold/60 transition-colors"
+        className="h-12 rounded-[12px] bg-cream px-3.5 text-[16px] text-ink ring-1 ring-inset ring-beige-dark placeholder:text-brown-muted/80 focus:outline-none focus:ring-2 focus:ring-gold-deep mb-3 w-full"
       />
 
       <textarea
@@ -213,7 +214,7 @@ function StoryBlock({ row, update, removeRow, tr, ui, onFiles, pending, canAddPh
         placeholder={tr.lovestory_text_placeholder}
         aria-label={tr.lovestory_text_label}
         rows={3}
-        className="w-full p-2.5 border border-beige-dark/50 rounded bg-cream text-sm leading-relaxed focus:outline-none focus:border-gold/60 transition-colors resize-y"
+        className="w-full resize-y rounded-[12px] bg-cream px-3.5 py-3 text-[16px] leading-relaxed text-ink ring-1 ring-inset ring-beige-dark placeholder:text-brown-muted/80 focus:outline-none focus:ring-2 focus:ring-gold-deep"
       />
 
       {/* Şəkillər */}
@@ -231,20 +232,20 @@ function StoryBlock({ row, update, removeRow, tr, ui, onFiles, pending, canAddPh
             <img
               src={storyPhotoSrc(src) || undefined}
               alt=""
-              className="w-full h-full object-cover rounded border border-beige-dark/50 bg-beige"
+              className="h-full w-full rounded-[12px] bg-beige object-cover ring-1 ring-inset ring-beige-dark"
             />
             <button
               type="button"
               onClick={() => update(row.id, 'photos', photos.filter((_, k) => k !== j))}
               aria-label={ui.removePhoto}
-              className="absolute -top-2 -right-2 w-6 h-6 flex items-center justify-center rounded-full bg-white border border-beige-dark/60 text-brown-muted/70 hover:text-red-500 shadow-sm touch-manipulation"
+              className="absolute -right-2 -top-2 grid h-7 w-7 place-items-center rounded-full bg-white text-brown-dark shadow-soft ring-1 ring-beige-dark transition-colors hover:text-rust touch-manipulation"
             >
               <X size={12} strokeWidth={2.2} />
             </button>
           </div>
         ))}
         {Array.from({ length: pending }).map((_, k) => (
-          <div key={'p' + k} className="aspect-square flex items-center justify-center rounded border border-dashed border-gold/40 text-gold/70" aria-label={ui.uploading}>
+          <div key={'p' + k} className="flex aspect-square items-center justify-center rounded-[12px] border border-dashed border-gold/50 bg-gold-mist/30 text-gold-deep" aria-label={ui.uploading}>
             <Loader2 size={16} strokeWidth={1.6} className="animate-spin" />
           </div>
         ))}
@@ -252,10 +253,10 @@ function StoryBlock({ row, update, removeRow, tr, ui, onFiles, pending, canAddPh
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="aspect-square flex flex-col items-center justify-center gap-1 border border-dashed border-beige-dark/60 rounded text-brown-muted/55 hover:border-gold/45 hover:text-gold/80 transition-colors touch-manipulation"
+            className="flex aspect-square flex-col items-center justify-center gap-1 rounded-[12px] border border-dashed border-gold/50 bg-white/60 text-gold-deep transition-colors hover:border-gold-deep hover:bg-gold-mist/40 touch-manipulation"
           >
             <ImagePlus size={16} strokeWidth={1.5} />
-            <span className="text-[8.5px] leading-tight tracking-[0.12em] uppercase text-center px-1">{ui.addPhotos}</span>
+            <span className="px-1 text-center text-[10px] font-semibold uppercase leading-tight tracking-[0.08em]">{ui.addPhotos}</span>
           </button>
         )}
       </div>
@@ -268,7 +269,7 @@ function StoryBlock({ row, update, removeRow, tr, ui, onFiles, pending, canAddPh
           onChange={(e) => update(row.id, 'caption', e.target.value)}
           placeholder={ui.captionPh}
           aria-label={ui.caption}
-          className="w-full mt-2.5 p-2.5 border border-beige-dark/50 rounded bg-cream text-sm focus:outline-none focus:border-gold/60 transition-colors"
+          className="h-12 rounded-[12px] bg-cream px-3.5 text-[16px] text-ink ring-1 ring-inset ring-beige-dark placeholder:text-brown-muted/80 focus:outline-none focus:ring-2 focus:ring-gold-deep mt-3 w-full"
         />
       )}
     </Reorder.Item>
@@ -346,21 +347,21 @@ export default function LoveStoryStep({ rows = [], onChange, lang = 'az' }) {
   return (
     <div className="space-y-4">
       {/* Vəziyyət sətri */}
-      <span className="block text-[10px] tracking-[0.18em] uppercase text-brown-muted/60 font-medium">
+      <span className="block text-[12px] font-semibold uppercase tracking-label tabular-nums text-brown-dark/80">
         {normalized.length} / {MAX_BLOCKS} {ui.blocks}
-        <span className={canAddPhotos ? 'text-brown-muted/45' : 'text-amber-700'}>
+        <span className={canAddPhotos ? 'text-brown-dark/60' : 'text-rust'}>
           {' · '}{totalPhotos} / {MAX_TOTAL_PHOTOS} {ui.photos}
         </span>
       </span>
 
       {error && (
-        <p role="alert" className="text-[11.5px] leading-relaxed text-red-700 bg-red-50 border border-red-200 rounded px-3 py-2.5">
+        <p role="alert" className="rounded-2xl bg-rust-mist px-4 py-3 text-[13.5px] leading-relaxed text-rust">
           {error}
         </p>
       )}
 
       {normalized.length === 0 && (
-        <p className="text-[12px] leading-relaxed text-brown-muted/60 font-light border border-dashed border-beige-dark/50 rounded-lg px-4 py-6 text-center">
+        <p className="rounded-2xl border border-dashed border-gold/40 bg-white/50 px-4 py-6 text-center text-[14px] leading-relaxed text-brown-dark/80">
           {ui.empty}
         </p>
       )}
@@ -381,16 +382,11 @@ export default function LoveStoryStep({ rows = [], onChange, lang = 'az' }) {
         ))}
       </Reorder.Group>
 
-      <button
-        type="button"
-        onClick={addRow}
-        disabled={atLimit}
-        className="text-[11px] tracking-[0.16em] uppercase text-gold/80 hover:text-gold border border-gold/25 hover:border-gold/50 px-4 py-3 min-h-[44px] transition-all duration-200 flex items-center gap-2 touch-manipulation disabled:opacity-35 disabled:cursor-not-allowed"
-      >
-        {tr.lovestory_add_row}
-      </button>
+      <AddButton onClick={addRow} disabled={atLimit}>
+        {String(tr.lovestory_add_row || '').replace(/^\+\s*/, '')}
+      </AddButton>
 
-      <p className="text-[11px] text-brown-muted/60 font-light tracking-wide leading-relaxed">
+      <p className="text-[13px] leading-relaxed text-brown-dark/85">
         {atLimit ? ui.limitBlocks : ui.hint}
       </p>
     </div>
