@@ -219,7 +219,7 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
   const motionStep = { duration: 0.35, ease: [0.32, 0, 0.68, 1] }
 
   return (
-    <div className="dt-site min-h-screen bg-cream">
+    <div className="dt-site dt-page min-h-screen bg-cream">
 
       <Header
         lang={lang}

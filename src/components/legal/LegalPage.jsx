@@ -62,7 +62,7 @@ export default function LegalPage({ doc, lang, setLang, onBack }) {
   const nav = (e, href) => spaClick(e, href)
 
   return (
-    <div className="dt-site min-h-screen bg-cream text-brown-dark">
+    <div className="dt-site dt-page min-h-screen bg-cream text-brown-dark">
       <SubpageHeader
         lang={lang}
         backLabel={ui.page.back}

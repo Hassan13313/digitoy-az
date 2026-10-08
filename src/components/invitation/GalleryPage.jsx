@@ -319,7 +319,7 @@ export default function GalleryPage() {
   )
 
   return (
-    <div className="dt-site min-h-screen bg-cream text-brown-dark">
+    <div className="dt-site dt-page min-h-screen bg-cream text-brown-dark">
       <GalleryTopBar
         onBack={goBack}
         title="Qonaq Şəkilləri"

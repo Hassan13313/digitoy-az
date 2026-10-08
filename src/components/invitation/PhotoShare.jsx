@@ -304,7 +304,7 @@ export default function PhotoShare() {
     `${counts.photos} foto${counts.videos > 0 ? ` · ${counts.videos} video` : ''}`
 
   return (
-    <div className="dt-site min-h-screen bg-cream text-brown-dark">
+    <div className="dt-site dt-page min-h-screen bg-cream text-brown-dark">
       {backHref && (
         <header className="sticky top-0 z-40 border-b border-gold/20 bg-cream/90 pt-[env(safe-area-inset-top,0px)] backdrop-blur-xl">
           <div className="mx-auto flex h-14 max-w-[560px] items-center px-3">

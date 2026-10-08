@@ -147,7 +147,7 @@ export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCrea
   const legal = legalUi(lang).links
 
   return (
-    <div className="dt-site min-h-screen bg-cream">
+    <div className="dt-site dt-page min-h-screen bg-cream">
       <SubpageHeader
         lang={lang}
         backLabel={ui.back}
