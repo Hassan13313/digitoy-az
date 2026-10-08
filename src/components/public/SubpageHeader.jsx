@@ -44,9 +44,10 @@ export default function SubpageHeader({
           <span className="sr-only min-[440px]:hidden">{backLabel}</span>
         </a>
 
+        {/* Dar ekranda (< 440px) mərkəzdə dil seçimi ilə üst-üstə düşürdü → oxun yanına keçir */}
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[19px] sm:text-[23px]"
+          className="pointer-events-none absolute left-14 top-1/2 -translate-y-1/2 text-[19px] min-[440px]:left-1/2 min-[440px]:-translate-x-1/2 sm:text-[23px]"
         >
           <Wordmark />
         </span>

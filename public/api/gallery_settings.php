@@ -108,6 +108,8 @@ $defaults = [
     'standShowPhoto'    => true,
     'slideSeconds'      => 6,
     'slideFeaturedOnly' => false,
+    /* UI redesign 2026-10: TV slayd şouda «Şəkil göndər» QR kartı */
+    'slideShowQr'       => true,
 ];
 
 /* Başlanğıc: default ← mövcud (yalnız tanınan açarlar) */
@@ -137,12 +139,16 @@ if (array_key_exists('slideSeconds', $in)) {
 if (array_key_exists('slideFeaturedOnly', $in)) {
     $config['slideFeaturedOnly'] = $in['slideFeaturedOnly'] === true;
 }
+if (array_key_exists('slideShowQr', $in)) {
+    $config['slideShowQr'] = $in['slideShowQr'] !== false;
+}
 
 /* Tiplər sabitlənir — köhnə sətirdə səhv tip qalmış ola bilər */
 $config['coverEnabled']      = (bool) $config['coverEnabled'];
 $config['standShowDate']     = (bool) $config['standShowDate'];
 $config['standShowPhoto']    = (bool) $config['standShowPhoto'];
 $config['slideFeaturedOnly'] = (bool) $config['slideFeaturedOnly'];
+$config['slideShowQr']       = (bool) $config['slideShowQr'];
 $config['slideSeconds']      = max(3, min(30, (int) $config['slideSeconds']));
 $config['coverPhoto']        = sanitizeCover($config['coverPhoto']);
 if (!in_array($config['standLayout'], $layouts, true)) $config['standLayout'] = 'classic';
