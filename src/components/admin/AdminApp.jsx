@@ -41,7 +41,7 @@ export default function AdminApp({ lang = 'az', setLang }) {
 
   return (
     <AdminLayout section={section.replace('-detail', '')} onNavigate={(sec) => navigate(sec)}>
-      {section === 'dashboard'    && <AdminDashboard />}
+      {section === 'dashboard'    && <AdminDashboard onNavigate={(sec) => navigate(sec)} />}
       {section === 'orders'       && <AdminOrdersList onSelectOrder={handleSelectOrder} />}
       {section === 'order-detail' && <AdminOrderDetail draftCode={draftCode} onBack={handleBack} lang={lang} />}
       {section === 'invitations'  && <AdminInvitationsList />}

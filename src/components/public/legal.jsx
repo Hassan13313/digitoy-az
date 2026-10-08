@@ -36,7 +36,7 @@ export function LegalDocTabs({ docs = [], currentHref, onNavigate, label = 'Hüq
                 href={d.href}
                 aria-current={current ? 'page' : undefined}
                 onClick={(e) => onNavigate?.(e, d.href)}
-                className={`flex h-full min-h-[48px] items-center justify-center rounded-[16px] px-2 text-center text-[12.5px] font-medium leading-tight transition-[background-color,color] duration-300 sm:rounded-full sm:px-5 sm:text-[13.5px] ${FOCUS} ${
+                className={`flex h-full min-h-[48px] items-center justify-center rounded-[16px] px-2 text-center text-[12.5px] font-medium leading-tight hyphens-auto [overflow-wrap:anywhere] transition-[background-color,color] duration-300 sm:rounded-full sm:px-5 sm:text-[13.5px] ${FOCUS} ${
                   current
                     ? 'bg-espresso text-cream shadow-soft'
                     : 'text-brown-dark hover:bg-gold-mist/60 hover:text-ink'

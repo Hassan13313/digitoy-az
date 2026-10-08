@@ -18,4 +18,10 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
   },
+  {
+    /* UI redesign 2026-10 admin dəsti: komponent faylları kiçik sabit və
+       köməkçiləri də ixrac edir (bu qayda yalnız dev-dəki HMR-ə aiddir) */
+    files: ['**/components/admin/v2/**/*.{js,jsx}'],
+    rules: { 'react-refresh/only-export-components': 'off' },
+  },
 ])
