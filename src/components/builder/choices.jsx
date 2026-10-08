@@ -179,6 +179,8 @@ export function TemplateCard({
                 alt=""
                 loading="lazy"
                 className="h-full w-full object-cover transition-transform duration-700 ease-luxe group-hover:scale-[1.03]"
+                /* Digitoy: şəkil telefon ekranıdır (390×844) — adlar və tarix yuxarı üçdə birdədir */
+                style={{ objectPosition: '50% 16%' }}
               />
             ) : (
               <span className="block h-full w-full transition-transform duration-700 ease-luxe group-hover:scale-[1.03]">

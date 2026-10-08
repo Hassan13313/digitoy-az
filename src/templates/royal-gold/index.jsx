@@ -502,7 +502,7 @@ function GoldMusic({ lang, music, playerRef, visible = false, autoPlay = false }
         aria-label={playing ? 'Musiqini dayandır' : 'Musiqini başlat'}
         style={{
           position: 'fixed',
-          bottom: 'max(20px, env(safe-area-inset-bottom, 20px))',
+          bottom: 'calc(max(20px, env(safe-area-inset-bottom, 20px)) + var(--dt-preview-offset, 0px))',
           right: 20, zIndex: 55,
           width: 46, height: 46, borderRadius: '50%',
           border: `1px solid ${TH.primary}59`, background: `${TH.primary}1A`,

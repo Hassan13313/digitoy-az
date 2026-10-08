@@ -399,7 +399,7 @@ export default function TemplateShell({
             data-press
             aria-label={music.playing ? 'Musiqini dayandır' : 'Musiqini başlat'}
             style={{
-              position: 'fixed', bottom: 'max(20px, env(safe-area-inset-bottom, 20px))', right: 20, zIndex: 55,
+              position: 'fixed', bottom: 'calc(max(20px, env(safe-area-inset-bottom, 20px)) + var(--dt-preview-offset, 0px))', right: 20, zIndex: 55,
               width: 46, height: 46, borderRadius: '50%',
               border: `1px solid ${alpha(theme.accent, 0.4)}`, background: D.dark ? alpha(theme.accent, 0.12) : alpha(theme.surface, 0.95),
               backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3, cursor: 'pointer',

@@ -34,7 +34,7 @@ const MusicToggle = forwardRef(function MusicToggle({ lang, music = null, visibl
         aria-label={playing ? tr.inv_music_off : tr.inv_music_on}
         className="fixed w-14 h-14 rounded-full flex items-center justify-center glass glow-gold transition-all duration-base group"
         style={{
-          bottom: 'max(20px, env(safe-area-inset-bottom, 20px))',
+          bottom: 'calc(max(20px, env(safe-area-inset-bottom, 20px)) + var(--dt-preview-offset, 0px))',
           right: '20px',
           zIndex: 55,
         }}

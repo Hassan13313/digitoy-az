@@ -189,7 +189,7 @@ export function MusicStartBubble({ theme, lang = 'az', visible, onStart }) {
           aria-label={t.musicAria}
           style={{
             position: 'fixed',
-            bottom: 'max(96px, calc(env(safe-area-inset-bottom, 20px) + 76px))',
+            bottom: 'calc(max(96px, calc(env(safe-area-inset-bottom, 20px) + 76px)) + var(--dt-preview-offset, 0px))',
             right: 20, zIndex: 54,
             display: 'flex', alignItems: 'center', gap: 8,
             padding: '10px 18px 10px 14px',

@@ -20,11 +20,14 @@ const LegalPage        = lazy(() => import('./components/legal/LegalPage'))
 import TemplateRenderer from './templates/TemplateRenderer'
 import { defaultWedding } from './data/defaultWedding'
 import { demoInvitation, demoGuestbook } from './data/demoInvitation'
-import { DEFAULT_TEMPLATE_ID, getTemplateConfig, resolveTemplateId } from './templates/templateConfig'
+import { DEFAULT_TEMPLATE_ID, resolveTemplateId, isTemplateSelectable } from './templates/templateConfig'
 import { getInvitation, adminLogin, getDraftByCode } from './utils/api'
 import { unlockAudio } from './utils/audioUnlock'
 import ScrollProgress from './components/ui/ScrollProgress'
-import StatusPage from './components/ui/StatusPage'
+import StatusPage from './components/public/StatusPage'
+import TemplatePreviewBar from './components/public/TemplatePreviewBar'
+import { readBuilderSnapshot, saveBuilderSnapshot } from './utils/builderSession'
+import { trackTemplateSelected } from './templates/templateAnalytics'
 import { matchLegalRoute, isKnownSpaPath } from './utils/siteRoutes'
 import { legalDoc as findLegalDoc } from './data/legal/docs'
 import { legalUi } from './data/legal/ui'
@@ -404,6 +407,25 @@ export default function App() {
     setTimeout(tick, 220)
   }, [])
 
+  /* ── Önbaxış panelindəki «Bu dizaynla sifariş et» (UI redesign 2026-10) ──
+     Şablon builder snapshot-una yazılır (data.templateId → autosave/draft/sifariş
+     zənciri onsuz da bu sahəni daşıyır), addım 1-ə (Dizayn) qaytarılır.
+       • önbaxışa builder-dən gəlinibsə (paket seçilib) → builder-ə qayıdış
+       • əks halda → «Paketlərə keç» axını: paket seçilən kimi builder bu
+         dizaynla açılır */
+  const choosePreviewTemplate = useCallback(() => {
+    const id = previewTemplateId
+    if (!id || !isTemplateSelectable(id)) return
+    const snap = readBuilderSnapshot()
+    saveBuilderSnapshot({ data: { ...(snap?.data || {}), templateId: id }, step: 1 })
+    trackTemplateSelected(id, { source: 'preview_bar' })
+    let ctx = null
+    try { ctx = JSON.parse(sessionStorage.getItem('digitoy_preview_return') || 'null') } catch { /* private mode */ }
+    if (ctx?.origin === 'builder' && ctx.pkg) { goBackFromPreview(); return }
+    try { sessionStorage.removeItem('digitoy_preview_return') } catch { /* private mode */ }
+    window.dispatchEvent(new CustomEvent('digitoy:packages'))
+  }, [previewTemplateId, goBackFromPreview])
+
   /* Ana səhifəyə qayıdış (hüquqi səhifə, 404, deaktiv dəvətnamə) */
   const goHome = useCallback(() => {
     window.history.pushState({}, '', '/')
@@ -603,21 +625,8 @@ export default function App() {
      builder/admin/production invite marşrutlarından tam təcrid olunub.
      isPreview={true} → hazırlanmaqda olan (enabled=false) şablonlar da açılır. */
   if (view === 'template-preview') {
-    const previewConfig = getTemplateConfig(previewTemplateId)
     return (
       <div className="min-h-screen bg-cream">
-        {/* Daxili test lenti — canlı müştəri bu marşruta düşmür */}
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 220,
-          padding: '5px 12px', textAlign: 'center',
-          background: 'rgba(26,20,12,0.86)', color: 'rgba(255,255,255,0.82)',
-          fontFamily: 'Inter, system-ui, sans-serif',
-          fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase',
-          pointerEvents: 'none', backdropFilter: 'blur(6px)',
-        }}>
-          {/* `lang="en"` — ingiliscə ad AZ səhifədə «BOARDİNG PASS» olmasın */}
-          Önbaxış · <span lang="en">{previewConfig?.name || previewTemplateId} · {previewTemplateId}</span>
-        </div>
         <TemplateRenderer
           template={previewTemplateId}
           isPreview={true}
@@ -626,6 +635,13 @@ export default function App() {
           isDemoMode={true}
           initialGuestbook={demoGuestbook}
           onBack={goBackFromPreview}
+        />
+        {/* UI redesign: köhnə yazı zolağının yerinə önbaxış paneli */}
+        <TemplatePreviewBar
+          templateId={previewTemplateId}
+          lang={lang}
+          onBack={goBackFromPreview}
+          onChoose={choosePreviewTemplate}
         />
       </div>
     )
@@ -662,7 +678,16 @@ export default function App() {
 
   if (view === 'not-found') {
     const t = legalUi(lang).notFound
-    return <StatusPage code="404" title={t.title} text={t.text} homeLabel={t.home} onHome={goHome} />
+    const templatesLabel = { az: 'Şablonlara bax', en: 'Browse templates', ru: 'Смотреть шаблоны' }[lang] || 'Şablonlara bax'
+    return (
+      <StatusPage
+        variant="not-found" code="404" lang={lang}
+        title={t.title} text={t.text}
+        primaryLabel={t.home} onPrimary={goHome}
+        secondaryLabel={templatesLabel}
+        onSecondary={() => { window.history.pushState({}, '', '/templates'); setView('templates'); window.scrollTo(0, 0) }}
+      />
+    )
   }
 
   /* ── /demo — Phase 27: nümunə dəvətnamə artıq FLORAL GARDEN şablonudur.
@@ -727,9 +752,10 @@ export default function App() {
   if (view === 'invite-disabled') {
     return (
       <StatusPage
+        variant="invite-disabled"
         title="Bu dəvətnamə deaktiv edilmişdir."
         text="Əlavə məlumat üçün təşkilatçı ilə əlaqə saxlayın."
-        homeLabel="Ana səhifəyə qayıt" onHome={goHome}
+        primaryLabel="Ana səhifəyə qayıt" onPrimary={goHome}
       />
     )
   }
@@ -737,9 +763,10 @@ export default function App() {
   if (view === 'invite-not-found') {
     return (
       <StatusPage
-        code="404" title="Bu dəvətnamə tapılmadı."
+        variant="invite-not-found" code="404"
+        title="Bu dəvətnamə tapılmadı."
         text="Link köhnəlmiş və ya yanlış ola bilər. Zəhmət olmasa dəvətnamə sahibindən yeni link tələb edin."
-        homeLabel="Ana səhifəyə qayıt" onHome={goHome}
+        primaryLabel="Ana səhifəyə qayıt" onPrimary={goHome}
       />
     )
   }
