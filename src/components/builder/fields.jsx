@@ -151,7 +151,7 @@ export const TextInput = forwardRef(function TextInput(
         onChange={(e) => onChange?.(e.target.value, e)}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy(id, error, hint)}
-        className={`${inputBase} ${ringState(error)} h-14 ${Icon ? 'pl-11' : 'pl-4'} pr-4 ${className}`}
+        className={`${inputBase} ${ringState(error)} h-12 sm:h-14 ${Icon ? 'pl-11' : 'pl-4'} pr-4 ${className}`}
         {...rest}
       />
     </div>
@@ -191,7 +191,7 @@ export const DateInput = forwardRef(function DateInput(
           aria-describedby={
             [describedBy(id, error, hint), pretty && `${id}-pretty`].filter(Boolean).join(' ') || undefined
           }
-          className={`${inputBase} ${ringState(error)} h-14 appearance-none pl-11 pr-4 lining-nums tabular-nums [&::-webkit-calendar-picker-indicator]:opacity-60 ${className}`}
+          className={`${inputBase} ${ringState(error)} h-12 sm:h-14 appearance-none pl-11 pr-4 lining-nums tabular-nums [&::-webkit-calendar-picker-indicator]:opacity-60 ${className}`}
           {...rest}
         />
       </div>
@@ -238,7 +238,7 @@ export const TimeInput = forwardRef(function TimeInput(
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy(id, error, hint)}
         className={`${inputBase} ${ringState(error)} appearance-none lining-nums tabular-nums [&::-webkit-calendar-picker-indicator]:opacity-50 ${
-          sm ? 'h-12 px-2 text-center font-medium [&::-webkit-calendar-picker-indicator]:hidden' : 'h-14 pl-11 pr-4'
+          sm ? 'h-12 px-2 text-center font-medium [&::-webkit-calendar-picker-indicator]:hidden' : 'h-12 pl-11 pr-4 sm:h-14'
         } ${className}`}
         {...rest}
       />
@@ -330,7 +330,7 @@ export function SelectCard({
         className="peer sr-only"
       />
       <span
-        className={`relative flex min-h-[112px] flex-col items-center justify-center gap-3 rounded-2xl px-3 py-5 text-center ring-1 ring-inset transition-[background-color,box-shadow,transform] duration-300 ease-luxe peer-focus-visible:ring-2 peer-focus-visible:ring-gold-deep peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-cream ${
+        className={`relative flex min-h-[96px] flex-col items-center justify-center gap-2.5 rounded-2xl px-2 py-4 text-center sm:min-h-[112px] sm:gap-3 sm:px-3 sm:py-5 ring-1 ring-inset transition-[background-color,box-shadow,transform] duration-300 ease-luxe peer-focus-visible:ring-2 peer-focus-visible:ring-gold-deep peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-cream ${
           checked
             ? 'bg-gold-mist/70 shadow-soft ring-2 ring-espresso'
             : off
@@ -356,7 +356,7 @@ export function SelectCard({
           />
         )}
         <span
-          className={`text-[12px] font-semibold uppercase tracking-label ${checked ? 'text-ink' : off ? 'text-brown-muted' : 'text-brown-dark'}`}
+          className={`max-w-full text-[11px] font-semibold uppercase tracking-[0.04em] min-[400px]:tracking-[0.1em] sm:text-[12px] sm:tracking-label ${checked ? 'text-ink' : off ? 'text-brown-muted' : 'text-brown-dark'}`}
         >
           {label}
         </span>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import LandingPage from './components/landing/LandingPage'
 import InvitationPage from './components/invitation/InvitationPage'
@@ -29,6 +29,7 @@ import TemplatePreviewBar from './components/public/TemplatePreviewBar'
 import { readBuilderSnapshot, saveBuilderSnapshot } from './utils/builderSession'
 import { trackTemplateSelected } from './templates/templateAnalytics'
 import { matchLegalRoute, isKnownSpaPath } from './utils/siteRoutes'
+import { pushView, goBackOr, canGoBackInApp, savedScroll, restoreScroll } from './utils/navHistory'
 import { legalDoc as findLegalDoc } from './data/legal/docs'
 import { legalUi } from './data/legal/ui'
 import { consent } from './utils/consent'
@@ -317,6 +318,12 @@ export default function App() {
   /* «Paketlərə keç» — landing paket kartları ilə açılsın (Phase 27.4) */
   const [packagesIntent, setPackagesIntent] = useState(false)
 
+  /* ── Brauzer tarixçəsi (2026-10-09) ── hər SPA keçidi `go()` ilə: köhnə girişə
+     view + scroll yazılır, GERİ basanda popstate onları bərpa edir (utils/navHistory). */
+  const viewRef = useRef(view)
+  useEffect(() => { viewRef.current = view }, [view])
+  const go = useCallback((path, state) => pushView(path, state, { view: viewRef.current }), [])
+
   /* Hər view dəyişəndə <head> meta-larını yenilə (title, description, OG, Twitter, canonical) */
   useSEO(getSEOConfig(view, { weddingData, slug: adminSlug || parseInviteSlug().slug, legalDoc }))
 
@@ -360,14 +367,15 @@ export default function App() {
        • builder-dən              → builder-ə, paket saxlanılır, şablon seçiminə scroll
        • birbaşa link (kontekst yox) → landing/builder (default)
      Kontekst önbaxış açılarkən sessionStorage-a yazılır. */
-  const goBackFromPreview = useCallback(() => {
+  /* Önbaxış kontekstini oxu və bərpanı hazırla — həm səhifədəki «geri»
+     düyməsi, həm brauzerin GERİ düyməsi (popstate) bunu çağırır */
+  const takePreviewReturn = useCallback(() => {
     let ctx = null
     try {
       const raw = sessionStorage.getItem('digitoy_preview_return')
       if (raw) ctx = JSON.parse(raw)
       sessionStorage.removeItem('digitoy_preview_return')
     } catch { /* private mode */ }
-
     if (ctx?.origin === 'templates') {
       /* Vitrin öz vəziyyətini mount-da bu açardan oxuyur */
       try {
@@ -375,13 +383,25 @@ export default function App() {
           status: ctx.status, category: ctx.category, scrollY: ctx.scrollY,
         }))
       } catch { /* private mode */ }
-      window.history.pushState({}, '', '/templates')
+    }
+    if (ctx?.pkg) setResumePackage(ctx.pkg)
+    return ctx
+  }, [])
+
+  const goBackFromPreview = useCallback(() => {
+    /* Önbaxışa saytın içindən gəlinibsə — bir addım geri: popstate view-u,
+       vitrin filtrlərini və scroll mövqeyini bərpa edir. Tarixçədə artıq
+       «irəli» önbaxış girişi qalmır (əvvəl yeni giriş əlavə olunurdu). */
+    if (canGoBackInApp()) { window.history.back(); return }
+
+    const ctx = takePreviewReturn()
+    if (ctx?.origin === 'templates') {
+      go('/templates')
       setView('templates')
       return
     }
 
-    if (ctx?.pkg) setResumePackage(ctx.pkg)
-    window.history.pushState({}, '', '/')
+    go('/')
     setView('landing')
 
     /* Scroll bərpası — builder blokunun tam qurulması bir neçə kadr çəkir
@@ -405,7 +425,7 @@ export default function App() {
       window.scrollTo({ top: Math.min(top, Math.max(0, maxScroll)), behavior: 'auto' })
     }
     setTimeout(tick, 220)
-  }, [])
+  }, [takePreviewReturn, go])
 
   /* ── Önbaxış panelindəki «Bu dizaynla sifariş et» (UI redesign 2026-10) ──
      Şablon builder snapshot-una yazılır (data.templateId → autosave/draft/sifariş
@@ -428,20 +448,22 @@ export default function App() {
 
   /* Ana səhifəyə qayıdış (hüquqi səhifə, 404, deaktiv dəvətnamə) */
   const goHome = useCallback(() => {
-    window.history.pushState({}, '', '/')
+    /* Ana səhifədən gəlinibsə — ora, eyni scroll mövqeyinə */
+    if (canGoBackInApp('/')) { window.history.back(); return }
+    go('/')
     setView('landing')
     window.scrollTo(0, 0)
-  }, [])
+  }, [go])
 
   /* Landing-in builder blokuna keçid (şablon vitrinindəki "Dəvətnaməni hazırla") */
   const goToBuilder = useCallback(() => {
-    window.history.pushState({}, '', '/')
+    go('/')
     setView('landing')
     setTimeout(() => {
       const el = document.getElementById('builder-content')
       if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 72, behavior: 'smooth' })
     }, 260)
-  }, [])
+  }, [go])
 
   /* Builder-dəki "Önbaxış" düyməsi — eyni tabda şablon önbaxışına keç */
   useEffect(() => {
@@ -449,14 +471,14 @@ export default function App() {
       const id = e?.detail?.id
       if (!id) return
       setPackagesIntent(false)
-      window.history.pushState({}, '', `/demo/template/${id}`)
+      go(`/demo/template/${id}`)
       setPreviewTemplateId(resolveTemplateId(id, { allowDisabled: true }))
       setView('template-preview')
       window.scrollTo(0, 0)
     }
     window.addEventListener('digitoy:preview', onPreview)
     return () => window.removeEventListener('digitoy:preview', onPreview)
-  }, [])
+  }, [go])
 
   /* ── «Paketlərə keç» (şablonun son CTA-sı) ─────────────────────────────────
      Demo / önbaxış / vitrin — hamısından landing-in paket kartlarına aparır.
@@ -465,14 +487,14 @@ export default function App() {
      paketi seçən kimi forma məlumatları olduğu kimi qayıdır. */
   useEffect(() => {
     const onPackages = () => {
-      window.history.pushState({}, '', '/')
+      go('/')
       setPackagesIntent(true)
       setView('landing')
       window.scrollTo(0, 0)
     }
     window.addEventListener('digitoy:packages', onPackages)
     return () => window.removeEventListener('digitoy:packages', onPackages)
-  }, [])
+  }, [go])
 
   /* ⚠ Brauzerin öz GERİ/İRƏLİ düymələri (Phase 27.3).
      Əvvəl `popstate` dinlənilmirdi: pushState ilə açılan önbaxışdan geri
@@ -481,30 +503,47 @@ export default function App() {
      Phase 47: footer/sifariş qeydi linkləri (siteRoutes.navigateSpa) EYNİ
      yoldan keçir — pushState, sonra URL-ə uyğun view. Hash (#kuki) qalır. */
   useEffect(() => {
-    const onPop = () => {
+    /* 2026-10-09: girişin `view`-u (məs. «Dəvətnaməni gör» → 'invitation',
+       admin baxışı → 'admin-review') və scroll mövqeyi də bərpa olunur */
+    const ROOT_VIEWS = ['landing', 'invitation', 'admin-review']
+    const route = () => {
       const path = window.location.pathname
-      /* Brauzerin geri/irəli düyməsi «Paketlərə keç» niyyətini ləğv edir —
-         əks halda builder əvəzinə paket kartları açılırdı. */
-      setPackagesIntent(false)
       const previewId = parseTemplatePreviewId()
       if (previewId) {
         setPreviewTemplateId(resolveTemplateId(previewId, { allowDisabled: true }))
         setView('template-preview')
-        return
+        return true
       }
-      if (/^\/templates\/?$/.test(path)) { setView('templates'); return }
-      if (path === '/preview/live') { setView('live-preview'); return }
-      if (path === '/demo') { setView('demo'); return }
-      if (path === '/') { setView('landing'); return }
+      if (/^\/templates\/?$/.test(path)) { setView('templates'); return true }
+      if (path === '/preview/live') { setView('live-preview'); return true }
+      if (path === '/demo') { setView('demo'); return true }
+      if (path === '/') {
+        const v = window.history.state?.view
+        setView(ROOT_VIEWS.includes(v) ? v : 'landing')
+        return true
+      }
       const legal = matchLegalRoute(path)
-      if (legal) { setLegalDoc(legal); setView('legal'); return }
-      if (!isKnownSpaPath(path)) setView('not-found')
+      if (legal) { setLegalDoc(legal); setView('legal'); return true }
+      if (!isKnownSpaPath(path)) { setView('not-found'); return true }
+      return false   /* /admin, /invite — öz komponentləri idarə edir */
+    }
+    const onPop = () => {
+      /* Brauzerin geri/irəli düyməsi «Paketlərə keç» niyyətini ləğv edir —
+         əks halda builder əvəzinə paket kartları açılırdı. */
+      setPackagesIntent(false)
+      /* Önbaxışdan geri: vitrin filtrləri / builder paketi də qayıdır */
+      if (viewRef.current === 'template-preview') takePreviewReturn()
+      if (!route()) return
+      /* yalnız `go()`-nun yazdığı mövqe; #anker girişlərində brauzer özü idarə edir */
+      const y = savedScroll()
+      if (y != null) restoreScroll(y)
     }
     const onNavigate = (e) => {
       const path = String(e?.detail?.path || '')
       if (!path) return
-      window.history.pushState({}, '', path)
-      onPop()
+      go(path)
+      setPackagesIntent(false)
+      route()
       window.scrollTo(0, 0)
     }
     window.addEventListener('popstate', onPop)
@@ -513,7 +552,7 @@ export default function App() {
       window.removeEventListener('popstate', onPop)
       window.removeEventListener('digitoy:navigate', onNavigate)
     }
-  }, [])
+  }, [takePreviewReturn, go])
 
   useEffect(() => {
     /* ⚠ CANLI ÖNBAXIŞ — /preview/live: marşrutlaşdırma APARILMIR.
@@ -656,7 +695,7 @@ export default function App() {
           lang={lang} setLang={setLang}
           onBack={goHome}
           onPreview={(tpl) => {
-            window.history.pushState({}, '', `/demo/template/${tpl.id}`)
+            go(`/demo/template/${tpl.id}`)
             setPreviewTemplateId(tpl.id)
             setView('template-preview')
             window.scrollTo(0, 0)
@@ -685,7 +724,7 @@ export default function App() {
         title={t.title} text={t.text}
         primaryLabel={t.home} onPrimary={goHome}
         secondaryLabel={templatesLabel}
-        onSecondary={() => { window.history.pushState({}, '', '/templates'); setView('templates'); window.scrollTo(0, 0) }}
+        onSecondary={() => { go('/templates'); setView('templates'); window.scrollTo(0, 0) }}
       />
     )
   }
@@ -703,7 +742,7 @@ export default function App() {
           weddingData={demoInvitation}
           isDemoMode={true}
           initialGuestbook={demoGuestbook}
-          onBack={() => { window.history.pushState({}, '', '/'); setView('landing') }}
+          onBack={() => goBackOr(() => { go('/'); setView('landing') })}
         />
       </div>
     )
@@ -735,10 +774,10 @@ export default function App() {
             lang={lang} setLang={setLang}
             weddingData={weddingData} setWeddingData={setWeddingData}
             onViewInvitation={() => navigateTo(() => {
-              if (adminSlug) window.history.pushState({}, '', `/invite/${adminSlug}`)
+              if (adminSlug) go(`/invite/${adminSlug}`)
               setView('invite')
             })}
-            onDemo={() => { trackEvent('demo_opened', { lang }); navigateTo(() => { window.history.pushState({}, '', '/demo'); setView('demo') }) }}
+            onDemo={() => { trackEvent('demo_opened', { lang }); navigateTo(() => { go('/demo'); setView('demo') }) }}
             isAdmin={true} initialShowPreview={false}
           />
         </div>
@@ -777,7 +816,7 @@ export default function App() {
         <InvitationPage
           lang={lang} setLang={setLang}
           weddingData={weddingData} isAdmin={isAdmin}
-          onBack={() => { window.history.pushState({}, '', '/'); setView('landing') }}
+          onBack={() => goBackOr(() => { go('/'); setView('landing') })}
         />
       </div>
     )
@@ -800,8 +839,13 @@ export default function App() {
           weddingData={weddingData} setWeddingData={setWeddingData}
           initialPackage={resumePackage}
           showPackages={packagesIntent}
-          onViewInvitation={() => navigateTo(() => setView('invitation'))}
-          onDemo={() => { trackEvent('demo_opened', { lang }); navigateTo(() => { window.history.pushState({}, '', '/demo'); setView('demo') }) }}
+          onViewInvitation={() => navigateTo(() => {
+            /* Tarixçəyə giriş — brauzerin GERİ düyməsi doldurulmuş builder/önbaxışa,
+               eyni scroll mövqeyinə qaytarır (əvvəl saytdan çıxırdı) */
+            go('/', { view: 'invitation' })
+            setView('invitation')
+          })}
+          onDemo={() => { trackEvent('demo_opened', { lang }); navigateTo(() => { go('/demo'); setView('demo') }) }}
           isAdmin={isAdmin}
         />
       </div>
@@ -810,13 +854,13 @@ export default function App() {
           <InvitationPage
             lang={lang} setLang={setLang}
             weddingData={weddingData}
-            onBack={() => {
+            onBack={() => goBackOr(() => {
               setView('landing')
               setTimeout(() => {
                 const el = document.getElementById('builder-content')
                 if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 72, behavior: 'smooth' })
               }, 80)
-            }}
+            })}
           />
         </div>
       )}

@@ -115,7 +115,7 @@ export default function Pricing({
           />
 
           {/* Artan sıra: 59 → 89 → 129. lg-də Premium sağda yuxarı qalxır və bir az enlidir */}
-          <ul className="mt-16 grid gap-8 lg:mt-24 lg:grid-cols-[1fr_1fr_1.08fr] lg:items-start lg:gap-5 xl:gap-7">
+          <ul className="mt-10 grid gap-7 sm:mt-16 sm:gap-8 lg:mt-24 lg:grid-cols-[1fr_1fr_1.08fr] lg:items-start lg:gap-5 xl:gap-7">
             {packages.map((p, i) => (
               <motion.li
                 key={p.id}
@@ -195,8 +195,8 @@ function PackageCard({ p, x, selected, onSelect }) {
       aria-labelledby={titleId}
       className={`group relative flex h-full flex-col rounded-[28px] transition-[transform,box-shadow] duration-500 ease-luxe hover:-translate-y-1 ${
         dark
-          ? 'bg-espresso-grad p-8 text-cream shadow-[0_40px_80px_-40px_rgba(44,37,35,0.65)] sm:p-10'
-          : 'bg-white/85 p-8 text-brown-dark shadow-soft ring-1 ring-gold/15 hover:shadow-lift sm:p-9'
+          ? 'bg-espresso-grad p-6 text-cream shadow-[0_40px_80px_-40px_rgba(44,37,35,0.65)] min-[400px]:p-7 sm:p-10'
+          : 'bg-white/85 p-6 text-brown-dark shadow-soft ring-1 ring-gold/15 hover:shadow-lift min-[400px]:p-7 sm:p-9'
       } ${selected ? 'ring-2 ring-gold-deep ring-offset-4 ring-offset-beige' : ''}`}
     >
       {/* Premium: qızılı qradiyent kənar + daxili parıltı */}
@@ -216,7 +216,7 @@ function PackageCard({ p, x, selected, onSelect }) {
       {/* nişan */}
       {p.badge && (
         <span
-          className={`absolute -top-3.5 left-8 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[10.5px] font-semibold uppercase tracking-[0.16em] sm:left-10 ${
+          className={`absolute -top-3.5 left-6 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[10.5px] font-semibold uppercase tracking-[0.16em] min-[400px]:left-7 sm:left-10 ${
             dark ? 'bg-gold text-espresso shadow-lift' : 'bg-espresso text-gold-light shadow-soft'
           }`}
         >
@@ -230,16 +230,16 @@ function PackageCard({ p, x, selected, onSelect }) {
       )}
 
       {/* başlıq + qiymət */}
-      <div className="relative">
+      <div className="relative order-1">
         <h3
           id={titleId}
           className={`text-xs font-semibold uppercase tracking-eyebrow ${dark ? 'text-gold-light' : 'text-gold-deep'}`}
         >
           {p.name}
         </h3>
-        <p className="mt-5 flex items-start gap-1.5">
+        <p className="mt-4 flex items-start gap-1.5 sm:mt-5">
           <span
-            className={`font-serif text-[76px] font-normal leading-[0.85] lining-nums tracking-[-0.02em] ${
+            className={`font-serif text-[64px] font-normal leading-[0.85] sm:text-[76px] lining-nums tracking-[-0.02em] ${
               dark ? 'text-cream' : 'text-ink'
             }`}
           >
@@ -250,15 +250,15 @@ function PackageCard({ p, x, selected, onSelect }) {
           </span>
           <span className="sr-only">{x.currencyName ?? 'manat'}</span>
         </p>
-        <p className={`mt-4 min-h-[3em] text-[15px] leading-relaxed ${dark ? 'text-sand' : 'text-brown-dark'}`}>
+        <p className={`mt-3 text-[15px] leading-relaxed sm:mt-4 lg:min-h-[3em] ${dark ? 'text-sand' : 'text-brown-dark'}`}>
           {p.tagline}
         </p>
       </div>
 
-      <div aria-hidden="true" className={`my-7 h-px ${dark ? 'bg-gold/25' : 'bg-gold/20'}`} />
+      <div aria-hidden="true" className={`order-3 my-6 h-px lg:my-7 ${dark ? 'bg-gold/25' : 'bg-gold/20'}`} />
 
       {/* funksiyalar */}
-      <ul className="relative flex-1 space-y-3.5">
+      <ul className="relative order-4 flex-1 space-y-3 lg:space-y-3.5">
         {p.features.map(([status, label]) => (
           <li key={label} className="flex items-start gap-3 text-[14.5px] leading-snug">
             <FeatureIcon status={status} dark={dark} />
@@ -286,7 +286,7 @@ function PackageCard({ p, x, selected, onSelect }) {
 
       {/* hədiyyə */}
       <div
-        className={`relative mt-8 flex items-start gap-3 rounded-2xl px-4 py-3.5 text-[13px] leading-snug ${
+        className={`relative order-5 mt-6 flex items-start gap-3 rounded-2xl px-4 py-3.5 lg:mt-8 text-[13px] leading-snug ${
           dark ? 'bg-white/[0.06] text-sand ring-1 ring-inset ring-gold/20' : 'bg-gold-mist/60 text-brown-dark'
         }`}
       >
@@ -298,14 +298,15 @@ function PackageCard({ p, x, selected, onSelect }) {
         <span>{p.gift}</span>
       </div>
 
-      {/* CTA */}
+      {/* CTA — telefonda/planşetdə qiymətin dərhal altında (uzun siyahını
+          keçmədən seçmək olur), desktopda kartın dibində */}
       <Button
         variant={dark ? 'gold' : p.badge ? 'primary' : 'outline'}
         size="lg"
         onClick={onSelect}
         aria-pressed={selected}
         aria-describedby={titleId}
-        className={`relative mt-7 w-full ${dark ? 'focus-visible:ring-offset-espresso' : ''}`}
+        className={`relative order-2 mt-6 w-full lg:order-6 lg:mt-7 ${dark ? 'focus-visible:ring-offset-espresso' : ''}`}
       >
         {selected ? (
           <>

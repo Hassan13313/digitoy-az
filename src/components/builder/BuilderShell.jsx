@@ -109,7 +109,7 @@ export default function BuilderShell({
           <StepNav lang={lang} steps={steps} current={current} completed={completed} onStepClick={onStepClick} allowJump={allowJump} />
         </div>
 
-        <div className="mx-auto mt-8 max-w-[780px] sm:mt-10">
+        <div className="mx-auto mt-5 max-w-[780px] sm:mt-10">
           {notice && <div className="mb-5">{notice}</div>}
 
           <div
@@ -125,7 +125,7 @@ export default function BuilderShell({
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: direction * -20 }}
                 transition={{ duration: 0.38, ease: EASE }}
-                className="px-5 py-8 sm:px-10 sm:py-11"
+                className="px-5 pb-7 pt-6 sm:px-10 sm:py-11"
               >
                 {children}
               </motion.div>
@@ -133,7 +133,7 @@ export default function BuilderShell({
           </div>
 
           {/* Alt naviqasiya — mobildə ekranın altına yapışır (builder görünən müddətdə) */}
-          <div data-avoid-scroll-progress className="sticky bottom-0 z-20 -mx-5 mt-6 border-t border-gold/15 bg-cream/90 px-5 pb-[calc(env(safe-area-inset-bottom,0px)+12px)] pt-3 backdrop-blur-xl sm:static sm:mx-0 sm:mt-8 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
+          <div data-avoid-scroll-progress className="sticky bottom-0 z-20 -mx-5 mt-5 border-t border-gold/15 bg-cream/90 px-5 pb-[calc(env(safe-area-inset-bottom,0px)+12px)] pt-3 backdrop-blur-xl sm:bottom-5 sm:mx-0 sm:mt-8 sm:rounded-full sm:border sm:bg-cream/80 sm:p-2 sm:shadow-lift">
             <div className="flex items-center justify-between gap-3">
               <button
                 type="button"
@@ -327,26 +327,26 @@ export function StepNav({ steps, current, completed, onStepClick, allowJump = fa
 export function StepCard({ title, subtitle, icon: Icon, action, children }) {
   return (
     <section>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="min-w-0">
           <h3
             data-step-heading
             tabIndex={-1}
-            className="flex items-center gap-3 font-serif text-[30px] font-medium leading-tight text-ink focus:outline-none sm:text-[34px]"
+            className="flex items-center gap-3 font-serif text-[26px] font-medium leading-tight text-ink focus:outline-none sm:text-[34px]"
           >
             {Icon && (
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold-mist text-gold-deep">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gold-mist text-gold-deep sm:h-10 sm:w-10">
                 <Icon className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
               </span>
             )}
             {title}
           </h3>
-          {subtitle && <p className="mt-2 max-w-[56ch] text-[15px] leading-relaxed text-brown-dark/90">{subtitle}</p>}
+          {subtitle && <p className="mt-1.5 max-w-[56ch] text-[14px] leading-relaxed text-brown-dark/90 sm:mt-2 sm:text-[15px]">{subtitle}</p>}
         </div>
         {action && <div className="shrink-0">{action}</div>}
       </div>
-      <div aria-hidden="true" className="my-7 h-px bg-gradient-to-r from-gold/30 via-gold/15 to-transparent sm:my-8" />
-      <div className="space-y-7">{children}</div>
+      <div aria-hidden="true" className="my-5 h-px bg-gradient-to-r from-gold/30 via-gold/15 to-transparent sm:my-8" />
+      <div className="space-y-6 sm:space-y-7">{children}</div>
     </section>
   );
 }

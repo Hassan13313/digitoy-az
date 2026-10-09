@@ -17,7 +17,7 @@ import { buildPricingPackages, UI as PKG_UI, VAGZALI_NOTE } from '../../data/pac
 import { SOCIAL_LINKS, CONTACT_EMAIL } from '../../data/constants'
 import { LEGAL_DOCS } from '../../data/legal/docs'
 import { legalUi } from '../../data/legal/ui'
-import { spaClick } from '../../utils/siteRoutes'
+import { spaClick, navigateSpa } from '../../utils/siteRoutes'
 import { consent } from '../../utils/consent'
 import { trackEvent } from '../../utils/analytics'
 import { readBuilderSnapshot, clearBuilderSnapshot } from '../../utils/builderSession'
@@ -194,8 +194,9 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
 
   const handleNavigate = (id) => {
     if (id === 'builder-section') { scrollToBuilder(); return }
-    /* Şablonlar — ayrıca ictimai səhifə (Phase 27.1) */
-    if (id === 'templates') { window.location.assign('/templates'); return }
+    /* Şablonlar — ayrıca ictimai səhifə (Phase 27.1); səhifə yenilənmədən açılır ki,
+       brauzerin GERİ düyməsi landing-ə eyni scroll mövqeyində qaytarsın */
+    if (id === 'templates') { navigateSpa('/templates'); return }
     scrollToSection(id)
   }
 
@@ -248,17 +249,19 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
       {/* Naviqasiya anchor — packages tab hədəfi */}
       <div id="pricing-section" />
 
-      {/* ── 4. Paketlər / Builder bölməsi ── */}
+      {/* ── 4. Paketlər / Builder bölməsi ──
+          ⚠ overflow-clip (hidden yox): `hidden` bölməni scroll konteynerinə çevirir və
+          builder-in alt naviqasiyası (sticky «Növbəti») ekrana yapışmırdı. */}
       <section
         id="builder-section"
         aria-label={tr.navPackages}
-        className="grain relative isolate z-10 overflow-hidden bg-beige py-24 sm:py-28 lg:py-32"
+        className="grain relative isolate z-10 overflow-hidden bg-beige py-16 supports-[overflow:clip]:overflow-clip sm:py-28 lg:py-32"
       >
         <PricingBackdrop />
 
         {/* Başlıq — yalnız builder/preview aktiv ikən göstərilir (paket kartlarının öz başlığı var) */}
         {(showPreview || selectedPackage) && (
-          <Container className="mb-14 sm:mb-16">
+          <Container className="mb-8 sm:mb-16">
             <SectionHeading
               eyebrow={showPreview ? 'Preview' : 'Builder'}
               title={tr.builder_title}

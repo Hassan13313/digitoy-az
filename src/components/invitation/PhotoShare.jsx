@@ -88,6 +88,8 @@ export default function PhotoShare() {
      sayəsində dəyişiklik olmayanda cavab 304-dür.
      ⚠ Meta yüklənməsə səhifə TAM İŞLƏYİR — yalnız rəqəmlər görünmür. */
   const meta = useGalleryMeta(slug, { interval: 30000 })
+  /* Server «belə dəvətnamə yoxdur» deyirsə yükləmə formu göstərilmir (gallery_meta.php › exists) */
+  const notReady = meta.meta?.exists === false
 
   /* QR skan — bu səhifəyə gəliş praktikada QR kodun skan edilməsidir.
      Server GÜNDƏ BİR DƏFƏ sayır (ip_hash + tarix), ona görə səhifəni
@@ -290,7 +292,7 @@ export default function PhotoShare() {
   }
 
   /* Fayl bütün pəncərəyə sürüklənəndə (desktop) — köhnə «drop» sahəsinin yerinə */
-  const dropActive = useWindowFileDrop({ onFiles: addFiles, disabled: done })
+  const dropActive = useWindowFileDrop({ onFiles: addFiles, disabled: done || notReady })
 
   /* Qapaq: cütlüyün qalereya qapağı (data URI / tam ünvan). Qalereyadan seçilmiş
      fayl adı bu səhifədə həll olunmur (media siyahısı yüklənmir) — o halda
@@ -337,7 +339,15 @@ export default function PhotoShare() {
             </UploadNotice>
           )}
 
-          {done ? (
+          {notReady ? (
+            /* Dəvətnamə hələ yoxdur (məs. builder önbaxışındakı nümunə QR/link —
+               real link təsdiqdən sonra sifariş koduna bağlı suffiks alır).
+               Əvvəl qonaq faylı seçib göndərirdi və yalnız sonda «tapılmadı» alırdı. */
+            <UploadNotice tone="info" title="Bu dəvətnamə hələ aktiv deyil">
+              Foto və video paylaşımı dəvətnamə təsdiqləndikdən sonra açılır. Önbaxışdakı QR kod
+              və link yalnız nümunədir — təsdiqdən sonra göndərilən linkdə şəkillər qəbul olunacaq.
+            </UploadNotice>
+          ) : done ? (
             <UploadDone
               count={doneCount}
               formatText={(n) => `${n} fayl cütlüyün qalereyasına əlavə olundu.`

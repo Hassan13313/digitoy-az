@@ -94,7 +94,7 @@ export default function Header({
     requestAnimationFrame(() => {
       if (onNavigate) { onNavigate(id); return; }
       scrollToSection(id);
-      history.replaceState(null, '', `#${id}`);
+      history.replaceState(history.state, '', `#${id}`);
     });
   }, [onNavigate]);
 

@@ -8,36 +8,49 @@ import AdminPhotosList from './AdminPhotosList'
 import AdminQrStand from './AdminQrStand'
 import AdminGuestbook from './AdminGuestbook'
 import AdminMaintenance from './AdminMaintenance'
+import { pushView, goBackOr, savedScroll, restoreScroll } from '../../utils/navHistory'
+
+/** /admin/orders/DT-X → { section: 'order-detail', draftCode: 'DT-X' } */
+function parseAdminUrl() {
+  const match = window.location.pathname.match(/^\/admin(?:\/([^/?]+)(?:\/([^/?]+))?)?/)
+  const sec = match?.[1] || 'dashboard'
+  const id  = match?.[2] || null
+  return sec === 'orders' && id ? { section: 'order-detail', draftCode: id } : { section: sec, draftCode: null }
+}
 
 export default function AdminApp({ lang = 'az', setLang }) {
-  const [section,   setSection]   = useState('dashboard')
-  const [draftCode, setDraftCode] = useState(null)
+  const [section,   setSection]   = useState(() => parseAdminUrl().section)
+  const [draftCode, setDraftCode] = useState(() => parseAdminUrl().draftCode)
 
-  /* URL-dən başlanğıc bölməni aşkar et */
+  /* Brauzerin GERİ/İRƏLİ düymələri (2026-10-09: əvvəl popstate dinlənilmirdi,
+     GERİ yalnız URL-i dəyişirdi, ekran eyni qalırdı) */
   useEffect(() => {
-    const match = window.location.pathname.match(/^\/admin(?:\/([^/?]+)(?:\/([^/?]+))?)?/)
-    const sec = match?.[1] || 'dashboard'
-    const id  = match?.[2] || null
-    if (sec === 'orders' && id)  { setSection('order-detail'); setDraftCode(id) }
-    else if (sec)                { setSection(sec) }
+    const onPop = () => {
+      if (!window.location.pathname.startsWith('/admin')) return
+      const r = parseAdminUrl()
+      setSection(r.section)
+      setDraftCode(r.draftCode)
+      const y = savedScroll()
+      if (y != null) restoreScroll(y)
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
   }, [])
 
   const DETAIL_KEY = { orders: 'order-detail' }
 
   const navigate = (sec, id = null) => {
     const path = id ? `/admin/${sec}/${id}` : `/admin/${sec}`
-    window.history.pushState({}, '', path)
+    pushView(path)
     setSection(id ? (DETAIL_KEY[sec] || `${sec}-detail`) : sec)
     if (sec === 'orders' && id) setDraftCode(id)
+    window.scrollTo(0, 0)
   }
 
   const handleSelectOrder = (code) => navigate('orders', code)
 
-  const handleBack = () => {
-    window.history.pushState({}, '', '/admin/orders')
-    setSection('orders')
-    setDraftCode(null)
-  }
+  /* Siyahıdan gəlinibsə — ora, eyni scroll mövqeyinə; birbaşa linkdə siyahını aç */
+  const handleBack = () => goBackOr(() => navigate('orders'), '/admin/orders')
 
   return (
     <AdminLayout section={section.replace('-detail', '')} onNavigate={(sec) => navigate(sec)}>

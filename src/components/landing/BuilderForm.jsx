@@ -207,7 +207,7 @@ function VenueSearchInput({ value, onSelect, lang, tr }) {
           type="text"
           defaultValue={value || ''}
           placeholder={tr.venue_search_placeholder}
-          className={`${inputBase} ${ringState(false)} h-14 pl-11 pr-4`}
+          className={`${inputBase} ${ringState(false)} h-12 pl-11 pr-4 sm:h-14`}
         />
       </div>
       {success && (
@@ -523,6 +523,7 @@ function toIso(year, month, day) {
 function AzCalendar({ value, onChange, hasError, lang = 'az' }) {
   const [open, setOpen] = useState(false)
   const wrapRef = useRef(null)
+  const panelRef = useRef(null)
 
   const today    = new Date()
   const selected = parseIso(value)
@@ -552,6 +553,13 @@ function AzCalendar({ value, onChange, hasError, lang = 'az' }) {
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  /* açılanda panel tam görünsün — mobil alt naviqasiya da onu örtməsin */
+  useEffect(() => {
+    if (!open) return
+    const id = requestAnimationFrame(() => panelRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }))
+    return () => cancelAnimationFrame(id)
   }, [open])
 
   const prevMonth = () => {
@@ -606,7 +614,7 @@ function AzCalendar({ value, onChange, hasError, lang = 'az' }) {
   return (
     <div ref={wrapRef} className="relative">
       {/* yazıla bilən + ikonlu trigger */}
-      <div className={`flex h-14 items-center rounded-2xl bg-white pl-4 pr-1.5 ring-1 ring-inset transition-shadow duration-300 focus-within:ring-2 ${hasError ? 'ring-rust/70 focus-within:ring-rust' : 'ring-beige-dark hover:ring-gold/60 focus-within:ring-gold-deep'}`}>
+      <div className={`flex h-12 items-center rounded-2xl bg-white pl-4 pr-1.5 sm:h-14 ring-1 ring-inset transition-shadow duration-300 focus-within:ring-2 ${hasError ? 'ring-rust/70 focus-within:ring-rust' : 'ring-beige-dark hover:ring-gold/60 focus-within:ring-gold-deep'}`}>
         <input
           type="text"
           inputMode="numeric"
@@ -635,11 +643,12 @@ function AzCalendar({ value, onChange, hasError, lang = 'az' }) {
         </p>
       )}
 
-      {/* təqvim paneli — absolute, z-[9999] */}
+      {/* təqvim paneli — axında (inline): kartın overflow-hidden-i onu kəsmir,
+          sticky alt naviqasiya üçün scroll-margin saxlanılır */}
       {open && (
         <div
-          className="absolute left-0 top-full mt-2 w-full max-w-[340px] rounded-2xl bg-white p-4 shadow-luxe ring-1 ring-gold/25"
-          style={{ zIndex: 9999 }}
+          ref={panelRef}
+          className="mt-3 w-full max-w-[340px] scroll-mb-28 scroll-mt-24 animate-fade-in rounded-2xl bg-white p-4 shadow-luxe ring-1 ring-gold/25 [animation-duration:250ms]"
         >
           {/* başlıq */}
           <div className="flex items-center justify-between mb-4">
@@ -719,7 +728,7 @@ function TimeInputAz({ value, onChange }) {
   }
 
   return (
-    <div className="flex h-14 items-center rounded-2xl bg-white px-4 ring-1 ring-inset ring-beige-dark transition-shadow duration-300 hover:ring-gold/60 focus-within:ring-2 focus-within:ring-gold-deep">
+    <div className="flex h-12 items-center rounded-2xl bg-white px-4 sm:h-14 ring-1 ring-inset ring-beige-dark transition-shadow duration-300 hover:ring-gold/60 focus-within:ring-2 focus-within:ring-gold-deep">
       <Clock size={18} strokeWidth={1.6} className="mr-3 shrink-0 text-gold-deep" aria-hidden="true" />
       <input
         type="text"
@@ -752,7 +761,7 @@ function Input({ className = '', invalid = false, ...props }) {
     <input
       {...props}
       aria-invalid={invalid || undefined}
-      className={`${inputBase} ${ringState(invalid)} h-14 px-4 ${className}`}
+      className={`${inputBase} ${ringState(invalid)} h-12 px-4 sm:h-14 ${className}`}
     />
   )
 }
@@ -917,7 +926,11 @@ function GalleryAdminStep({ data, isCouple, isCorp, isAdmin = false, canonicalSl
         url={photoShareUrl}
         features={['QR paylaşım', 'Şəxsi qalereya', 'HD yükləmə', 'ZIP export']}
         title="Qonaqlar bu QR vasitəsilə şəkil göndərəcək"
-        text="Masa kartlarına bu QR kodu yapışdırın. Qonaqlar skan edərək toy şəkillərini birbaşa sistemə yükləyəcəklər."
+        text={canonicalSlug
+          ? 'Masa kartlarına bu QR kodu yapışdırın. Qonaqlar skan edərək toy şəkillərini birbaşa sistemə yükləyəcəklər.'
+          /* Təsdiqdən əvvəl slug-ın sifariş suffiksi hələ yoxdur — bu QR işləməyən
+             (və ya başqasının) ünvanına apara bilər, çap edilməməlidir */
+          : 'Bu QR nümunədir: əsl QR kod dəvətnamə təsdiqləndikdən sonra hazırlanır və sizə göndərilir. Qonaqlar onu skan edərək toy şəkillərini birbaşa sistemə yükləyəcəklər.'}
       />
 
       {/* Admin: SVG masa kartı + müştərinin qalereya idarəetmə linki */}
@@ -1850,7 +1863,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
 
         {/* STEP 1 */}
         {actualStep === 1 && (
-          <div className="space-y-8 pb-10">
+          <div className="space-y-6 pb-6 sm:space-y-8 sm:pb-10">
             {/* Tədbir növü */}
             <ChoiceGroup legend={tr.event_type || 'Tədbir növü'} className="grid grid-cols-3 gap-2.5 sm:grid-cols-5">
               {EVENT_TYPES.map(({ id }) => (
@@ -1892,7 +1905,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
               /* Toy / Nişan — cütlük adları.
                  ⚠ Phase 27: sıra BƏY → GƏLİN. Yalnız göstərim sırası dəyişdi;
                  `brideName`/`groomName` data açarları OLDUĞU KİMİ qalır. */
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8">
                 <div>
                   <Label required>{tr.groom_label}</Label>
                   <Input
@@ -1926,7 +1939,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
             )}
 
             {/* Tarix & Vaxt */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8">
               <div>
                 <Label required>{tr.date_label}</Label>
                 <AzCalendar
@@ -1952,7 +1965,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
 
         {/* STEP 2 */}
         {actualStep === 2 && (
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             <div>
               <Label required>{tr.venue_search_label}</Label>
               <VenueSearchInput
@@ -1995,7 +2008,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
 
         {/* STEP 4 — Dress Code (Phase 25.3 — premium kart dizaynı) */}
         {actualStep === 4 && (
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             <div>
               <Label>{tr.dresscode_type_label}</Label>
               {/* Kartların adının dəyişdirilə bildiyini bildirən qısa izah */}
