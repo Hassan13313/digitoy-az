@@ -1,182 +1,23 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Search, X, RefreshCw, Download, LayoutList, AlignLeft, Printer } from 'lucide-react'
 import { getGuests, exportGuestsCsv } from '../../utils/api'
 import { azDate } from './adminFormat'
-import { useIsNarrow } from '../../hooks/useIsNarrow'
+import GuestReportTab from './v2/GuestReportTab'
+import { Notice } from './v2/adminUi'
 
-const STATUS_DOT = { GOING: '🟢', NOT_GOING: '🔴', MAYBE: '🟡', NO_RESPONSE: '⚪' }
-const STATUS_AZ  = { GOING: 'Gələcək', NOT_GOING: 'Gəlməyəcək', MAYBE: 'Bəlkə', NO_RESPONSE: 'Cavab yoxdur' }
+/* ─────────────────────────────────────────────────────────────────────────────
+   Qonaq hesabatı — UI redesign 2026-10 (görünüş v2/GuestReportTab)
 
-const STATUS_META = {
-  GOING:       { bg: 'oklch(93% 0.05 145)', color: 'oklch(35% 0.1 145)' },
-  NOT_GOING:   { bg: 'oklch(94% 0.05 25)',  color: 'oklch(38% 0.12 25)' },
-  MAYBE:       { bg: 'oklch(94% 0.06 80)',  color: 'oklch(42% 0.08 70)' },
-  NO_RESPONSE: { bg: 'oklch(93% 0.01 60)',  color: 'oklch(50% 0.03 60)' },
-}
+   Məntiq dəyişməyib: get_guests.php, masalara / statusa görə qruplaşdırma,
+   axtarış + masa + status filtri, serverdən CSV (export_guests.php), A4 çap.
+   ⚠ Çap pəncərəsi admin səhifəsi ilə EYNİ mənşəlidir — qonaq adı və qeyd
+   (builder-də müştəri yazır) HTML kimi yazılmır, hamısı escape olunur.
+   ───────────────────────────────────────────────────────────────────────── */
 
-const FILTERS = [
-  { key: null,          label: 'Hamısı' },
-  { key: 'GOING',       label: '🟢 Gələcək' },
-  { key: 'NOT_GOING',   label: '🔴 Gəlməyəcək' },
-  { key: 'MAYBE',       label: '🟡 Bəlkə' },
-  { key: 'NO_RESPONSE', label: '⚪ Cavabsız' },
-]
+const VIEW_STATUS = { GOING: 'yes', NOT_GOING: 'no', MAYBE: 'maybe', NO_RESPONSE: 'none' }
+const STATUS_TITLE = { GOING: 'Gələcək', MAYBE: 'Bəlkə', NOT_GOING: 'Gəlməyəcək', NO_RESPONSE: 'Cavabsız' }
+const STATUS_ORDER = ['GOING', 'MAYBE', 'NOT_GOING', 'NO_RESPONSE']
 
-const COL_HDR = { fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'oklch(50% 0.03 60)' }
-
-function StatusBadge({ status }) {
-  const m = STATUS_META[status] || { bg: 'oklch(93% 0.01 60)', color: 'oklch(50% 0.03 60)' }
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 3, fontSize: 10, fontWeight: 600, background: m.bg, color: m.color }}>
-      {STATUS_DOT[status]} {STATUS_AZ[status] || status}
-    </span>
-  )
-}
-
-export function StatCard({ label, value, color, highlight }) {
-  /* Telefonda 4 kart bir sırada ~84px-dir: 14px yan boşluqla «GƏLMƏYƏCƏK»
-     sözü kartdan çıxırdı — dar ekranda boşluq azalır. */
-  const narrow = useIsNarrow()
-  return (
-    <div style={{ flex: 1, minWidth: 80, background: highlight ? 'oklch(96% 0.03 80)' : 'white', border: `1px solid ${highlight ? 'oklch(78% 0.1 80)' : 'oklch(88% 0.02 60)'}`, borderRadius: 5, padding: narrow ? '12px 4px' : '12px 14px', textAlign: 'center' }}>
-      <div style={{ fontSize: 24, fontWeight: 300, color, lineHeight: 1, fontFamily: '"Cormorant Garamond",serif' }}>{value}</div>
-      <div style={{ fontSize: 9, letterSpacing: narrow ? '0.05em' : '0.1em', textTransform: 'uppercase', color: 'oklch(55% 0.03 60)', marginTop: 4 }}>{label}</div>
-    </div>
-  )
-}
-
-/* ── Telefon sətri (Phase 45) ──
-   5 sütunlu şəbəkə 384px-də ad sütununu ~3px-ə sıxırdı. Telefonda ad + status
-   yuxarıda, əlavə qonaq / masa / qeyd / tarix alt sətirdədir. */
-function GuestLine({ g, showTable = false }) {
-  const meta = [
-    g.extra_guests > 0 ? `+${g.extra_guests} qonaq` : null,
-    showTable ? g.table_id : null,
-    g.notes || null,
-    g.submitted_at ? azDate(g.submitted_at, { year: false }) : null,
-  ].filter(Boolean)
-  return (
-    <div style={{ padding: '10px 14px', borderBottom: '1px solid oklch(94% 0.01 60)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: 14, color: 'oklch(22% 0.02 60)', overflowWrap: 'anywhere', minWidth: 0 }}>{g.full_name}</span>
-        <span style={{ flex: '0 0 auto' }}><StatusBadge status={g.status} /></span>
-      </div>
-      {meta.length > 0 && (
-        <div style={{ fontSize: 12, color: 'oklch(52% 0.03 60)', marginTop: 4, overflowWrap: 'anywhere' }}>{meta.join(' · ')}</div>
-      )}
-    </div>
-  )
-}
-
-/* ── Mode A: Masalara görə ── */
-function ByTablesView({ guests, tableIds }) {
-  const narrow = useIsNarrow()
-  const byTable = {}
-  for (const tid of tableIds) byTable[tid] = []
-  for (const g of guests) {
-    if (byTable[g.table_id]) byTable[g.table_id].push(g)
-    else byTable[g.table_id] = [g]
-  }
-
-  const COLS = '1fr 140px 58px 1fr 88px'
-
-  return (
-    <div>
-      {tableIds.filter(tid => byTable[tid]?.length).map(tid => (
-        <div key={tid} style={{ marginBottom: 18 }}>
-          <div style={{ padding: '8px 14px', background: 'oklch(95% 0.01 75)', borderBottom: '1px solid oklch(88% 0.02 60)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: 'oklch(25% 0.03 60)' }}>{tid}</span>
-            <span style={{ fontSize: 10, color: 'oklch(55% 0.03 60)' }}>
-              {byTable[tid].filter(g => g.status !== 'NO_RESPONSE').length}/{byTable[tid].length} cavab
-            </span>
-          </div>
-          {narrow && byTable[tid].map(g => <GuestLine key={g.id} g={g} />)}
-          {/* Column header for this table group */}
-          {!narrow && (
-          <div style={{ display: 'grid', gridTemplateColumns: COLS, gap: 8, padding: '5px 16px', background: 'oklch(97% 0.005 75)', borderBottom: '1px solid oklch(91% 0.01 75)' }}>
-            {['Ad', 'Status', 'Əlavə', 'Qeyd', 'Tarix'].map((h, i) => (
-              <span key={i} style={COL_HDR}>{h}</span>
-            ))}
-          </div>
-          )}
-          {!narrow && byTable[tid].map(g => (
-            <div key={g.id} style={{ display: 'grid', gridTemplateColumns: COLS, gap: 8, padding: '8px 16px', alignItems: 'center', borderBottom: '1px solid oklch(94% 0.01 60)' }}>
-              <span style={{ fontSize: 13, color: 'oklch(22% 0.02 60)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{g.full_name}</span>
-              <StatusBadge status={g.status} />
-              <span style={{ fontSize: 12, color: 'oklch(35% 0.08 75)', fontWeight: 600, textAlign: 'center' }}>
-                {g.extra_guests > 0 ? `+${g.extra_guests}` : '—'}
-              </span>
-              <span style={{ fontSize: 11, color: 'oklch(52% 0.03 60)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={g.notes || ''}>
-                {g.notes || ''}
-              </span>
-              <span style={{ fontSize: 11, color: 'oklch(58% 0.03 60)' }}>
-                {g.submitted_at ? azDate(g.submitted_at, { year: false }) : '—'}
-              </span>
-            </div>
-          ))}
-        </div>
-      ))}
-    </div>
-  )
-}
-
-/* ── Mode B: Statuslara görə ── */
-function ByStatusView({ guests }) {
-  const narrow = useIsNarrow()
-  const order = ['GOING', 'MAYBE', 'NOT_GOING', 'NO_RESPONSE']
-  const byStatus = {}
-  for (const s of order) byStatus[s] = []
-  for (const g of guests) {
-    if (byStatus[g.status]) byStatus[g.status].push(g)
-    else byStatus[g.status] = [g]
-  }
-
-  const COLS = '1fr 120px 58px 1fr 88px'
-
-  return (
-    <div>
-      {order.filter(s => byStatus[s]?.length).map(s => narrow ? (
-        <div key={s} style={{ marginBottom: 18 }}>
-          <div style={{ padding: '8px 14px', background: STATUS_META[s]?.bg || 'oklch(95% 0.01 75)', borderBottom: '1px solid oklch(88% 0.02 60)' }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: STATUS_META[s]?.color || 'oklch(30% 0.02 60)' }}>
-              {STATUS_DOT[s]} {STATUS_AZ[s]} — {byStatus[s].length} nəfər
-            </span>
-          </div>
-          {byStatus[s].map(g => <GuestLine key={g.id} g={g} showTable />)}
-        </div>
-      ) : (
-        <div key={s} style={{ marginBottom: 18 }}>
-          <div style={{ padding: '8px 14px', background: STATUS_META[s]?.bg || 'oklch(95% 0.01 75)', borderBottom: '1px solid oklch(88% 0.02 60)' }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: STATUS_META[s]?.color || 'oklch(30% 0.02 60)' }}>
-              {STATUS_DOT[s]} {STATUS_AZ[s]} — {byStatus[s].length} nəfər
-            </span>
-          </div>
-          {/* Column header */}
-          <div style={{ display: 'grid', gridTemplateColumns: COLS, gap: 8, padding: '5px 16px', background: 'oklch(97% 0.005 75)', borderBottom: '1px solid oklch(91% 0.01 75)' }}>
-            {['Ad', 'Masa', 'Əlavə', 'Qeyd', 'Tarix'].map((h, i) => (
-              <span key={i} style={COL_HDR}>{h}</span>
-            ))}
-          </div>
-          {byStatus[s].map(g => (
-            <div key={g.id} style={{ display: 'grid', gridTemplateColumns: COLS, gap: 8, padding: '8px 16px', alignItems: 'center', borderBottom: '1px solid oklch(94% 0.01 60)' }}>
-              <span style={{ fontSize: 13, color: 'oklch(22% 0.02 60)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{g.full_name}</span>
-              <span style={{ fontSize: 11, color: 'oklch(45% 0.05 75)' }}>{g.table_id}</span>
-              <span style={{ fontSize: 12, color: 'oklch(35% 0.08 75)', fontWeight: 600, textAlign: 'center' }}>
-                {g.extra_guests > 0 ? `+${g.extra_guests}` : '—'}
-              </span>
-              <span style={{ fontSize: 11, color: 'oklch(52% 0.03 60)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={g.notes || ''}>
-                {g.notes || ''}
-              </span>
-              <span style={{ fontSize: 11, color: 'oklch(58% 0.03 60)' }}>
-                {g.submitted_at ? azDate(g.submitted_at, { year: false }) : '—'}
-              </span>
-            </div>
-          ))}
-        </div>
-      ))}
-    </div>
-  )
-}
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
 
 /* ── Print: yeni pəncərədə A4 HTML açır ── */
 function buildPrintHtml({ guests, stats, names, dateStr }) {
@@ -193,15 +34,15 @@ function buildPrintHtml({ guests, stats, names, dateStr }) {
 
   const tableHtml = Object.entries(byTable).map(([tid, list]) => `
     <div class="tbl">
-      <div class="tbl-hdr">${tid} &mdash; ${list.length} nəfər</div>
+      <div class="tbl-hdr">${esc(tid)} &mdash; ${list.length} nəfər</div>
       <table>
         <thead><tr><th>Ad</th><th>Status</th><th>Əlavə qonaq</th><th>Qeyd</th></tr></thead>
         <tbody>${list.map((g, i) => `
           <tr class="${i % 2 === 1 ? 'alt' : ''}">
-            <td>${g.full_name}</td>
-            <td>${PRINT_STATUS[g.status] || g.status}</td>
-            <td style="text-align:center">${g.extra_guests > 0 ? '+' + g.extra_guests : '—'}</td>
-            <td class="note">${g.notes ? g.notes.replace(/</g, '&lt;') : ''}</td>
+            <td>${esc(g.full_name)}</td>
+            <td>${esc(PRINT_STATUS[g.status] || g.status)}</td>
+            <td style="text-align:center">${g.extra_guests > 0 ? '+' + esc(g.extra_guests) : '—'}</td>
+            <td class="note">${esc(g.notes || '')}</td>
           </tr>`).join('')}
         </tbody>
       </table>
@@ -212,7 +53,7 @@ function buildPrintHtml({ guests, stats, names, dateStr }) {
 <html lang="az">
 <head>
 <meta charset="UTF-8">
-<title>Qonaq Siyahısı${names ? ' — ' + names : ''}</title>
+<title>Qonaq Siyahısı${names ? ' — ' + esc(names) : ''}</title>
 <style>
   @page { size: A4 portrait; margin: 14mm 16mm; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -241,32 +82,43 @@ function buildPrintHtml({ guests, stats, names, dateStr }) {
 <body>
 <div class="header">
   <div class="logo">DigiToy.az &mdash; Qonaq Hesabatı</div>
-  <div class="ename">${names || ''}</div>
-  ${dateStr ? `<div class="edate">${dateStr}</div>` : ''}
+  <div class="ename">${esc(names || '')}</div>
+  ${dateStr ? `<div class="edate">${esc(dateStr)}</div>` : ''}
 </div>
 <div class="stats">
-  <div class="sbox"><div class="sval">${stats.total || 0}</div><div class="slbl">Ümumi qonaq</div></div>
-  <div class="sbox"><div class="sval g">${stats.going || 0}</div><div class="slbl">Gələcək</div></div>
-  <div class="sbox"><div class="sval">${stats.extra_guests_total || 0}</div><div class="slbl">Əlavə qonaq</div></div>
-  <div class="sbox hi"><div class="sval a">${stats.real_attendance || 0}</div><div class="slbl">Real iştirak</div></div>
+  <div class="sbox"><div class="sval">${esc(stats.total || 0)}</div><div class="slbl">Ümumi qonaq</div></div>
+  <div class="sbox"><div class="sval g">${esc(stats.going || 0)}</div><div class="slbl">Gələcək</div></div>
+  <div class="sbox"><div class="sval">${esc(stats.extra_guests_total || 0)}</div><div class="slbl">Əlavə qonaq</div></div>
+  <div class="sbox hi"><div class="sval a">${esc(stats.real_attendance || 0)}</div><div class="slbl">Real iştirak</div></div>
 </div>
 ${tableHtml}
-<div class="footer">${azDate(new Date(), { long: true })} &nbsp;&middot;&nbsp; DigiToy.az</div>
+<div class="footer">${esc(azDate(new Date(), { long: true }))} &nbsp;&middot;&nbsp; DigiToy.az</div>
 <script>window.onload=function(){window.print();};<\/script>
 </body>
 </html>`
 }
 
-/* ── Əsas komponent ── */
+const statusOf = (g) => VIEW_STATUS[g.status] || 'none'
+
+const toRow = (g, withTable) => ({
+  id: String(g.id),
+  name: g.full_name,
+  status: statusOf(g),
+  plus: Number(g.extra_guests) || 0,
+  /* statusa görə görünüşdə masa da görünsün (köhnə «Masa» sütunu) */
+  note: [withTable ? g.table_id : null, g.notes || null].filter(Boolean).join(' · '),
+  date: g.submitted_at ? azDate(g.submitted_at, { year: false }) : '',
+})
+
 export default function AdminGuestReports({ slug, names, dateStr = '' }) {
   const [data,         setData]         = useState(null)
   const [loading,      setLoading]      = useState(true)
   const [error,        setError]        = useState('')
-  const [mode,         setMode]         = useState('tables')
-  const [filterStatus, setFilterStatus] = useState(null)
-  const [filterTable,  setFilterTable]  = useState(null)
+  const [notice,       setNotice]       = useState('')
+  const [view,         setView]         = useState('table')
+  const [filterStatus, setFilterStatus] = useState('all')
+  const [filterTable,  setFilterTable]  = useState('')
   const [searchVal,    setSearchVal]    = useState('')
-  const [exporting,    setExporting]    = useState(false)
 
   const load = () => {
     if (!slug) return
@@ -277,154 +129,88 @@ export default function AdminGuestReports({ slug, names, dateStr = '' }) {
       .catch(() => { setError('Məlumatlar yüklənmədi.'); setLoading(false) })
   }
 
-  useEffect(() => { load() }, [slug])
+  useEffect(() => { load() }, [slug]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const allGuests = data?.guests ?? []
-  const stats     = data?.stats  ?? {}
+  const allGuests = useMemo(() => data?.guests ?? [], [data])
+  const stats     = data?.stats ?? {}
   const tableIds  = useMemo(() => [...new Set(allGuests.map(g => g.table_id))].sort(), [allGuests])
 
   /* ── Filterlər + axtarış ── */
-  const visible = useMemo(() => allGuests.filter(g => {
-    const matchStatus = filterStatus === null || g.status === filterStatus
-    const matchTable  = filterTable  === null || g.table_id === filterTable
-    const matchSearch = searchVal === '' || g.full_name.toLowerCase().includes(searchVal.toLowerCase())
-    return matchStatus && matchTable && matchSearch
-  }), [allGuests, filterStatus, filterTable, searchVal])
+  const baseVisible = useMemo(() => allGuests.filter(g =>
+    (filterTable === '' || g.table_id === filterTable)
+    && (searchVal === '' || (g.full_name || '').toLowerCase().includes(searchVal.toLowerCase())),
+  ), [allGuests, filterTable, searchVal])
+  const visible = useMemo(
+    () => baseVisible.filter(g => filterStatus === 'all' || statusOf(g) === filterStatus),
+    [baseVisible, filterStatus],
+  )
 
-  const visibleTableIds = useMemo(() => [...new Set(visible.map(g => g.table_id))].sort(), [visible])
+  const statusCounts = useMemo(() => {
+    const c = { all: baseVisible.length, yes: 0, no: 0, maybe: 0, none: 0 }
+    for (const g of baseVisible) c[statusOf(g)] += 1
+    return c
+  }, [baseVisible])
 
-  const handleExport = async (exportMode) => {
-    setExporting(true)
-    try { await exportGuestsCsv(slug, exportMode) } catch { alert('Export xətası.') } finally { setExporting(false) }
+  const groups = useMemo(() => {
+    if (view === 'status') {
+      return STATUS_ORDER.map(s => {
+        const list = visible.filter(g => g.status === s)
+        return { id: s, title: STATUS_TITLE[s], meta: `${list.length} nəfər`, guests: list.map(g => toRow(g, true)) }
+      })
+    }
+    const ids = [...new Set(visible.map(g => g.table_id))].sort()
+    return ids.map(tid => {
+      const list = visible.filter(g => g.table_id === tid)
+      const answered = list.filter(g => g.status !== 'NO_RESPONSE').length
+      return { id: String(tid), title: tid, meta: `${answered}/${list.length} cavab`, guests: list.map(g => toRow(g, false)) }
+    })
+  }, [visible, view])
+
+  const handleExport = async (by) => {
+    setNotice('')
+    try { await exportGuestsCsv(slug, by === 'table' ? 'tables' : 'status') }
+    catch { setNotice('Export xətası.') }
   }
 
   const handlePrint = () => {
     const html = buildPrintHtml({ guests: allGuests, stats, names, dateStr })
     const w = window.open('', '_blank', 'width=850,height=700')
-    if (!w) { alert('Pop-up bloklanıb. Brauzerin pop-up icazəsini açın.'); return }
+    if (!w) { setNotice('Pop-up bloklanıb. Brauzerin pop-up icazəsini açın.'); return }
     w.document.write(html)
     w.document.close()
   }
 
-  const btnBase = { display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', border: 'none', borderRadius: 3, cursor: 'pointer', fontSize: 10, fontWeight: 600 }
-
   if (!slug) return null
 
   return (
-    <div style={{ marginTop: 24 }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
-        <span style={{ fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'oklch(45% 0.03 60)', fontWeight: 600 }}>
-          Qonaq Hesabatı
-        </span>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          <button type="button" onClick={handlePrint} disabled={!allGuests.length}
-            style={{ ...btnBase, background: 'oklch(32% 0.04 60)', color: 'white', opacity: allGuests.length ? 1 : 0.4 }}>
-            <Printer size={10} strokeWidth={2} />Çap et
-          </button>
-          <button type="button" onClick={() => handleExport('tables')} disabled={exporting || !allGuests.length}
-            style={{ ...btnBase, background: 'oklch(38% 0.1 145)', color: 'white', opacity: allGuests.length ? 1 : 0.4 }}>
-            <Download size={10} strokeWidth={2} />{exporting ? '...' : 'CSV (Masa)'}
-          </button>
-          <button type="button" onClick={() => handleExport('status')} disabled={exporting || !allGuests.length}
-            style={{ ...btnBase, background: 'oklch(42% 0.09 75)', color: 'white', opacity: allGuests.length ? 1 : 0.4 }}>
-            <Download size={10} strokeWidth={2} />{exporting ? '...' : 'CSV (Status)'}
-          </button>
-          <button type="button" onClick={load}
-            style={{ ...btnBase, background: 'white', border: '1px solid oklch(85% 0.02 60)', color: 'oklch(50% 0.03 60)' }}>
-            <RefreshCw size={10} strokeWidth={1.5} />Yenilə
-          </button>
-        </div>
-      </div>
-
-      {loading ? (
-        <div style={{ padding: '20px 0', textAlign: 'center', fontSize: 12, color: 'oklch(60% 0.03 60)' }}>Yüklənir...</div>
-      ) : error ? (
-        <div style={{ padding: '14px', background: 'oklch(97% 0.02 25)', borderRadius: 4, fontSize: 12, color: 'oklch(42% 0.1 25)' }}>{error}</div>
-      ) : (
-        <>
-          {/* Stats — 8 kart */}
-          <div style={{ display: 'flex', gap: 6, marginBottom: 14, flexWrap: 'wrap' }}>
-            <StatCard label="Ümumi Qonaq"    value={stats.total              ?? 0} color="oklch(30% 0.03 60)" />
-            <StatCard label="🟢 Gələcək"      value={stats.going              ?? 0} color="oklch(35% 0.1 145)" />
-            <StatCard label="🔴 Gəlməyəcək"   value={stats.not_going          ?? 0} color="oklch(38% 0.12 25)" />
-            <StatCard label="🟡 Bəlkə"        value={stats.maybe              ?? 0} color="oklch(42% 0.08 70)" />
-            <StatCard label="⚪ Cavabsız"      value={stats.no_response        ?? 0} color="oklch(50% 0.03 60)" />
-            <StatCard label="Cavab Faizi"     value={`${stats.response_rate   ?? 0}%`} color="oklch(38% 0.09 80)" />
-            <StatCard label="➕ Əlavə qonaq"  value={stats.extra_guests_total ?? 0} color="oklch(38% 0.09 220)" />
-            <StatCard label="Real İştirak"    value={stats.real_attendance    ?? 0} color="oklch(38% 0.08 75)" highlight />
-          </div>
-
-          {/* Mode switcher */}
-          <div style={{ display: 'flex', gap: 0, marginBottom: 12, border: '1px solid oklch(85% 0.02 60)', borderRadius: 4, overflow: 'hidden', width: 'fit-content' }}>
-            {[
-              { key: 'tables', label: 'Masalara görə', Icon: LayoutList },
-              { key: 'status', label: 'Statusa görə',  Icon: AlignLeft },
-            ].map(({ key, label, Icon }) => (
-              <button key={key} type="button" onClick={() => setMode(key)}
-                style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 14px', border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: mode === key ? 700 : 400,
-                  background: mode === key ? 'oklch(42% 0.09 75)' : 'white', color: mode === key ? 'white' : 'oklch(45% 0.03 60)' }}>
-                <Icon size={11} strokeWidth={1.5} />{label}
-              </button>
-            ))}
-          </div>
-
-          {/* Search + Filters */}
-          <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-            <div style={{ position: 'relative', flex: 1, minWidth: 180 }}>
-              <Search size={13} strokeWidth={1.5} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'oklch(62% 0.03 60)', pointerEvents: 'none' }} />
-              <input type="text" placeholder="Ad axtar..." value={searchVal} onChange={e => setSearchVal(e.target.value)}
-                style={{ width: '100%', padding: '8px 30px 8px 30px', border: '1px solid oklch(85% 0.02 60)', borderRadius: 4, fontSize: 12, color: 'oklch(30% 0.02 60)', background: 'white', outline: 'none', boxSizing: 'border-box' }}
-                onFocus={e => { e.target.style.borderColor = 'oklch(72% 0.12 80)' }}
-                onBlur={e  => { e.target.style.borderColor = 'oklch(85% 0.02 60)' }}
-              />
-              {searchVal && <button type="button" onClick={() => setSearchVal('')} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer' }}><X size={12} strokeWidth={2} style={{ color: 'oklch(60% 0.03 60)' }} /></button>}
-            </div>
-
-            {/* Table filter */}
-            <select value={filterTable ?? ''} onChange={e => setFilterTable(e.target.value || null)}
-              style={{ padding: '8px 10px', border: '1px solid oklch(85% 0.02 60)', borderRadius: 4, fontSize: 11, color: 'oklch(30% 0.02 60)', background: 'white', outline: 'none' }}>
-              <option value="">Bütün masalar</option>
-              {tableIds.map(tid => <option key={tid} value={tid}>{tid}</option>)}
-            </select>
-          </div>
-
-          {/* Status filter tabs */}
-          <div style={{ display: 'flex', gap: 2, marginBottom: 12, borderBottom: '1px solid oklch(88% 0.02 60)' }}>
-            {FILTERS.map(({ key, label }) => {
-              const active = filterStatus === key
-              return (
-                <button key={String(key)} type="button" onClick={() => setFilterStatus(key)}
-                  style={{ padding: '7px 12px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: active ? 700 : 400,
-                    color: active ? 'oklch(30% 0.04 70)' : 'oklch(55% 0.03 60)',
-                    borderBottom: active ? '2px solid oklch(72% 0.12 80)' : '2px solid transparent', marginBottom: -1 }}>
-                  {label}
-                </button>
-              )
-            })}
-          </div>
-
-          {/* Result count */}
-          <div style={{ fontSize: 10, color: 'oklch(58% 0.03 60)', marginBottom: 10 }}>
-            {visible.length} qonaq göstərilir {visible.length !== allGuests.length ? `(ümumi ${allGuests.length})` : ''}
-          </div>
-
-          {/* Table content */}
-          {visible.length === 0 ? (
-            <div style={{ padding: '24px', textAlign: 'center', fontSize: 12, color: 'oklch(62% 0.03 60)', background: 'white', border: '1px solid oklch(88% 0.02 60)', borderRadius: 5 }}>
-              {searchVal || filterStatus || filterTable ? 'Nəticə tapılmadı.' : 'Hələ heç bir qonaq əlavə edilməyib.'}
-            </div>
-          ) : (
-            <div style={{ background: 'white', border: '1px solid oklch(88% 0.02 60)', borderRadius: 5, overflow: 'hidden' }}>
-              {mode === 'tables' ? (
-                <ByTablesView guests={visible} tableIds={visibleTableIds} />
-              ) : (
-                <ByStatusView guests={visible} />
-              )}
-            </div>
-          )}
-        </>
-      )}
-    </div>
+    <>
+      {error && <Notice tone="danger" title={error} className="mb-4" />}
+      {notice && <Notice tone="warning" title={notice} className="mb-4" />}
+      <GuestReportTab
+        stats={{
+          total: stats.total ?? 0, yes: stats.going ?? 0, no: stats.not_going ?? 0,
+          maybe: stats.maybe ?? 0, none: stats.no_response ?? 0, rate: stats.response_rate ?? 0,
+          plus: stats.extra_guests_total ?? 0, real: stats.real_attendance ?? 0,
+        }}
+        view={view}
+        onView={setView}
+        search={searchVal}
+        onSearch={setSearchVal}
+        tableFilter={filterTable}
+        onTableFilter={setFilterTable}
+        tableOptions={[{ value: '', label: 'Bütün masalar' }, ...tableIds.map(t => ({ value: t, label: t }))]}
+        statusFilter={filterStatus}
+        onStatusFilter={setFilterStatus}
+        statusCounts={statusCounts}
+        groups={groups}
+        shownCount={visible.length}
+        onResetFilters={() => { setFilterStatus('all'); setFilterTable(''); setSearchVal('') }}
+        onPrint={allGuests.length ? handlePrint : undefined}
+        onExportCsv={allGuests.length ? handleExport : undefined}
+        onRefresh={load}
+        refreshing={loading && !!data}
+        loading={loading && !data}
+      />
+    </>
   )
 }

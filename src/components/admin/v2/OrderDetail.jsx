@@ -90,6 +90,7 @@ export const ORDER_DETAIL_TABS = [
  * @param {{seating?:import('react').ReactNode,report?:import('react').ReactNode,rsvp?:import('react').ReactNode}} [p.panels]
  *        Təsdiqlənmiş sifarişin tab məzmunu (SeatingPlanTab, GuestReportTab, RsvpTab)
  * @param {Partial<Record<'seating'|'report'|'rsvp',number>>} [p.tabCounts]
+ * @param {import('react').ReactNode} [p.asideExtra]  Digitoy: xülasə sütununun sonunda əlavə blok
  */
 export default function OrderDetail({
   order,
@@ -110,6 +111,7 @@ export default function OrderDetail({
   onTab,
   panels = {},
   tabCounts = {},
+  asideExtra,
 }) {
   const [dialog, setDialog] = useControllable(dialogProp, onDialogChange, null);
   const [tab, setTab] = useControllable(tabProp, onTab, 'seating');
@@ -135,6 +137,7 @@ export default function OrderDetail({
       label: 'Telefon',
       value: order.phone && <span className="tabular-nums">{order.phone}</span>,
     },
+    ...(order.extraInfo ?? []),
   ];
 
   const WaTag = whatsappHref ? 'a' : 'button';
@@ -287,6 +290,7 @@ export default function OrderDetail({
               <CopyField value={order.inviteUrl} onCopy={onCopyLink} openHref={order.inviteUrl} />
             </Panel>
           )}
+          {asideExtra}
         </aside>
 
         {/* ── Sağ: qonaq alətləri ── */}

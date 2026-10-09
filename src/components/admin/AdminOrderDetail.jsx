@@ -1,179 +1,33 @@
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Package, User, Users, Calendar, MapPin, Shirt, ExternalLink, MessageCircle, CheckCircle, XCircle, Trash2, Copy, Link2, LayoutTemplate } from 'lucide-react'
-import { getTemplateName, DEFAULT_TEMPLATE_ID } from '../../templates/templateConfig'
+import { Armchair, LogIn } from 'lucide-react'
+import { DEFAULT_TEMPLATE_ID } from '../../templates/templateConfig'
 import { getDraftByCode, approveDraft, rejectDraft, deleteDraft, saveInvitation } from '../../utils/api'
 import { computeInviteSlug } from '../../utils/inviteSlug'
 import AdminSeatingPlan from './AdminSeatingPlan'
 import AdminGuestReports from './AdminGuestReports'
 import AdminRSVPBlock from './AdminRSVPBlock'
-import { useIsNarrow } from '../../hooks/useIsNarrow'
-import { azDate, pagePadding } from './adminFormat'
+import OrderDetail from './v2/OrderDetail'
+import { Button, ConfirmDialog, EmptyState, Notice, PageHeader, Skeleton } from './v2/adminUi'
+import { azDate } from './adminFormat'
+import { templateMeta } from './templateMeta'
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Sifariş detalı — UI redesign 2026-10 (görünüş v2/OrderDetail)
+
+   Məntiq dəyişməyib:
+   • Təsdiq dəvətnaməni də yaradır (Phase 46 — save_invitation → approve_draft,
+     builder-in «Sifarişi təsdiqlə» düyməsi ilə eyni ardıcıllıq). Təsdiqdən
+     əvvəl soruşulur (köhnə window.confirm → təsdiq pəncərəsi).
+   • Rədd et (səbəb ixtiyari), Sil (status «deleted»), Redaktə → /?draft=KOD.
+   • Admin tokeni client-də yoxlanılır; bitibsə «Yenidən daxil ol».
+   • Təsdiqlənmiş, amma dəvətnaməsi olmayan sifariş → «Dəvətnaməni yarat».
+   • Qonaq alətləri (oturma planı, hesabat, iştirak təsdiqi) yalnız təsdiqdən sonra.
+   ───────────────────────────────────────────────────────────────────────── */
 
 /* Tədbir növü — əvvəl xam açar («corporate») göstərilirdi */
 const EVENT_LABELS = { toy: 'Toy', nishan: 'Nişan', birthday: 'Ad günü', corporate: 'Korporativ', other: 'Digər' }
-
 const PKG_LABEL = { SADE: 'Sadə (59₼)', VIP: 'VİP (89₼)', PREMIUM: 'Premium (129₼)' }
-const STATUS_COLOR = {
-  submitted: 'oklch(45% 0.08 70)', approved: 'oklch(38% 0.1 145)',
-  rejected: 'oklch(40% 0.12 25)', draft: 'oklch(50% 0.03 60)', deleted: 'oklch(40% 0.02 0)',
-}
-
-const STATUS_LABELS = {
-  submitted: 'Yeni', approved: 'Təsdiqləndi', rejected: 'Rədd edildi',
-  deleted: 'Silinmiş', draft: 'Qaralama',
-}
-
-function InviteLinkBlock({ draftCode, approvedSlug, status, onEdit, onCreate }) {
-  const [copied, setCopied] = useState(false)
-  const [creating, setCreating] = useState(false)
-  const [createError, setCreateError] = useState('')
-  const inviteUrl = approvedSlug ? `https://digitoy.az/invite/${approvedSlug}` : null
-
-  const handleCopy = () => {
-    if (!inviteUrl) return
-    navigator.clipboard.writeText(inviteUrl).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2200)
-    })
-  }
-
-  return (
-    <div style={{
-      marginTop: 20,
-      background: 'oklch(97% 0.01 80)',
-      border: '1px solid oklch(88% 0.02 60)',
-      borderRadius: 6, padding: '18px 22px',
-    }}>
-      {/* Sifariş Kodu */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-        <span style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'oklch(55% 0.03 60)', minWidth: 96 }}>
-          Sifariş Kodu
-        </span>
-        <span style={{ fontFamily: 'monospace', fontSize: 14, fontWeight: 700, color: 'oklch(38% 0.08 75)', letterSpacing: '0.08em' }}>
-          {draftCode}
-        </span>
-      </div>
-
-      {/* Status */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: inviteUrl ? 16 : 0 }}>
-        <span style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'oklch(55% 0.03 60)', minWidth: 96 }}>
-          Status
-        </span>
-        <span style={{
-          fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
-          color: STATUS_COLOR[status] || STATUS_COLOR.draft,
-        }}>
-          {STATUS_LABELS[status] || status}
-        </span>
-      </div>
-
-      {/* Dəvətnamə Linki — yalnız approve + slug varsa */}
-      {inviteUrl && (
-        <div>
-          <div style={{ height: 1, background: 'oklch(88% 0.02 60)', margin: '0 0 14px' }} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <Link2 size={12} strokeWidth={1.5} style={{ color: 'oklch(55% 0.07 145)', flexShrink: 0 }} />
-            <span style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'oklch(55% 0.03 60)' }}>
-              Dəvətnamə Linki
-            </span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <a
-              href={inviteUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                fontFamily: 'monospace', fontSize: 12, color: 'oklch(38% 0.1 220)',
-                textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap', flex: 1,
-              }}
-            >
-              {inviteUrl}
-            </a>
-            <button
-              type="button"
-              onClick={handleCopy}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 5,
-                padding: '7px 14px', flexShrink: 0,
-                background: copied ? 'oklch(38% 0.1 145)' : 'oklch(45% 0.08 75)',
-                border: 'none', borderRadius: 3, cursor: 'pointer',
-                fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
-                color: 'white', transition: 'background 0.2s',
-              }}
-            >
-              <Copy size={11} strokeWidth={2} />
-              {copied ? 'Kopyalandı!' : 'Kopyala'}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Approved amma slug tapılmadı — yenidən saxlama tələb olunur */}
-      {status === 'approved' && !inviteUrl && (
-        <div style={{ marginTop: 12, padding: '14px 16px', background: 'oklch(96% 0.025 75)', borderRadius: 4, border: '1px solid oklch(84% 0.05 75)' }}>
-          <p style={{ fontSize: 11, fontWeight: 600, color: 'oklch(40% 0.05 75)', margin: '0 0 6px' }}>
-            Dəvətnamə linki tapılmadı
-          </p>
-          <p style={{ fontSize: 11, color: 'oklch(52% 0.03 60)', margin: '0 0 12px', lineHeight: 1.5 }}>
-            Sifariş təsdiqlənib, amma dəvətnaməsi yaradılmayıb. «Dəvətnaməni yarat» onu sifarişin
-            məlumatları ilə indi yaradır (builder-in «Sifarişi təsdiqlə» düyməsi ilə eyni).
-          </p>
-          {/* Phase 46 — sinxron: sifarişdən birbaşa dəvətnamə */}
-          <button
-            type="button"
-            disabled={creating}
-            onClick={async () => {
-              setCreating(true)
-              setCreateError('')
-              try { await onCreate() } catch (e) { setCreateError(e?.message || 'Yaradılmadı.') } finally { setCreating(false) }
-            }}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6, marginRight: 8, marginBottom: 6,
-              padding: '8px 16px', background: 'oklch(38% 0.1 145)',
-              border: 'none', borderRadius: 3, cursor: 'pointer',
-              fontSize: 10, fontWeight: 700, letterSpacing: '0.1em',
-              textTransform: 'uppercase', color: 'white', opacity: creating ? 0.6 : 1,
-            }}
-          >
-            {creating ? 'Yaradılır…' : 'Dəvətnaməni yarat'}
-          </button>
-          <button
-            type="button"
-            onClick={onEdit}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              padding: '8px 16px', background: 'oklch(45% 0.08 75)',
-              border: 'none', borderRadius: 3, cursor: 'pointer',
-              fontSize: 10, fontWeight: 700, letterSpacing: '0.1em',
-              textTransform: 'uppercase', color: 'white',
-            }}
-          >
-            Builder-də aç
-          </button>
-          {createError && <p role="alert" style={{ fontSize: 11, color: 'oklch(48% 0.16 25)', margin: '8px 0 0' }}>{createError}</p>}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function InfoRow({ icon: Icon, label, value }) {
-  if (!value) return null
-  return (
-    <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', paddingBottom: 12 }}>
-      <Icon size={14} strokeWidth={1.5} style={{ color: 'oklch(65% 0.06 80)', marginTop: 1, flexShrink: 0 }} />
-      <div>
-        <div style={{ fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'oklch(60% 0.03 60)', marginBottom: 2 }}>
-          {label}
-        </div>
-        <div style={{ fontSize: 13, color: 'oklch(22% 0.02 60)', fontWeight: 500 }}>
-          {value}
-        </div>
-      </div>
-    </div>
-  )
-}
+const VIEW_STATUS = { submitted: 'new' }
 
 /* Token client-side yoxla — server round-trip olmadan */
 function isAdminTokenValid() {
@@ -190,23 +44,15 @@ function redirectToLogin() {
   window.location.href = '/admin'
 }
 
-export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
-  /* Telefonda başlıq + 4 düymə bir sətrə sığmırdı, modallar 400px-lik idi */
-  const narrow = useIsNarrow()
-  const [draft,         setDraft]         = useState(null)
-  const [loading,       setLoading]       = useState(true)
-  const [error,         setError]         = useState('')
-  const [actionLoading, setActionLoading] = useState(false)
-  const [actionDone,    setActionDone]    = useState('')
-  const [rejectModal,   setRejectModal]   = useState(false)
-  const [rejectReason,  setRejectReason]  = useState('')
-  const [deleteModal,   setDeleteModal]   = useState(false)
-  const [sessionError,  setSessionError]  = useState(false)
-
-  /* Komponent yükləndikdə token yoxla */
-  useEffect(() => {
-    if (!isAdminTokenValid()) setSessionError(true)
-  }, [])
+export default function AdminOrderDetail({ draftCode, onBack }) {
+  const [draft,        setDraft]        = useState(null)
+  const [loading,      setLoading]      = useState(true)
+  const [error,        setError]        = useState('')
+  const [busy,         setBusy]         = useState({})
+  const [actionError,  setActionError]  = useState('')
+  const [approveAsk,   setApproveAsk]   = useState(false)
+  const [creating,     setCreating]     = useState(false)
+  const [sessionError, setSessionError] = useState(() => !isAdminTokenValid())
 
   useEffect(() => {
     if (!draftCode) return
@@ -220,10 +66,7 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
     window.location.href = `/?draft=${draftCode}`
   }
 
-  /* Phase 46 — SİNXRON: təsdiq dəvətnaməni də yaradır. Əvvəl yalnız sifarişin
-     statusu dəyişirdi — Sifarişlərdə «təsdiqlənmiş», Dəvətnamələrdə isə heç nə
-     görünürdü. Builder-in «Sifarişi təsdiqlə» düyməsi ilə eyni ardıcıllıq:
-     save_invitation (slug sifariş koduna bağlanır) → approve_draft. */
+  /* Phase 46 — SİNXRON: təsdiq dəvətnaməni də yaradır. */
   const createInvitation = async () => {
     const fd = draft?.form_data
     if (!fd) throw new Error('Sifarişin məlumatı tapılmadı.')
@@ -235,90 +78,74 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
 
   const handleApprove = async () => {
     if (!isAdminTokenValid()) { setSessionError(true); return }
-    if (!window.confirm('Bu sifarişi TƏSDİQLƏYİRSİNİZ? Dəvətnamə də yaradılacaq.')) return
-    setActionLoading(true)
+    setBusy(b => ({ ...b, approve: true }))
+    setActionError('')
     try {
       await createInvitation()
-      setActionDone('approved')
+      setApproveAsk(false)
     } catch {
-      alert('Xəta: təsdiq edilmədi.')
+      setActionError('Xəta: təsdiq edilmədi.')
+      setApproveAsk(false)
     } finally {
-      setActionLoading(false)
+      setBusy(b => ({ ...b, approve: false }))
     }
   }
 
-  const handleRejectConfirm = async () => {
-    if (!isAdminTokenValid()) { setSessionError(true); setRejectModal(false); return }
-    setActionLoading(true)
+  const handleReject = async (reason) => {
+    if (!isAdminTokenValid()) { setSessionError(true); return }
+    setBusy(b => ({ ...b, reject: true }))
+    setActionError('')
     try {
-      await rejectDraft(draftCode, rejectReason)
-      setDraft(prev => ({ ...prev, status: 'rejected' }))
-      setActionDone('rejected')
-      setRejectModal(false)
-    } catch {
-      alert('Xəta: rədd edilmədi.')
+      await rejectDraft(draftCode, reason)
+      setDraft(prev => ({ ...prev, status: 'rejected', reject_reason: reason || prev.reject_reason }))
+    } catch (e) {
+      setActionError('Xəta: rədd edilmədi.')
+      throw e
     } finally {
-      setActionLoading(false)
+      setBusy(b => ({ ...b, reject: false }))
     }
   }
 
-  const handleDeleteConfirm = async () => {
-    if (!isAdminTokenValid()) { setSessionError(true); setDeleteModal(false); return }
-    setActionLoading(true)
+  const handleDelete = async () => {
+    if (!isAdminTokenValid()) { setSessionError(true); return }
+    setBusy(b => ({ ...b, delete: true }))
+    setActionError('')
     try {
       await deleteDraft(draftCode)
-      setDeleteModal(false)
       onBack()
     } catch (err) {
-      setActionLoading(false)
-      setDeleteModal(false)
-      const is401 = err?.message?.includes('401')
-      if (is401) { setSessionError(true) }
-      else { alert('Xəta: sifariş silinmədi. (' + (err?.message || '') + ')') }
+      setBusy(b => ({ ...b, delete: false }))
+      if (err?.message?.includes('401')) setSessionError(true)
+      else setActionError('Xəta: sifariş silinmədi. (' + (err?.message || '') + ')')
     }
   }
 
-  /* Sessiya bitib → tam ekran prompt */
+  /* Sessiya bitib → yenidən giriş */
   if (sessionError) return (
-    <div style={{ padding: '64px 36px', maxWidth: 420 }}>
-      <div style={{
-        background: 'oklch(96% 0.03 70)', border: '1px solid oklch(85% 0.06 75)',
-        borderRadius: 6, padding: '24px 28px',
-      }}>
-        <p style={{ fontSize: 14, color: 'oklch(30% 0.03 60)', margin: '0 0 16px', fontWeight: 500 }}>
-          Admin sessiyası bitib
-        </p>
-        <p style={{ fontSize: 12, color: 'oklch(50% 0.03 60)', margin: '0 0 20px', lineHeight: 1.5 }}>
-          Admin token 8 saat etibarlıdır. Yenidən daxil olmaq üçün aşağıdakı düyməni kliklə.
-        </p>
-        <button
-          type="button"
-          onClick={redirectToLogin}
-          style={{
-            padding: '10px 22px', background: 'oklch(45% 0.08 75)',
-            border: 'none', borderRadius: 3, cursor: 'pointer',
-            fontSize: 12, color: 'white', fontWeight: 600, letterSpacing: '0.06em',
-          }}
-        >
-          Yenidən daxil ol
-        </button>
+    <div className="mx-auto max-w-[520px] pt-10">
+      <div className="rounded-[12px] bg-white ring-1 ring-inset ring-[#E5DED2]">
+        <EmptyState
+          icon={LogIn}
+          title="Admin sessiyası bitib"
+          text="Admin token 8 saat etibarlıdır. Yenidən daxil olmaq üçün aşağıdakı düyməni klikləyin."
+          action={<Button variant="primary" onClick={redirectToLogin}>Yenidən daxil ol</Button>}
+        />
       </div>
     </div>
   )
 
   if (loading) return (
-    <div style={{ padding: '64px 36px', textAlign: 'center', color: 'oklch(60% 0.03 60)', fontSize: 13 }}>
-      Yüklənir...
+    <div role="status" aria-label="Yüklənir" className="space-y-4">
+      <Skeleton className="h-4 w-40" />
+      <Skeleton className="h-9 w-72" />
+      <Skeleton className="h-[320px] w-full max-w-[400px]" />
     </div>
   )
 
   if (error || !draft?.found) return (
-    <div style={{ padding: '64px 36px' }}>
-      <button type="button" onClick={onBack}
-        style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: 'oklch(55% 0.04 70)', fontSize: 12, marginBottom: 24 }}>
-        <ArrowLeft size={14} strokeWidth={1.5} /> Geri
-      </button>
-      <p style={{ color: 'oklch(45% 0.1 25)', fontSize: 13 }}>{error || 'Sifariş tapılmadı.'}</p>
+    <div>
+      <PageHeader back={{ label: 'Sifarişlərə qayıt', onClick: onBack }} title="Sifariş" />
+      <Notice tone="danger" title={error || 'Sifariş tapılmadı.'} />
     </div>
   )
 
@@ -331,360 +158,89 @@ export default function AdminOrderDetail({ draftCode, onBack, lang = 'az' }) {
 
   const dateStr = fd.date ? azDate(fd.date, { long: true }) : ''
   const timeStr = fd.time || ''
+  const slug = draft.approved_slug
+  const inviteUrl = slug ? `https://digitoy.az/invite/${slug}` : undefined
 
-  /* Telefonda modal ekrandan kənara çıxmasın */
-  const modalBox = (w) => ({
-    background: 'white', borderRadius: 8, padding: narrow ? '22px 18px' : '32px 36px',
-    width: narrow ? 'calc(100vw - 28px)' : w, maxWidth: w, boxSizing: 'border-box',
-  })
+  const extraInfo = []
+  if (fd.seatingMethod === 'digitory') extraInfo.push({ icon: Armchair, label: 'Oturma planı', value: 'DigiToy dolduracaq (+15 AZN)' })
+  if (fd.seatingMethod === 'self' && fd.seatingPlan) extraInfo.push({ icon: Armchair, label: 'Oturma planı', value: 'Müştəri doldurdu' })
+
+  const order = {
+    code: draftCode,
+    status: VIEW_STATUS[draft.status] || draft.status || 'draft',
+    names: names || '—',
+    pkg: PKG_LABEL[draft.package] || draft.package,
+    /* Phase 4 — şablon adı metadata-dan (hardcode yox) */
+    template: templateMeta(fd.templateId || draft.template_id || DEFAULT_TEMPLATE_ID),
+    event: EVENT_LABELS[fd.eventType] || fd.eventType || undefined,
+    date: [dateStr, timeStr].filter(Boolean).join(', ') || undefined,
+    venue: [fd.venueName, fd.venueNote].filter(Boolean).join(' — ') || undefined,
+    dressCode: [fd.dressCodePalette, (fd.dressCodeLabels?.[fd.dressCodePalette] || '').trim()].filter(Boolean).join(' — ') || undefined,
+    phone: draft.customer_phone || undefined,
+    submittedAt: draft.submitted_at ? azDate(draft.submitted_at, { time: true, long: true }) : undefined,
+    inviteUrl,
+    rejectReason: draft.reject_reason || undefined,
+    extraInfo,
+  }
+
+  /* Approved amma slug tapılmadı — dəvətnaməni sifarişin məlumatı ilə yarat */
+  const missingInvite = draft.status === 'approved' && !inviteUrl ? (
+    <Notice
+      tone="warning"
+      title="Dəvətnamə linki tapılmadı"
+      action={
+        <div className="flex flex-wrap gap-2">
+          <Button
+            size="sm" variant="success" loading={creating}
+            onClick={async () => {
+              setCreating(true)
+              setActionError('')
+              try { await createInvitation() } catch (e) { setActionError(e?.message || 'Yaradılmadı.') } finally { setCreating(false) }
+            }}
+          >
+            Dəvətnaməni yarat
+          </Button>
+          <Button size="sm" onClick={handleEdit}>Builder-də aç</Button>
+        </div>
+      }
+    >
+      Sifariş təsdiqlənib, amma dəvətnaməsi yaradılmayıb. «Dəvətnaməni yarat» onu sifarişin məlumatları ilə indi yaradır.
+    </Notice>
+  ) : null
 
   return (
-    <div style={{ padding: pagePadding(narrow), maxWidth: 640 }}>
-      {/* Header */}
-      <button type="button" onClick={onBack}
-        style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: 'oklch(55% 0.04 70)', fontSize: narrow ? 14 : 12, marginBottom: narrow ? 16 : 28, letterSpacing: '0.04em', minHeight: narrow ? 40 : undefined, padding: 0 }}>
-        <ArrowLeft size={13} strokeWidth={1.5} /> Sifarişlərə qayıt
-      </button>
-
-      <div style={{
-        display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 28,
-        flexDirection: narrow ? 'column' : 'row', gap: narrow ? 14 : 0,
-      }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-            <span style={{ fontFamily: 'monospace', fontSize: 14, fontWeight: 700, color: 'oklch(45% 0.07 75)', letterSpacing: '0.06em' }}>
-              {draftCode}
-            </span>
-            <span style={{
-              fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase',
-              color: STATUS_COLOR[draft.status] || STATUS_COLOR.draft,
-              background: 'oklch(95% 0.02 80)', padding: '2px 8px', borderRadius: 3,
-            }}>
-              {STATUS_LABELS[draft.status] || draft.status}
-            </span>
-            {actionDone === 'approved' && (
-              <span style={{ fontSize: 11, color: 'oklch(38% 0.1 145)', fontWeight: 600 }}>✓ Təsdiqləndi</span>
-            )}
-            {actionDone === 'rejected' && (
-              <span style={{ fontSize: 11, color: 'oklch(40% 0.12 25)', fontWeight: 600 }}>✗ Rədd edildi</span>
-            )}
-          </div>
-          <h1 style={{
-            fontFamily: '"Cormorant Garamond","Playfair Display",serif',
-            fontSize: 22, fontWeight: 300, color: 'oklch(18% 0.02 60)',
-            margin: 0, letterSpacing: '-0.01em',
-          }}>
-            {names || '—'}
-          </h1>
-        </div>
-
-        {/* Action buttons — telefonda tam en, sətirə sığmayanda aşağı keçir */}
-        <div style={{ display: 'flex', gap: 8, flexShrink: 0, flexWrap: narrow ? 'wrap' : 'nowrap', width: narrow ? '100%' : undefined }}>
-          {/* Approve — yalnız submitted vəziyyətdə */}
-          {draft.status === 'submitted' && (
-            <button
-              type="button"
-              onClick={handleApprove}
-              disabled={actionLoading}
-              style={{
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                flex: narrow ? '1 1 40%' : undefined, minHeight: narrow ? 46 : undefined,
-                padding: '10px 18px', background: 'oklch(38% 0.1 145)',
-                border: 'none', borderRadius: 3, cursor: actionLoading ? 'not-allowed' : 'pointer',
-                fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase',
-                color: 'white', fontWeight: 600, opacity: actionLoading ? 0.6 : 1,
-                transition: 'opacity 0.15s',
-              }}
-              onMouseEnter={e => { if (!actionLoading) e.currentTarget.style.opacity = '0.85' }}
-              onMouseLeave={e => { if (!actionLoading) e.currentTarget.style.opacity = '1' }}
-            >
-              <CheckCircle size={13} strokeWidth={2} />
-              Təsdiq et
-            </button>
-          )}
-
-          {/* Reject — submitted vəziyyətdə */}
-          {draft.status === 'submitted' && (
-            <button
-              type="button"
-              onClick={() => setRejectModal(true)}
-              disabled={actionLoading}
-              style={{
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                flex: narrow ? '1 1 40%' : undefined, minHeight: narrow ? 46 : undefined,
-                padding: '10px 18px', background: 'white',
-                border: '1px solid oklch(75% 0.08 25)', borderRadius: 3,
-                cursor: actionLoading ? 'not-allowed' : 'pointer',
-                fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase',
-                color: 'oklch(40% 0.12 25)', fontWeight: 600,
-                transition: 'background 0.15s',
-              }}
-              onMouseEnter={e => { if (!actionLoading) e.currentTarget.style.background = 'oklch(97% 0.02 25)' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'white' }}
-            >
-              <XCircle size={13} strokeWidth={2} />
-              Rədd et
-            </button>
-          )}
-
-          {/* Edit */}
-          <button
-            type="button"
-            onClick={handleEdit}
-            style={{
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-              flex: narrow ? '1 1 40%' : undefined, minHeight: narrow ? 46 : undefined,
-              padding: '10px 18px', background: 'oklch(72% 0.12 80)',
-              border: 'none', borderRadius: 3, cursor: 'pointer',
-              fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase',
-              color: 'white', fontWeight: 600,
-              transition: 'opacity 0.15s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.opacity = '0.85' }}
-            onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
-          >
-            <ExternalLink size={12} strokeWidth={2} />
-            Redaktə et
-          </button>
-
-          {/* Delete — hər zaman mövcuddur (artıq silinmiş deyilsə) */}
-          {draft.status !== 'deleted' && (
-            <button
-              type="button"
-              onClick={() => setDeleteModal(true)}
-              disabled={actionLoading}
-              style={{
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                minHeight: narrow ? 46 : undefined, minWidth: narrow ? 52 : undefined,
-                padding: '10px 14px', background: 'white',
-                border: '1px solid oklch(80% 0.04 25)', borderRadius: 3,
-                cursor: actionLoading ? 'not-allowed' : 'pointer',
-                fontSize: 11, color: 'oklch(48% 0.1 25)',
-                transition: 'background 0.15s',
-              }}
-              onMouseEnter={e => { if (!actionLoading) e.currentTarget.style.background = 'oklch(97% 0.02 25)' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'white' }}
-              title="Sifarişi sil"
-            >
-              <Trash2 size={13} strokeWidth={1.5} />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Delete modal */}
-      {deleteModal && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
-        }}>
-          <div style={{ ...modalBox(400), boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-              <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'oklch(95% 0.03 25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Trash2 size={14} strokeWidth={1.5} style={{ color: 'oklch(45% 0.1 25)' }} />
-              </div>
-              <h2 style={{ fontFamily: '"Cormorant Garamond",serif', fontSize: 19, fontWeight: 400, margin: 0, color: 'oklch(20% 0.02 60)' }}>
-                Sifarişi sil
-              </h2>
-            </div>
-            <p style={{ fontSize: 13, color: 'oklch(40% 0.03 60)', margin: '0 0 6px', lineHeight: 1.5 }}>
-              Sifarişi silmək istədiyinizə əminsiniz?
-            </p>
-            <p style={{ fontSize: 11, color: 'oklch(60% 0.03 60)', margin: '0 0 24px' }}>
-              <strong style={{ fontFamily: 'monospace' }}>{draftCode}</strong> — bu əməliyyat geri alına bilər (status yenidən dəyişilə bilər).
-            </p>
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-              <button type="button" onClick={() => setDeleteModal(false)}
-                style={{ padding: '9px 20px', background: 'white', border: '1px solid oklch(82% 0.02 60)', borderRadius: 3, cursor: 'pointer', fontSize: 12, color: 'oklch(45% 0.03 60)' }}>
-                Ləğv et
-              </button>
-              <button type="button" onClick={handleDeleteConfirm} disabled={actionLoading}
-                style={{
-                  padding: '9px 20px',
-                  background: actionLoading ? 'oklch(70% 0.06 25)' : 'oklch(45% 0.1 25)',
-                  border: 'none', borderRadius: 3,
-                  cursor: actionLoading ? 'not-allowed' : 'pointer',
-                  fontSize: 12, color: 'white', fontWeight: 600, letterSpacing: '0.04em',
-                }}>
-                {actionLoading ? 'Silinir...' : 'Bəli, sil'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Reject modal */}
-      {rejectModal && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 1000,
-        }}>
-          <div style={{ ...modalBox(420), boxShadow: '0 20px 60px rgba(0,0,0,0.18)' }}>
-            <h2 style={{
-              fontFamily: '"Cormorant Garamond",serif', fontSize: 20, fontWeight: 400,
-              margin: '0 0 8px', color: 'oklch(20% 0.02 60)',
-            }}>
-              Sifarişi rədd et
-            </h2>
-            <p style={{ fontSize: 12, color: 'oklch(55% 0.03 60)', margin: '0 0 20px' }}>
-              <strong style={{ fontFamily: 'monospace' }}>{draftCode}</strong> — bu əməliyyat geri alına bilər (statusu yenidən dəyişmək mümkündür).
-            </p>
-            <textarea
-              placeholder="Rədd səbəbi (ixtiyari)..."
-              value={rejectReason}
-              onChange={e => setRejectReason(e.target.value)}
-              rows={3}
-              style={{
-                width: '100%', padding: '10px 12px', fontSize: 13,
-                border: '1px solid oklch(82% 0.02 60)', borderRadius: 4,
-                resize: 'vertical', outline: 'none', boxSizing: 'border-box',
-                fontFamily: 'inherit', color: 'oklch(25% 0.02 60)',
-              }}
-            />
-            <div style={{ display: 'flex', gap: 10, marginTop: 20, justifyContent: 'flex-end' }}>
-              <button
-                type="button"
-                onClick={() => { setRejectModal(false); setRejectReason('') }}
-                style={{
-                  padding: '9px 20px', background: 'white',
-                  border: '1px solid oklch(82% 0.02 60)', borderRadius: 3,
-                  cursor: 'pointer', fontSize: 12, color: 'oklch(45% 0.03 60)',
-                }}
-              >
-                Ləğv et
-              </button>
-              <button
-                type="button"
-                onClick={handleRejectConfirm}
-                disabled={actionLoading}
-                style={{
-                  padding: '9px 20px',
-                  background: actionLoading ? 'oklch(75% 0.06 25)' : 'oklch(45% 0.12 25)',
-                  border: 'none', borderRadius: 3,
-                  cursor: actionLoading ? 'not-allowed' : 'pointer',
-                  fontSize: 12, color: 'white', fontWeight: 600, letterSpacing: '0.06em',
-                }}
-              >
-                {actionLoading ? 'Göndərilir...' : 'Rədd et'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Details card */}
-      <div style={{
-        background: 'white', border: '1px solid oklch(88% 0.02 60)',
-        borderRadius: 6, padding: narrow ? '18px 16px 8px' : '24px 28px',
-        display: 'grid', gridTemplateColumns: narrow ? '1fr' : '1fr 1fr', gap: narrow ? '4px 0' : '8px 32px',
-      }}>
-        <InfoRow icon={Package}  label="Paket"  value={PKG_LABEL[draft.package] || draft.package} />
-        {/* Phase 4 — şablon adı metadata-dan (hardcode yox) */}
-        <InfoRow icon={LayoutTemplate} label="Şablon" value={getTemplateName(fd.templateId || draft.template_id || DEFAULT_TEMPLATE_ID)} />
-        <InfoRow icon={User}     label="Hadisə" value={EVENT_LABELS[fd.eventType] || fd.eventType} />
-        <InfoRow icon={Calendar} label="Tarix"  value={[dateStr, timeStr].filter(Boolean).join(', ')} />
-        <InfoRow icon={MapPin}   label="Məkan"  value={[fd.venueName, fd.venueNote].filter(Boolean).join(' — ')} />
-        <InfoRow icon={Shirt}    label="Dress Code" value={[fd.dressCodePalette, (fd.dressCodeLabels?.[fd.dressCodePalette] || '').trim()].filter(Boolean).join(' — ')} />
-        {fd.seatingMethod === 'digitory' && (
-          <InfoRow icon={Users} label="Oturma Planı" value="DigiToy dolduracaq (+15 AZN)" />
-        )}
-        {fd.seatingMethod === 'self' && fd.seatingPlan && (
-          <InfoRow icon={Users} label="Oturma Planı" value="Müştəri doldurdu" />
-        )}
-        {draft.customer_phone && (
-          <InfoRow icon={User} label="Telefon" value={draft.customer_phone} />
-        )}
-      </div>
-
-      {/* WhatsApp düyməsi — yalnız telefon varsa */}
-      {draft.customer_phone && (
-        <div style={{ marginTop: 20 }}>
-          <a
-            href={`https://wa.me/${draft.customer_phone.replace(/\D/g, '')}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              padding: '10px 20px',
-              background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)',
-              borderRadius: 4, textDecoration: 'none',
-              fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase',
-              color: 'white', fontWeight: 700,
-              boxShadow: '0 4px 16px rgba(37,211,102,0.3)',
-              transition: 'opacity 0.15s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.opacity = '0.85' }}
-            onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
-          >
-            <MessageCircle size={14} strokeWidth={2} />
-            WhatsApp-a Yaz
-          </a>
-          <span style={{ fontSize: 11, color: 'oklch(55% 0.03 60)', marginLeft: 12 }}>
-            {draft.customer_phone}
-          </span>
-        </div>
-      )}
-
-      {/* Submitted at */}
-      {draft.submitted_at && (
-        <p style={{ fontSize: 11, color: 'oklch(60% 0.03 60)', marginTop: 16, letterSpacing: '0.04em' }}>
-          Göndərilmə tarixi: {azDate(draft.submitted_at, { time: true, long: true })}
-        </p>
-      )}
-
-      {/* ── Sifariş Kodu + Dəvətnamə Linki bloku ── */}
-      <InviteLinkBlock draftCode={draftCode} approvedSlug={draft.approved_slug} status={draft.status} onEdit={handleEdit} onCreate={createInvitation} />
-
-      {/* ── Qonaq Məlumatları — yalnız approved + slug varsa ── */}
-      {draft.status === 'approved' && draft.approved_slug && (
-        <GuestDataTabs slug={draft.approved_slug} names={names} seatingPlan={fd.seatingPlan || ''} dateStr={dateStr} />
-      )}
-    </div>
-  )
-}
-
-/* ── Tab switcher for guest data sections ── */
-function GuestDataTabs({ slug, names, seatingPlan, dateStr }) {
-  const [activeTab, setActiveTab] = useState('seating')
-
-  const TABS = [
-    { key: 'seating',  label: '🪑 Oturma Planı' },
-    { key: 'reports',  label: '📊 Qonaq Hesabatı' },
-    /* Phase 48 — siyahısız (adını yazıb) verilən cavablar; hesabat yalnız siyahını oxuyur */
-    { key: 'rsvp',     label: '✅ İştirak Təsdiqi' },
-  ]
-
-  return (
-    <div style={{ marginTop: 28 }}>
-      {/* Tab header */}
-      {/* 3 tab telefona (≈384px) sığmır — sonuncu alt sətrə keçir, səhifə enlənmir */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 0, borderBottom: '2px solid oklch(88% 0.02 60)', marginBottom: 0 }}>
-        {TABS.map(({ key, label }) => {
-          const active = activeTab === key
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setActiveTab(key)}
-              style={{
-                padding: '9px 18px', background: 'none', border: 'none', cursor: 'pointer',
-                whiteSpace: 'nowrap', flexShrink: 0,
-                fontSize: 12, fontWeight: active ? 700 : 400,
-                color: active ? 'oklch(30% 0.04 70)' : 'oklch(55% 0.03 60)',
-                borderBottom: active ? '2px solid oklch(60% 0.12 75)' : '2px solid transparent',
-                marginBottom: -2, letterSpacing: '0.02em', transition: 'color 0.12s',
-              }}
-            >
-              {label}
-            </button>
-          )
-        })}
-      </div>
-
-      {activeTab === 'seating' && <AdminSeatingPlan slug={slug} seatingPlan={seatingPlan} />}
-      {activeTab === 'reports' && <AdminGuestReports slug={slug} names={names} dateStr={dateStr} />}
-      {activeTab === 'rsvp'     && <AdminRSVPBlock slug={slug} names={names} />}
-    </div>
+    <>
+      {actionError && <Notice tone="danger" title={actionError} className="mb-4" />}
+      <OrderDetail
+        order={order}
+        onBack={onBack}
+        onApprove={() => { if (!isAdminTokenValid()) { setSessionError(true); return } setApproveAsk(true) }}
+        onReject={handleReject}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onCopyLink={(url) => navigator.clipboard.writeText(url)}
+        whatsappHref={draft.customer_phone ? `https://wa.me/${draft.customer_phone.replace(/\D/g, '')}` : undefined}
+        busy={busy}
+        asideExtra={missingInvite}
+        panels={slug ? {
+          seating: <AdminSeatingPlan slug={slug} seatingPlan={fd.seatingPlan || ''} />,
+          report: <AdminGuestReports slug={slug} names={names} dateStr={dateStr} />,
+          /* Phase 48 — siyahısız (adını yazıb) verilən cavablar; hesabat yalnız siyahını oxuyur */
+          rsvp: <AdminRSVPBlock slug={slug} names={names} />,
+        } : {
+          seating: missingInvite, report: missingInvite, rsvp: missingInvite,
+        }}
+      />
+      <ConfirmDialog
+        open={approveAsk}
+        tone="success"
+        title="Sifarişi təsdiqləmək?"
+        description={`${draftCode} · ${names || '—'} — dəvətnamə də yaradılacaq və müştəri linki aktiv olacaq.`}
+        confirmLabel="Təsdiq et"
+        busy={busy.approve}
+        onCancel={() => setApproveAsk(false)}
+        onConfirm={handleApprove}
+      />
+    </>
   )
 }

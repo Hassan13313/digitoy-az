@@ -32,7 +32,6 @@ import {
   Modal,
   RefreshButton,
   RSVP_DOT,
-  STATUS,
   SearchInput,
   Select,
   Skeleton,
@@ -48,10 +47,9 @@ import {
  * @property {number} [plus]  Əlavə qonaq sayı (+1, +2)
  * @property {string} [phone]  @property {string} [note]
  * @typedef {{id:string,name:string,guests:Guest[]}} SeatTable
- * @typedef {{name:string,phone:string,status:Guest['status'],plus:number,tableId:string}} GuestInput
+ * @typedef {{name:string,note:string,tableId:string}} GuestInput  Digitoy: manage_guest.php sahələri
  */
 
-const RSVP_OPTIONS = ['yes', 'maybe', 'no', 'none'].map((v) => ({ value: v, label: STATUS.rsvp[v].label }));
 const lc = (s) => String(s ?? '').toLocaleLowerCase('az');
 
 /** 6-dan az masa — hamısı açıq; çox masa — yalnız birincisi açıq (dar ekranda). */
@@ -412,8 +410,10 @@ function TableCard({
                     </span>
                   )}
                 </p>
-                {g.phone && !compact && (
-                  <p className="text-[12.5px] text-[#6B5E54] tabular-nums">{g.phone}</p>
+                {(g.phone || g.note) && !compact && (
+                  <p className="truncate text-[12.5px] text-[#6B5E54]">
+                    {[g.phone, g.note].filter(Boolean).join(' · ')}
+                  </p>
                 )}
               </div>
               <StatusBadge kind="rsvp" status={g.status} size="sm" />
@@ -505,9 +505,7 @@ export function GuestFormDialog({
 function GuestForm({ initial, tables, onSubmit, onCancel, busy, mode }) {
   const [v, setV] = useState({
     name: initial.name ?? '',
-    phone: initial.phone ?? '',
-    status: initial.status ?? 'none',
-    plus: initial.plus ?? 0,
+    note: initial.note ?? '',
     tableId: initial.tableId ?? tables[0]?.value ?? '',
   });
   const [err, setErr] = useState('');
@@ -521,7 +519,7 @@ function GuestForm({ initial, tables, onSubmit, onCancel, busy, mode }) {
           setErr('Ad boş ola bilməz');
           return;
         }
-        onSubmit?.({ ...v, name: v.name.trim(), plus: Number(v.plus) || 0 });
+        onSubmit?.({ ...v, name: v.name.trim(), note: v.note.trim() });
       }}
       className="space-y-4"
     >
@@ -536,24 +534,9 @@ function GuestForm({ initial, tables, onSubmit, onCancel, busy, mode }) {
           data-autofocus
         />
       </Field>
-      <Field label="Telefon" hint="İxtiyari">
-        <Input
-          value={v.phone}
-          onChange={set('phone')}
-          type="tel"
-          inputMode="tel"
-          autoComplete="off"
-          placeholder="+994 50 000 00 00"
-        />
+      <Field label="Qeyd" hint="İxtiyari">
+        <Input value={v.note} onChange={set('note')} autoComplete="off" maxLength={1000} />
       </Field>
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Status">
-          <Select value={v.status} onValueChange={set('status')} options={RSVP_OPTIONS} />
-        </Field>
-        <Field label="Əlavə qonaq">
-          <Input type="number" min={0} max={20} inputMode="numeric" value={v.plus} onChange={set('plus')} />
-        </Field>
-      </div>
       <Field label="Masa">
         <Select value={v.tableId} onValueChange={set('tableId')} options={tables} />
       </Field>

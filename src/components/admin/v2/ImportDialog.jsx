@@ -33,6 +33,7 @@ const STEPS = [
  * @param {{added:number,skipped:number,newTables?:number}} [p.result]  done mərhələsi
  * @param {number} [p.maxRows=2000]
  * @param {string} [p.hint]  Fayl seçimi altında qısa izah (sütunlar)
+ * @param {string} [p.warning]  Digitoy: review/done mərhələsində xəbərdarlıq (məs. başlıq tapılmadı)
  */
 export default function ImportDialog({
   open,
@@ -52,6 +53,7 @@ export default function ImportDialog({
   result,
   maxRows = 2000,
   hint = 'Faylda «Ad», «Masa» və «Telefon» sütunları olsun.',
+  warning,
 }) {
   const stepIndex = STEPS.findIndex((s) => s.id === step);
   const footer =
@@ -124,6 +126,13 @@ export default function ImportDialog({
         <PickStep onPickFile={onPickFile} parsing={parsing} error={error} maxRows={maxRows} hint={hint} />
       )}
 
+      {step !== 'pick' && (error || warning) && (
+        <div className="mb-4 space-y-2">
+          {error && <Notice tone="danger">{error}</Notice>}
+          {warning && <Notice tone="warning">{warning}</Notice>}
+        </div>
+      )}
+
       {step === 'review' && (
         <div className="space-y-5">
           <div className="flex flex-wrap items-center gap-3 rounded-[8px] bg-[#FAF8F4] px-3.5 py-2.5">
@@ -194,8 +203,8 @@ export default function ImportDialog({
                 Buraxılan sətirlər ({skipped.length})
               </h3>
               <ul className="max-h-[180px] divide-y divide-[#F0E1DC] overflow-auto rounded-[8px] bg-rust-mist/60 ring-1 ring-inset ring-[#E8C7BF]">
-                {skipped.map((s) => (
-                  <li key={s.row} className="flex gap-3 px-3.5 py-2.5 text-[13.5px]">
+                {skipped.map((s, i) => (
+                  <li key={`${s.row}-${i}`} className="flex gap-3 px-3.5 py-2.5 text-[13.5px]">
                     <span className="w-16 shrink-0 font-semibold text-[#8A3125] tabular-nums">
                       Sətir {s.row}
                     </span>
