@@ -17,12 +17,23 @@
 
 const H = () => (typeof window === 'undefined' ? null : window.history)
 
-/** Cari girişin vəziyyətinə scroll mövqeyini (+ `here` sahələrini) yaz; digər sahələr qalır */
+/** Cari girişin vəziyyətinə scroll mövqeyini (+ `here` sahələrini) yaz; digər sahələr qalır.
+    `here.scrollY: null` → mövqe saxlanılmır (məs. builder addımı: qayıdanda addımın başına sürüşülür) */
 export function rememberScroll(here = {}) {
   const h = H()
   if (!h) return
-  try { h.replaceState({ ...(h.state || {}), ...here, scrollY: Math.round(window.scrollY) }, '') } catch { /* təhlükəsiz */ }
+  try { h.replaceState({ ...(h.state || {}), scrollY: Math.round(window.scrollY), ...here }, '') } catch { /* təhlükəsiz */ }
 }
+
+/** Cari girişin vəziyyətini yenilə — yeni giriş YARATMADAN (görünən mərhələ ilə sinxron) */
+export function patchState(fields) {
+  const h = H()
+  if (!h) return
+  try { h.replaceState({ ...(h.state || {}), ...fields }, '') } catch { /* təhlükəsiz */ }
+}
+
+/** Cari ünvan (yol + sorğu) — eyni səhifədə mərhələ girişləri üçün */
+export const currentUrl = () => window.location.pathname + window.location.search
 
 /** Yeni SPA girişi — əvvəlki girişin scroll mövqeyi (+ `here`, məs. { view }) saxlanılır */
 export function pushView(path, state = {}, here = {}) {

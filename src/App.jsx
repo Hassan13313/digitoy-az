@@ -778,7 +778,7 @@ export default function App() {
               setView('invite')
             })}
             onDemo={() => { trackEvent('demo_opened', { lang }); navigateTo(() => { go('/demo'); setView('demo') }) }}
-            isAdmin={true} initialShowPreview={false}
+            isAdmin={true} initialShowPreview={false} historyView="admin-review"
           />
         </div>
       </>

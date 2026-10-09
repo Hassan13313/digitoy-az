@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import BuilderForm from './BuilderForm'
 import Preview from './Preview'
@@ -21,6 +21,7 @@ import { spaClick, navigateSpa } from '../../utils/siteRoutes'
 import { consent } from '../../utils/consent'
 import { trackEvent } from '../../utils/analytics'
 import { readBuilderSnapshot, clearBuilderSnapshot } from '../../utils/builderSession'
+import { pushView, patchState, currentUrl } from '../../utils/navHistory'
 
 /* Navbar yüksəkliyi 72px — scroll hesablamada çıxılır */
 function scrollToSection(id) {
@@ -54,9 +55,12 @@ const navItems = (tr) => [
   { id: 'faq',             label: tr.navFaq },
 ]
 
-export default function LandingPage({ lang, setLang, weddingData, setWeddingData, onViewInvitation, onDemo, isAdmin = false, initialShowPreview = false, initialPackage = null, showPackages = false }) {
+export default function LandingPage({ lang, setLang, weddingData, setWeddingData, onViewInvitation, onDemo, isAdmin = false, initialShowPreview = false, initialPackage = null, showPackages = false, historyView = 'landing' }) {
   const tr = t[lang] || t.az
-  const [showPreview,     setShowPreview]     = useState(initialShowPreview)
+  /* Tarixçə girişinin mərhələsi (bax aşağıda «Brauzer tarixçəsi») — remount-da da bərpa olunur */
+  const entryStage = () => (window.history.state?.view === historyView ? window.history.state?.stage : null)
+  const [showPreview,     setShowPreview]     = useState(() => initialShowPreview
+    || (entryStage() === 'preview' && !!readBuilderSnapshot()?.data))
   /* Forma məlumatları: eyni tabda snapshot varsa ondan bərpa olunur
      (önbaxış → geri ssenarisi), yoxsa App-dən gələn `weddingData`. */
   const [formData, setFormData] = useState(() => {
@@ -77,7 +81,7 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
      sessionStorage snapshot-ında qalır → paketi seçən kimi hər şey yerindədir. */
   const [selectedPackage, setSelectedPackage] = useState(() => {
     if (isAdmin) return weddingData?.package || 'SADE'
-    if (showPackages) return null
+    if (showPackages || entryStage() === 'packages') return null
     /* Snapshot-dakı paket də sayılır — beləliklə HƏR qayıdış yolu
        (geri düyməsi, brauzerin geri düyməsi, önbaxış linki) builder-i açır,
        paket seçimi ekranına düşmür. */
@@ -114,12 +118,62 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
     if (!isAdmin) trackEvent('landing_view', { lang })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  /* Preview göstərildikdə builder bölməsinə scroll et */
+  /* Preview göstərildikdə builder bölməsinə scroll et
+     (brauzerin GERİ/İRƏLİ düyməsi ilə gəlinibsə — mövqeni App bərpa edir) */
+  const fromPopRef = useRef(false)
   useEffect(() => {
-    if (showPreview) {
-      setTimeout(() => scrollToSection('builder-content'), 100)
-    }
+    if (!showPreview) return
+    if (fromPopRef.current) { fromPopRef.current = false; return }
+    setTimeout(() => scrollToSection('builder-content'), 100)
   }, [showPreview])
+
+  /* ── Brauzer tarixçəsi (2026-10-09) ──
+     Paket seçimi → builder → önbaxış hər biri AYRICA girişdir (builder addımları
+     BuilderForm-da): telefonun GERİ düyməsi bir mərhələ geri aparır — əvvəl
+     önbaxışdan GERİ saytdan tamam çıxırdı. Cari giriş həmişə görünən mərhələni
+     bilir (patchState), popstate onu bərpa edir; scroll mövqeyini App qaytarır. */
+  const stage = showPreview ? 'preview' : selectedPackage ? 'builder' : 'packages'
+  const stageRef = useRef(stage)
+  useEffect(() => {
+    stageRef.current = stage
+    /* «Dəvətnaməni gör» girişinə (view: 'invitation') toxunulmur */
+    const v = window.history.state?.view
+    if (!v || v === historyView) patchState({ view: historyView, stage })
+  }, [historyView, stage])
+
+  useEffect(() => {
+    const onPop = () => {
+      const s = window.history.state
+      const from = stageRef.current
+      if (!s || s.view !== historyView || !s.stage || s.stage === from) return
+      if (s.stage === 'packages') {
+        setShowPreview(false)
+        setSelectedPackage(null)
+        setReturnToStep(null)
+        return
+      }
+      if (s.stage === 'builder') {
+        const pkg = readBuilderSnapshot()?.data?.package
+        /* «yenidən başla»-dan sonra (snapshot silinib) builder-ə qayıtmaq olmur */
+        if (from === 'packages' && !pkg) { patchState({ stage: 'packages' }); return }
+        setShowPreview(false)
+        setSelectedPackage((p) => p || pkg)
+        if (from === 'preview') setTimeout(() => scrollToSection('builder-content'), 100)
+        return
+      }
+      if (s.stage === 'preview') {
+        const data = readBuilderSnapshot()?.data
+        if (!data) return
+        const enriched = { ...data, package: data.package || 'SADE' }
+        setFormData((d) => ({ ...d, ...enriched }))
+        setWeddingData((w) => ({ ...w, ...enriched }))
+        fromPopRef.current = true
+        setShowPreview(true)
+      }
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [historyView, setWeddingData])
 
   /* Admin dərin link: mount zamanı birbaşa builder-ə jump et */
   useEffect(() => {
@@ -138,6 +192,8 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
   const handleFormSubmit = (data) => {
     /* Paket həmişə data-da olur — mövcudsa qoru, yoxdursa selectedPackage-dən al */
     const enriched = { ...data, package: data.package || selectedPackage || 'SADE' }
+    /* builder girişində mövqe saxlanılmır — GERİ basanda builder-in başına sürüşülür */
+    pushView(currentUrl(), { view: historyView, stage: 'preview' }, { scrollY: null })
     setFormData(enriched)
     setWeddingData(enriched)
     setReturnToStep(null)
@@ -150,6 +206,7 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
     /* Admin review modunda addım 1-dən başla; müştəridə son addıma qayıt
        (7 = Foto Qalereya; paketdə bağlıdırsa BuilderForm son görünən addıma yuvarlaqlaşdırır) */
     setReturnToStep(isAdmin ? 1 : 7)
+    pushView(currentUrl(), { view: historyView, stage: 'builder' })
     setShowPreview(false)
     setTimeout(() => scrollToSection('builder-content'), 100)
   }
@@ -165,6 +222,8 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
 
   /* Naviqasiyadakı «Paketlər» — paket seçiminə qayıt, ilk kart üzərindən -240px offset ilə scroll */
   const scrollToBuilder = () => {
+    /* builder/önbaxışdan gəlinibsə — GERİ ora qaytarsın */
+    if (stageRef.current !== 'packages') pushView(currentUrl(), { view: historyView, stage: 'packages' })
     setReturnToStep(null)
     setShowPreview(false)
     setSelectedPackage(null)
@@ -203,6 +262,7 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
   /* Paket seçildikdə çağırılır — yalnız bundan sonra BuilderForm açılır */
   const handlePackageSelect = (pkgId) => {
     try { localStorage.setItem('selected_package', pkgId) } catch { /* private mode */ }
+    pushView(currentUrl(), { view: historyView, stage: 'builder' })
     setSelectedPackage(pkgId)
     setFormData(d => ({ ...d, package: pkgId }))   // initialData.package-i sinxronlaşdır
     setReturnToStep(null)

@@ -38,6 +38,7 @@ import { computeInviteSlug } from '../../utils/inviteSlug'
 import { defaultWedding } from '../../data/defaultWedding'
 import { buildShortLiveLink } from '../../utils/whatsappOrder'
 import { formatFullDateByLang } from '../../utils/dateFormat'
+import { pushView, patchState, currentUrl } from '../../utils/navHistory'
 import { saveDraft, getDraft, submitDraft, saveInvitation, approveDraft } from '../../utils/api'
 import { saveBuilderSnapshot, readBuilderSnapshot } from '../../utils/builderSession'
 import t from '../../data/translations'
@@ -510,6 +511,14 @@ function parseIso(iso) {
   if (!iso) return null
   const [y, m, d] = iso.split('-').map(Number)
   return { year: y, month: m - 1, day: d }
+}
+
+/* Builder blokunun başına hamar sürüşdür (addım dəyişəndə) */
+function scrollBuilderToTop() {
+  setTimeout(() => {
+    const el = document.getElementById('builder-content') || document.getElementById('builder-section')
+    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 72, behavior: 'smooth' })
+  }, 60)
 }
 
 /* ── Köməkçi: { year, month, day } → YYYY-MM-DD ── */
@@ -1535,6 +1544,24 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     }
   }, [isAdmin])
 
+  /* ── Tarixçə: cari giriş addımı bilsin; GERİ/İRƏLİ düyməsi addımı dəyişsin ── */
+  const stepRef = useRef(step)
+  useEffect(() => {
+    stepRef.current = step
+    if (window.history.state?.stage === 'builder') patchState({ step })
+  }, [step])
+  useEffect(() => {
+    const onPop = () => {
+      const s = window.history.state
+      if (s?.stage !== 'builder' || !Number.isFinite(s.step) || s.step === stepRef.current) return
+      setDir(s.step < stepRef.current ? -1 : 1)
+      setStep(s.step)
+      scrollBuilderToTop()
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+
   /* ── Autosave: data/step dəyişəndə 800ms debounce ilə saxla ── */
   useEffect(() => {
     if (isAdmin) return
@@ -1613,26 +1640,29 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     return Object.keys(e).length === 0
   }
 
-  const scrollToTop = () => {
-    setTimeout(() => {
-      const el = document.getElementById('builder-content') || document.getElementById('builder-section')
-      if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 72, behavior: 'smooth' })
-    }, 60)
+  const scrollToTop = scrollBuilderToTop
+
+  /* Hər addım ayrıca tarixçə girişidir — telefonun GERİ düyməsi əvvəlki addıma
+     aparır (əvvəl builder-in ortasında GERİ saytdan çıxırdı). Köhnə girişdə
+     mövqe saxlanılmır: qayıdanda addımın başına sürüşülür. */
+  const goStep = (target, d, scroll = true) => {
+    const n = clampStep(target)
+    if (n === step) return
+    pushView(currentUrl(),
+      { view: window.history.state?.view || 'landing', stage: 'builder', step: n },
+      { stage: 'builder', step, scrollY: null })
+    setDir(d)
+    setStep(n)
+    if (scroll) scrollToTop()
   }
 
   const next = (e) => {
     if (e) { e.preventDefault(); e.stopPropagation() }
-    if (validate()) {
-      setDir(1)
-      setStep(Math.min(step + 1, VISIBLE_TOTAL))
-      scrollToTop()
-    }
+    if (validate()) goStep(step + 1, 1)
   }
   const prev = (e) => {
     if (e) { e.preventDefault(); e.stopPropagation() }
-    setDir(-1)
-    setStep(Math.max(step - 1, 1))
-    scrollToTop()
+    goStep(step - 1, -1)
   }
   const handleSubmit = async (e) => {
     if (e) { e.preventDefault(); e.stopPropagation() }
@@ -1805,7 +1835,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
         steps={visibleSteps.map((id) => ({ id: String(id), label: titleOf(id) }))}
         current={step - 1}
         direction={dir}
-        onStepClick={(i) => { setDir(i + 1 >= step ? 1 : -1); setStep(i + 1) }}
+        onStepClick={(i) => goStep(i + 1, i + 1 >= step ? 1 : -1, false)}
         onPrev={prev}
         onNext={step < VISIBLE_TOTAL ? next : handleSubmit}
         isLast={step === VISIBLE_TOTAL}
