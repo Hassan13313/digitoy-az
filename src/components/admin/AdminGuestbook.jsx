@@ -1,59 +1,43 @@
-import { useState, useEffect, useRef } from 'react'
-import { RefreshCw, Search, X, Trash2, ExternalLink, MessageSquare } from 'lucide-react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { getAdminGuestbook, deleteGuestbookMessage } from '../../utils/api'
-import { useIsNarrow } from '../../hooks/useIsNarrow'
-import { azDate, pagePadding } from './adminFormat'
+import MessagesList from './v2/MessagesList'
+import { Notice } from './v2/adminUi'
+import { azDate } from './adminFormat'
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   TƏBRİK MƏKTUBLARI — admin moderasiyası (Phase 36).
-
-   Qonaqların yazdığı mesajlarda spam / təhqir / səhv məzmun ola bilər.
-   Bu panel həmin mesajları göstərir və silməyə imkan verir.
+   TƏBRİK MƏKTUBLARI — admin moderasiyası (Phase 36;
+   UI redesign 2026-10: görünüş v2/MessagesList)
 
    ⚠ QONAĞIN AXINI DƏYİŞMİR: yazma forması, `submit_guest_response.php` və
    dəvətnamədəki `Guestbook` bölməsi toxunulmur.
-
    ⚠ SİLMƏ RSVP-ni MƏHV ETMİR: eyni sətirdə iştirak cavabı varsa yalnız mesaj
-   mətni silinir (backend qərar verir — bax `admin_guestbook.php`). Panel
-   həmin sətirləri «RSVP» nişanı ilə göstərir ki, admin nə olacağını bilsin.
+   mətni silinir (backend qərar verir — bax `admin_guestbook.php`). Kartda
+   «İştirak» nişanı göstərilir ki, admin nə olacağını bilsin.
+   ⚠ Silmə server təsdiqindən SONRA siyahıdan çıxır (optimistik deyil).
    ───────────────────────────────────────────────────────────────────────── */
 
-const C = {
-  ink:    'oklch(20% 0.02 60)',
-  text:   'oklch(25% 0.02 60)',
-  sub:    'oklch(55% 0.03 60)',
-  faint:  'oklch(60% 0.03 60)',
-  line:   'oklch(88% 0.02 60)',
-  hair:   'oklch(93% 0.01 75)',
-  head:   'oklch(95% 0.01 75)',
-  gold:   'oklch(45% 0.07 75)',
-  danger: 'oklch(48% 0.15 25)',
-}
-
-/* ⚠ `toLocaleString('az-AZ')` Chrome-da «M06» verirdi — bax adminFormat */
-function formatDateTime(iso) {
-  return azDate(iso, { time: true })
-}
-
 export default function AdminGuestbook() {
-  /* Telefonda 5 sütunlu cədvəl sığmırdı (mətn və «Sil» ekrandan kənarda idi) */
-  const narrow = useIsNarrow()
   const [items,     setItems]     = useState([])
   const [total,     setTotal]     = useState(0)
   const [loading,   setLoading]   = useState(true)
   const [error,     setError]     = useState('')
   const [searchVal, setSearchVal] = useState('')
   const [search,    setSearch]    = useState('')
-  /* İki addımlı silmə — brauzer confirm() dialoqu İSTİFADƏ EDİLMİR */
-  const [confirmId, setConfirmId] = useState(null)
+  const [slug,      setSlug]      = useState('')
+  const [slugs,     setSlugs]     = useState([])   /* filtr seçimləri (filtrsiz yükləmədən) */
   const [busyId,    setBusyId]    = useState(null)
   const debounceRef = useRef(null)
 
-  const load = (q = '') => {
+  const load = (q = '', s = '') => {
     setLoading(true)
     setError('')
-    getAdminGuestbook({ search: q })
-      .then((d) => { setItems(d.messages || []); setTotal(d.total || 0) })
+    getAdminGuestbook({ search: q, slug: s })
+      .then((d) => {
+        const list = d.messages || []
+        setItems(list)
+        setTotal(d.total || 0)
+        if (!s) setSlugs(prev => [...new Set([...prev, ...list.map(m => m.slug)])].sort())
+      })
       .catch(() => setError('Mesajlar yüklənmədi.'))
       .finally(() => setLoading(false))
   }
@@ -63,217 +47,54 @@ export default function AdminGuestbook() {
   const handleSearch = (val) => {
     setSearchVal(val)
     clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => { setSearch(val); load(val) }, 400)
+    debounceRef.current = setTimeout(() => { setSearch(val); load(val, slug) }, val ? 400 : 0)
   }
 
-  const clearSearch = () => { setSearchVal(''); setSearch(''); load('') }
+  const handleSlug = (s) => {
+    setSlug(s)
+    load(search, s)
+  }
 
   const handleDelete = async (id) => {
     setBusyId(id)
     try {
       await deleteGuestbookMessage(id)
-      /* Optimistik deyil — server təsdiqindən SONRA siyahıdan çıxarılır,
-         ona görə "silindi" göstərib geri qayıtma problemi yaranmır. */
       setItems((prev) => prev.filter((m) => m.id !== id))
       setTotal((n) => Math.max(0, n - 1))
-      setConfirmId(null)
     } catch (e) {
       setError(e?.message || 'Mesaj silinmədi.')
+      throw e
     } finally {
       setBusyId(null)
     }
   }
 
+  const messages = useMemo(() => items.map(m => ({
+    id: m.id,
+    author: m.name || '—',
+    text: m.text || '',
+    date: azDate(m.created_at, { time: true }),
+    hasRsvp: !!m.has_rsvp,
+    invitation: { slug: m.slug, url: `/invite/${m.slug}` },
+  })), [items])
+
   return (
-    <div style={{ padding: pagePadding(narrow) }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
-        <div>
-          <h1 style={{
-            fontFamily: '"Cormorant Garamond","Playfair Display",serif',
-            fontSize: 24, fontWeight: 300, color: C.ink, margin: 0, letterSpacing: '-0.01em',
-          }}>
-            Təbrik Məktubları
-          </h1>
-          <p style={{ fontSize: 12, color: C.sub, margin: '4px 0 0' }}>
-            {total} mesaj{search ? ` — "${search}"` : ''}
-          </p>
-        </div>
-
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', width: narrow ? '100%' : undefined }}>
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flex: narrow ? 1 : undefined, minWidth: 0 }}>
-            <Search size={13} strokeWidth={1.5} style={{ position: 'absolute', left: 10, color: C.faint, pointerEvents: 'none' }} />
-            <input
-              type="text" placeholder="Ad, mətn, slug axtar..."
-              value={searchVal} onChange={(e) => handleSearch(e.target.value)}
-              style={{
-                padding: narrow ? '11px 36px 11px 32px' : '8px 32px 8px 30px', border: `1px solid ${'oklch(85% 0.02 60)'}`, borderRadius: narrow ? 8 : 4,
-                fontSize: narrow ? 15 : 12, color: 'oklch(30% 0.02 60)', background: 'white', outline: 'none', width: narrow ? '100%' : 220,
-              }}
-            />
-            {searchVal && (
-              <button type="button" onClick={clearSearch} aria-label="Axtarışı təmizlə" style={{ position: 'absolute', right: 8, background: 'none', border: 'none', cursor: 'pointer', color: C.faint, display: 'flex' }}>
-                <X size={12} strokeWidth={2} />
-              </button>
-            )}
-          </div>
-          <button type="button" onClick={() => load(search)} style={{
-            display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'white',
-            border: '1px solid oklch(85% 0.02 60)', borderRadius: narrow ? 8 : 4, cursor: 'pointer',
-            fontSize: 11, color: 'oklch(45% 0.03 60)', letterSpacing: '0.06em', textTransform: 'uppercase',
-            minHeight: narrow ? 44 : undefined, flex: '0 0 auto',
-          }}>
-            <RefreshCw size={12} strokeWidth={1.5} />
-            Yenilə
-          </button>
-        </div>
-      </div>
-
-      {error && (
-        <div style={{ marginBottom: 14, padding: '10px 14px', border: `1px solid ${C.danger}`, borderRadius: 4, color: C.danger, fontSize: 12, background: 'oklch(97% 0.02 25)' }}>
-          {error}
-        </div>
-      )}
-
-      {loading ? (
-        <div style={{ padding: '48px 0', textAlign: 'center', color: C.faint, fontSize: 13 }}>Yüklənir...</div>
-      ) : items.length === 0 ? (
-        <div style={{ padding: '56px 0', textAlign: 'center', color: C.faint, fontSize: 13 }}>
-          <MessageSquare size={20} strokeWidth={1.2} style={{ opacity: 0.5, marginBottom: 10 }} />
-          <div>Təbrik mesajı yoxdur.</div>
-        </div>
-      ) : narrow ? (
-        /* ── Telefon: hər mesaj bir kart ── */
-        <div style={{ display: 'grid', gap: 10 }}>
-          {items.map((m) => (
-            <div key={m.id} style={{
-              background: confirmId === m.id ? 'oklch(97% 0.02 25)' : 'white',
-              border: `1px solid ${C.line}`, borderRadius: 10, padding: '12px 14px',
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 }}>
-                <span style={{ fontSize: 14.5, color: C.text, fontWeight: 600, overflowWrap: 'anywhere' }}>{m.name || '—'}</span>
-                <span style={{ fontSize: 11.5, color: C.faint, flex: '0 0 auto' }}>{formatDateTime(m.created_at)}</span>
-              </div>
-              <a
-                href={`/invite/${m.slug}`} target="_blank" rel="noopener noreferrer"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 4, fontFamily: 'monospace', fontSize: 11.5, color: C.gold, textDecoration: 'none', overflowWrap: 'anywhere' }}
-              >
-                {m.slug}<ExternalLink size={11} strokeWidth={1.6} style={{ flexShrink: 0 }} />
-              </a>
-              <div style={{ fontSize: 14, color: C.text, lineHeight: 1.6, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', marginTop: 8 }}>
-                {m.text}
-                {m.has_rsvp && (
-                  <span style={{
-                    marginLeft: 8, padding: '1px 6px', borderRadius: 3, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase',
-                    border: '1px solid oklch(80% 0.05 150)', color: 'oklch(45% 0.09 150)', whiteSpace: 'nowrap',
-                  }}>İştirak</span>
-                )}
-              </div>
-              <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-                {confirmId === m.id ? (
-                  <>
-                    <button type="button" disabled={busyId === m.id} onClick={() => handleDelete(m.id)}
-                      style={{ flex: 2, minHeight: 44, borderRadius: 8, border: 'none', cursor: 'pointer', background: C.danger, color: 'white', fontSize: 13, fontFamily: 'inherit', opacity: busyId === m.id ? 0.6 : 1 }}>
-                      {busyId === m.id ? '…' : 'Bəli, sil'}
-                    </button>
-                    <button type="button" onClick={() => setConfirmId(null)}
-                      style={{ flex: 1, minHeight: 44, borderRadius: 8, border: `1px solid ${C.line}`, background: 'white', cursor: 'pointer', fontSize: 13, color: C.sub, fontFamily: 'inherit' }}>
-                      Ləğv et
-                    </button>
-                  </>
-                ) : (
-                  <button type="button" onClick={() => setConfirmId(m.id)}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 40, padding: '0 14px', borderRadius: 8, border: `1px solid ${C.line}`, background: 'white', cursor: 'pointer', fontSize: 13, color: C.danger, fontFamily: 'inherit' }}>
-                    <Trash2 size={14} strokeWidth={1.6} /> Sil
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div style={{ background: 'white', border: `1px solid ${C.line}`, borderRadius: 6, overflow: 'hidden' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '150px 130px 1fr 150px 88px', gap: 12, padding: '10px 20px', background: C.head, borderBottom: `1px solid ${C.line}` }}>
-            {['Müəllif', 'Dəvətnamə', 'Mətn', 'Tarix', ''].map((h, i) => (
-              <span key={i} style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'oklch(50% 0.03 60)' }}>{h}</span>
-            ))}
-          </div>
-
-          {items.map((m, i) => (
-            <div key={m.id} style={{
-              display: 'grid', gridTemplateColumns: '150px 130px 1fr 150px 88px', gap: 12,
-              padding: '13px 20px', alignItems: 'start',
-              borderBottom: i < items.length - 1 ? `1px solid ${C.hair}` : 'none',
-              background: confirmId === m.id ? 'oklch(97% 0.02 25)' : 'transparent',
-            }}>
-              <span style={{ fontSize: 13, color: C.text, fontWeight: 500, wordBreak: 'break-word' }}>
-                {m.name || '—'}
-              </span>
-
-              <a
-                href={`/invite/${m.slug}`} target="_blank" rel="noopener noreferrer"
-                style={{ fontFamily: 'monospace', fontSize: 11, color: C.gold, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4, wordBreak: 'break-all' }}
-                title="Dəvətnaməni aç"
-              >
-                {m.slug}
-                <ExternalLink size={10} strokeWidth={1.6} style={{ flexShrink: 0 }} />
-              </a>
-
-              <span style={{ fontSize: 12.5, color: C.text, lineHeight: 1.55, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                {m.text}
-                {m.has_rsvp && (
-                  <span title="Bu sətirdə iştirak cavabı da var — silinəndə yalnız mətn gedir, cavab qalır" style={{
-                    marginLeft: 8, padding: '1px 6px', borderRadius: 3, fontSize: 9,
-                    letterSpacing: '0.08em', textTransform: 'uppercase',
-                    border: '1px solid oklch(80% 0.05 150)', color: 'oklch(45% 0.09 150)', whiteSpace: 'nowrap',
-                  }}>
-                    İştirak
-                  </span>
-                )}
-              </span>
-
-              <span style={{ fontSize: 11, color: C.faint }}>{formatDateTime(m.created_at)}</span>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                {confirmId === m.id ? (
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    <button
-                      type="button" disabled={busyId === m.id}
-                      onClick={() => handleDelete(m.id)}
-                      style={{
-                        padding: '5px 9px', borderRadius: 4, border: 'none', cursor: 'pointer',
-                        background: C.danger, color: 'white', fontSize: 10, letterSpacing: '0.06em',
-                        textTransform: 'uppercase', opacity: busyId === m.id ? 0.6 : 1,
-                      }}
-                    >
-                      {busyId === m.id ? '...' : 'Təsdiqlə'}
-                    </button>
-                    <button
-                      type="button" onClick={() => setConfirmId(null)}
-                      style={{ padding: '5px 8px', borderRadius: 4, border: `1px solid ${C.line}`, background: 'white', cursor: 'pointer', fontSize: 10, color: C.sub }}
-                    >
-                      Ləğv
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button" onClick={() => setConfirmId(m.id)}
-                    title="Mesajı sil"
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 5, padding: '5px 9px',
-                      borderRadius: 4, border: `1px solid ${C.line}`, background: 'white',
-                      cursor: 'pointer', fontSize: 10, color: C.danger,
-                      letterSpacing: '0.06em', textTransform: 'uppercase',
-                    }}
-                  >
-                    <Trash2 size={11} strokeWidth={1.6} />
-                    Sil
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+    <>
+      {error && <Notice tone="danger" title={error} className="mb-4" />}
+      <MessagesList
+        messages={messages}
+        total={total}
+        search={searchVal}
+        onSearch={handleSearch}
+        invitationFilter={slug}
+        onInvitationFilter={handleSlug}
+        invitationOptions={[{ value: '', label: 'Bütün dəvətnamələr' }, ...slugs.map(s => ({ value: s, label: s }))]}
+        onDeleteMessage={(m) => handleDelete(m.id)}
+        deletingId={busyId}
+        onRefresh={() => load(search, slug)}
+        refreshing={loading}
+        loading={loading}
+      />
+    </>
   )
 }

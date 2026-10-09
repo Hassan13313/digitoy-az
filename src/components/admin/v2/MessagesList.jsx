@@ -197,6 +197,9 @@ export default function MessagesList({
               <span className="mt-2 block rounded-[8px] bg-[#FAF8F4] px-3 py-2 italic text-[#3F342E]">
                 «{del.text.length > 120 ? `${del.text.slice(0, 120)}…` : del.text}»
               </span>
+              {del.hasRsvp && (
+                <span className="mt-2 block">Bu sətirdə iştirak cavabı da var — yalnız mətn silinir, cavab qalır.</span>
+              )}
             </>
           )
         }
@@ -247,7 +250,17 @@ export function MessageCard({ message: m, onDelete, deleting = false, hideInvita
   return (
     <li className="flex min-w-0 flex-col rounded-[12px] bg-white p-4 ring-1 ring-inset ring-[#E5DED2]">
       <div className="flex items-start justify-between gap-3">
-        <p className="min-w-0 text-[15px] font-semibold text-espresso">{m.author}</p>
+        <p className="min-w-0 text-[15px] font-semibold text-espresso">
+          {m.author}
+          {m.hasRsvp && (
+            <span
+              title="Bu sətirdə iştirak cavabı da var — silinəndə yalnız mətn gedir, cavab qalır"
+              className="ml-2 inline-flex h-5 items-center rounded bg-olive-mist px-1.5 align-middle text-[11.5px] font-semibold text-[#3D5530]"
+            >
+              İştirak
+            </span>
+          )}
+        </p>
         <time className="shrink-0 text-[13px] text-[#6B5E54] tabular-nums">{m.date}</time>
       </div>
       {!hideInvitation && (

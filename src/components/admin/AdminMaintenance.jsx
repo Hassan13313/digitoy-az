@@ -1,94 +1,48 @@
 import { useState, useEffect } from 'react'
-import { RefreshCw, ShieldCheck, ShieldAlert, HardDrive, Trash2, Database, ScrollText, Eraser } from 'lucide-react'
 import { getMaintenanceStatus, cleanupDrafts, reindexMedia, getAdminAudit, runRetention } from '../../utils/api'
-import { useIsNarrow } from '../../hooks/useIsNarrow'
+import MaintenancePage from './v2/MaintenancePage'
+import { Button, Notice } from './v2/adminUi'
 import { azDate } from './adminFormat'
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   BAXIM — Phase 37/39.
-
-   Dörd şey göstərir və iki əməliyyat icra edir. Tamamilə additivdir:
-   mövcud bölmələrin heç biri bundan asılı deyil.
+   BAXIM — Phase 37/39/47 (UI redesign 2026-10: görünüş v2/MaintenancePage)
 
    ⚠ BACKUP SİSTEMİ QURULMUR. Panel yalnız serverdə arxiv faylı olub-olmadığını
-   OXUYUR. Heç nə tapılmasa dürüst «məlum deyil» yazılır — «backup var»
-   iddiası edilmir, çünki yanlış təhlükəsizlik hissi backup-ın olmamasından
-   da pisdir.
-
-   ⚠ DRAFT TƏMİZLƏMƏ yalnız `status='draft'`, 30 gün toxunulmamış sətirləri
-   və onların öz fayllarını silir. Sifariş (submitted / approved / rejected)
-   HEÇ VAXT silinmir.
-
-   Phase 47 — MƏLUMAT SAXLAMA: retention.php gündə bir dəfə özü işləyir
-   (dashboard açılanda). Əl ilə işlətmək üçün əvvəl önizləmə (dry run) lazımdır.
+   OXUYUR. Heç nə tapılmasa dürüst «məlum deyil» yazılır.
+   ⚠ DRAFT TƏMİZLƏMƏ yalnız `status='draft'`, N gün toxunulmamış sətirləri
+   və onların öz fayllarını silir. Sifariş HEÇ VAXT silinmir.
+   ⚠ MƏLUMAT SAXLAMA: retention.php gündə bir dəfə özü işləyir. Əl ilə
+   işlətmək üçün əvvəl önizləmə (dry run) lazımdır, sonra təsdiq.
    ───────────────────────────────────────────────────────────────────────── */
 
-const C = {
-  ink:    'oklch(20% 0.02 60)',
-  text:   'oklch(25% 0.02 60)',
-  sub:    'oklch(55% 0.03 60)',
-  faint:  'oklch(60% 0.03 60)',
-  line:   'oklch(88% 0.02 60)',
-  hair:   'oklch(93% 0.01 75)',
-  head:   'oklch(95% 0.01 75)',
-  gold:   'oklch(45% 0.07 75)',
-  ok:     'oklch(45% 0.11 150)',
-  warn:   'oklch(52% 0.13 75)',
-  danger: 'oklch(48% 0.15 25)',
-}
+const formatDateTime = (iso) => azDate(iso, { time: true })
+const n = (v) => (typeof v === 'number' ? v : v === 'error' ? 'xəta' : 0)
 
-/* ⚠ `toLocaleString('az-AZ')` Chrome-da «2026 M09 07» verirdi — bax adminFormat */
-function formatDateTime(iso) {
-  return azDate(iso, { time: true })
-}
-
-const card = {
-  border: `1px solid ${C.line}`, borderRadius: 10, background: '#fff',
-  padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 10,
-}
-const btn = (tone = 'gold') => ({
-  display: 'inline-flex', alignItems: 'center', gap: 7,
-  padding: '9px 15px', borderRadius: 7, cursor: 'pointer',
-  border: `1px solid ${tone === 'danger' ? C.danger : C.line}`,
-  background: tone === 'danger' ? C.danger : '#fff',
-  color: tone === 'danger' ? '#fff' : C.text,
-  fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap',
-})
-
-/** retention.php nəticəsi → oxunaqlı sətirlər */
-function retentionLines(r) {
+/** retention.php nəticəsi → kart sətirləri */
+function retentionItems(r) {
   if (!r) return []
-  const n = (v) => (typeof v === 'number' ? v : v === 'error' ? 'xəta' : 0)
-  const verb = r.dry ? 'silinəcək' : 'silindi'
   return [
-    `Audit jurnalında ${n(r.audit_ip)} köhnə IP ${verb}`,
-    `Qalereya statistikasında ${n(r.gallery_ip)} IP izi ${verb}`,
-    `${n(r.temp_files)} müvəqqəti fayl, ${n(r.media_logs)} köhnə log ${verb}`,
-    `${n(r.drafts?.drafts)} tərk edilmiş draft (${n(r.drafts?.files)} fayl) ${verb}`,
-    r.orphans?.buckets ? `Sahibsiz ${r.orphans.buckets} qovluq (${r.orphans.mb} MB) — yalnız hesabat, silinmir` : null,
-  ].filter(Boolean)
+    { label: 'Audit jurnalında köhnə IP', count: n(r.audit_ip) },
+    { label: 'Qalereya statistikasında IP izi', count: n(r.gallery_ip) },
+    { label: 'Müvəqqəti fayl', count: n(r.temp_files) },
+    { label: 'Köhnə log', count: n(r.media_logs) },
+    { label: 'Tərk edilmiş draft', count: n(r.drafts?.drafts) },
+    { label: 'Draftların faylları', count: n(r.drafts?.files) },
+    ...(r.orphans?.buckets ? [{ label: `Sahibsiz qovluq (${r.orphans.mb} MB) — yalnız hesabat, silinmir`, count: r.orphans.buckets }] : []),
+  ]
 }
-
-function Stat({ label, value, hint }) {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
-      <span style={{ fontSize: 10, letterSpacing: '.09em', textTransform: 'uppercase', color: C.faint, fontWeight: 700 }}>{label}</span>
-      <span style={{ fontSize: 19, fontWeight: 700, color: C.ink, fontVariantNumeric: 'tabular-nums' }}>{value}</span>
-      {hint && <span style={{ fontSize: 12, color: C.sub }}>{hint}</span>}
-    </div>
-  )
-}
+const retentionSummary = (r) => retentionItems(r)
+  .filter(i => !String(i.label).startsWith('Sahibsiz'))
+  .map(i => `${i.label}: ${i.count}`).join('; ')
 
 export default function AdminMaintenance() {
-  /* Telefonda məzmun ekranın kənarına yapışırdı (yan boşluq 0 idi) */
-  const narrow = useIsNarrow()
-  const [data,    setData]    = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error,   setError]   = useState('')
-  const [busy,    setBusy]    = useState('')      /* 'drafts' | 'media' | 'ret-dry' | 'ret' */
-  const [result,  setResult]  = useState('')
-  const [audit,   setAudit]   = useState(null)
-  const [preview, setPreview] = useState(null)    /* son dry run nəticəsi */
+  const [data,     setData]     = useState(null)
+  const [loading,  setLoading]  = useState(true)
+  const [error,    setError]    = useState('')
+  const [drafts,   setDrafts]   = useState({ state: 'idle' })
+  const [media,    setMedia]    = useState({ state: 'idle' })
+  const [ret,      setRet]      = useState({ state: 'idle' })    /* state, preview, resultText, errorText */
+  const [audit,    setAudit]    = useState({ state: 'idle' })
 
   const load = () => {
     setLoading(true); setError('')
@@ -101,54 +55,64 @@ export default function AdminMaintenance() {
   useEffect(() => { load() }, [])
 
   const runCleanup = async () => {
-    setBusy('drafts'); setResult('')
+    setDrafts({ state: 'running' })
     try {
       const r = await cleanupDrafts()
-      setResult(r.message || `${r.deleted} draft silindi.`)
+      setDrafts({ state: 'done', resultText: r.message || `${r.deleted} draft silindi.` })
       load()
     } catch (e) {
-      setResult(e?.message || 'Təmizləmə alınmadı.')
-    } finally { setBusy('') }
+      setDrafts({ state: 'error', resultText: e?.message || 'Təmizləmə alınmadı.' })
+    }
   }
 
   const runReindex = async () => {
-    setBusy('media'); setResult('')
+    setMedia({ state: 'running' })
     try {
       const r = await reindexMedia()
-      setResult(r.message || `${r.indexed} media indeksləndi.`)
+      setMedia({ state: 'done', resultText: r.message || `${r.indexed} media indeksləndi.` })
       load()
     } catch (e) {
-      setResult(e?.message || 'İndeks qurulmadı.')
-    } finally { setBusy('') }
+      setMedia({ state: 'error', resultText: e?.message || 'İndeks qurulmadı.' })
+    }
   }
 
   const runRetentionStep = async (dry) => {
-    setBusy(dry ? 'ret-dry' : 'ret'); setResult('')
+    setRet(s => ({ ...s, state: 'running', errorText: undefined, resultText: dry ? undefined : s.resultText }))
     try {
       const r = await runRetention(dry)
-      if (dry) setPreview(r.result)
-      else { setPreview(null); setResult('Təmizləmə tamamlandı: ' + retentionLines(r.result).join('; ') + '.'); load() }
+      if (dry) setRet({ state: 'done', preview: r.result })
+      else { setRet({ state: 'idle', resultText: 'Təmizləmə tamamlandı — ' + retentionSummary(r.result) + '.' }); load() }
     } catch (e) {
-      setResult(e?.message || 'Təmizləmə alınmadı.')
-    } finally { setBusy('') }
+      setRet({ state: 'error', errorText: e?.message || 'Təmizləmə alınmadı.' })
+    }
   }
 
   const loadAudit = async () => {
+    setAudit({ state: 'running' })
     try {
       const r = await getAdminAudit(50)
-      setAudit(r.entries || [])
-    } catch { setAudit([]) }
+      setAudit({
+        state: 'done',
+        rows: (r.entries || []).map(e => ({
+          id: String(e.id),
+          date: formatDateTime(e.created_at),
+          action: e.action,
+          object: `${e.slug || '—'}${e.detail ? ` · ${e.detail}` : ''}`,
+          ip: e.ip || '—',
+        })),
+      })
+    } catch (e) {
+      setAudit({ state: 'error', errorText: e?.message || 'Jurnalı yükləmək alınmadı.' })
+    }
   }
 
-  if (loading) {
-    return <div style={{ padding: 40, color: C.sub, fontSize: 14 }}>Yüklənir…</div>
-  }
-  if (error) {
+  if (error && !data) {
     return (
-      <div style={{ padding: 30 }}>
-        <p style={{ color: C.danger, fontSize: 14, marginBottom: 12 }}>{error}</p>
-        <button type="button" style={btn()} onClick={load}><RefreshCw size={14} /> Yenidən cəhd et</button>
-      </div>
+      <Notice
+        tone="danger"
+        title={error}
+        action={<Button size="sm" onClick={load}>Yenidən cəhd et</Button>}
+      />
     )
   }
 
@@ -158,178 +122,51 @@ export default function AdminMaintenance() {
   const rt = data?.retention || {}
   const rp = rt.periods || {}
 
-  const backupTone = b.status === 'ok' ? C.ok : b.status === 'stale' ? C.warn : C.danger
-  const BackupIcon = b.status === 'ok' ? ShieldCheck : ShieldAlert
+  const backupLast = b.last_at
+    ? [formatDateTime(b.last_at), b.newest_file, b.size ? `${(b.size / 1048576).toFixed(0)} MB` : null, b.files ? `${b.files} fayl` : null]
+      .filter(Boolean).join(' · ')
+    : 'Məlum deyil'
 
   return (
-    <div style={{ padding: narrow ? '16px 14px 28px' : '4px 0 40px' }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 4 }}>
-        <h2 style={{ margin: 0, fontSize: 21, fontWeight: 700, color: C.ink }}>Baxım</h2>
-        <span style={{ fontSize: 12, color: C.sub }}>sxem v{data?.schema_version ?? '—'}</span>
-        <button type="button" style={{ ...btn(), marginLeft: 'auto' }} onClick={load}>
-          <RefreshCw size={14} /> Yenilə
-        </button>
-      </div>
-      <p style={{ margin: '0 0 20px', fontSize: 13, color: C.sub, maxWidth: '68ch' }}>
-        Sistemin sağlamlıq göstəriciləri və təhlükəsiz təmizləmə əməliyyatları.
-      </p>
-
-      {result && (
-        <div style={{
-          border: `1px solid ${C.line}`, background: C.head, borderRadius: 8,
-          padding: '11px 15px', marginBottom: 18, fontSize: 13.5, color: C.text,
-        }}>{result}</div>
-      )}
-
-      <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
-
-        {/* ── BACKUP ── */}
-        <div style={{ ...card, borderLeft: `4px solid ${backupTone}` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-            <BackupIcon size={17} color={backupTone} />
-            <h3 style={{ margin: 0, fontSize: 15.5, fontWeight: 700, color: C.ink }}>Backup vəziyyəti</h3>
-            <span style={{
-              marginLeft: 'auto', fontSize: 10, fontWeight: 700, letterSpacing: '.08em',
-              textTransform: 'uppercase', color: backupTone,
-              border: `1px solid ${backupTone}`, borderRadius: 4, padding: '2px 7px',
-            }}>
-              {b.status === 'ok' ? 'Var' : b.status === 'stale' ? 'Köhnəlmiş' : 'Məlum deyil'}
-            </span>
-          </div>
-          <Stat label="Son backup" value={b.last_at ? formatDateTime(b.last_at) : 'Məlum deyil'}
-                hint={b.newest_file
-                  ? `${b.newest_file}${b.size ? ` · ${(b.size / 1048576).toFixed(0)} MB` : ''} · ${b.files} fayl`
-                  : null} />
-          <p style={{ margin: 0, fontSize: 12.5, color: C.sub, lineHeight: 1.5 }}>{b.message}</p>
-          {/* Phase 46 — DirectAdmin backup-ı da tanınır (/home/<user>/backups, .tar.zst) */}
-          <p style={{ margin: 0, fontSize: 12, color: b.status === 'ok' ? C.sub : C.danger, lineHeight: 1.5 }}>
-            {b.status === 'ok'
-              ? 'Backup eyni serverdədir — disk nasazlığından qorumaq üçün DirectAdmin › Create/Restore Backups bölməsindən kompüterə də endirin.'
-              : 'Yeni backup: DirectAdmin › Create/Restore Backups › «Create Backup» (sayt + bazalar). Həftədə bir dəfə edin və kompüterə endirin.'}
-          </p>
-        </div>
-
-        {/* ── DRAFT TƏMİZLƏMƏ ── */}
-        <div style={card}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-            <Trash2 size={17} color={C.gold} />
-            <h3 style={{ margin: 0, fontSize: 15.5, fontWeight: 700, color: C.ink }}>Draft təmizləmə</h3>
-          </div>
-          <div style={{ display: 'flex', gap: 26 }}>
-            <Stat label="Vaxtı keçmiş" value={dr.expired ?? 0} />
-            <Stat label="Cəmi draft" value={dr.total ?? 0} />
-          </div>
-          <p style={{ margin: 0, fontSize: 12.5, color: C.sub, lineHeight: 1.5 }}>
-            Builder-i yarımçıq qoyan ziyarətçilərin qeydləri. Yalnız {rp.draft_days} gün
-            toxunulmamış <b>qaralamalar</b> və onların öz şəkil/musiqi faylları silinir —
-            sifarişlərə (göndərilmiş, təsdiqlənmiş, rədd edilmiş) toxunulmur.
-          </p>
-          <div>
-            <button type="button" style={btn(dr.expired > 0 ? 'danger' : 'gold')}
-                    onClick={runCleanup} disabled={busy === 'drafts' || !dr.expired}>
-              <Trash2 size={14} />
-              {busy === 'drafts' ? 'Silinir…' : dr.expired > 0 ? `${dr.expired} draft-ı sil` : 'Təmizlənəcək draft yoxdur'}
-            </button>
-          </div>
-        </div>
-
-        {/* ── MƏLUMAT SAXLAMA (Phase 47) ── */}
-        <div style={card}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-            <Eraser size={17} color={C.gold} />
-            <h3 style={{ margin: 0, fontSize: 15.5, fontWeight: 700, color: C.ink }}>Məlumat saxlama</h3>
-          </div>
-          <Stat label="Son avtomatik təmizləmə" value={rt.last?.at ? formatDateTime(rt.last.at) : 'Hələ işləməyib'} />
-          <p style={{ margin: 0, fontSize: 12.5, color: C.sub, lineHeight: 1.5 }}>
-            Gündə bir dəfə özü işləyir: audit IP-ləri {rp.audit_ip_days} gün, qalereya IP izləri {rp.gallery_ip_days} gün,
-            loglar {rp.media_log_days} gün, tərk edilmiş draft-lar {rp.draft_days} gün saxlanılır.
-            Məxfilik siyasətindəki müddətlərlə eynidir.
-          </p>
-          {preview && (
-            <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12.5, color: C.text, lineHeight: 1.6 }}>
-              {retentionLines(preview).map((l) => <li key={l}>{l}</li>)}
-            </ul>
-          )}
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button type="button" style={btn()} onClick={() => runRetentionStep(true)} disabled={!!busy}>
-              <Eraser size={14} /> {busy === 'ret-dry' ? 'Hesablanır…' : 'Önizlə (heç nə silinmir)'}
-            </button>
-            {preview && (
-              <button type="button" style={btn('danger')} onClick={() => runRetentionStep(false)} disabled={!!busy}>
-                <Trash2 size={14} /> {busy === 'ret' ? 'Təmizlənir…' : 'Təsdiqlə və indi işlət'}
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* ── MEDIA İNDEKSİ ── */}
-        <div style={card}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-            <Database size={17} color={C.gold} />
-            <h3 style={{ margin: 0, fontSize: 15.5, fontWeight: 700, color: C.ink }}>Media indeksi</h3>
-            <span style={{
-              marginLeft: 'auto', fontSize: 10, fontWeight: 700, letterSpacing: '.08em',
-              textTransform: 'uppercase', color: md.indexed ? C.ok : C.warn,
-              border: `1px solid ${md.indexed ? C.ok : C.warn}`, borderRadius: 4, padding: '2px 7px',
-            }}>{md.indexed ? 'Qurulub' : 'Qurulmayıb'}</span>
-          </div>
-          <div style={{ display: 'flex', gap: 26 }}>
-            <Stat label="İndekslənmiş" value={md.indexed_rows ?? 0} />
-            <Stat label="Albom" value={md.uploads?.albums ?? 0} />
-          </div>
-          <p style={{ margin: 0, fontSize: 12.5, color: C.sub, lineHeight: 1.5 }}>
-            {md.indexed
-              ? 'Dashboard foto sayğacı bazadan oxunur — fayl sistemi gəzilmir.'
-              : 'Sayğac hazırda BÜTÜN uploads ağacını gəzir. İndeksi bir dəfə qurun — panel sürətlənəcək, rəqəm dəyişməyəcək.'}
-          </p>
-          <div>
-            <button type="button" style={btn()} onClick={runReindex} disabled={busy === 'media'}>
-              <HardDrive size={14} />
-              {busy === 'media' ? 'İndekslənir…' : md.indexed ? 'İndeksi yenilə' : 'Media indeksini qur'}
-            </button>
-          </div>
-          {md.indexed_at && (
-            <span style={{ fontSize: 11.5, color: C.faint }}>Son indeks: {formatDateTime(md.indexed_at)}</span>
-          )}
-        </div>
-
-        {/* ── AUDİT JURNALI ── */}
-        <div style={card}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-            <ScrollText size={17} color={C.gold} />
-            <h3 style={{ margin: 0, fontSize: 15.5, fontWeight: 700, color: C.ink }}>Admin əməliyyatları</h3>
-          </div>
-          <p style={{ margin: 0, fontSize: 12.5, color: C.sub, lineHeight: 1.5 }}>
-            Dağıdıcı əməliyyatların izi: link aktiv/deaktiv, mesaj silmə,
-            sifariş təsdiqi və rəddi, foto silmə.
-          </p>
-          {audit === null ? (
-            <div>
-              <button type="button" style={btn()} onClick={loadAudit}>
-                <ScrollText size={14} /> Jurnalı göstər
-              </button>
-            </div>
-          ) : audit.length === 0 ? (
-            <p style={{ margin: 0, fontSize: 13, color: C.faint }}>Hələ qeyd yoxdur.</p>
-          ) : (
-            <div style={{ maxHeight: 260, overflowY: 'auto', border: `1px solid ${C.hair}`, borderRadius: 7 }}>
-              {audit.map((e) => (
-                <div key={e.id} style={{
-                  display: 'grid', gridTemplateColumns: '1fr auto', gap: '2px 12px',
-                  padding: '8px 11px', borderBottom: `1px solid ${C.hair}`, fontSize: 12.5,
-                }}>
-                  <span style={{ color: C.ink, fontWeight: 600 }}>{e.action}</span>
-                  <span style={{ color: C.faint, whiteSpace: 'nowrap' }}>{formatDateTime(e.created_at)}</span>
-                  <span style={{ color: C.sub, wordBreak: 'break-all' }}>
-                    {e.slug || '—'}{e.detail ? ` · ${e.detail}` : ''}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-      </div>
-    </div>
+    <>
+      {error && data && <Notice tone="danger" title={error} className="mb-4" />}
+      <MaintenancePage
+        schemaVersion={data?.schema_version != null ? `v${data.schema_version}` : undefined}
+        onRefresh={load}
+        refreshing={loading && !!data}
+        loading={loading && !data}
+        backup={{ status: b.status === 'ok' ? 'ok' : b.status === 'stale' ? 'stale' : 'unknown', last: backupLast }}
+        drafts={{ expired: dr.expired ?? 0, total: dr.total ?? 0, ...drafts }}
+        onCleanupDrafts={runCleanup}
+        retention={{
+          lastRun: rt.last?.at ? formatDateTime(rt.last.at) : 'Hələ işləməyib',
+          state: ret.state,
+          items: ret.preview ? retentionItems(ret.preview) : undefined,
+          errorText: ret.errorText,
+          resultText: ret.resultText,
+        }}
+        onRetentionPreview={() => runRetentionStep(true)}
+        onRetentionRun={() => runRetentionStep(false)}
+        media={{
+          indexed: md.indexed_rows ?? 0,
+          albums: md.uploads?.albums ?? 0,
+          built: !!md.indexed,
+          state: media.state,
+          resultText: media.resultText ?? (md.indexed_at ? `Son indeks: ${formatDateTime(md.indexed_at)}` : undefined),
+        }}
+        onReindex={runReindex}
+        audit={audit}
+        onShowAudit={loadAudit}
+        texts={{
+          ...(b.status !== 'ok' && b.message ? { backup: b.message } : {}),
+          ...(b.status === 'ok' ? { backupHelp: 'Backup eyni serverdədir — disk nasazlığından qorumaq üçün DirectAdmin › Create/Restore Backups bölməsindən kompüterə də endirin.' } : {}),
+          ...(rp.draft_days ? { drafts: `Builder-i yarımçıq qoyan ziyarətçilərin qeydləri. Yalnız ${rp.draft_days} gün toxunulmamış qaralamalar və onların öz şəkil/musiqi faylları silinir — sifarişlərə (göndərilmiş, təsdiqlənmiş, rədd edilmiş) toxunulmur.` } : {}),
+          ...(rp.audit_ip_days ? { retention: `Gündə bir dəfə özü işləyir: audit IP-ləri ${rp.audit_ip_days} gün, qalereya IP izləri ${rp.gallery_ip_days} gün, loglar ${rp.media_log_days} gün, tərk edilmiş draft-lar ${rp.draft_days} gün saxlanılır. Məxfilik siyasətindəki müddətlərlə eynidir.` } : {}),
+          media: md.indexed
+            ? 'Dashboard foto sayğacı bazadan oxunur — fayl sistemi gəzilmir.'
+            : 'Sayğac hazırda BÜTÜN uploads ağacını gəzir. İndeksi bir dəfə qurun — panel sürətlənəcək, rəqəm dəyişməyəcək.',
+        }}
+      />
+    </>
   )
 }

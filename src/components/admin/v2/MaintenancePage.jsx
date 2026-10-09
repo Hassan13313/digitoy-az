@@ -143,6 +143,7 @@ export function HealthCard({
  * @param {{lastRun:string,state?:'idle'|'running'|'done'|'error',items?:{label:string,count:number}[],errorText?:string}} p.retention
  *        items — önizləmə nəticəsi (heç nə silinmir)
  * @param {()=>void} p.onRetentionPreview
+ * @param {()=>void} [p.onRetentionRun]  Digitoy: önizləmədən sonra real təmizləmə (təsdiqlə)
  * @param {{indexed:number,albums:number,built:boolean,state?:'idle'|'running'|'done'|'error',progress?:number,resultText?:string}} p.media
  * @param {()=>void} p.onReindex
  * @param {{state?:'idle'|'running'|'done'|'error',rows?:{id:string,date:string,action:string,object:string,ip:string}[],errorText?:string}} [p.audit]
@@ -159,6 +160,7 @@ export default function MaintenancePage({
   onCleanupDrafts,
   retention = { lastRun: '—' },
   onRetentionPreview,
+  onRetentionRun,
   media = { indexed: 0, albums: 0, built: false },
   onReindex,
   audit = {},
@@ -166,6 +168,7 @@ export default function MaintenancePage({
   texts = {},
 }) {
   const [confirmDrafts, setConfirmDrafts] = useState(false);
+  const [confirmRetention, setConfirmRetention] = useState(false);
   const [auditOpen, setAuditOpen] = useState(false);
   const t = {
     backup: 'Backup tapılmadı. Avtomatik arxiv qurulmayıbsa, media və baza qorunmur.',
@@ -269,8 +272,16 @@ export default function MaintenancePage({
               <Button icon={Eye} loading={retention.state === 'running'} onClick={onRetentionPreview}>
                 Önizlə (heç nə silinmir)
               </Button>
+              {retention.state === 'done' && retention.items && onRetentionRun && (
+                <Button destructive icon={Trash2} onClick={() => setConfirmRetention(true)}>
+                  Təsdiqlə və indi işlət
+                </Button>
+              )}
               {retention.state === 'error' && (
                 <OpStatus state="error" text={retention.errorText ?? 'Önizləmə alınmadı'} />
+              )}
+              {retention.resultText && retention.state !== 'error' && (
+                <OpStatus state="done" text={retention.resultText} />
               )}
             </>
           }
@@ -409,6 +420,18 @@ export default function MaintenancePage({
         onConfirm={() => {
           setConfirmDrafts(false);
           onCleanupDrafts?.();
+        }}
+      />
+
+      <ConfirmDialog
+        open={confirmRetention}
+        title="Təmizləməni indi işlətmək?"
+        description="Önizləmədə göstərilənlər silinəcək (köhnə IP-lər, müvəqqəti fayllar, loglar, tərk edilmiş draftlar). Sifarişlərə və dəvətnamələrə toxunulmur."
+        confirmLabel="İndi işlət"
+        onCancel={() => setConfirmRetention(false)}
+        onConfirm={() => {
+          setConfirmRetention(false);
+          onRetentionRun?.();
         }}
       />
 
