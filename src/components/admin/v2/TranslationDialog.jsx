@@ -37,6 +37,8 @@ import {
  * @param {(lang:string)=>void} [p.onAutofill]  «Lüğətlə doldur»  @param {boolean} [p.autofilling]
  * @param {()=>void|Promise<void>} p.onSave  @param {'idle'|'saving'|'saved'|'error'} [p.saveState]  @param {string} [p.saveError]
  * @param {number} [p.dirty]  Saxlanmamış dəyişiklik sayı — bağlayanda xəbərdarlıq üçün
+ * @param {boolean} [p.canSave]  Digitoy: «Saxla» aktivdir (default: dirty > 0)
+ * @param {boolean} [p.loading]  @param {string} [p.loadError]  @param {string} [p.emptyText]
  */
 export default function TranslationDialog({
   open,
@@ -55,6 +57,10 @@ export default function TranslationDialog({
   saveState = 'idle',
   saveError = 'Saxlamaq alınmadı. Yenidən cəhd edin.',
   dirty = 0,
+  canSave,
+  loading = false,
+  loadError,
+  emptyText = 'Bu dəvətnamədə tərcümə ediləsi fərdi mətn yoxdur.',
 }) {
   const [langInner, setLangInner] = useState(langs[0]);
   const [filter, setFilter] = useState('all');
@@ -95,7 +101,7 @@ export default function TranslationDialog({
               variant="primary"
               loading={saveState === 'saving'}
               onClick={onSave}
-              disabled={dirty === 0 && saveState !== 'error'}
+              disabled={canSave != null ? !canSave : dirty === 0 && saveState !== 'error'}
             >
               {saveState === 'saving' ? 'Saxlanılır…' : 'Saxla'}
             </Button>
@@ -143,6 +149,12 @@ export default function TranslationDialog({
           </div>
         </div>
 
+        {loadError && <Notice tone="danger" className="mb-4">{loadError}</Notice>}
+        {loading && <p className="py-10 text-center text-[14px] text-[#6B5E54]" role="status">Yüklənir…</p>}
+        {!loading && !loadError && groups.length === 0 && (
+          <p className="py-10 text-center text-[14px] text-[#6B5E54]">{emptyText}</p>
+        )}
+        {!loading && groups.length > 0 && (<>
         <Notice tone="info" className="mb-4">
           «Avtomatik» nişanlı mətnlər daxili lüğətdən doldurulub — istədiyinizi dəyişə bilərsiniz,
           dəyişdiyiniz mətn bir daha avtomatik yenilənmir. Boş buraxılan sahə orijinal Azərbaycan mətnini
@@ -257,6 +269,7 @@ export default function TranslationDialog({
             </p>
           )}
         </div>
+        </>)}
         {(saveState === 'saved' || saveState === 'error') && (
           <OpStatus
             className="mt-4"

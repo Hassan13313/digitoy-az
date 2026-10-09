@@ -139,6 +139,9 @@ const EMBLEM_MODES = [
  * @param {'az'|'en'|'ru'} [p.lang]  @param {(l:string)=>void} [p.onLang]
  * @param {(file:File)=>void} [p.onUploadEmblem]  Açılış nişanı şəkli  @param {number|null} [p.emblemProgress]  0–100
  * @param {(chapterId:string, files:File[])=>void} [p.onUploadStoryImages]  @param {string|null} [p.storyUploadingId]
+ * @param {{opening?:import('react').ReactNode,story?:import('react').ReactNode}} [p.customTabs]  Digitoy: tab məzmununu əvəz edir
+ * @param {Partial<Record<string,number>>} [p.extraDirty]  Digitoy: customTabs-dakı saxlanmamış dəyişikliklər
+ * @param {(sectionId:string)=>void} [p.onFocusSection]  Digitoy: önbaxışı bölməyə sürüşdür
  */
 export default function ContentManager({
   open,
@@ -166,6 +169,9 @@ export default function ContentManager({
   emblemProgress = null,
   onUploadStoryImages,
   storyUploadingId = null,
+  customTabs = {},
+  extraDirty = {},
+  onFocusSection,
 }) {
   const [tabInner, setTabInner] = useState('texts');
   const [langInner, setLangInner] = useState('az');
@@ -197,14 +203,15 @@ export default function ContentManager({
     prevSave.current = saveState;
   }, [saveState]);
 
-  const dirty = diffCount(values, savedValues);
-  const tabDirty = (id) => diffCount(values?.[id], savedValues?.[id]);
+  const extraTotal = Object.values(extraDirty).reduce((n, v) => n + (v || 0), 0);
+  const dirty = diffCount(values, savedValues) + extraTotal;
+  const tabDirty = (id) => diffCount(values?.[id], savedValues?.[id]) + (extraDirty[id] || 0);
   const changed = (path) => !same(get(values, path), get(savedValues, path));
   const set = (path, v) => onChange?.(setIn(values, path, v), path);
   const requestClose = () => (dirty > 0 ? setConfirm('close') : onClose?.());
   const activeTab = CONTENT_TABS.find((t) => t.id === tab) ?? CONTENT_TABS[0];
 
-  const ctx = { values, defaults, schema, lang, set, changed };
+  const ctx = { values, defaults, schema, lang, set, changed, onFocusSection };
 
   return (
     <>
@@ -334,10 +341,12 @@ export default function ContentManager({
                 className="space-y-4 px-5 py-5 sm:px-6"
               >
                 {tab === 'texts' && <TextsTab {...ctx} />}
-                {tab === 'opening' && (
+                {tab === 'opening' && customTabs.opening}
+                {tab === 'opening' && !customTabs.opening && (
                   <OpeningTab {...ctx} onUploadEmblem={onUploadEmblem} emblemProgress={emblemProgress} />
                 )}
-                {tab === 'story' && (
+                {tab === 'story' && customTabs.story}
+                {tab === 'story' && !customTabs.story && (
                   <StoryTab
                     {...ctx}
                     onUploadStoryImages={onUploadStoryImages}
@@ -379,7 +388,7 @@ export default function ContentManager({
       <ConfirmDialog
         open={confirm === 'reset'}
         title="Hamısını sıfırlamaq?"
-        description="Bütün mətnlər, rənglər, şrift və bölmə ayarları şablonun öz dəyərlərinə qayıdacaq. «Saxla» basmayana qədər dəvətnamə dəyişmir."
+        description="Bütün mətnlər, açılış və hekayə düzəlişləri, rənglər və şriftlər şablonun öz dəyərlərinə qayıdacaq (bölmə görünürlüyü dəyişmir). «Saxla» basmayana qədər dəvətnamə dəyişmir."
         confirmLabel="Hamısını sıfırla"
         onCancel={() => setConfirm(null)}
         onConfirm={() => {
@@ -557,7 +566,7 @@ const placeholderFor = (defaults, group, lang, key) =>
   get(defaults, [group, lang, key]) || get(defaults, [group, 'az', key]) || '';
 
 // ── 1. Mətnlər ───────────────────────────────────────────────────
-function TextsTab({ values, defaults, schema, lang, set, changed }) {
+function TextsTab({ values, defaults, schema, lang, set, changed, onFocusSection }) {
   return (
     <>
       <Notice tone="info">
@@ -570,6 +579,7 @@ function TextsTab({ values, defaults, schema, lang, set, changed }) {
             key={sec.id}
             aria-labelledby={`ts-${sec.id}`}
             className="rounded-[12px] ring-1 ring-inset ring-[#E5DED2]"
+            onFocusCapture={() => onFocusSection?.(sec.id)}
           >
             <header className="flex items-start justify-between gap-3 rounded-t-[12px] bg-[#FAF8F4] px-4 py-3">
               <div>
@@ -967,6 +977,7 @@ function StoryTab({
 
 // ── 4. Rənglər ───────────────────────────────────────────────────
 function ColorsTab({ values, defaults, schema, set, changed }) {
+  if (schema.lockedNote) return <Notice tone="warning">{schema.lockedNote}</Notice>;
   return (
     <>
       <div className="flex items-center gap-3">
@@ -1057,6 +1068,7 @@ function FontChoice({ title, options, value, onChange, sample, sampleClass, chan
 function TypographyTab({ values, defaults, schema, set, changed }) {
   const t = values.typography ?? {};
   const sc = schema.scale ?? { min: 90, max: 115, step: 5 };
+  if (schema.lockedNote) return <Notice tone="warning">{schema.lockedNote}</Notice>;
   return (
     <div className="space-y-6">
       <FontChoice
@@ -1079,6 +1091,33 @@ function TypographyTab({ values, defaults, schema, set, changed }) {
         sample="Bu özəl günü bizimlə paylaşın"
         sampleClass="text-[15px]"
       />
+      {schema.scaleFields ? (
+        schema.scaleFields.map((f) => (
+          <div
+            key={f.key}
+            className={cx(
+              'rounded-[12px] p-4 ring-1 ring-inset ring-[#E5DED2]',
+              changed(['typography', f.key]) && 'bg-[#FDF8EC]',
+            )}
+          >
+            <RangeField
+              label={
+                <span className="inline-flex items-center gap-2">
+                  {f.label} {changed(['typography', f.key]) && <ChangedBadge />}
+                </span>
+              }
+              value={t[f.key] ?? 100}
+              min={sc.min}
+              max={sc.max}
+              step={sc.step}
+              format={(v) => `${v}%`}
+              ends={['Kiçik', 'Böyük']}
+              onChange={(v) => set(['typography', f.key], v)}
+              hint={f.hint}
+            />
+          </div>
+        ))
+      ) : (
       <div
         className={cx(
           'rounded-[12px] p-4 ring-1 ring-inset ring-[#E5DED2]',
@@ -1101,6 +1140,7 @@ function TypographyTab({ values, defaults, schema, set, changed }) {
           hint="Bütün dəvətnamədə mətnləri birlikdə böyüdür və ya kiçildir."
         />
       </div>
+      )}
     </div>
   );
 }
