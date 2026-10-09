@@ -18,7 +18,7 @@ $guestId     = (int)($body['guest_id'] ?? 0);
 /* ⚠ 2026-09-28: qonaq DƏVƏTNAMƏYƏ bağlanır. Qonaq id-ləri ardıcıl rəqəmdir;
    əvvəl istənilən id ilə İSTƏNİLƏN toyun cavab verməmiş qonağını
    «gəlməyəcək» işarələmək və mövcud cavabları (409) oxumaq olurdu. */
-$invId       = trim((string)($body['invitation_id'] ?? ''));
+$invId       = is_string($body['invitation_id'] ?? null) ? trim($body['invitation_id']) : '';
 $status      = strtoupper(trim($body['status'] ?? ''));
 $msg         = isset($body['optional_message']) ? trim($body['optional_message']) : null;
 $extraGuests = min(10, max(0, (int)($body['extra_guests'] ?? 0)));

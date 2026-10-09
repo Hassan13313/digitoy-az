@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
-import { motion, useScroll, useSpring } from 'framer-motion'
+import { motion, useScroll } from 'framer-motion'
 
 export default function ScrollProgress() {
   const { scrollYProgress } = useScroll()
-  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 })
   const [pct, setPct] = useState(0)
   /* UI redesign (2026-10): `data-avoid-scroll-progress` elementi (məs. builder-in
      mobildə yapışan «Növbəti» paneli) dairənin yerinə düşəndə dairə gizlənir —
@@ -41,7 +40,9 @@ export default function ScrollProgress() {
         alignItems: 'center',
         justifyContent: 'center',
         pointerEvents: 'none',
-        opacity: covered ? 0 : 1,
+        /* Səhifənin lap başında (0%) gizli: orada heç nə göstərmir, telefonda isə
+           hero-nun alt sətrinin («Готово за ~5 минут») üstünə düşürdü (Phase 49.8). */
+        opacity: covered || pct < 1 ? 0 : 1,
         transition: 'opacity 200ms ease',
       }}
     >

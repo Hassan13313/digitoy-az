@@ -7,6 +7,20 @@
 
 header('Content-Type: application/json; charset=utf-8');
 
+/* ── Tutulmamış istisnalar → təmiz JSON (Phase 49.8) ──
+   `?slug[]=x` və ya JSON-da `{"slug":["x"]}` kimi massiv string gözləyən
+   trim()/substr()-ə düşəndə TypeError atılır; əvvəl bu boş gövdəli 500 idi.
+   İndi belə giriş xətası → 400 {"error":"Invalid input"}, qalan hər şey →
+   500 {"error":"Server error"}. Detal (sinif, mesaj, fayl:sətir) yalnız
+   server loguna yazılır — cavaba heç vaxt düşmür. */
+set_exception_handler(function (Throwable $e): void {
+    $badInput = $e instanceof TypeError && str_contains($e->getMessage(), ', array given');
+    error_log(($badInput ? 'Invalid input: ' : 'Uncaught: ') . get_class($e) . ': '
+        . $e->getMessage() . ' @ ' . basename($e->getFile()) . ':' . $e->getLine());
+    if (!headers_sent()) http_response_code($badInput ? 400 : 500);
+    echo json_encode(['error' => $badInput ? 'Invalid input' : 'Server error']);
+});
+
 /* ── Phase 4: Dizayn şablonu ──
    Frontend-dəki `templates/templateConfig.js → DEFAULT_TEMPLATE_ID` ilə
    EYNİ olmalıdır. Bütün köhnə/naməlum dəyərlər buna düşür. */

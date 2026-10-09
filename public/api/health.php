@@ -1,6 +1,10 @@
 <?php
-/* ── /api/health.php — Sistem vəziyyəti ── */
+/* ── /api/health.php — Sistem vəziyyəti ──
+   Açıq cavab yalnız status + db + vaxt verir (uptime yoxlaması üçün kifayətdir).
+   PHP versiyası, mühit və cədvəl adları yalnız admin tokeni ilə göstərilir
+   (Phase 49.8 — açıq cavabda server detalı sızdırılmır). */
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/auth.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
@@ -54,6 +58,10 @@ $httpCode = match($result['status']) {
     'degraded' => 200,
     default    => 503,
 };
+
+if (!isAdminRequest()) {
+    $result = array_intersect_key($result, array_flip(['status', 'db', 'timestamp']));
+}
 
 http_response_code($httpCode);
 echo json_encode($result, JSON_PRETTY_PRINT);

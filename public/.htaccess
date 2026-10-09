@@ -36,8 +36,17 @@ RewriteRule ^ - [L]
 # qaytarir — sayt hec vaxt bu sebebden sinmir.
 RewriteRule ^ seo.php [L]
 
+# -- Staging (test.digitoy.az) axtarış sistemlərinə düşməsin (Phase 49.8) --
+# Eyni ZIP hər iki serverə gedir, ona görə qayda host-a görə şərtlidir və
+# digitoy.az-a təsir etmir. `<If>` əvəzinə SetEnvIf + `env=` işlədilir:
+# bu hostinqdə sınanmamış direktiv formaları HTTP 500 verə bilər.
+<IfModule mod_setenvif.c>
+  SetEnvIfNoCase Host ^test\.digitoy\.az(:[0-9]+)?$ DIGITOY_STAGING=1
+</IfModule>
+
 # -- Security Headers --
 <IfModule mod_headers.c>
+  Header always set X-Robots-Tag "noindex, nofollow" env=DIGITOY_STAGING
   Header always set X-Content-Type-Options "nosniff"
   Header always set X-Frame-Options "SAMEORIGIN"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
