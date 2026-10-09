@@ -17,7 +17,10 @@ const ID_MAP = { invites: 'invitations', qr: 'qrstand', letters: 'guestbook' }
 const SECTIONS = ADMIN_SECTIONS.map((s) => ({ ...s, id: ID_MAP[s.id] || s.id }))
 const MOBILE_TABS = ['dashboard', 'orders', 'invitations', 'photos']
 
-export default function AdminLayout({ children, section, onNavigate }) {
+export default function AdminLayout({ children, section: sectionProp, onNavigate }) {
+  /* AdminApp detal səhifəsini «order» kimi ötürür ('order-detail' → '-detail' silinir) —
+     menyuda «Sifarişlər» aktiv görünsün */
+  const section = sectionProp === 'order' ? 'orders' : sectionProp
   const current = SECTIONS.find((s) => s.id === section)
   return (
     <div className="dt-page">
