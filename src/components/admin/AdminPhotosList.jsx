@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import GalleriesList from './v2/GalleriesList'
 import { Notice } from './v2/adminUi'
 import { azDate } from './adminFormat'
+import { getAdminToken } from '../../utils/api'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Fotolar (qonaq qalereyaları) — UI redesign 2026-10 (görünüş v2/GalleriesList)
@@ -13,15 +14,6 @@ import { azDate } from './adminFormat'
    ───────────────────────────────────────────────────────────────────────── */
 
 const BASE = import.meta.env.VITE_API_URL || '/api'
-
-function getAdminToken() {
-  try {
-    const t = sessionStorage.getItem('adminToken')
-    const e = parseInt(sessionStorage.getItem('adminTokenExp') || '0', 10)
-    if (t && e && Date.now() < e * 1000) return t
-  } catch { /* sessionStorage əlçatmaz */ }
-  return null
-}
 
 async function fetchGalleryLink(slug) {
   const token = getAdminToken()

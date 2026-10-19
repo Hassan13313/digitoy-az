@@ -4,7 +4,7 @@ import AdminContentManager from './AdminContentManager'
 import PurgeInvitationDialog from './PurgeInvitationDialog'
 import InvitationsList from './v2/InvitationsList'
 import { Notice, Toast } from './v2/adminUi'
-import { setInvitationActive } from '../../utils/api'
+import { setInvitationActive, getAdminToken } from '../../utils/api'
 import { azDate } from './adminFormat'
 import { templateMeta } from './templateMeta'
 
@@ -18,15 +18,6 @@ import { templateMeta } from './templateMeta'
    ───────────────────────────────────────────────────────────────────────── */
 
 const BASE = import.meta.env.VITE_API_URL || '/api'
-
-function getAdminToken() {
-  try {
-    const t = sessionStorage.getItem('adminToken')
-    const e = parseInt(sessionStorage.getItem('adminTokenExp') || '0', 10)
-    if (t && e && Date.now() < e * 1000) return t
-  } catch { /* sessionStorage əlçatmaz */ }
-  return null
-}
 
 async function getInvitationsList(search = '', limit = 50, offset = 0) {
   const p = new URLSearchParams({ limit, offset })

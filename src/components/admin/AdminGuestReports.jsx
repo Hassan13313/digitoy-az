@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { getGuests, exportGuestsCsv } from '../../utils/api'
-import { azDate } from './adminFormat'
+import { azDate, esc } from './adminFormat'
 import GuestReportTab from './v2/GuestReportTab'
 import { Notice } from './v2/adminUi'
 
@@ -16,8 +16,6 @@ import { Notice } from './v2/adminUi'
 const VIEW_STATUS = { GOING: 'yes', NOT_GOING: 'no', MAYBE: 'maybe', NO_RESPONSE: 'none' }
 const STATUS_TITLE = { GOING: 'Gələcək', MAYBE: 'Bəlkə', NOT_GOING: 'Gəlməyəcək', NO_RESPONSE: 'Cavabsız' }
 const STATUS_ORDER = ['GOING', 'MAYBE', 'NOT_GOING', 'NO_RESPONSE']
-
-const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
 
 /* ── Print: yeni pəncərədə A4 HTML açır ── */
 function buildPrintHtml({ guests, stats, names, dateStr }) {

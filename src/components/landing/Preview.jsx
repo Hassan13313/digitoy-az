@@ -1,11 +1,11 @@
-import { useState, useCallback } from 'react'
+import { useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { Eye, EyeOff, MessageCircle, Edit2, Calendar, MapPin, Shirt, Users, Image, ListOrdered, ShieldCheck, Copy, Check, Crown, Martini, Palette, Music } from 'lucide-react'
+import { Eye, EyeOff, MessageCircle, Edit2, Calendar, MapPin, Shirt, Users, Image, ListOrdered, Crown, Martini, Palette, Music } from 'lucide-react'
 import { DRESS_CODE_PALETTES } from '../../data/constants'
 import { resolveDressGenders } from '../../data/dressCode'
 import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
-import { buildWhatsAppUrl, buildShortLiveLink } from '../../utils/whatsappOrder'
-import { saveInvitation, submitDraft } from '../../utils/api'
+import { buildWhatsAppUrl } from '../../utils/whatsappOrder'
+import { submitDraft } from '../../utils/api'
 import { trackEvent } from '../../utils/analytics'
 import OrderLegalNote from '../legal/OrderLegalNote'
 import t from '../../data/translations'
@@ -42,75 +42,10 @@ function fmtSec(sec) {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
 }
 
-/* ── Admin paneli: linki kopyala düyməsi ── */
-function CopyBtn({ text }) {
-  const [copied, setCopied] = useState(false)
-  const handleCopy = () => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2500)
-    })
-  }
-  return (
-    <button
-      type="button"
-      onClick={handleCopy}
-      className="flex items-center gap-1.5 text-xs text-emerald-700 hover:text-emerald-900 transition-colors"
-    >
-      {copied ? <Check size={12} /> : <Copy size={12} />}
-      {copied ? 'Kopyalandı!' : 'Kopyala'}
-    </button>
-  )
-}
-
-export default function Preview({ lang, data, onEdit, onView, isAdmin = false }) {
+export default function Preview({ lang, data, onEdit, onView }) {
   const tr = t[lang]
   const palette = DRESS_CODE_PALETTES.find(p => p.id === data.dressCodePalette)
   const isCouple = ['toy', 'nishan'].includes(data.eventType)
-
-  const [liveLink,      setLiveLink]      = useState('')
-  const [linkCopied,    setLinkCopied]    = useState(false)
-  const [linkGenerated, setLinkGenerated] = useState(false)
-  const [saving,        setSaving]        = useState(false)
-  const [saveError,     setSaveError]     = useState(false)
-
-  /* slug — useCallback-dan əvvəl declare edilməlidir (TDZ) */
-  function toSlug(str = '') {
-    return str.toLowerCase()
-      .replace(/ç/g,'c').replace(/ğ/g,'g').replace(/[ışı]/g,'i')
-      .replace(/ö/g,'o').replace(/ş/g,'s').replace(/ü/g,'u')
-      .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'davetname'
-  }
-  const isCouple2 = ['toy', 'nishan'].includes(data.eventType)
-  const isCorp2   = ['corporate', 'other'].includes(data.eventType)
-  const slug = isCouple2
-    ? `${toSlug(data.brideName || '')}-ve-${toSlug(data.groomName || '')}`
-    : isCorp2 ? toSlug(data.eventName || 'tedbir')
-    : toSlug(data.brideName || 'davetname')
-
-  const handleApprove = useCallback(async () => {
-    if (saving) return
-    setSaving(true)
-    setSaveError(false)
-    try {
-      await saveInvitation(slug, data)
-      const link = buildShortLiveLink(slug)
-      setLiveLink(link)
-      setLinkGenerated(true)
-      navigator.clipboard.writeText(link).catch(() => {})
-    } catch {
-      setSaveError(true)
-    } finally {
-      setSaving(false)
-    }
-  }, [slug, data, saving])
-
-  const handleCopyLink = useCallback(() => {
-    navigator.clipboard.writeText(liveLink).then(() => {
-      setLinkCopied(true)
-      setTimeout(() => setLinkCopied(false), 2500)
-    })
-  }, [liveLink])
 
   const eventLabels = {
     toy: tr.event_toy, nishan: tr.event_nishan,
@@ -122,7 +57,7 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
   const timeStr    = formatTime24(data.time)
   const dateDisplay = dayName ? `${formattedDate} — ${dayName}` : formattedDate
 
-  const waUrl = buildWhatsAppUrl(data, lang, ADMIN_WA, slug, '')
+  const waUrl = buildWhatsAppUrl(data, lang, ADMIN_WA)
 
   const handleWaClick = useCallback(() => {
     const sid = localStorage.getItem('digitoy_session_id') || ''
@@ -345,70 +280,6 @@ export default function Preview({ lang, data, onEdit, onView, isAdmin = false })
           <span className="absolute bottom-0 left-0 w-0 group-hover:w-full h-px bg-gold transition-all duration-300" />
         </span>
       </button>
-
-      {/* ── Admin Paneli — approve BuilderForm-dan edilir; burada gizlədilir ── */}
-      {isAdmin && false && (
-        <div
-          className="mt-8 rounded-2xl overflow-hidden"
-          style={{
-            background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
-            border: '1px solid rgba(16,185,129,0.22)',
-            boxShadow: '0 8px 24px rgba(16,185,129,0.08)',
-          }}
-        >
-          <div style={{ height: 1, background: 'linear-gradient(to right,transparent,rgba(16,185,129,0.6) 40%,rgba(16,185,129,0.8) 50%,rgba(16,185,129,0.6) 60%,transparent)' }} />
-          <div className="px-8 py-7 text-center">
-            <div className="flex items-center justify-center gap-2.5 mb-2">
-              <ShieldCheck size={15} className="text-emerald-700" strokeWidth={1.5} />
-              <p className="text-[10px] tracking-[0.28em] uppercase text-emerald-700 font-semibold">⚡ Admin Paneli</p>
-            </div>
-            <p className="text-sm text-emerald-800/70 font-light leading-relaxed mb-6 max-w-sm mx-auto">
-              Müştərinin məlumatlarını yuxarıda redaktə edin. Hər şey hazır olduqda müştəriyə göndəriləcək yekun linki yaradın.
-            </p>
-
-            {!linkGenerated ? (
-              <div className="space-y-2">
-                <motion.button
-                  type="button"
-                  onClick={handleApprove}
-                  disabled={saving}
-                  className="inline-flex items-center gap-2.5 px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed text-white text-[11px] tracking-[0.2em] uppercase font-semibold transition-colors duration-200 shadow-md rounded-xl"
-                  whileHover={saving ? {} : { scale: 1.02 }}
-                  whileTap={saving ? {} : { scale: 0.97 }}
-                >
-                  <Check size={13} strokeWidth={2.5} />
-                  {saving ? 'Saxlanılır...' : 'Sifarişi Təsdiqlə'}
-                </motion.button>
-                {saveError && (
-                  <p className="text-[10px] text-red-500 font-medium">
-                    Xəta baş verdi. Yenidən cəhd edin.
-                  </p>
-                )}
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <p className="text-[10px] tracking-[0.2em] uppercase text-emerald-700 font-semibold">
-                  ✓ Saxlandı — müştəriyə göndər
-                </p>
-                <div className="bg-cream border border-beige-dark/70 rounded-xl px-4 py-3 text-left">
-                  <p className="text-xs text-espresso font-mono break-all leading-relaxed">{liveLink}</p>
-                </div>
-                <motion.button
-                  type="button"
-                  onClick={handleCopyLink}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 border border-emerald-600 text-emerald-700 text-[10px] tracking-[0.18em] uppercase font-semibold hover:bg-emerald-600 hover:text-white transition-colors duration-200 rounded-xl"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  {linkCopied ? <Check size={12} strokeWidth={2.5} /> : <Copy size={12} strokeWidth={1.5} />}
-                  {linkCopied ? 'Kopyalandı!' : 'Linki Kopyala'}
-                </motion.button>
-              </div>
-            )}
-          </div>
-          <div style={{ height: 1, background: 'linear-gradient(to right,transparent,rgba(16,185,129,0.6) 40%,rgba(16,185,129,0.8) 50%,rgba(16,185,129,0.6) 60%,transparent)' }} />
-        </div>
-      )}
     </div>
   )
 }

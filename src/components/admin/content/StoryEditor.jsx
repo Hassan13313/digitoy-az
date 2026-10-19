@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { ChevronDown, ChevronRight, Plus, RotateCcw, Trash2 } from 'lucide-react'
 import { resolveWeddingContent } from '../../../data/contentI18n'
-import { STORY_TEXT_KEYS, STORY_MAX_CHAPTERS, STORY_MAX_PHOTOS } from '../../../data/adminOverrides'
+import { STORY_TEXT_KEYS, STORY_MAX_CHAPTERS, STORY_MAX_PHOTOS, photosOf } from '../../../data/adminOverrides'
 import { getStoryCopy, getStoryTheme } from '../../../templates/_shared/loveStoryTheme'
 import { Card, FieldRow, Toggle, StickerPicker, ImageUpload, Thumb } from './ui'
 import { C, inputStyle, labelStyle } from './style'
@@ -33,11 +33,6 @@ const TEXT_LABELS = {
   photo:  '«Foto» sözü (şəkil altı)',
 }
 
-function photosOf(row) {
-  if (!row || typeof row !== 'object') return []
-  if (Array.isArray(row.photos)) return row.photos.filter((s) => typeof s === 'string' && s)
-  return row.photo ? [row.photo] : []
-}
 
 /** Boş dəyərləri at — JSON təmiz qalsın, «boş = dəyişiklik yoxdur» */
 function prune(obj) {

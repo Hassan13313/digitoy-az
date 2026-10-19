@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { getRsvpResponses } from '../../utils/api'
-import { azDate } from './adminFormat'
+import { azDate, esc } from './adminFormat'
 import RsvpTab from './v2/RsvpTab'
 import { Notice } from './v2/adminUi'
 
@@ -40,9 +40,6 @@ function exportCSV(responses, slug) {
   a.click()
   URL.revokeObjectURL(url)
 }
-
-/* Qonaq adı İCTİMAİ formadan gəlir — çap pəncərəsinə HTML kimi yazılmamalıdır */
-const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
 
 /* ── Print Window ── */
 function handlePrint(data, names, slug) {

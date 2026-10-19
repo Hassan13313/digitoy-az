@@ -3,7 +3,7 @@ import { getDashboardStats, getGalleryAnalytics } from '../../utils/api'
 import DashboardView from './v2/AdminDashboard'
 import { Notice } from './v2/adminUi'
 import { azWeekdayShort } from './adminFormat'
-import { shortDay } from '../ui/GalleryCharts'
+import { shortDay } from '../../utils/dateFormat'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Admin Dashboard — sifariş statistikası + qalereya analitikası

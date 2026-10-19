@@ -34,6 +34,9 @@ DIGITOY_AUDIT.md
 # Alet kesleri — her defe yeniden yaranir, commit edilmir
 .claude-flow/
 
+# AI agent təlimatları (skills) — lokal alətlər üçündür, tətbiq kodu deyil
+.agents/
+
 # ── Cihaz matrisi E2E fixture-ları (Phase 42.1) ────────────────────────────
 # ⚠ QƏSDƏN REPO-DA DEYİL: `vid_100mb.mp4` ~97 MB-dır, git tarixini şişirdər.
 # Yenidən yaratmaq üçün: tests/fixtures/README.md (ffmpeg + PHP GD əmrləri).

@@ -342,7 +342,6 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
                 data={formData}
                 onEdit={handleEditFromPreview}
                 onView={onViewInvitation}
-                isAdmin={isAdmin}
               />
             </motion.div>
           ) : !selectedPackage ? (

@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react'
+import { computeInviteSlug } from '../utils/inviteSlug'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    useGallery — foto qalereya / QR paylaşım məntiqi (UI-sız).
@@ -8,27 +9,14 @@ import { useCallback, useMemo } from 'react'
    SVG məzmunu hərf-hərf eynidir — endirilən fayl dəyişmir.
    ───────────────────────────────────────────────────────────────────────── */
 
-/* Ad → URL slug (BuilderForm.toSlug ilə eyni) */
-export function toSlug(str = '') {
-  return str.toLowerCase()
-    .replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/[ışı]/g, 'i')
-    .replace(/ö/g, 'o').replace(/ş/g, 's').replace(/ü/g, 'u')
-    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'davetname'
-}
-
-export function useGallery({ weddingData, isCouple, isCorp }) {
+export function useGallery({ weddingData, isCouple }) {
   /* URL-dəki slug prioritetlidir; yoxdursa adlardan hesablanır (preview rejimi) */
   const pageSlug = (window.location.pathname.match(/\/invite\/([^/?#]+)/) || [])[1] || ''
 
-  const effectiveSlug = useMemo(() => (
-    pageSlug || (
-      isCouple
-        ? `${toSlug(weddingData?.brideName || '')}-ve-${toSlug(weddingData?.groomName || '')}`
-        : isCorp
-          ? toSlug(weddingData?.eventName || 'tedbir')
-          : toSlug(weddingData?.brideName || 'davetname')
-    )
-  ), [pageSlug, weddingData, isCouple, isCorp])
+  const effectiveSlug = useMemo(
+    () => pageSlug || computeInviteSlug(weddingData || {}),
+    [pageSlug, weddingData],
+  )
 
   const photoShareUrl = `${window.location.origin}/invite/${effectiveSlug}/foto`
 

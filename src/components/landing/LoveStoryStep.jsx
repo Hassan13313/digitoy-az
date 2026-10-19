@@ -4,6 +4,7 @@ import { GripVertical, Trash2, ImagePlus, X, Loader2 } from 'lucide-react'
 import { resizeToBlob, resizeErrorText } from '../../utils/imageResize'
 import { uploadStoryPhoto, storyPhotoSrc } from '../../utils/api'
 import t from '../../data/translations'
+import { photosOf } from '../../data/adminOverrides'
 import { AddButton } from '../builder/fields'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -66,11 +67,6 @@ const UI = {
   },
 }
 
-/** Blokun şəkilləri — yeni `photos[]` və Phase 43-ün tək `photo` sahəsi */
-function photosOf(row) {
-  if (Array.isArray(row?.photos)) return row.photos.filter(s => typeof s === 'string' && s)
-  return row?.photo ? [row.photo] : []
-}
 
 /** Şəkil siyahısını yaz, köhnə sahələri at */
 function withPhotos(row, photos) {

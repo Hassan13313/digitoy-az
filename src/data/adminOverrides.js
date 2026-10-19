@@ -474,9 +474,11 @@ export function normalizeOverrides(raw) {
      → admin-in AZ mətni
      → müştərinin mətni
    ⚠ Override YOXDURSA eyni referans qayıdır → React remount etmir. */
-function photosOf(row) {
+/** Blokun şəkilləri — yeni `photos[]` və Phase 43-ün tək `photo` sahəsi.
+ *  Admin redaktoru şəkil indekslərini bu süzülmüş siyahı üzərində saxlayır. */
+export function photosOf(row) {
   if (!row || typeof row !== 'object') return []
-  if (Array.isArray(row.photos)) return row.photos
+  if (Array.isArray(row.photos)) return row.photos.filter((s) => typeof s === 'string' && s)
   return row.photo ? [row.photo] : []
 }
 

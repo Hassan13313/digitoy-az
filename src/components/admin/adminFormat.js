@@ -45,3 +45,6 @@ export function azWeekdayShort(v) {
 export function pagePadding(narrow) {
   return narrow ? '16px 14px 24px' : '32px 36px'
 }
+
+/* Qonaq adı İCTİMAİ formadan gəlir — çap pəncərəsinə HTML kimi yazılmamalıdır */
+export const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))

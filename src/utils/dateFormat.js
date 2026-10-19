@@ -105,3 +105,9 @@ export function formatTime24(timeString) {
   if (period === 'PM' && hours !== 12) hours += 12
   return `${String(hours).padStart(2, '0')}:${minutes}`
 }
+
+/** `2026-09-25` → `25.09` (qrafik altındaki qısa etiket) */
+export function shortDay(iso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''))
+  return m ? `${m[3]}.${m[2]}` : String(iso || '')
+}

@@ -64,8 +64,6 @@ const SCALE_MIN = 0.85;
 const SCALE_MAX = 1.25;
 const MAX_TEXT  = 160;
 
-function invSlugOk(string $s): bool { return (bool)isValidSlug($s); }
-
 /** Nəzarət simvollarını at, boşluqları yığ, kəs. Boş qalsa null. */
 function cleanText($v, int $max = MAX_TEXT): ?string {
     if (!is_string($v)) return null;
@@ -92,7 +90,7 @@ function cleanScale($v): ?float {
 /* ─────────────────────────── OXU ─────────────────────────── */
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $slug = trim($_GET['slug'] ?? '');
-    if (!invSlugOk($slug)) {
+    if (!isValidSlug($slug)) {
         http_response_code(400);
         echo json_encode(['error' => 'Valid slug required']);
         exit;
@@ -144,7 +142,7 @@ if (!is_array($body)) {
 }
 
 $slug = trim((string)($body['slug'] ?? ''));
-if (!invSlugOk($slug)) {
+if (!isValidSlug($slug)) {
     http_response_code(400);
     echo json_encode(['error' => 'Valid slug required']);
     exit;

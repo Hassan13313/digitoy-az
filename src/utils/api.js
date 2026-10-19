@@ -9,7 +9,7 @@ import { buildAutoI18n } from '../data/contentI18n'
 const BASE = import.meta.env.VITE_API_URL || '/api'
 
 /* ── Admin HMAC tokeni sessionStorage-dan oxu ── */
-function getAdminToken() {
+export function getAdminToken() {
   try {
     const token = sessionStorage.getItem('adminToken')
     const exp   = parseInt(sessionStorage.getItem('adminTokenExp') || '0', 10)

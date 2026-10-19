@@ -30,16 +30,10 @@ requireAdmin();
 $LANGS = ['en', 'ru'];               /* AZ mənbə dildir — tərcümə saxlanmır */
 $MAX_FIELD_LEN = 2000;               /* bir sahənin maksimum uzunluğu       */
 
-/* ⚠ BÖYÜK HƏRF: köhnə (Phase 33-dən əvvəlki) sluglarda böyük hərf var —
-   `get_invitation.php` ilə eyni geniş şablon işlədilir. */
-function invSlugOk(string $s): bool {
-    return (bool)isValidSlug($s);
-}
-
 /* ─────────────────────────── OXU ─────────────────────────── */
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $slug = trim($_GET['slug'] ?? '');
-    if (!invSlugOk($slug)) {
+    if (!isValidSlug($slug)) {
         http_response_code(400);
         echo json_encode(['error' => 'Valid slug required']);
         exit;
@@ -81,7 +75,7 @@ $slug = trim($body['slug'] ?? '');
 $in   = $body['i18n'] ?? null;
 $inMeta = $body['i18nMeta'] ?? null;
 
-if (!invSlugOk($slug)) {
+if (!isValidSlug($slug)) {
     http_response_code(400);
     echo json_encode(['error' => 'Valid slug required']);
     exit;

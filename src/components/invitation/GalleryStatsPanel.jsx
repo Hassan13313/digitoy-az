@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import StatsSheet from '../guest-photos/stats'
 import { getGalleryAnalytics } from '../../utils/api'
-import { shortDay } from '../ui/GalleryCharts'
+import { shortDay } from '../../utils/dateFormat'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    GalleryStatsPanel — cütlüyün öz qalereya statistikası (Phase 43;
