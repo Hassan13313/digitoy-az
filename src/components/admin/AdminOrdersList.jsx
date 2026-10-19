@@ -5,6 +5,7 @@ import OrdersList from './v2/OrdersList'
 import { Notice } from './v2/adminUi'
 import { azDate } from './adminFormat'
 import { templateMeta } from './templateMeta'
+import { customerWaUrl, formatPhoneDisplay } from '../../utils/customerPhone'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Sifarişlər siyahısı — UI redesign 2026-10 (görünüş v2/OrdersList)
@@ -15,9 +16,13 @@ import { templateMeta } from './templateMeta'
    saxlayır və onlar siyahıda qalır.
    ───────────────────────────────────────────────────────────────────────── */
 
-/* Görünüşün tab id-ləri ↔ API statusları */
-const TAB_TO_STATUS = { new: 'submitted', approved: 'approved', rejected: 'rejected', all: 'all', deleted: 'deleted' }
+/* Görünüşün tab id-ləri ↔ API statusları.
+   Phase 50 — «Yarımçıq» (abandoned): builderdə nömrə yazıb sifarişi göndərməyənlər. */
+const TAB_TO_STATUS = { new: 'submitted', approved: 'approved', rejected: 'rejected', all: 'all', abandoned: 'abandoned', deleted: 'deleted' }
 const VIEW_STATUS = { submitted: 'new' }
+
+/* Yarımçıq qalan müştəriyə hazır ilk mesaj (WhatsApp-da redaktə etmək olur) */
+const ABANDONED_WA_TEXT = encodeURIComponent('Salam! DigiToy-da dəvətnamə hazırlamağa başlamışdınız — tamamlamaqda kömək edək?')
 
 /* ⚠ `toLocaleDateString('az-AZ')` Chrome-da «M06 29» verirdi — bax adminFormat */
 const formatDate = (iso) => azDate(iso, { time: true, year: false })
@@ -87,10 +92,12 @@ export default function AdminOrdersList({ onSelectOrder }) {
     }
   })
 
+  const abandoned = statusTab === 'abandoned'
   const rows = useMemo(() => orders.map((o, i) => ({
-    id: o.draft_code || `row-${i}`,
+    id: o.draft_code || (o.id ? `d-${o.id}` : `row-${i}`),
     code: o.draft_code || '—',
-    date: formatDate(o.submitted_at),
+    /* qaralamanın submitted_at-ı yoxdur — son fəaliyyət */
+    date: formatDate(o.submitted_at || o.updated_at),
     names: o.names || '—',
     pkg: o.package_label,
     template: templateMeta(o.template_id),
@@ -98,7 +105,11 @@ export default function AdminOrdersList({ onSelectOrder }) {
     /* Phase 48 — təsdiqlənmiş, amma dəvətnaməsi silinmiş/yaradılmamış sifariş.
        `null` = server yoxladı və tapmadı (köhnə API-də sahə yoxdur → göstərilmir). */
     note: o.status === 'approved' && o.invitation_slug === null ? 'Dəvətnamə yoxdur' : '',
-  })), [orders])
+    /* Phase 50 — builderdə yazılan nömrə */
+    phone: formatPhoneDisplay(o.customer_phone),
+    waHref: customerWaUrl(o.customer_phone, abandoned ? ABANDONED_WA_TEXT : ''),
+    step: o.current_step ? `Addım ${o.current_step}` : '—',
+  })), [orders, abandoned])
 
   const templates = useMemo(() => [
     { value: '', label: 'Bütün şablonlar' },

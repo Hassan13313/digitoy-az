@@ -1,6 +1,7 @@
 <?php
 /* ── submit_draft.php — draft-ı submitted vəziyyətinə keçir ── */
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/phone_lib.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -24,7 +25,9 @@ if (!rateGate('draft_submit|' . clientIp(), 10, 3600)) {
 
 $body          = json_decode((string) $raw, true);
 $sessionId     = trim($body['session_id']     ?? '');
-$customerPhone = trim($body['customer_phone'] ?? '');
+/* Phase 50 — normallaşdırılmış nömrə və ya null. null olanda autosave-in
+   yazdığı nömrə SAXLANILIR (COALESCE) — əvvəl NULL ilə üzərindən yazılırdı. */
+$customerPhone = normalizeCustomerPhone($body['customer_phone'] ?? null);
 $formData      = $body['form_data']            ?? null;
 $package       = trim($body['package']        ?? 'SADE');
 
@@ -71,7 +74,7 @@ if ($existing) {
             package        = :pkg,
             form_data      = :data,
             template_id    = :tpl,
-            customer_phone = :phone,
+            customer_phone = COALESCE(:phone, customer_phone),
             status         = 'submitted',
             submitted_at   = IF(submitted_at IS NULL, NOW(), submitted_at),
             expires_at     = DATE_ADD(NOW(), INTERVAL 30 DAY)
@@ -81,7 +84,7 @@ if ($existing) {
         ':pkg'   => $package,
         ':data'  => $json,
         ':tpl'   => $templateId,
-        ':phone' => $customerPhone ?: null,
+        ':phone' => $customerPhone,
         ':id'    => $existing['id'],
     ]);
 } else {
@@ -95,7 +98,7 @@ if ($existing) {
         ':pkg'   => $package,
         ':data'  => $json,
         ':tpl'   => $templateId,
-        ':phone' => $customerPhone ?: null,
+        ':phone' => $customerPhone,
     ]);
 }
 

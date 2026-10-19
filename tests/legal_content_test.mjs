@@ -61,6 +61,13 @@ ok('privacy: #kuki bölməsi var', texts.privacy.az.sections.some((s) => s.id ==
 ok('privacy/az: real yaddaş açarları sadalanır', ['digitoy_consent', 'digitoy_session_id', '_ga', 'ph_*_posthog']
   .every((k) => flatten(texts.privacy.az).join(' ').includes(k)))
 
+/* Phase 50 — builder əlaqə nömrəsi və «Müştəri paneli» açarı 3 dildə sadalanır */
+for (const l of LANGS) {
+  const all = flatten(texts.privacy[l]).join(' ')
+  ok(`privacy/${l}: digitoy_customer_phone və digitoyOwnerKey sadalanır`,
+    all.includes('digitoy_customer_phone') && all.includes('digitoyOwnerKey:*'))
+}
+
 /* Saxlama müddətləri — retention.php ilə eyni */
 const php = readFileSync(fileURLToPath(new URL('../public/api/retention.php', import.meta.url)), 'utf8')
 const phpConst = (n) => Number((php.match(new RegExp(`const ${n}\\s*=\\s*(\\d+)`)) || [])[1])

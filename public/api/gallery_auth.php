@@ -23,6 +23,7 @@
 ══════════════════════════════════════════════════ */
 
 require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/owner_auth.php';
 
 /** Qalereya imzaları üçün ayrıca açar — admin açarı ilə eyni deyil */
 function gallerySigningKey(): string {
@@ -80,19 +81,16 @@ function readGalleryToken(): string {
  * Uğursuzluqda 401/403 ilə dayandırır.
  */
 function requireGalleryAccess(string $slug): void {
-    /* 1) Admin tokeni (admin panel) */
-    $adminToken = '';
-    if (!empty($_SERVER['HTTP_X_ADMIN_TOKEN'])) {
-        $adminToken = trim($_SERVER['HTTP_X_ADMIN_TOKEN']);
-    } elseif (!empty($_SERVER['HTTP_AUTHORIZATION'])
-        && preg_match('/^Bearer\s+(.+)$/i', $_SERVER['HTTP_AUTHORIZATION'], $m)) {
-        $adminToken = trim($m[1]);
-    }
-    if ($adminToken !== '' && validateAdminToken($adminToken)) return;
+    /* 1) Admin tokeni (admin panel) — auth.php ilə eyni oxunuş */
+    if (isAdminRequest()) return;
 
-    /* 2) Bu slug üçün qalereya tokeni (cütlüyün idarəetmə linki) */
+    /* 2) Bu slug üçün qalereya tokeni (cütlüyün idarəetmə linki) — DB-siz */
     $galleryToken = readGalleryToken();
     if ($galleryToken !== '' && validateGalleryToken($galleryToken, $slug)) return;
+
+    /* 3) Phase 50 — bu slug-un «Müştəri paneli» açarı. Panel linki
+       yenilənəndə bu icazə də dərhal bağlanır (açar DB-dədir). */
+    if (isOwnerRequest($slug)) return;
 
     http_response_code(401);
     echo json_encode([

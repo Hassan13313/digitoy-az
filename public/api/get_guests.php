@@ -10,9 +10,11 @@
      • Admin tokeni ilə → tam cavab (admin: oturma planı, hesabatlar).
      • Tokensiz (dəvətnaməyə baxan qonaq) → YALNIZ «masanı tap» və RSVP
        üçün lazım olan sahələr: id, ad, masa, yer. Statistika da verilmir.
+     • Phase 50 — «Müştəri paneli» açarı ilə → tam hesabat, amma qonaqların
+       TELEFONU verilmir (panel onu göstərmir; link sızsa zərər az olsun).
 ══════════════════════════════════════════════════ */
 require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/owner_auth.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
@@ -70,7 +72,10 @@ try {
     $rows = $st->fetchAll();
 }
 
-if (!isAdminRequest()) {
+$role    = invitationRole($invId);   /* 'admin' | 'owner' | null (ictimai) */
+$isAdmin = $role === 'admin';
+
+if ($role === null) {
     echo json_encode([
         'ok'     => true,
         'guests' => array_map(fn($r) => [
@@ -91,7 +96,7 @@ $guests = array_map(fn($r) => [
     'seat_number'      => $r['seat_number'] !== null ? (int)$r['seat_number'] : null,
     'notes'            => $r['notes'],
     /* Phase 43 — sütun yoxdursa null (bax guestQuery FAIL-OPEN) */
-    'phone'            => $r['phone'] ?? null,
+    'phone'            => $isAdmin ? ($r['phone'] ?? null) : null,
     'created_at'       => $r['created_at'],
     'status'           => $r['attendance_status'],
     'submitted_at'     => $r['submitted_at'],

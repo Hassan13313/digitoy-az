@@ -1,20 +1,18 @@
 <?php
 /* ══════════════════════════════════════════════════
-   GET /api/export_guests.php  (Admin tələb olunur)
+   GET /api/export_guests.php  (Admin və ya «Müştəri paneli» açarı)
    ?invitation_id=SLUG&mode=tables|status&format=csv
    Qonaqları CSV formatında ixrac edir.
    Phase 22 — Guest Management Refactor
 ══════════════════════════════════════════════════ */
 require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/owner_auth.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
     echo json_encode(['error' => 'GET required']);
     exit;
 }
-
-requireAdmin();
 
 $invId = trim($_GET['invitation_id'] ?? '');
 $mode  = trim($_GET['mode']          ?? 'tables');  // tables | status
@@ -25,6 +23,9 @@ if (!$invId) {
     exit;
 }
 $invId = substr($invId, 0, 120);
+
+/* Phase 50 — admin VƏ YA bu dəvətnamənin «Müştəri paneli» açarı */
+requireInvitationAccess($invId);
 
 ensureTables();
 $db = getDB();

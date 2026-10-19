@@ -74,12 +74,13 @@ function formatEventDate(iso, lang = 'az') {
  * @param {string} p.label
  * @param {boolean} [p.required]
  * @param {boolean} [p.optional]   «(istəyə bağlı)» yazısı
+ * @param {boolean} [p.recommended] «(tövsiyə olunur)» yazısı — məcburi deyil, amma xahiş edirik
  * @param {string} [p.hint]        Sahənin altındakı köməkçi mətn
  * @param {string} [p.error]       Xəta mətni — verilərsə ipucunun yerinə göstərilir
  * @param {React.ReactNode} [p.aside]  Label sətrinin sağında (məs. simvol sayğacı)
  * @param {'az'|'en'|'ru'} [p.lang]
  */
-export function Field({ id, label, required, optional, hint, error, aside, lang = 'az', className = '', children }) {
+export function Field({ id, label, required, optional, recommended, hint, error, aside, lang = 'az', className = '', children }) {
   const x = tx(lang);
   return (
     <div className={className}>
@@ -96,6 +97,11 @@ export function Field({ id, label, required, optional, hint, error, aside, lang 
             {optional && (
               <span className="ml-1.5 font-normal normal-case tracking-normal text-brown-muted">
                 ({x.fieldOptional ?? 'istəyə bağlı'})
+              </span>
+            )}
+            {recommended && (
+              <span className="ml-1.5 font-normal normal-case tracking-normal text-brown-muted">
+                ({x.fieldRecommended ?? 'tövsiyə olunur'})
               </span>
             )}
           </label>

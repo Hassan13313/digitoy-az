@@ -4,7 +4,9 @@ import AdminContentManager from './AdminContentManager'
 import PurgeInvitationDialog from './PurgeInvitationDialog'
 import InvitationsList from './v2/InvitationsList'
 import { Notice, Toast } from './v2/adminUi'
+import { RotateOwnerLinkDialog } from './OwnerPanelLinkCard'
 import { setInvitationActive, getAdminToken } from '../../utils/api'
+import { getOwnerLink, rotateOwnerLink } from '../../utils/ownerApi'
 import { azDate } from './adminFormat'
 import { templateMeta } from './templateMeta'
 
@@ -49,7 +51,27 @@ export default function AdminInvitationsList() {
   /* Phase 46 — birdəfəlik silmə pəncərəsi ({ slug, names }) */
   const [purgeInv,  setPurgeInv]  = useState(null)
   const [toast,     setToast]     = useState('')
+  /* Phase 50 — «Müştəri paneli» linkini yeniləmə təsdiqi ({ slug, names }) */
+  const [ownerAsk,  setOwnerAsk]  = useState(null)
+  const [ownerBusy, setOwnerBusy] = useState(false)
   const debounceRef = useRef(null)
+
+  /* Link serverdən gəlir; await-dən sonra clipboard bəzi brauzerlərdə rədd
+     olunur — onda link pəncərədə göstərilir ki, əllə kopyalansın. */
+  const copyOwnerLink = async (request, doneText) => {
+    setError('')
+    try {
+      const { url } = await request
+      try {
+        await navigator.clipboard.writeText(url)
+        setToast(doneText)
+      } catch {
+        window.prompt('Müştəri paneli linki — kopyalayın:', url)
+      }
+    } catch {
+      setError('Müştəri paneli linki alınmadı.')
+    }
+  }
 
   const load = (q = '') => {
     setLoading(true)
@@ -119,10 +141,25 @@ export default function AdminInvitationsList() {
         onPurge={(inv) => setPurgeInv({ slug: inv.slug, names: inv.names })}
         onCopyLink={(inv) => navigator.clipboard.writeText(`${window.location.origin}/invite/${inv.slug}`)
           .then(() => setToast('Link kopyalandı.'))}
+        onCopyOwnerLink={(inv) => copyOwnerLink(getOwnerLink(inv.slug), 'Müştəri paneli linki kopyalandı.')}
+        onRotateOwnerLink={(inv) => setOwnerAsk({ slug: inv.slug, names: inv.names })}
         togglingId={busySlug}
       />
 
       <Toast open={!!toast} message={toast} onClose={() => setToast('')} />
+
+      <RotateOwnerLinkDialog
+        open={!!ownerAsk}
+        names={ownerAsk?.names || ownerAsk?.slug}
+        busy={ownerBusy}
+        onCancel={() => setOwnerAsk(null)}
+        onConfirm={async () => {
+          setOwnerBusy(true)
+          await copyOwnerLink(rotateOwnerLink(ownerAsk.slug), 'Yeni link kopyalandı — köhnəsi artıq açılmır.')
+          setOwnerBusy(false)
+          setOwnerAsk(null)
+        }}
+      />
 
       {purgeInv && (
         <PurgeInvitationDialog

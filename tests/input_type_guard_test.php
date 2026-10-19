@@ -46,6 +46,10 @@ foreach ([
     ['POST', '/api/submit_guest_response.php', '{"invitation_id":["x"],"name":["x"]}'],
     ['POST', '/api/media_react.php', '{"slug":["x"],"id":["x"]}'],
     ['POST', '/api/gallery_track.php', '{"slug":["x"]}'],
+    /* Phase 50 — müştəri paneli: auth slug-dan sonra yoxlanılır, massiv yenə 400 */
+    ['GET',  '/api/owner_panel.php?slug[]=x'],
+    ['GET',  '/api/get_rsvp_responses.php?slug[]=x'],
+    ['GET',  '/api/export_guests.php?invitation_id[]=x'],
 ] as $r) {
     [$m, $p] = $r;
     [$code, $out] = req($m, $p, $r[2] ?? null);

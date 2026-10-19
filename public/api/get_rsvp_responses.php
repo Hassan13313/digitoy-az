@@ -1,9 +1,8 @@
 <?php
-/* ── get_rsvp_responses.php — Admin: slug üzrə RSVP cavabları ── */
+/* ── get_rsvp_responses.php — slug üzrə RSVP cavabları ──
+   Admin VƏ YA bu dəvətnamənin «Müştəri paneli» açarı (Phase 50). */
 require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/auth.php';
-
-requireAdmin();
+require_once __DIR__ . '/owner_auth.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
@@ -17,6 +16,9 @@ if (!$slug || !isValidSlug($slug)) {
     echo json_encode(['error' => 'Valid slug required']);
     exit;
 }
+
+requireInvitationAccess($slug);
+header('Cache-Control: no-store');
 
 $db = getDB();
 

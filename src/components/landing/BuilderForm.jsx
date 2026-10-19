@@ -41,6 +41,8 @@ import { formatFullDateByLang } from '../../utils/dateFormat'
 import { pushView, patchState, currentUrl } from '../../utils/navHistory'
 import { saveDraft, getDraft, submitDraft, saveInvitation, approveDraft } from '../../utils/api'
 import { saveBuilderSnapshot, readBuilderSnapshot } from '../../utils/builderSession'
+import { readCustomerPhone, saveCustomerPhone, formatPhoneDisplay, normalizeCustomerPhone } from '../../utils/customerPhone'
+import ContactPhoneField from '../builder/ContactPhoneField'
 import t from '../../data/translations'
 import BuilderShell, { StepCard, GhostButton } from '../builder/BuilderShell'
 import { ChoiceGroup, SelectCard, AddButton } from '../builder/fields'
@@ -1419,6 +1421,20 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     snapshot?.data ? { ...initialData, ...snapshot.data } : initialData
   ))
 
+  /* Phase 50 — könüllü əlaqə nömrəsi. ⚠ `data`-da DEYİL: form_data dəvətnamədə
+     ictimai qaytarılır. Yalnız draft_invitations.customer_phone-a gedir.
+     Serverə normallaşdırılmış dəyər gedir — yarımçıq yazılmış nömrə autosave etmir. */
+  const [customerPhone, setCustomerPhone] = useState(() => (isAdmin ? '' : readCustomerPhone()))
+  const savedPhone = normalizeCustomerPhone(customerPhone) || ''
+  useEffect(() => { if (!isAdmin) saveCustomerPhone(customerPhone.trim()) }, [customerPhone, isAdmin])
+
+  /* Server draft-ı bərpa olunana qədər autosave gözləyir: əks halda yeni tabda
+     defolt data və boş nömrə serverdəki qaralamanın üstünə yazıla bilərdi.
+     Bərpa edilməyən hallarda (admin, eyni tab snapshot-u, ?data=) dərhal hazırdır. */
+  const [draftReady, setDraftReady] = useState(() => (
+    isAdmin || !!snapshot || !!new URLSearchParams(window.location.search).get('data')
+  ))
+
   /* Phase 35 axını: 0 Dizayn · 1 Tədbir · 9 Bölmələr · 2 Məkan · 3 Proqram
      · 4 Geyim · 5 Musiqi · 6 Oturma · 7 Qalereya · 8 Partnyorlar (həmişə SON).
      Sıra BUILDER_STEP_ORDER-dədir; id-lər Phase 25.3-dəki kimi qalır.
@@ -1535,12 +1551,18 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     if (!hasUrlData && !snapshot) {
       getDraft(sid)
         .then(function(draft) {
-          if (!draft?.found || !draft.form_data) return
+          if (!draft?.found) return
+          /* Phase 50 — yeni tabda nömrə serverdən gəlir (sessiyada yazılmayıbsa) */
+          if (draft.customer_phone) {
+            setCustomerPhone(function(p) { return p || formatPhoneDisplay(draft.customer_phone) })
+          }
+          if (!draft.form_data) return
           setData(function(prev) { return { ...prev, ...draft.form_data } })
           if (draft.current_step > 1) setStep(clampStep(draft.current_step))
           setDraftRestored(true) /* banner göstər */
         })
         .catch(function() {}) /* draft restore non-critical */
+        .finally(function() { setDraftReady(true) })
     }
   }, [isAdmin])
 
@@ -1571,14 +1593,14 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
   }, [data, step, isAdmin])
 
   useEffect(() => {
-    if (!isHydrated || !sessionIdRef.current || isAdmin) return
+    if (!isHydrated || !draftReady || !sessionIdRef.current || isAdmin) return
     clearTimeout(autosaveTimer.current)
     autosaveTimer.current = setTimeout(function() {
       const pkg = data.package || data.selectedPackage || pkgId || 'SADE'
-      saveDraft(sessionIdRef.current, { ...data, templateId: selectedTemplate }, pkg, step).catch(function() {})
+      saveDraft(sessionIdRef.current, { ...data, templateId: selectedTemplate }, pkg, step, savedPhone).catch(function() {})
     }, 800)
     return function() { clearTimeout(autosaveTimer.current) }
-  }, [data, step, isHydrated, isAdmin, selectedTemplate])
+  }, [data, step, isHydrated, draftReady, isAdmin, selectedTemplate, savedPhone])
 
   const set = (key, val) => {
     setData((d) => ({ ...d, [key]: val }))
@@ -1987,6 +2009,11 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
                 />
               </div>
             </div>
+
+            {/* Phase 50 — əlaqə nömrəsi (tövsiyə olunur, məcburi deyil; validate() yoxlamır) */}
+            {!isAdmin && !adminMode && (
+              <ContactPhoneField value={customerPhone} onChange={setCustomerPhone} lang={lang} />
+            )}
 
             {/* ⚠ Phase 35: «Dizayn seç» bloku buradan ÇIXARILDI — artıq
                 builderin 0-cı (ilk) addımıdır. Bax: actualStep === 0. */}

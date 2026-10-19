@@ -3,6 +3,7 @@ import { Music } from 'lucide-react'
 import { buildWhatsAppUrl } from '../../utils/whatsappOrder'
 import { WHATSAPP_NUMBER } from '../../data/constants'
 import { submitDraft } from '../../utils/api'
+import { readCustomerPhone } from '../../utils/customerPhone'
 import { alpha, readableOn } from './geo'
 import OrderLegalNote from '../../components/legal/OrderLegalNote'
 
@@ -73,7 +74,7 @@ export function OrderCta({ theme, weddingData, lang = 'az', pageSlug, isDemoMode
   const handleOrder = () => {
     const sid = localStorage.getItem('digitoy_session_id') || ''
     const pkg = weddingData?.package || weddingData?.selectedPackage || 'SADE'
-    submitDraft(sid, weddingData, pkg).catch(() => {})
+    submitDraft(sid, weddingData, pkg, readCustomerPhone()).catch(() => {})
   }
 
   return (

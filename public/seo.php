@@ -78,7 +78,7 @@ if ($path === '/') {
     /* Phase 47 — hüquqi səhifələr: ictimai, indekslənir */
     [$meta['title'], $meta['desc']] = $legal;
     $meta['canon'] = SITE . $path;
-} elseif (preg_match('#^/invite/([a-zA-Z0-9\-]{2,120})(?:/(foto|qalereya-idare|slayd))?$#', $path, $m)) {
+} elseif (preg_match('#^/invite/([a-zA-Z0-9\-]{2,120})(?:/(foto|qalereya-idare|slayd|panel))?$#', $path, $m)) {
     $slug = $m[1];
     $sub  = $m[2] ?? '';
 
@@ -96,6 +96,12 @@ if ($path === '/') {
     } elseif ($sub === 'slayd') {
         $meta['title'] = 'Slayd Şou | DigiToy';
         $meta['desc']  = 'Qonaqların paylaşdığı şəkillər canlı slayd şouda.';
+    } elseif ($sub === 'panel') {
+        /* Phase 50 — müştərinin şəxsi paneli: önbaxışda adlar GÖSTƏRİLMİR,
+           səhifədəki linklər də izlənmir (nofollow). */
+        $meta['title']    = 'Müştəri paneli | DigiToy';
+        $meta['desc']     = 'Dəvətnamənizin iştirak təsdiqləri, təbrikləri və şəkilləri bir yerdə.';
+        $meta['nofollow'] = true;
     } else {
         /* ── Dəvətnamə önbaxışı ──
            WhatsApp/Telegram/Facebook JS icra ETMİR, ona görə cütlüyün adı
@@ -246,7 +252,7 @@ function seoQueryInvite(string $slug): ?array {
 /* ── Meta blokunu qur ── */
 $e = fn($v) => htmlspecialchars((string) $v, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-$robots = $meta['index'] ? 'index, follow' : 'noindex, follow';
+$robots = ($meta['index'] ? 'index, ' : 'noindex, ') . (empty($meta['nofollow']) ? 'follow' : 'nofollow');
 $ogUrl  = $meta['canon'] !== '' ? $meta['canon'] : SITE . $path;
 
 $block  = "<title>" . $e($meta['title']) . "</title>\n";

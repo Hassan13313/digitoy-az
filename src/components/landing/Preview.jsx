@@ -6,6 +6,7 @@ import { resolveDressGenders } from '../../data/dressCode'
 import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
 import { buildWhatsAppUrl } from '../../utils/whatsappOrder'
 import { submitDraft } from '../../utils/api'
+import { readCustomerPhone } from '../../utils/customerPhone'
 import { trackEvent } from '../../utils/analytics'
 import OrderLegalNote from '../legal/OrderLegalNote'
 import t from '../../data/translations'
@@ -63,7 +64,7 @@ export default function Preview({ lang, data, onEdit, onView }) {
     const sid = localStorage.getItem('digitoy_session_id') || ''
     const pkg = data.package || data.selectedPackage || 'SADE'
     trackEvent('whatsapp_order_clicked', { lang, package: pkg })
-    submitDraft(sid, data, pkg).then(r => {
+    submitDraft(sid, data, pkg, readCustomerPhone()).then(r => {
       if (r?.draft_code) trackEvent('order_submitted', { lang, package: pkg })
     }).catch(() => {})
   }, [data, lang])

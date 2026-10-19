@@ -65,3 +65,12 @@ RedirectMatch 404 ^/api/migrations/
 <Files "order_link.php">
     Require all denied
 </Files>
+
+# Phase 50 — musteri paneli acari ve telefon normallasdirmasi (yalniz include)
+<Files "owner_auth.php">
+    Require all denied
+</Files>
+
+<Files "phone_lib.php">
+    Require all denied
+</Files>

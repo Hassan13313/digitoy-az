@@ -6,7 +6,7 @@
 // (iki addımlı), təsdiqdən sonra `onPurge(order)` / `onPurgeAll()` çağırılır.
 // ════════════════════════════════════════════════════════════════
 import { useState } from 'react';
-import { Inbox, SearchX, Trash2 } from 'lucide-react';
+import { Inbox, MessageCircle, PencilLine, SearchX, Trash2 } from 'lucide-react';
 import {
   Button,
   ConfirmDialog,
@@ -33,6 +33,9 @@ import {
  * @property {number} [price]     129
  * @property {{name:string,color:string}} template
  * @property {'new'|'approved'|'rejected'|'deleted'|'draft'} status
+ * @property {string} [phone]     Digitoy Phase 50: «+994 50 123 45 67» (yoxdursa boş)
+ * @property {string} [waHref]    WhatsApp linki (nömrə tanınıbsa)
+ * @property {string} [step]      «Yarımçıq» tabı: «Addım 3»
  */
 
 export const ORDER_TABS = [
@@ -40,6 +43,8 @@ export const ORDER_TABS = [
   { id: 'approved', label: 'Təsdiqlənmiş' },
   { id: 'rejected', label: 'Rədd' },
   { id: 'all', label: 'Hamısı' },
+  /* Digitoy Phase 50 — builderdə nömrə yazıb sifarişi göndərməyənlər */
+  { id: 'abandoned', label: 'Yarımçıq' },
   { id: 'deleted', label: 'Silinmiş' },
 ];
 
@@ -48,6 +53,10 @@ const EMPTY = {
   approved: { title: 'Təsdiqlənmiş sifariş yoxdur', text: 'Təsdiq etdiyiniz sifarişlər bu tabda toplanır.' },
   rejected: { title: 'Rədd edilmiş sifariş yoxdur' },
   all: { title: 'Hələ sifariş yoxdur', text: 'İlk sifariş gələndə burada görünəcək.' },
+  abandoned: {
+    title: 'Yarımçıq sifariş yoxdur',
+    text: 'Builderdə nömrəsini yazıb sifarişi göndərməyən müştərilər burada görünəcək.',
+  },
   deleted: {
     title: 'Silinmiş sifariş yoxdur',
     text: 'Sildiyiniz sifarişlər birdəfəlik silinənə qədər burada qalır.',
@@ -92,9 +101,74 @@ export default function OrdersList({
 }) {
   const [confirm, setConfirm] = useState(null); // { type:'one', order } | { type:'all' }
   const deletedTab = tab === 'deleted';
+  const abandonedTab = tab === 'abandoned';
   const filtered = Boolean(search || template);
 
-  const columns = [
+  /* Digitoy Phase 50 — telefon (WhatsApp linki). DataTable link klikini sətir klikindən ayırır. */
+  const phoneCol = {
+    key: 'phone',
+    header: 'Telefon',
+    nowrap: true,
+    mobile: 'detail',
+    colClassName: abandonedTab ? '' : 'max-lg:hidden',
+    render: (o) =>
+      !o.phone ? (
+        <span className="text-[#A79C90]">—</span>
+      ) : o.waHref ? (
+        <a
+          href={o.waHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="tabular-nums text-espresso underline-offset-2 hover:underline"
+        >
+          {o.phone}
+        </a>
+      ) : (
+        <span className="tabular-nums">{o.phone}</span>
+      ),
+  };
+
+  const templateCol = {
+    key: 'template',
+    header: 'Şablon',
+    mobile: 'meta',
+    render: (o) => <TemplateLabel name={o.template?.name} color={o.template?.color} />,
+    cellClassName: 'text-[#3F342E] max-w-[180px]',
+  };
+
+  const abandonedColumns = [
+    { key: 'date', header: 'Son fəaliyyət', nowrap: true, width: '140px', mobile: 'meta', cellClassName: 'text-[#5C4A3A] tabular-nums' },
+    { key: 'names', header: 'Ad', primary: true, mobile: 'title' },
+    phoneCol,
+    { key: 'pkg', header: 'Paket', nowrap: true, mobile: 'meta', cellClassName: 'text-[#3F342E]' },
+    { ...templateCol, colClassName: 'max-xl:hidden' },
+    {
+      key: 'step',
+      header: 'Qaldığı yer',
+      nowrap: true,
+      mobile: 'meta',
+      render: (o) => (
+        <span className="inline-flex items-center gap-1.5 text-[#5C4A3A]">
+          <PencilLine className="h-3.5 w-3.5" aria-hidden="true" />
+          {o.step}
+        </span>
+      ),
+    },
+    {
+      key: 'wa',
+      header: <span className="sr-only">Əməliyyat</span>,
+      align: 'right',
+      mobile: 'footer',
+      render: (o) =>
+        o.waHref && (
+          <Button size="sm" icon={MessageCircle} href={o.waHref} target="_blank" rel="noopener noreferrer" className="max-md:w-full">
+            WhatsApp-a yaz
+          </Button>
+        ),
+    },
+  ];
+
+  const orderColumns = [
     {
       key: 'date',
       header: 'Tarix',
@@ -127,13 +201,8 @@ export default function OrdersList({
       render: (o) => `${o.pkg}${o.price != null ? ` (${formatPrice(o.price)})` : ''}`,
       cellClassName: 'text-[#3F342E]',
     },
-    {
-      key: 'template',
-      header: 'Şablon',
-      mobile: 'meta',
-      render: (o) => <TemplateLabel name={o.template?.name} color={o.template?.color} />,
-      cellClassName: 'text-[#3F342E] max-w-[180px]',
-    },
+    templateCol,
+    phoneCol,
     {
       key: 'code',
       header: 'Sifariş kodu',
@@ -149,6 +218,7 @@ export default function OrdersList({
       render: (o) => <StatusBadge status={o.status} size="sm" />,
     },
   ];
+  const columns = abandonedTab ? abandonedColumns : orderColumns;
   if (deletedTab && onPurge) {
     columns.push({
       key: 'purge',
@@ -191,7 +261,10 @@ export default function OrdersList({
 
   return (
     <div>
-      <PageHeader title="Sifarişlər" subtitle={loading ? 'Yüklənir…' : `${total ?? orders.length} sifariş`} />
+      <PageHeader
+        title="Sifarişlər"
+        subtitle={loading ? 'Yüklənir…' : `${total ?? orders.length} ${abandonedTab ? 'yarımçıq' : 'sifariş'}`}
+      />
 
       <Toolbar
         search={{
@@ -240,7 +313,7 @@ export default function OrdersList({
         columns={columns}
         rows={orders}
         loading={loading}
-        onRowClick={onOpen}
+        onRowClick={abandonedTab ? undefined : onOpen}
         rowLabel={(o) => `Sifarişi aç: ${o.names}, ${o.code}`}
         empty={empty}
       />

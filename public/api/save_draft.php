@@ -1,6 +1,7 @@
 <?php
 /* ── save_draft.php — session_id üzrə draft upsert ── */
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/phone_lib.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -31,6 +32,11 @@ $formData    = $body['form_data']          ?? null;
 $package     = trim($body['package']      ?? 'SADE');
 $currentStep = (int) ($body['current_step'] ?? 1);
 
+/* Phase 50 — builderdəki könüllü əlaqə nömrəsi. Açar YOXDURSA (köhnə bundle)
+   sütuna toxunulmur; varsa normallaşdırılmış dəyər və ya NULL (sahə silinib). */
+$hasPhone = is_array($body) && array_key_exists('customer_phone', $body);
+$phone    = $hasPhone ? normalizeCustomerPhone($body['customer_phone']) : null;
+
 if (!$sessionId || !preg_match('/^[a-zA-Z0-9\-]{8,64}$/', $sessionId)) {
     http_response_code(400);
     echo json_encode(['error' => 'Valid session_id required']);
@@ -39,7 +45,7 @@ if (!$sessionId || !preg_match('/^[a-zA-Z0-9\-]{8,64}$/', $sessionId)) {
 
 $validPkgs = ['SADE', 'VIP', 'PREMIUM'];
 if (!in_array($package, $validPkgs, true)) $package = 'SADE';
-$currentStep = max(1, min(6, $currentStep));
+$currentStep = max(1, min(12, $currentStep));   /* builderdə 11 addıma qədər var */
 
 $json      = $formData ? json_encode($formData, JSON_UNESCAPED_UNICODE) : null;
 $templateId = normalizeTemplateId($formData['templateId'] ?? null);
@@ -57,27 +63,30 @@ $existing = $stmt->fetch();
 if ($existing) {
     $stmt = $db->prepare("UPDATE draft_invitations
         SET package = :pkg, current_step = :step, form_data = :data,
-            template_id = :tpl, expires_at = :exp
+            template_id = :tpl, expires_at = :exp" . ($hasPhone ? ', customer_phone = :phone' : '') . "
         WHERE id = :id");
-    $stmt->execute([
+    $params = [
         ':pkg'  => $package,
         ':step' => $currentStep,
         ':data' => $json,
         ':tpl'  => $templateId,
         ':exp'  => $expiresAt,
         ':id'   => $existing['id'],
-    ]);
+    ];
+    if ($hasPhone) $params[':phone'] = $phone;
+    $stmt->execute($params);
 } else {
     $stmt = $db->prepare("INSERT INTO draft_invitations
-        (session_id, package, current_step, form_data, template_id, expires_at)
-        VALUES (:sid, :pkg, :step, :data, :tpl, :exp)");
+        (session_id, package, current_step, form_data, template_id, customer_phone, expires_at)
+        VALUES (:sid, :pkg, :step, :data, :tpl, :phone, :exp)");
     $stmt->execute([
-        ':sid'  => $sessionId,
-        ':pkg'  => $package,
-        ':step' => $currentStep,
-        ':data' => $json,
-        ':tpl'  => $templateId,
-        ':exp'  => $expiresAt,
+        ':sid'   => $sessionId,
+        ':pkg'   => $package,
+        ':step'  => $currentStep,
+        ':data'  => $json,
+        ':tpl'   => $templateId,
+        ':phone' => $phone,
+        ':exp'   => $expiresAt,
     ]);
 }
 

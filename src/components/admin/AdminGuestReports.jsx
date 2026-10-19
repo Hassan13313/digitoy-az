@@ -108,7 +108,9 @@ const toRow = (g, withTable) => ({
   date: g.submitted_at ? azDate(g.submitted_at, { year: false }) : '',
 })
 
-export default function AdminGuestReports({ slug, names, dateStr = '' }) {
+/* `refreshSignal` (Phase 50, Müştəri paneli): dəyişəndə hesabat yenidən yüklənir.
+   Admin onu ötürmür — orada davranış dəyişmir. */
+export default function AdminGuestReports({ slug, names, dateStr = '', refreshSignal = 0 }) {
   const [data,         setData]         = useState(null)
   const [loading,      setLoading]      = useState(true)
   const [error,        setError]        = useState('')
@@ -127,7 +129,7 @@ export default function AdminGuestReports({ slug, names, dateStr = '' }) {
       .catch(() => { setError('Məlumatlar yüklənmədi.'); setLoading(false) })
   }
 
-  useEffect(() => { load() }, [slug]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load() }, [slug, refreshSignal]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const allGuests = useMemo(() => data?.guests ?? [], [data])
   const stats     = data?.stats ?? {}

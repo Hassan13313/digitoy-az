@@ -512,7 +512,7 @@ function canvasToJpegBytes(canvas, quality = 0.94) {
   })
 }
 
-function triggerDownload(blob, filename) {
+export function triggerDownload(blob, filename) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url

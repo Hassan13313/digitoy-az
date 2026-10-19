@@ -258,6 +258,7 @@ const BTN_DESTRUCTIVE = {
  * @param {boolean} [p.loading]   Spinner göstərir və kliki bağlayır
  * @param {boolean} [p.destructive] secondary/ghost üçün qırmızı mətn (məs. «Rədd et»)
  * @param {boolean} [p.block]     Tam en
+ * @param {string} [p.href]       Digitoy: verilsə düymə görünüşlü <a> (target/rel …rest ilə ötürülür)
  */
 export function Button({
   variant = 'secondary',
@@ -271,22 +272,36 @@ export function Button({
   children,
   type = 'button',
   disabled,
+  href,
   ref,
   ...rest
 }) {
   const v = (destructive && BTN_DESTRUCTIVE[variant]) || BTN_VARIANT[variant] || BTN_VARIANT.secondary;
+  const cls = cx(BTN_BASE, BTN_SIZE[size], v, block && 'w-full', FOCUS, className);
+  const inner = (
+    <>
+      {loading ? <Spinner /> : Icon ? <Icon className="h-4 w-4 shrink-0" aria-hidden="true" /> : null}
+      {children}
+      {IconRight && !loading && <IconRight className="h-4 w-4 shrink-0" aria-hidden="true" />}
+    </>
+  );
+  if (href) {
+    return (
+      <a ref={ref} href={href} className={cls} {...rest}>
+        {inner}
+      </a>
+    );
+  }
   return (
     <button
       ref={ref}
       type={type}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
-      className={cx(BTN_BASE, BTN_SIZE[size], v, block && 'w-full', FOCUS, className)}
+      className={cls}
       {...rest}
     >
-      {loading ? <Spinner /> : Icon ? <Icon className="h-4 w-4 shrink-0" aria-hidden="true" /> : null}
-      {children}
-      {IconRight && !loading && <IconRight className="h-4 w-4 shrink-0" aria-hidden="true" />}
+      {inner}
     </button>
   );
 }

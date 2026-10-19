@@ -12,8 +12,10 @@ import {
   ExternalLink,
   FileText,
   Languages,
+  LayoutDashboard,
   Link2,
   Power,
+  RotateCcw,
   SearchX,
   SlidersHorizontal,
   Trash2,
@@ -79,6 +81,8 @@ export function TranslationPills({ translations = {}, className = '' }) {
  *        false — linki bağla (təsdiqdən sonra), true — yenidən aç (birbaşa)
  * @param {(inv:InvitationRow)=>void} p.onPurge  «Birdəfəlik sil» (PurgeInvitationDialog-u açın)
  * @param {(inv:InvitationRow)=>void|Promise<void>} [p.onCopyLink]  Menyuda «Linki kopyala»
+ * @param {(inv:InvitationRow)=>void} [p.onCopyOwnerLink]    Phase 50 — «Müştəri paneli linkini kopyala»
+ * @param {(inv:InvitationRow)=>void} [p.onRotateOwnerLink]  Phase 50 — «Müştəri paneli linkini yenilə»
  * @param {string} [p.togglingId]  Status dəyişən sətir (təsdiq düyməsində spinner)
  */
 export default function InvitationsList({
@@ -94,6 +98,8 @@ export default function InvitationsList({
   onToggleActive,
   onPurge,
   onCopyLink,
+  onCopyOwnerLink,
+  onRotateOwnerLink,
   togglingId,
 }) {
   const [deactivate, setDeactivate] = useState(null);
@@ -112,6 +118,20 @@ export default function InvitationsList({
       icon: Link2,
       onSelect: () => onCopyLink?.(inv),
       hidden: !onCopyLink,
+    },
+    {
+      id: 'owner-copy',
+      label: 'Müştəri paneli linkini kopyala',
+      icon: LayoutDashboard,
+      onSelect: () => onCopyOwnerLink?.(inv),
+      hidden: !onCopyOwnerLink,
+    },
+    {
+      id: 'owner-rotate',
+      label: 'Müştəri paneli linkini yenilə',
+      icon: RotateCcw,
+      onSelect: () => onRotateOwnerLink?.(inv),
+      hidden: !onRotateOwnerLink,
     },
     { id: 'div', divider: true },
     inv.active

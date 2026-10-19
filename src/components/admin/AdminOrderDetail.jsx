@@ -6,7 +6,9 @@ import { computeInviteSlug } from '../../utils/inviteSlug'
 import AdminSeatingPlan from './AdminSeatingPlan'
 import AdminGuestReports from './AdminGuestReports'
 import AdminRSVPBlock from './AdminRSVPBlock'
+import OwnerPanelLinkCard from './OwnerPanelLinkCard'
 import OrderDetail from './v2/OrderDetail'
+import { customerWaUrl, formatPhoneDisplay } from '../../utils/customerPhone'
 import { Button, ConfirmDialog, EmptyState, Notice, PageHeader, Skeleton } from './v2/adminUi'
 import { azDate } from './adminFormat'
 import { templateMeta } from './templateMeta'
@@ -176,7 +178,7 @@ export default function AdminOrderDetail({ draftCode, onBack }) {
     date: [dateStr, timeStr].filter(Boolean).join(', ') || undefined,
     venue: [fd.venueName, fd.venueNote].filter(Boolean).join(' — ') || undefined,
     dressCode: [fd.dressCodePalette, (fd.dressCodeLabels?.[fd.dressCodePalette] || '').trim()].filter(Boolean).join(' — ') || undefined,
-    phone: draft.customer_phone || undefined,
+    phone: formatPhoneDisplay(draft.customer_phone) || undefined,
     submittedAt: draft.submitted_at ? azDate(draft.submitted_at, { time: true, long: true }) : undefined,
     inviteUrl,
     rejectReason: draft.reject_reason || undefined,
@@ -219,9 +221,16 @@ export default function AdminOrderDetail({ draftCode, onBack }) {
         onEdit={handleEdit}
         onDelete={handleDelete}
         onCopyLink={(url) => navigator.clipboard.writeText(url)}
-        whatsappHref={draft.customer_phone ? `https://wa.me/${draft.customer_phone.replace(/\D/g, '')}` : undefined}
+        /* Phase 50 — 050… kimi yerli yazılışda da işləsin (əvvəl wa.me/050… idi) */
+        whatsappHref={customerWaUrl(draft.customer_phone)}
         busy={busy}
-        asideExtra={missingInvite}
+        asideExtra={
+          <>
+            {missingInvite}
+            {/* Phase 50 — müştəriyə BİR link: iştirak təsdiqi, təbriklər, şəkillər */}
+            {draft.status === 'approved' && slug && <OwnerPanelLinkCard slug={slug} phone={draft.customer_phone} />}
+          </>
+        }
         panels={slug ? {
           seating: <AdminSeatingPlan slug={slug} seatingPlan={fd.seatingPlan || ''} />,
           report: <AdminGuestReports slug={slug} names={names} dateStr={dateStr} />,

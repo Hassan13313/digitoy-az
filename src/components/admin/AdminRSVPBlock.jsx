@@ -129,7 +129,9 @@ function handlePrint(data, names, slug) {
 
 const formatDate = (iso) => azDate(iso, { time: true, year: false })
 
-export default function AdminRSVPBlock({ slug, names }) {
+/* `refreshSignal` (Phase 50, Müştəri paneli): dəyişəndə siyahı yenidən yüklənir.
+   Admin onu ötürmür — orada davranış dəyişmir. */
+export default function AdminRSVPBlock({ slug, names, refreshSignal = 0 }) {
   const [data,      setData]      = useState(null)
   const [loading,   setLoading]   = useState(true)
   const [error,     setError]     = useState('')
@@ -145,7 +147,7 @@ export default function AdminRSVPBlock({ slug, names }) {
       .catch(() => { setError('İştirak Təsdiqi məlumatları yüklənmədi.'); setLoading(false) })
   }
 
-  useEffect(() => { load() }, [slug]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load() }, [slug, refreshSignal]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const responses = useMemo(() => data?.responses ?? [], [data])
   const hasData = responses.length > 0

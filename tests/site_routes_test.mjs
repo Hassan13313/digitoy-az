@@ -34,7 +34,14 @@ for (const p of ['/', '/mexfilikx', '/xmexfilik', '/mexfilik/alt', '/MEXFILIK', 
 /* ── 2. isKnownSpaPath — naməlum yol 404 ekranı açır ── */
 for (const p of ['/', '/index.html', '/demo', '/demo/', '/templates', '/templates/', '/preview/live', '/mexfilik', '/sertler/',
   '/geri-qaytarma', '/demo/template/royal-gold', '/admin', '/admin/orders', '/invite/aytac-ve-niyaz-51eedb',
-  '/invite/aytac-ve-niyaz-51eedb/foto']) ok(`tanınır: ${p}`, isKnownSpaPath(p))
+  '/invite/aytac-ve-niyaz-51eedb/foto', '/invite/aytac-ve-niyaz-51eedb/panel']) ok(`tanınır: ${p}`, isKnownSpaPath(p))
+
+/* ── 2b. Phase 50 — «Müştəri paneli» üç yerdə qeydiyyatdadır ── */
+{
+  const app = read('../src/App.jsx')
+  ok('App.jsx: /panel → owner-panel', app.includes("sub === 'panel'") && app.includes("view === 'owner-panel'"))
+  ok('seo.php: panel marşrutu tanınır', read('../public/seo.php').includes('slayd|panel'))
+}
 for (const p of ['/bu-yoxdur', '/invite', '/invite/', '/demo/template/', '/privacy', '/wp-login.php', '/a/b/c'])
   ok(`naməlum: ${p}`, !isKnownSpaPath(p))
 

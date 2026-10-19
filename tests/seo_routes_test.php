@@ -60,6 +60,14 @@ foreach (seoLegalPages() as $p => [$t]) {
 $r = $run('/bu-yoxdur');
 ok('/bu-yoxdur → 404 + «Səhifə tapılmadı»', $r['status'] === 404 && str_starts_with($r['title'], 'Səhifə tapılmadı') && str_starts_with($r['robots'], 'noindex'));
 ok('/admin → 404 deyil', $run('/admin')['status'] !== 404);
+
+/* Phase 50 — müştəri paneli: mövcud marşrut, indekslənmir, linkləri izlənmir, adlar yoxdur */
+$r = $run('/invite/aytac-ve-niyaz-51eedb/panel');
+ok('/invite/<slug>/panel → 404 deyil + «Müştəri paneli»', $r['status'] !== 404 && $r['title'] === 'Müştəri paneli | DigiToy');
+ok('/invite/<slug>/panel → noindex, nofollow', $r['robots'] === 'noindex, nofollow');
+ok('/invite/<slug>/panel → canonical yoxdur', $r['canon'] === '');
+ok('/invite/<slug>/foto əvvəlki kimi noindex, follow', $run('/invite/aytac-ve-niyaz-51eedb/foto')['robots'] === 'noindex, follow');
+ok('/invite/<slug>/bilinmeyen → 404', $run('/invite/aytac-ve-niyaz-51eedb/bilinmeyen')['status'] === 404);
 ok('/ → 404 deyil, ana səhifə canonical', ($h = $run('/'))['status'] !== 404 && $h['canon'] === 'https://digitoy.az/');
 
 @unlink($tmp . '/run.php'); @unlink($tmp . '/seo.php'); @unlink($tmp . '/index.html'); @rmdir($tmp);

@@ -5,6 +5,7 @@
 ══════════════════════════════════════════════════ */
 
 import { buildAutoI18n } from '../data/contentI18n'
+import { ownerHeaders, getOwnerKey } from './ownerKey'
 
 const BASE = import.meta.env.VITE_API_URL || '/api'
 
@@ -21,7 +22,7 @@ export function getAdminToken() {
 }
 
 /* ── Admin sorğularına X-Admin-Token header əlavə et ── */
-function adminHeaders() {
+export function adminHeaders() {
   const token = getAdminToken()
   return token ? { 'X-Admin-Token': token } : {}
 }
@@ -40,21 +41,27 @@ export function getGalleryKey(slug) {
   try { return localStorage.getItem(GALLERY_KEY_PREFIX + slug) || null } catch { return null }
 }
 
-/** Bu slug üçün idarəetmə səlahiyyəti varmı? (admin VƏ YA qalereya tokeni) */
+/** Bu slug üçün idarəetmə səlahiyyəti varmı? (admin, qalereya tokeni VƏ YA
+    Phase 50 «Müştəri paneli» açarı — server üçünü də qəbul edir) */
 export function canManageGallery(slug) {
-  return Boolean(getAdminToken() || getGalleryKey(slug))
+  return Boolean(getAdminToken() || getGalleryKey(slug) || getOwnerKey(slug))
 }
 
 function galleryHeaders(slug) {
   const token = getGalleryKey(slug)
-  return token ? { 'X-Gallery-Token': token } : {}
+  return { ...(token ? { 'X-Gallery-Token': token } : {}), ...ownerHeaders(slug) }
+}
+
+/* Phase 50 — bir dəvətnaməyə aid OXU sorğuları: admin VƏ YA «Müştəri paneli» açarı */
+function inviteHeaders(slug) {
+  return { ...adminHeaders(), ...ownerHeaders(slug) }
 }
 
 /* ── Serverin JSON xəta cavabını istifadəçiyə göstəriləcək xətaya çevir ──
    Backend `message` (Azərbaycanca), `code` və `permanent` qaytarır.
    `permanent: true` = yenidən cəhd etmək mənasızdır (fayl çox böyük,
    format dəstəklənmir və s.) — çağıran tərəf buna görə davranır. */
-async function toApiError(res, fallback) {
+export async function toApiError(res, fallback) {
   let data = null
   try { data = await res.json() } catch { /* JSON deyil */ }
   const err = new Error(data?.message || fallback || `HTTP ${res.status}`)
@@ -756,12 +763,16 @@ export async function getOrdersList(status = 'submitted', limit = 50, offset = 0
   return res.json()
 }
 
-/* ── Draft: autosave (session_id üzrə upsert) ── */
-export async function saveDraft(sessionId, formData, pkg, currentStep) {
+/* ── Draft: autosave (session_id üzrə upsert) ──
+   Phase 50: customerPhone `undefined` olanda sahə göndərilmir və server
+   sütuna toxunmur; '' göndəriləndə nömrə silinir. */
+export async function saveDraft(sessionId, formData, pkg, currentStep, customerPhone) {
+  const body = { session_id: sessionId, form_data: formData, package: pkg, current_step: currentStep }
+  if (customerPhone !== undefined) body.customer_phone = customerPhone
   const res = await fetch(`${BASE}/save_draft.php`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ session_id: sessionId, form_data: formData, package: pkg, current_step: currentStep }),
+    body: JSON.stringify(body),
   })
   if (!res.ok) throw new Error(`save_draft: ${res.status}`)
   return res.json()
@@ -795,10 +806,11 @@ export async function submitDraft(sessionId, formData, pkg, customerPhone = '') 
   return res.json()
 }
 
-/* ── Admin: slug üzrə RSVP cavabları ── */
+/* ── Slug üzrə RSVP cavabları (admin VƏ YA «Müştəri paneli» açarı) ── */
 export async function getRsvpResponses(slug) {
   const res = await fetch(`${BASE}/get_rsvp_responses.php?slug=${encodeURIComponent(slug)}`, {
-    headers: adminHeaders(),
+    headers: inviteHeaders(slug),
+    cache: 'no-store',
   })
   if (!res.ok) throw new Error(`get_rsvp_responses: ${res.status}`)
   return res.json()
@@ -884,10 +896,13 @@ export async function getMediaAudit(slug) {
 ══════════════════════════════════════════════════ */
 
 /* ── Qonaqlar ──
-   Admin tokeni varsa tam siyahı (telefon, status, statistika); yoxdursa
-   server yalnız ad + masa verir (dəvətnamədəki «masanı tap», RSVP). */
+   Admin tokeni varsa tam siyahı (telefon, status, statistika); «Müştəri
+   paneli» açarı ilə telefonsuz tam hesabat; heç biri yoxdursa server yalnız
+   ad + masa verir (dəvətnamədəki «masanı tap», RSVP). */
 export async function getGuests(invitationId) {
-  const res = await fetch(`${BASE}/get_guests.php?invitation_id=${encodeURIComponent(invitationId)}`, { headers: adminHeaders() })
+  const res = await fetch(`${BASE}/get_guests.php?invitation_id=${encodeURIComponent(invitationId)}`, {
+    headers: inviteHeaders(invitationId),
+  })
   if (!res.ok) throw new Error(`get_guests: ${res.status}`)
   return res.json()
 }
@@ -936,11 +951,11 @@ export async function migrateGuests(invitationId, migrateAll = false) {
   return res.json()
 }
 
-/* ── Qonaqları CSV olaraq ixrac et (admin) ── */
+/* ── Qonaqları CSV olaraq ixrac et (admin VƏ YA «Müştəri paneli» açarı) ── */
 export async function exportGuestsCsv(invitationId, mode = 'tables') {
   const res = await fetch(
     `${BASE}/export_guests.php?invitation_id=${encodeURIComponent(invitationId)}&mode=${mode}`,
-    { headers: adminHeaders() }
+    { headers: inviteHeaders(invitationId) }
   )
   if (!res.ok) throw new Error(`export_guests: ${res.status}`)
   const blob = await res.blob()

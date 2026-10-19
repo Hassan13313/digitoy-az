@@ -80,7 +80,7 @@ if ($_origin !== '') {
         /* ⚠ `If-None-Match` və `If-Modified-Since` CORS safelist-də DEYİL:
            preflight tələb edirlər. Onlarsız qalereyanın şərti GET (ETag/304)
            optimallaşdırması cross-origin rejimdə tamamilə sınırdı. */
-        header('Access-Control-Allow-Headers: Content-Type, X-Admin-Token, X-Gallery-Token, Authorization, If-None-Match, If-Modified-Since');
+        header('Access-Control-Allow-Headers: Content-Type, X-Admin-Token, X-Gallery-Token, X-Owner-Token, Authorization, If-None-Match, If-Modified-Since');
         /* Cavab başlıqları cross-origin JS-ə default olaraq GÖRÜNMÜR —
            `res.headers.get('ETag')` null qaytarır və keş heç vaxt qurulmur. */
         header('Access-Control-Expose-Headers: ETag, Last-Modified');
@@ -310,7 +310,7 @@ function rateGate(string $key, int $limit, int $window): bool {
 /* ── Sxem versiyası (Phase 39) ──
    Sütun və ya cədvəl əlavə edəndə BU RƏQƏMİ ARTIR — əks halda miqrasiya
    canlıda işləməz. */
-const SCHEMA_VERSION = 46;
+const SCHEMA_VERSION = 47;
 
 /* ── Cədvəlləri avtomatik yarat ──
    Phase 39 OPTİMİZASİYASI: əvvəl bu funksiya HƏR sorğuda 6 `CREATE TABLE
@@ -658,6 +658,21 @@ function runMigrations(PDO $db): void {
     if (empty($db->query("SHOW COLUMNS FROM draft_invitations LIKE 'deleted_at'")->fetchAll())) {
         try {
             $db->exec("ALTER TABLE draft_invitations ADD COLUMN deleted_at DATETIME DEFAULT NULL");
+        } catch (PDOException $e) {
+            if ((int) ($e->errorInfo[1] ?? 0) !== 1060) throw $e;   /* paralel sorğu artıq əlavə edib */
+        }
+    }
+
+    /* ── Phase 50: invitations.owner_key — «Müştəri paneli» linkinin açarı ──
+       Hər dəvətnamə üçün 64 hex simvolluq təsadüfi açar (owner_auth.php).
+       NƏ ÜÇÜN DB-DƏ (qalereya tokeni kimi stateless DEYİL): admin linki
+       «yeniləyəndə» köhnə link dərhal işləməməlidir — imzalı token bunu bacarmır.
+       ascii_bin: açar müqayisəsi hərf-həssas və collation qarışığından azaddır.
+       ADDITIVE: NULL qəbul edir, açar yalnız admin linki ilk dəfə istəyəndə yaranır.
+       ROLLBACK lazım deyil (köhnə kod sütunu görmür). */
+    if (empty($db->query("SHOW COLUMNS FROM invitations LIKE 'owner_key'")->fetchAll())) {
+        try {
+            $db->exec("ALTER TABLE invitations ADD COLUMN owner_key CHAR(64) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL");
         } catch (PDOException $e) {
             if ((int) ($e->errorInfo[1] ?? 0) !== 1060) throw $e;   /* paralel sorğu artıq əlavə edib */
         }

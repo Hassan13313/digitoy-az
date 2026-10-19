@@ -10,6 +10,7 @@ const GalleryPage      = lazy(() => import('./components/invitation/GalleryPage'
 /* Phase 43 — TV/proyektor rejimi. Ayrı chunk: dəvətnaməni açan qonaq
    bu kodu heç vaxt endirmir. */
 const SlideshowPage    = lazy(() => import('./components/invitation/SlideshowPage'))
+const OwnerPanel       = lazy(() => import('./components/owner/OwnerPanel'))
 const AdminApp         = lazy(() => import('./components/admin/AdminApp'))
 const AdminLoginGate   = lazy(() => import('./components/admin/AdminLoginGate'))
 const TemplatesPage    = lazy(() => import('./components/landing/TemplatesPage'))
@@ -124,6 +125,10 @@ function getSEOConfig(view, { weddingData, slug, legalDoc } = {}) {
     case 'slideshow':
       return { title: 'Slayd Şou | DigiToy', description: 'Toy qalereyasının slayd şou rejimi.', noindex: true, nofollow: true }
 
+    /* Phase 50 — müştərinin şəxsi paneli: indekslənmir, linkləri izlənmir */
+    case 'owner-panel':
+      return { title: 'Müştəri paneli | DigiToy', description: 'Dəvətnamənizin iştirak təsdiqləri, təbrikləri və şəkilləri bir yerdə.', noindex: true, nofollow: true }
+
     case 'admin-panel':
     case 'admin-login':
     case 'admin-review':
@@ -198,6 +203,8 @@ function routeAfterAuth(
     /* Phase 43 — TV/proyektor rejimi. Token tələb etmir: zal ekranını
        açan şəxs onsuz da slug-u bilir və bu səhifə yalnız OXUYUR. */
     if (sub === 'slayd')          { setView('slideshow');    return }
+    /* Phase 50 — «Müştəri paneli»: açar URL fragment-indədir (#k=…), bax owner/OwnerPanel */
+    if (sub === 'panel')          { setView('owner-panel');  return }
 
     const viewParam  = params.get('view')
     const dParam     = params.get('d')
@@ -751,6 +758,7 @@ export default function App() {
   if (view === 'photo')        return <Suspense fallback={<RouteLoader />}><PhotoShare /></Suspense>
   if (view === 'gallery-page') return <Suspense fallback={<RouteLoader />}><GalleryPage /></Suspense>
   if (view === 'slideshow')    return <Suspense fallback={<RouteLoader />}><SlideshowPage /></Suspense>
+  if (view === 'owner-panel')  return <Suspense fallback={<RouteLoader />}><OwnerPanel /></Suspense>
   if (view === 'admin-panel')  return <Suspense fallback={<RouteLoader />}><AdminApp lang={lang} setLang={setLang} /></Suspense>
   if (view === 'admin-login')  return (
     <Suspense fallback={<RouteLoader />}>

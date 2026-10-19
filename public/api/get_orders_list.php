@@ -17,8 +17,9 @@ $limit  = min((int)($_GET['limit']  ?? 50), 100);
 $offset = max((int)($_GET['offset'] ?? 0),  0);
 $search = trim($_GET['search'] ?? '');
 
-$validStatuses = ['submitted', 'approved', 'rejected', 'draft', 'deleted', 'all'];
+$validStatuses = ['submitted', 'approved', 'rejected', 'draft', 'deleted', 'all', 'abandoned'];
 if (!in_array($status, $validStatuses, true)) $status = 'submitted';
+$isAbandoned = $status === 'abandoned';
 
 /* Phase 4 — template_id sutunu SELECT-de istifade olunur; sxem hazir olsun */
 ensureTables();
@@ -31,6 +32,16 @@ $params     = [];
 if ($status === 'all') {
     /* "Hamısı" tabı: draft + deleted xaric */
     $conditions[] = "status NOT IN ('draft', 'deleted')";
+} elseif ($isAbandoned) {
+    /* Phase 50 — «Yarımçıq»: builderdə nömrə qoyub sifarişi GÖNDƏRMƏYƏNLƏR.
+       Eyni sessiyada göndərilmiş/təsdiqlənmiş sifariş varsa (sifarişdən sonra
+       builderə qayıdanda autosave yeni draft yaradır) bu yalançı siqnaldır.
+       Eyni cədvəldir — collation qarışığı yoxdur (bax order_link.php). */
+    $conditions[] = "status = 'draft'";
+    $conditions[] = "customer_phone IS NOT NULL AND customer_phone <> ''";
+    $conditions[] = "NOT EXISTS (SELECT 1 FROM draft_invitations s2
+                     WHERE s2.session_id = draft_invitations.session_id
+                       AND s2.status IN ('submitted', 'approved'))";
 } else {
     $conditions[] = "status = :status";
     $params[':status'] = $status;
@@ -59,9 +70,11 @@ $cntStmt->execute($params);
 $total = (int)$cntStmt->fetchColumn();
 
 /* Siyahı */
-$sql  = "SELECT id, draft_code, package, status, customer_phone, submitted_at, form_data, template_id, approved_slug
+/* Qaralamanın submitted_at-ı NULL-dur — onda son fəaliyyət (updated_at) */
+$sql  = "SELECT id, draft_code, package, status, customer_phone, submitted_at, updated_at, current_step,
+                form_data, template_id, approved_slug
          FROM draft_invitations $where
-         ORDER BY submitted_at DESC
+         ORDER BY COALESCE(submitted_at, updated_at) DESC
          LIMIT :lim OFFSET :off";
 $stmt = $db->prepare($sql);
 foreach ($params as $k => $v) $stmt->bindValue($k, $v);
@@ -95,6 +108,8 @@ foreach ($rows as $row) {
         'status'         => $row['status'],
         'customer_phone' => $row['customer_phone'] ?? '',
         'submitted_at'   => $row['submitted_at'],
+        'updated_at'     => $row['updated_at'],
+        'current_step'   => (int) $row['current_step'],
         'event_type'     => $eventType,
         'names'          => $names ?: '—',
         /* Phase 48 — təsdiqlənmişin CANLI dəvətnaməsi (detal və silmə ilə eyni qayda) */
