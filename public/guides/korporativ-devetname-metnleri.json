@@ -1,0 +1,64 @@
+{
+  "slug": "korporativ-devetname-metnleri",
+  "label": "Korporativ dəvətnamə mətnləri",
+  "title": "Korporativ Tədbir Dəvətnaməsi Mətnləri və Nümunələri | DigiToy",
+  "description": "Korporativ tədbirlər üçün rəsmi dəvətnamə mətnləri: konfrans, açılış, qala gecəsi, yeni il şənliyi və seminar. Kopyalayın və online dəvətnamə ilə göndərin.",
+  "h1": "Korporativ tədbir dəvətnaməsi mətnləri",
+  "updated": "2026-10-21",
+  "intro": [
+    "Korporativ dəvətnamə rəsmi, qısa və konkret olmalıdır: kim dəvət edir, tədbirin adı və məqsədi, vaxt, ünvan və qeydiyyat.",
+    "Aşağıdakı nümunələr şirkətin adından yazılıb — kvadrat mötərizədəki yerləri dəyişin."
+  ],
+  "sections": [
+    {
+      "id": "konfrans",
+      "title": "Konfrans və seminar",
+      "samples": [
+        "Hörmətli [qonağın adı],\n[Şirkətin adı] sizi [tədbirin adı] konfransına dəvət edir. Proqramda [mövzu] üzrə çıxışlar və panel müzakirəsi var.\nTarix: [tarix], saat [saat]\nMəkan: [məkan, ünvan]\nİştirakınızı [son tarix] tarixinədək təsdiqləməyinizi xahiş edirik.",
+        "Hörmətli [qonağın adı],\n[Şirkətin adı] [mövzu] mövzusunda seminar keçirir. Yerlərin sayı məhduddur, ona görə qeydiyyat tələb olunur.\n[tarix], saat [saat], [məkan]"
+      ]
+    },
+    {
+      "id": "acilis",
+      "title": "Açılış və şirkət yubileyi",
+      "samples": [
+        "Hörmətli tərəfdaşımız!\n[Şirkətin adı] [ünvan] ünvanında yeni ofisinin açılışını qeyd edir. Bu əlamətdar gündə sizi də aramızda görməkdən məmnun olarıq.\n[tarix], saat [saat]",
+        "Hörmətli [qonağın adı],\n[Şirkətin adı] [il] illik yubileyini qeyd edir. Bu yolu birlikdə keçdiyimiz tərəfdaşlarımızı təntənəli mərasimə dəvət edirik.\n[tarix], saat [saat], [məkan]"
+      ]
+    },
+    {
+      "id": "qala",
+      "title": "Qala gecəsi və il sonu",
+      "samples": [
+        "[Şirkətin adı] [il] ili yekunlaşdırır.\nSizi əməkdaşlarımız və tərəfdaşlarımızla birlikdə qala gecəsinə dəvət edirik.\n[tarix], saat [saat], [məkan]\nGeyim tərzi: [rəsmi / kokteyl]",
+        "Əziz həmkarlar!\nİli birlikdə uğurla başa vurduq — indi qeyd etmək vaxtıdır. Yeni il korporativ şənliyimizə dəvətlisiniz.\n[tarix], saat [saat], [məkan]\nİştirakınızı linkdən təsdiqləyin."
+      ]
+    },
+    {
+      "id": "nece-yazilir",
+      "title": "Korporativ dəvətnamədə nələr olmalıdır?",
+      "body": [
+        {"list": [
+          "Şirkətin adı;",
+          "Tədbirin adı və formatı — konfrans, açılış, qala gecəsi;",
+          "Tarix, başlama saatı və təxmini müddət;",
+          "Ünvan, xəritə və parkinq imkanı;",
+          "Geyim tərzi;",
+          "Qeydiyyat və ya iştirak təsdiqi üçün son tarix;",
+          "Sual üçün əlaqə şəxsi."
+        ]},
+        "DigiToy-da tədbir növü olaraq «Korporativ»i seçəndə tədbirin adı və təşkilatçı sahələri açılır, dəvətnamənin başlığında tədbirin adı göstərilir."
+      ]
+    }
+  ],
+  "faq": [
+    {"q": "Korporativ dəvətnaməni e-poçtla, yoxsa WhatsApp-la göndərmək daha yaxşıdır?", "a": "Rəsmi tərəfdaşlara e-poçt, əməkdaşlara və tanış qonaqlara WhatsApp daha uyğundur. Online dəvətnamə linkini hər iki kanalda göndərmək olar."},
+    {"q": "Qonaqların sayını necə bilmək olar?", "a": "İştirak təsdiqi ilə: qonaq linkdə «Gələcəm», «Gəlmiyəcəm» və ya «Bəlkə» seçir, siz cavabları real vaxtda görürsünüz."},
+    {"q": "Korporativ dəvətnamə nə vaxt göndərilir?", "a": "Konfrans və qala gecəsi üçün 3–4 həftə əvvəl, daxili şənliklər üçün 1–2 həftə əvvəl. Tədbirdən 1–2 gün əvvəl qısa xatırlatma mesajı iştirakı artırır."}
+  ],
+  "cta": {
+    "title": "Korporativ tədbiriniz üçün online dəvətnamə",
+    "text": "Tədbirin adı, proqramı, məkanı və iştirak təsdiqi bir linkdə — qonaqlara bir dəqiqəyə göndərin."
+  },
+  "related": ["online-devetname-nece-hazirlanir", "ad-gunu-devetnamesi-metnleri", "toy-devetnamesi-metnleri", "nisan-devetnamesi-metnleri"]
+}

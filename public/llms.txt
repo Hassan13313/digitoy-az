@@ -20,6 +20,15 @@ açır — heç bir tətbiq quraşdırmadan.
 - [Şablonlar](https://digitoy.az/templates): bütün dəvətnamə dizaynları və canlı önbaxış
 - [Nümunə dəvətnamə](https://digitoy.az/demo): hazır dəvətnamənin canlı nümunəsi
 
+## Bələdçilər və dəvətnamə mətnləri
+
+- [Online dəvətnamə necə hazırlanır](https://digitoy.az/online-devetname-nece-hazirlanir): online (elektron) dəvətnamə nədir, kağızdan fərqi, 5 addımda hazırlanması, qiymətlər
+- [Toy dəvətnaməsi mətnləri](https://digitoy.az/toy-devetnamesi-metnleri): rəsmi, romantik, şeirli, WhatsApp və kəbin mərasimi üçün hazır mətnlər
+- [Nişan dəvətnaməsi mətnləri](https://digitoy.az/nisan-devetnamesi-metnleri): ailələrin və cütlüyün adından nişan dəvəti nümunələri
+- [Xına dəvətnaməsi mətnləri](https://digitoy.az/xina-devetnamesi-metnleri): xına gecəsi və qızlar gecəsi üçün mətnlər
+- [Ad günü dəvətnaməsi mətnləri](https://digitoy.az/ad-gunu-devetnamesi-metnleri): uşaq ad günü, 1 yaş, yubiley və sürpriz parti mətnləri
+- [Korporativ dəvətnamə mətnləri](https://digitoy.az/korporativ-devetname-metnleri): konfrans, açılış, qala gecəsi və il sonu şənliyi üçün rəsmi mətnlər
+
 ## Əsas xüsusiyyətlər
 
 - İştirak Təsdiqi (RSVP) — qonaqlar iştirakını onlayn təsdiqləyir

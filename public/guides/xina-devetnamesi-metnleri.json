@@ -1,0 +1,71 @@
+{
+  "slug": "xina-devetnamesi-metnleri",
+  "label": "Xına dəvətnaməsi mətnləri",
+  "title": "Xına Dəvətnaməsi Mətnləri və Nümunələri (2026) | DigiToy",
+  "description": "Xına gecəsi üçün hazır dəvətnamə mətnləri: ənənəvi, şeirli, qızlar gecəsi və qısa WhatsApp nümunələri. Kopyalayın və online xına dəvətnaməsi hazırlayın.",
+  "h1": "Xına dəvətnaməsi mətnləri",
+  "updated": "2026-10-21",
+  "intro": [
+    "Xına gecəsi toydan əvvəl keçirilən, mahnılı, oyunlu və çox səmimi məclisdir. Dəvətnamə mətni də buna uyğun isti və şən olmalıdır.",
+    "Aşağıdakı nümunələrdə kvadrat mötərizədəki yerləri öz məlumatlarınızla əvəz edin."
+  ],
+  "sections": [
+    {
+      "id": "enenevi",
+      "title": "Ənənəvi xına dəvətnaməsi",
+      "body": ["Gəlinin ailəsinin adından yazılan mətn."],
+      "samples": [
+        "Hörmətli [qonağın adı]!\nQızımız [Gəlinin adı] üçün xına gecəsi təşkil edirik. Bu şirin gecədə sizi də aramızda görmək istəyirik.\n[tarix], saat [saat], [məkan]\nHörmətlə, [ailənin adı] ailəsi",
+        "Xına yaxılır, ürəklər şad olur.\n[Gəlinin adı] gəlin köçməzdən əvvəl qız evində keçirilən məclisə sizi dəvət edirik.\n[tarix], saat [saat], [məkan]",
+        "Əziz qonaqlar!\nXına gecəsi qız evinin ən şən gecəsidir. [Gəlinin adı] üçün qurduğumuz məclisdə xına yaxacaq, mahnı oxuyub oynayacağıq — sizi də gözləyirik.\n[tarix], saat [saat], [məkan]\nHörmətlə, [ailənin adı] ailəsi"
+      ]
+    },
+    {
+      "id": "seirli",
+      "title": "Şeirli xına dəvətnaməsi",
+      "samples": [
+        "Xına gəldi, nur gəldi,\nQız evinə gül gəldi.\nToy öncəsi bu gecə\nHamı şad-xürrəm gəldi.\n\nSizi [Gəlinin adı] üçün keçirilən xına gecəsinə dəvət edirik.\n[tarix], saat [saat], [məkan]"
+      ]
+    },
+    {
+      "id": "qizlar-gecesi",
+      "title": "Qızlar gecəsi",
+      "body": ["Rəfiqələr arasında keçən, daha müasir xına məclisi üçün."],
+      "samples": [
+        "Qızlar, hazır olun!\n[Gəlinin adı] subay həyatı ilə vidalaşır — xına, musiqi və çoxlu rəqs olacaq.\n[tarix], saat [saat], [məkan]\nGeyim: [rəng] tonlarında"
+      ]
+    },
+    {
+      "id": "whatsapp",
+      "title": "Qısa WhatsApp mesajı",
+      "samples": [
+        "Salam! [tarix] tarixində [Gəlinin adı] üçün xına gecəsi keçiririk, sizi də gözləyirik. Ünvan və iştirak təsdiqi linkdədir: [link]"
+      ]
+    },
+    {
+      "id": "nece-yazilir",
+      "title": "Xına dəvətnaməsinə nə yazılır?",
+      "body": [
+        "Xına gecəsinin dəvətnaməsi toy dəvətnaməsindən qısa və daha səmimi olur. Əsas məlumatlar:",
+        {"list": [
+          "Gəlinin adı;",
+          "Tarix və saat — xına gecəsi adətən axşam keçirilir;",
+          "Məkan — qız evi, restoran və ya zal;",
+          "Geyim istəyi — bəzi ailələr qonaqlardan qırmızı və ya milli geyim istəyir;",
+          "İştirak təsdiqi."
+        ]},
+        "DigiToy-da xına dəvətnaməsi üçün tədbir növü olaraq «Digər»i seçib adını «Xına gecəsi» yazmaq kifayətdir."
+      ]
+    }
+  ],
+  "faq": [
+    {"q": "Xına gecəsinə kimlər dəvət olunur?", "a": "Ənənəvi olaraq gəlinin qohumları, rəfiqələri və qonşu qadınlar. Bəzi ailələr bəy tərəfini də dəvət edir — bunu dəvətnamədə aydın yazmaq yaxşıdır."},
+    {"q": "Xına dəvətnaməsini nə vaxt göndərmək lazımdır?", "a": "Toy dəvətnaməsi ilə eyni vaxtda və ya xına gecəsindən 1–2 həftə əvvəl."},
+    {"q": "Xına üçün ayrıca dəvətnamə lazımdırmı?", "a": "Qonaqların hamısı həm xınaya, həm toya gəlirsə, hər iki tədbiri bir dəvətnamədə göstərmək olar. Qonaq siyahıları fərqlidirsə, ayrıca qısa dəvətnamə daha aydın olur."}
+  ],
+  "cta": {
+    "title": "Online xına dəvətnaməsi hazırlayın",
+    "text": "Şablonu seçin, mətni yazın və linki rəfiqələrinizə WhatsApp-da göndərin."
+  },
+  "related": ["toy-devetnamesi-metnleri", "nisan-devetnamesi-metnleri", "online-devetname-nece-hazirlanir", "ad-gunu-devetnamesi-metnleri"]
+}

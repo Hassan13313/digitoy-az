@@ -16,6 +16,7 @@ import { getFaqItems } from '../../data/faq'
 import { buildPricingPackages, UI as PKG_UI, VAGZALI_NOTE } from '../../data/packageCopy'
 import { SOCIAL_LINKS, CONTACT_EMAIL } from '../../data/constants'
 import { LEGAL_DOCS } from '../../data/legal/docs'
+import { GUIDES } from '../../data/guides'
 import { legalUi } from '../../data/legal/ui'
 import { spaClick, navigateSpa } from '../../utils/siteRoutes'
 import { consent } from '../../utils/consent'
@@ -277,6 +278,10 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
   const legalLinks = LEGAL_DOCS.map((d) => ({
     id: d.id, href: d.path, label: legal[d.id], onClick: (e) => spaClick(e, d.path),
   }))
+  /* Phase 52 — bələdçilər yalnız Azərbaycancadır, ona görə adlar tərcümə olunmur */
+  const guideLinks = GUIDES.map((g) => ({
+    id: g.slug, href: `/${g.slug}`, label: g.label, onClick: (e) => spaClick(e, `/${g.slug}`),
+  }))
   const motionStep = { duration: 0.35, ease: [0.32, 0, 0.68, 1] }
 
   return (
@@ -392,6 +397,7 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
         onNavigate={handleNavigate}
         onLogoClick={handleLogoClick}
         legalLinks={legalLinks}
+        guideLinks={guideLinks}
         cookiesLabel={legal.cookies}
         onCookieSettings={() => consent.openSettings()}
       />

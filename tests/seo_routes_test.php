@@ -36,6 +36,9 @@ $tmp = sys_get_temp_dir() . '/dt_seo_routes_' . getmypid();
 @mkdir($tmp);
 copy($root . '/public/seo.php', $tmp . '/seo.php');
 copy($root . '/index.html', $tmp . '/index.html');
+@mkdir($tmp . '/guides');
+$guideFiles = glob($root . '/public/guides/*.json') ?: [];
+foreach ($guideFiles as $f) copy($f, $tmp . '/guides/' . basename($f));
 /* Windows-da escapeshellarg dırnaqları silir → kod -r ilə yox, ayrıca faylla ötürülür */
 file_put_contents($tmp . '/run.php', '<?php $_SERVER["REQUEST_URI"] = $argv[1]; ob_start(); include __DIR__ . "/seo.php";'
     . ' $o = ob_get_clean(); echo (int) http_response_code(), "\n", $o;');
@@ -89,6 +92,36 @@ foreach (['/invite/aytac-ve-niyaz-51eedb', '/invite/aytac-ve-niyaz-51eedb/panel'
     ok("$p → <noscript> YOXDUR (şəxsi/daxili/hüquqi)", !str_contains($run($p)['html'], '<noscript>'));
 }
 
+/* Phase 52 — bələdçilər: public/guides/<slug>.json-dan meta, schema, <noscript>, daxili data */
+ok('bələdçi faylları var (≥ 6)', count($guideFiles) >= 6);
+foreach ($guideFiles as $f) {
+    $g = json_decode(file_get_contents($f), true);
+    $p = '/' . $g['slug'];
+    $r = $run($p . '/');
+    $h = $r['html'];
+    ok("$p → 404 deyil, öz title/canonical-ı, indekslənir", $r['status'] !== 404 && $r['title'] === htmlspecialchars($g['title'], ENT_QUOTES)
+        && $r['canon'] === 'https://digitoy.az' . $p && $r['robots'] === 'index, follow');
+    ok("$p → og:type article", str_contains($h, '<meta property="og:type" content="article" />'));
+    ok("$p → Article + BreadcrumbList + FAQPage", str_contains($h, '"@type":"Article"') && str_contains($h, '"@type":"BreadcrumbList"')
+        && substr_count($h, '"@type":"Question"') === count($g['faq']));
+    $first = $g['sections'][0]['samples'][0] ?? null;
+    ok("$p → <noscript>: H1 + bütün bölmələr" . ($first ? ' + ilk nümunə' : ''),
+        str_contains($h, '<noscript><main') && str_contains($h, '<h1>' . htmlspecialchars($g['h1'], ENT_QUOTES | ENT_HTML5) . '</h1>')
+        && substr_count($h, '<h2>') >= count($g['sections'])
+        && (!$first || str_contains($h, nl2br(htmlspecialchars($first, ENT_QUOTES | ENT_HTML5), false))));
+    ok("$p → daxili JSON data oxunur, slug eynidir",
+        preg_match('#<script id="dt-guide-data" type="application/json">(.*?)</script>#s', $h, $m) === 1
+        && (json_decode($m[1], true)['slug'] ?? '') === $g['slug']);
+}
+ok('/ → <noscript>-da bələdçi linkləri', str_contains($run('/')['html'], 'Bələdçilər: <a href="/'));
+ok('/toy-devetnamesi-metnleri/x → 404', $run('/toy-devetnamesi-metnleri/x')['status'] === 404);
+ok('/bu-beledci-yoxdur → 404, data yoxdur', ($r = $run('/bu-beledci-yoxdur'))['status'] === 404 && !str_contains($r['html'], 'dt-guide-data'));
+ok('/..%2Fapi → 404 (fayl yolundan çıxmaq olmur)', $run('/..%2Fapi')['status'] === 404);
+ok('/mexfilik → bələdçi datası yoxdur', !str_contains($run('/mexfilik')['html'], 'dt-guide-data'));
+
+/* müvəqqəti qovluğu təmizlə — yalnız yuxarıda özümüzün köçürdüyü fayllar */
+foreach ($guideFiles as $f) @unlink($tmp . '/guides/' . basename($f));
+@rmdir($tmp . '/guides');
 @unlink($tmp . '/run.php'); @unlink($tmp . '/seo.php'); @unlink($tmp . '/index.html'); @rmdir($tmp);
 
 echo "\n$passed ok, $failed FAIL\n";

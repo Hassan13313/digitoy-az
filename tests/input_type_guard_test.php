@@ -78,7 +78,10 @@ echo "test.digitoy.az noindex (.htaccess, statik)\n";
 $ht = file_get_contents($root . '/.htaccess');
 check('staging hostu SetEnvIf ilə tanınır', (bool) preg_match('/SetEnvIfNoCase\s+Host\s+\^test\\\\\.digitoy\\\\\.az\S*\s+DIGITOY_STAGING/', $ht));
 check('X-Robots-Tag yalnız staging env-ində', (bool) preg_match('/Header always set X-Robots-Tag "noindex, nofollow" env=DIGITOY_STAGING/', $ht));
-check('şərtsiz X-Robots-Tag yoxdur (prod indekslənir)', preg_match_all('/X-Robots-Tag/', $ht) === preg_match_all('/X-Robots-Tag[^\n]*env=DIGITOY_STAGING/', $ht));
+check('şərtsiz X-Robots-Tag yoxdur (prod indekslənir)', preg_match_all('/X-Robots-Tag/', $ht) === preg_match_all('/X-Robots-Tag[^\n]*env=DIGITOY_(STAGING|NOINDEX)/', $ht));
+/* Phase 52: DIGITOY_NOINDEX yalnız bələdçi JSON-larına (/guides/) aiddir, səhifələrə yox */
+check('DIGITOY_NOINDEX yalnız /guides/ üçün', preg_match_all('/SetEnvIf\S*\s+\S+\s+\S+\s+DIGITOY_NOINDEX/', $ht) === 1
+    && (bool) preg_match('/SetEnvIf\s+Request_URI\s+\^\/guides\/\s+DIGITOY_NOINDEX=1/', $ht));
 check('<If> bloku işlədilmir (hostinqdə sınanmayıb)', !preg_match('/<If\s/i', $ht));
 
 echo "\n$pass ok, $fail fail\n";

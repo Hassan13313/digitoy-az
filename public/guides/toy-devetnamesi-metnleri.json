@@ -1,0 +1,104 @@
+{
+  "slug": "toy-devetnamesi-metnleri",
+  "label": "Toy dəvətnaməsi mətnləri",
+  "title": "Toy Dəvətnaməsi Mətnləri və Nümunələri (2026) | DigiToy",
+  "description": "Toy dəvətnaməsi üçün hazır mətnlər: rəsmi, romantik, şeirli, qısa WhatsApp mesajı və kəbin mərasimi nümunələri. Kopyalayın və online dəvətnamədə işlədin.",
+  "h1": "Toy dəvətnaməsi mətnləri və nümunələri",
+  "updated": "2026-10-21",
+  "intro": [
+    "Toy dəvətnaməsinin mətni qonağın ilk oxuduğu sözdür: kim dəvət edir, kimin toyudur, nə vaxt və harada. Aşağıda müxtəlif üslubda hazır mətnlər var — rəsmi, romantik, şeirli, qısa WhatsApp mesajı və kəbin mərasimi üçün.",
+    "Kvadrat mötərizədəki yerləri öz məlumatlarınızla əvəz edin. Mətni kağız dəvətnamədə də işlədə bilərsiniz; online dəvətnamədə isə tarix, məkan xəritəsi, geri sayım və iştirak təsdiqi mətnin altında ayrıca göstərilir."
+  ],
+  "sections": [
+    {
+      "id": "resmi",
+      "title": "Rəsmi və klassik mətnlər",
+      "body": ["Valideynlərin adından yazılan ənənəvi mətn. Böyük qohumlar və ailə dostları üçün ən uyğun seçimdir."],
+      "samples": [
+        "Hörmətli [qonağın adı]!\nSizi oğlumuz [Bəyin adı] və gəlinimiz [Gəlinin adı] üçün təşkil etdiyimiz toy mərasiminə dəvət edirik.\nTarix: [tarix], saat [saat]\nMəkan: [şadlıq sarayının adı]\nSizi aramızda görməkdən məmnun olarıq.\nHörmətlə, [ailənin adı] ailəsi",
+        "Əziz qonaqlar!\nQızımız [Gəlinin adı] və kürəkənimiz [Bəyin adı] həyatlarını birləşdirirlər. Bu xoşbəxt günümüzdə yanımızda olmağınızı arzu edirik.\n[tarix], saat [saat], [məkan]\nHörmətlə, [ailənin adı] ailəsi",
+        "[Bəyin ailəsi] və [Gəlinin ailəsi] ailələri sizi övladları [Bəyin adı] və [Gəlinin adı] üçün keçirilən toy mərasiminə hörmətlə dəvət edir.\n[tarix], saat [saat]\n[məkan], [ünvan]"
+      ]
+    },
+    {
+      "id": "romantik",
+      "title": "Romantik və müasir mətnlər",
+      "body": ["Cütlüyün öz adından yazılır. Dostlar və həmyaşıdlar üçün daha səmimi səslənir."],
+      "samples": [
+        "Biz evlənirik!\n[Bəyin adı] və [Gəlinin adı]\nHekayəmizin ən gözəl gününü sizinlə bölüşmək istəyirik.\n[tarix], saat [saat]\n[məkan]\nGəlişiniz bizim üçün ən gözəl hədiyyədir.",
+        "Bir «bəli» ilə başlayan hekayəmiz yeni səhifəyə keçir.\nSizi [tarix] tarixində toyumuzda görmək istəyirik.\nSaat [saat], [məkan].\nSevgiylə, [Bəyin adı] və [Gəlinin adı]",
+        "İki ürək, bir yol.\n[Bəyin adı] və [Gəlinin adı] sizi ömürlərinin ən xoşbəxt gününə dəvət edir.\n[tarix], [məkan]\nZəhmət olmasa, iştirakınızı [son tarix] tarixinədək təsdiqləyin."
+      ]
+    },
+    {
+      "id": "seirli",
+      "title": "Şeirli toy dəvətnaməsi mətnləri",
+      "body": ["Qısa bənd mətnə bayram ovqatı qatır. Şeiri əvvələ, dəvət cümləsini isə sonuna yazın."],
+      "samples": [
+        "Bağçamızda gül açdı,\nÜrəklərə nur saçdı.\nİki könül bir oldu,\nToya bir qapı açdı.\n\nSizi [Bəyin adı] və [Gəlinin adı] üçün qurulan toy məclisimizə dəvət edirik.\n[tarix], saat [saat], [məkan]",
+        "Sevinc dolu bu günü\nSizsiz necə qeyd edək?\nGəlin, bizə qoşulun,\nXoşbəxtliyi bölüşək.\n\n[Bəyin adı] və [Gəlinin adı]\n[tarix], saat [saat], [məkan]"
+      ]
+    },
+    {
+      "id": "whatsapp",
+      "title": "Qısa WhatsApp mesajı",
+      "body": ["Online dəvətnamə linki ilə birlikdə göndərilən bir-iki cümlə. Ətraflı məlumat linkin özündə olduğu üçün mesaj qısa qalmalıdır."],
+      "samples": [
+        "Salam! [tarix] tarixində toyumuz olacaq, sizi də aramızda görmək istəyirik. Dəvətnaməmiz bu linkdədir: [link]",
+        "Əziz [qonağın adı], [Bəyin adı] və [Gəlinin adı] sizi toylarına dəvət edir! Tarix, məkan və iştirak təsdiqi linkdədir: [link]",
+        "Hörmətli [qonağın adı], oğlumuzun toyuna dəvət edirik. Zəhmət olmasa, linkə daxil olub gələcəyinizi təsdiqləyin: [link]"
+      ]
+    },
+    {
+      "id": "kebin",
+      "title": "Kəbin və dini mərasim mətnləri",
+      "body": ["Kəbin kəsilməsi və ya mövludla birgə keçirilən məclislər üçün. Mətnə «Bismillah» ilə başlamaq ənənəvidir."],
+      "samples": [
+        "Bismillahir-Rəhmanir-Rəhim.\nUca Allahın izni ilə [Bəyin adı] və [Gəlinin adı] arasında kəbin kəsiləcək. Bu xeyirli məclisdə sizi də görmək istəyirik.\n[tarix], saat [saat], [məkan]\nHörmətlə, [ailənin adı] ailəsi",
+        "Allahın xeyir-duası ilə övladlarımız [Bəyin adı] və [Gəlinin adı] ailə qururlar. Kəbin mərasimimizə və ardınca keçiriləcək toy məclisimizə dəvətlisiniz.\n[tarix], [məkan]"
+      ]
+    },
+    {
+      "id": "kicik-toy",
+      "title": "Kiçik toy və ailəvi məclis",
+      "body": ["Az qonaqlı, ailə arasında keçən məclislər üçün daha səmimi mətn."],
+      "samples": [
+        "Əziz [qonağın adı],\nToyumuzu kiçik, ailəvi bir məclisdə qeyd edirik və ən yaxınlarımızın yanımızda olmasını istəyirik. Siz də onlardansınız.\n[tarix], saat [saat], [məkan]\n[Bəyin adı] və [Gəlinin adı]"
+      ]
+    },
+    {
+      "id": "nece-yazilir",
+      "title": "Toy dəvətnaməsinə nələr yazılır?",
+      "body": [
+        "Üslubdan asılı olmayaraq qonaq dəvətnaməni oxuyanda bu suallara cavab tapmalıdır:",
+        {"list": [
+          "Kim dəvət edir — valideynlər, cütlük və ya hər iki ailə;",
+          "Kimin toyudur — bəyin və gəlinin adı;",
+          "Nə vaxt — gün, ay, il və başlama saatı;",
+          "Harada — şadlıq sarayının adı və ünvanı, online dəvətnamədə xəritə ilə;",
+          "Cavab nə vaxta qədər gözlənilir — iştirak təsdiqi üçün son tarix;",
+          "Əlavə qeydlər — geyim tərzi, uşaqlarla bağlı istək və ya nəqliyyat."
+        ]},
+        "Online dəvətnamədə bu məlumatların çoxu ayrıca bölmələrdə görünür: geri sayım, Google Maps və Waze ilə yol, tədbirin proqramı və iştirak təsdiqi düyməsi. Ona görə əsas mətn qısa və isti qala bilər."
+      ]
+    },
+    {
+      "id": "ne-vaxt",
+      "title": "Dəvətnamə nə vaxt göndərilir?",
+      "body": [
+        "Toy dəvətnaməsini adətən tədbirdən 3–4 həftə əvvəl göndərirlər; başqa şəhər və ya ölkədən gələn qonaqlara 1,5–2 ay əvvəl xəbər vermək yaxşıdır.",
+        "Online dəvətnamədə qonaqlar iştiraklarını linkdən təsdiqləyir, siz də cavabları bir siyahıda görürsünüz. Bu, şadlıq sarayına dəqiq qonaq sayını vaxtında vermək üçün vacibdir."
+      ]
+    }
+  ],
+  "faq": [
+    {"q": "Toy dəvətnaməsini kimin adından yazmaq lazımdır?", "a": "Ənənəvi olaraq toyu təşkil edən ailənin — çox vaxt bəyin valideynlərinin — adından yazılır. Cütlük toyu özü təşkil edirsə, mətni öz adından yaza bilər. Hər iki ailənin adından yazmaq da qəbul olunur."},
+    {"q": "WhatsApp-da dəvətnamə göndərmək hörmətsizlik sayılırmı?", "a": "Xeyr, bu artıq geniş yayılıb. Hörmət mətndən və şəxsi müraciətdən gəlir: qonağın adını yazın, böyük qohumlara isə əlavə olaraq zəng edin. Online dəvətnamə linkində qonaq tarixi, məkanı və xəritəni bir yerdə görür."},
+    {"q": "Mətni sonradan dəyişmək olarmı?", "a": "Kağız dəvətnamədə yox. Online dəvətnamədə isə bəli: tarix, saat və ya məkan dəyişsə, eyni link yenilənmiş məlumatı göstərir."}
+  ],
+  "cta": {
+    "title": "Mətni seçdiniz? Dəvətnaməni hazırlayın",
+    "text": "DigiToy-da online toy dəvətnaməsi 59 ₼-dan: şablonu seçin, mətni və məlumatları yazın, linki WhatsApp-da göndərin."
+  },
+  "related": ["online-devetname-nece-hazirlanir", "nisan-devetnamesi-metnleri", "xina-devetnamesi-metnleri", "ad-gunu-devetnamesi-metnleri"]
+}

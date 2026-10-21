@@ -57,7 +57,7 @@ for (const d of LEGAL_DOCS) {
 }
 eq('id-lər təkrarsızdır', new Set(LEGAL_DOCS.map((d) => d.id)).size, LEGAL_DOCS.length)
 const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])
-eq('sitemap: 6 URL', locs.length, 6)
+eq('sitemap: 12 URL (6 əsas + 6 bələdçi, Phase 52)', locs.length, 12)
 ok('sitemap: urlset bağlanır', sitemap.trim().endsWith('</urlset>'))
 
 /* ── 4. index.html Organization JSON-LD ── */

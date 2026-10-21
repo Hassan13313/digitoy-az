@@ -1,0 +1,74 @@
+{
+  "slug": "nisan-devetnamesi-metnleri",
+  "label": "Nişan dəvətnaməsi mətnləri",
+  "title": "Nişan Dəvətnaməsi Mətnləri və Nümunələri (2026) | DigiToy",
+  "description": "Nişan dəvətnaməsi üçün hazır mətnlər: ailələrin adından, romantik, şeirli və qısa WhatsApp nümunələri. Kopyalayın və online nişan dəvətnaməsi hazırlayın.",
+  "h1": "Nişan dəvətnaməsi mətnləri və nümunələri",
+  "updated": "2026-10-21",
+  "intro": [
+    "Nişan iki ailənin rəsmi olaraq qohumlaşdığı gündür, ona görə dəvətnamə mətni də çox vaxt ailələrin adından yazılır. Cütlüyün öz adından yazılan müasir mətnlər isə dostlar arasında daha səmimi qarşılanır.",
+    "Aşağıdakı nümunələrdə kvadrat mötərizədəki yerləri öz məlumatlarınızla əvəz etmək kifayətdir."
+  ],
+  "sections": [
+    {
+      "id": "aileler",
+      "title": "Ailələrin adından",
+      "body": ["Ənənəvi nişan mərasimi üçün rəsmi mətn."],
+      "samples": [
+        "Hörmətli [qonağın adı]!\nOğlumuz [Bəyin adı] ilə [Gəlinin adı] nişanlanır. Bu xoş gündə sizi də yanımızda görmək istəyirik.\n[tarix], saat [saat], [məkan]\nHörmətlə, [ailənin adı] ailəsi",
+        "[Bəyin ailəsi] və [Gəlinin ailəsi] ailələri sizi övladları [Bəyin adı] və [Gəlinin adı] üçün keçirilən nişan mərasiminə dəvət edir.\n[tarix], saat [saat]\n[məkan]"
+      ]
+    },
+    {
+      "id": "romantik",
+      "title": "Cütlüyün adından",
+      "body": ["Müasir, yüngül və səmimi mətnlər."],
+      "samples": [
+        "O, «hə» dedi!\n[Bəyin adı] və [Gəlinin adı] nişanlanır və bu sevinci sizinlə bölüşmək istəyir.\n[tarix], saat [saat], [məkan]",
+        "Üzüklər hazırdır, ürəklər də.\nNişan məclisimizə gəlin, bu anı birlikdə yaşayaq.\n[tarix], [məkan]\n[Bəyin adı] və [Gəlinin adı]"
+      ]
+    },
+    {
+      "id": "seirli",
+      "title": "Şeirli nişan dəvətnaməsi",
+      "body": ["Dörd misralıq bənd və altında dəvət cümləsi."],
+      "samples": [
+        "Barmaqda bir üzük var,\nÜrəkdə min arzu var.\nBu gün nişan günüdür,\nSizin üçün də yer var.\n\n[Bəyin adı] və [Gəlinin adı]\n[tarix], saat [saat], [məkan]"
+      ]
+    },
+    {
+      "id": "whatsapp",
+      "title": "Qısa WhatsApp mesajı",
+      "body": ["Dəvətnamə linki ilə birlikdə göndərmək üçün."],
+      "samples": [
+        "Salam! [tarix] tarixində nişanımız olacaq, sizi də gözləyirik. Ətraflı məlumat və iştirak təsdiqi: [link]",
+        "Əziz [qonağın adı], [Bəyin adı] və [Gəlinin adı] nişanlanır! Məclisə dəvətlisiniz, detallar linkdədir: [link]"
+      ]
+    },
+    {
+      "id": "nece-yazilir",
+      "title": "Nişan dəvətnaməsində nələr olmalıdır?",
+      "body": [
+        {"list": [
+          "Kimin adından dəvət olunur — ailələr və ya cütlük;",
+          "Nişanlananların adları;",
+          "Tarix və başlama saatı;",
+          "Məkan — ev, restoran və ya zal, online dəvətnamədə xəritə ilə;",
+          "Geyim tərzi, əgər xüsusi istək varsa;",
+          "İştirak təsdiqi üçün son tarix."
+        ]},
+        "Nişanda qonaq sayı toya nisbətən az olur və hər yer önəmlidir. İştirak təsdiqi ilə dəqiq sayı əvvəlcədən bilmək süfrəni və xərcləri planlamağa kömək edir."
+      ]
+    }
+  ],
+  "faq": [
+    {"q": "Nişan dəvətnaməsi nə vaxt göndərilir?", "a": "Adətən nişandan 2–3 həftə əvvəl. Qonaqlar yalnız yaxın qohum və dostlardırsa, 10 gün də kifayətdir."},
+    {"q": "Nişan və toy üçün eyni dəvətnamədən istifadə etmək olarmı?", "a": "Dizaynı eyni saxlamaq olar, amma mətn və tarix fərqli olmalıdır. DigiToy-da tədbir növü kimi «Nişan» seçiləndə dəvətnamənin başlığı və geri sayımı nişana uyğunlaşır."},
+    {"q": "Nişan dəvətnaməsini kim göndərir?", "a": "Çox vaxt məclisi təşkil edən ailə göndərir. Müasir nişanlarda cütlük dəvətnaməni öz adından da göndərə bilər."}
+  ],
+  "cta": {
+    "title": "Online nişan dəvətnaməsi hazırlayın",
+    "text": "Şablonu seçin, mətni yazın və linki qonaqlara WhatsApp-da göndərin — iştirak təsdiqləri bir siyahıda toplanır."
+  },
+  "related": ["toy-devetnamesi-metnleri", "xina-devetnamesi-metnleri", "online-devetname-nece-hazirlanir", "ad-gunu-devetnamesi-metnleri"]
+}

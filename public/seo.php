@@ -50,6 +50,7 @@ $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $path = rtrim($path, '/');
 if ($path === '') $path = '/';
 $legal = seoLegalPages()[$path] ?? null;   /* Phase 47: [title, description] və ya null */
+$guide = $legal ? null : seoGuide($path);  /* Phase 52: public/guides/<slug>.json və ya null */
 
 /* ── Marşruta görə meta ──
    `index` sahəsi YALNIZ ictimai marketinq səhifələri üçün true-dur.
@@ -81,6 +82,12 @@ if ($path === '/') {
     /* Phase 47 — hüquqi səhifələr: ictimai, indekslənir */
     [$meta['title'], $meta['desc']] = $legal;
     $meta['canon'] = SITE . $path;
+} elseif ($guide) {
+    /* Phase 52 — bələdçi / dəvətnamə mətnləri: ictimai, indekslənir */
+    $meta['title']  = $guide['title'];
+    $meta['desc']   = $guide['description'];
+    $meta['canon']  = SITE . $path;
+    $meta['ogtype'] = 'article';
 } elseif (preg_match('#^/invite/([a-zA-Z0-9\-]{2,120})(?:/(foto|qalereya-idare|slayd|panel))?$#', $path, $m)) {
     $slug = $m[1];
     $sub  = $m[2] ?? '';
@@ -191,12 +198,30 @@ function seoHomeFaq(): array {
     Yalnız indekslənən marketinq səhifələri; qalan marşrutlar üçün ''.
     Mətnlər səhifədəkilərlə eynidir: hero — src/data/landingCopy.js,
     şablonlar — TemplatesPage.jsx UI.az (tests/seo_keywords_test.mjs). */
-function seoNoscript(string $path, callable $e): string {
+function seoNoscript(string $path, callable $e, ?array $guide = null): string {
     $nav = '<p><a href="/">Ana səhifə</a> · <a href="/templates">Dəvətnamə şablonları</a> · '
          . '<a href="/demo">Nümunə dəvətnamə</a> · <a href="https://wa.me/994992133696">WhatsApp: +994 99 213 36 96</a> · '
          . '<a href="/mexfilik">Məxfilik</a> · <a href="/sertler">Şərtlər</a></p>';
+    $links = [];
+    foreach (seoGuideLinks() as $slug => $label) $links[] = '<a href="/' . $e($slug) . '">' . $e($label) . '</a>';
+    if ($links) $nav .= '<p>Bələdçilər: ' . implode(' · ', $links) . '</p>';
 
-    if ($path === '/') {
+    if ($guide) {
+        /* Phase 52 — bələdçinin bütün mətni (GuidePage ilə eyni JSON) */
+        $body = '<h1>' . $e($guide['h1']) . '</h1>' . seoBlocks($guide['intro'] ?? [], $e);
+        foreach ($guide['sections'] as $s) {
+            $body .= '<h2>' . $e($s['title'] ?? '') . '</h2>' . seoBlocks($s['body'] ?? [], $e);
+            foreach ($s['samples'] ?? [] as $t) $body .= '<blockquote><p>' . nl2br($e($t), false) . '</p></blockquote>';
+        }
+        if (!empty($guide['faq'])) {
+            $body .= '<h2>Tez-tez verilən suallar</h2>';
+            foreach ($guide['faq'] as $f) $body .= '<h3>' . $e($f['q'] ?? '') . '</h3><p>' . $e($f['a'] ?? '') . '</p>';
+        }
+        if (!empty($guide['cta']['title'])) {
+            $body .= '<h2>' . $e($guide['cta']['title']) . '</h2><p>' . $e($guide['cta']['text'] ?? '')
+                   . ' <a href="/">Dəvətnaməni hazırla</a></p>';
+        }
+    } elseif ($path === '/') {
         $faq = '';
         foreach (seoHomeFaq() as [$q, $a]) $faq .= '<h3>' . $e($q) . '</h3><p>' . $e($a) . '</p>';
         $body = '<h1>Rəqəmsal Toy Dəvətnamənizi Özünüz Yaradın</h1>'
@@ -215,6 +240,42 @@ function seoNoscript(string $path, callable $e): string {
     return '<noscript><main style="max-width:760px;margin:40px auto;padding:0 16px;line-height:1.6">'
          . $body . '<p>Saytın bütün imkanları üçün brauzerinizdə JavaScript-i aktiv edin.</p>' . $nav
          . '</main></noscript>';
+}
+
+/** Phase 52 — mətn blokları: sətir → <p>, {list} → <ul>, {steps} → <ol> (GuidePage Body ilə eyni). */
+function seoBlocks(array $blocks, callable $e): string {
+    $html = '';
+    foreach ($blocks as $b) {
+        if (is_string($b)) { $html .= '<p>' . $e($b) . '</p>'; continue; }
+        foreach (['list' => 'ul', 'steps' => 'ol'] as $key => $tag) {
+            if (is_array($b[$key] ?? null)) {
+                $html .= "<$tag>" . implode('', array_map(fn($i) => '<li>' . $e($i) . '</li>', $b[$key])) . "</$tag>";
+            }
+        }
+    }
+    return $html;
+}
+
+/** Phase 52 — bələdçi səhifəsi: public/guides/<slug>.json. Tapılmasa və ya forma
+    pozuqdursa null (→ adi 404 yolu). Slug yalnız [a-z0-9-] — fayl yolundan çıxmaq olmur. */
+function seoGuide(string $path): ?array {
+    if (!preg_match('#^/([a-z0-9]+(?:-[a-z0-9]+)*)$#', $path, $m)) return null;
+    $file = __DIR__ . '/guides/' . $m[1] . '.json';
+    if (!is_file($file)) return null;
+    $g = json_decode((string) file_get_contents($file), true);
+    if (!is_array($g) || ($g['slug'] ?? '') !== $m[1] || empty($g['title']) || empty($g['description'])
+        || empty($g['h1']) || !is_array($g['sections'] ?? null)) return null;
+    return $g;
+}
+
+/** Phase 52 — <noscript> naviqasiyası üçün bütün bələdçilər: slug → label */
+function seoGuideLinks(): array {
+    $out = [];
+    foreach (glob(__DIR__ . '/guides/*.json') ?: [] as $file) {
+        $g = json_decode((string) file_get_contents($file), true);
+        if (is_array($g) && !empty($g['slug']) && !empty($g['label'])) $out[$g['slug']] = $g['label'];
+    }
+    return $out;
 }
 
 /** Sorğu paylaşım önbaxışı / axtarış botundandırmı? */
@@ -393,6 +454,40 @@ if ($path === '/') {
             ['@type' => 'ListItem', 'position' => 2, 'name' => $label,       'item' => SITE . $path],
         ],
     ];
+} elseif ($guide) {
+    $jsonld[] = [
+        '@context'         => 'https://schema.org',
+        '@type'            => 'Article',
+        'headline'         => $guide['h1'],
+        'description'      => $guide['description'],
+        'inLanguage'       => 'az',
+        'datePublished'    => $guide['updated'] ?? '',
+        'dateModified'     => $guide['updated'] ?? '',
+        'mainEntityOfPage' => SITE . $path,
+        'image'            => SITE . '/og-image.jpg',
+        'author'           => ['@type' => 'Organization', 'name' => 'DigiToy', 'url' => SITE],
+        'publisher'        => ['@type' => 'Organization', 'name' => 'DigiToy',
+                               'logo' => ['@type' => 'ImageObject', 'url' => SITE . '/android-chrome-512x512.png']],
+    ];
+    $jsonld[] = [
+        '@context'        => 'https://schema.org',
+        '@type'           => 'BreadcrumbList',
+        'itemListElement' => [
+            ['@type' => 'ListItem', 'position' => 1, 'name' => 'Ana səhifə', 'item' => SITE . '/'],
+            ['@type' => 'ListItem', 'position' => 2, 'name' => $guide['label'] ?? $guide['h1'], 'item' => SITE . $path],
+        ],
+    ];
+    if (!empty($guide['faq']) && is_array($guide['faq'])) {
+        $jsonld[] = [
+            '@context'   => 'https://schema.org',
+            '@type'      => 'FAQPage',
+            'mainEntity' => array_map(fn($f) => [
+                '@type' => 'Question',
+                'name'  => (string) ($f['q'] ?? ''),
+                'acceptedAnswer' => ['@type' => 'Answer', 'text' => (string) ($f['a'] ?? '')],
+            ], $guide['faq']),
+        ];
+    }
 }
 
 foreach ($jsonld as $ld) {
@@ -416,7 +511,13 @@ if ($out === null || $count !== 1) {
    kimi AI axtarışları) xam HTML-də cəmi ~11 söz görürdü. <noscript> həmin
    səhifənin GÖRÜNƏN mətnini verir; JS işləyən brauzerdə və Googlebot-un
    render etdiyi səhifədə heç nə dəyişmir. Tapılmasa — sadəcə əlavə olunmur. */
-$noscript = seoNoscript($path, $e);
+$noscript = seoNoscript($path, $e, $guide);
+/* Phase 52: bələdçinin JSON-u səhifənin içində — GuidePage ilk açılışda
+   əlavə sorğu etmir. JSON_HEX_TAG: mətndəki «</script>» bloku qıra bilməz. */
+if ($guide) {
+    $data = json_encode($guide, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP);
+    if ($data !== false) $noscript .= "\n    <script id=\"dt-guide-data\" type=\"application/json\">" . $data . '</script>';
+}
 if ($noscript !== '') {
     $out = str_replace('<div id="root"></div>', '<div id="root"></div>' . "\n    " . $noscript, $out);
 }

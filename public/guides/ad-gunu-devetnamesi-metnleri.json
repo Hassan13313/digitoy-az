@@ -1,0 +1,78 @@
+{
+  "slug": "ad-gunu-devetnamesi-metnleri",
+  "label": "Ad günü dəvətnaməsi mətnləri",
+  "title": "Ad Günü Dəvətnaməsi Mətnləri: Uşaq, 1 Yaş, Yubiley | DigiToy",
+  "description": "Ad günü dəvətnaməsi üçün hazır mətnlər: uşaq ad günü, 1 yaş, yubiley, sürpriz parti və qısa WhatsApp mesajı. Kopyalayın və online dəvətnamə hazırlayın.",
+  "h1": "Ad günü dəvətnaməsi mətnləri",
+  "updated": "2026-10-21",
+  "intro": [
+    "Ad günü dəvətnaməsinin tonu kimin ad günü olduğundan asılıdır: uşaq şənliyi üçün şən və sadə, yubiley üçün hörmətli və isti, dostlarla parti üçün yüngül.",
+    "Aşağıda hər hal üçün hazır nümunələr var — kvadrat mötərizədəki yerləri öz məlumatlarınızla əvəz edin."
+  ],
+  "sections": [
+    {
+      "id": "usaq",
+      "title": "Uşaq ad günü",
+      "body": ["Məktəb yaşlı uşaqlar üçün mətni uşağın öz dilindən yazmaq daha maraqlı alınır, balacalar üçün isə valideynlərin adından."],
+      "samples": [
+        "Mən [yaş] yaşıma girirəm!\nSəni ad günü şənliyimə dəvət edirəm: oyunlar, tort və çoxlu əyləncə olacaq.\n[tarix], saat [saat], [məkan]\nGözləyirəm, [uşağın adı]",
+        "Əziz dostlar!\nBalamız [uşağın adı] [yaş] yaşını qeyd edir. Bu şən gündə sizi və balacalarınızı aramızda görmək istəyirik.\n[tarix], saat [saat], [məkan]\nHörmətlə, [valideynlərin adı]"
+      ]
+    },
+    {
+      "id": "bir-yas",
+      "title": "1 yaş ad günü",
+      "samples": [
+        "Bir il əvvəl həyatımıza bir möcüzə gəldi.\n[uşağın adı] ilk ad gününü qeyd edir və bu sevinci sizinlə bölüşmək istəyirik.\n[tarix], saat [saat], [məkan]\nSevgiylə, [ailənin adı] ailəsi"
+      ]
+    },
+    {
+      "id": "yubiley",
+      "title": "Yubiley",
+      "body": ["50, 60, 70 yaş kimi yubileylər üçün ailənin adından rəsmi mətn."],
+      "samples": [
+        "Hörmətli [qonağın adı]!\nAtamız [adı] [yaş] yaşını qeyd edir. Bu əlamətdar gündə sizi də süfrəmizdə görməkdən şad olarıq.\n[tarix], saat [saat], [məkan]\nHörmətlə, [ailənin adı] ailəsi",
+        "Yarım əsr — gülüş, dostluq və xatirələr.\n[adı] 50 yaşını qeyd edir və bu yubileyi ən əziz insanlarla keçirmək istəyir. Siz də onlardansınız.\n[tarix], saat [saat], [məkan]"
+      ]
+    },
+    {
+      "id": "boyukler",
+      "title": "Dostlarla ad günü və sürpriz parti",
+      "samples": [
+        "[yaş] yaşım tamam olur və bunu sizinlə qeyd etmək istəyirəm!\nYaxşı musiqi, dadlı yeməklər və gözəl söhbət — qalan hər şey sizinlə.\n[tarix], saat [saat], [məkan]",
+        "Sss… bu sürprizdir!\n[adı] üçün sürpriz ad günü hazırlayırıq. Ona heç nə deməyin!\nGörüş: [tarix], saat [saat], [məkan]\nZəhmət olmasa, 15 dəqiqə tez gəlin."
+      ]
+    },
+    {
+      "id": "whatsapp",
+      "title": "Qısa WhatsApp mesajı",
+      "samples": [
+        "Salam! [tarix] tarixində [uşağın adı] ad gününü qeyd edir, sizi də gözləyirik. Ünvan və iştirak təsdiqi linkdədir: [link]"
+      ]
+    },
+    {
+      "id": "nece-yazilir",
+      "title": "Ad günü dəvətnaməsində nələr olmalıdır?",
+      "body": [
+        {"list": [
+          "Kimin ad günüdür və neçə yaşı tamam olur;",
+          "Tarix, başlama və bitmə saatı — uşaq şənliklərində valideynlər üçün xüsusilə vacibdir;",
+          "Məkan və xəritə;",
+          "Tema və ya geyim, məsələn, kostyumlu parti;",
+          "Hədiyyə ilə bağlı istək, əgər varsa;",
+          "İştirak təsdiqi — neçə uşaq və böyük gələcəyini bilmək üçün."
+        ]}
+      ]
+    }
+  ],
+  "faq": [
+    {"q": "Uşaq ad günü dəvətnaməsi kimin adından yazılır?", "a": "Kiçik uşaqlar üçün valideynlərin adından, məktəb yaşlı uşaqlar üçün isə uşağın öz dilindən yazılan mətn daha maraqlı alınır."},
+    {"q": "Ad günü dəvətnaməsini nə vaxt göndərmək lazımdır?", "a": "1–2 həftə əvvəl. Yubiley və böyük məclislər üçün 3 həftə əvvəl göndərmək daha yaxşıdır."},
+    {"q": "Online ad günü dəvətnaməsinə musiqi əlavə etmək olarmı?", "a": "Bəli. DigiToy dəvətnaməsində musiqi seçmək olar; qonaq dəvətnaməni açanda musiqi səslənir."}
+  ],
+  "cta": {
+    "title": "Online ad günü dəvətnaməsi hazırlayın",
+    "text": "Tədbir növü kimi «Ad günü»nü seçin — dəvətnamənin başlığı və geri sayımı ad gününə uyğunlaşır."
+  },
+  "related": ["toy-devetnamesi-metnleri", "korporativ-devetname-metnleri", "online-devetname-nece-hazirlanir", "nisan-devetnamesi-metnleri"]
+}

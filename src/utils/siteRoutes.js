@@ -8,6 +8,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { LEGAL_DOCS } from '../data/legal/docs.js'
+import { matchGuideRoute } from '../data/guides.js'
 
 /** '/demo/' → '/demo'; hash/sorğu atılır */
 function norm(pathname) {
@@ -26,6 +27,7 @@ export function isKnownSpaPath(pathname) {
   const p = norm(pathname)
   return p === '/' || p === '/index.html' || p === '/demo' || p === '/templates' || p === '/preview/live'
     || matchLegalRoute(p) !== null
+    || matchGuideRoute(p) !== null
     || /^\/demo\/template\/[^/]+$/.test(p)
     || /^\/admin(\/.*)?$/.test(p)
     || /^\/invite\/[^/]+(\/[^/]*)?$/.test(p)

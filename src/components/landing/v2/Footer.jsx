@@ -49,6 +49,8 @@ export default function Footer({
   nav: navProp,
   onNavigate,
   legalLinks,
+  /* Phase 52: bələdçi səhifələri [{id,href,label,onClick}] — verilməsə sütun yoxdur */
+  guideLinks,
   cookiesLabel,
   onLogoClick,
 }) {
@@ -88,7 +90,11 @@ export default function Footer({
       <div id="contact-section" />
       <Container className="pb-10 pt-20 lg:pt-24">
         {/* ── Yuxarı: brend + sütunlar ──────────────────────────── */}
-        <div className="grid gap-14 lg:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))] lg:gap-10">
+        <div
+          className={`grid gap-14 lg:gap-10 ${guideLinks?.length
+            ? 'lg:grid-cols-[minmax(0,1.2fr)_repeat(4,minmax(0,1fr))]'
+            : 'lg:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))]'}`}
+        >
           <div className="max-w-sm">
             <a
               href="/"
@@ -141,6 +147,22 @@ export default function Footer({
               ))}
             </ul>
           </nav>
+
+          {guideLinks?.length > 0 && (
+            <nav aria-label={x.footerGuides ?? 'Bələdçilər'}>
+              <h2 className={headCls}>{x.footerGuides ?? 'Bələdçilər'}</h2>
+              <ul className="mt-5 space-y-3" lang="az">
+                {guideLinks.map((l) => (
+                  <li key={l.id}>
+                    {/* inline-block: uzun ad iki sətrə düşəndə də bütün sahə kliklənir */}
+                    <a href={l.href} onClick={l.onClick} className={`${linkCls} inline-block`}>
+                      {l.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          )}
 
           <div>
             <h2 className={headCls}>{x.footerContact ?? 'Əlaqə'}</h2>

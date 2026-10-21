@@ -18,7 +18,7 @@ export const CONSENT_MAX_AGE_MS = 365 * 86400000
    açdığı dəvətnamə səhifələrində çıxmır, orada analitika yalnız əvvəlcədən
    razılıq verilibsə işləyir. Qonaq səhifələrində də soruşmaq üçün bu siyahıya
    'invite', 'photo', 'gallery-page', 'slideshow' əlavə et. */
-export const CONSENT_PROMPT_VIEWS = ['landing', 'invitation', 'demo', 'templates', 'template-preview', 'legal', 'not-found']
+export const CONSENT_PROMPT_VIEWS = ['landing', 'invitation', 'demo', 'templates', 'template-preview', 'legal', 'guide', 'not-found']
 
 const STATUSES = ['granted', 'denied']
 

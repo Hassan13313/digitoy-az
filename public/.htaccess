@@ -42,10 +42,15 @@ RewriteRule ^ seo.php [L]
 # bu hostinqdə sınanmamış direktiv formaları HTTP 500 verə bilər.
 <IfModule mod_setenvif.c>
   SetEnvIfNoCase Host ^test\.digitoy\.az(:[0-9]+)?$ DIGITOY_STAGING=1
+  # Phase 52: bələdçi JSON-ları (public/guides/*.json) səhifənin xammalıdır,
+  # axtarışda ayrıca nəticə kimi çıxmasın. robots.txt ilə BAĞLAMIRIQ —
+  # Googlebot onları səhifəni render edəndə oxuya bilməlidir.
+  SetEnvIf Request_URI ^/guides/ DIGITOY_NOINDEX=1
 </IfModule>
 
 # -- Security Headers --
 <IfModule mod_headers.c>
+  Header always set X-Robots-Tag "noindex" env=DIGITOY_NOINDEX
   Header always set X-Robots-Tag "noindex, nofollow" env=DIGITOY_STAGING
   Header always set X-Content-Type-Options "nosniff"
   Header always set X-Frame-Options "SAMEORIGIN"

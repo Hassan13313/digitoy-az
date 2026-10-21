@@ -16,6 +16,8 @@ const AdminLoginGate   = lazy(() => import('./components/admin/AdminLoginGate'))
 const TemplatesPage    = lazy(() => import('./components/landing/TemplatesPage'))
 /* Phase 47 — hüquqi səhifələr: mətnlər də ayrıca chunk-dadır */
 const LegalPage        = lazy(() => import('./components/legal/LegalPage'))
+/* Phase 52 — bələdçi / dəvətnamə mətnləri səhifələri (SEO) */
+const GuidePage        = lazy(() => import('./components/guides/GuidePage'))
 /* Template Engine — InvitationPage onsuz da statik import edir,
    preview marşrutu üçün ayrıca chunk yaratmağa ehtiyac yoxdur. */
 import TemplateRenderer from './templates/TemplateRenderer'
@@ -32,6 +34,7 @@ import { trackTemplateSelected } from './templates/templateAnalytics'
 import { matchLegalRoute, isKnownSpaPath } from './utils/siteRoutes'
 import { pushView, goBackOr, canGoBackInApp, savedScroll, restoreScroll } from './utils/navHistory'
 import { legalDoc as findLegalDoc } from './data/legal/docs'
+import { matchGuideRoute, findGuide } from './data/guides'
 import { legalUi } from './data/legal/ui'
 import { consent } from './utils/consent'
 import { useSEO } from './hooks/useSEO'
@@ -57,8 +60,15 @@ const TEMPLATES_TITLE = 'Online Dəvətnamə Şablonları — Toy, Nişan, Ad G�
 const TEMPLATES_DESC  = 'Online dəvətnamə şablonları: klassik qızıl, botanik bağ, modern qara, gecə səması və daha çoxu. Toy, nişan və ad günü üçün hər birinin canlı önbaxışına baxın.'
 
 /* ── view → SEO konfiqurasiyası (title/description/canonical/OG/Twitter) ── */
-function getSEOConfig(view, { weddingData, slug, legalDoc } = {}) {
+function getSEOConfig(view, { weddingData, slug, legalDoc, guideSlug } = {}) {
   switch (view) {
+    /* Phase 52 — bələdçilər (seo.php eyni mətni public/guides/<slug>.json-dan oxuyur) */
+    case 'guide': {
+      const g = findGuide(guideSlug)
+      if (g) return { title: g.title, description: g.description, path: `/${g.slug}`, type: 'article' }
+      return { title: HOME_TITLE, description: HOME_DESC, path: '/', type: 'website' }
+    }
+
     /* Phase 47 — hüquqi səhifələr (seo.php ilə eyni mətn, bax data/legal/docs.js) */
     case 'legal': {
       const doc = findLegalDoc(legalDoc)
@@ -142,6 +152,7 @@ function getAnalyticsPath(view, slug) {
     case 'landing':
     case 'invitation': return '/'
     case 'demo':       return '/demo'
+    case 'guide':      return window.location.pathname
     case 'invite':     return slug ? `/invite/${slug}` : null
     case 'photo':      return slug ? `/invite/${slug}/foto` : null
     case 'gallery-page': return slug ? `/invite/${slug}/qalereya-idare` : null
@@ -305,10 +316,14 @@ export default function App() {
   const [view,        setView]        = useState(() => {
     if (typeof window === 'undefined') return 'loading'
     if (window.location.pathname === '/preview/live') return 'live-preview'
-    return matchLegalRoute(window.location.pathname) ? 'legal' : 'loading'
+    if (matchLegalRoute(window.location.pathname)) return 'legal'
+    return matchGuideRoute(window.location.pathname) ? 'guide' : 'loading'
   })
   const [legalDoc,    setLegalDoc]    = useState(
     () => (typeof window !== 'undefined' ? matchLegalRoute(window.location.pathname) : null),
+  )
+  const [guideSlug,   setGuideSlug]   = useState(
+    () => (typeof window !== 'undefined' ? matchGuideRoute(window.location.pathname) : null),
   )
   const [lang,        setLang]        = useState('az')
   const [weddingData, setWeddingData] = useState(defaultWedding)
@@ -329,7 +344,7 @@ export default function App() {
   const go = useCallback((path, state) => pushView(path, state, { view: viewRef.current }), [])
 
   /* Hər view dəyişəndə <head> meta-larını yenilə (title, description, OG, Twitter, canonical) */
-  useSEO(getSEOConfig(view, { weddingData, slug: adminSlug || parseInviteSlug().slug, legalDoc }))
+  useSEO(getSEOConfig(view, { weddingData, slug: adminSlug || parseInviteSlug().slug, legalDoc, guideSlug }))
 
   /* ⚠ KRİTİK LOCALE DÜZƏLİŞİ (Phase 27): `<html lang>` statik olaraq "az" idi və
      dil dəyişəndə yenilənmirdi. CSS `text-transform: uppercase` element dilinə
@@ -528,6 +543,8 @@ export default function App() {
       }
       const legal = matchLegalRoute(path)
       if (legal) { setLegalDoc(legal); setView('legal'); return true }
+      const guide = matchGuideRoute(path)
+      if (guide) { setGuideSlug(guide); setView('guide'); return true }
       if (!isKnownSpaPath(path)) { setView('not-found'); return true }
       return false   /* /admin, /invite — öz komponentləri idarə edir */
     }
@@ -566,8 +583,8 @@ export default function App() {
        ⚠ Burada `setView` ÇAĞIRILMIR — yalnız çıxış, ona görə kaskad render
        xəbərdarlığı da yaranmır. */
     if (window.location.pathname === '/preview/live') return
-    /* Hüquqi səhifə ilkin state-də həll olunub (yuxarıya bax) */
-    if (matchLegalRoute(window.location.pathname)) return
+    /* Hüquqi səhifə və bələdçi ilkin state-də həll olunub (yuxarıya bax) */
+    if (matchLegalRoute(window.location.pathname) || matchGuideRoute(window.location.pathname)) return
 
     /* Admin Panel — /admin/* route-ları */
     if (window.location.pathname.startsWith('/admin')) {
@@ -715,6 +732,15 @@ export default function App() {
     return (
       <Suspense fallback={<RouteLoader />}>
         <LegalPage doc={legalDoc} lang={lang} setLang={setLang} onBack={goHome} />
+      </Suspense>
+    )
+  }
+
+  /* ── Phase 52: bələdçilər — /toy-devetnamesi-metnleri və s. ── */
+  if (view === 'guide') {
+    return (
+      <Suspense fallback={<RouteLoader />}>
+        <GuidePage slug={guideSlug} onBack={goHome} onCreate={goToBuilder} />
       </Suspense>
     )
   }

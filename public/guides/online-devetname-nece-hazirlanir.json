@@ -1,0 +1,100 @@
+{
+  "slug": "online-devetname-nece-hazirlanir",
+  "label": "Online dəvətnamə necə hazırlanır",
+  "title": "Online Dəvətnamə Necə Hazırlanır? Addım-addım Bələdçi | DigiToy",
+  "description": "Online (elektron) dəvətnamə nədir, kağızdan nə ilə fərqlənir, necə hazırlanır və WhatsApp-da necə göndərilir — 5 addımda sadə bələdçi və qiymətlər.",
+  "h1": "Online dəvətnamə necə hazırlanır?",
+  "updated": "2026-10-21",
+  "intro": [
+    "Online dəvətnamə linklə göndərilən dəvətnamə səhifəsidir. Qonaq linki telefonda açır, tarixi, məkanı və xəritəni görür, musiqini dinləyir və iştirakını elə oradan təsdiqləyir.",
+    "Bu bələdçidə online dəvətnamənin nə olduğunu, kağız dəvətnamədən fərqini, necə hazırlandığını və qonaqlara necə göndərildiyini izah edirik."
+  ],
+  "sections": [
+    {
+      "id": "nedir",
+      "title": "Online dəvətnamə nədir?",
+      "body": [
+        "Online dəvətnamə (onlayn, elektron, rəqəmsal və ya digital dəvətnamə də deyilir) kağız kartın internetdəki variantıdır, amma ondan daha çox iş görür. Bir linkdə bunlar olur:",
+        {"list": [
+          "dəvət mətni, cütlüyün və ya tədbirin adı;",
+          "geri sayım — tədbirə neçə gün qaldığı;",
+          "məkan, Google Maps və Waze ilə yol;",
+          "tədbirin proqramı və geyim tərzi;",
+          "musiqi və foto qalereya;",
+          "iştirak təsdiqi — qonaq «Gələcəm», «Gəlmiyəcəm» və ya «Bəlkə» seçir."
+        ]},
+        "Qonağın heç bir tətbiq yükləməsi lazım deyil: link istənilən telefonda brauzerdə açılır."
+      ]
+    },
+    {
+      "id": "kagiz-ferqi",
+      "title": "Kağız dəvətnamədən fərqi",
+      "body": [
+        {"list": [
+          "Çap və çatdırılma yoxdur — link bir dəqiqəyə bütün qonaqlara çatır;",
+          "Məlumat dəyişəndə yenidən çap etmək lazım deyil — eyni link yenilənmiş tarixi və məkanı göstərir;",
+          "Qonaqların cavabını bir siyahıda görürsünüz, hər kəsə zəng edib soruşmağa ehtiyac qalmır;",
+          "Qiymət qonaq sayından asılı deyil — eyni link istənilən sayda qonağa göndərilə bilər."
+        ]},
+        "Kağız dəvətnaməni xatirə kimi saxlamaq istəyənlər hər ikisini birlikdə işlədə bilər: yaxın qohumlara kağız, qalan qonaqlara online dəvətnamə."
+      ]
+    },
+    {
+      "id": "addimlar",
+      "title": "5 addımda online dəvətnamə",
+      "body": [
+        {"steps": [
+          "Paket seçin. SADƏ, VİP və ya PREMIUM — fərq funksiyalardadır; məsələn, QR foto qalereyası PREMIUM paketdədir.",
+          "Şablon seçin. Hər şablonun öz rəngi, şrifti və açılış animasiyası var; hamısına canlı önbaxışla baxmaq olar.",
+          "Məlumatları yazın: adlar, tarix və saat, məkan (xəritədən seçilir), proqram, geyim tərzi və musiqi.",
+          "Önbaxışa baxın və sifarişi WhatsApp ilə göndərin. Məlumatlar yoxlanılır, dəvətnamə adətən 24 saat ərzində hazır olur.",
+          "Linki qonaqlara göndərin və iştirak təsdiqlərini izləyin."
+        ]}
+      ]
+    },
+    {
+      "id": "gondermek",
+      "title": "Qonaqlara necə göndərilir?",
+      "body": [
+        "Ən rahat yol WhatsApp-dır: linki qısa bir mesajla birlikdə göndərin. Qrup mesajı əvəzinə hər qonağa ayrıca yazmaq daha hörmətli görünür. Telegram, Instagram və SMS ilə də göndərmək olar — link hər yerdə açılır.",
+        "Mesaj üçün hazır mətn lazımdırsa, aşağıdakı toy, nişan və ad günü dəvətnaməsi mətnləri səhifələrinə baxın."
+      ]
+    },
+    {
+      "id": "qiymet",
+      "title": "Online dəvətnamə neçəyədir?",
+      "body": [
+        "DigiToy-da qiymət paketə görədir:",
+        {"list": [
+          "SADƏ — 59 ₼;",
+          "VİP — 89 ₼;",
+          "PREMIUM — 129 ₼, QR foto qalereyası daxil."
+        ]},
+        "Bir dəvətnamənin qiyməti qonaq sayından asılı deyil. Ödəniş son variant sizinlə təsdiqləndikdən sonra edilir."
+      ]
+    },
+    {
+      "id": "meslehetler",
+      "title": "Yaxşı online dəvətnamə üçün məsləhətlər",
+      "body": [
+        {"list": [
+          "Dəvətnaməni tədbirdən 3–4 həftə əvvəl göndərin;",
+          "Mətndə cavab üçün son tarix yazın — şadlıq sarayına dəqiq qonaq sayını vaxtında verərsiniz;",
+          "Məkanı xəritədən seçin ki, qonaqlar yolu axtarmasın;",
+          "Sakit musiqi seçin — dəvətnamə çox vaxt iş yerində və ya ictimai yerdə açılır;",
+          "Göndərməzdən əvvəl linki özünüz telefonda açıb yoxlayın."
+        ]}
+      ]
+    }
+  ],
+  "faq": [
+    {"q": "Online dəvətnamə ilə elektron dəvətnamə eyni şeydirmi?", "a": "Bəli. Online, onlayn, elektron, rəqəmsal və ya digital dəvətnamə — hamısı linklə göndərilən eyni dəvətnamə növüdür."},
+    {"q": "Yaşlı qonaqlar online dəvətnaməni aça biləcəkmi?", "a": "Link WhatsApp-da adi mesaj kimi açılır, heç nə yükləmək lazım deyil. Dəvətnamə Azərbaycan, rus və ingilis dillərində oxunur. Yaşlı qohumlara əlavə olaraq zəng etmək isə yaxşı ənənədir."},
+    {"q": "Dəvətnamə nə qədər müddət açıq qalır?", "a": "Tədbir gününə qədər tam aktiv qalır, sonra da saytdan silinmir — xatirə kimi saxlanılır."}
+  ],
+  "cta": {
+    "title": "Online dəvətnamənizi indi hazırlayın",
+    "text": "Şablonu seçin, məlumatları yazın — dəvətnamə adətən 24 saat ərzində hazır olur. Qiymət 59 ₼-dan."
+  },
+  "related": ["toy-devetnamesi-metnleri", "nisan-devetnamesi-metnleri", "ad-gunu-devetnamesi-metnleri", "korporativ-devetname-metnleri"]
+}
