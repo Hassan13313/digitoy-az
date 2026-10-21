@@ -70,6 +70,25 @@ ok('/invite/<slug>/foto əvvəlki kimi noindex, follow', $run('/invite/aytac-ve-
 ok('/invite/<slug>/bilinmeyen → 404', $run('/invite/aytac-ve-niyaz-51eedb/bilinmeyen')['status'] === 404);
 ok('/ → 404 deyil, ana səhifə canonical', ($h = $run('/'))['status'] !== 404 && $h['canon'] === 'https://digitoy.az/');
 
+/* Phase 51 — axtarış sözləri + JS-siz botlar üçün <noscript> mətni */
+ok('/ → title «Online Dəvətnamə» ilə başlayır', str_starts_with($h['title'], 'Online Dəvətnamə'));
+ok('/ → <noscript> #root-dan sonra, H1 + FAQ ilə',
+    preg_match('#<div id="root"></div>\s*<noscript><main[^>]*><h1>Rəqəmsal Toy Dəvətnamənizi Özünüz Yaradın</h1>#u', $h['html']) === 1
+    && str_contains($h['html'], '<h3>Online dəvətnamə nədir?</h3>'));
+ok('/ → <noscript> bir dəfə', substr_count($h['html'], '<noscript>') === 1);
+ok('/ → FAQ dırnaqları HTML-də escape olunub', str_contains($h['html'], '&quot;İndi Başla&quot;'));
+ok('/ → FAQPage schema 12 sual, ilki «Online dəvətnamə nədir?»',
+    preg_match('#"@type":"FAQPage","mainEntity":\[\{"@type":"Question","name":"Online dəvətnamə nədir\?"#u', $h['html']) === 1
+    && substr_count($h['html'], '"@type":"Question"') === 12);
+foreach (['/templates' => 'Dəvətnamə Şablonları', '/demo' => 'Online Dəvətnamə Nümunəsi'] as $p => $h1) {
+    $r = $run($p);
+    ok("$p → title «Online Dəvətnamə» ilə başlayır", str_starts_with($r['title'], 'Online Dəvətnamə'));
+    ok("$p → <noscript> H1: $h1", str_contains($r['html'], "<noscript><main") && str_contains($r['html'], "<h1>$h1</h1>"));
+}
+foreach (['/invite/aytac-ve-niyaz-51eedb', '/invite/aytac-ve-niyaz-51eedb/panel', '/mexfilik', '/bu-yoxdur', '/admin'] as $p) {
+    ok("$p → <noscript> YOXDUR (şəxsi/daxili/hüquqi)", !str_contains($run($p)['html'], '<noscript>'));
+}
+
 @unlink($tmp . '/run.php'); @unlink($tmp . '/seo.php'); @unlink($tmp . '/index.html'); @rmdir($tmp);
 
 echo "\n$passed ok, $failed FAIL\n";

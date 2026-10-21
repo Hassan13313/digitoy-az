@@ -55,9 +55,12 @@ $legal = seoLegalPages()[$path] ?? null;   /* Phase 47: [title, description] və
    `index` sahəsi YALNIZ ictimai marketinq səhifələri üçün true-dur.
    Google-un crawl büdcəsi şəxsi toy səhifələrinə sərf olunmamalıdır. */
 $seoStatus = 200;
+/* Phase 51 SEO: başlıqlar «online / elektron dəvətnamə» axtarışına görədir.
+   ⚠ src/App.jsx (HOME_/DEMO_/TEMPLATES_) ilə HƏRFBƏHƏRF eyni
+   (tests/seo_keywords_test.mjs). */
 $meta = [
-    'title'  => 'DigiToy — Rəqəmsal Toy Dəvətnaməsi, İştirak Təsdiqi və QR Foto Paylaşımı',
-    'desc'   => 'Bir Dəvətnamədən Daha Artığı. İştirak Təsdiqi (RSVP), oturma planı, QR foto paylaşımı və premium rəqəmsal toy dəvətnamələri.',
+    'title'  => 'Online Dəvətnamə — Rəqəmsal və Elektron Toy Dəvətnaməsi | DigiToy',
+    'desc'   => 'Online dəvətnamə hazırlayın: toy, nişan və ad günü üçün rəqəmsal (elektron) dəvətnamə — İştirak Təsdiqi, oturma planı, QR foto paylaşımı. 59 ₼-dan.',
     'canon'  => SITE . '/',
     'index'  => true,
     'ogtype' => 'website',
@@ -67,12 +70,12 @@ $meta = [
 if ($path === '/') {
     /* defolt */
 } elseif ($path === '/demo') {
-    $meta['title'] = 'Nümunə Dəvətnamə — DigiToy Rəqəmsal Toy Dəvətnaməsi';
-    $meta['desc']  = 'DigiToy rəqəmsal toy dəvətnaməsinin canlı nümunəsinə baxın: İştirak Təsdiqi, oturma planı, QR foto paylaşımı və premium dizayn bir arada.';
+    $meta['title'] = 'Online Dəvətnamə Nümunəsi — Rəqəmsal Toy Dəvətnaməsi | DigiToy';
+    $meta['desc']  = 'Online dəvətnamə necə görünür? DigiToy rəqəmsal toy dəvətnaməsinin canlı nümunəsi: İştirak Təsdiqi, oturma planı, QR foto paylaşımı və premium dizayn bir arada.';
     $meta['canon'] = SITE . '/demo';
 } elseif ($path === '/templates') {
-    $meta['title'] = 'Dəvətnamə Şablonları — Rəqəmsal Toy Dəvətnaməsi | DigiToy';
-    $meta['desc']  = 'DigiToy-un bütün rəqəmsal dəvətnamə şablonları: klassik qızıl, botanik bağ, modern qara, gecə səması və daha çoxu. Hər birinin canlı önbaxışına baxın.';
+    $meta['title'] = 'Online Dəvətnamə Şablonları — Toy, Nişan, Ad Günü | DigiToy';
+    $meta['desc']  = 'Online dəvətnamə şablonları: klassik qızıl, botanik bağ, modern qara, gecə səması və daha çoxu. Toy, nişan və ad günü üçün hər birinin canlı önbaxışına baxın.';
     $meta['canon'] = SITE . '/templates';
 } elseif ($legal) {
     /* Phase 47 — hüquqi səhifələr: ictimai, indekslənir */
@@ -151,6 +154,67 @@ function seoIsAppRoute(string $path): bool {
     return $path === '/preview/live'
         || (bool) preg_match('#^/demo/template/[a-zA-Z0-9\-]{1,60}$#', $path)
         || (bool) preg_match('#^/admin(/[a-zA-Z0-9\-/]*)?$#', $path);
+}
+
+/** Phase 51 — ana səhifənin FAQ-ı: [sual, cavab]. Səhifədə görünən AZ FAQ ilə
+    HƏRFBƏHƏRF eyni: src/data/faq.js getFaqItems('az') (tests/seo_keywords_test.mjs). */
+function seoHomeFaq(): array {
+    return [
+        ['Online dəvətnamə nədir?',
+         'Online dəvətnamə (elektron və ya rəqəmsal dəvətnamə də deyilir) kağız kartın yerinə linklə göndərilən dəvətnamə səhifəsidir. Qonaqlar onu WhatsApp və ya Telegram-dan telefonda açır: tarix, məkan və xəritə, geri sayım, musiqi bir yerdədir, iştirakını da elə oradan təsdiqləyir. Çap və çatdırılma lazım deyil, məlumatları istənilən vaxt yeniləmək olar.'],
+        ['Hansı tədbirlər üçün dəvətnamə hazırlamaq olar?',
+         'Toy, nişan, ad günü və korporativ tədbirlər üçün; xına, yubiley kimi digər tədbirlər üçün də tədbirin adını özünüz yazırsınız. Hər tədbir növünün mətni ayrıca uyğunlaşdırılıb, dəvətnamə Azərbaycan, ingilis və rus dillərində açılır.'],
+        ['Rəqəmsal dəvətnamə necə sifariş edilir?',
+         'Səhifədəki "İndi Başla" düyməsinə basaraq istəyinizə və zövqünüzə tam uyğun paketi seçib, dəvətnamənizi dərhal özünüz düzəltməyə başlaya bilərsiniz.'],
+        ['Dəvətnamənin istifadə müddəti nə qədərdir?',
+         'Sifariş etdiyiniz dəvətnamə tədbir gününüz bitənə qədər tam aktiv və onlayn qalır.'],
+        ['Qonaqlar dəvətnaməni necə açır?',
+         'Sizə WhatsApp vasitəsilə göndərilən unikal link vasitəsilə qonaqlar birbaşa brauzerdən açır — heç bir tətbiq lazım deyil.'],
+        ['Hazırlıq müddəti nə qədərdir?',
+         'Sifarişi WhatsApp vasitəsilə yerləşdirdikdən sonra dəvətnaməniz ümumiyyətlə 24 saat ərzində hazır olur. VİP və Premium paketlər üçün xüsusi dizayn elementləri varsa, bu müddət 48 saata çata bilər.'],
+        ['Eyni link neçə nəfər tərəfindən açıla bilər?',
+         'Limitsiz. Eyni link istənilən sayda qonağa göndərilə bilər. Hər qonaq öz adını dəvətnamədə ayrıca görür.'],
+        ['İştirak Təsdiqi sistemi necə işləyir?',
+         'Qonaqlar "Gələcəm", "Gəlmiyəcəm" və ya "Bəlkə" seçimindən birini edə bilər. Əlavə nəfər sayını da bildirə bilərlər. Siz admin paneldən bütün cavabları real vaxtda izləyə bilərsiniz.'],
+        ['Dəvətnamənin məlumatlarını sonra dəyişmək olarmı?',
+         'Bəli. Sifariş etdikdən sonra da admin linkiniz vasitəsilə tarix, yer, geyim kodu, musiqi seçimi və digər məlumatları istənilən vaxt yeniləyə bilərsiniz. Dəvətnamə avtomatik yenilənir.'],
+        ['Neçə dil dəstəklənir?',
+         'Dəvətnamə Azərbaycan, İngilis və Rus dillərini tam dəstəkləyir. Qonaqlar səhifə yükləndiyi anda öz dilini seçə bilər. Mətn, tarix formatı və bütün interfeys tam lokalizasiya olunub.'],
+        ['Ödəniş necə edilir?',
+         'Sifariş tamamlanıb "WhatsApp ilə sifariş et" düyməsi vasitəsilə bizə göndərildikdən sonra məlumatlar yoxlanılır. Son variant sizinlə təsdiqləndikdən sonra ödəniş edilir. Ödənişi bank kartı və ya elektron ödəniş vasitəsilə həyata keçirmək mümkündür.'],
+        ['Dəvətnamə neçə müddət aktiv qalır?',
+         'Dəvətnaməniz toy/nişan gününüz bitənə qədər tam aktiv qalır. Tədbirinizdən sonra saytdan silinmir — yaddaş olaraq qalır. Əlavə müddətə ehtiyac duyulsada, biz onu saxlayırıq.'],
+    ];
+}
+
+/** Phase 51 — JS-siz oxuyan botlar üçün səhifənin görünən mətni (<noscript>).
+    Yalnız indekslənən marketinq səhifələri; qalan marşrutlar üçün ''.
+    Mətnlər səhifədəkilərlə eynidir: hero — src/data/landingCopy.js,
+    şablonlar — TemplatesPage.jsx UI.az (tests/seo_keywords_test.mjs). */
+function seoNoscript(string $path, callable $e): string {
+    $nav = '<p><a href="/">Ana səhifə</a> · <a href="/templates">Dəvətnamə şablonları</a> · '
+         . '<a href="/demo">Nümunə dəvətnamə</a> · <a href="https://wa.me/994992133696">WhatsApp: +994 99 213 36 96</a> · '
+         . '<a href="/mexfilik">Məxfilik</a> · <a href="/sertler">Şərtlər</a></p>';
+
+    if ($path === '/') {
+        $faq = '';
+        foreach (seoHomeFaq() as [$q, $a]) $faq .= '<h3>' . $e($q) . '</h3><p>' . $e($a) . '</p>';
+        $body = '<h1>Rəqəmsal Toy Dəvətnamənizi Özünüz Yaradın</h1>'
+              . '<p>Sadəcə online dəvətnamə deyil — İştirak Təsdiqi, oturma planı, foto paylaşımı və xatirələrin toplandığı tam bir toy təcrübəsi. Hamısı bir zərif linkdə.</p>'
+              . '<h2>Paketinizi Seçin</h2><ul><li>SADƏ — 59 ₼</li><li>VİP — 89 ₼</li><li>PREMIUM — 129 ₼</li></ul>'
+              . '<h2>Tez-tez verilən suallar</h2>' . $faq;
+    } elseif ($path === '/templates') {
+        $body = '<h1>Dəvətnamə Şablonları</h1>'
+              . '<p>Toy, nişan və ad günü üçün online dəvətnamə şablonları. Hər şablon ayrıca dizayn dilidir — rəng, şrift, animasiya və açılış ekranı fərqlidir. Bəyəndiyinizi seçin, məlumatlarınız eyni qalır.</p>';
+    } elseif ($path === '/demo') {
+        $body = '<h1>Online Dəvətnamə Nümunəsi</h1>'
+              . '<p>Online dəvətnamə necə görünür? DigiToy rəqəmsal toy dəvətnaməsinin canlı nümunəsi: İştirak Təsdiqi, oturma planı, QR foto paylaşımı və premium dizayn bir arada.</p>';
+    } else {
+        return '';
+    }
+    return '<noscript><main style="max-width:760px;margin:40px auto;padding:0 16px;line-height:1.6">'
+         . $body . '<p>Saytın bütün imkanları üçün brauzerinizdə JavaScript-i aktiv edin.</p>' . $nav
+         . '</main></noscript>';
 }
 
 /** Sorğu paylaşım önbaxışı / axtarış botundandırmı? */
@@ -286,10 +350,11 @@ if ($path === '/') {
     $jsonld[] = [
         '@context' => 'https://schema.org',
         '@type'    => 'Service',
-        'name'     => 'Rəqəmsal Toy Dəvətnaməsi',
-        'alternateName' => ['Elektron dəvətnamə', 'Online dəvətnamə', 'Digital wedding invitation'],
-        'serviceType'   => 'Rəqəmsal dəvətnamə hazırlanması',
-        'description'   => 'Toy, nişan və digər tədbirlər üçün premium rəqəmsal dəvətnamə: '
+        'name'     => 'Online Dəvətnamə',
+        'alternateName' => ['Onlayn dəvətnamə', 'Elektron dəvətnamə', 'Rəqəmsal dəvətnamə',
+                            'Toy dəvətnaməsi', 'Digital wedding invitation'],
+        'serviceType'   => 'Online dəvətnamə hazırlanması',
+        'description'   => 'Toy, nişan, ad günü və digər tədbirlər üçün online (elektron) dəvətnamə: '
                          . 'İştirak Təsdiqi (RSVP), oturma planı, QR ilə foto/video paylaşımı.',
         'provider' => ['@type' => 'Organization', 'name' => 'DigiToy', 'url' => SITE],
         'areaServed' => ['@type' => 'Country', 'name' => 'Azərbaycan'],
@@ -304,54 +369,17 @@ if ($path === '/') {
         ],
     ];
 
-    /* FAQPage — məzmun əvvəl index.html-də STATİK idi, yəni HƏR səhifədə,
-       o cümlədən şəxsi dəvətnamələrdə görünürdü. İndi yalnız ana səhifədə.
-       Suallar dəyişməyib (Google-un artıq gördüyü məzmun qorunur). */
+    /* FAQPage — yalnız ana səhifədə. Phase 51: suallar səhifədə GÖRÜNƏN
+       FAQ ilə eynidir (Google schema-nın görünən məzmuna uyğun olmasını
+       tələb edir; əvvəlki 5 sual səhifədə yox idi). */
     $jsonld[] = [
         '@context'   => 'https://schema.org',
         '@type'      => 'FAQPage',
-        'mainEntity' => [
-            [
-                '@type' => 'Question',
-                'name' => 'DigiToy nədir?',
-                'acceptedAnswer' => [
-                    '@type' => 'Answer',
-                    'text' => 'DigiToy Azərbaycanda rəqəmsal toy dəvətnaməsi platformasıdır. RSVP (iştirak təsdiqi), oturma planı, QR foto paylaşımı və premium animasiyalı dəvətnamələr bir arada təqdim edilir.'
-                ]
-            ],
-            [
-                '@type' => 'Question',
-                'name' => 'Paketlər nə qədərdir?',
-                'acceptedAnswer' => [
-                    '@type' => 'Answer',
-                    'text' => 'DigiToy üç paket təqdim edir: Sadə (59₼), VİP (89₼) və Premium (129₼). Hər paket müxtəlif animasiya, xüsusiyyət və dəstək səviyyəsi ilə gəlir.'
-                ]
-            ],
-            [
-                '@type' => 'Question',
-                'name' => 'Dəvətnamə necə göndərilir?',
-                'acceptedAnswer' => [
-                    '@type' => 'Answer',
-                    'text' => 'Dəvətnamə unikal keçid vasitəsilə WhatsApp, Telegram və ya digər mesajlaşma tətbiqləri üzərindən paylaşılır. Qonaqlar keçidə klikləyərək dəvətnaməni açır, RSVP verir və yerini görür.'
-                ]
-            ],
-            [
-                '@type' => 'Question',
-                'name' => 'RSVP və oturma planı nədir?',
-                'acceptedAnswer' => [
-                    '@type' => 'Answer',
-                    'text' => 'RSVP qonaqların iştirakını təsdiqləməsidir. Oturma planı isə hər qonağın stolunu göstərir — qonaqlar öz adlarını axtararaq masalarını tapa bilir.'
-                ]
-            ],
-            [
-                '@type' => 'Question',
-                'name' => 'QR foto paylaşımı necə işləyir?',
-                'acceptedAnswer' => [
-                    '@type' => 'Answer',
-                    'text' => 'Masa kartlarına yerləşdirilmiş QR kodu ilə qonaqlar toy şəkillərini birbaşa yükləyə bilər. Bütün fotoşəkillər admin panelindən idarə olunur.'
-                ]
-            ]
-        ],
+        'mainEntity' => array_map(fn($f) => [
+            '@type' => 'Question',
+            'name'  => $f[0],
+            'acceptedAnswer' => ['@type' => 'Answer', 'text' => $f[1]],
+        ], seoHomeFaq()),
     ];
 
 } elseif ($path === '/templates' || $path === '/demo' || $legal) {
@@ -382,6 +410,15 @@ $out = preg_replace($pattern, $block, $html, 1, $count);
 
 if ($out === null || $count !== 1) {
     seoFallback($__indexFile);
+}
+
+/* Phase 51 — JS icra etməyən botlar (Yandex-in ilk keçidi, ChatGPT/Perplexity
+   kimi AI axtarışları) xam HTML-də cəmi ~11 söz görürdü. <noscript> həmin
+   səhifənin GÖRÜNƏN mətnini verir; JS işləyən brauzerdə və Googlebot-un
+   render etdiyi səhifədə heç nə dəyişmir. Tapılmasa — sadəcə əlavə olunmur. */
+$noscript = seoNoscript($path, $e);
+if ($noscript !== '') {
+    $out = str_replace('<div id="root"></div>', '<div id="root"></div>' . "\n    " . $noscript, $out);
 }
 
 if ($seoStatus !== 200) http_response_code($seoStatus);

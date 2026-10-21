@@ -27,7 +27,7 @@ const UI = {
   az: {
     kicker: 'Dizayn kolleksiyası',
     title: 'Dəvətnamə Şablonları',
-    intro: 'Hər şablon ayrıca dizayn dilidir — rəng, şrift, animasiya və açılış ekranı fərqlidir. Bəyəndiyinizi seçin, məlumatlarınız eyni qalır.',
+    intro: 'Toy, nişan və ad günü üçün online dəvətnamə şablonları. Hər şablon ayrıca dizayn dilidir — rəng, şrift, animasiya və açılış ekranı fərqlidir. Bəyəndiyinizi seçin, məlumatlarınız eyni qalır.',
     preview: 'Önbaxış',
     back: 'Ana səhifə',
     cta: 'Dəvətnaməni hazırla',
@@ -47,7 +47,7 @@ const UI = {
   en: {
     kicker: 'Design collection',
     title: 'Invitation Templates',
-    intro: 'Each template is its own design language — colours, type, motion and opening screen all differ. Pick the one you like; your details stay the same.',
+    intro: 'Online invitation templates for weddings, engagements and birthdays. Each template is its own design language — colours, type, motion and opening screen all differ. Pick the one you like; your details stay the same.',
     preview: 'Preview',
     back: 'Home',
     cta: 'Create your invitation',
@@ -67,7 +67,7 @@ const UI = {
   ru: {
     kicker: 'Коллекция дизайнов',
     title: 'Шаблоны приглашений',
-    intro: 'Каждый шаблон — отдельный язык дизайна: цвета, шрифты, анимация и экран открытия. Выберите понравившийся, ваши данные останутся теми же.',
+    intro: 'Шаблоны онлайн-приглашений на свадьбу, помолвку и день рождения. Каждый шаблон — отдельный язык дизайна: цвета, шрифты, анимация и экран открытия. Выберите понравившийся, ваши данные останутся теми же.',
     preview: 'Просмотр',
     back: 'На главную',
     cta: 'Создать приглашение',

@@ -46,8 +46,15 @@ const LivePreviewPage = lazy(() => import('./components/admin/LivePreviewPage'))
 
 const ACTIVE_UI = 'v3'
 
-const HOME_TITLE = 'DigiToy — Rəqəmsal Toy Dəvətnaməsi, İştirak Təsdiqi və QR Foto Paylaşımı'
-const HOME_DESC  = 'Bir Dəvətnamədən Daha Artığı. İştirak Təsdiqi, oturma planı, QR foto paylaşımı və premium rəqəmsal toy dəvətnamələri.'
+/* Phase 51 SEO: insanlar Google-da «online dəvətnamə», «elektron dəvətnamə»
+   yazır — bu sözlər başlığın ƏVVƏLİNDƏ olmalıdır. ⚠ seo.php ilə HƏRFBƏHƏRF
+   eyni (tests/seo_keywords_test.mjs). */
+const HOME_TITLE = 'Online Dəvətnamə — Rəqəmsal və Elektron Toy Dəvətnaməsi | DigiToy'
+const HOME_DESC  = 'Online dəvətnamə hazırlayın: toy, nişan və ad günü üçün rəqəmsal (elektron) dəvətnamə — İştirak Təsdiqi, oturma planı, QR foto paylaşımı. 59 ₼-dan.'
+const DEMO_TITLE = 'Online Dəvətnamə Nümunəsi — Rəqəmsal Toy Dəvətnaməsi | DigiToy'
+const DEMO_DESC  = 'Online dəvətnamə necə görünür? DigiToy rəqəmsal toy dəvətnaməsinin canlı nümunəsi: İştirak Təsdiqi, oturma planı, QR foto paylaşımı və premium dizayn bir arada.'
+const TEMPLATES_TITLE = 'Online Dəvətnamə Şablonları — Toy, Nişan, Ad Günü | DigiToy'
+const TEMPLATES_DESC  = 'Online dəvətnamə şablonları: klassik qızıl, botanik bağ, modern qara, gecə səması və daha çoxu. Toy, nişan və ad günü üçün hər birinin canlı önbaxışına baxın.'
 
 /* ── view → SEO konfiqurasiyası (title/description/canonical/OG/Twitter) ── */
 function getSEOConfig(view, { weddingData, slug, legalDoc } = {}) {
@@ -68,21 +75,11 @@ function getSEOConfig(view, { weddingData, slug, legalDoc } = {}) {
       return { title: HOME_TITLE, description: HOME_DESC, path: '/', type: 'website' }
 
     case 'demo':
-      return {
-        title: 'Nümunə Dəvətnamə — DigiToy Rəqəmsal Toy Dəvətnaməsi',
-        description: 'DigiToy rəqəmsal toy dəvətnaməsinin canlı nümunəsinə baxın: İştirak Təsdiqi, oturma planı, QR foto paylaşımı və premium dizayn bir arada.',
-        path: '/demo',
-        type: 'website',
-      }
+      return { title: DEMO_TITLE, description: DEMO_DESC, path: '/demo', type: 'website' }
 
     /* Şablonlar vitrini — müştəriyə göndərilə bilən ictimai səhifə */
     case 'templates':
-      return {
-        title: 'Dəvətnamə Şablonları — DigiToy',
-        description: 'DigiToy-un bütün rəqəmsal dəvətnamə şablonları: klassik qızıl, botanik bağ, modern qara, gecə səması və daha çoxu. Hər birinin canlı önbaxışına baxın.',
-        path: '/templates',
-        type: 'website',
-      }
+      return { title: TEMPLATES_TITLE, description: TEMPLATES_DESC, path: '/templates', type: 'website' }
 
     /* Şablon önbaxışı — yalnız daxili test marşrutu, indekslənmir */
     case 'template-preview':
