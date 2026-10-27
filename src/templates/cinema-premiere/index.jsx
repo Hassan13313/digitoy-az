@@ -8,6 +8,7 @@ import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    CINEMA PREMIERE — «Qırmızı xalça premyerası» (premium redizayn, 2026-10)
@@ -47,17 +48,23 @@ const CREDITS = {
   ru: { presents: 'представляет', star: (n) => `В главных ролях ${n}`, rest: ['Сценарий: Любовь', 'Режиссёр: Судьба', 'Музыка: Сердцебиение'], premiere: 'Премьера', admit: 'Входной билет', table: 'Стол', hall: 'Зал' },
 }
 
-const BLACK = '#0B0A0C'
-const VELVET = '#7A111B'
-const GOLD = '#D9A441'
-const GOLD_L = '#F1CF7E'
-const LIGHT = '#FFF3DA'
-const IVORY = '#F2EBDD'
-const MUTED = '#A9A39A'
-const GOLD_TEXT = `linear-gradient(180deg, ${GOLD_L} 10%, ${GOLD} 55%, #9C6E22 100%)`
+const PAL = {
+  BLACK: '#0B0A0C',
+  VELVET: '#7A111B',
+  GOLD: '#D9A441',
+  GOLD_L: '#F1CF7E',
+  LIGHT: '#FFF3DA',
+  IVORY: '#F2EBDD',
+  MUTED: '#A9A39A',
+}
+
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['GOLD'], secondary: ['VELVET'], accent: ['GOLD'], background: ['BLACK'], text: ['IVORY'] }
+const GOLD_TEXT = (C) => `linear-gradient(180deg, ${C.GOLD_L} 10%, ${C.GOLD} 55%, #9C6E22 100%)`
 const CURTAIN = `repeating-linear-gradient(90deg, #3E070D 0, #7A111B 2.2%, #A72330 3.6%, #7A111B 5%, #3E070D 7%)`
 
-const KEYFRAMES = `
+const KEYFRAMES = (C) => `
 @keyframes cp-bulb  { 0%,100% { opacity: .35 } 40% { opacity: 1 } }
 @keyframes cp-rise  { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes cp-fade  { from { opacity: 0 } to { opacity: 1 } }
@@ -66,8 +73,8 @@ const KEYFRAMES = `
 @keyframes cp-hint  { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
 [data-cp] span[aria-hidden="true"], [data-cp] svg[aria-hidden="true"], [data-cp] div[aria-hidden="true"] { pointer-events: none; }
 [data-cp] ::placeholder { color: rgba(169,163,154,.6); }
-[data-cp] input:focus-visible, [data-cp] textarea:focus-visible { border-color: ${GOLD} !important; outline: none; }
-[data-cp] button:focus-visible, [data-cp] a:focus-visible, [data-cp] [role="button"]:focus-visible { outline: 1.5px solid ${GOLD}; outline-offset: 3px; }
+[data-cp] input:focus-visible, [data-cp] textarea:focus-visible { border-color: ${C.GOLD} !important; outline: none; }
+[data-cp] button:focus-visible, [data-cp] a:focus-visible, [data-cp] [role="button"]:focus-visible { outline: 1.5px solid ${C.GOLD}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-cp] *, [data-cp] { animation: none !important; transition: none !important; } }
 `
 
@@ -89,26 +96,29 @@ const BULBS = bulbs(300, 230)
 
 /* Zərli saçaq — pərdənin üstü */
 function Valance() {
+  const C = usePalette()
   return (
     <svg viewBox="0 0 400 70" preserveAspectRatio="none" width="100%" height="70" aria-hidden="true" style={{ display: 'block' }}>
       <defs>
         <linearGradient id="cp-val" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#5A0A12" /><stop offset="1" stopColor="#8E1A24" /></linearGradient>
       </defs>
       <rect width="400" height="26" fill="url(#cp-val)" />
-      <path d={Array.from({ length: 8 }, (_, i) => `M${i * 50} 26Q${i * 50 + 25} 62 ${i * 50 + 50} 26`).join('')} fill="url(#cp-val)" stroke={GOLD} strokeWidth="1.4" />
-      <path d="M0 24H400" stroke={GOLD} strokeWidth="2" />
-      {Array.from({ length: 8 }, (_, i) => <circle key={i} cx={i * 50} cy="27" r="3.2" fill={GOLD} />)}
+      <path d={Array.from({ length: 8 }, (_, i) => `M${i * 50} 26Q${i * 50 + 25} 62 ${i * 50 + 50} 26`).join('')} fill="url(#cp-val)" stroke={C.GOLD} strokeWidth="1.4" />
+      <path d="M0 24H400" stroke={C.GOLD} strokeWidth="2" />
+      {Array.from({ length: 8 }, (_, i) => <circle key={i} cx={i * 50} cy="27" r="3.2" fill={C.GOLD} />)}
       {Array.from({ length: 80 }, (_, i) => {
         const x = i * 5 + 2.5, k = (x % 50) / 50
         const yb = 26 + Math.sin(Math.PI * k) * 36
-        return <path key={`f${i}`} d={`M${x} ${yb}v6`} stroke={GOLD} strokeWidth="1" strokeOpacity=".8" />
+        return <path key={`f${i}`} d={`M${x} ${yb}v6`} stroke={C.GOLD} strokeWidth="1" strokeOpacity=".8" />
       })}
     </svg>
   )
 }
 
 /* Art-deko yelpik — bölmə nişanı */
-function Fan({ size = 40, color = GOLD }) {
+function Fan(props) {
+  const C = usePalette()
+  const { size = 40, color = C.GOLD } = props
   return (
     <svg viewBox="-20 -20 40 22" width={size} height={size * 0.55} aria-hidden="true" style={{ display: 'block', margin: '0 auto' }}>
       {Array.from({ length: 9 }, (_, i) => {
@@ -123,6 +133,7 @@ function Fan({ size = 40, color = GOLD }) {
 
 /* ═══ 01 — AÇILIŞ: pərdə + marquee ═══ */
 function PremiereOpening({ inv, theme }) {
+  const C = usePalette()
   const { ot, lang } = inv
   const gate = useGate({ inv, ms: 1450 })
   if (gate.gone) return null
@@ -140,7 +151,7 @@ function PremiereOpening({ inv, theme }) {
     <motion.div {...gate.gateProps} data-cp
       animate={gate.opening ? { opacity: 0 } : {}}
       transition={{ duration: 0.4, delay: 1.1 }}
-      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: `radial-gradient(70% 50% at 50% 50%, #FFF8E8, #D9CBB0 40%, ${BLACK} 100%)`, color: IVORY, fontFamily: theme.fonts.body }}>
+      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: `radial-gradient(70% 50% at 50% 50%, #FFF8E8, #D9CBB0 40%, ${C.BLACK} 100%)`, color: C.IVORY, fontFamily: theme.fonts.body }}>
       <motion.div animate={gate.opening ? { x: '-100%', scaleX: 0.7 } : {}} transition={{ duration: 1.1, ease: [0.6, 0, 0.3, 1], delay: 0.35 }} style={{ ...curtain('left'), transformOrigin: 'left center' }} />
       <motion.div animate={gate.opening ? { x: '100%', scaleX: 0.7 } : {}} transition={{ duration: 1.1, ease: [0.6, 0, 0.3, 1], delay: 0.35 }} style={{ ...curtain('right'), transformOrigin: 'right center' }} />
       <motion.div animate={gate.opening ? { y: -90 } : {}} transition={{ duration: 0.9, delay: 0.4 }} style={{ position: 'absolute', left: 0, right: 0, top: 0 }}>
@@ -149,10 +160,10 @@ function PremiereOpening({ inv, theme }) {
 
       <motion.div animate={gate.opening ? { opacity: 0, y: -24 } : {}} transition={{ duration: 0.35 }}
         style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 18px 0', textAlign: 'center' }}>
-        {ot.show('kicker') && <div style={{ fontFamily: theme.fonts.body, fontStyle: 'italic', fontSize: 18, color: GOLD_L, textShadow: '0 2px 10px rgba(0,0,0,.6)', animation: 'cp-rise .9s ease-out .5s both' }}>{ot.text('kicker')}</div>}
+        {ot.show('kicker') && <div style={{ fontFamily: theme.fonts.body, fontStyle: 'italic', fontSize: 18, color: C.GOLD_L, textShadow: '0 2px 10px rgba(0,0,0,.6)', animation: 'cp-rise .9s ease-out .5s both' }}>{ot.text('kicker')}</div>}
         {/* marquee */}
         <div style={{ position: 'relative', width: 'min(86vw, 330px)', aspectRatio: '300 / 230', marginTop: 14, animation: 'cp-rise 1s cubic-bezier(.2,.8,.2,1) .3s both' }}>
-          <div style={{ position: 'absolute', inset: 0, borderRadius: 10, background: 'linear-gradient(180deg, #2A2320, #120E0C)', boxShadow: `0 0 0 2px ${GOLD}, 0 0 0 6px #1A1310, 0 0 0 7px ${alpha(GOLD, 0.6)}, 0 30px 60px rgba(0,0,0,.6)` }} />
+          <div style={{ position: 'absolute', inset: 0, borderRadius: 10, background: 'linear-gradient(180deg, #2A2320, #120E0C)', boxShadow: `0 0 0 2px ${C.GOLD}, 0 0 0 6px #1A1310, 0 0 0 7px ${alpha(C.GOLD, 0.6)}, 0 30px 60px rgba(0,0,0,.6)` }} />
           <svg viewBox="-12 -12 324 254" width="100%" height="100%" aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'visible' }}>
             {BULBS.map(([x, y], i) => (
               <g key={i}>
@@ -163,7 +174,7 @@ function PremiereOpening({ inv, theme }) {
           </svg>
           <div style={{
             position: 'absolute', inset: '14% 9%', borderRadius: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            background: `repeating-linear-gradient(180deg, transparent 0 ${fs * 1.18 - 2}px, rgba(0,0,0,.12) ${fs * 1.18 - 2}px ${fs * 1.18}px), linear-gradient(180deg, #FFFBF0, ${LIGHT} 60%, #F5E2B8)`,
+            background: `repeating-linear-gradient(180deg, transparent 0 ${fs * 1.18 - 2}px, rgba(0,0,0,.12) ${fs * 1.18 - 2}px ${fs * 1.18}px), linear-gradient(180deg, #FFFBF0, ${C.LIGHT} 60%, #F5E2B8)`,
             boxShadow: 'inset 0 0 22px rgba(255,200,120,.55), 0 0 30px rgba(255,220,150,.35)', animation: 'cp-on 1.4s linear .9s both',
           }}>
             {titleOv !== '' && (
@@ -171,12 +182,12 @@ function PremiereOpening({ inv, theme }) {
                 <div>{l1}</div>{l2 && <div>{l2}</div>}
               </div>
             )}
-            {ot.show('sub') && <div style={{ marginTop: 6, fontFamily: theme.fonts.body, fontStyle: 'italic', fontSize: 14, color: VELVET }}>{ot.text('sub')}</div>}
+            {ot.show('sub') && <div style={{ marginTop: 6, fontFamily: theme.fonts.body, fontStyle: 'italic', fontSize: 14, color: C.VELVET }}>{ot.text('sub')}</div>}
           </div>
         </div>
-        {ot.show('meta') && <div style={{ marginTop: 26, fontFamily: head, fontWeight: 700, fontSize: 16, letterSpacing: '.14em', color: IVORY, textShadow: '0 2px 10px rgba(0,0,0,.7)', animation: 'cp-rise .9s ease-out 1.6s both' }}>{upper(ot.text('meta'), lang)}</div>}
+        {ot.show('meta') && <div style={{ marginTop: 26, fontFamily: head, fontWeight: 700, fontSize: 16, letterSpacing: '.14em', color: C.IVORY, textShadow: '0 2px 10px rgba(0,0,0,.7)', animation: 'cp-rise .9s ease-out 1.6s both' }}>{upper(ot.text('meta'), lang)}</div>}
         {ot.show('cta') && (
-          <div style={{ marginTop: 20, minHeight: 50, padding: '13px 30px', display: 'inline-flex', alignItems: 'center', background: GOLD_TEXT, color: '#1A1208', fontFamily: head, fontWeight: 800, fontSize: 17, letterSpacing: '.12em', clipPath: 'polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0 50%)', animation: 'cp-rise .9s ease-out 1.9s both' }}>
+          <div style={{ marginTop: 20, minHeight: 50, padding: '13px 30px', display: 'inline-flex', alignItems: 'center', background: GOLD_TEXT(C), color: '#1A1208', fontFamily: head, fontWeight: 800, fontSize: 17, letterSpacing: '.12em', clipPath: 'polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0 50%)', animation: 'cp-rise .9s ease-out 1.9s both' }}>
             {upper(ot.text('cta'), lang)}
           </div>
         )}
@@ -188,15 +199,16 @@ function PremiereOpening({ inv, theme }) {
 
 /* Bölmə */
 function Reel({ id, section, title, kicker, sub, children, head, lang, center = true }) {
+  const C = usePalette()
   return (
     <section id={id} data-section={section} style={{ position: 'relative', padding: '58px 20px 64px' }}>
       <Reveal style={{ maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: center ? 'center' : 'left', marginBottom: 30 }}>
             {center && <Fan />}
-            {title && <h2 style={{ margin: '14px 0 0', fontFamily: head, fontWeight: 800, fontSize: 'clamp(34px, 10.5vw, 46px)', lineHeight: 1, letterSpacing: '.03em', background: GOLD_TEXT, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>{upper(title, lang)}</h2>}
-            {kicker && <div style={{ marginTop: 8, fontStyle: 'italic', fontSize: 16, color: MUTED }}>{kicker}</div>}
-            {sub && <p style={{ margin: '8px auto 0', maxWidth: 320, fontSize: 15.5, color: MUTED, lineHeight: 1.55 }}>{sub}</p>}
+            {title && <h2 style={{ margin: '14px 0 0', fontFamily: head, fontWeight: 800, fontSize: scaleFont('clamp(34px, 10.5vw, 46px)', C.hs), lineHeight: 1, letterSpacing: '.03em', background: GOLD_TEXT(C), WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>{upper(title, lang)}</h2>}
+            {kicker && <div style={{ marginTop: 8, fontStyle: 'italic', fontSize: 16, color: C.MUTED }}>{kicker}</div>}
+            {sub && <p style={{ margin: '8px auto 0', maxWidth: 320, fontSize: 15.5, color: C.MUTED, lineHeight: 1.55 }}>{sub}</p>}
           </div>
         )}
         {children}
@@ -205,271 +217,274 @@ function Reel({ id, section, title, kicker, sub, children, head, lang, center = 
   )
 }
 
-const field = {
-  width: '100%', background: '#141215', border: `1px solid ${alpha(GOLD, 0.35)}`, borderRadius: 2,
-  padding: '14px 16px', fontSize: 16, color: IVORY, outline: 'none',
-}
-const btn = (on, head) => ({
+const field = (C) => ({
+  width: '100%', background: '#141215', border: `1px solid ${alpha(C.GOLD, 0.35)}`, borderRadius: 2,
+  padding: '14px 16px', fontSize: 16, color: C.IVORY, outline: 'none',
+})
+const btn = (C, on, head) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 22px', borderRadius: 2,
   fontFamily: head, fontWeight: 700, fontSize: 16, letterSpacing: '.1em', textDecoration: 'none', cursor: 'pointer',
-  background: on ? GOLD_TEXT : 'transparent', color: on ? '#1A1208' : GOLD_L, border: on ? 'none' : `1px solid ${alpha(GOLD, 0.6)}`,
+  background: on ? GOLD_TEXT(C) : 'transparent', color: on ? '#1A1208' : C.GOLD_L, border: on ? 'none' : `1px solid ${alpha(C.GOLD, 0.6)}`,
 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function CinemaPremiereTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const C = CREDITS[lang] || CREDITS.az
-  const names = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const CR = CREDITS[lang] || CREDITS.az
+  const names = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const [y, m, d] = String(weddingData.date || '').split('-')
   const dotted = d ? `${d}.${m}.${y}` : ''
   const P = { head, lang }
 
   return (
-    <div data-cp data-enter={enterDirection(ID)} style={{
-      background: `radial-gradient(120% 50% at 50% 0%, #2A0A0F, ${BLACK} 60%)`, backgroundColor: BLACK,
-      minHeight: '100vh', fontFamily: body, color: IVORY, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
-      fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(GOLD, 0.3),
-    }}>
-      <style>{KEYFRAMES}</style>
-      {!inv.opened && <PremiereOpening inv={inv} theme={theme} />}
+    <PaletteContext.Provider value={C}>
+      <div data-cp data-enter={enterDirection(ID)} style={{
+        background: `radial-gradient(120% 50% at 50% 0%, #2A0A0F, ${C.BLACK} 60%)`, backgroundColor: C.BLACK,
+        minHeight: '100vh', fontFamily: body, color: C.IVORY, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
+        fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.GOLD, 0.3),
+      }}>
+        <style>{KEYFRAMES(C)}</style>
+        {!inv.opened && <PremiereOpening inv={inv} theme={theme} />}
 
-      <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: '#141215', border: `1px solid ${alpha(GOLD, 0.5)}` }}>
-        {({ playing }) => <EqBars playing={playing} color={GOLD} idle={alpha(GOLD, 0.35)} />}
-      </MusicFab>
+        <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: '#141215', border: `1px solid ${alpha(C.GOLD, 0.5)}` }}>
+          {({ playing }) => <EqBars playing={playing} color={C.GOLD} idle={alpha(C.GOLD, 0.35)} />}
+        </MusicFab>
 
-      {inv.opened && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }} style={{ position: 'relative', zIndex: 1 }}>
-          <header style={{
-            position: 'sticky', top: 0, zIndex: 40, height: 52, padding: '0 16px',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            background: alpha(BLACK, 0.88), backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
-            borderBottom: `1px solid ${alpha(GOLD, 0.22)}`,
-          }}>
-            <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: MUTED, fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
-              <span aria-hidden="true">←</span>{tr.btn_back}
-            </button>
-            <div style={{ fontFamily: head, fontWeight: 800, fontSize: 17, letterSpacing: '.16em', color: GOLD }}>DIGITOY PICTURES</div>
-            <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
-          </header>
-
-          {/* HERO — art-deko afişa */}
-          <section style={{ padding: '24px 14px 30px' }}>
-            <div style={{ position: 'relative', maxWidth: 440, margin: '0 auto', padding: '40px 22px 26px', textAlign: 'center', overflow: 'hidden',
-              background: `repeating-conic-gradient(from 180deg at 50% 0%, ${alpha(GOLD, 0.09)} 0deg 4deg, transparent 4deg 9deg), linear-gradient(180deg, #1C0A0E, #0E0A0B 70%)`,
-              boxShadow: `inset 0 0 0 1px ${GOLD}, inset 0 0 0 6px #0E0A0B, inset 0 0 0 7px ${alpha(GOLD, 0.55)}, 0 30px 60px -30px #000`,
+        {inv.opened && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }} style={{ position: 'relative', zIndex: 1 }}>
+            <header style={{
+              position: 'sticky', top: 0, zIndex: 40, height: 52, padding: '0 16px',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: alpha(C.BLACK, 0.88), backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
+              borderBottom: `1px solid ${alpha(C.GOLD, 0.22)}`,
             }}>
-              {[0, 1, 2, 3].map((c) => (
-                <svg key={c} viewBox="0 0 30 30" width="30" height="30" aria-hidden="true" style={{ position: 'absolute', [c < 2 ? 'top' : 'bottom']: 12, [c % 2 ? 'right' : 'left']: 12, transform: `scale(${c % 2 ? -1 : 1}, ${c < 2 ? 1 : -1})` }}>
-                  <path d="M0 30V10H10V0H30M5 30V15H15V5H30" fill="none" stroke={GOLD} strokeWidth="1.2" />
-                </svg>
-              ))}
-              <div style={{ fontFamily: head, fontWeight: 700, fontSize: 14, letterSpacing: '.3em', color: GOLD_L }}>DIGITOY PICTURES</div>
-              <div style={{ marginTop: 4, fontStyle: 'italic', fontSize: 15, color: MUTED }}>{C.presents}</div>
-              <div style={{ marginTop: 26, fontStyle: 'italic', fontSize: 16, color: IVORY }}>{L('hero', 'kicker', inv.eventLabel)}</div>
-              <h1 style={{ margin: '10px 0 0', fontFamily: head, fontWeight: 800, fontSize: 'clamp(46px, 15vw, 72px)', lineHeight: 0.95, letterSpacing: '.02em', background: GOLD_TEXT, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', textWrap: 'balance' }}>
-                {inv.heroTitle ? upper(inv.heroTitle, lang) : inv.isCouple ? <>{upper(inv.groom, lang)}<span style={{ display: 'block', fontFamily: body, fontStyle: 'italic', fontWeight: 400, fontSize: '.42em', lineHeight: 1.4 }}>&amp;</span>{upper(inv.bride, lang)}</> : upper(inv.single, lang)}
-              </h1>
-              {inv.ot.show('sub') && <div style={{ marginTop: 16, fontStyle: 'italic', fontSize: 19, color: IVORY }}>{inv.ot.text('sub')}</div>}
-              <div style={{ margin: '28px auto 0', display: 'inline-flex', alignItems: 'center', gap: 12, fontFamily: head, fontWeight: 700, fontSize: 24, letterSpacing: '.08em' }}>
-                <span style={{ width: 28, height: 1, background: GOLD }} />{dotted}<span style={{ width: 28, height: 1, background: GOLD }} />
-              </div>
-              <div style={{ marginTop: 4, fontSize: 15, color: MUTED }}>{[inv.time, weddingData.venueName].filter(Boolean).join(' · ')}</div>
-              {inv.isCorp && weddingData.organizer?.trim() && <div style={{ marginTop: 8, fontSize: 14.5, color: MUTED }}>{tr.organizer_display}: {weddingData.organizer}</div>}
-              {/* billing block */}
-              <div style={{ marginTop: 26, paddingTop: 14, borderTop: `1px solid ${alpha(GOLD, 0.3)}`, fontFamily: head, fontWeight: 500, fontSize: 12.5, lineHeight: 1.5, letterSpacing: '.12em', color: alpha(IVORY, 0.7), textWrap: 'balance' }}>
-                {upper([C.star(names), ...C.rest, `${C.premiere} ${dotted}`].join(' · '), lang)}
-              </div>
-            </div>
-            <p style={{ margin: '26px auto 0', maxWidth: 320, textAlign: 'center', fontStyle: 'italic', fontSize: 17, lineHeight: 1.55, color: MUTED }}>{tr.inv_join}</p>
-          </section>
+              <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
+                <span aria-hidden="true">←</span>{tr.btn_back}
+              </button>
+              <div style={{ fontFamily: head, fontWeight: 800, fontSize: 17, letterSpacing: '.16em', color: C.GOLD }}>DIGITOY PICTURES</div>
+              <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
+            </header>
 
-          {/* SAYĞAC — plyonka lideri */}
-          {S.countdown && (
-            <Reel {...P} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
-              <div style={{ position: 'relative', width: 'min(70vw, 240px)', aspectRatio: '1', margin: '0 auto' }}>
-                <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'radial-gradient(circle, #E9E1D2, #BDB29E)', boxShadow: '0 0 0 6px #141215, 0 0 0 7px ' + alpha(GOLD, 0.5) }} />
-                <div aria-hidden="true" style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'conic-gradient(rgba(20,16,16,.28) 0 60deg, transparent 60deg)', animation: 'cp-sweep 4s linear infinite' }} />
-                <svg viewBox="-50 -50 100 100" width="100%" height="100%" aria-hidden="true" style={{ position: 'absolute', inset: 0 }}>
-                  <circle r="44" fill="none" stroke="#141010" strokeWidth=".8" />
-                  <circle r="36" fill="none" stroke="#141010" strokeWidth=".8" />
-                  <path d="M-50 0H50M0 -50V50" stroke="#141010" strokeWidth=".6" />
-                </svg>
-                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#141010' }}>
-                  <div style={{ fontFamily: head, fontWeight: 800, fontSize: 'clamp(56px, 18vw, 78px)', lineHeight: 0.9, fontVariantNumeric: 'tabular-nums' }}>{cd.days}</div>
-                  <div style={{ fontFamily: head, fontWeight: 700, fontSize: 14, letterSpacing: '.2em' }}>{upper(cd.labels.days, lang)}</div>
+            {/* HERO — art-deko afişa */}
+            <section data-section="hero" style={{ padding: '24px 14px 30px' }}>
+              <div style={{ position: 'relative', maxWidth: 440, margin: '0 auto', padding: '40px 22px 26px', textAlign: 'center', overflow: 'hidden',
+                background: `repeating-conic-gradient(from 180deg at 50% 0%, ${alpha(C.GOLD, 0.09)} 0deg 4deg, transparent 4deg 9deg), linear-gradient(180deg, #1C0A0E, #0E0A0B 70%)`,
+                boxShadow: `inset 0 0 0 1px ${C.GOLD}, inset 0 0 0 6px #0E0A0B, inset 0 0 0 7px ${alpha(C.GOLD, 0.55)}, 0 30px 60px -30px #000`,
+              }}>
+                {[0, 1, 2, 3].map((c) => (
+                  <svg key={c} viewBox="0 0 30 30" width="30" height="30" aria-hidden="true" style={{ position: 'absolute', [c < 2 ? 'top' : 'bottom']: 12, [c % 2 ? 'right' : 'left']: 12, transform: `scale(${c % 2 ? -1 : 1}, ${c < 2 ? 1 : -1})` }}>
+                    <path d="M0 30V10H10V0H30M5 30V15H15V5H30" fill="none" stroke={C.GOLD} strokeWidth="1.2" />
+                  </svg>
+                ))}
+                <div style={{ fontFamily: head, fontWeight: 700, fontSize: 14, letterSpacing: '.3em', color: C.GOLD_L }}>DIGITOY PICTURES</div>
+                <div style={{ marginTop: 4, fontStyle: 'italic', fontSize: 15, color: C.MUTED }}>{CR.presents}</div>
+                <div style={{ marginTop: 26, fontStyle: 'italic', fontSize: 16, color: C.IVORY }}>{L('hero', 'kicker', inv.eventLabel)}</div>
+                <h1 style={{ margin: '10px 0 0', fontFamily: head, fontWeight: 800, fontSize: 'clamp(46px, 15vw, 72px)', lineHeight: 0.95, letterSpacing: '.02em', background: GOLD_TEXT(C), WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', textWrap: 'balance' }}>
+                  {inv.heroTitle ? upper(inv.heroTitle, lang) : inv.isCouple ? <>{upper(inv.groom, lang)}<span style={{ display: 'block', fontFamily: body, fontStyle: 'italic', fontWeight: 400, fontSize: '.42em', lineHeight: 1.4 }}>{inv.and}</span>{upper(inv.bride, lang)}</> : upper(inv.single, lang)}
+                </h1>
+                {inv.ot.show('sub') && <div style={{ marginTop: 16, fontStyle: 'italic', fontSize: 19, color: C.IVORY }}>{inv.ot.text('sub')}</div>}
+                <div style={{ margin: '28px auto 0', display: 'inline-flex', alignItems: 'center', gap: 12, fontFamily: head, fontWeight: 700, fontSize: 24, letterSpacing: '.08em' }}>
+                  <span style={{ width: 28, height: 1, background: C.GOLD }} />{dotted}<span style={{ width: 28, height: 1, background: C.GOLD }} />
+                </div>
+                <div style={{ marginTop: 4, fontSize: 15, color: C.MUTED }}>{[inv.time, weddingData.venueName].filter(Boolean).join(' · ')}</div>
+                {inv.isCorp && weddingData.organizer?.trim() && <div style={{ marginTop: 8, fontSize: 14.5, color: C.MUTED }}>{tr.organizer_display}: {weddingData.organizer}</div>}
+                {/* billing block */}
+                <div style={{ marginTop: 26, paddingTop: 14, borderTop: `1px solid ${alpha(C.GOLD, 0.3)}`, fontFamily: head, fontWeight: 500, fontSize: 12.5, lineHeight: 1.5, letterSpacing: '.12em', color: alpha(C.IVORY, 0.7), textWrap: 'balance' }}>
+                  {upper([CR.star(names), ...CR.rest, `${CR.premiere} ${dotted}`].join(' · '), lang)}
                 </div>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: 22, marginTop: 24 }}>
-                {[
-                  { v: cd.hours, l: cd.labels.hours },
-                  { v: cd.minutes, l: cd.labels.minutes },
-                  { v: cd.seconds, l: cd.labels.seconds, pop: true },
-                ].map(({ v, l, pop }) => (
-                  <div key={l} style={{ textAlign: 'center' }}>
-                    <div style={{ fontFamily: head, fontWeight: 800, fontSize: 36, lineHeight: 1, color: pop ? GOLD_L : IVORY, fontVariantNumeric: 'tabular-nums' }}><PopDigit value={v} pop={pop} /></div>
-                    <div style={{ marginTop: 4, fontFamily: head, fontWeight: 500, fontSize: 12.5, letterSpacing: '.16em', color: MUTED }}>{upper(l, lang)}</div>
-                  </div>
-                ))}
-              </div>
-            </Reel>
-          )}
+              <p style={{ margin: '26px auto 0', maxWidth: 320, textAlign: 'center', fontStyle: 'italic', fontSize: 17, lineHeight: 1.55, color: C.MUTED }}>{tr.inv_join}</p>
+            </section>
 
-          <StoryBlock inv={inv} templateId={ID} weddingData={weddingData} lang={lang} />
-
-          {/* MƏKAN — pərdəli ekran */}
-          {S.venue && (
-            <Reel {...P} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
-              <div style={{ position: 'relative', padding: '14px 26px 0' }}>
-                <div aria-hidden="true" style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 34, background: CURTAIN, borderRadius: '0 0 40% 0', boxShadow: 'inset -6px 0 10px rgba(0,0,0,.5)' }} />
-                <div aria-hidden="true" style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 34, background: CURTAIN, borderRadius: '0 0 0 40%', boxShadow: 'inset 6px 0 10px rgba(0,0,0,.5)' }} />
-                <div aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 14, background: `linear-gradient(180deg, #5A0A12, ${VELVET})`, borderBottom: `1.5px solid ${GOLD}` }} />
-                <div style={{ position: 'relative', overflow: 'hidden', boxShadow: '0 0 40px rgba(255,240,210,.12)' }}>
-                  <MapSection
-                    weddingData={weddingData} theme={theme} accent={GOLD} height="clamp(210px, 58vw, 270px)"
-                    map={{ opacity: 0.65, filter: 'grayscale(1) contrast(1.15) brightness(.85)', tintOpacity: 0.25, tint: '#E9E1D2', blend: 'multiply' }}
-                    frame={<ScreenPin />}
-                    fallback={<div style={{ height: 'clamp(210px, 58vw, 270px)', position: 'relative', background: 'radial-gradient(circle, #E9E1D2, #9E9483)' }}><ScreenPin /></div>}
-                  />
-                </div>
-              </div>
-              <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontWeight: 700, fontSize: 28, letterSpacing: '.04em', lineHeight: 1.1 }}>{upper(weddingData.venueName, lang)}</div>
-              {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 6, fontStyle: 'italic', fontSize: 16, color: MUTED }}>{weddingData.venueNote}</div>}
-              <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
-                {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(true, head)}>{upper(tr.inv_directions_btn, lang)}</a>}
-                {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(!inv.dirUrl, head)}>MAPS</a>}
-                {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(false, head)}>WAZE</a>}
-                {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(false, head)}>APPLE</a>}
-              </div>
-            </Reel>
-          )}
-
-          {/* PROQRAM — kinoplyonka */}
-          {S.program && (
-            <Reel {...P} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
-              <ol style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                {timeline.events.map((ev, i) => (
-                  <li key={i} style={{ display: 'grid', gridTemplateColumns: '96px 1fr', alignItems: 'stretch', gap: 16 }}>
-                    <div style={{ position: 'relative', background: '#16130F', padding: '6px 16px', display: 'flex', alignItems: 'center' }}>
-                      <span aria-hidden="true" style={{ position: 'absolute', left: 3, top: 0, bottom: 0, width: 8, backgroundImage: SPROCKET, backgroundSize: '8px 14px' }} />
-                      <span aria-hidden="true" style={{ position: 'absolute', right: 3, top: 0, bottom: 0, width: 8, backgroundImage: SPROCKET, backgroundSize: '8px 14px' }} />
-                      <div style={{ width: '100%', minHeight: 54, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(160deg, #3A2A1A, #1D1610)', boxShadow: `inset 0 0 0 1px ${alpha(GOLD, 0.25)}`, fontFamily: head, fontWeight: 800, fontSize: 20, letterSpacing: '.04em', color: GOLD_L, fontVariantNumeric: 'tabular-nums' }}>{ev.time}</div>
-                    </div>
-                    <div style={{ padding: '16px 0', borderBottom: `1px solid ${alpha(GOLD, 0.16)}`, display: 'flex', alignItems: 'center', minWidth: 0 }}>
-                      <div style={{ fontFamily: body, fontSize: 19, lineHeight: 1.3 }}>{ev.label}</div>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </Reel>
-          )}
-
-          {S.dresscode && (
-            <Reel {...P} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
-              <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
-                customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={body} align="center" onDark italic />
-            </Reel>
-          )}
-
-          {/* MASA — kino bileti */}
-          {S.seating && !seating.isEmpty && (
-            <Reel {...P} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <input {...seatInputProps(inv, 'cp-seat-list')} style={field} />
-              <SeatSuggest inv={inv} id="cp-seat-list" c={{ bg: '#141215', border: `1px solid ${alpha(GOLD, 0.35)}`, active: alpha(GOLD, 0.12), text: IVORY, table: GOLD_L, radius: 2, font: body }} />
-              {seating.showNotFound && <div style={{ marginTop: 12, fontStyle: 'italic', fontSize: 15, color: MUTED, textAlign: 'center' }}>{tr.inv_seat_fullname}</div>}
-              {seating.selected && (
-                <div style={{ position: 'relative', maxWidth: 320, margin: '28px auto 0', padding: 12, background: '#B3262F', color: '#FFF1DE',
-                  WebkitMask: 'radial-gradient(circle at 0 50%, transparent 6px, #000 6.5px) 0 0 / 51% 18px repeat-y, radial-gradient(circle at 100% 50%, transparent 6px, #000 6.5px) 100% 0 / 51% 18px repeat-y',
-                  mask: 'radial-gradient(circle at 0 50%, transparent 6px, #000 6.5px) 0 0 / 51% 18px repeat-y, radial-gradient(circle at 100% 50%, transparent 6px, #000 6.5px) 100% 0 / 51% 18px repeat-y',
-                  animation: 'cp-rise .6s ease-out both' }}>
-                  <div style={{ border: '1.5px dashed rgba(255,241,222,.6)', padding: '14px 16px', textAlign: 'center' }}>
-                    <div style={{ fontFamily: head, fontWeight: 700, fontSize: 14, letterSpacing: '.3em' }}>{upper(C.admit, lang)}</div>
-                    <div style={{ marginTop: 8, fontSize: 15 }}>{seating.selected.full_name}</div>
-                    <div style={{ marginTop: 4, display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 10 }}>
-                      <span style={{ fontFamily: head, fontWeight: 700, fontSize: 16, letterSpacing: '.2em' }}>{upper(C.table, lang)}</span>
-                      <span style={{ fontFamily: head, fontWeight: 800, fontSize: 64, lineHeight: 1 }}>{seating.selected.table_id}</span>
-                    </div>
-                    {seating.tablemates.length > 0 && <div style={{ marginTop: 8, fontSize: 14, lineHeight: 1.5, opacity: 0.9 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}
+            {/* SAYĞAC — plyonka lideri */}
+            {S.countdown && (
+              <Reel section="countdown" {...P} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+                <div style={{ position: 'relative', width: 'min(70vw, 240px)', aspectRatio: '1', margin: '0 auto' }}>
+                  <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'radial-gradient(circle, #E9E1D2, #BDB29E)', boxShadow: '0 0 0 6px #141215, 0 0 0 7px ' + alpha(C.GOLD, 0.5) }} />
+                  <div aria-hidden="true" style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'conic-gradient(rgba(20,16,16,.28) 0 60deg, transparent 60deg)', animation: 'cp-sweep 4s linear infinite' }} />
+                  <svg viewBox="-50 -50 100 100" width="100%" height="100%" aria-hidden="true" style={{ position: 'absolute', inset: 0 }}>
+                    <circle r="44" fill="none" stroke="#141010" strokeWidth=".8" />
+                    <circle r="36" fill="none" stroke="#141010" strokeWidth=".8" />
+                    <path d="M-50 0H50M0 -50V50" stroke="#141010" strokeWidth=".6" />
+                  </svg>
+                  <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#141010' }}>
+                    <div style={{ fontFamily: head, fontWeight: 800, fontSize: 'clamp(56px, 18vw, 78px)', lineHeight: 0.9, fontVariantNumeric: 'tabular-nums' }}>{cd.days}</div>
+                    <div style={{ fontFamily: head, fontWeight: 700, fontSize: 14, letterSpacing: '.2em' }}>{upper(cd.labels.days, lang)}</div>
                   </div>
                 </div>
-              )}
-              {seating.selected && (
-                <div style={{ textAlign: 'center' }}>
-                  <button onClick={seating.reset} data-press style={{ marginTop: 10, background: 'none', border: 'none', color: GOLD_L, fontSize: 15, minHeight: 44, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 4, fontFamily: body }}>
-                    {seatingL.again || 'Yenidən axtar'}
-                  </button>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: 22, marginTop: 24 }}>
+                  {[
+                    { v: cd.hours, l: cd.labels.hours },
+                    { v: cd.minutes, l: cd.labels.minutes },
+                    { v: cd.seconds, l: cd.labels.seconds, pop: true },
+                  ].map(({ v, l, pop }) => (
+                    <div key={l} style={{ textAlign: 'center' }}>
+                      <div style={{ fontFamily: head, fontWeight: 800, fontSize: 36, lineHeight: 1, color: pop ? C.GOLD_L : C.IVORY, fontVariantNumeric: 'tabular-nums' }}><PopDigit value={v} pop={pop} /></div>
+                      <div style={{ marginTop: 4, fontFamily: head, fontWeight: 500, fontSize: 12.5, letterSpacing: '.16em', color: C.MUTED }}>{upper(l, lang)}</div>
+                    </div>
+                  ))}
                 </div>
-              )}
-            </Reel>
-          )}
+              </Reel>
+            )}
 
-          {/* FOTOLAR — plyonka kadrları */}
-          {S.gallery && (
-            <Reel id="gallery-section" {...P} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ position: 'relative', background: '#16130F', padding: '18px 8px', marginBottom: 28 }}>
-                  <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 3, height: 8, backgroundImage: SPROCKET_H, backgroundSize: '14px 8px' }} />
-                  <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, bottom: 3, height: 8, backgroundImage: SPROCKET_H, backgroundSize: '14px 8px' }} />
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 6 }}>
-                    {gallery.demoPhotos.map((url, i) => (
-                      <div key={i} style={{ aspectRatio: '4 / 3', background: '#2A2420', overflow: 'hidden' }}>
-                        <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: 'sepia(.25) contrast(1.05)' }} />
+            <StoryBlock inv={inv} templateId={ID} weddingData={weddingData} lang={lang} />
+
+            {/* MƏKAN — pərdəli ekran */}
+            {S.venue && (
+              <Reel section="venue" {...P} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+                <div style={{ position: 'relative', padding: '14px 26px 0' }}>
+                  <div aria-hidden="true" style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 34, background: CURTAIN, borderRadius: '0 0 40% 0', boxShadow: 'inset -6px 0 10px rgba(0,0,0,.5)' }} />
+                  <div aria-hidden="true" style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 34, background: CURTAIN, borderRadius: '0 0 0 40%', boxShadow: 'inset 6px 0 10px rgba(0,0,0,.5)' }} />
+                  <div aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 14, background: `linear-gradient(180deg, #5A0A12, ${C.VELVET})`, borderBottom: `1.5px solid ${C.GOLD}` }} />
+                  <div style={{ position: 'relative', overflow: 'hidden', boxShadow: '0 0 40px rgba(255,240,210,.12)' }}>
+                    <MapSection
+                      weddingData={weddingData} theme={theme} accent={C.GOLD} height="clamp(210px, 58vw, 270px)"
+                      map={{ opacity: 0.65, filter: 'grayscale(1) contrast(1.15) brightness(.85)', tintOpacity: 0.25, tint: '#E9E1D2', blend: 'multiply' }}
+                      frame={<ScreenPin />}
+                      fallback={<div style={{ height: 'clamp(210px, 58vw, 270px)', position: 'relative', background: 'radial-gradient(circle, #E9E1D2, #9E9483)' }}><ScreenPin /></div>}
+                    />
+                  </div>
+                </div>
+                <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontWeight: 700, fontSize: 28, letterSpacing: '.04em', lineHeight: 1.1 }}>{upper(weddingData.venueName, lang)}</div>
+                {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 6, fontStyle: 'italic', fontSize: 16, color: C.MUTED }}>{weddingData.venueNote}</div>}
+                <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
+                  {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(C, true, head)}>{upper(tr.inv_directions_btn, lang)}</a>}
+                  {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C, !inv.dirUrl, head)}>MAPS</a>}
+                  {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C, false, head)}>WAZE</a>}
+                  {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C, false, head)}>APPLE</a>}
+                </div>
+              </Reel>
+            )}
+
+            {/* PROQRAM — kinoplyonka */}
+            {S.program && (
+              <Reel section="program" {...P} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+                <ol style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                  {timeline.events.map((ev, i) => (
+                    <li key={i} style={{ display: 'grid', gridTemplateColumns: '96px 1fr', alignItems: 'stretch', gap: 16 }}>
+                      <div style={{ position: 'relative', background: '#16130F', padding: '6px 16px', display: 'flex', alignItems: 'center' }}>
+                        <span aria-hidden="true" style={{ position: 'absolute', left: 3, top: 0, bottom: 0, width: 8, backgroundImage: SPROCKET, backgroundSize: '8px 14px' }} />
+                        <span aria-hidden="true" style={{ position: 'absolute', right: 3, top: 0, bottom: 0, width: 8, backgroundImage: SPROCKET, backgroundSize: '8px 14px' }} />
+                        <div style={{ width: '100%', minHeight: 54, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(160deg, #3A2A1A, #1D1610)', boxShadow: `inset 0 0 0 1px ${alpha(C.GOLD, 0.25)}`, fontFamily: head, fontWeight: 800, fontSize: 20, letterSpacing: '.04em', color: C.GOLD_L, fontVariantNumeric: 'tabular-nums' }}>{ev.time}</div>
                       </div>
-                    ))}
+                      <div style={{ padding: '16px 0', borderBottom: `1px solid ${alpha(C.GOLD, 0.16)}`, display: 'flex', alignItems: 'center', minWidth: 0 }}>
+                        <div style={{ fontFamily: body, fontSize: 19, lineHeight: 1.3 }}>{ev.label}</div>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </Reel>
+            )}
+
+            {S.dresscode && (
+              <Reel section="dresscode" {...P} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+                <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
+                  customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={body} align="center" onDark italic />
+              </Reel>
+            )}
+
+            {/* MASA — kino bileti */}
+            {S.seating && !seating.isEmpty && (
+              <Reel section="seating" {...P} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+                <input {...seatInputProps(inv, 'cp-seat-list')} style={field(C)} />
+                <SeatSuggest inv={inv} id="cp-seat-list" c={{ bg: '#141215', border: `1px solid ${alpha(C.GOLD, 0.35)}`, active: alpha(C.GOLD, 0.12), text: C.IVORY, table: C.GOLD_L, radius: 2, font: body }} />
+                {seating.showNotFound && <div style={{ marginTop: 12, fontStyle: 'italic', fontSize: 15, color: C.MUTED, textAlign: 'center' }}>{tr.inv_seat_fullname}</div>}
+                {seating.selected && (
+                  <div style={{ position: 'relative', maxWidth: 320, margin: '28px auto 0', padding: 12, background: '#B3262F', color: '#FFF1DE',
+                    WebkitMask: 'radial-gradient(circle at 0 50%, transparent 6px, #000 6.5px) 0 0 / 51% 18px repeat-y, radial-gradient(circle at 100% 50%, transparent 6px, #000 6.5px) 100% 0 / 51% 18px repeat-y',
+                    mask: 'radial-gradient(circle at 0 50%, transparent 6px, #000 6.5px) 0 0 / 51% 18px repeat-y, radial-gradient(circle at 100% 50%, transparent 6px, #000 6.5px) 100% 0 / 51% 18px repeat-y',
+                    animation: 'cp-rise .6s ease-out both' }}>
+                    <div style={{ border: '1.5px dashed rgba(255,241,222,.6)', padding: '14px 16px', textAlign: 'center' }}>
+                      <div style={{ fontFamily: head, fontWeight: 700, fontSize: 14, letterSpacing: '.3em' }}>{upper(CR.admit, lang)}</div>
+                      <div style={{ marginTop: 8, fontSize: 15 }}>{seating.selected.full_name}</div>
+                      <div style={{ marginTop: 4, display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 10 }}>
+                        <span style={{ fontFamily: head, fontWeight: 700, fontSize: 16, letterSpacing: '.2em' }}>{upper(CR.table, lang)}</span>
+                        <span style={{ fontFamily: head, fontWeight: 800, fontSize: 64, lineHeight: 1 }}>{seating.selected.table_id}</span>
+                      </div>
+                      {seating.tablemates.length > 0 && <div style={{ marginTop: 8, fontSize: 14, lineHeight: 1.5, opacity: 0.9 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}
+                    </div>
                   </div>
+                )}
+                {seating.selected && (
+                  <div style={{ textAlign: 'center' }}>
+                    <button onClick={seating.reset} data-press style={{ marginTop: 10, background: 'none', border: 'none', color: C.GOLD_L, fontSize: 15, minHeight: 44, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 4, fontFamily: body }}>
+                      {seatingL.again || 'Yenidən axtar'}
+                    </button>
+                  </div>
+                )}
+              </Reel>
+            )}
+
+            {/* FOTOLAR — plyonka kadrları */}
+            {S.gallery && (
+              <Reel section="gallery" id="gallery-section" {...P} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+                {gallery.demoPhotos.length > 0 && (
+                  <div style={{ position: 'relative', background: '#16130F', padding: '18px 8px', marginBottom: 28 }}>
+                    <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 3, height: 8, backgroundImage: SPROCKET_H, backgroundSize: '14px 8px' }} />
+                    <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, bottom: 3, height: 8, backgroundImage: SPROCKET_H, backgroundSize: '14px 8px' }} />
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 6 }}>
+                      {gallery.demoPhotos.map((url, i) => (
+                        <div key={i} style={{ aspectRatio: '4 / 3', background: '#2A2420', overflow: 'hidden' }}>
+                          <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: 'sepia(.25) contrast(1.05)' }} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ display: 'inline-block', padding: 12, background: C.IVORY, boxShadow: `0 0 0 1px ${C.GOLD}, 0 0 0 6px ${C.BLACK}, 0 0 0 7px ${alpha(C.GOLD, 0.5)}` }}>
+                    <QRCodeSVG value={gallery.photoShareUrl} size={128} bgColor={C.IVORY} fgColor="#141010" level="M" />
+                  </div>
+                  <div style={{ marginTop: 16, fontSize: 15, color: C.MUTED }}>{tr.inv_scan_upload}</div>
+                  <a data-press href={gallery.photoShareUrl} style={{ ...btn(C, true, head), marginTop: 16 }}>{upper(tr.inv_gallery_btn, lang)}</a>
+                  <p style={{ margin: '16px auto 0', maxWidth: 340, fontSize: 15.5, color: C.MUTED, lineHeight: 1.6 }}>{tr.inv_gallery_desc}</p>
                 </div>
-              )}
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ display: 'inline-block', padding: 12, background: IVORY, boxShadow: `0 0 0 1px ${GOLD}, 0 0 0 6px ${BLACK}, 0 0 0 7px ${alpha(GOLD, 0.5)}` }}>
-                  <QRCodeSVG value={gallery.photoShareUrl} size={128} bgColor={IVORY} fgColor="#141010" level="M" />
+              </Reel>
+            )}
+
+            {/* RSVP — kassa */}
+            {S.rsvp && (
+              <Reel section="rsvp" {...P} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+                <ReplyForm inv={inv} t={{ ink: C.IVORY, muted: C.MUTED, line: alpha(C.GOLD, 0.45), hair: alpha(C.GOLD, 0.16), accent: C.GOLD_L, font: body, display: head, radius: 2, btnFont: head, btnUpper: true, btnTracking: '.12em', doneMark: <Fan size={30} />, marker: (a) => <span style={{ color: a ? C.GOLD_L : alpha(C.GOLD, 0.35), fontSize: 13, lineHeight: 1 }}>★</span>, suggest: { bg: '#141215', border: `1px solid ${alpha(C.GOLD, 0.35)}`, active: alpha(C.GOLD, 0.12), text: C.IVORY, table: C.GOLD_L, radius: 2, font: body } }} />
+              </Reel>
+            )}
+
+            {/* TAMAŞAÇI RƏYLƏRİ */}
+            {S.guestbook && (
+              <Reel section="guestbook" {...P} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+                <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 34 }}>
+                  <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbookL.namePh} style={field(C)} />
+                  <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbookL.msgPh} rows={3} style={{ ...field(C), resize: 'none', lineHeight: 1.5 }} />
+                  <button type="submit" disabled={!gbook.canSubmit} data-press style={{ ...btn(C, gbook.canSubmit, head), width: '100%', opacity: gbook.canSubmit ? 1 : 0.5, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed' }}>
+                    {gbook.sending ? gbookL.sending : upper(gbookL.btn, lang)}
+                  </button>
+                  {gbook.error && <p role="alert" style={{ margin: 0, fontSize: 14 }}>⚠ {gbookL.error}</p>}
+                </form>
+                <div style={{ display: 'grid', gap: 30, textAlign: 'center' }}>
+                  {gbook.messages.map((raw, i) => {
+                    const msg = gbook.readMessage(raw)
+                    return (
+                      <figure key={msg.name + i} style={{ margin: 0 }}>
+                        <div aria-hidden="true" style={{ fontSize: 17, letterSpacing: '.3em', color: C.GOLD }}>★★★★★</div>
+                        <blockquote style={{ margin: '10px 0 0', fontStyle: 'italic', fontSize: 20, lineHeight: 1.45, color: C.IVORY }}>«{msg.text}»</blockquote>
+                        <figcaption style={{ marginTop: 10, fontFamily: head, fontWeight: 700, fontSize: 15, letterSpacing: '.14em', color: C.GOLD_L }}>— {upper(msg.name, lang)}{msg.date ? <span style={{ fontFamily: body, fontWeight: 400, letterSpacing: 0, color: C.MUTED }}>{`, ${gbook.formatDate(msg.date)}`}</span> : null}</figcaption>
+                      </figure>
+                    )
+                  })}
                 </div>
-                <div style={{ marginTop: 16, fontSize: 15, color: MUTED }}>{tr.inv_scan_upload}</div>
-                <a data-press href={gallery.photoShareUrl} style={{ ...btn(true, head), marginTop: 16 }}>{upper(tr.inv_gallery_btn, lang)}</a>
-                <p style={{ margin: '16px auto 0', maxWidth: 340, fontSize: 15.5, color: MUTED, lineHeight: 1.6 }}>{tr.inv_gallery_desc}</p>
-              </div>
-            </Reel>
-          )}
+              </Reel>
+            )}
 
-          {/* RSVP — kassa */}
-          {S.rsvp && (
-            <Reel {...P} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
-              <ReplyForm inv={inv} t={{ ink: IVORY, muted: MUTED, line: alpha(GOLD, 0.45), hair: alpha(GOLD, 0.16), accent: GOLD_L, font: body, display: head, radius: 2, btnFont: head, btnUpper: true, btnTracking: '.12em', doneMark: <Fan size={30} />, marker: (a) => <span style={{ color: a ? GOLD_L : alpha(GOLD, 0.35), fontSize: 13, lineHeight: 1 }}>★</span>, suggest: { bg: '#141215', border: `1px solid ${alpha(GOLD, 0.35)}`, active: alpha(GOLD, 0.12), text: IVORY, table: GOLD_L, radius: 2, font: body } }} />
-            </Reel>
-          )}
-
-          {/* TAMAŞAÇI RƏYLƏRİ */}
-          {S.guestbook && (
-            <Reel {...P} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 34 }}>
-                <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbookL.namePh} style={field} />
-                <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbookL.msgPh} rows={3} style={{ ...field, resize: 'none', lineHeight: 1.5 }} />
-                <button type="submit" disabled={!gbook.canSubmit} data-press style={{ ...btn(gbook.canSubmit, head), width: '100%', opacity: gbook.canSubmit ? 1 : 0.5, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed' }}>
-                  {gbook.sending ? gbookL.sending : upper(gbookL.btn, lang)}
-                </button>
-                {gbook.error && <p role="alert" style={{ margin: 0, fontSize: 14 }}>⚠ {gbookL.error}</p>}
-              </form>
-              <div style={{ display: 'grid', gap: 30, textAlign: 'center' }}>
-                {gbook.messages.map((raw, i) => {
-                  const msg = gbook.readMessage(raw)
-                  return (
-                    <figure key={msg.name + i} style={{ margin: 0 }}>
-                      <div aria-hidden="true" style={{ fontSize: 17, letterSpacing: '.3em', color: GOLD }}>★★★★★</div>
-                      <blockquote style={{ margin: '10px 0 0', fontStyle: 'italic', fontSize: 20, lineHeight: 1.45, color: IVORY }}>«{msg.text}»</blockquote>
-                      <figcaption style={{ marginTop: 10, fontFamily: head, fontWeight: 700, fontSize: 15, letterSpacing: '.14em', color: GOLD_L }}>— {upper(msg.name, lang)}{msg.date ? <span style={{ fontFamily: body, fontWeight: 400, letterSpacing: 0, color: MUTED }}>{`, ${gbook.formatDate(msg.date)}`}</span> : null}</figcaption>
-                    </figure>
-                  )
-                })}
-              </div>
-            </Reel>
-          )}
-
-          <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
-        </motion.div>
-      )}
-    </div>
+            <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
+          </motion.div>
+        )}
+      </div>
+    </PaletteContext.Provider>
   )
 }
 
@@ -477,10 +492,11 @@ const SPROCKET = `url("data:image/svg+xml,${encodeURIComponent("<svg xmlns='http
 const SPROCKET_H = `url("data:image/svg+xml,${encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='14' height='8'><rect x='3' y='1' width='8' height='6' rx='1.6' fill='#E9DFC9'/></svg>")}")`
 
 function ScreenPin() {
+  const C = usePalette()
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
       <svg width="36" height="36" viewBox="-18 -18 36 36" style={{ position: 'absolute', left: -18, top: -18 }}>
-        <path d="M0 -15L4.4 -4.6L15 -4.6L6.4 2.2L9.6 13L0 6.6L-9.6 13L-6.4 2.2L-15 -4.6L-4.4 -4.6Z" fill={GOLD} stroke="#141010" strokeWidth="1.2" />
+        <path d="M0 -15L4.4 -4.6L15 -4.6L6.4 2.2L9.6 13L0 6.6L-9.6 13L-6.4 2.2L-15 -4.6L-4.4 -4.6Z" fill={C.GOLD} stroke="#141010" strokeWidth="1.2" />
       </svg>
     </span>
   )

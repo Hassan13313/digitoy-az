@@ -108,6 +108,10 @@ export function useInvitation({
     formattedDate, dayName, dp, time, fullDate,
     heroTitle, single,
     groom: weddingData.groomName || '', bride: weddingData.brideName || '',
+    /* Adlar arasındakı bağlayıcı: premium dizaynlar «&» işlədir; admin
+       «Mətnlər › Hero › «və» bağlayıcısı»-nı yazıbsa onun mətni (TemplateShell
+       bu sətri həmişə `tr.inv_and`-dən göstərirdi). */
+    and: adminStrings?.inv_and ? tr.inv_and : '&',
     footer: sectionHead(L, 'footer'),
     storyAdminTheme: adminOverrides?.theme || null,
     storyCopy: adminOverrides?.story?.text || null,

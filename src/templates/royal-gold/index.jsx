@@ -547,7 +547,7 @@ export default function RoyalGoldTemplate({
             </header>
 
             {/* 04 — HERO: gravür sertifikat */}
-            <section style={{
+            <section data-section="hero" style={{
               position: 'relative', minHeight: 'calc(100svh - 52px)', overflow: 'hidden',
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
               padding: '64px 26px 84px', textAlign: 'center',
@@ -644,7 +644,7 @@ export default function RoyalGoldTemplate({
 
             {/* 05 — SAYĞAC: xronoqraf */}
             {S.countdown && (
-              <Plate title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+              <Plate section="countdown" title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
                 <div style={{ position: 'relative', width: 'min(78vw, 300px)', aspectRatio: '1', margin: '0 auto' }}>
                   <ChronoDial size="100%" seconds={cd.seconds} />
                   <div style={{
@@ -696,7 +696,7 @@ export default function RoyalGoldTemplate({
 
             {/* 06 — MƏKAN: banknot halqası içində dairəvi xəritə */}
             {S.venue && (
-              <Plate title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+              <Plate section="venue" title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
                 <div style={{ position: 'relative', width: MAP_BOX, aspectRatio: '1', margin: '0 auto' }}>
                   <Rosette size="100%" rose={false} inner={false} stroke={0.7} style={{ position: 'absolute', inset: 0 }} />
                   <div style={{
@@ -749,7 +749,7 @@ export default function RoyalGoldTemplate({
 
             {/* 07 — PROQRAM: ziyafət menyu kartı */}
             {S.program && (
-              <Plate title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+              <Plate section="program" title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
                 <div style={{
                   position: 'relative', padding: '26px 22px 22px',
                   border: `1px solid ${TH.primary}66`, outline: `1px solid ${TH.primary}24`, outlineOffset: 5,
@@ -778,7 +778,7 @@ export default function RoyalGoldTemplate({
 
             {/* 08 — GEYİM TƏRZİ */}
             {S.dresscode && (
-              <Plate title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+              <Plate section="dresscode" title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
                 <DressCodeSection
                   theme={TH}
                   paletteId={weddingData.dressCodePalette}
@@ -795,7 +795,7 @@ export default function RoyalGoldTemplate({
 
             {/* 09 — MASA AXTARIŞI: fil sümüyü yer kartı */}
             {canShowSeating && !seating.isEmpty && (
-              <Plate title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+              <Plate section="seating" title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
                 <div>
                   <input
                     ref={seatInputRef}
@@ -853,7 +853,7 @@ export default function RoyalGoldTemplate({
 
             {/* 10 — FOTO PAYLAŞIMI */}
             {canShowGallery && (
-              <Plate id="gallery-section" title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+              <Plate section="gallery" id="gallery-section" title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
                 <div style={{ textAlign: 'center' }}>
                   {gallery.demoPhotos.length > 0 && (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8, marginBottom: 28 }}>
@@ -888,7 +888,7 @@ export default function RoyalGoldTemplate({
                  yox (qonaq rəyi: kart çox qabarıq görünürdü). Qızıl xətlər,
                  sikkə nişanlı seçimlər, dar kontur düymə. Məntiq eynidir. */}
             {canShowRsvp && (
-              <Plate title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+              <Plate section="rsvp" title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
                 <div style={{ maxWidth: 400, margin: '0 auto' }}>
                   {(rsvp.rsvpClosed && !rsvp.submitted) || rsvp.alreadyDone || rsvp.submitted ? (
                     <div style={{ textAlign: 'center', padding: '4px 0' }}>
@@ -995,7 +995,7 @@ export default function RoyalGoldTemplate({
 
             {/* 12 — TƏBRİK KİTABI */}
             {S.guestbook && (
-              <Plate title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+              <Plate section="guestbook" title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
                 <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 12, marginBottom: 8 }}>
                   <input
                     type="text"

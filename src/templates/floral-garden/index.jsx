@@ -507,7 +507,7 @@ export default function FloralGardenTemplate({
             </header>
 
             {/* 04 — HERO: sağ küncdən sallanan buket, sola yığılmış adlar */}
-            <section style={{
+            <section data-section="hero" style={{
               position: 'relative', minHeight: 'calc(100svh - 52px)', overflow: 'hidden',
               display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
               padding: 'clamp(220px, 58vw, 280px) 28px 64px',
@@ -574,7 +574,7 @@ export default function FloralGardenTemplate({
 
               {/* 05 — SAYĞAC */}
               {S.countdown && (
-                <Bed title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+                <Bed section="countdown" title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
                   <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14 }}>
                     <div style={{
                       fontFamily: serif, fontWeight: 300, fontSize: 'clamp(84px, 28vw, 120px)', lineHeight: 0.82,
@@ -618,7 +618,7 @@ export default function FloralGardenTemplate({
 
               {/* 06 — MƏKAN: tağlı bağ pəncərəsi */}
               {S.venue && (
-                <Bed title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+                <Bed section="venue" title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
                   <div style={{ position: 'relative', maxWidth: 340, marginTop: 8 }}>
                     <div style={{
                       borderRadius: '999px 999px 24px 24px', overflow: 'hidden', border: '6px solid #FFFFFF',
@@ -667,7 +667,7 @@ export default function FloralGardenTemplate({
 
               {/* 07 — PROQRAM: hər hadisə bağ yolunda açan çiçəkdir */}
               {S.program && (
-                <Bed title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+                <Bed section="program" title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
                   <ol style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: 26 }}>
                     {timeline.events.map((ev, i) => (
                       <li key={i} style={{ position: 'relative' }}>
@@ -690,7 +690,7 @@ export default function FloralGardenTemplate({
 
               {/* 08 — GEYİM TƏRZİ */}
               {S.dresscode && (
-                <Bed title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+                <Bed section="dresscode" title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
                   <DressCodeSection
                     theme={TH}
                     paletteId={weddingData.dressCodePalette}
@@ -706,7 +706,7 @@ export default function FloralGardenTemplate({
 
               {/* 09 — MASA AXTARIŞI: ağ yer kartı */}
               {canShowSeating && !seating.isEmpty && (
-                <Bed title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+                <Bed section="seating" title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
                   <div>
                     <input
                       ref={seatInputRef}
@@ -765,7 +765,7 @@ export default function FloralGardenTemplate({
 
               {/* 10 — FOTO PAYLAŞIMI */}
               {canShowGallery && (
-                <Bed id="gallery-section" title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+                <Bed section="gallery" id="gallery-section" title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
                   {gallery.demoPhotos.length > 0 && (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8, marginBottom: 26 }}>
                       {gallery.demoPhotos.map((url, i) => (
@@ -807,7 +807,7 @@ export default function FloralGardenTemplate({
                    (qonaq rəyi: kart çox qabarıq görünürdü). Alt xətli ad sahəsi,
                    xırda pion qönçəsi ilə seçimlər, dar kontur düymə. Məntiq eynidir. */}
               {canShowRsvp && (
-                <Bed title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+                <Bed section="rsvp" title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
                   <div style={{ maxWidth: 400, margin: '0 auto' }}>
                     {(rsvp.rsvpClosed && !rsvp.submitted) || rsvp.alreadyDone || rsvp.submitted ? (
                       <div style={{ textAlign: 'center', padding: '4px 0' }}>
@@ -915,7 +915,7 @@ export default function FloralGardenTemplate({
 
               {/* 12 — TƏBRİK KİTABI: bağ qeydləri */}
               {S.guestbook && (
-                <Bed title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+                <Bed section="guestbook" title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
                   <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 30 }}>
                     <input
                       type="text"
