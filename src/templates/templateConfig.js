@@ -399,8 +399,8 @@ export const TEMPLATES = [
   {
     id: 'nature-touch',
     name: 'Nature Touch',
-    tagline: 'Herbari · Preslənmiş qıjı · Kraft',
-    description: 'Botanika muzeyinin herbari qovluğu — kəndirlə bağlanmış cild, preslənmiş qıjı, muzey etiketi, kartoteka kartı və kraft etiketlər.',
+    tagline: 'Herbari qovluğu · Dağ çəmənliyi · Ağac kəsiyi',
+    description: 'Şəhərdən kənar toy — kəndirli herbari qovluğu açılır, içəridə qızıl saatda Qafqaz dağları, ağac kəsiyində sayğac və masa nömrəsi, meşə cığırı boyunca proqram.',
     shortDescription: { az: 'Kətan və meşə yaşılı təbiət üslubu', en: 'Linen and forest green nature style' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'nature',
@@ -410,8 +410,8 @@ export const TEMPLATES = [
       primary: '#2F3A2C',
       accent: '#9A5530',
       secondary: '#5C6B4C',
-      background: '#E8E2D3',
-      surface: '#F6F2E7',
+      background: '#F6F2E7',
+      surface: '#E8E2D3',
       text: '#2F3A2C',
       muted: '#5C6B4C',
       mapTint: '#93A07E',
@@ -422,8 +422,8 @@ export const TEMPLATES = [
     },
     preview: {
       accent: '#9A5530',
-      background: 'linear-gradient(165deg, #F6F2E7, #E8E2D3)',
-      swatches: ['#F6F2E7', '#34432F', '#CDAE7C'],
+      background: 'linear-gradient(180deg, #F5E2C4, #A8B9A5 60%, #33493A)',
+      swatches: ['#F6F2E7', '#5A715D', '#D9A55B'],
     },
   },
   {

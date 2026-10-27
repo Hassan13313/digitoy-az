@@ -6,8 +6,8 @@ import MapSection from '../_shared/MapSection'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
 import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
-import { useInvitation, useGate, openingNames, seatInputProps, rsvpInputProps, rsvpOptions, rsvpState, alpha } from '../_shared/useInvitation'
-import { MusicFab, EqBars, SeatSuggest, RsvpSuggest, RsvpStatus, StoryBlock, InvitationEnd } from '../_shared/invitationKit'
+import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
+import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    MEDITERRANEAN — «Riviera: limon və mayolika» (premium redizayn, 2026-10)
@@ -222,7 +222,7 @@ const btn = (on) => ({
 export default function MediterraneanTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
-  const { theme, tr, L, K, S, cd, timeline, seating, rsvp, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const serif = theme.fonts.heading
   const body = theme.fonts.body
   const T = TXT[lang] || TXT.az
@@ -420,58 +420,7 @@ export default function MediterraneanTemplate(props) {
           {/* RSVP — poçt kartı */}
           {S.rsvp && (
             <Terrace serif={serif} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
-              <div style={{ position: 'relative', padding: '22px clamp(16px, 5vw, 24px) 24px', background: '#FFFDF8', borderRadius: 4, boxShadow: '0 1px 0 #fff inset, 0 24px 40px -24px rgba(30,51,72,.45), 0 2px 6px rgba(30,51,72,.08)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 14 }}>
-                  <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 22, color: AZURE, lineHeight: 1.2 }}>{T.greet}</div>
-                  <div aria-hidden="true" style={{ position: 'relative', flex: 'none', width: 62, height: 74, padding: 5, background: `radial-gradient(circle, #FFFDF8 2.4px, transparent 2.8px) -4px -4px / 8px 8px, ${TERRA}` }}>
-                    <div style={{ width: '100%', height: '100%', background: '#FFF6E6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Lemon size={34} /></div>
-                    <svg viewBox="0 0 60 30" width="60" height="30" style={{ position: 'absolute', left: -30, top: 20 }}><path d="M0 6q7.5-6 15 0t15 0t15 0t15 0M0 15q7.5-6 15 0t15 0t15 0t15 0M0 24q7.5-6 15 0t15 0t15 0t15 0" fill="none" stroke={alpha(INK, 0.45)} strokeWidth="1.1" /></svg>
-                  </div>
-                </div>
-                <RsvpStatus inv={inv} render={({ title, sub }) => (
-                  <div style={{ padding: '8px 0' }}>
-                    <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 25, lineHeight: 1.25, color: INK }}>{title}</div>
-                    {sub && <div style={{ marginTop: 6, fontSize: 15, color: MUTED }}>{sub}</div>}
-                  </div>
-                )} />
-                {rsvpState(rsvp) === 'form' && (
-                  <form onSubmit={rsvp.handleSubmit}>
-                    <input {...rsvpInputProps(inv)} style={{ ...field, borderRadius: 0, border: 'none', borderBottom: `1.5px solid ${alpha(AZURE, 0.4)}`, background: 'transparent', fontFamily: serif, fontStyle: 'italic', fontSize: 19, padding: '12px 2px' }} />
-                    <RsvpSuggest inv={inv} c={{ bg: '#FFFFFF', border: `1px solid ${alpha(AZURE, 0.25)}`, active: alpha(AZURE, 0.08), text: INK, table: AZURE, radius: 12, font: body }} />
-                    {rsvp.showNotFound && <div style={{ marginTop: 8, fontSize: 14, color: TERRA }}>{rsvpL.not_in_list}</div>}
-                    <div role="radiogroup" aria-label={L('rsvp', 'title', rsvpL.title)} style={{ display: 'grid', marginTop: 14 }}>
-                      {rsvpOptions(inv).map(({ val, label }) => {
-                        const active = rsvp.status === val
-                        return (
-                          <button key={val} type="button" role="radio" aria-checked={active} onClick={() => rsvp.chooseStatus(val)} data-press style={{
-                            display: 'flex', alignItems: 'center', gap: 12, minHeight: 48, padding: 0, background: 'none', border: 'none',
-                            borderBottom: `1px dashed ${alpha(AZURE, 0.25)}`, cursor: 'pointer', color: INK, fontFamily: body, fontSize: 16.5, textAlign: 'left',
-                          }}>
-                            <span aria-hidden="true" style={{ width: 22, height: 22, flex: 'none', borderRadius: '50%', border: `1.5px solid ${AZURE}`, background: active ? LEMON : 'transparent', boxShadow: active ? `inset 0 0 0 3px #FFFDF8` : 'none' }} />
-                            {label}
-                          </button>
-                        )
-                      })}
-                    </div>
-                    {rsvp.status === 'yes' && (
-                      <div style={{ marginTop: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-                        <span style={{ fontSize: 15, color: MUTED }}>{rsvpL.plusq}</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} data-press aria-label="Azalt" style={{ width: 44, height: 44, borderRadius: '50%', border: `1.5px solid ${AZURE}`, background: 'transparent', color: AZURE, fontSize: 19, cursor: 'pointer', opacity: rsvp.plusOne === 0 ? 0.35 : 1 }}>−</button>
-                          <span style={{ width: 30, textAlign: 'center', fontFamily: serif, fontStyle: 'italic', fontSize: 28, color: AZURE }}>{rsvp.plusOne}</span>
-                          <button type="button" onClick={rsvp.incPlusOne} disabled={rsvp.plusOne === rsvp.maxExtraGuests} data-press aria-label="Artır" style={{ width: 44, height: 44, borderRadius: '50%', border: `1.5px solid ${AZURE}`, background: 'transparent', color: AZURE, fontSize: 19, cursor: 'pointer', opacity: rsvp.plusOne === rsvp.maxExtraGuests ? 0.35 : 1 }}>+</button>
-                        </div>
-                      </div>
-                    )}
-                    <button type="submit" disabled={!rsvp.canSubmit} data-press style={{
-                      ...btn(true), width: '100%', marginTop: 20, minHeight: 52, fontSize: 16,
-                      opacity: rsvp.canSubmit ? 1 : 0.45, cursor: rsvp.canSubmit ? 'pointer' : 'not-allowed',
-                    }}>
-                      {rsvp.sending ? '…' : rsvpL.send}
-                    </button>
-                  </form>
-                )}
-              </div>
+              <ReplyForm inv={inv} t={{ ink: INK, muted: MUTED, line: alpha(AZURE, 0.4), hair: alpha(AZURE, 0.14), accent: AZURE, font: body, display: serif, displayItalic: true, doneMark: <Lemon size={30} style={{ margin: '0 auto 8px' }} />, marker: (a) => (a ? <Lemon size={18} /> : <span style={{ display: 'block', width: 12, height: 12, borderRadius: '50%', border: `1.5px solid ${alpha(AZURE, 0.45)}` }} />), suggest: { bg: '#FFFFFF', border: `1px solid ${alpha(AZURE, 0.25)}`, active: alpha(AZURE, 0.08), text: INK, table: AZURE, radius: 12, font: body } }} />
             </Terrace>
           )}
 

@@ -7,8 +7,9 @@ import { EmblemSlot } from '../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
 import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
-import { useInvitation, useGate, openingNames, seatInputProps, rsvpInputProps, rsvpOptions, rsvpState, alpha } from '../_shared/useInvitation'
-import { MusicFab, EqBars, SeatSuggest, RsvpSuggest, RsvpStatus, StoryBlock, InvitationEnd } from '../_shared/invitationKit'
+import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
+import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
+import { brilliant, brilliantSide, stepCut, pearCut } from './gems'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    LUXURY JEWELRY — «Zərgərlik evi» (premium redizayn, 2026-10)
@@ -16,15 +17,15 @@ import { MusicFab, EqBars, SeatSuggest, RsvpSuggest, RsvpStatus, StoryBlock, Inv
    Konsept: yüksək zərgərlik evinin (haute joaillerie) vitrini. Açılış —
    vitrin işığı altında zümrüd məxmər üzük qutusu, altında adlar. Toxunanda
    qapaq qalxır, atlaz astarda zərgərlik evinin möhürü kimi monoqram,
-   yastıqda zümrüd kəsimli daşlı üzük; sonra daşın içinə girilir. Daxildə:
-     hero      → kataloq səhifəsi: böyük zümrüd kəsim daş, kolleksiya ili
-     sayğac    → dörd fərqli kəsim: dəyirmi, oval, zümrüd, armud
-     məkan     → zümrüd kəsim (pilləli səkkizbucaq) çərçivə
+   yastıqda tək daşlı brilyant üzük; sonra daşın içinə girilir. Daxildə:
+     hero      → kataloq səhifəsi: real faset sxemli böyük brilyant (gems.js)
+     sayğac    → dörd kəsim: dəyirmi, oval, pilləli, armud — rəngsiz brilyant
+     məkan     → pilləli kəsim (səkkizbucaq) çərçivə
      proqram   → hərrac kataloqu: «Lot 01 …»
      masa      → məxmər vitrin lövhəsində platin lövhəcik
      RSVP      → butik görüş kartı
      arzular   → lentli hədiyyə kartları
-   Rəng: zümrüd məxmər, gecə yaşılı, platin, atlaz fil sümüyü.
+   Rəng: zümrüd məxmər, gecə yaşılı, platin, brilyant ağı, atlaz fil sümüyü.
    Şriftlər: Libre Caslon Display · Raleway (nazik).
    ───────────────────────────────────────────────────────────────────────── */
 
@@ -49,7 +50,6 @@ const TXT = {
 
 const NIGHT = '#07110E'
 const VELVET = '#0E2A23'
-const EMERALD = '#1F7A5C'
 const MINT = '#A3D6C7'
 const PLAT = '#D9DEE0'
 const SATIN = '#EFEAE0'
@@ -71,60 +71,75 @@ const KEYFRAMES = `
 @media (prefers-reduced-motion: reduce) { [data-lj] *, [data-lj] { animation: none !important; transition: none !important; } }
 `
 
-/* ─── Daş kəsimləri (yuxarıdan) ─── */
-function step(w, h, c) { return `M${-w + c} ${-h}H${w - c}L${w} ${-h + c}V${h - c}L${w - c} ${h}H${-w + c}L${-w} ${h - c}V${-h + c}Z` }
-function EmeraldCut({ w = 40, h = 54, uid = 'e', style }) {
-  const rings = [1, 0.78, 0.56, 0.38]
+/* ─── Brilyant (bax gems.js) ─── */
+const BR = brilliant(50)
+const SIDE = brilliantSide(20)
+const STEP = stepCut(24, 32)
+const PEAR = pearCut(36)
+
+/** Dəyirmi brilyant — yuxarıdan, real faset sxemi */
+function BrilliantTop({ size = 120, uid = 'b', style }) {
   return (
-    <svg viewBox={`${-w - 2} ${-h - 2} ${2 * w + 4} ${2 * h + 4}`} width={(w + 2) * 2} height={(h + 2) * 2} aria-hidden="true" style={{ display: 'block', overflow: 'visible', ...style }}>
+    <svg viewBox="-54 -54 108 108" width={size} height={size} aria-hidden="true" style={{ display: 'block', overflow: 'visible', ...style }}>
       <defs>
-        <linearGradient id={`lj-g-${uid}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#5FD3A6" /><stop offset=".45" stopColor={EMERALD} /><stop offset="1" stopColor="#0B3D2D" />
-        </linearGradient>
+        <radialGradient id={`lj-t-${uid}`} cx="42%" cy="38%" r="70%">
+          <stop offset="0" stopColor="#FFFFFF" /><stop offset=".6" stopColor="#EEF3F6" /><stop offset="1" stopColor="#C2CDD6" />
+        </radialGradient>
+        <radialGradient id={`lj-v-${uid}`} r=".5">
+          <stop offset=".7" stopColor="#0B1418" stopOpacity="0" /><stop offset="1" stopColor="#0B1418" stopOpacity=".28" />
+        </radialGradient>
       </defs>
-      {rings.map((k, i) => {
-        const c = w * 0.3 * k
-        return <path key={k} d={step(w * k, h * k, c)} fill={i % 2 ? `url(#lj-g-${uid})` : alpha('#7BE0B8', 0.35 + i * 0.1)} stroke="#C8F2E1" strokeOpacity=".55" strokeWidth=".7" />
-      })}
-      {[[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([sx, sy], i) => (
-        <path key={i} d={`M${sx * (w - w * 0.3)} ${sy * h}L${sx * (w * 0.38 - w * 0.3 * 0.38)} ${sy * h * 0.38}M${sx * w} ${sy * (h - w * 0.3)}L${sx * w * 0.38} ${sy * (h * 0.38 - w * 0.3 * 0.38)}`} stroke="#C8F2E1" strokeOpacity=".45" strokeWidth=".6" />
-      ))}
-      <path d={`M${-w * 0.2} ${-h * 0.25}L${w * 0.05} ${-h * 0.32}`} stroke="#fff" strokeWidth="2" strokeLinecap="round" opacity=".8" />
-    </svg>
-  )
-}
-function Round({ r = 34 }) {
-  const n = 8
-  return (
-    <svg viewBox={`${-r - 2} ${-r - 2} ${2 * r + 4} ${2 * r + 4}`} width="100%" height="100%" aria-hidden="true" style={{ display: 'block' }}>
-      <circle r={r} fill={alpha('#7BE0B8', 0.45)} stroke="#C8F2E1" strokeOpacity=".6" strokeWidth=".8" />
-      <path d={Array.from({ length: n }, (_, i) => { const a = (i / n) * Math.PI * 2; return `${i ? 'L' : 'M'}${(Math.cos(a) * r * 0.55).toFixed(1)} ${(Math.sin(a) * r * 0.55).toFixed(1)}` }).join('') + 'Z'} fill={EMERALD} stroke="#C8F2E1" strokeOpacity=".5" strokeWidth=".6" />
-      {Array.from({ length: n }, (_, i) => { const a = (i / n) * Math.PI * 2, b = ((i + 0.5) / n) * Math.PI * 2; return <path key={i} d={`M${(Math.cos(a) * r * 0.55).toFixed(1)} ${(Math.sin(a) * r * 0.55).toFixed(1)}L${(Math.cos(b) * r).toFixed(1)} ${(Math.sin(b) * r).toFixed(1)}`} stroke="#C8F2E1" strokeOpacity=".45" strokeWidth=".6" /> })}
-    </svg>
-  )
-}
-function Oval({ rx = 26, ry = 36 }) {
-  return (
-    <svg viewBox={`${-rx - 2} ${-ry - 2} ${2 * rx + 4} ${2 * ry + 4}`} width="100%" height="100%" aria-hidden="true" style={{ display: 'block' }}>
-      <ellipse rx={rx} ry={ry} fill={alpha('#7BE0B8', 0.45)} stroke="#C8F2E1" strokeOpacity=".6" strokeWidth=".8" />
-      <ellipse rx={rx * 0.56} ry={ry * 0.56} fill={EMERALD} stroke="#C8F2E1" strokeOpacity=".5" strokeWidth=".6" />
-      {[0, 45, 90, 135].map((a) => <path key={a} d={`M0 ${-ry}L0 ${ry}`} transform={`rotate(${a}) scale(${rx / ry} 1)`} stroke="#C8F2E1" strokeOpacity=".35" strokeWidth=".6" />)}
-    </svg>
-  )
-}
-function Pear({ s = 36 }) {
-  const d = `M0 ${-s}C${s * 0.5} ${-s * 0.3} ${s * 0.75} ${s * 0.2} ${s * 0.55} ${s * 0.6}C${s * 0.4} ${s * 0.95} ${-s * 0.4} ${s * 0.95} ${-s * 0.55} ${s * 0.6}C${-s * 0.75} ${s * 0.2} ${-s * 0.5} ${-s * 0.3} 0 ${-s}Z`
-  return (
-    <svg viewBox={`${-s} ${-s - 2} ${2 * s} ${2 * s}`} width="100%" height="100%" aria-hidden="true" style={{ display: 'block' }}>
-      <path d={d} fill={alpha('#7BE0B8', 0.45)} stroke="#C8F2E1" strokeOpacity=".6" strokeWidth=".8" />
-      <path d={d} transform="translate(0 6) scale(.55)" fill={EMERALD} stroke="#C8F2E1" strokeOpacity=".5" strokeWidth=".6" />
-      <path d={`M0 ${-s}V${s * 0.85}`} stroke="#C8F2E1" strokeOpacity=".35" strokeWidth=".6" />
+      <circle r="50.6" fill="#2A3540" />
+      {BR.facets.map((f, i) => <path key={i} d={f.d} fill={f.fill} stroke="#FFFFFF" strokeOpacity=".55" strokeWidth=".35" strokeLinejoin="round" />)}
+      {BR.fire.map((f, i) => <path key={`f${i}`} d={f.d} fill={f.fill} opacity=".6" />)}
+      <path d={BR.table} fill={`url(#lj-t-${uid})`} stroke="#FFFFFF" strokeOpacity=".8" strokeWidth=".45" />
+      {BR.inner.map((f, i) => <path key={`i${i}`} d={f.d} fill={f.fill} />)}
+      <path d={BR.table} fill="none" stroke="#FFFFFF" strokeOpacity=".7" strokeWidth=".4" />
+      <circle r="50.4" fill={`url(#lj-v-${uid})`} />
+      <circle r="50.4" fill="none" stroke="#E9EEF1" strokeWidth=".9" />
+      <path d="M-20 -30L-8 -33" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" opacity=".85" />
     </svg>
   )
 }
 
-function EmeraldTile() {
-  return <EmeraldCut w={24} h={32} uid="cd" style={{ width: '100%', height: '100%' }} />
+/** Brilyant — yandan (üzükdə, nişanlarda) */
+function Diamond({ size = 30, style }) {
+  return (
+    <svg viewBox="-21 -9 42 30" width={size} height={size * 0.72} aria-hidden="true" style={{ display: 'block', overflow: 'visible', ...style }}>
+      {SIDE.facets.map((f, i) => <path key={i} d={f.d} fill={f.fill} stroke="#FFFFFF" strokeOpacity=".7" strokeWidth=".4" strokeLinejoin="round" />)}
+      <path d={SIDE.outline} fill="none" stroke="#8E9AA4" strokeWidth=".6" strokeLinejoin="round" />
+      <path d={`M${-SIDE.w} 0H${SIDE.w}`} stroke="#8E9AA4" strokeWidth=".6" />
+    </svg>
+  )
+}
+
+/* Sayğac üçün dörd kəsim — hamısı rəngsiz brilyant */
+function Round() { return <BrilliantTop size="100%" uid="cd-r" /> }
+function Oval() { return <BrilliantTop size="100%" uid="cd-o" style={{ transform: 'scaleX(.74)' }} /> }
+function StepTile() {
+  return (
+    <svg viewBox="-26 -34 52 68" width="100%" height="100%" aria-hidden="true" style={{ display: 'block' }}>
+      {STEP.map((f, i) => <path key={i} d={f.d} fill={f.fill} stroke="#FFFFFF" strokeOpacity=".75" strokeWidth=".5" />)}
+      {[[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([sx, sy], i) => (
+        <path key={i} d={`M${sx * 16.8} ${sy * 32}L${sx * 7} ${sy * 13.4}M${sx * 24} ${sy * 24.8}L${sx * 10} ${sy * 10}`} stroke="#8E9AA4" strokeOpacity=".5" strokeWidth=".5" />
+      ))}
+      <path d="M-10 -20L2 -22" stroke="#fff" strokeWidth="2" strokeLinecap="round" opacity=".9" />
+    </svg>
+  )
+}
+function Pear() {
+  const s = PEAR.s
+  return (
+    <svg viewBox={`${-s} ${-s - 2} ${2 * s} ${2 * s}`} width="100%" height="100%" aria-hidden="true" style={{ display: 'block' }}>
+      <defs>
+        <radialGradient id="lj-pear" cx="45%" cy="55%" r="65%"><stop offset="0" stopColor="#FFFFFF" /><stop offset=".6" stopColor="#DCE4EA" /><stop offset="1" stopColor="#8E9CA8" /></radialGradient>
+      </defs>
+      <path d={PEAR.outline} fill="url(#lj-pear)" stroke="#E9EEF1" strokeWidth=".9" />
+      <path d={PEAR.outline} transform="translate(0 7) scale(.52)" fill="#F7FAFC" stroke="#8E9AA4" strokeOpacity=".6" strokeWidth="1" />
+      {[-0.55, -0.25, 0.25, 0.55].map((k) => <path key={k} d={`M0 ${-s}L${k * s} ${s * 0.72}`} stroke="#8E9AA4" strokeOpacity=".35" strokeWidth=".6" />)}
+      <path d={`M${-s * 0.3} ${-s * 0.05}L${-s * 0.12} ${-s * 0.32}`} stroke="#fff" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  )
 }
 
 function Glint({ size = 18, delay = 0, style }) {
@@ -139,7 +154,7 @@ function Chain({ width = 200 }) {
   return (
     <div aria-hidden="true" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
       <span style={{ width: width / 2 - 16, height: 3, backgroundImage: `radial-gradient(ellipse at center, ${PLAT} 0 45%, transparent 50%)`, backgroundSize: '6px 3px', opacity: 0.7 }} />
-      <svg viewBox="-8 -10 16 20" width="11" height="14"><path d={step(6, 8, 2.4)} fill={EMERALD} stroke={MINT} strokeWidth=".8" /></svg>
+      <Diamond size={15} />
       <span style={{ width: width / 2 - 16, height: 3, backgroundImage: `radial-gradient(ellipse at center, ${PLAT} 0 45%, transparent 50%)`, backgroundSize: '6px 3px', opacity: 0.7 }} />
     </div>
   )
@@ -170,7 +185,7 @@ function RingBoxOpening({ inv, theme }) {
             style={{ position: 'absolute', inset: 0, transformOrigin: 'bottom', borderRadius: '20px 20px 4px 4px', padding: 10, background: VELVET_BG }}>
             <div style={{ height: '100%', borderRadius: '12px 12px 2px 2px', background: `radial-gradient(90% 80% at 50% 30%, #FBF8F1, ${SATIN} 60%, #D9D1C2)`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: VELVET }}>
               <EmblemSlot mono={ot.mono} size={50} border={`1px solid ${alpha('#9C7A33', 0.6)}`} background="transparent" color="#8A6A2A" font={disp} style={{ animation: 'none' }}>
-                <EmeraldCut w={12} h={16} uid="lid" />
+                <BrilliantTop size={30} uid="lid" />
               </EmblemSlot>
               <div style={{ marginTop: 8, fontFamily: disp, fontSize: 15, letterSpacing: '.24em', color: '#8A6A2A' }}>DIGITOY</div>
               <div style={{ fontSize: 9.5, letterSpacing: '.3em', color: '#8A6A2A' }}>MAISON</div>
@@ -183,8 +198,14 @@ function RingBoxOpening({ inv, theme }) {
           <span aria-hidden="true" style={{ position: 'absolute', left: '49.6%', top: '22%', width: 2, height: '24%', background: '#06150F' }} />
           <motion.div initial={{ opacity: 0, y: 14 }} animate={gate.opening ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }} transition={{ duration: 0.5, delay: 0.6 }}
             style={{ position: 'absolute', left: 'calc(50% - 35px)', top: '-2%', width: 70, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <EmeraldCut w={13} h={17} uid="ring" />
-            <span style={{ display: 'block', width: 46, height: 30, marginTop: -6, borderRadius: '50%', border: '5px solid transparent', background: `${PLAT_GRAD} border-box`, WebkitMask: 'linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0)', WebkitMaskComposite: 'xor', maskComposite: 'exclude' }} />
+            <Diamond size={36} style={{ position: 'relative', zIndex: 1 }} />
+            <svg viewBox="-30 -4 60 40" width="56" height="37" aria-hidden="true" style={{ display: 'block', marginTop: -6, overflow: 'visible' }}>
+              <defs>
+                <linearGradient id="lj-band" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#F4F6F7" /><stop offset=".45" stopColor="#9EA6AA" /><stop offset=".7" stopColor="#E8EBEC" /><stop offset="1" stopColor="#7E868A" /></linearGradient>
+              </defs>
+              <path d="M-6 0L-10 6M6 0L10 6M0 0V5" stroke="#C3C9CC" strokeWidth="1.6" strokeLinecap="round" />
+              <ellipse cx="0" cy="20" rx="25" ry="14" fill="none" stroke="url(#lj-band)" strokeWidth="4.5" />
+            </svg>
             <Glint size={20} delay={0.9} style={{ left: 10, top: -2 }} />
           </motion.div>
         </div>
@@ -243,7 +264,7 @@ const btn = (on) => ({
 export default function LuxuryJewelryTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
-  const { theme, tr, L, K, S, cd, timeline, seating, rsvp, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const disp = theme.fonts.heading
   const body = theme.fonts.body
   const T = TXT[lang] || TXT.az
@@ -280,11 +301,12 @@ export default function LuxuryJewelryTemplate(props) {
 
           {/* HERO — kataloq səhifəsi */}
           <section style={{ padding: '44px 20px 40px', textAlign: 'center' }}>
-            <div style={{ position: 'relative', width: 150, margin: '0 auto' }}>
-              <span aria-hidden="true" style={{ position: 'absolute', inset: -40, borderRadius: '50%', background: `radial-gradient(circle, ${alpha('#5FD3A6', 0.28)}, transparent 65%)` }} />
-              <EmeraldCut w={56} h={74} uid="hero" style={{ position: 'relative', margin: '0 auto' }} />
-              <Glint size={24} delay={0.4} style={{ left: 18, top: 14 }} />
-              <Glint size={16} delay={1.6} style={{ right: 20, bottom: 30 }} />
+            <div style={{ position: 'relative', width: 168, margin: '0 auto' }}>
+              <span aria-hidden="true" style={{ position: 'absolute', inset: -46, borderRadius: '50%', background: `radial-gradient(circle, ${alpha('#E8F4FF', 0.22)}, transparent 62%)` }} />
+              <BrilliantTop size={168} uid="hero" style={{ position: 'relative', margin: '0 auto', filter: 'drop-shadow(0 18px 26px rgba(0,0,0,.55))' }} />
+              <Glint size={26} delay={0.4} style={{ left: 10, top: 18 }} />
+              <Glint size={18} delay={1.6} style={{ right: 6, bottom: 34 }} />
+              <Glint size={14} delay={2.4} style={{ right: 40, top: 6 }} />
             </div>
             <div style={{ marginTop: 26, fontSize: 11.5, letterSpacing: '.34em', paddingLeft: '.34em', color: MUTED }}>{String(`${T.collection} ${year}`).toLocaleUpperCase(lang === 'az' ? 'az' : lang)}</div>
             <div style={{ marginTop: 6, fontSize: 14.5, color: MINT }}>{L('hero', 'kicker', inv.eventLabel)}</div>
@@ -305,7 +327,7 @@ export default function LuxuryJewelryTemplate(props) {
                 {[
                   { v: cd.days, l: cd.labels.days, G: Round },
                   { v: cd.hours, l: cd.labels.hours, G: Oval },
-                  { v: cd.minutes, l: cd.labels.minutes, G: EmeraldTile },
+                  { v: cd.minutes, l: cd.labels.minutes, G: StepTile },
                   { v: cd.seconds, l: cd.labels.seconds, G: Pear, pop: true },
                 ].map(({ v, l, G, pop }) => (
                   <div key={l} style={{ textAlign: 'center' }}>
@@ -328,7 +350,7 @@ export default function LuxuryJewelryTemplate(props) {
                   <div style={{ clipPath: OCT, overflow: 'hidden', background: NIGHT }}>
                     <MapSection
                       weddingData={weddingData} theme={theme} accent={MINT} height="clamp(300px, 92vw, 380px)"
-                      map={{ opacity: 0.55, filter: 'grayscale(1) brightness(.6) contrast(1.2)', tintOpacity: 0.55, tint: EMERALD, blend: 'color' }}
+                      map={{ opacity: 0.55, filter: 'grayscale(1) brightness(.6) contrast(1.2)', tintOpacity: 0.55, tint: '#1F5A4A', blend: 'color' }}
                       frame={<GemPin />}
                       fallback={<div style={{ height: 'clamp(300px, 92vw, 380px)', position: 'relative', background: `radial-gradient(circle at 50% 50%, #1A4A3D, ${NIGHT} 75%)` }}><GemPin /></div>}
                     />
@@ -429,56 +451,7 @@ export default function LuxuryJewelryTemplate(props) {
           {/* RSVP — butik görüş kartı */}
           {S.rsvp && (
             <Vitrine disp={disp} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
-              <div style={{ padding: 1.5, background: PLAT_GRAD }}>
-                <div style={{ padding: '28px clamp(18px, 6vw, 26px) 26px', background: `linear-gradient(170deg, #123A30, ${VELVET} 60%, #0A211B)` }}>
-                  <RsvpStatus inv={inv} render={({ title, sub }) => (
-                    <div style={{ textAlign: 'center', padding: '6px 0' }}>
-                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}><EmeraldCut w={12} h={16} uid="ok" /></div>
-                      <div style={{ fontFamily: disp, fontSize: 25, lineHeight: 1.25 }}>{title}</div>
-                      {sub && <div style={{ marginTop: 6, fontSize: 14.5, color: MUTED }}>{sub}</div>}
-                    </div>
-                  )} />
-                  {rsvpState(rsvp) === 'form' && (
-                    <form onSubmit={rsvp.handleSubmit}>
-                      <input {...rsvpInputProps(inv)} style={field} />
-                      <RsvpSuggest inv={inv} c={{ bg: VELVET, border: `1px solid ${alpha(PLAT, 0.3)}`, active: alpha(MINT, 0.12), text: IVORY, table: MINT, radius: 0, font: body }} />
-                      {rsvp.showNotFound && <div style={{ marginTop: 8, fontSize: 13.5, color: MUTED }}>{rsvpL.not_in_list}</div>}
-                      <div role="radiogroup" aria-label={L('rsvp', 'title', rsvpL.title)} style={{ display: 'grid', marginTop: 16 }}>
-                        {rsvpOptions(inv).map(({ val, label }) => {
-                          const active = rsvp.status === val
-                          return (
-                            <button key={val} type="button" role="radio" aria-checked={active} onClick={() => rsvp.chooseStatus(val)} data-press style={{
-                              display: 'flex', alignItems: 'center', gap: 14, minHeight: 52, padding: '0 4px', background: 'none', border: 'none',
-                              borderBottom: `1px solid ${alpha(PLAT, 0.16)}`, cursor: 'pointer', color: IVORY, fontFamily: body, fontSize: 16, textAlign: 'left',
-                            }}>
-                              <svg width="16" height="20" viewBox="-8 -10 16 20" aria-hidden="true" style={{ flex: 'none' }}>
-                                <path d={step(6.5, 8.5, 2.6)} fill={active ? EMERALD : 'none'} stroke={active ? MINT : alpha(PLAT, 0.5)} strokeWidth="1" />
-                              </svg>
-                              {label}
-                            </button>
-                          )
-                        })}
-                      </div>
-                      {rsvp.status === 'yes' && (
-                        <div style={{ marginTop: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-                          <span style={{ fontSize: 14.5, color: MUTED }}>{rsvpL.plusq}</span>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} data-press aria-label="Azalt" style={{ width: 44, height: 44, border: `1px solid ${alpha(PLAT, 0.45)}`, background: 'transparent', color: IVORY, fontSize: 19, cursor: 'pointer', opacity: rsvp.plusOne === 0 ? 0.35 : 1 }}>−</button>
-                            <span style={{ width: 30, textAlign: 'center', fontFamily: disp, fontSize: 28 }}>{rsvp.plusOne}</span>
-                            <button type="button" onClick={rsvp.incPlusOne} disabled={rsvp.plusOne === rsvp.maxExtraGuests} data-press aria-label="Artır" style={{ width: 44, height: 44, border: `1px solid ${alpha(PLAT, 0.45)}`, background: 'transparent', color: IVORY, fontSize: 19, cursor: 'pointer', opacity: rsvp.plusOne === rsvp.maxExtraGuests ? 0.35 : 1 }}>+</button>
-                          </div>
-                        </div>
-                      )}
-                      <button type="submit" disabled={!rsvp.canSubmit} data-press style={{
-                        ...btn(true), width: '100%', marginTop: 22, minHeight: 54,
-                        opacity: rsvp.canSubmit ? 1 : 0.4, cursor: rsvp.canSubmit ? 'pointer' : 'not-allowed',
-                      }}>
-                        {rsvp.sending ? '…' : rsvpL.send}
-                      </button>
-                    </form>
-                  )}
-                </div>
-              </div>
+              <ReplyForm inv={inv} t={{ ink: IVORY, muted: MUTED, line: alpha(PLAT, 0.4), hair: alpha(PLAT, 0.14), accent: PLAT, font: body, display: disp, radius: 0, btnUpper: true, btnTracking: '.2em', doneMark: <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><Diamond size={30} /></div>, marker: (a) => <svg width="14" height="14" viewBox="-8 -8 16 16"><path d="M-6 -2.5L-3 -6.5H3L6 -2.5L0 7Z" fill={a ? '#FFFFFF' : 'none'} stroke={a ? PLAT : alpha(PLAT, 0.45)} strokeWidth="1" strokeLinejoin="round" /></svg>, suggest: { bg: VELVET, border: `1px solid ${alpha(PLAT, 0.3)}`, active: alpha(MINT, 0.12), text: IVORY, table: MINT, radius: 0, font: body } }} />
             </Vitrine>
           )}
 
@@ -498,7 +471,7 @@ export default function LuxuryJewelryTemplate(props) {
                   const msg = gbook.readMessage(raw)
                   return (
                     <figure className="lj-satin" key={msg.name + i} style={{ position: 'relative', margin: 0, padding: '20px 20px 16px 22px', background: `linear-gradient(160deg, #FBF8F1, ${SATIN})`, color: VELVET, overflow: 'hidden', boxShadow: '0 16px 30px -18px #000' }}>
-                      <span aria-hidden="true" style={{ position: 'absolute', right: -26, top: 14, width: 110, height: 14, background: `linear-gradient(180deg, #2A7A60, ${EMERALD} 50%, #145440)`, transform: 'rotate(45deg)', boxShadow: '0 2px 4px rgba(0,0,0,.2)' }} />
+                      <span aria-hidden="true" style={{ position: 'absolute', right: -26, top: 14, width: 110, height: 14, background: `linear-gradient(180deg, #2A7A60, #1F7A5C 50%, #145440)`, transform: 'rotate(45deg)', boxShadow: '0 2px 4px rgba(0,0,0,.2)' }} />
                       <blockquote style={{ margin: 0, paddingRight: 28, fontFamily: disp, fontSize: 18, lineHeight: 1.5 }}>{msg.text}</blockquote>
                       <figcaption style={{ marginTop: 10, fontSize: 11.5, letterSpacing: '.18em', color: '#4F6A62' }}>{String(msg.name).toLocaleUpperCase(lang === 'az' ? 'az' : lang)}{msg.date ? ` · ${gbook.formatDate(msg.date)}` : ''}</figcaption>
                     </figure>
@@ -518,8 +491,8 @@ export default function LuxuryJewelryTemplate(props) {
 function GemPin() {
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
-      <span style={{ position: 'absolute', left: -32, top: -32, width: 64, height: 64, borderRadius: '50%', background: `radial-gradient(circle, ${alpha('#5FD3A6', 0.4)}, transparent 70%)` }} />
-      <span style={{ position: 'absolute', left: -14, top: -18 }}><EmeraldCut w={12} h={16} uid="pin" /></span>
+      <span style={{ position: 'absolute', left: -34, top: -34, width: 68, height: 68, borderRadius: '50%', background: `radial-gradient(circle, ${alpha('#E8F4FF', 0.35)}, transparent 70%)` }} />
+      <span style={{ position: 'absolute', left: -17, top: -17 }}><BrilliantTop size={34} uid="pin" /></span>
     </span>
   )
 }

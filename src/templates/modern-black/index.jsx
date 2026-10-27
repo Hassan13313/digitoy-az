@@ -6,8 +6,8 @@ import MapSection from '../_shared/MapSection'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
 import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
-import { useInvitation, useGate, openingNames, seatInputProps, rsvpInputProps, rsvpOptions, rsvpState, alpha } from '../_shared/useInvitation'
-import { MusicFab, EqBars, SeatSuggest, RsvpSuggest, RsvpStatus, StoryBlock, InvitationEnd } from '../_shared/invitationKit'
+import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
+import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    MODERN BLACK — «Moda evinin tipoqrafik afişası» (premium redizayn, 2026-10)
@@ -230,7 +230,7 @@ const lineField = (invert = false) => ({
 export default function ModernBlackTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
-  const { theme, tr, L, K, S, cd, timeline, seating, rsvp, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const display = theme.fonts.heading
   const sans = theme.fonts.body
   const spec = SPEC[lang] || SPEC.az
@@ -429,52 +429,8 @@ export default function ModernBlackTemplate(props) {
 
           {/* RSVP — yeganə ağ blok */}
           {S.rsvp && (
-            <Block theme={theme} invert title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
-              <RsvpStatus inv={inv} render={({ title, sub }) => (
-                <div style={{ borderTop: '2px solid #000000', paddingTop: 18 }}>
-                  <div style={{ fontFamily: display, fontWeight: 300, fontSize: 24, lineHeight: 1.2 }}>{title}</div>
-                  {sub && <div style={{ fontSize: 15, color: '#444444', marginTop: 6 }}>{sub}</div>}
-                </div>
-              )} />
-              {rsvpState(rsvp) === 'form' && (
-                <form onSubmit={rsvp.handleSubmit}>
-                  <input {...rsvpInputProps(inv)} style={lineField(true)} />
-                  <RsvpSuggest inv={inv} c={{ bg: '#F2F2F2', border: '1px solid #000000', active: 'rgba(0,0,0,.08)', text: '#000000', table: '#555555' }} />
-                  {rsvp.showNotFound && <div style={{ fontSize: 13.5, color: '#444444', marginTop: 8 }}>{rsvpL.not_in_list}</div>}
-                  <div role="radiogroup" aria-label={L('rsvp', 'title', rsvpL.title)} style={{ display: 'grid', gap: 8, marginTop: 22 }}>
-                    {rsvpOptions(inv).map(({ val, label }) => {
-                      const active = rsvp.status === val
-                      return (
-                        <button key={val} type="button" role="radio" aria-checked={active} onClick={() => rsvp.chooseStatus(val)} data-press style={{
-                          display: 'flex', justifyContent: 'space-between', alignItems: 'center', minHeight: 56, padding: '0 18px',
-                          border: '1px solid #000000', borderRadius: 0, cursor: 'pointer', fontFamily: sans, fontSize: 16, fontWeight: 500,
-                          background: active ? '#000000' : '#FFFFFF', color: active ? '#FFFFFF' : '#000000',
-                        }}>
-                          <span>{label}</span>
-                          <span aria-hidden="true" style={{ width: 14, height: 14, border: `1px solid ${active ? '#FFFFFF' : '#000000'}`, background: active ? '#FFFFFF' : 'transparent' }} />
-                        </button>
-                      )
-                    })}
-                  </div>
-                  {rsvp.status === 'yes' && (
-                    <div style={{ marginTop: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-                      <span style={{ fontSize: 15, color: '#333333' }}>{rsvpL.plusq}</span>
-                      <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #000000' }}>
-                        <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} data-press aria-label="Azalt" style={{ width: 46, height: 46, border: 'none', background: '#FFFFFF', color: '#000000', fontSize: 20, cursor: 'pointer', opacity: rsvp.plusOne === 0 ? 0.3 : 1 }}>−</button>
-                        <span style={{ width: 46, textAlign: 'center', fontFamily: display, fontSize: 20, fontVariantNumeric: 'tabular-nums', borderLeft: '1px solid #000', borderRight: '1px solid #000', lineHeight: '46px' }}>{rsvp.plusOne}</span>
-                        <button type="button" onClick={rsvp.incPlusOne} disabled={rsvp.plusOne === rsvp.maxExtraGuests} data-press aria-label="Artır" style={{ width: 46, height: 46, border: 'none', background: '#FFFFFF', color: '#000000', fontSize: 20, cursor: 'pointer', opacity: rsvp.plusOne === rsvp.maxExtraGuests ? 0.3 : 1 }}>+</button>
-                      </div>
-                    </div>
-                  )}
-                  <button type="submit" disabled={!rsvp.canSubmit} data-press style={{
-                    ...btn(rsvp.canSubmit, true), width: '100%', marginTop: 22, minHeight: 56, fontSize: 16,
-                    color: rsvp.canSubmit ? '#FFFFFF' : 'rgba(0,0,0,.4)', borderColor: rsvp.canSubmit ? '#000000' : 'rgba(0,0,0,.25)',
-                    cursor: rsvp.canSubmit ? 'pointer' : 'not-allowed',
-                  }}>
-                    {rsvp.sending ? '…' : rsvpL.send}
-                  </button>
-                </form>
-              )}
+            <Block theme={theme} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+              <ReplyForm inv={inv} t={{ ink: '#FFFFFF', muted: '#8C8C8C', line: 'rgba(255,255,255,.5)', hair: 'rgba(255,255,255,.14)', accent: '#FFFFFF', font: sans, display, radius: 0, btnUpper: true, btnTracking: '.14em', marker: (a) => <span style={{ display: 'block', width: 11, height: 11, border: '1px solid #FFFFFF', background: a ? '#FFFFFF' : 'transparent' }} />, suggest: { bg: '#0D0D0D', border: '1px solid rgba(255,255,255,.2)', active: 'rgba(255,255,255,.08)', text: '#FFFFFF', table: '#8C8C8C', radius: 0, font: sans } }} />
             </Block>
           )}
 

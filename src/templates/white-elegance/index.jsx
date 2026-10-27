@@ -7,8 +7,8 @@ import { MonoContent } from '../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
 import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
-import { useInvitation, useGate, openingNames, seatInputProps, rsvpInputProps, rsvpOptions, rsvpState, alpha } from '../_shared/useInvitation'
-import { MusicFab, EqBars, SeatSuggest, RsvpSuggest, RsvpStatus, StoryBlock, InvitationEnd } from '../_shared/invitationKit'
+import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
+import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    WHITE ELEGANCE — «Pambıq kağız, rəngsiz qabartma» (premium redizayn, 2026-10)
@@ -67,7 +67,6 @@ function deckle(seed = 1, n = 46, amp = 0.55) {
 }
 const DECKLE_A = deckle(7)
 const DECKLE_B = deckle(19)
-const DECKLE_C = deckle(31)
 
 const KEYFRAMES = `
 @keyframes we-in    { from { opacity: 0; transform: translateY(18px) rotate(-2deg) } to { opacity: 1; transform: rotate(-1.2deg) } }
@@ -200,7 +199,7 @@ const lineField = {
 export default function WhiteEleganceTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
-  const { theme, tr, L, K, S, cd, timeline, seating, rsvp, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const f = theme.fonts.heading
 
   return (
@@ -380,62 +379,8 @@ export default function WhiteEleganceTemplate(props) {
 
           {/* CAVAB KARTI */}
           {S.rsvp && (
-            <Folio f={f}>
-              <CottonCard edge={DECKLE_C} pad="clamp(40px, 10vw, 52px) clamp(20px, 7vw, 32px)">
-                <span aria-hidden="true" style={{ position: 'absolute', inset: 12, boxShadow: 'inset 1px 1px 0 rgba(60,48,36,.12), inset -1px -1px 0 #FFF' }} />
-                <div style={{ fontSize: 12, letterSpacing: '.34em', textTransform: 'uppercase', color: GREY, paddingLeft: '.34em' }}>{L('rsvp', 'kicker', tr.inv_rsvp)}</div>
-                <h2 style={{ margin: '12px 0 0', fontStyle: 'italic', fontWeight: 300, fontSize: 'clamp(28px, 8vw, 34px)', lineHeight: 1.15 }}>{L('rsvp', 'title', rsvpL.title)}</h2>
-                <p style={{ margin: '10px auto 0', maxWidth: 280, fontSize: 15.5, color: GREY, lineHeight: 1.5 }}>{rsvpL.subtitle}</p>
-                <RsvpStatus inv={inv} render={({ title, sub }) => (
-                  <div style={{ marginTop: 26 }}>
-                    <div style={{ fontStyle: 'italic', fontSize: 23, lineHeight: 1.3 }}>{title}</div>
-                    {sub && <div style={{ marginTop: 6, fontSize: 15, color: GREY }}>{sub}</div>}
-                  </div>
-                )} />
-                {rsvpState(rsvp) === 'form' && (
-                  <form onSubmit={rsvp.handleSubmit} style={{ marginTop: 22 }}>
-                    <input {...rsvpInputProps(inv)} style={lineField} />
-                    <RsvpSuggest inv={inv} c={{ bg: PAPER, border: '1px solid rgba(43,39,35,.18)', active: 'rgba(43,39,35,.06)', text: INK, table: GREY, font: f }} />
-                    {rsvp.showNotFound && <div style={{ marginTop: 8, fontStyle: 'italic', fontSize: 14, color: GREY }}>{rsvpL.not_in_list}</div>}
-                    <div role="radiogroup" aria-label={L('rsvp', 'title', rsvpL.title)} style={{ display: 'grid', gap: 4, marginTop: 22, textAlign: 'left', maxWidth: 280, marginInline: 'auto' }}>
-                      {rsvpOptions(inv).map(({ val, label }) => {
-                        const active = rsvp.status === val
-                        return (
-                          <button key={val} type="button" role="radio" aria-checked={active} onClick={() => rsvp.chooseStatus(val)} data-press style={{
-                            display: 'flex', alignItems: 'center', gap: 14, minHeight: 48, background: 'none', border: 'none', cursor: 'pointer',
-                            fontFamily: f, fontSize: 18, color: INK, fontStyle: active ? 'italic' : 'normal', padding: '4px 2px',
-                          }}>
-                            <span aria-hidden="true" style={{
-                              width: 18, height: 18, flex: '0 0 auto', background: PAPER, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              boxShadow: 'inset 1px 1px 2px rgba(60,48,36,.28), inset -1px -1px 1px #FFF',
-                            }}>
-                              {active && <span style={{ width: 8, height: 8, background: INK }} />}
-                            </span>
-                            {label}
-                          </button>
-                        )
-                      })}
-                    </div>
-                    {rsvp.status === 'yes' && (
-                      <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
-                        <span style={{ fontSize: 15.5, color: GREY, fontStyle: 'italic' }}>{rsvpL.plusq}</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} data-press aria-label="Azalt" style={{ width: 40, height: 40, border: 'none', background: PAPER, boxShadow: '-2px -2px 4px #FFF, 2px 2px 5px rgba(60,48,36,.18)', fontSize: 18, color: INK, cursor: 'pointer', opacity: rsvp.plusOne === 0 ? 0.35 : 1 }}>−</button>
-                          <span style={{ width: 28, textAlign: 'center', fontSize: 24, fontWeight: 300 }}>{rsvp.plusOne}</span>
-                          <button type="button" onClick={rsvp.incPlusOne} disabled={rsvp.plusOne === rsvp.maxExtraGuests} data-press aria-label="Artır" style={{ width: 40, height: 40, border: 'none', background: PAPER, boxShadow: '-2px -2px 4px #FFF, 2px 2px 5px rgba(60,48,36,.18)', fontSize: 18, color: INK, cursor: 'pointer', opacity: rsvp.plusOne === rsvp.maxExtraGuests ? 0.35 : 1 }}>+</button>
-                        </div>
-                      </div>
-                    )}
-                    <button type="submit" disabled={!rsvp.canSubmit} data-press style={{
-                      ...btn(rsvp.canSubmit), width: '100%', marginTop: 24, minHeight: 52, fontSize: 18, fontStyle: 'italic',
-                      color: rsvp.canSubmit ? PAPER : 'rgba(43,39,35,.4)', borderColor: rsvp.canSubmit ? INK : 'rgba(43,39,35,.2)',
-                      cursor: rsvp.canSubmit ? 'pointer' : 'not-allowed',
-                    }}>
-                      {rsvp.sending ? '…' : rsvpL.send}
-                    </button>
-                  </form>
-                )}
-              </CottonCard>
+            <Folio f={f} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+              <ReplyForm inv={inv} t={{ ink: INK, muted: GREY, line: 'rgba(43,39,35,.35)', hair: 'rgba(43,39,35,.1)', accent: INK, font: f, display: f, displayItalic: true, marker: (a) => <span style={{ display: 'block', width: 12, height: 12, borderRadius: '50%', border: `1px solid ${INK}`, background: a ? INK : 'transparent' }} />, suggest: { bg: PAPER, border: '1px solid rgba(43,39,35,.18)', active: 'rgba(43,39,35,.06)', text: INK, table: GREY, font: f } }} />
             </Folio>
           )}
 

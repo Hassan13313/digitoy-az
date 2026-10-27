@@ -8,8 +8,8 @@ import { parseLatLon } from '../_shared/geo'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
 import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
-import { useInvitation, useGate, openingNames, seatInputProps, rsvpInputProps, rsvpOptions, rsvpState, alpha } from '../_shared/useInvitation'
-import { MusicFab, EqBars, SeatSuggest, RsvpSuggest, RsvpStatus, StoryBlock, InvitationEnd } from '../_shared/invitationKit'
+import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
+import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { computeSky, faintStars, moonPath, dms } from './sky'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -218,7 +218,7 @@ const field = {
 export default function NightSkyTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
-  const { theme, tr, L, K, S, cd, timeline, seating, rsvp, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const serif = theme.fonts.heading
   const sans = theme.fonts.body
 
@@ -431,53 +431,7 @@ export default function NightSkyTemplate(props) {
           {/* RSVP */}
           {S.rsvp && (
             <Field serif={serif} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
-              <div style={{ padding: '26px clamp(18px, 6vw, 26px)', borderRadius: 26, background: alpha(DEEP, 0.85), border: `1px solid ${alpha(SILVER, 0.22)}`, boxShadow: `0 30px 60px -30px #000, inset 0 1px 0 ${alpha(MOON, 0.08)}` }}>
-                <RsvpStatus inv={inv} render={({ title, sub }) => (
-                  <div style={{ textAlign: 'center', padding: '8px 0' }}>
-                    <Sparkle size={22} style={{ margin: '0 auto 12px' }} />
-                    <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 23, color: STARGOLD }}>{title}</div>
-                    {sub && <div style={{ marginTop: 6, fontSize: 14.5, color: MUTED }}>{sub}</div>}
-                  </div>
-                )} />
-                {rsvpState(rsvp) === 'form' && (
-                  <form onSubmit={rsvp.handleSubmit}>
-                    <input {...rsvpInputProps(inv)} style={field} />
-                    <RsvpSuggest inv={inv} c={{ bg: DEEP, border: `1px solid ${alpha(SILVER, 0.25)}`, active: alpha(SILVER, 0.1), text: MOON, table: STARGOLD, radius: 16 }} />
-                    {rsvp.showNotFound && <div style={{ marginTop: 8, fontSize: 13.5, color: SILVER }}>{rsvpL.not_in_list}</div>}
-                    <div role="radiogroup" aria-label={L('rsvp', 'title', rsvpL.title)} style={{ display: 'grid', gap: 8, marginTop: 16 }}>
-                      {rsvpOptions(inv).map(({ val, label }) => {
-                        const active = rsvp.status === val
-                        return (
-                          <button key={val} type="button" role="radio" aria-checked={active} onClick={() => rsvp.chooseStatus(val)} data-press style={{
-                            display: 'flex', alignItems: 'center', gap: 12, minHeight: 52, padding: '0 18px', borderRadius: 999, cursor: 'pointer',
-                            fontFamily: sans, fontSize: 15.5, textAlign: 'left',
-                            background: active ? alpha(STARGOLD, 0.16) : 'transparent', color: MOON,
-                            border: `1px solid ${active ? STARGOLD : alpha(SILVER, 0.3)}`,
-                          }}>
-                            <Sparkle size={13} color={active ? STARGOLD : alpha(SILVER, 0.35)} />{label}
-                          </button>
-                        )
-                      })}
-                    </div>
-                    {rsvp.status === 'yes' && (
-                      <div style={{ marginTop: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-                        <span style={{ fontSize: 14.5, color: MUTED }}>{rsvpL.plusq}</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} data-press aria-label="Azalt" style={{ width: 42, height: 42, borderRadius: '50%', border: `1px solid ${alpha(SILVER, 0.4)}`, background: 'transparent', color: MOON, fontSize: 18, cursor: 'pointer', opacity: rsvp.plusOne === 0 ? 0.35 : 1 }}>−</button>
-                          <span style={{ width: 28, textAlign: 'center', fontFamily: serif, fontSize: 26, color: STARGOLD }}>{rsvp.plusOne}</span>
-                          <button type="button" onClick={rsvp.incPlusOne} disabled={rsvp.plusOne === rsvp.maxExtraGuests} data-press aria-label="Artır" style={{ width: 42, height: 42, borderRadius: '50%', border: `1px solid ${alpha(SILVER, 0.4)}`, background: 'transparent', color: MOON, fontSize: 18, cursor: 'pointer', opacity: rsvp.plusOne === rsvp.maxExtraGuests ? 0.35 : 1 }}>+</button>
-                        </div>
-                      </div>
-                    )}
-                    <button type="submit" disabled={!rsvp.canSubmit} data-press style={{
-                      ...pill(rsvp.canSubmit), width: '100%', marginTop: 20, minHeight: 54, fontSize: 16,
-                      opacity: rsvp.canSubmit ? 1 : 0.45, cursor: rsvp.canSubmit ? 'pointer' : 'not-allowed',
-                    }}>
-                      {rsvp.sending ? '…' : rsvpL.send}
-                    </button>
-                  </form>
-                )}
-              </div>
+              <ReplyForm inv={inv} t={{ ink: MOON, muted: MUTED, line: alpha(SILVER, 0.4), hair: alpha(SILVER, 0.14), accent: STARGOLD, font: sans, display: serif, displayItalic: true, doneMark: <Sparkle size={20} style={{ margin: '0 auto 10px' }} />, marker: (a) => <Sparkle size={13} color={a ? STARGOLD : alpha(SILVER, 0.35)} />, suggest: { bg: DEEP, border: `1px solid ${alpha(SILVER, 0.25)}`, active: alpha(SILVER, 0.1), text: MOON, table: STARGOLD, radius: 16 } }} />
             </Field>
           )}
 

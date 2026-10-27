@@ -7,8 +7,8 @@ import { MonoContent } from '../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
 import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
-import { useInvitation, useGate, openingNames, seatInputProps, rsvpInputProps, rsvpOptions, rsvpState, alpha } from '../_shared/useInvitation'
-import { MusicFab, EqBars, SeatSuggest, RsvpSuggest, RsvpStatus, StoryBlock, InvitationEnd } from '../_shared/invitationKit'
+import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
+import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { lattice, starPoints, shamsaPath, golPath, BUTA, BUTA_IN, HASIYE_URI, RHOMB_URI, GIRIH_URI } from './ornaments'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -263,7 +263,7 @@ const btn = (on, dark = false) => ({
 export default function OrientalLuxeTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
-  const { theme, tr, L, K, S, cd, timeline, seating, rsvp, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
 
@@ -488,61 +488,7 @@ export default function OrientalLuxeTemplate(props) {
           {/* RSVP — ipək kart */}
           {S.rsvp && (
             <Majlis head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
-              <div className="ol-silk" style={{
-                position: 'relative', padding: '30px clamp(18px, 6vw, 28px) 28px', background: `linear-gradient(160deg, #FBF3E2, ${SILK} 50%, #EEDDB9)`, color: NAR,
-                border: `1px solid ${GOLD}`, boxShadow: `inset 0 0 0 6px ${SILK}, inset 0 0 0 7px ${alpha(NAR, 0.35)}, 0 30px 50px -28px rgba(0,0,0,.65)`,
-              }}>
-                {[0, 1, 2, 3].map((c) => (
-                  <Star8 key={c} size={12} color={alpha(NAR, 0.45)} style={{ position: 'absolute', [c < 2 ? 'top' : 'bottom']: 16, [c % 2 ? 'right' : 'left']: 16 }} />
-                ))}
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}><Pomegranate size={46} /></div>
-                <RsvpStatus inv={inv} render={({ title, sub }) => (
-                  <div style={{ textAlign: 'center', padding: '4px 0 8px' }}>
-                    <div style={{ fontFamily: head, fontSize: 23, lineHeight: 1.3 }}>{title}</div>
-                    {sub && <div style={{ marginTop: 6, fontSize: 16, fontStyle: 'italic', color: alpha(NAR, 0.75) }}>{sub}</div>}
-                  </div>
-                )} />
-                {rsvpState(rsvp) === 'form' && (
-                  <form onSubmit={rsvp.handleSubmit}>
-                    <input {...rsvpInputProps(inv)} style={{ ...field, background: 'rgba(74,15,28,.04)', color: NAR, boxShadow: `inset 0 -1px 0 ${alpha(NAR, 0.5)}` }} />
-                    <RsvpSuggest inv={inv} c={{ bg: SILK, border: `1px solid ${alpha(NAR, 0.3)}`, active: alpha(NAR, 0.07), text: NAR, table: '#8A5A2B', radius: 0, font: body }} />
-                    {rsvp.showNotFound && <div style={{ marginTop: 8, fontSize: 14.5, fontStyle: 'italic', color: alpha(NAR, 0.8) }}>{rsvpL.not_in_list}</div>}
-                    <div role="radiogroup" aria-label={L('rsvp', 'title', rsvpL.title)} style={{ display: 'grid', gap: 2, marginTop: 16 }}>
-                      {rsvpOptions(inv).map(({ val, label }) => {
-                        const active = rsvp.status === val
-                        return (
-                          <button key={val} type="button" role="radio" aria-checked={active} onClick={() => rsvp.chooseStatus(val)} data-press style={{
-                            display: 'flex', alignItems: 'center', gap: 14, minHeight: 50, padding: '0 6px', cursor: 'pointer',
-                            background: 'none', border: 'none', borderBottom: `1px solid ${alpha(NAR, 0.14)}`, color: NAR, fontFamily: body, fontSize: 17, textAlign: 'left',
-                          }}>
-                            <svg width="18" height="18" viewBox="-9 -9 18 18" aria-hidden="true" style={{ flex: 'none' }}>
-                              <path d="M0 -8L8 0L0 8L-8 0Z" fill="none" stroke={NAR} strokeWidth="1.1" />
-                              {active && <path d="M0 -4.4L4.4 0L0 4.4L-4.4 0Z" fill={NAR} />}
-                            </svg>
-                            <span style={{ fontWeight: active ? 500 : 400 }}>{label}</span>
-                          </button>
-                        )
-                      })}
-                    </div>
-                    {rsvp.status === 'yes' && (
-                      <div style={{ marginTop: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-                        <span style={{ fontSize: 16, fontStyle: 'italic' }}>{rsvpL.plusq}</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} data-press aria-label="Azalt" style={{ width: 44, height: 44, border: 'none', clipPath: CHAMFER, background: alpha(NAR, 0.08), color: NAR, fontSize: 19, cursor: 'pointer', opacity: rsvp.plusOne === 0 ? 0.35 : 1 }}>−</button>
-                          <span style={{ width: 30, textAlign: 'center', fontFamily: head, fontSize: 24 }}>{rsvp.plusOne}</span>
-                          <button type="button" onClick={rsvp.incPlusOne} disabled={rsvp.plusOne === rsvp.maxExtraGuests} data-press aria-label="Artır" style={{ width: 44, height: 44, border: 'none', clipPath: CHAMFER, background: alpha(NAR, 0.08), color: NAR, fontSize: 19, cursor: 'pointer', opacity: rsvp.plusOne === rsvp.maxExtraGuests ? 0.35 : 1 }}>+</button>
-                        </div>
-                      </div>
-                    )}
-                    <button type="submit" disabled={!rsvp.canSubmit} data-press style={{
-                      ...btn(true, true), width: '100%', marginTop: 22, minHeight: 54, fontFamily: head, fontSize: 16, color: GOLD,
-                      opacity: rsvp.canSubmit ? 1 : 0.4, cursor: rsvp.canSubmit ? 'pointer' : 'not-allowed',
-                    }}>
-                      {rsvp.sending ? '…' : rsvpL.send}
-                    </button>
-                  </form>
-                )}
-              </div>
+              <ReplyForm inv={inv} t={{ ink: IVORY, muted: MUTED, line: alpha(GOLD, 0.5), hair: alpha(GOLD, 0.16), accent: GOLD, font: body, display: head, radius: 0, btnFont: head, doneMark: <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><Pomegranate size={42} color={GOLD} seed={IVORY} /></div>, marker: (a) => <svg width="14" height="14" viewBox="-8 -8 16 16"><path d="M0 -7L7 0L0 7L-7 0Z" fill={a ? GOLD : 'none'} stroke={GOLD} strokeOpacity={a ? 1 : 0.5} strokeWidth="1.1" /></svg>, suggest: { bg: DEEP, border: `1px solid ${alpha(GOLD, 0.4)}`, active: alpha(GOLD, 0.12), text: IVORY, table: GOLD, radius: 0, font: body } }} />
             </Majlis>
           )}
 

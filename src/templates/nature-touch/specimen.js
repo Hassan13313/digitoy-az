@@ -117,6 +117,77 @@ export function contours(cx, cy, count = 9, step = 16, seed = 3) {
   return out
 }
 
+/* Ağac kəsiyi — illik halqalar (mərkəz 0,0; R — xarici radius) */
+export function woodRings(R = 50, count = 11, seed = 2) {
+  const out = []
+  for (let k = 1; k <= count; k++) {
+    const base = (k / (count + 0.6)) * R * 0.9
+    let d = ''
+    for (let s = 0; s <= 40; s++) {
+      const th = (s / 40) * Math.PI * 2
+      const rr = base * (1 + 0.035 * Math.sin(3 * th + seed + k * 0.4) + 0.025 * Math.sin(5 * th + seed * 1.7) + 0.02 * Math.sin(2 * th - k))
+      d += `${s ? 'L' : 'M'}${r1(Math.cos(th) * rr)} ${r1(Math.sin(th) * rr)}`
+    }
+    out.push(d + 'Z')
+  }
+  let bark = ''
+  for (let s = 0; s <= 64; s++) {
+    const th = (s / 64) * Math.PI * 2
+    const rr = R * (1 + 0.025 * Math.sin(7 * th + seed) + 0.018 * Math.sin(13 * th + seed * 2.3))
+    bark += `${s ? 'L' : 'M'}${r1(Math.cos(th) * rr)} ${r1(Math.sin(th) * rr)}`
+  }
+  return { rings: out, bark: bark + 'Z' }
+}
+
+/**
+ * Dağ mənzərəsi: w×h kətanda arxadan önə silsilələr, ön silsilədə küknarlar,
+ * çəmənlikdə çöl çiçəkləri. Hamısı toxumla deterministikdir.
+ */
+export function landscape({ w = 400, h = 520, seed = 3 } = {}) {
+  const ridgeY = (x, y0, amp, sd, rough) => {
+    const t = x / w
+    const v = Math.sin(t * Math.PI * (1.2 + sd * 0.31) + sd) * 0.55
+      + Math.sin(t * Math.PI * (2.9 + sd * 0.17) + sd * 2.1) * 0.3
+      + Math.abs(Math.sin(t * Math.PI * (5.7 + sd * 0.5) + sd * 0.7)) * rough
+    return y0 - v * amp
+  }
+  const layer = (y0, amp, sd, rough) => {
+    let d = `M0 ${h}`
+    for (let x = 0; x <= w; x += 6) d += `L${x} ${r1(ridgeY(x, y0, amp, sd, rough))}`
+    return d + `L${w} ${h}Z`
+  }
+  const specs = [
+    { y: h * 0.47, amp: 46, rough: 0.55 },
+    { y: h * 0.55, amp: 40, rough: 0.45 },
+    { y: h * 0.63, amp: 32, rough: 0.35 },
+    { y: h * 0.72, amp: 24, rough: 0.25 },
+  ]
+  const layers = specs.map((sp, i) => layer(sp.y, sp.amp, seed + i * 1.37, sp.rough))
+  /* ön təpə və küknarlar */
+  const hillY = (x) => h * 0.8 - Math.sin((x / w) * Math.PI * 1.1 + seed) * 18 - Math.sin((x / w) * Math.PI * 3.3) * 6
+  let hill = `M0 ${h}`
+  for (let x = 0; x <= w; x += 6) hill += `L${x} ${r1(hillY(x))}`
+  hill += `L${w} ${h}Z`
+  let trees = ''
+  let rnd = seed * 9301 + 49297
+  const rand = () => ((rnd = (rnd * 9301 + 49297) % 233280) / 233280)
+  for (let x = -6; x < w + 6; x += 7 + rand() * 9) {
+    if (x > w * 0.34 && x < w * 0.58 && rand() < 0.75) continue /* ortada açıqlıq */
+    const base = hillY(Math.max(0, Math.min(w, x))) + 4
+    const th = 22 + rand() * 30
+    const tw = th * (0.32 + rand() * 0.08)
+    trees += `M${r1(x - tw / 2)} ${r1(base)}L${r1(x)} ${r1(base - th)}L${r1(x + tw / 2)} ${r1(base)}Z`
+    trees += `M${r1(x - tw * 0.38)} ${r1(base - th * 0.38)}L${r1(x)} ${r1(base - th * 1.06)}L${r1(x + tw * 0.38)} ${r1(base - th * 0.38)}Z`
+  }
+  const flowers = []
+  for (let i = 0; i < 70; i++) {
+    const x = rand() * w
+    const y = hillY(x) + 14 + rand() * (h - hillY(x) - 18)
+    flowers.push({ x: r1(x), y: r1(y), r: r1(0.9 + rand() * 1.6), c: ['#F4E9D2', '#E9B8A6', '#F0C66E', '#FFFFFF'][Math.floor(rand() * 4)] })
+  }
+  return { layers, hill, trees, flowers }
+}
+
 /* Coğrafi koordinat — 40°22′N */
 export function dms(v, pos, neg) {
   const a = Math.abs(v)

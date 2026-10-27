@@ -7,8 +7,8 @@ import { EmblemSlot } from '../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
 import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
-import { useInvitation, useGate, openingNames, seatInputProps, rsvpInputProps, rsvpOptions, rsvpState, alpha } from '../_shared/useInvitation'
-import { MusicFab, EqBars, SeatSuggest, RsvpSuggest, RsvpStatus, StoryBlock, InvitationEnd } from '../_shared/invitationKit'
+import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
+import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    CRYSTAL GLASS — «Çilçıraq» (premium redizayn, 2026-10)
@@ -291,7 +291,7 @@ const btn = (on) => ({
 export default function CrystalGlassTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
-  const { theme, tr, L, K, S, cd, timeline, seating, rsvp, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
   const n = timeline.events.length
@@ -481,56 +481,7 @@ export default function CrystalGlassTemplate(props) {
           {/* RSVP — akril kart */}
           {S.rsvp && (
             <Hall head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
-              <Acrylic pad="26px clamp(18px, 5vw, 24px) 24px">
-                <RsvpStatus inv={inv} render={({ title, sub }) => (
-                  <div style={{ textAlign: 'center', padding: '6px 0' }}>
-                    <Brilliant size={22} color={STEEL} style={{ margin: '0 auto 12px' }} />
-                    <div style={{ fontFamily: head, fontWeight: 300, fontSize: 24, lineHeight: 1.3 }}>{title}</div>
-                    {sub && <div style={{ marginTop: 6, fontSize: 15, color: STEEL }}>{sub}</div>}
-                  </div>
-                )} />
-                {rsvpState(rsvp) === 'form' && (
-                  <form onSubmit={rsvp.handleSubmit}>
-                    <input {...rsvpInputProps(inv)} style={field} />
-                    <RsvpSuggest inv={inv} c={{ bg: '#fff', border: `1px solid ${alpha(SILVER, 0.9)}`, active: alpha(SILVER, 0.2), text: INK, table: STEEL, radius: 14, font: body }} />
-                    {rsvp.showNotFound && <div style={{ marginTop: 8, fontSize: 13.5, color: STEEL }}>{rsvpL.not_in_list}</div>}
-                    <div role="radiogroup" aria-label={L('rsvp', 'title', rsvpL.title)} style={{ display: 'grid', gap: 8, marginTop: 16 }}>
-                      {rsvpOptions(inv).map(({ val, label }) => {
-                        const active = rsvp.status === val
-                        return (
-                          <button key={val} type="button" role="radio" aria-checked={active} onClick={() => rsvp.chooseStatus(val)} data-press style={{
-                            display: 'flex', alignItems: 'center', gap: 12, minHeight: 52, padding: '0 16px', borderRadius: 14, cursor: 'pointer',
-                            fontFamily: body, fontSize: 16, textAlign: 'left', color: INK,
-                            background: active ? '#fff' : 'rgba(255,255,255,.5)', border: `1px solid ${active ? INK : alpha(SILVER, 0.8)}`,
-                            boxShadow: active ? '0 8px 18px -10px rgba(35,48,59,.35)' : 'none',
-                          }}>
-                            <svg width="18" height="18" viewBox="-10 -10 20 20" aria-hidden="true" style={{ flex: 'none' }}>
-                              <path d="M-4 -9.5L4 -9.5L9.5 -4L9.5 4L4 9.5L-4 9.5L-9.5 4L-9.5 -4Z" fill={active ? 'url(#cg-spec)' : 'none'} stroke={active ? INK : SILVER} strokeWidth="1.1" />
-                            </svg>
-                            {label}
-                          </button>
-                        )
-                      })}
-                    </div>
-                    {rsvp.status === 'yes' && (
-                      <div style={{ marginTop: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-                        <span style={{ fontSize: 15, color: STEEL }}>{rsvpL.plusq}</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} data-press aria-label="Azalt" style={{ width: 44, height: 44, borderRadius: '50%', border: `1px solid ${alpha(SILVER, 0.9)}`, background: '#fff', color: INK, fontSize: 19, cursor: 'pointer', opacity: rsvp.plusOne === 0 ? 0.35 : 1 }}>−</button>
-                          <span style={{ width: 30, textAlign: 'center', fontFamily: head, fontWeight: 300, fontSize: 26 }}>{rsvp.plusOne}</span>
-                          <button type="button" onClick={rsvp.incPlusOne} disabled={rsvp.plusOne === rsvp.maxExtraGuests} data-press aria-label="Artır" style={{ width: 44, height: 44, borderRadius: '50%', border: `1px solid ${alpha(SILVER, 0.9)}`, background: '#fff', color: INK, fontSize: 19, cursor: 'pointer', opacity: rsvp.plusOne === rsvp.maxExtraGuests ? 0.35 : 1 }}>+</button>
-                        </div>
-                      </div>
-                    )}
-                    <button type="submit" disabled={!rsvp.canSubmit} data-press style={{
-                      ...btn(rsvp.canSubmit), width: '100%', marginTop: 20, minHeight: 54, fontSize: 16,
-                      opacity: rsvp.canSubmit ? 1 : 0.5, cursor: rsvp.canSubmit ? 'pointer' : 'not-allowed',
-                    }}>
-                      {rsvp.sending ? '…' : rsvpL.send}
-                    </button>
-                  </form>
-                )}
-              </Acrylic>
+              <ReplyForm inv={inv} t={{ ink: INK, muted: STEEL, line: alpha(SILVER, 0.9), hair: alpha(SILVER, 0.45), accent: INK, font: body, display: head, doneMark: <Brilliant size={20} color={STEEL} style={{ margin: '0 auto 10px' }} />, marker: (a) => <Brilliant size={14} color={a ? INK : SILVER} />, suggest: { bg: '#fff', border: `1px solid ${alpha(SILVER, 0.9)}`, active: alpha(SILVER, 0.2), text: INK, table: STEEL, radius: 14, font: body } }} />
             </Hall>
           )}
 

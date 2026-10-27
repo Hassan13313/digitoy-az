@@ -7,8 +7,8 @@ import MapSection from '../_shared/MapSection'
 import { Reveal, enterDirection } from '../_shared/motion'
 import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
-import { useInvitation, useGate, openingNames, seatInputProps, rsvpInputProps, rsvpOptions, rsvpState, alpha } from '../_shared/useInvitation'
-import { MusicFab, EqBars, SeatSuggest, RsvpSuggest, RsvpStatus, StoryBlock, InvitationEnd } from '../_shared/invitationKit'
+import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
+import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    BOARDING PASS — «Birinci sinif» (premium redizayn, 2026-10)
@@ -268,7 +268,7 @@ const btn = (on) => ({
 export default function BoardingPassTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
-  const { theme, tr, L, K, S, cd, timeline, seating, rsvp, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
   const mono = theme.fonts.mono || "'IBM Plex Mono', ui-monospace, monospace"
@@ -512,58 +512,7 @@ export default function BoardingPassTemplate(props) {
           {/* RSVP — check-in */}
           {S.rsvp && (
             <Leg {...P} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
-              <div className="bp-card" style={{ background: IVORY, color: INK, borderRadius: 10, overflow: 'hidden' }}>
-                <div style={{ background: INK, color: IVORY, padding: '12px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: mono, fontSize: 11, letterSpacing: '.16em' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Plane size={13} />{flight}</span><span style={{ color: BRASS }}>{dateTicket}</span>
-                </div>
-                <div style={{ padding: '20px 18px 22px' }}>
-                  <RsvpStatus inv={inv} render={({ title, sub }) => (
-                    <div style={{ textAlign: 'center', padding: '6px 0' }}>
-                      <div style={{ display: 'inline-block', padding: '6px 14px', border: `2px solid ${RED}`, color: RED, fontFamily: head, fontWeight: 500, fontSize: 20, letterSpacing: '.06em', transform: 'rotate(-4deg)' }}>{upper(title, lang)}</div>
-                      {sub && <div style={{ marginTop: 12, fontSize: 15, color: alpha(INK, 0.7) }}>{sub}</div>}
-                    </div>
-                  )} />
-                  {rsvpState(rsvp) === 'form' && (
-                    <form onSubmit={rsvp.handleSubmit}>
-                      <label style={{ display: 'block', fontFamily: mono, fontSize: 10.5, letterSpacing: '.16em', color: alpha(INK, 0.55), marginBottom: 6 }}>{upper(T.paxOne, lang)}</label>
-                      <input {...rsvpInputProps(inv)} style={{ ...field, background: '#FBF8F1', color: INK, border: `1px solid ${alpha(INK, 0.25)}` }} />
-                      <RsvpSuggest inv={inv} c={{ bg: '#FBF8F1', border: `1px solid ${alpha(INK, 0.25)}`, active: alpha(INK, 0.07), text: INK, table: COPPER, radius: 4, font: body }} />
-                      {rsvp.showNotFound && <div style={{ marginTop: 8, fontSize: 13.5, color: RED }}>{rsvpL.not_in_list}</div>}
-                      <div role="radiogroup" aria-label={L('rsvp', 'title', rsvpL.title)} style={{ display: 'grid', gap: 8, marginTop: 16 }}>
-                        {rsvpOptions(inv).map(({ val, label }) => {
-                          const active = rsvp.status === val
-                          return (
-                            <button key={val} type="button" role="radio" aria-checked={active} onClick={() => rsvp.chooseStatus(val)} data-press style={{
-                              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, minHeight: 52, padding: '0 16px', borderRadius: 6, cursor: 'pointer',
-                              fontFamily: body, fontSize: 16, textAlign: 'left', color: active ? IVORY : INK,
-                              background: active ? INK : '#FBF8F1', border: `1px solid ${active ? INK : alpha(INK, 0.2)}`,
-                            }}>
-                              {label}
-                              <span aria-hidden="true" style={{ fontFamily: mono, fontSize: 11, letterSpacing: '.12em', color: active ? BRASS : alpha(INK, 0.35) }}>{active ? '✓' : '○'}</span>
-                            </button>
-                          )
-                        })}
-                      </div>
-                      {rsvp.status === 'yes' && (
-                        <div style={{ marginTop: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-                          <span style={{ fontSize: 15, color: alpha(INK, 0.75) }}>{rsvpL.plusq}</span>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} data-press aria-label="Azalt" style={{ width: 44, height: 44, borderRadius: 6, border: `1px solid ${alpha(INK, 0.3)}`, background: '#FBF8F1', color: INK, fontSize: 19, cursor: 'pointer', opacity: rsvp.plusOne === 0 ? 0.35 : 1 }}>−</button>
-                            <span style={{ width: 32, textAlign: 'center', fontFamily: head, fontWeight: 500, fontSize: 26 }}>{rsvp.plusOne}</span>
-                            <button type="button" onClick={rsvp.incPlusOne} disabled={rsvp.plusOne === rsvp.maxExtraGuests} data-press aria-label="Artır" style={{ width: 44, height: 44, borderRadius: 6, border: `1px solid ${alpha(INK, 0.3)}`, background: '#FBF8F1', color: INK, fontSize: 19, cursor: 'pointer', opacity: rsvp.plusOne === rsvp.maxExtraGuests ? 0.35 : 1 }}>+</button>
-                          </div>
-                        </div>
-                      )}
-                      <button type="submit" disabled={!rsvp.canSubmit} data-press style={{
-                        ...btn(true), width: '100%', marginTop: 20, minHeight: 54, fontFamily: head, fontWeight: 500, fontSize: 17, letterSpacing: '.08em', background: INK, color: IVORY, border: 'none',
-                        opacity: rsvp.canSubmit ? 1 : 0.4, cursor: rsvp.canSubmit ? 'pointer' : 'not-allowed',
-                      }}>
-                        {rsvp.sending ? '…' : upper(rsvpL.send, lang)}
-                      </button>
-                    </form>
-                  )}
-                </div>
-              </div>
+              <ReplyForm inv={inv} t={{ ink: IVORY, muted: MUTED, line: alpha(MUTED, 0.45), hair: alpha(MUTED, 0.16), accent: BRASS, font: body, display: head, radius: 4, btnFont: head, btnUpper: true, btnTracking: '.1em', marker: (a) => <Plane size={13} color={a ? BRASS : alpha(MUTED, 0.45)} style={{ transform: 'rotate(90deg)' }} />, suggest: { bg: '#0F1A2A', border: `1px solid ${alpha(MUTED, 0.35)}`, active: alpha(BRASS, 0.14), text: IVORY, table: BRASS, radius: 4, font: body } }} />
             </Leg>
           )}
 

@@ -6,8 +6,8 @@ import MapSection from '../_shared/MapSection'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
 import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
-import { useInvitation, useGate, openingNames, seatInputProps, rsvpInputProps, rsvpOptions, rsvpState, alpha } from '../_shared/useInvitation'
-import { MusicFab, EqBars, SeatSuggest, RsvpSuggest, RsvpStatus, StoryBlock, InvitationEnd } from '../_shared/invitationKit'
+import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
+import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    CINEMA PREMIERE — «Qırmızı xalça premyerası» (premium redizayn, 2026-10)
@@ -219,7 +219,7 @@ const btn = (on, head) => ({
 export default function CinemaPremiereTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
-  const { theme, tr, L, K, S, cd, timeline, seating, rsvp, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
   const C = CREDITS[lang] || CREDITS.az
@@ -436,52 +436,7 @@ export default function CinemaPremiereTemplate(props) {
           {/* RSVP — kassa */}
           {S.rsvp && (
             <Reel {...P} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
-              <div style={{ padding: '26px clamp(18px, 5vw, 24px)', background: 'linear-gradient(180deg, #1A1316, #110D0F)', boxShadow: `inset 0 0 0 1px ${GOLD}, inset 0 0 0 6px #110D0F, inset 0 0 0 7px ${alpha(GOLD, 0.45)}` }}>
-                <RsvpStatus inv={inv} render={({ title, sub }) => (
-                  <div style={{ textAlign: 'center', padding: '8px 0' }}>
-                    <Fan size={34} />
-                    <div style={{ marginTop: 10, fontFamily: head, fontWeight: 800, fontSize: 28, letterSpacing: '.04em', color: GOLD_L }}>{upper(title, lang)}</div>
-                    {sub && <div style={{ marginTop: 6, fontStyle: 'italic', fontSize: 15.5, color: MUTED }}>{sub}</div>}
-                  </div>
-                )} />
-                {rsvpState(rsvp) === 'form' && (
-                  <form onSubmit={rsvp.handleSubmit}>
-                    <input {...rsvpInputProps(inv)} style={field} />
-                    <RsvpSuggest inv={inv} c={{ bg: '#141215', border: `1px solid ${alpha(GOLD, 0.35)}`, active: alpha(GOLD, 0.12), text: IVORY, table: GOLD_L, radius: 2, font: body }} />
-                    {rsvp.showNotFound && <div style={{ marginTop: 8, fontSize: 14, fontStyle: 'italic', color: MUTED }}>{rsvpL.not_in_list}</div>}
-                    <div role="radiogroup" aria-label={L('rsvp', 'title', rsvpL.title)} style={{ display: 'grid', gap: 8, marginTop: 16 }}>
-                      {rsvpOptions(inv).map(({ val, label }) => {
-                        const active = rsvp.status === val
-                        return (
-                          <button key={val} type="button" role="radio" aria-checked={active} onClick={() => rsvp.chooseStatus(val)} data-press style={{
-                            minHeight: 52, padding: '0 18px', cursor: 'pointer', fontFamily: body, fontSize: 17, textAlign: 'center',
-                            background: active ? alpha(GOLD, 0.16) : 'transparent', color: active ? GOLD_L : IVORY,
-                            border: `1px solid ${active ? GOLD : alpha(GOLD, 0.3)}`, borderRadius: 2,
-                          }}>
-                            {active ? '★ ' : ''}{label}
-                          </button>
-                        )
-                      })}
-                    </div>
-                    {rsvp.status === 'yes' && (
-                      <div style={{ marginTop: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-                        <span style={{ fontSize: 15.5, fontStyle: 'italic', color: MUTED }}>{rsvpL.plusq}</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} data-press aria-label="Azalt" style={{ width: 44, height: 44, border: `1px solid ${alpha(GOLD, 0.5)}`, background: 'transparent', color: GOLD_L, fontSize: 19, cursor: 'pointer', opacity: rsvp.plusOne === 0 ? 0.35 : 1 }}>−</button>
-                          <span style={{ width: 32, textAlign: 'center', fontFamily: head, fontWeight: 800, fontSize: 30, color: GOLD_L }}>{rsvp.plusOne}</span>
-                          <button type="button" onClick={rsvp.incPlusOne} disabled={rsvp.plusOne === rsvp.maxExtraGuests} data-press aria-label="Artır" style={{ width: 44, height: 44, border: `1px solid ${alpha(GOLD, 0.5)}`, background: 'transparent', color: GOLD_L, fontSize: 19, cursor: 'pointer', opacity: rsvp.plusOne === rsvp.maxExtraGuests ? 0.35 : 1 }}>+</button>
-                        </div>
-                      </div>
-                    )}
-                    <button type="submit" disabled={!rsvp.canSubmit} data-press style={{
-                      ...btn(true, head), width: '100%', marginTop: 20, minHeight: 54, fontSize: 18,
-                      opacity: rsvp.canSubmit ? 1 : 0.4, cursor: rsvp.canSubmit ? 'pointer' : 'not-allowed',
-                    }}>
-                      {rsvp.sending ? '…' : upper(rsvpL.send, lang)}
-                    </button>
-                  </form>
-                )}
-              </div>
+              <ReplyForm inv={inv} t={{ ink: IVORY, muted: MUTED, line: alpha(GOLD, 0.45), hair: alpha(GOLD, 0.16), accent: GOLD_L, font: body, display: head, radius: 2, btnFont: head, btnUpper: true, btnTracking: '.12em', doneMark: <Fan size={30} />, marker: (a) => <span style={{ color: a ? GOLD_L : alpha(GOLD, 0.35), fontSize: 13, lineHeight: 1 }}>★</span>, suggest: { bg: '#141215', border: `1px solid ${alpha(GOLD, 0.35)}`, active: alpha(GOLD, 0.12), text: IVORY, table: GOLD_L, radius: 2, font: body } }} />
             </Reel>
           )}
 

@@ -884,39 +884,24 @@ export default function RoyalGoldTemplate({
               </Plate>
             )}
 
-            {/* 11 — İŞTİRAK TƏSDİQİ: fil sümüyü cavab kartı */}
+            {/* 11 — İŞTİRAK TƏSDİQİ: səhifənin öz axınında — ayrıca fil sümüyü kart
+                 yox (qonaq rəyi: kart çox qabarıq görünürdü). Qızıl xətlər,
+                 sikkə nişanlı seçimlər, dar kontur düymə. Məntiq eynidir. */}
             {canShowRsvp && (
-              <Plate>
-                <IvoryCard style={{ padding: '40px clamp(20px, 6vw, 30px) 30px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
-                    <RosetteMark size={28} opacity={1} />
-                  </div>
-                  {/* ⚠ SABİT «RSVP» DEYİL: AZ-da «İştirak Təsdiqi» (translations › inv_rsvp) */}
-                  <div style={{ fontSize: 11, letterSpacing: '.3em', textTransform: 'uppercase', color: BRONZE, paddingLeft: '.3em' }}>
-                    {L('rsvp', 'kicker', tr.inv_rsvp)}
-                  </div>
-                  <h2 style={{ fontFamily: display, fontStyle: 'italic', fontWeight: 300, fontSize: 'clamp(26px, 7.6vw, 31px)', lineHeight: 1.2, color: INK, margin: '10px 0 0' }}>
-                    {L('rsvp', 'title', rsvpL.title)}
-                  </h2>
-                  <p style={{ fontSize: 13.5, color: INK_SOFT, margin: '10px auto 0', maxWidth: 300, lineHeight: 1.55 }}>{rsvpL.subtitle}</p>
-
-                  {rsvp.rsvpClosed && !rsvp.submitted ? (
-                    <div style={{ marginTop: 26 }}>
-                      <div style={{ fontFamily: display, fontStyle: 'italic', fontSize: 21, color: INK }}>{tr.rsvp_closed_title}</div>
-                      <div style={{ fontSize: 13, color: INK_SOFT, marginTop: 6 }}>{tr.rsvp_closed_desc}</div>
-                    </div>
-                  ) : rsvp.alreadyDone ? (
-                    <div style={{ marginTop: 26 }}>
-                      <div style={{ fontFamily: display, fontStyle: 'italic', fontSize: 21, color: INK }}>{rsvpL.already_done}</div>
-                      <div style={{ fontSize: 13, color: INK_SOFT, marginTop: 6 }}>{rsvp.selected?.full_name}</div>
-                    </div>
-                  ) : rsvp.submitted ? (
-                    <div style={{ marginTop: 26 }}>
-                      <div style={{ fontFamily: display, fontStyle: 'italic', fontSize: 23, color: INK }}>{rsvp.thanksMsg}</div>
-                      <div style={{ fontSize: 13, color: INK_SOFT, marginTop: 6 }}>{rsvpL.thanks_sub}</div>
+              <Plate title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+                <div style={{ maxWidth: 400, margin: '0 auto' }}>
+                  {(rsvp.rsvpClosed && !rsvp.submitted) || rsvp.alreadyDone || rsvp.submitted ? (
+                    <div style={{ textAlign: 'center', padding: '4px 0' }}>
+                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}><RosetteMark size={26} opacity={1} /></div>
+                      <div style={{ fontFamily: display, fontStyle: 'italic', fontSize: 23, color: '#E6DAC3' }}>
+                        {rsvp.rsvpClosed && !rsvp.submitted ? tr.rsvp_closed_title : rsvp.alreadyDone ? rsvpL.already_done : rsvp.thanksMsg}
+                      </div>
+                      <div style={{ fontSize: 13.5, color: TH.muted, marginTop: 6 }}>
+                        {rsvp.rsvpClosed && !rsvp.submitted ? tr.rsvp_closed_desc : rsvp.alreadyDone ? rsvp.selected?.full_name : rsvpL.thanks_sub}
+                      </div>
                     </div>
                   ) : (
-                    <form onSubmit={rsvp.handleSubmit} style={{ marginTop: 22 }}>
+                    <form onSubmit={rsvp.handleSubmit}>
                       <input
                         ref={rsvpInputRef}
                         type="text"
@@ -926,17 +911,17 @@ export default function RoyalGoldTemplate({
                         placeholder={rsvpL.namePh}
                         required={!rsvp.useGuestMode}
                         autoComplete="off"
-                        style={{ ...lineInput, color: INK, borderBottom: `1px solid ${BRONZE}8C`, textAlign: 'center' }}
+                        style={{ ...lineInput, textAlign: 'center' }}
                       />
                       <SuggestList
-                        items={rsvp.suggestions} light
+                        items={rsvp.suggestions}
                         activeIdx={rsvp.activeIdx} setActiveIdx={rsvp.setActiveIdx} onPick={rsvp.pick}
                       />
                       {rsvp.showNotFound && (
-                        <div style={{ fontSize: 12.5, color: BRONZE, marginTop: 8 }}>{rsvpL.not_in_list}</div>
+                        <div style={{ fontSize: 13, color: TH.muted, marginTop: 8, textAlign: 'center' }}>{rsvpL.not_in_list}</div>
                       )}
 
-                      <div role="radiogroup" aria-label={L('rsvp', 'title', rsvpL.title)} style={{ marginTop: 22, textAlign: 'left', borderTop: `1px dotted ${BRONZE}73` }}>
+                      <div role="radiogroup" aria-label={L('rsvp', 'title', rsvpL.title)} style={{ marginTop: 18 }}>
                         {[
                           { val: 'yes',   label: rsvpL.yes },
                           { val: 'no',    label: rsvpL.no },
@@ -950,20 +935,17 @@ export default function RoyalGoldTemplate({
                               role="radio"
                               aria-checked={active}
                               onClick={() => rsvp.chooseStatus(val)}
-                              data-press
                               style={{
-                                display: 'flex', alignItems: 'center', gap: 14, width: '100%', minHeight: 54,
-                                padding: '12px 4px', background: 'none', border: 'none', cursor: 'pointer',
-                                borderBottom: `1px dotted ${BRONZE}73`, textAlign: 'left',
-                                fontFamily: display, fontSize: 18, color: INK,
+                                display: 'flex', alignItems: 'center', gap: 14, width: '100%', minHeight: 50,
+                                padding: '0 4px', background: 'none', border: 'none', cursor: 'pointer',
+                                borderBottom: '1px solid rgba(197,160,89,.18)', textAlign: 'left',
+                                fontFamily: display, fontSize: 18.5, color: active ? '#E6DAC3' : TH.muted,
                               }}
                             >
                               <span aria-hidden="true" style={{
-                                width: 20, height: 20, flex: '0 0 auto', borderRadius: '50%',
-                                border: `1px solid ${BRONZE}`, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              }}>
-                                {active && <span style={{ width: 10, height: 10, borderRadius: '50%', background: 'linear-gradient(135deg, #B98A3E, #6E4F1C)' }} />}
-                              </span>
+                                width: 16, height: 16, flex: '0 0 auto', borderRadius: '50%',
+                                border: `1px solid ${LINE}`, background: active ? FOIL : 'transparent',
+                              }} />
                               <span style={{ fontStyle: active ? 'italic' : 'normal' }}>{label}</span>
                             </button>
                           )
@@ -971,43 +953,42 @@ export default function RoyalGoldTemplate({
                       </div>
 
                       {rsvp.status === 'yes' && (
-                        <div style={{ marginTop: 18, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14 }}>
-                          <span style={{ fontSize: 13.5, color: INK_SOFT, textAlign: 'left', lineHeight: 1.4 }}>{rsvpL.plusq}</span>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: '0 0 auto' }}>
+                        <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14 }}>
+                          <span style={{ fontSize: 14, color: TH.muted, lineHeight: 1.4 }}>{rsvpL.plusq}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: '0 0 auto' }}>
                             <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} data-press aria-label="Azalt"
-                              style={{ width: 40, height: 40, border: `1px solid ${BRONZE}`, background: 'none', color: INK, fontSize: 18, cursor: 'pointer', opacity: rsvp.plusOne === 0 ? 0.35 : 1 }}>
+                              style={{ width: 40, height: 40, borderRadius: '50%', border: `1px solid ${LINE}`, background: 'none', color: '#E6DAC3', fontSize: 18, cursor: 'pointer', opacity: rsvp.plusOne === 0 ? 0.35 : 1 }}>
                               −
                             </button>
-                            <span style={{ fontFamily: display, fontSize: 30, color: INK, width: 32, textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>
+                            <span style={{ fontFamily: display, fontSize: 26, color: '#E6DAC3', width: 30, textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>
                               {rsvp.plusOne}
                             </span>
                             <button type="button" onClick={rsvp.incPlusOne} disabled={rsvp.plusOne === rsvp.maxExtraGuests} data-press aria-label="Artır"
-                              style={{ width: 40, height: 40, border: `1px solid ${BRONZE}`, background: 'none', color: INK, fontSize: 18, cursor: 'pointer', opacity: rsvp.plusOne === rsvp.maxExtraGuests ? 0.35 : 1 }}>
+                              style={{ width: 40, height: 40, borderRadius: '50%', border: `1px solid ${LINE}`, background: 'none', color: '#E6DAC3', fontSize: 18, cursor: 'pointer', opacity: rsvp.plusOne === rsvp.maxExtraGuests ? 0.35 : 1 }}>
                               +
                             </button>
                           </div>
                         </div>
                       )}
 
-                      <button
-                        type="submit"
-                        disabled={!rsvp.canSubmit}
-                        data-press
-                        style={{
-                          marginTop: 24, width: '100%', minHeight: 54,
-                          /* deaktiv: boz blok yox — kartın üzərində gravür kontur */
-                          border: rsvp.canSubmit ? '1px solid transparent' : `1px solid ${INK}40`,
-                          background: rsvp.canSubmit ? '#15110A' : 'transparent',
-                          color: rsvp.canSubmit ? '#EBD9A8' : `${INK}80`,
-                          cursor: rsvp.canSubmit ? 'pointer' : 'not-allowed',
-                          fontFamily: display, fontStyle: 'italic', fontSize: 19,
-                        }}
-                      >
-                        {rsvp.sending ? '…' : rsvpL.send}
-                      </button>
+                      <div style={{ textAlign: 'center', marginTop: 24 }}>
+                        <button
+                          type="submit"
+                          disabled={!rsvp.canSubmit}
+                          data-press
+                          style={{
+                            minWidth: 200, minHeight: 46, padding: '0 28px', background: 'transparent',
+                            border: `1px solid ${rsvp.canSubmit ? TH.primary : LINE}`, color: rsvp.canSubmit ? TH.primary : TH.muted,
+                            cursor: rsvp.canSubmit ? 'pointer' : 'not-allowed', opacity: rsvp.canSubmit ? 1 : 0.6,
+                            fontFamily: display, fontStyle: 'italic', fontSize: 18,
+                          }}
+                        >
+                          {rsvp.sending ? '…' : rsvpL.send}
+                        </button>
+                      </div>
                     </form>
                   )}
-                </IvoryCard>
+                </div>
                 {/* ⚠ Phase 27: RSVP statistika paneli qonağa göstərilmir */}
               </Plate>
             )}

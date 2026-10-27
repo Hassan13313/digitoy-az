@@ -90,7 +90,6 @@ const OPEN_BL = html(smallBouquet('fgo4', { seed: 4, t0: 0.95 }))
 const HERO_TR = html(cornerBouquet('fgh1', { seed: 5 }))
 const HERO_BL = html(smallBouquet('fgh2', { seed: 6 }))
 const CARD    = html(cardBouquet('fgc1', { seed: 7 }))
-const CARD_2  = html(cardBouquet('fgc2', { seed: 9 }))
 const SPRIG   = html(sprigMark('fgs1', { seed: 8 }))
 const EMBLEM  = html(singleBloom('fge1', { kind: 'peony', hue: 'pink', size: 80, seed: 12 }))
 
@@ -804,38 +803,23 @@ export default function FloralGardenTemplate({
                 </Bed>
               )}
 
-              {/* 11 — İŞTİRAK TƏSDİQİ: küncünə pion taxılmış kart */}
+              {/* 11 — İŞTİRAK TƏSDİQİ: bağın öz səhifəsində — ayrıca ağ kart yox
+                   (qonaq rəyi: kart çox qabarıq görünürdü). Alt xətli ad sahəsi,
+                   xırda pion qönçəsi ilə seçimlər, dar kontur düymə. Məntiq eynidir. */}
               {canShowRsvp && (
-                <Bed>
-                  <div style={{ ...card, padding: '34px clamp(20px, 6vw, 28px) 28px', marginTop: 24 }}>
-                    {svgBox(CARD_2, { position: 'absolute', right: -34, top: -52, width: 150 })}
-                    {/* ⚠ SABİT «RSVP» DEYİL: AZ-da «İştirak Təsdiqi» (translations › inv_rsvp) */}
-                    <div style={{ fontSize: 14, fontWeight: 500, color: ROSE_TXT }}>{L('rsvp', 'kicker', tr.inv_rsvp)}</div>
-                    <h2 style={{
-                      margin: '8px 0 0', maxWidth: 230, fontFamily: serif, fontStyle: 'italic', fontWeight: 300,
-                      fontSize: 'clamp(28px, 8vw, 34px)', lineHeight: 1.1, color: INK, fontVariationSettings: SOFT,
-                    }}>
-                      {L('rsvp', 'title', rsvpL.title)}
-                    </h2>
-                    <p style={{ margin: '10px 0 0', fontSize: 14, color: MUTED, lineHeight: 1.55 }}>{rsvpL.subtitle}</p>
-
-                    {rsvp.rsvpClosed && !rsvp.submitted ? (
-                      <div style={{ marginTop: 22, padding: '18px 18px', borderRadius: 18, background: '#F4F6EF' }}>
-                        <div style={{ fontFamily: serif, fontSize: 20, color: INK }}>{tr.rsvp_closed_title}</div>
-                        <div style={{ fontSize: 13.5, color: MUTED, marginTop: 4 }}>{tr.rsvp_closed_desc}</div>
-                      </div>
-                    ) : rsvp.alreadyDone ? (
-                      <div style={{ marginTop: 22, padding: '18px 18px', borderRadius: 18, background: '#F4F6EF' }}>
-                        <div style={{ fontFamily: serif, fontSize: 20, color: INK }}>{rsvpL.already_done}</div>
-                        <div style={{ fontSize: 13.5, color: MUTED, marginTop: 4 }}>{rsvp.selected?.full_name}</div>
-                      </div>
-                    ) : rsvp.submitted ? (
-                      <div style={{ marginTop: 22, padding: '18px 18px', borderRadius: 18, background: '#F4F6EF' }}>
-                        <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 22, color: INK }}>{rsvp.thanksMsg}</div>
-                        <div style={{ fontSize: 13.5, color: MUTED, marginTop: 4 }}>{rsvpL.thanks_sub}</div>
+                <Bed title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+                  <div style={{ maxWidth: 400, margin: '0 auto' }}>
+                    {(rsvp.rsvpClosed && !rsvp.submitted) || rsvp.alreadyDone || rsvp.submitted ? (
+                      <div style={{ textAlign: 'center', padding: '4px 0' }}>
+                        <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 23, color: INK, fontVariationSettings: SOFT }}>
+                          {rsvp.rsvpClosed && !rsvp.submitted ? tr.rsvp_closed_title : rsvp.alreadyDone ? rsvpL.already_done : rsvp.thanksMsg}
+                        </div>
+                        <div style={{ fontSize: 14, color: MUTED, marginTop: 6 }}>
+                          {rsvp.rsvpClosed && !rsvp.submitted ? tr.rsvp_closed_desc : rsvp.alreadyDone ? rsvp.selected?.full_name : rsvpL.thanks_sub}
+                        </div>
                       </div>
                     ) : (
-                      <form onSubmit={rsvp.handleSubmit} style={{ marginTop: 20 }}>
+                      <form onSubmit={rsvp.handleSubmit}>
                         <input
                           ref={rsvpInputRef}
                           type="text"
@@ -845,7 +829,10 @@ export default function FloralGardenTemplate({
                           placeholder={rsvpL.namePh}
                           required={!rsvp.useGuestMode}
                           autoComplete="off"
-                          style={{ ...field, background: '#F7F9F4' }}
+                          style={{
+                            width: '100%', background: 'transparent', border: 'none', borderBottom: `1px solid ${LINE}`, borderRadius: 0,
+                            padding: '12px 2px', fontFamily: serif, fontStyle: 'italic', fontSize: 19, color: INK, outline: 'none',
+                          }}
                         />
                         <SuggestList
                           items={rsvp.suggestions}
@@ -855,7 +842,7 @@ export default function FloralGardenTemplate({
                           <div style={{ fontSize: 13, color: ROSE_TXT, marginTop: 8 }}>{rsvpL.not_in_list}</div>
                         )}
 
-                        <div role="radiogroup" aria-label={L('rsvp', 'title', rsvpL.title)} style={{ display: 'grid', gap: 8, marginTop: 16 }}>
+                        <div role="radiogroup" aria-label={L('rsvp', 'title', rsvpL.title)} style={{ marginTop: 14 }}>
                           {[
                             { val: 'yes',   label: rsvpL.yes },
                             { val: 'no',    label: rsvpL.no },
@@ -869,25 +856,16 @@ export default function FloralGardenTemplate({
                                 role="radio"
                                 aria-checked={active}
                                 onClick={() => rsvp.chooseStatus(val)}
-                                data-press
                                 style={{
-                                  display: 'flex', alignItems: 'center', gap: 12, minHeight: 52, padding: '12px 18px',
-                                  borderRadius: 999, cursor: 'pointer', textAlign: 'left',
-                                  fontFamily: sans, fontSize: 15, fontWeight: active ? 500 : 400,
-                                  background: active ? EUCA : '#FFFFFF',
-                                  color: active ? '#FFFFFF' : INK,
-                                  border: active ? '1px solid transparent' : `1px solid ${LINE}`,
+                                  display: 'flex', alignItems: 'center', gap: 12, width: '100%', minHeight: 48, padding: '0 2px',
+                                  background: 'none', border: 'none', borderBottom: `1px solid ${EUCA}26`, cursor: 'pointer', textAlign: 'left',
+                                  fontFamily: sans, fontSize: 16, fontWeight: active ? 500 : 400, color: active ? INK : MUTED,
                                 }}
                               >
                                 <span aria-hidden="true" style={{
-                                  width: 20, height: 20, flex: '0 0 auto', borderRadius: '50%',
-                                  border: active ? '1px solid rgba(255,255,255,.7)' : `1px solid ${EUCA}80`,
-                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                }}>
-                                  {active && (
-                                    <svg viewBox="0 0 12 12" width="11" height="11"><path d="M2.2 6.3 L4.9 8.8 L9.8 3.4" fill="none" stroke="#FFFFFF" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                                  )}
-                                </span>
+                                  width: 14, height: 14, flex: '0 0 auto', borderRadius: '50% 50% 50% 0', transform: 'rotate(-45deg)',
+                                  border: `1px solid ${active ? PEONY : EUCA + '80'}`, background: active ? PEONY : 'transparent',
+                                }} />
                                 {label}
                               </button>
                             )
@@ -895,37 +873,39 @@ export default function FloralGardenTemplate({
                         </div>
 
                         {rsvp.status === 'yes' && (
-                          <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                          <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                             <span style={{ fontSize: 14, color: MUTED, lineHeight: 1.4 }}>{rsvpL.plusq}</span>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: '0 0 auto' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: '0 0 auto' }}>
                               <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} data-press aria-label="Azalt"
-                                style={{ width: 42, height: 42, borderRadius: '50%', border: `1px solid ${LINE}`, background: '#FFFFFF', color: INK, fontSize: 18, cursor: 'pointer', opacity: rsvp.plusOne === 0 ? 0.35 : 1 }}>
+                                style={{ width: 40, height: 40, borderRadius: '50%', border: `1px solid ${LINE}`, background: 'transparent', color: INK, fontSize: 18, cursor: 'pointer', opacity: rsvp.plusOne === 0 ? 0.35 : 1 }}>
                                 −
                               </button>
-                              <span style={{ fontFamily: serif, fontSize: 28, color: INK, width: 30, textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>
+                              <span style={{ fontFamily: serif, fontSize: 24, color: INK, width: 30, textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>
                                 {rsvp.plusOne}
                               </span>
                               <button type="button" onClick={rsvp.incPlusOne} disabled={rsvp.plusOne === rsvp.maxExtraGuests} data-press aria-label="Artır"
-                                style={{ width: 42, height: 42, borderRadius: '50%', border: `1px solid ${LINE}`, background: '#FFFFFF', color: INK, fontSize: 18, cursor: 'pointer', opacity: rsvp.plusOne === rsvp.maxExtraGuests ? 0.35 : 1 }}>
+                                style={{ width: 40, height: 40, borderRadius: '50%', border: `1px solid ${LINE}`, background: 'transparent', color: INK, fontSize: 18, cursor: 'pointer', opacity: rsvp.plusOne === rsvp.maxExtraGuests ? 0.35 : 1 }}>
                                 +
                               </button>
                             </div>
                           </div>
                         )}
 
-                        <button
-                          type="submit"
-                          disabled={!rsvp.canSubmit}
-                          data-press
-                          style={{
-                            marginTop: 20, width: '100%', minHeight: 54, border: 'none', borderRadius: 999,
-                            background: rsvp.canSubmit ? INK : '#E3E9E1', color: rsvp.canSubmit ? '#FFFFFF' : '#7D8A81',
-                            fontFamily: sans, fontSize: 15.5, fontWeight: 500,
-                            cursor: rsvp.canSubmit ? 'pointer' : 'not-allowed',
-                          }}
-                        >
-                          {rsvp.sending ? '…' : rsvpL.send}
-                        </button>
+                        <div style={{ textAlign: 'center', marginTop: 24 }}>
+                          <button
+                            type="submit"
+                            disabled={!rsvp.canSubmit}
+                            data-press
+                            style={{
+                              minWidth: 200, minHeight: 46, padding: '0 28px', borderRadius: 999, background: 'transparent',
+                              border: `1px solid ${rsvp.canSubmit ? EUCA : LINE}`, color: rsvp.canSubmit ? EUCA : MUTED,
+                              fontFamily: sans, fontSize: 15, fontWeight: 500, opacity: rsvp.canSubmit ? 1 : 0.6,
+                              cursor: rsvp.canSubmit ? 'pointer' : 'not-allowed',
+                            }}
+                          >
+                            {rsvp.sending ? '…' : rsvpL.send}
+                          </button>
+                        </div>
                       </form>
                     )}
                   </div>
