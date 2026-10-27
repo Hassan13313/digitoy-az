@@ -173,7 +173,9 @@ export default function TemplateOutro({
         <div style={{
           fontFamily: serif || theme.fonts?.heading,
           fontSize: 'clamp(16px, 4.5vw, 18px)', letterSpacing: '.04em',
-          color: theme.primary, marginBottom: 12,
+          /* `footerAccent` — tünd footer fonunda əsas rəng zəif oxunanda
+             (məs. Floral Garden-in evkalipti) şablon öz açıq tonunu verir */
+          color: theme.footerAccent || theme.primary, marginBottom: 12,
         }}>
           {footer?.title ? footer.title : names.length === 2 ? (
             <>

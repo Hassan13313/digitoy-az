@@ -28,6 +28,12 @@ const FONT_HREF =
   '&family=Bebas+Neue' +                            /* Cinema Premiere        */
   '&family=Cinzel:wght@400;500;600' +               /* Royal Palace           */
   '&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400' + /* Gazette        */
+  /* Premium redizayn — Royal Gold (gravür) və Floral Garden (bağ) */
+  '&family=Noto+Serif+Display:ital,wght@0,300;0,400;1,300;1,400' + /* Royal Gold */
+  '&family=Hanken+Grotesk:wght@300;400;500' +                        /* Royal Gold */
+  '&family=Ballet' +                                                 /* Royal Gold «&» */
+  '&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..500,0..100;1,9..144,300..500,0..100' + /* Floral */
+  '&family=Mulish:wght@300;400;500;600' +                            /* Floral */
   '&display=swap'
 
 const LINK_ID = 'digitoy-template-fonts'

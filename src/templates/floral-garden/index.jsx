@@ -5,17 +5,17 @@ import LanguageSwitcher from '../../components/LanguageSwitcher'
 import DressCodeSection from '../_shared/DressCodeSection'
 import LoveStorySection from '../_shared/LoveStorySection'
 import { getStoryTheme } from '../_shared/loveStoryTheme'
-import MapSection, { MapRings } from '../_shared/MapSection'
+import MapSection from '../_shared/MapSection'
 import { directionsUrl, openMapUrl } from '../_shared/geo'
 import { OrderCta, MusicStartBubble } from '../_shared/TemplateActions'
 import TemplateOutro from '../_shared/TemplateOutro'
-import { getTemplateTheme } from '../templateConfig'
+import { getTemplateTheme, FONT_STACKS } from '../templateConfig'
 import { buildPresetMusic, PRESET_TRACKS, MUSIC_PLAY_MODES, shouldAutoPlay } from '../../data/music'
 import { getSectionVisibility } from '../../data/sections'
-import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
+import { formatAzDate, formatTime24, dateParts } from '../../utils/dateFormat'
 import { unlockAudio } from '../../utils/audioUnlock'
 import { trackEvent } from '../../utils/analytics'
-import { Reveal, Stagger, Parallax, PopDigit, enterDirection, AmbientLayer } from '../_shared/motion'
+import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
 import { hidePhoto } from '../../utils/photoGallery'
 import { useCountdown } from '../../hooks/useCountdown'
 import { useTimeline } from '../../hooks/useTimeline'
@@ -29,196 +29,108 @@ import t from '../../data/translations'
 import { mergeSectionLabels, withStringOverrides, makeLabelResolver, sectionHead } from '../../data/adminOverrides'
 import { makeOpeningText, phrase } from '../_shared/openingSpec'
 import { EmblemSlot } from '../_shared/MonoContent'
+import {
+  cornerBouquet, smallBouquet, cardBouquet, sprigMark, singleBloom,
+  BLOSSOM_DATA_URI, VINE_DATA_URI, PAPER_DATA_URI,
+} from './botanicals'
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   FLORAL GARDEN ROMANCE — Claude Design "Digitoy Templates.dc.html" · t2
+   FLORAL GARDEN ROMANCE — «Bağ mərasimi» (premium redizayn, 2026-10)
 
-   Design story: gündüz, açıq havada, ot üzərində keçən toy. Qızıl yox —
-   işıq və bitki. Palitra: adaçayı (#7E8C6E) · tozlu qızılgül (#C98F84).
-   Tipoqrafika: Cormorant Garamond Italic (başlıq) + Jost (mətn).
+   Konsept: floristin qurduğu gündüz bağ mərasimi. Bəzək YALNIZ çiçəkdir —
+   pion, bağ qızılgülü, evkalipt, qönçə; çərçivə, nazik xətt, büyük hərfli
+   etiket yoxdur. Düzülüş asimmetrikdir və sola yığılır (bağ qeyri-rəsmidir),
+   Royal Gold-un simmetrik mərkəz oxunun əksi.
 
-   ⚠ Bu fayl YALNIZ UI qatıdır — bütün biznes məntiqi hook-lardadır
-   (useRsvp / useSeating / useGuestbook / useCountdown / useGallery /
-   useTimeline / useMusicPlayer). simple-luxury ilə eyni hook-ları işlədir,
-   yəni RSVP/oturma/qonaq dəftəri backend davranışı tam eynidir.
+   Bölmələrin şablona məxsus forması:
+     açılış   → çiçək qapısı: dörd küncdə buketlər bir-bir açır; toxunanda
+                buketlər iki yana aralanır və qonaq bağa daxil olur
+     hero     → sağ-yuxarı küncdən sallanan buket, sola yığılmış adlar
+     bağ yolu → sol kənarda bütün səhifə boyu uzanan yaşıl gövdə; proqramın
+                hər hadisəsi bu gövdədə AÇAN çiçəkdir
+     sayğac   → böyük «gün» rəqəmi + bir sətirdə saat/dəqiqə/saniyə
+     məkan    → tağlı bağ pəncərəsi içində xəritə, küncündə buket
+     masa     → ağ yer kartı, budaq nişanı ilə
+     RSVP     → küncünə pion taxılmış ağ kart, seçimlər yumşaq həblər
 
-   Bölmə sırası design faylındakı "Struktur" leqendası ilə eynidir (13 bölmə).
+   Palitra: səhər kətanı #F4F6EF · evkalipt #5E7C6B · qıjı mürəkkəbi #213229
+   · pion #C9768A · tozcuq #E9C46A. Şriftlər: Fraunces (yumşaq serif,
+   başlıqlar; rus dilində Cormorant) · Mulish (mətn).
+
+   ⚠ Bu fayl YALNIZ UI qatıdır — bütün biznes məntiqi hook-lardadır.
    ───────────────────────────────────────────────────────────────────────── */
 
 const TH = getTemplateTheme('floral-garden')
 const DEFAULT_MUSIC = buildPresetMusic(PRESET_TRACKS[0], { playMode: MUSIC_PLAY_MODES.AUTO })
 
-const serif = TH.fonts.heading
+/* Başlıq şrifti CSS dəyişənidir: Fraunces-də kiril olmadığı üçün rus dilində
+   kök element onu bütövlükdə Cormorant-a keçirir (bir sətirdə iki şrift
+   qarışmasın deyə — hərf-hərf ehtiyat yox). */
+const serif = 'var(--fg-serif)'
 const sans  = TH.fonts.body
 
-/* Şablona məxsus keyframe-lər — qlobal CSS-ə toxunmur, prefiks `fg-` */
+const INK      = TH.text          /* #213229 */
+const EUCA     = TH.primary       /* #5E7C6B */
+const PEONY    = TH.accent        /* #C9768A — dekor və böyük mətn */
+const ROSE_TXT = '#A4526A'        /* kiçik mətn üçün kontrastlı qızılgül */
+const MUTED    = TH.muted
+const LINE     = 'rgba(94,124,107,.32)'
+const SOFT     = "'SOFT' 100, 'WONK' 0"
+
+/* Buketlər modul səviyyəsində bir dəfə qurulur (statik SVG mətni).
+   ⚠ `{ __html }` obyekti də SABİTDİR: React 19 bu prop-u obyekt kimi
+   müqayisə edir — hər render-də yeni obyekt versək, sayğacın hər saniyəlik
+   yenilənməsində bütün buketlər DOM-dan silinib yenidən parse olunur
+   (açılış animasiyası hər saniyə sıfırlanırdı, telefonda isə yük idi). */
+const html = (s) => ({ __html: s })
+const OPEN_TL = html(cornerBouquet('fgo1', { seed: 1, t0: 0.2 }))
+const OPEN_TR = html(smallBouquet('fgo2', { seed: 2, t0: 0.7 }))
+const OPEN_BR = html(cornerBouquet('fgo3', { seed: 3, flip: true, t0: 0.45 }))
+const OPEN_BL = html(smallBouquet('fgo4', { seed: 4, t0: 0.95 }))
+const HERO_TR = html(cornerBouquet('fgh1', { seed: 5 }))
+const HERO_BL = html(smallBouquet('fgh2', { seed: 6 }))
+const CARD    = html(cardBouquet('fgc1', { seed: 7 }))
+const CARD_2  = html(cardBouquet('fgc2', { seed: 9 }))
+const SPRIG   = html(sprigMark('fgs1', { seed: 8 }))
+const EMBLEM  = html(singleBloom('fge1', { kind: 'peony', hue: 'pink', size: 80, seed: 12 }))
+
+const svgBox = (art, style) => (
+  <div aria-hidden="true" style={{ lineHeight: 0, pointerEvents: 'none', ...style }} dangerouslySetInnerHTML={art} />
+)
+
 const KEYFRAMES = `
+@keyframes fg-in    { from { opacity: 0; transform: scale(.94) } to { opacity: 1; transform: none } }
+@keyframes fg-bloom { from { opacity: 0; transform: scale(.2) rotate(-50deg) } to { opacity: 1; transform: none } }
+@keyframes fg-grow  { from { opacity: 0; transform: scale(.35) } to { opacity: 1; transform: none } }
+@keyframes fg-rise  { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
+@keyframes fg-fade  { from { opacity: 0 } to { opacity: 1 } }
 @keyframes fg-eq    { 0%,100% { transform: scaleY(.35) } 50% { transform: scaleY(1) } }
-@keyframes fg-hint  { 0%,100% { transform: translateY(0); opacity:.35 } 50% { transform: translateY(6px); opacity:1 } }
+@keyframes fg-breathe { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
 
-/* «Açılış Ekranı düzəliş V1» — açan çiçək ardıcıllığı */
-@keyframes fg-veil   { from { opacity:1 } to { opacity:0 } }
-@keyframes fg-rise   { from { opacity:0; transform:translateY(14px) } to { opacity:1; transform:none } }
-@keyframes fg-halo   { 0%,100% { opacity:.55; transform:scale(1) } 50% { opacity:1; transform:scale(1.1) } }
-@keyframes fg-vine   { from { transform:scaleY(0) } to { transform:scaleY(1) } }
-@keyframes fg-fall   { 0% { opacity:0; transform:translate3d(0,-34px,0) rotate(0) } 14% { opacity:.85 } 100% { opacity:0; transform:translate3d(-40px,320px,0) rotate(300deg) } }
-@keyframes fg-bloom  { 0% { opacity:0; transform:rotate(-120deg) scale(.15) } 70% { opacity:1; transform:rotate(6deg) scale(1.06) } 100% { opacity:1; transform:rotate(0) scale(1) } }
-@keyframes fg-letter { from { opacity:0; transform:translateY(26px) rotateX(52deg); filter:blur(7px) } to { opacity:1; transform:none; filter:blur(0) } }
-@keyframes fg-cta    { from { opacity:0; transform:translateY(16px) scale(.94) } to { opacity:1; transform:none } }
-@keyframes fg-gleam  { 0% { transform:translateX(-140%) skewX(-18deg); opacity:0 } 22% { opacity:.9 } 100% { transform:translateX(300%) skewX(-18deg); opacity:0 } }
+[data-fg] .fg-anim .fgb { transform-box: fill-box; transform-origin: 50% 50%; animation: fg-bloom 1.3s cubic-bezier(.2,.8,.2,1) 1.1s both; }
+[data-fg] .fg-anim .fgl { transform-box: fill-box; transform-origin: 50% 100%; animation: fg-grow 1.2s cubic-bezier(.2,.8,.2,1) .15s both; }
+[data-fg] ::placeholder { color: rgba(93,107,97,.62); }
+[data-fg] input:focus-visible, [data-fg] textarea:focus-visible { border-color: ${EUCA} !important; box-shadow: 0 0 0 3px rgba(94,124,107,.16); outline: none; }
+[data-fg] button:focus-visible, [data-fg] a:focus-visible, [data-fg] [role="button"]:focus-visible { outline: 2px solid ${EUCA}; outline-offset: 3px; }
 
-/* Daxili arxa fon (ambient) */
-@keyframes fg-wander { 0%,100% { transform:translate3d(0,0,0) } 33% { transform:translate3d(26px,-34px,0) } 66% { transform:translate3d(-22px,20px,0) } }
-@keyframes fg-abloom { 0% { transform:translate3d(0,-16%,0) rotate(-20deg) scale(.85); opacity:0 } 12% { opacity:.9 } 88% { opacity:.9 } 100% { transform:translate3d(-56px,116%,0) rotate(200deg) scale(1.05); opacity:0 } }
-@keyframes fg-afall  { 0% { transform:translate3d(0,-14%,0) rotate(0); opacity:0 } 12% { opacity:.85 } 100% { transform:translate3d(-48px,114%,0) rotate(280deg); opacity:0 } }
 @media (prefers-reduced-motion: reduce) {
   [data-fg] *, [data-fg] { animation: none !important; transition: none !important; }
 }
 `
 
-/* ── Daxili arxa fon — «Açılış Ekranı düzəliş V1» ────────────────────────────
-   Design t2-də dəvətnamənin fonu düz kağız deyil: iki akvarel ləkəsi gəzişir,
-   yuxarıdan çiçək və ləçək süzülür. Qat `multiply` blend ilə məzmunun
-   ÜSTÜNDƏDİR — açıq şablonda yalnız kölgələyir, mətni örtmür.
-   ⚠ zIndex 3: məzmundan yuxarı, amma başlıq/düymələrdən aşağı. */
-const AMBIENT_BLOOMS = [
-  { left: '8%',  size: 34, dur: 21, delay: 0,  fill: 'rgba(214,166,157,.5)' },
-  { left: '30%', size: 26, dur: 16, delay: 6,  fill: 'rgba(201,143,132,.45)' },
-  { left: '54%', size: 40, dur: 25, delay: 12, fill: 'rgba(230,196,190,.5)' },
-  { left: '76%', size: 28, dur: 17, delay: 3,  fill: 'rgba(201,143,132,.42)' },
-  { left: '92%', size: 32, dur: 20, delay: 17, fill: 'rgba(214,166,157,.45)' },
-]
-
-const AMBIENT_PETALS = [
-  { left: '16%', dur: 11, delay: 1 },
-  { left: '37%', dur: 13, delay: 5 },
-  { left: '58%', dur: 12, delay: 9 },
-  { left: '78%', dur: 14, delay: 2.5 },
-  { left: '92%', dur: 12.5, delay: 13 },
-]
-
-function WatercolorBlobs() {
-  return (
-    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
-      <span style={{
-        position: 'absolute', left: '-18%', top: '8%', width: '70%', height: '34%', borderRadius: '50%',
-        background: `radial-gradient(circle, ${TH.accent}52, transparent 68%)`,
-        filter: 'blur(38px)', animation: 'fg-wander 19s ease-in-out infinite',
-      }} />
-      <span style={{
-        position: 'absolute', right: '-20%', bottom: '14%', width: '64%', height: '30%', borderRadius: '50%',
-        background: `radial-gradient(circle, ${TH.primary}52, transparent 70%)`,
-        filter: 'blur(40px)', animation: 'fg-wander 24s ease-in-out 8s infinite reverse',
-      }} />
-
-      {AMBIENT_BLOOMS.map((b, i) => (
-        <span key={i} style={{
-          position: 'absolute', left: b.left, top: '-12%', width: b.size, height: b.size,
-          animation: `fg-abloom ${b.dur}s linear ${b.delay}s infinite`,
-        }}>
-          <svg viewBox="0 0 40 40" width={b.size} height={b.size} fill="none" aria-hidden="true">
-            <g transform="translate(20 20)">
-              {[0, 60, 120, 180, 240, 300].map((deg) => (
-                <ellipse key={deg} cx="0" cy="-9" rx="6" ry="10" transform={`rotate(${deg})`} fill={b.fill} />
-              ))}
-              <circle cx="0" cy="0" r="4" fill="rgba(246,226,194,.75)" />
-            </g>
-          </svg>
-        </span>
-      ))}
-
-      {AMBIENT_PETALS.map((p, i) => (
-        <span key={i} style={{
-          position: 'absolute', left: p.left, top: 0, width: 9, height: 12,
-          borderRadius: '60% 60% 55% 55% / 70% 70% 45% 45%',
-          background: `${TH.accent}73`,
-          animation: `fg-afall ${p.dur}s linear ${p.delay}s infinite`,
-        }} />
-      ))}
-    </div>
-  )
-}
-
-/* Bölmə başlığı: kiçik caps etiket + italik serif başlıq */
-function SectionHead({ kicker, title, align = 'left' }) {
-  return (
-    <>
-      <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.primary, textAlign: align }}>
-        {kicker}
-      </div>
-      <div style={{
-        fontFamily: serif, fontStyle: 'italic', fontSize: 'clamp(22px,6vw,26px)',
-        color: TH.text, margin: '6px 0 18px', textAlign: align, lineHeight: 1.25,
-      }}>
-        {title}
-      </div>
-    </>
-  )
-}
-
-const pill = (filled) => ({
-  flex: 1, textAlign: 'center', borderRadius: 100, padding: '13px 6px',
-  fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase',
-  fontFamily: sans, cursor: 'pointer', textDecoration: 'none',
-  background: filled ? TH.primary : 'transparent',
-  color: filled ? TH.background : '#5F6B53',
-  border: filled ? '1px solid transparent' : `1px solid ${TH.primary}66`,
-  display: 'block',
-})
-
 /* ═══════════════════════════════════════════════════════════════════════════
-   01 — AÇILIŞ: açan çiçək («Açılış Ekranı düzəliş V1»)
+   01 — AÇILIŞ: çiçək qapısı
 
-   Design t2 açılışı artıq iki taya bölünən pərdə deyil — BAĞÇANIN ÖZÜDÜR.
-   Ağ işıq pərdəsi əriyir, yanlardan iki sarmaşıq xətti böyüyür, havada ləçək
-   düşür, mərkəzdə çiçək altı ləçəyi ilə AÇILIR (fl-bloom) — yalnız bundan
-   sonra adlar qalxır.
+   Kətan fon → küncdən-küncə buketlərin yarpaqları böyüyür, çiçəklər bir-bir
+   açır → mərkəzdə pion, adlar, düymə. Toxunanda sol buketlər sola, sağ
+   buketlər sağa aralanır — qonaq bağa addımlayır.
 
-   ⚠ `onOpenStart` MÜTLƏQ toxunuş hadisəsinin içində çağırılır (musiqi).
+   ⚠ `onOpenStart` MÜTLƏQ toxunuş hadisəsinin içində çağırılır (iOS musiqi).
    ═══════════════════════════════════════════════════════════════════════════ */
-
-/* Havada düşən ləçəklər — açılış ekranı üçün (deterministik) */
-const PETALS = [
-  { left: '14%', dur: 11, delay: 0 },
-  { left: '30%', dur: 13, delay: 2.4 },
-  { left: '48%', dur: 10, delay: 1.2 },
-  { left: '64%', dur: 12.5, delay: 4 },
-  { left: '80%', dur: 11.5, delay: 3 },
-  { left: '92%', dur: 14, delay: 5.6 },
-  { left: '22%', dur: 12, delay: 6.8 },
-]
-
-/* Altı ləçəkli çiçək — mərkəzdən burularaq açılır */
-function BloomFlower({ delay = 1.5 }) {
-  return (
-    <div style={{
-      position: 'relative', width: 120, height: 120, margin: '0 auto',
-      animation: `fg-bloom 1.7s cubic-bezier(.2,.9,.25,1) ${delay}s both`,
-    }}>
-      {[0, 60, 120, 180, 240, 300].map((deg) => (
-        <span key={deg} style={{
-          position: 'absolute', left: '50%', top: '50%', width: 26, height: 40,
-          margin: '-40px 0 0 -13px', transformOrigin: '50% 100%', transform: `rotate(${deg}deg)`,
-          borderRadius: '60% 60% 40% 40% / 70% 70% 30% 30%',
-          background: `linear-gradient(170deg, #FBEDEA, ${TH.accent}D9)`,
-          border: `1px solid ${TH.accent}59`,
-        }} />
-      ))}
-      <span style={{
-        position: 'absolute', left: '50%', top: '50%', width: 20, height: 20,
-        transform: 'translate(-50%,-50%)', borderRadius: '50%',
-        background: `radial-gradient(circle at 36% 30%, #F6E2C2, ${TH.accent})`,
-        boxShadow: '0 3px 10px rgba(140,90,80,.28)',
-      }} />
-    </div>
-  )
-}
-
-function GardenOpening({ weddingData, isCouple, ot, onOpen, onOpenStart }) {
+function GardenGate({ weddingData, isCouple, ot, onOpen, onOpenStart }) {
   const [opening, setOpening] = useState(false)
   const [gone, setGone] = useState(false)
 
-  /* Admin adları öz mətni ilə əvəz edibsə tək sətir (bax openingSpec) */
   const titleOv = ot.override('title')
   const first = titleOv !== undefined
     ? titleOv
@@ -228,21 +140,16 @@ function GardenOpening({ weddingData, isCouple, ot, onOpen, onOpenStart }) {
   const start = () => {
     if (opening) return
     unlockAudio()
-    /* ⚠ Musiqi toxunuş hadisəsinin İÇİNDƏ başlayır — `onOpen` 950ms sonra
-       gəlir və o vaxt brauzerin jest pəncərəsi bağlı olur. */
     onOpenStart?.()
     setOpening(true)
-    setTimeout(() => { setGone(true); onOpen() }, 950)
+    setTimeout(() => { setGone(true); onOpen() }, 1250)
   }
 
   if (gone) return null
 
-  /* Sarmaşıq — biri yuxarıdan, digəri aşağıdan böyüyür */
-  const vine = (side, origin, delay) => ({
-    position: 'absolute', top: 0, bottom: 0, [side]: 26, width: 1, pointerEvents: 'none',
-    background: `linear-gradient(180deg, transparent, ${TH.primary}80, transparent)`,
-    transformOrigin: `50% ${origin}`,
-    animation: `fg-vine 1.6s cubic-bezier(.22,.61,.36,1) ${delay}s both`,
+  const part = (dir) => ({
+    animate: opening ? { x: dir === 'l' ? '-75%' : '75%', rotate: dir === 'l' ? -9 : 9, opacity: 0 } : {},
+    transition: { duration: 1.15, ease: [0.62, 0, 0.3, 1] },
   })
 
   return (
@@ -253,152 +160,105 @@ function GardenOpening({ weddingData, isCouple, ot, onOpen, onOpenStart }) {
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); start() } }}
       aria-label={ot.text('cta') || phrase('open', ot.lang)}
       data-fg
-      animate={opening ? { opacity: 0, scale: 1.04 } : {}}
-      transition={{ duration: 0.95, ease: [0.65, 0, 0.35, 1] }}
+      animate={opening ? { backgroundColor: 'rgba(244,246,239,0)' } : {}}
+      transition={{ duration: 0.5, delay: 0.75 }}
       style={{
         position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden',
-        background: `radial-gradient(120% 80% at 50% 22%, #FFFDFB, #F4EBE5 76%)`,
+        backgroundColor: TH.background, backgroundImage: PAPER_DATA_URI,
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        textAlign: 'center', padding: '0 clamp(22px, 8vw, 32px)', fontFamily: sans,
-        isolation: 'isolate',
+        textAlign: 'center', padding: '0 28px', fontFamily: sans,
       }}
     >
-      {/* Pərdə */}
-      <span aria-hidden="true" style={{
-        position: 'absolute', inset: 0, background: TH.background, pointerEvents: 'none', zIndex: 2,
-        animation: 'fg-veil 1s ease-out .1s both',
-      }} />
+      <div className="fg-anim" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+        <motion.div {...part('l')} style={{ position: 'absolute', left: -74, top: -64, width: 'min(88vw, 350px)' }}>
+          <div style={{ animation: 'fg-in 1.2s ease-out .05s both' }}>{svgBox(OPEN_TL)}</div>
+        </motion.div>
+        <motion.div {...part('r')} style={{ position: 'absolute', right: -52, top: -34, width: 'min(54vw, 210px)' }}>
+          <div style={{ animation: 'fg-in 1.2s ease-out .4s both' }}>{svgBox(OPEN_TR, { transform: 'scaleX(-1)' })}</div>
+        </motion.div>
+        <motion.div {...part('r')} style={{ position: 'absolute', right: -84, bottom: -66, width: 'min(90vw, 360px)' }}>
+          <div style={{ animation: 'fg-in 1.2s ease-out .25s both' }}>{svgBox(OPEN_BR)}</div>
+        </motion.div>
+        <motion.div {...part('l')} style={{ position: 'absolute', left: -54, bottom: -34, width: 'min(54vw, 210px)' }}>
+          <div style={{ animation: 'fg-in 1.2s ease-out .6s both' }}>{svgBox(OPEN_BL, { transform: 'scaleY(-1)' })}</div>
+        </motion.div>
+      </div>
 
-      {/* İki akvarel ləkəsi — tozlu qızılgül və adaçayı */}
-      <span aria-hidden="true" style={{
-        position: 'absolute', top: -100, left: -100, width: 320, height: 320, borderRadius: '50%',
-        background: `radial-gradient(circle, ${TH.accent}52, transparent 68%)`,
-        filter: 'blur(30px)', pointerEvents: 'none', zIndex: -1,
-        animation: 'fg-halo 10s ease-in-out 1s infinite',
-      }} />
-      <span aria-hidden="true" style={{
-        position: 'absolute', bottom: -90, right: -80, width: 280, height: 280, borderRadius: '50%',
-        background: `radial-gradient(circle, ${TH.primary}4D, transparent 68%)`,
-        filter: 'blur(30px)', pointerEvents: 'none', zIndex: -1,
-        animation: 'fg-halo 12s ease-in-out 2s infinite',
-      }} />
-
-      {/* Düşən ləçəklər */}
-      <span aria-hidden="true" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: -1 }}>
-        {PETALS.map((p, i) => (
-          <span key={i} style={{
-            position: 'absolute', left: p.left, top: '-6%', width: 9, height: 12, opacity: 0,
-            borderRadius: '60% 60% 55% 55% / 70% 70% 45% 45%',
-            background: `linear-gradient(160deg, #F0D3CE, ${TH.accent})`,
-            animation: `fg-fall ${p.dur}s linear ${p.delay}s infinite`,
-          }} />
-        ))}
-      </span>
-
-      <span aria-hidden="true" style={vine('left', '0', 0.6)} />
-      <span aria-hidden="true" style={vine('right', '100%', 0.8)} />
-
-      <div style={{ position: 'relative' }}>
-        {/* Kicker — yanlarda adaçayı xətləri */}
-        {ot.show('kicker') && (
-          <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
-            animation: 'fg-rise .9s cubic-bezier(.22,.61,.36,1) 1.1s both',
-          }}>
-            <span style={{ width: 20, height: 1, background: `${TH.primary}B3` }} />
-            <span style={{ fontSize: 9.5, letterSpacing: '.4em', textTransform: 'uppercase', color: TH.muted, whiteSpace: 'nowrap' }}>
-              {ot.text('kicker')}
-            </span>
-            <span style={{ width: 20, height: 1, background: `${TH.primary}B3` }} />
-          </div>
-        )}
-
-        {/* Çiçək — admin onu mətn/stiker/şəkillə əvəz edə və ya gizlədə bilər */}
+      <motion.div
+        animate={opening ? { opacity: 0, scale: 0.96 } : {}}
+        transition={{ duration: 0.55, ease: 'easeIn' }}
+        style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: 330 }}
+      >
         {ot.mono.kind !== 'none' && (
-          <div style={{ marginTop: 32 }}>
+          <div style={{ marginBottom: 18 }}>
             <EmblemSlot
-              mono={ot.mono} size={96} delay={1.5}
-              border={`1px solid ${TH.accent}8C`} background="rgba(255,255,255,.7)"
-              color="#7A5C55" font={serif}
-              style={{ animation: 'fg-bloom 1.7s cubic-bezier(.2,.9,.25,1) 1.5s both' }}
+              mono={ot.mono} size={84} delay={1.6}
+              border={`1px solid ${PEONY}66`} background="rgba(255,255,255,.82)"
+              color={ROSE_TXT} font={serif}
             >
-              <BloomFlower delay={1.5} />
+              <div className="fg-anim" style={{ width: 66, height: 66, margin: '0 auto' }}>
+                <div style={{ animation: 'fg-bloom 1.5s cubic-bezier(.2,.8,.2,1) 1.6s both' }}>{svgBox(EMBLEM)}</div>
+              </div>
             </EmblemSlot>
           </div>
         )}
 
-        {/* Adlar — hər söz ayrıca qalxır (admin gizlədibsə sətir yoxdur) */}
+        {ot.show('kicker') && (
+          <div style={{
+            fontFamily: serif, fontStyle: 'italic', fontSize: 17, color: ROSE_TXT, fontVariationSettings: SOFT,
+            animation: 'fg-rise .9s ease-out 1.9s both',
+          }}>
+            {ot.text('kicker')}
+          </div>
+        )}
+
         {titleOv !== '' && (
           <div style={{
-            display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 11, marginTop: 28,
-            fontFamily: serif, fontSize: 'clamp(28px, 10vw, 36px)', color: '#4A3B37', lineHeight: 1,
-            flexWrap: titleOv !== undefined ? 'wrap' : undefined,
+            marginTop: 10, fontFamily: serif, fontStyle: 'italic', fontWeight: 300,
+            fontSize: 'clamp(40px, 13vw, 56px)', lineHeight: 1.02, color: INK,
+            fontVariationSettings: SOFT, letterSpacing: '-.01em',
+            animation: 'fg-rise 1.1s cubic-bezier(.22,.61,.36,1) 2.15s both',
           }}>
-            <span style={{ display: 'inline-block', animation: 'fg-letter 1s cubic-bezier(.22,.61,.36,1) 2.9s both' }}>{first}</span>
+            <div>{first}</div>
             {second && (
               <>
-                <span style={{ display: 'inline-block', fontSize: 'clamp(18px, 6.5vw, 23px)', color: TH.accent, animation: 'fg-letter 1s cubic-bezier(.22,.61,.36,1) 3.1s both' }}>&amp;</span>
-                <span style={{ display: 'inline-block', animation: 'fg-letter 1s cubic-bezier(.22,.61,.36,1) 3.3s both' }}>{second}</span>
+                <div style={{ fontSize: '.66em', color: PEONY, margin: '2px 0' }}>&amp;</div>
+                <div>{second}</div>
               </>
             )}
           </div>
         )}
 
-        {/* Ornament — solub gedən xətlər və ortada qızılgül nöqtəsi */}
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, marginTop: 16,
-          animation: 'fg-rise .8s ease-out 3.6s both',
-        }}>
-          <span style={{ width: 30, height: 1, background: `linear-gradient(90deg, transparent, ${TH.accent})` }} />
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: TH.accent }} />
-          <span style={{ width: 30, height: 1, background: `linear-gradient(90deg, ${TH.accent}, transparent)` }} />
-        </div>
-
         {ot.show('meta') && (
-          <div style={{
-            fontSize: 10.5, letterSpacing: '.24em', textTransform: 'uppercase', color: TH.muted, marginTop: 14,
-            animation: 'fg-rise .8s ease-out 3.8s both',
-          }}>
+          <div style={{ marginTop: 18, fontSize: 14.5, color: MUTED, animation: 'fg-rise .9s ease-out 2.5s both' }}>
             {ot.text('meta')}
           </div>
         )}
 
-        {/* CTA — ağ, üzərindən işıq keçir */}
         {ot.show('cta') && (
           <div style={{
-            position: 'relative', overflow: 'hidden', marginTop: 38,
-            display: 'inline-flex', alignItems: 'center', gap: 10,
-            border: `1px solid ${TH.accent}8C`, borderRadius: 100, padding: '14px 26px',
-            fontSize: 10, letterSpacing: '.24em', textTransform: 'uppercase',
-            color: '#7A5C55', background: 'rgba(255,255,255,.7)',
-            animation: 'fg-cta .9s cubic-bezier(.22,.61,.36,1) 4.1s both',
+            marginTop: 26, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            minHeight: 50, padding: '14px 28px', borderRadius: 999,
+            background: EUCA, color: '#FFFFFF', fontSize: 15, fontWeight: 500, letterSpacing: '.01em',
+            boxShadow: '0 12px 26px rgba(47,74,59,.28)',
+            animation: 'fg-rise .9s ease-out 2.85s both',
           }}>
-            <span aria-hidden="true" style={{
-              position: 'absolute', top: 0, bottom: 0, left: 0, width: '38%',
-              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,.9), transparent)',
-              animation: 'fg-gleam 4.6s ease-in-out 5.3s infinite',
-            }} />
-            <span style={{ position: 'relative' }}>{ot.text('cta')}</span>
-            <span style={{ position: 'relative' }}>→</span>
+            {ot.text('cta')}
           </div>
         )}
-      </div>
 
-      {ot.show('hint') && (
-        <div style={{
-          position: 'absolute', left: 0, right: 0, bottom: 32, textAlign: 'center',
-          fontSize: 10.5, letterSpacing: '.2em', color: '#9C8B84',
-          animation: 'fg-rise .8s ease-out 4.6s both, fg-hint 2.8s ease-in-out 5.4s infinite',
-        }}>
-          {ot.text('hint')}
-        </div>
-      )}
+        {ot.show('hint') && (
+          <div style={{ marginTop: 14, fontSize: 12.5, color: MUTED, animation: 'fg-fade .8s ease-out 3.4s both, fg-breathe 3s ease-in-out 4.2s infinite' }}>
+            {ot.text('hint')}
+          </div>
+        )}
+      </motion.div>
     </motion.div>
   )
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   03 — MUSİQİ: adaçayı ekvalayzer dairəsi (audio engine useMusicPlayer-dədir)
+   MUSİQİ — ağ dairə, evkalipt rəngli ekvalayzer
    ═══════════════════════════════════════════════════════════════════════════ */
 function GardenMusic({ lang, music, playerRef, visible = false, autoPlay = false }) {
   const { audioProps, playing, play, pause, toggle, hasMusic } = useMusicPlayer({
@@ -409,66 +269,133 @@ function GardenMusic({ lang, music, playerRef, visible = false, autoPlay = false
     if (playerRef) playerRef.current = { play, pause }
   })
 
-  /* Bubble: açılışdan 900ms sonra çıxır, İLK SCROLL-da və ya toxunanda gedir */
   const [prompt, dismissPrompt] = useMusicPrompt({ enabled: visible && hasMusic })
 
   if (!hasMusic) return null
 
   return (
     <>
-      {/* ⚠ `visible` = dəvətnamə açılıb. <audio> BUNDAN ASILI DEYİL — zərf
-          açılmamışdan əvvəl də mount olunur ki, açılış toxunuşunda play()
-          sinxron çağırıla bilsin (iOS Safari yalnız jest daxilində icazə
-          verir). Görünən yalnız UI-dır: ekvalayzer düyməsi və bubble. */}
+      {/* ⚠ <audio> açılışdan əvvəl də mount olunur (iOS jest qaydası) */}
       <audio {...audioProps} />
       {!visible ? null : (
-      <>
-      {/* YALNIZ start helper — musiqi çalırsa klik heç nə etmir */}
-      <MusicStartBubble
-        theme={TH} lang={lang} visible={prompt} playing={playing}
-        onStart={() => { if (!playing) play(); dismissPrompt() }}
-      />
-      <button
-        onClick={toggle}
-        data-press
-        aria-label={playing ? 'Musiqini dayandır' : 'Musiqini başlat'}
-        style={{
-          position: 'fixed',
-          bottom: 'calc(max(20px, env(safe-area-inset-bottom, 20px)) + var(--dt-preview-offset, 0px))',
-          right: 20, zIndex: 55,
-          width: 46, height: 46, borderRadius: '50%',
-          border: `1px solid ${TH.primary}66`,
-          background: 'rgba(255,255,255,0.82)',
-          backdropFilter: 'blur(8px)',
-          boxShadow: '0 6px 20px rgba(62,74,58,0.14)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3,
-          cursor: 'pointer',
-        }}
-      >
-        {[0, 0.2, 0.4].map((d) => (
-          <span key={d} style={{
-            width: 2.5, height: 12, background: playing ? TH.primary : `${TH.muted}80`,
-            transformOrigin: 'bottom', display: 'block',
-            animation: playing ? `fg-eq 1.1s ease-in-out ${d}s infinite` : 'none',
-            transform: playing ? undefined : 'scaleY(.45)',
-          }} />
-        ))}
-      </button>
-      </>
+        <>
+          <MusicStartBubble
+            theme={TH} lang={lang} visible={prompt} playing={playing}
+            onStart={() => { if (!playing) play(); dismissPrompt() }}
+          />
+          <button
+            onClick={toggle}
+            data-press
+            aria-label={playing ? 'Musiqini dayandır' : 'Musiqini başlat'}
+            style={{
+              position: 'fixed',
+              bottom: 'calc(max(20px, env(safe-area-inset-bottom, 20px)) + var(--dt-preview-offset, 0px))',
+              right: 20, zIndex: 55, width: 48, height: 48, borderRadius: '50%',
+              border: `1px solid ${LINE}`, background: 'rgba(255,255,255,.92)',
+              boxShadow: '0 10px 24px rgba(33,50,41,.16)', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3,
+            }}
+          >
+            {[0, 0.18, 0.36].map((d) => (
+              <span key={d} style={{
+                width: 2.5, height: 13, borderRadius: 2, background: playing ? EUCA : `${MUTED}80`,
+                transformOrigin: 'bottom', display: 'block',
+                animation: playing ? `fg-eq 1s ease-in-out ${d}s infinite` : 'none',
+                transform: playing ? undefined : 'scaleY(.45)',
+              }} />
+            ))}
+          </button>
+        </>
       )}
     </>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BAĞ YATAĞI — bölmə qabı. Sol kənarda bağ yolu gövdəsi (ana qabın fonu),
+   məzmun gövdənin sağında. `kicker` yalnız admin yazanda görünür.
+   ═══════════════════════════════════════════════════════════════════════════ */
+function Bed({ id, section, title, kicker, sub, children, style = {} }) {
+  return (
+    <section id={id} data-section={section} style={{ position: 'relative', padding: '44px 24px 52px 58px', ...style }}>
+      <Reveal style={{ maxWidth: 460 }}>
+        {(title || kicker || sub) && (
+          <div style={{ marginBottom: 26 }}>
+            {title && (
+              <h2 style={{
+                margin: 0, fontFamily: serif, fontStyle: 'italic', fontWeight: 300,
+                fontSize: 'clamp(30px, 8.8vw, 38px)', lineHeight: 1.08, color: INK,
+                fontVariationSettings: SOFT, letterSpacing: '-.01em',
+              }}>
+                {title}
+              </h2>
+            )}
+            {kicker && <div style={{ marginTop: 8, fontSize: 13.5, color: ROSE_TXT }}>{kicker}</div>}
+            {sub && <p style={{ margin: '8px 0 0', fontSize: 14.5, color: MUTED, lineHeight: 1.55, maxWidth: 320 }}>{sub}</p>}
+          </div>
+        )}
+        {children}
+      </Reveal>
+    </section>
+  )
+}
+
+/* Düymələr — həb formalı */
+const pill = (filled) => ({
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+  minHeight: 46, padding: '12px 20px', borderRadius: 999, textDecoration: 'none', cursor: 'pointer',
+  fontFamily: sans, fontSize: 14, fontWeight: 500,
+  background: filled ? EUCA : 'rgba(255,255,255,.7)',
+  color: filled ? '#FFFFFF' : INK,
+  border: filled ? '1px solid transparent' : `1px solid ${LINE}`,
+  boxShadow: filled ? '0 8px 18px rgba(47,74,59,.2)' : 'none',
+})
+
+const field = {
+  width: '100%', background: '#FFFFFF', border: `1px solid ${LINE}`, borderRadius: 999,
+  padding: '14px 20px', fontFamily: sans, fontSize: 15, color: INK, outline: 'none',
+}
+
+/* Ağ kart — yalnız iki yerdə: yer kartı və RSVP */
+const card = {
+  position: 'relative', background: '#FFFFFF', borderRadius: 26,
+  boxShadow: '0 1px 0 rgba(33,50,41,.04), 0 24px 48px -18px rgba(33,50,41,.22)',
+}
+
+function SuggestList({ id, items, activeIdx, setActiveIdx, onPick }) {
+  if (!items.length) return null
+  return (
+    <ul id={id} role="listbox" style={{
+      listStyle: 'none', margin: '8px 0 0', padding: 6, textAlign: 'left',
+      background: '#FFFFFF', border: `1px solid ${LINE}`, borderRadius: 18,
+      boxShadow: '0 16px 30px -16px rgba(33,50,41,.25)', maxHeight: 280, overflowY: 'auto',
+    }}>
+      {items.map((g, i) => (
+        <li
+          key={g.id ?? `${g.full_name}-${i}`}
+          role="option"
+          aria-selected={i === activeIdx}
+          onMouseEnter={() => setActiveIdx(i)}
+          onMouseDown={(e) => { e.preventDefault(); onPick(g) }}
+          style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
+            padding: '12px 14px', borderRadius: 12, cursor: 'pointer',
+            background: i === activeIdx ? 'rgba(94,124,107,.1)' : 'transparent',
+          }}
+        >
+          <span style={{ fontSize: 14.5, color: INK }}>{g.full_name}</span>
+          {g.table_id && <span style={{ fontSize: 12.5, color: ROSE_TXT, whiteSpace: 'nowrap' }}>{g.table_id}</span>}
+        </li>
+      ))}
+    </ul>
   )
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function FloralGardenTemplate({
   lang, setLang, weddingData, onBack, isDemoMode = false, initialGuestbook,
-  /* Phase 45 — admin override-ları və admin önbaxışında açılışı atlamaq.
-     Verilməyəndə davranış əvvəlki kimidir. */
   adminOverrides = null, startOpened = false,
 }) {
-  /* Phase 45 — admin «Mətnlər»: sətir override-ları nazik Proxy ilə (yoxdursa
-     EYNİ obyekt), bölmə adları `L()` ilə — TemplateShell-in eyni qaydası. */
   const adminStrings = adminOverrides?.strings || null
   const tr = withStringOverrides(t[lang] || t.az, adminStrings, lang)
   const L = makeLabelResolver(mergeSectionLabels(null, adminOverrides), lang)
@@ -476,8 +403,6 @@ export default function FloralGardenTemplate({
   const musicRef = useRef(null)
 
   const isCouple = ['toy', 'nishan'].includes(weddingData.eventType)
-  /* Location: koordinat varsa real xəritə, yoxsa köhnə abstrakt kart */
-  /* Naviqasiya linkləri tək mənbədən (MapSection) — yoxdursa null */
   const dirUrl = directionsUrl(weddingData)
   const mapUrl = openMapUrl(weddingData)
   const isCorp   = ['corporate', 'other'].includes(weddingData.eventType)
@@ -492,26 +417,19 @@ export default function FloralGardenTemplate({
     'floral-garden', { weddingData, lang, isCouple, isCorp, eventLabel }, adminOverrides?.opening || null,
   )
 
-  /* Paket gating — simple-luxury ilə eyni məntiq */
   const activePkgId = isDemoMode ? 'PREMIUM' : (weddingData.package || 'SADE')
 
-  /* ── Phase 35 — bölmə görünürlüyü: paket icazəsi AND cütlüyün seçimi ──
-     Köhnə (sections sahəsi olmayan) dəvətnamələrdə hamısı `true` qayıdır. */
   const S = getSectionVisibility(weddingData, activePkgId)
   const canShowSeating = S.seating
   const canShowGallery = S.gallery
   const canShowRsvp    = S.rsvp
 
-  /* Musiqi söndürülübsə mənbə `null` → nə <audio>, nə üzən düymə render olunur */
   const invMusic  = S.music ? (weddingData?.music || DEFAULT_MUSIC) : null
-  /* ⚠ Autoplay YALNIZ builder-də "Dəvətnamə açılan kimi" seçiləndə (və ya
-     musiqi seçilməyib default preset işlədiləndə) — bax data/music.js */
   const autoPlay  = shouldAutoPlay(invMusic)
 
   /* ── Hook-lar: bütün biznes məntiqi ── */
   const cd       = useCountdown({ date: weddingData.date, time: weddingData.time, lang, eventType: weddingData.eventType, eventName: weddingData.eventName })
   const timeline = useTimeline({ lang, eventType: weddingData.eventType, programSteps: weddingData.programSteps })
-  /* inputRef ayrıca çıxarılır — qalan obyektdə ref qalmasın (react-hooks/refs) */
   const { inputRef: seatInputRef, ...seating } = useSeating({ seatingPlan: weddingData.seatingPlan, lang })
   const { inputRef: rsvpInputRef, ...rsvp } = useRsvp({ lang, weddingData })
   const gbook    = useGuestbook({ lang, initialMessages: initialGuestbook })
@@ -519,39 +437,34 @@ export default function FloralGardenTemplate({
   const rsvpL    = withStringOverrides(rsvp.labels,    adminStrings, lang, 'rsvp.')
   const gbookL   = withStringOverrides(gbook.labels,   adminStrings, lang, 'gbook.')
   const seatingL = withStringOverrides(seating.labels, adminStrings, lang, 'seating.')
+  const heroTitle = L('hero', 'title', null)
 
-  /* Dəvətnamə açıldı — demo/preview sayılmır */
   useEffect(() => {
     if (!isDemoMode) trackEvent('invitation_opened', { lang, event_type: weddingData?.eventType })
   }, [])
 
   const { formattedDate, dayName } = formatAzDate(weddingData.date, lang)
-  const names = L('hero', 'title', null) || (isCouple
-    ? `${weddingData.groomName || ''}\n& ${weddingData.brideName || ''}`
-    : (weddingData.eventName || weddingData.brideName || ''))
-  /* Kartın başlıq yeri məkan adıdır; admin başlıq yazıbsa o başlıq olur və
-     məkan adı altında ikinci sətir kimi qalır (itmir). */
-  const venueTitle = L('venue', 'title', null)
-
+  const dp = dateParts(weddingData.date, lang)
+  const time = weddingData.time ? formatTime24(weddingData.time) : ''
+  const K = (key) => L(key, 'kicker', null)
 
   return (
     <div
       data-fg
       data-enter={enterDirection('floral-garden')}
       style={{
-        background: TH.background, minHeight: '100vh', fontFamily: sans, color: TH.text,
-        overflowX: 'hidden', position: 'relative',
-        /* ⚠ ambient qatının `multiply` blend-ini bu kökə bağlayır — olmasa
-           blend səhifədən kənara (body) sızır. */
-        isolation: 'isolate',
-        '--tpl-glow': `${TH.primary}42`,
+        backgroundColor: TH.background, backgroundImage: PAPER_DATA_URI,
+        minHeight: '100vh', fontFamily: sans, color: INK,
+        overflowX: 'hidden', position: 'relative', isolation: 'isolate',
+        '--tpl-glow': `${TH.accent}40`,
+        '--fg-serif': lang === 'ru' ? FONT_STACKS.cormorant : TH.fonts.heading,
       }}
     >
       <style>{KEYFRAMES}</style>
 
-      {/* 01 — ZƏRF AÇILIŞI */}
+      {/* 01 — AÇILIŞ */}
       {!opened && (
-        <GardenOpening
+        <GardenGate
           weddingData={weddingData}
           isCouple={isCouple}
           ot={ot}
@@ -560,19 +473,7 @@ export default function FloralGardenTemplate({
         />
       )}
 
-      {/* Daxili arxa fon — scroll-a əks istiqamətdə sürüşür (parallaks).
-          ⚠ `translate` yazılır — ləkələrin öz `fg-wander` transform animasiyası
-          toxunulmaz qalır.
-          ⚠ Qat məzmunun ALTINDADIR. Əvvəl üstdə `mix-blend-mode: multiply` ilə
-          idi — bax motion.jsx › AmbientLayer: blend donmanın səbəbi idi, blendsiz
-          üstdə qalsaydı isə bu AÇIQ fonda mətni ağardardı. */}
-      {opened && (
-        <AmbientLayer below>
-          <WatercolorBlobs />
-        </AmbientLayer>
-      )}
-
-      {/* 03 — MUSİQİ TOGGLE */}
+      {/* 03 — MUSİQİ */}
       <GardenMusic lang={lang} music={invMusic} playerRef={musicRef} visible={opened} autoPlay={autoPlay} />
 
       <AnimatePresence>
@@ -580,275 +481,233 @@ export default function FloralGardenTemplate({
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            style={{ position: 'relative', zIndex: 1 }}
           >
-            {/* 02 — STICKY HEADER */}
+            {/* 02 — BAŞLIQ ZOLAĞI */}
             <header style={{
-              position: 'sticky', top: 0, zIndex: 40, height: 52,
-              padding: '0 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              background: 'rgba(251,247,242,0.9)', backdropFilter: 'blur(10px)',
-              borderBottom: `1px solid ${TH.primary}33`,
+              position: 'sticky', top: 0, zIndex: 40, height: 52, padding: '0 16px',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: 'rgba(244,246,239,.82)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
+              borderBottom: `1px solid ${LINE}`,
             }}>
               <button
                 onClick={onBack}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none',
-                  fontSize: 10, letterSpacing: '.14em', textTransform: 'uppercase', color: TH.muted,
-                  cursor: 'pointer', fontFamily: sans,
-                  /* toxunma hədəfi — design mobil qeydi: min 44px */
-                  minHeight: 44, padding: '0 8px 0 0', marginLeft: -2,
+                  fontSize: 14, color: MUTED, cursor: 'pointer', fontFamily: sans,
+                  minHeight: 44, padding: '0 8px 0 0',
                 }}
               >
-                <span>←</span>{tr.btn_back}
+                <span aria-hidden="true">←</span>{tr.btn_back}
               </button>
-              <div style={{ fontFamily: serif, fontSize: 14, letterSpacing: '.06em' }}>
-                <span style={{ color: TH.primary }}>Digitoy</span>
-                <span style={{ color: `${TH.muted}80` }}>.az</span>
+              <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 17, color: INK, fontVariationSettings: SOFT }}>
+                Digitoy
               </div>
-              {/* Phase 36: seçici şablonun palitrasından rəng alır */}
               <LanguageSwitcher lang={lang} setLang={setLang} theme={TH} />
             </header>
 
-            {/* 04 — HERO
-                ⚠ Phase 43: əvvəl sola düzləndirilmişdi. İndi bütün şablonlarda
-                hero MƏRKƏZDƏDİR (referans: Royal Palace) — cütlüyün adı
-                kənarda qalmasın. Bölmənin qalan hissələri toxunulmayıb. */}
-            <section style={{ position: 'relative', padding: '52px 28px 48px', overflow: 'hidden' }}>
-              {/* Akvarel ləkəsi parallaksla dərinlik verir (scroll-a əks istiqamət) */}
-              <Parallax
-                speed={0.18}
-                max={38}
-                style={{
-                  position: 'absolute', width: 260, height: 260, borderRadius: '50%',
-                  background: `radial-gradient(circle, ${TH.accent}4D, transparent 66%)`,
-                  top: -70, right: -90, filter: 'blur(24px)', pointerEvents: 'none',
-                }}
-              />
-              <div style={{ position: 'relative', maxWidth: 560, margin: '0 auto', textAlign: 'center' }}>
-                <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.primary, marginBottom: 12 }}>
+            {/* 04 — HERO: sağ küncdən sallanan buket, sola yığılmış adlar */}
+            <section style={{
+              position: 'relative', minHeight: 'calc(100svh - 52px)', overflow: 'hidden',
+              display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
+              padding: 'clamp(220px, 58vw, 280px) 28px 64px',
+            }}>
+              {svgBox(HERO_TR, { position: 'absolute', right: -96, top: -78, width: 'min(92vw, 360px)', transform: 'scaleX(-1)' })}
+              {svgBox(HERO_BL, { position: 'absolute', right: -70, bottom: -56, width: 200, transform: 'rotate(180deg)', opacity: 0.95 })}
+
+              <div style={{ position: 'relative', maxWidth: 440 }}>
+                <div style={{ fontSize: 14, color: ROSE_TXT, fontWeight: 500 }}>
                   {L('hero', 'kicker', eventLabel)}
                 </div>
-                <div style={{ fontFamily: serif, fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.muted }}>
-                  {tr.inv_join}
-                </div>
-                <h1 style={{
-                  fontFamily: serif, fontStyle: 'italic', fontWeight: 300,
-                  fontSize: 'clamp(38px,12vw,50px)', lineHeight: 1.1,
-                  color: '#3E3730', margin: '14px 0 0', whiteSpace: 'pre-line',
+                <p style={{
+                  margin: '10px 0 0', maxWidth: 280, fontFamily: serif, fontStyle: 'italic', fontWeight: 300,
+                  fontSize: 17, lineHeight: 1.5, color: MUTED, fontVariationSettings: SOFT,
                 }}>
-                  {names}
+                  {tr.inv_join}
+                </p>
+
+                <h1 style={{
+                  margin: '22px 0 0', fontFamily: serif, fontWeight: 300, lineHeight: 0.98, color: INK,
+                  fontSize: heroTitle || !isCouple ? 'clamp(44px, 13vw, 64px)' : 'clamp(54px, 17.5vw, 82px)',
+                  letterSpacing: '-.02em', fontVariationSettings: SOFT,
+                }}>
+                  {heroTitle ? heroTitle : isCouple ? (
+                    <>
+                      <span style={{ display: 'block' }}>{weddingData.groomName}</span>
+                      <span style={{ display: 'block', paddingLeft: '.42em' }}>
+                        <span style={{ fontStyle: 'italic', color: PEONY, fontSize: '.72em', marginRight: '.18em' }}>&amp;</span>
+                        {weddingData.brideName}
+                      </span>
+                    </>
+                  ) : (weddingData.eventName || weddingData.brideName)}
                 </h1>
 
                 {isCorp && weddingData.organizer?.trim() && (
-                  <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.primary, marginTop: 10 }}>
+                  <div style={{ fontSize: 14, color: MUTED, marginTop: 12 }}>
                     {tr.organizer_display}: {weddingData.organizer}
                   </div>
                 )}
 
-                {/* Ornament
-                    ⚠ `justifyContent: 'center'` MƏCBURİDİR: bu sətir flex
-                    konteynerdir və valideyndəki `textAlign: center` flex
-                    elementlərinin yerləşməsinə TƏSİR ETMİR — onsuz ayırıcı
-                    adlar mərkəzdə olsa da solda qalır. */}
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, margin: '22px 0' }}>
-                  <div style={{ width: 44, height: 1, background: TH.accent }} />
-                  <div style={{ width: 4, height: 4, background: TH.accent, transform: 'rotate(45deg)' }} />
-                  <div style={{ width: 22, height: 1, background: `${TH.accent}66` }} />
-                </div>
-
-                <div style={{ fontSize: 14, color: '#4A4139' }}>{formattedDate}</div>
-                <div style={{ fontSize: 10, letterSpacing: '.22em', textTransform: 'uppercase', color: TH.primary, marginTop: 5 }}>
-                  {[dayName, weddingData.time ? formatTime24(weddingData.time) : ''].filter(Boolean).join(' · ')}
-                </div>
-                {weddingData.venueName && (
-                  <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.muted, marginTop: 16 }}>
-                    {weddingData.venueName}
+                <div style={{ marginTop: 30, display: 'flex', gap: 16, alignItems: 'stretch' }}>
+                  <span aria-hidden="true" style={{ width: 2, borderRadius: 2, background: PEONY, opacity: 0.7 }} />
+                  <div>
+                    <div style={{ fontFamily: serif, fontSize: 23, color: INK, fontVariationSettings: SOFT }}>
+                      {dp ? `${dp.day} ${dp.month} ${dp.year}` : formattedDate}
+                    </div>
+                    <div style={{ fontSize: 14.5, color: MUTED, marginTop: 4 }}>
+                      {[dp ? dp.weekday : dayName, time && time !== '—' ? time : ''].filter(Boolean).join(', ')}
+                    </div>
+                    {weddingData.venueName && (
+                      <div style={{ fontSize: 14.5, color: INK, marginTop: 4 }}>{weddingData.venueName}</div>
+                    )}
                   </div>
-                )}
-
-                {/* ⚠ `marginInline: 'auto'` — sabit enli blokdur, `textAlign`
-                    onu mərkəzləmir (ornament ilə eyni səbəb). */}
-                <div style={{
-                  margin: '32px auto 0', width: 40, height: 40, border: `1px solid ${TH.primary}4D`,
-                  borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 14, color: TH.primary, animation: 'fg-hint 2.8s ease-in-out infinite',
-                }}>⌄</div>
+                </div>
               </div>
             </section>
 
-            {/* 05 — COUNTDOWN */}
-            {S.countdown && (
-            <section style={{ padding: '30px 28px', background: TH.surface }}>
-              <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
-                <SectionHead kicker={L('countdown', 'kicker', 'Countdown')} title={L('countdown', 'title', cd.title)} />
-                <Stagger base={55} style={{ display: 'flex', gap: 18, flexWrap: 'wrap' }}>
-                  {[
-                    { v: cd.days, l: cd.labels.days },
-                    { v: cd.hours, l: cd.labels.hours },
-                    { v: cd.minutes, l: cd.labels.minutes },
-                    { v: cd.seconds, l: cd.labels.seconds, accent: true, pop: true },
-                  ].map(({ v, l, accent, pop }) => (
-                    <div key={l}>
-                      <div style={{
-                        fontFamily: serif, fontSize: 34, lineHeight: 1,
-                        color: accent ? TH.accent : TH.text, fontVariantNumeric: 'tabular-nums',
-                      }}>
-                        {/* Yalnız saniyə rəqəmi döyünür */}
-                        <PopDigit value={v} pop={pop} />
-                      </div>
-                      <div style={{ fontSize: 10, letterSpacing: '.14em', textTransform: 'uppercase', color: TH.muted, marginTop: 4 }}>
-                        {l}
-                      </div>
-                    </div>
-                  ))}
-                </Stagger>
-              </Reveal>
-            </section>
-            )}
+            {/* BAĞ YOLU — sol kənarda bütün bölmələr boyunca gövdə */}
+            <div style={{
+              position: 'relative',
+              backgroundImage: VINE_DATA_URI, backgroundRepeat: 'repeat-y',
+              backgroundPosition: '4px 0', backgroundSize: '40px 240px',
+            }}>
 
-            {/* 05b — BİZİM HEKAYƏMİZ (Phase 44 · Claude Design)
-                Bölmə DEFAULT BAĞLIDIR (data/sections.js › DEFAULT_OFF) — mövcud
-                dəvətnamələrdə görünmür. Başlıq, fon və çərçivələr bölmənin öz
-                temasındandır (bax _shared/loveStoryTheme.js). */}
-            {S.lovestory && Array.isArray(weddingData.loveStory) && weddingData.loveStory.length > 0 && (
-            <section data-section="lovestory" style={{ padding: 'clamp(48px,12vw,64px) 22px clamp(56px,14vw,80px)', background: getStoryTheme('floral-garden').bg }}>
-              <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
-                <LoveStorySection
-                  story={weddingData.loveStory} templateId="floral-garden" lang={lang}
-                  copyOverrides={adminOverrides?.story?.text || null}
-                />
-              </Reveal>
-            </section>
-            )}
-
-            {/* 06 — LOCATION */}
-            {S.venue && (
-            <section style={{ padding: '34px 28px' }}>
-              <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
-                <div style={{ borderRadius: 18, overflow: 'hidden', border: `1px solid ${TH.primary}40` }}>
-                  {/* Hibrid xəritə — koordinat varsa OSM tile mozaikası,
-                      yoxdursa köhnə botanik nöqtə fonu (boş blok olmur). */}
-                  <div style={{ background: 'linear-gradient(150deg,#E4E7DC,#D3D9C8)', position: 'relative', overflow: 'hidden' }}>
-                    <MapSection
-                      weddingData={weddingData}
-                      theme={TH}
-                      accent={TH.primary}
-                      /* Açıq fonlu şablon — xəritə qaraldılmır, işıqlandırılır */
-                      map={{ opacity: 0.5, filter: 'grayscale(1) brightness(1.12) contrast(.9)', tintOpacity: 0.42 }}
-                      frame={<MapRings accent={TH.primary} />}
-                      /* Floral Garden-in ÖZ fallback-ı: botanik nöqtə fonu */
-                      fallback={(
-                        <div style={{
-                          height: 'clamp(148px, 42vw, 168px)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
-                        }}>
-                          <div style={{
-                            position: 'absolute', inset: 0, opacity: .35,
-                            backgroundImage: `radial-gradient(circle at 30% 40%, ${TH.primary}80 0 3px, transparent 4px), radial-gradient(circle at 72% 66%, ${TH.primary}66 0 2px, transparent 3px)`,
-                            backgroundSize: '60px 60px',
-                          }} />
-                          <MapRings accent={TH.primary} />
-                          <div style={{ width: 12, height: 12, borderRadius: '50%', background: TH.accent, boxShadow: `0 0 0 8px ${TH.accent}33` }} />
-                        </div>
-                      )}
-                    />
-                  </div>
-                  <div style={{ padding: 18, background: '#FFFFFF' }}>
-                    <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.primary }}>{L('venue', 'kicker', 'LOCATION')}</div>
-                    <div style={{ fontFamily: serif, fontSize: 20, color: TH.text, marginTop: 6 }}>
-                      {venueTitle || weddingData.venueName || tr.inv_location}
-                    </div>
-                    {venueTitle && weddingData.venueName && (
-                      <div style={{ fontFamily: serif, fontSize: 16, color: TH.text, marginTop: 4 }}>
-                        {weddingData.venueName}
-                      </div>
-                    )}
-                    {/* Məkan qeydi (zal/mərtəbə) — YALNIZ doludursa */}
-                    {weddingData.venueNote && (
-                      <div style={{ fontSize: 12.5, color: TH.muted, marginTop: 5, lineHeight: 1.5 }}>
-                        {weddingData.venueNote}
-                      </div>
-                    )}
-                    <Stagger base={110} style={{ display: 'flex', gap: 6, marginTop: 14, flexWrap: 'wrap' }}>
-                      {dirUrl && <a data-press href={dirUrl} target="_blank" rel="noopener noreferrer" style={pill(true)}>{tr.inv_directions_btn}</a>}
-                      {mapUrl && <a data-press href={mapUrl} target="_blank" rel="noopener noreferrer" style={pill(!dirUrl)}>Maps</a>}
-                      {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={pill(false)}>Waze</a>}
-                      {weddingData.appleMapsUrl && (
-                        <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={pill(false)}>Apple</a>
-                      )}
-                    </Stagger>
-                  </div>
-                </div>
-              </Reveal>
-            </section>
-            )}
-
-            {/* 07 — PROQRAM */}
-            {S.program && (
-            <section style={{ padding: '34px 28px' }}>
-              <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
-                <SectionHead kicker={L('program', 'kicker', 'Schedule')} title={L('program', 'title', timeline.sectionLabel)} />
-                <Stagger base={55}>
-                  {timeline.events.map((ev, i) => (
-                    <div key={i} style={{
-                      display: 'flex', gap: 14, alignItems: 'flex-start',
-                      paddingBottom: i === timeline.events.length - 1 ? 0 : 18,
-                      borderLeft: `1px solid ${TH.primary}4D`, paddingLeft: 16, marginLeft: 4, position: 'relative',
+              {/* 05 — SAYĞAC */}
+              {S.countdown && (
+                <Bed title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14 }}>
+                    <div style={{
+                      fontFamily: serif, fontWeight: 300, fontSize: 'clamp(84px, 28vw, 120px)', lineHeight: 0.82,
+                      color: ROSE_TXT, letterSpacing: '-.04em', fontVariantNumeric: 'tabular-nums', fontVariationSettings: SOFT,
                     }}>
-                      <span style={{
-                        position: 'absolute', left: -4, top: 6, width: 7, height: 7, borderRadius: '50%',
-                        background: i % 2 ? TH.accent : TH.primary,
-                      }} />
-                      <span style={{ width: 42, flex: '0 0 auto', fontSize: 10, letterSpacing: '.12em', color: TH.muted, paddingTop: 5 }}>
-                        {ev.time}
-                      </span>
-                      <span style={{
-                        width: 32, height: 32, flex: '0 0 auto', border: `1px solid ${TH.primary}4D`,
-                        borderRadius: 8, background: '#FFFFFF',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14,
-                      }}>{ev.icon}</span>
-                      <span style={{ paddingTop: 5, fontFamily: serif, fontSize: 17, color: TH.text }}>
-                        {ev.label}
-                      </span>
+                      <PopDigit value={cd.days} />
                     </div>
-                  ))}
-                </Stagger>
-              </Reveal>
-            </section>
-            )}
+                    <div style={{ paddingBottom: 6 }}>
+                      {svgBox(SPRIG, { width: 34, height: 34, marginBottom: 4 })}
+                      <div style={{ fontSize: 14, color: MUTED }}>{cd.labels.days}</div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 22, marginTop: 22, flexWrap: 'wrap' }}>
+                    {[
+                      { v: cd.hours, l: cd.labels.hours },
+                      { v: cd.minutes, l: cd.labels.minutes },
+                      { v: cd.seconds, l: cd.labels.seconds, pop: true },
+                    ].map(({ v, l, pop }) => (
+                      <div key={l} style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                        <span style={{ fontFamily: serif, fontSize: 30, color: pop ? PEONY : INK, fontVariantNumeric: 'tabular-nums', fontVariationSettings: SOFT }}>
+                          <PopDigit value={v} pop={pop} />
+                        </span>
+                        <span style={{ fontSize: 13, color: MUTED }}>{l}</span>
+                      </div>
+                    ))}
+                  </div>
+                </Bed>
+              )}
 
-            {/* 08 — DRESS CODE — Claude Design t2 bölməsinin piksel köçürməsi.
-                Fon design-dakı kimi #F3EFE8 (floral theme-in `surface` tokeni). */}
-            {S.dresscode && (
-            <section style={{ padding: '30px 28px', background: '#F3EFE8' }}>
-              <Reveal>
-                <DressCodeSection
-                  theme={TH}
-                  title={L('dresscode', 'title', tr.inv_dresscode)}
-                  kicker={L('dresscode', 'kicker', 'STYLE')}
-                  paletteId={weddingData.dressCodePalette}
-                  customLabels={weddingData.dressCodeLabels}
-                  customGenders={weddingData.dressCodeGenders}
-                  note={weddingData.dressCodeDescription}
-                  lang={lang}
-                  serif={serif}
-                  align="left"
-                  italic
-                />
-              </Reveal>
-            </section>
-            )}
+              {/* 05b — BİZİM HEKAYƏMİZ (default bağlıdır) */}
+              {S.lovestory && Array.isArray(weddingData.loveStory) && weddingData.loveStory.length > 0 && (
+                <section data-section="lovestory" style={{ padding: 'clamp(48px,12vw,64px) 22px clamp(56px,14vw,80px)', background: getStoryTheme('floral-garden').bg }}>
+                  <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
+                    <LoveStorySection
+                      story={weddingData.loveStory} templateId="floral-garden" lang={lang}
+                      copyOverrides={adminOverrides?.story?.text || null}
+                    />
+                  </Reveal>
+                </section>
+              )}
 
-            {/* 09 — OTURMA PLANI */}
-            {canShowSeating && !seating.isEmpty && (
-              <section style={{ padding: '34px 28px' }}>
-                <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
-                  <SectionHead kicker={L('seating', 'kicker', 'SEATING')} title={L('seating', 'title', seatingL.title)} />
+              {/* 06 — MƏKAN: tağlı bağ pəncərəsi */}
+              {S.venue && (
+                <Bed title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+                  <div style={{ position: 'relative', maxWidth: 340, marginTop: 8 }}>
+                    <div style={{
+                      borderRadius: '999px 999px 24px 24px', overflow: 'hidden', border: '6px solid #FFFFFF',
+                      boxShadow: '0 24px 44px -20px rgba(33,50,41,.35)',
+                    }}>
+                      <MapSection
+                        weddingData={weddingData}
+                        theme={TH}
+                        accent={EUCA}
+                        height="clamp(300px, 92vw, 380px)"
+                        map={{ opacity: 0.95, filter: 'grayscale(.85) brightness(1.08) contrast(.92)', tintOpacity: 0.22 }}
+                        frame={<BlossomPin />}
+                        fallback={(
+                          <div style={{
+                            height: 'clamp(300px, 92vw, 380px)', position: 'relative',
+                            background: 'linear-gradient(180deg, #EAF0E6, #DDE7DA)',
+                          }}>
+                            <span aria-hidden="true" style={{
+                              position: 'absolute', inset: 0, opacity: 0.55,
+                              backgroundImage: 'radial-gradient(rgba(94,124,107,.35) 1px, transparent 1.4px)',
+                              backgroundSize: '18px 18px',
+                            }} />
+                            <BlossomPin />
+                          </div>
+                        )}
+                      />
+                    </div>
+                    {svgBox(CARD, { position: 'absolute', right: -40, top: -46, width: 150 })}
+                  </div>
+                  <div style={{ marginTop: 22, fontFamily: serif, fontSize: 25, lineHeight: 1.25, color: INK, fontVariationSettings: SOFT }}>
+                    {weddingData.venueName}
+                  </div>
+                  {weddingData.venueNote && (
+                    <div style={{ marginTop: 6, fontSize: 14.5, color: MUTED, lineHeight: 1.55 }}>{weddingData.venueNote}</div>
+                  )}
+                  <div style={{ display: 'flex', gap: 8, marginTop: 18, flexWrap: 'wrap' }}>
+                    {dirUrl && <a data-press href={dirUrl} target="_blank" rel="noopener noreferrer" style={pill(true)}>{tr.inv_directions_btn}</a>}
+                    {mapUrl && <a data-press href={mapUrl} target="_blank" rel="noopener noreferrer" style={pill(!dirUrl)}>Maps</a>}
+                    {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={pill(false)}>Waze</a>}
+                    {weddingData.appleMapsUrl && (
+                      <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={pill(false)}>Apple</a>
+                    )}
+                  </div>
+                </Bed>
+              )}
 
-                  {/* ⚠ Təkliflər siyahısı QƏSDƏN normal document flow-dadır
-                      (position:absolute DEYİL) — açılanda aşağıdakı bölmələri
-                      örtmür, onları aşağı sürüşdürür. Heç bir viewport-da
-                      overlap olmur. */}
+              {/* 07 — PROQRAM: hər hadisə bağ yolunda açan çiçəkdir */}
+              {S.program && (
+                <Bed title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+                  <ol style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: 26 }}>
+                    {timeline.events.map((ev, i) => (
+                      <li key={i} style={{ position: 'relative' }}>
+                        <span aria-hidden="true" style={{
+                          position: 'absolute', left: -45, top: 0, width: 24, height: 24,
+                          backgroundImage: BLOSSOM_DATA_URI, backgroundSize: 'contain',
+                          filter: 'drop-shadow(0 2px 3px rgba(33,50,41,.18))',
+                        }} />
+                        <div style={{ fontSize: 13.5, fontWeight: 500, color: ROSE_TXT, fontVariantNumeric: 'tabular-nums', letterSpacing: '.02em' }}>
+                          {ev.time}
+                        </div>
+                        <div style={{ marginTop: 3, fontFamily: serif, fontSize: 20, lineHeight: 1.3, color: INK, fontVariationSettings: SOFT }}>
+                          {ev.label}
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </Bed>
+              )}
+
+              {/* 08 — GEYİM TƏRZİ */}
+              {S.dresscode && (
+                <Bed title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+                  <DressCodeSection
+                    theme={TH}
+                    paletteId={weddingData.dressCodePalette}
+                    customLabels={weddingData.dressCodeLabels}
+                    customGenders={weddingData.dressCodeGenders}
+                    note={weddingData.dressCodeDescription}
+                    lang={lang}
+                    serif={serif}
+                    align="left"
+                  />
+                </Bed>
+              )}
+
+              {/* 09 — MASA AXTARIŞI: ağ yer kartı */}
+              {canShowSeating && !seating.isEmpty && (
+                <Bed title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
                   <div>
                     <input
                       ref={seatInputRef}
@@ -862,154 +721,121 @@ export default function FloralGardenTemplate({
                       aria-controls="fg-seating-list"
                       aria-autocomplete="list"
                       autoComplete="off"
-                      style={{
-                        width: '100%', background: '#FFFFFF', border: `1px solid ${TH.primary}40`,
-                        borderRadius: 100, padding: '13px 18px', fontSize: 13, color: TH.text,
-                        fontFamily: sans, outline: 'none',
-                      }}
+                      style={field}
                     />
-                    {seating.suggestions.length > 0 && (
-                      <ul id="fg-seating-list" role="listbox" style={{
-                        listStyle: 'none', margin: '8px 0 0', padding: 4,
-                        background: '#FFFFFF', border: `1px solid ${TH.primary}40`, borderRadius: 16,
-                        boxShadow: '0 6px 18px rgba(62,74,58,0.10)', maxHeight: 300, overflowY: 'auto',
-                      }}>
-                        {seating.suggestions.map((g, i) => (
-                          <li
-                            key={g.id ?? `${g.full_name}-${i}`}
-                            role="option"
-                            aria-selected={i === seating.activeIdx}
-                            onMouseEnter={() => seating.setActiveIdx(i)}
-                            onMouseDown={(e) => { e.preventDefault(); seating.pick(g) }}
-                            style={{
-                              display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
-                              padding: '12px 14px', cursor: 'pointer', borderRadius: 12,
-                              background: i === seating.activeIdx ? `${TH.primary}14` : 'transparent',
-                            }}
-                          >
-                            <span style={{ fontSize: 13, color: TH.text }}>{g.full_name}</span>
-                            <span style={{
-                              background: TH.accent, color: '#FFF', fontSize: 10, letterSpacing: '.12em',
-                              padding: '4px 10px', borderRadius: 100, whiteSpace: 'nowrap',
-                            }}>{g.table_id}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                    <SuggestList
+                      id="fg-seating-list" items={seating.suggestions}
+                      activeIdx={seating.activeIdx} setActiveIdx={seating.setActiveIdx} onPick={seating.pick}
+                    />
                   </div>
 
                   {seating.showNotFound && (
-                    <div style={{ marginTop: 12, fontSize: 12.5, color: TH.muted }}>{tr.inv_seat_fullname}</div>
+                    <div style={{ marginTop: 12, fontSize: 13.5, color: MUTED }}>{tr.inv_seat_fullname}</div>
                   )}
 
                   {seating.selected && (
-                    <div style={{ marginTop: 12, background: '#FFFFFF', borderRadius: 16, padding: 18, border: `1px solid ${TH.accent}4D` }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-                        <span style={{ fontSize: 13, color: TH.text }}>{seating.selected.full_name}</span>
-                        <span style={{
-                          background: TH.accent, color: '#FFFFFF', fontSize: 10, letterSpacing: '.12em',
-                          padding: '4px 10px', borderRadius: 100, whiteSpace: 'nowrap',
-                          textTransform: 'uppercase',
-                        }}>{seating.selected.table_id}</span>
+                    <div style={{ ...card, marginTop: 22, padding: '24px 22px 14px', maxWidth: 330 }}>
+                      {svgBox(SPRIG, { position: 'absolute', right: 16, top: 14, width: 40, height: 40 })}
+                      <div style={{ fontSize: 13.5, color: MUTED }}>{seating.selected.full_name}</div>
+                      <div style={{
+                        marginTop: 6, fontFamily: serif, fontStyle: 'italic', fontWeight: 300, fontSize: 44, lineHeight: 1,
+                        color: ROSE_TXT, fontVariationSettings: SOFT,
+                      }}>
+                        {seating.selected.table_id}
                       </div>
-                      <div style={{ fontSize: 11, color: TH.muted, marginTop: 10, lineHeight: 1.6 }}>
-                        {seating.selected.table_id}: {seating.tablemates.map((g) => g.full_name).join(', ')}
-                      </div>
+                      {seating.tablemates.length > 0 && (
+                        <div style={{ fontSize: 13.5, color: MUTED, marginTop: 14, lineHeight: 1.6 }}>
+                          {seating.tablemates.map((g) => g.full_name).join(', ')}
+                        </div>
+                      )}
                       <button
                         onClick={seating.reset}
                         data-press
                         style={{
                           marginTop: 6, background: 'none', border: 'none', cursor: 'pointer',
-                          fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase', color: TH.primary, fontFamily: sans,
-                          minHeight: 44, padding: '0 8px 0 0',
+                          fontFamily: sans, fontSize: 14, fontWeight: 500, color: EUCA,
+                          minHeight: 44, padding: 0, textDecoration: 'underline', textUnderlineOffset: 4,
                         }}
                       >
                         {seatingL.again || 'Yenidən axtar'}
                       </button>
                     </div>
                   )}
-                </Reveal>
-              </section>
-            )}
+                </Bed>
+              )}
 
-            {/* 10 — FOTO QALEREYA */}
-            {canShowGallery && (
-              <section id="gallery-section" style={{ padding: '0 28px 34px' }}>
-                <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
-                  <div style={{
-                    background: '#FFFFFF', border: `1px solid ${TH.primary}38`, borderRadius: 18,
-                    padding: 22, textAlign: 'center',
-                  }}>
-                    <SectionHead kicker={L('gallery', 'kicker', 'Gallery')} title={L('gallery', 'title', tr.inv_gallery)} align="center" />
-
-                    {gallery.demoPhotos.length > 0 && (
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 6, marginBottom: 18 }}>
-                        {gallery.demoPhotos.map((url, i) => (
-                          <div key={i} style={{ aspectRatio: '3/2', overflow: 'hidden', background: '#EFE7DE', borderRadius: 6 }}>
-                            <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    <div style={{
-                      width: 128, height: 128, margin: '16px auto 0', borderRadius: 14,
-                      background: TH.surface, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      <QRCodeSVG value={gallery.photoShareUrl} size={104} bgColor="transparent" fgColor={TH.text} level="M" />
+              {/* 10 — FOTO PAYLAŞIMI */}
+              {canShowGallery && (
+                <Bed id="gallery-section" title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+                  {gallery.demoPhotos.length > 0 && (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8, marginBottom: 26 }}>
+                      {gallery.demoPhotos.map((url, i) => (
+                        <div key={i} style={{
+                          aspectRatio: '3/4', overflow: 'hidden', background: '#E6EDE3',
+                          borderRadius: '999px 999px 12px 12px', border: '3px solid #FFFFFF',
+                          boxShadow: '0 12px 22px -14px rgba(33,50,41,.4)',
+                        }}>
+                          <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                        </div>
+                      ))}
                     </div>
-                    <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: '#A79C90', marginTop: 12 }}>
+                  )}
+
+                  <div style={{ display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap' }}>
+                    <div style={{
+                      width: 148, height: 148, flex: '0 0 auto', borderRadius: 22, background: '#FFFFFF',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      boxShadow: '0 18px 34px -18px rgba(33,50,41,.35)',
+                    }}>
+                      <QRCodeSVG value={gallery.photoShareUrl} size={112} bgColor="#FFFFFF" fgColor={INK} level="M" />
+                    </div>
+                    <div style={{ flex: '1 1 140px', fontSize: 14, color: MUTED, lineHeight: 1.5 }}>
                       {tr.inv_scan_upload}
                     </div>
-
-                    <a data-press href={gallery.photoShareUrl} style={{ ...pill(true), marginTop: 14, padding: 13 }}>
-                      📷 {tr.inv_gallery_btn}
-                    </a>
-                    {/* ⚠ Phase 27: "Masa kartını yüklə" tamamilə silindi (QR + foto paylaşımı qalır) */}
-
-                    <div style={{ fontSize: 12.5, color: TH.muted, marginTop: 14, lineHeight: 1.8 }}>
-                      {tr.inv_gallery_desc}
-                    </div>
                   </div>
-                </Reveal>
-              </section>
-            )}
 
-            {/* 11 — RSVP */}
-            {canShowRsvp && (
-              <section style={{ padding: '36px 28px 56px', background: TH.surface }}>
-                <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.primary }}>
-                    {/* ⚠ SABİT «RSVP» DEYİL: AZ-da «İştirak Təsdiqi» görünməlidir
-                        (bax translations.js › inv_rsvp). Bu şablon TemplateShell
-                        işlətmir, ona görə düzəliş burada ayrıca edilir. */}
-                    <span style={{ width: 22, height: 1, background: `${TH.primary}99` }} />{L('rsvp', 'kicker', tr.inv_rsvp)}
-                    <span style={{ width: 22, height: 1, background: `${TH.primary}99` }} />
-                  </div>
-                  <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 'clamp(24px,7vw,28px)', color: TH.text, marginTop: 12, lineHeight: 1.3 }}>
-                    {L('rsvp', 'title', rsvpL.title)}
-                  </div>
-                  <div style={{ fontSize: 12.5, color: TH.muted, margin: '10px 0 20px' }}>{rsvpL.subtitle}</div>
+                  <a data-press href={gallery.photoShareUrl} style={{ ...pill(true), marginTop: 20 }}>
+                    {tr.inv_gallery_btn}
+                  </a>
 
-                  {rsvp.rsvpClosed && !rsvp.submitted ? (
-                    <div style={{ background: '#FFFFFF', border: `1px solid ${TH.primary}33`, borderRadius: 16, padding: 24, textAlign: 'center' }}>
-                      <div style={{ fontFamily: serif, fontSize: 18, color: TH.text }}>{tr.rsvp_closed_title}</div>
-                      <div style={{ fontSize: 11, color: TH.muted, marginTop: 6 }}>{tr.rsvp_closed_desc}</div>
-                    </div>
-                  ) : rsvp.alreadyDone ? (
-                    <div style={{ background: '#FFFFFF', border: `1px solid ${TH.accent}4D`, borderRadius: 16, padding: 24, textAlign: 'center' }}>
-                      <div style={{ fontFamily: serif, fontSize: 18, color: TH.text }}>{rsvpL.already_done}</div>
-                      <div style={{ fontSize: 11, color: TH.muted, marginTop: 6 }}>{rsvp.selected?.full_name}</div>
-                    </div>
-                  ) : rsvp.submitted ? (
-                    <div style={{ background: '#FFFFFF', border: `1px solid ${TH.primary}4D`, borderRadius: 16, padding: 24, textAlign: 'center' }}>
-                      <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 20, color: TH.text }}>{rsvp.thanksMsg}</div>
-                      <div style={{ fontSize: 11, color: TH.muted, marginTop: 6 }}>{rsvpL.thanks_sub}</div>
-                    </div>
-                  ) : (
-                    <form onSubmit={rsvp.handleSubmit}>
-                      {/* Ad / qonaq axtarışı */}
-                      <div style={{ marginBottom: 12 }}>
+                  <p style={{ fontSize: 14.5, color: MUTED, margin: '16px 0 0', lineHeight: 1.7, maxWidth: 360 }}>
+                    {tr.inv_gallery_desc}
+                  </p>
+                </Bed>
+              )}
+
+              {/* 11 — İŞTİRAK TƏSDİQİ: küncünə pion taxılmış kart */}
+              {canShowRsvp && (
+                <Bed>
+                  <div style={{ ...card, padding: '34px clamp(20px, 6vw, 28px) 28px', marginTop: 24 }}>
+                    {svgBox(CARD_2, { position: 'absolute', right: -34, top: -52, width: 150 })}
+                    {/* ⚠ SABİT «RSVP» DEYİL: AZ-da «İştirak Təsdiqi» (translations › inv_rsvp) */}
+                    <div style={{ fontSize: 14, fontWeight: 500, color: ROSE_TXT }}>{L('rsvp', 'kicker', tr.inv_rsvp)}</div>
+                    <h2 style={{
+                      margin: '8px 0 0', maxWidth: 230, fontFamily: serif, fontStyle: 'italic', fontWeight: 300,
+                      fontSize: 'clamp(28px, 8vw, 34px)', lineHeight: 1.1, color: INK, fontVariationSettings: SOFT,
+                    }}>
+                      {L('rsvp', 'title', rsvpL.title)}
+                    </h2>
+                    <p style={{ margin: '10px 0 0', fontSize: 14, color: MUTED, lineHeight: 1.55 }}>{rsvpL.subtitle}</p>
+
+                    {rsvp.rsvpClosed && !rsvp.submitted ? (
+                      <div style={{ marginTop: 22, padding: '18px 18px', borderRadius: 18, background: '#F4F6EF' }}>
+                        <div style={{ fontFamily: serif, fontSize: 20, color: INK }}>{tr.rsvp_closed_title}</div>
+                        <div style={{ fontSize: 13.5, color: MUTED, marginTop: 4 }}>{tr.rsvp_closed_desc}</div>
+                      </div>
+                    ) : rsvp.alreadyDone ? (
+                      <div style={{ marginTop: 22, padding: '18px 18px', borderRadius: 18, background: '#F4F6EF' }}>
+                        <div style={{ fontFamily: serif, fontSize: 20, color: INK }}>{rsvpL.already_done}</div>
+                        <div style={{ fontSize: 13.5, color: MUTED, marginTop: 4 }}>{rsvp.selected?.full_name}</div>
+                      </div>
+                    ) : rsvp.submitted ? (
+                      <div style={{ marginTop: 22, padding: '18px 18px', borderRadius: 18, background: '#F4F6EF' }}>
+                        <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 22, color: INK }}>{rsvp.thanksMsg}</div>
+                        <div style={{ fontSize: 13.5, color: MUTED, marginTop: 4 }}>{rsvpL.thanks_sub}</div>
+                      </div>
+                    ) : (
+                      <form onSubmit={rsvp.handleSubmit} style={{ marginTop: 20 }}>
                         <input
                           ref={rsvpInputRef}
                           type="text"
@@ -1019,191 +845,160 @@ export default function FloralGardenTemplate({
                           placeholder={rsvpL.namePh}
                           required={!rsvp.useGuestMode}
                           autoComplete="off"
-                          style={{
-                            width: '100%', background: '#FFFFFF', border: `1px solid ${TH.primary}40`,
-                            borderRadius: 100, padding: '14px 18px', fontSize: 13, color: TH.text,
-                            fontFamily: sans, outline: 'none',
-                          }}
+                          style={{ ...field, background: '#F7F9F4' }}
                         />
-                        {rsvp.suggestions.length > 0 && (
-                          /* flow-da qalır — RSVP formunu aşağı sürüşdürür, örtmür */
-                          <ul role="listbox" style={{
-                            listStyle: 'none', margin: '8px 0 0', padding: 4,
-                            background: '#FFFFFF', border: `1px solid ${TH.primary}40`, borderRadius: 16,
-                            boxShadow: '0 6px 18px rgba(62,74,58,0.10)', maxHeight: 260, overflowY: 'auto',
-                          }}>
-                            {rsvp.suggestions.map((g, i) => (
-                              <li
-                                key={g.id ?? `${g.full_name}-${i}`}
-                                role="option"
-                                aria-selected={i === rsvp.activeIdx}
-                                onMouseEnter={() => rsvp.setActiveIdx(i)}
-                                onMouseDown={(e) => { e.preventDefault(); rsvp.pick(g) }}
+                        <SuggestList
+                          items={rsvp.suggestions}
+                          activeIdx={rsvp.activeIdx} setActiveIdx={rsvp.setActiveIdx} onPick={rsvp.pick}
+                        />
+                        {rsvp.showNotFound && (
+                          <div style={{ fontSize: 13, color: ROSE_TXT, marginTop: 8 }}>{rsvpL.not_in_list}</div>
+                        )}
+
+                        <div role="radiogroup" aria-label={L('rsvp', 'title', rsvpL.title)} style={{ display: 'grid', gap: 8, marginTop: 16 }}>
+                          {[
+                            { val: 'yes',   label: rsvpL.yes },
+                            { val: 'no',    label: rsvpL.no },
+                            { val: 'maybe', label: rsvpL.maybe },
+                          ].map(({ val, label }) => {
+                            const active = rsvp.status === val
+                            return (
+                              <button
+                                key={val}
+                                type="button"
+                                role="radio"
+                                aria-checked={active}
+                                onClick={() => rsvp.chooseStatus(val)}
+                                data-press
                                 style={{
-                                  display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
-                                  padding: '12px 14px', cursor: 'pointer', borderRadius: 12,
-                                  background: i === rsvp.activeIdx ? `${TH.primary}14` : 'transparent',
+                                  display: 'flex', alignItems: 'center', gap: 12, minHeight: 52, padding: '12px 18px',
+                                  borderRadius: 999, cursor: 'pointer', textAlign: 'left',
+                                  fontFamily: sans, fontSize: 15, fontWeight: active ? 500 : 400,
+                                  background: active ? EUCA : '#FFFFFF',
+                                  color: active ? '#FFFFFF' : INK,
+                                  border: active ? '1px solid transparent' : `1px solid ${LINE}`,
                                 }}
                               >
-                                <span style={{ fontSize: 13, color: TH.text }}>{g.full_name}</span>
-                                <span style={{ fontSize: 10, letterSpacing: '.12em', color: TH.primary }}>{g.table_id}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                        {rsvp.showNotFound && (
-                          <div style={{ fontSize: 10, color: TH.accent, marginTop: 6 }}>{rsvpL.not_in_list}</div>
-                        )}
-                      </div>
+                                <span aria-hidden="true" style={{
+                                  width: 20, height: 20, flex: '0 0 auto', borderRadius: '50%',
+                                  border: active ? '1px solid rgba(255,255,255,.7)' : `1px solid ${EUCA}80`,
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                }}>
+                                  {active && (
+                                    <svg viewBox="0 0 12 12" width="11" height="11"><path d="M2.2 6.3 L4.9 8.8 L9.8 3.4" fill="none" stroke="#FFFFFF" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                                  )}
+                                </span>
+                                {label}
+                              </button>
+                            )
+                          })}
+                        </div>
 
-                      {/* Status düymələri */}
-                      <Stagger base={220} style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                        {[
-                          { val: 'yes',   label: rsvpL.yes,   bg: TH.accent },
-                          { val: 'no',    label: rsvpL.no,    bg: null },
-                          { val: 'maybe', label: rsvpL.maybe, bg: null },
-                        ].map(({ val, label, bg }) => {
-                          const active = rsvp.status === val
-                          return (
-                            <button
-                              key={val}
-                              type="button"
-                              onClick={() => rsvp.chooseStatus(val)}
-                              data-press
-                              style={{
-                                flex: '1 1 40%', minHeight: 48, borderRadius: 100, cursor: 'pointer',
-                                padding: '14px 8px', fontSize: 10.5, letterSpacing: '.12em',
-                                textTransform: 'uppercase', fontFamily: sans,
-                                background: active ? (bg || TH.primary) : '#FFFFFF',
-                                color: active ? '#FFFFFF' : '#6B6359',
-                                border: active ? '1px solid transparent' : `1px solid ${TH.primary}59`,
-                              }}
-                            >
-                              {label}
-                            </button>
-                          )
-                        })}
-                      </Stagger>
-
-                      {/* Əlavə qonaq */}
-                      {rsvp.status === 'yes' && (
-                        <div style={{
-                          marginTop: 12, background: '#FFFFFF', border: `1px solid ${TH.primary}40`,
-                          borderRadius: 16, padding: 20, textAlign: 'center',
-                        }}>
-                          <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: TH.muted }}>
-                            {rsvpL.plusq}
+                        {rsvp.status === 'yes' && (
+                          <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                            <span style={{ fontSize: 14, color: MUTED, lineHeight: 1.4 }}>{rsvpL.plusq}</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: '0 0 auto' }}>
+                              <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} data-press aria-label="Azalt"
+                                style={{ width: 42, height: 42, borderRadius: '50%', border: `1px solid ${LINE}`, background: '#FFFFFF', color: INK, fontSize: 18, cursor: 'pointer', opacity: rsvp.plusOne === 0 ? 0.35 : 1 }}>
+                                −
+                              </button>
+                              <span style={{ fontFamily: serif, fontSize: 28, color: INK, width: 30, textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>
+                                {rsvp.plusOne}
+                              </span>
+                              <button type="button" onClick={rsvp.incPlusOne} disabled={rsvp.plusOne === rsvp.maxExtraGuests} data-press aria-label="Artır"
+                                style={{ width: 42, height: 42, borderRadius: '50%', border: `1px solid ${LINE}`, background: '#FFFFFF', color: INK, fontSize: 18, cursor: 'pointer', opacity: rsvp.plusOne === rsvp.maxExtraGuests ? 0.35 : 1 }}>
+                                +
+                              </button>
+                            </div>
                           </div>
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 26, marginTop: 16 }}>
-                            <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} data-press aria-label="Azalt"
-                              style={{ width: 40, height: 40, border: `1px solid ${TH.primary}4D`, borderRadius: '50%', background: 'none', color: TH.muted, cursor: 'pointer', opacity: rsvp.plusOne === 0 ? .35 : 1 }}>
-                              −
-                            </button>
-                            <span style={{ fontFamily: serif, fontSize: 34, color: TH.text, width: 40, fontVariantNumeric: 'tabular-nums' }}>
-                              {rsvp.plusOne}
-                            </span>
-                            <button type="button" onClick={rsvp.incPlusOne} disabled={rsvp.plusOne === rsvp.maxExtraGuests} data-press aria-label="Artır"
-                              style={{ width: 40, height: 40, border: `1px solid ${TH.primary}4D`, borderRadius: '50%', background: 'none', color: TH.primary, cursor: 'pointer', opacity: rsvp.plusOne === rsvp.maxExtraGuests ? .35 : 1 }}>
-                              +
-                            </button>
-                          </div>
-                        </div>
-                      )}
+                        )}
 
-                      <button
-                        type="submit"
-                        disabled={!rsvp.canSubmit}
-                        data-press
-                        style={{
-                          marginTop: 12, width: '100%', minHeight: 50, borderRadius: 100, border: 'none',
-                          background: TH.primary, color: TH.background, cursor: rsvp.canSubmit ? 'pointer' : 'not-allowed',
-                          fontSize: 11, letterSpacing: '.14em', textTransform: 'uppercase', fontFamily: sans,
-                          opacity: rsvp.canSubmit ? 1 : .35,
-                        }}
-                      >
-                        {rsvp.sending ? '…' : rsvpL.send}
-                      </button>
-                    </form>
-                  )}
+                        <button
+                          type="submit"
+                          disabled={!rsvp.canSubmit}
+                          data-press
+                          style={{
+                            marginTop: 20, width: '100%', minHeight: 54, border: 'none', borderRadius: 999,
+                            background: rsvp.canSubmit ? INK : '#E3E9E1', color: rsvp.canSubmit ? '#FFFFFF' : '#7D8A81',
+                            fontFamily: sans, fontSize: 15.5, fontWeight: 500,
+                            cursor: rsvp.canSubmit ? 'pointer' : 'not-allowed',
+                          }}
+                        >
+                          {rsvp.sending ? '…' : rsvpL.send}
+                        </button>
+                      </form>
+                    )}
+                  </div>
+                  {/* ⚠ Phase 27: RSVP statistika paneli qonağa göstərilmir */}
+                </Bed>
+              )}
 
-                  {/* ⚠ Phase 27: RSVP statistika paneli SİLİNDİ — qonaq digər
-                      qonaqların cavablarını görməməlidir. Hesablama hook-da
-                      qalır (API dəyişmir), sadəcə render olunmur. */}
-                </Reveal>
-              </section>
-            )}
+              {/* 12 — TƏBRİK KİTABI: bağ qeydləri */}
+              {S.guestbook && (
+                <Bed title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+                  <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 30 }}>
+                    <input
+                      type="text"
+                      value={gbook.name}
+                      onChange={(e) => gbook.setName(e.target.value)}
+                      placeholder={gbookL.namePh}
+                      style={field}
+                    />
+                    <textarea
+                      value={gbook.text}
+                      onChange={(e) => gbook.setText(e.target.value)}
+                      placeholder={gbookL.msgPh}
+                      rows={3}
+                      style={{ ...field, borderRadius: 22, resize: 'none', lineHeight: 1.5 }}
+                    />
+                    <button
+                      type="submit"
+                      disabled={!gbook.canSubmit}
+                      data-press
+                      style={{
+                        ...pill(true), width: '100%', minHeight: 50, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed',
+                        ...(gbook.canSubmit ? {} : { background: '#E3E9E1', color: '#7D8A81', boxShadow: 'none' }),
+                      }}
+                    >
+                      {gbook.sending ? gbookL.sending : gbookL.btn}
+                    </button>
+                    {gbook.error && <p role="alert" style={{ margin: 0, fontSize: 13, color: INK }}>⚠ {gbookL.error}</p>}
+                  </form>
 
-            {/* 12 — QONAQ DƏFTƏRİ */}
-            {S.guestbook && (
-            <section style={{ padding: '34px 28px' }}>
-              <Reveal style={{ maxWidth: 560, margin: '0 auto' }}>
-                <SectionHead kicker={L('guestbook', 'kicker', 'Guestbook')} title={L('guestbook', 'title', gbookL.title)} />
+                  <div style={{ display: 'grid', gap: 22 }}>
+                    {gbook.messages.map((raw, i) => {
+                      const m = gbook.readMessage(raw)
+                      return (
+                        <figure key={m.name + i} style={{ margin: 0, position: 'relative' }}>
+                          <span aria-hidden="true" style={{
+                            position: 'absolute', left: -43, top: 4, width: 20, height: 20,
+                            backgroundImage: BLOSSOM_DATA_URI, backgroundSize: 'contain', opacity: 0.85,
+                          }} />
+                          <blockquote style={{
+                            margin: 0, fontFamily: serif, fontStyle: 'italic', fontWeight: 300, fontSize: 19,
+                            lineHeight: 1.5, color: INK, fontVariationSettings: SOFT,
+                          }}>
+                            “{m.text}”
+                          </blockquote>
+                          <figcaption style={{ marginTop: 8, fontSize: 13.5, color: MUTED }}>
+                            {m.name}{m.date ? `, ${gbook.formatDate(m.date)}` : ''}
+                          </figcaption>
+                        </figure>
+                      )
+                    })}
+                  </div>
+                </Bed>
+              )}
+            </div>
 
-                <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 18 }}>
-                  <input
-                    type="text"
-                    value={gbook.name}
-                    onChange={(e) => gbook.setName(e.target.value)}
-                    placeholder={gbookL.namePh}
-                    style={{
-                      background: '#FFFFFF', border: `1px solid ${TH.primary}40`, borderRadius: 100,
-                      padding: '13px 18px', fontSize: 13, color: TH.text, fontFamily: sans, outline: 'none',
-                    }}
-                  />
-                  <textarea
-                    value={gbook.text}
-                    onChange={(e) => gbook.setText(e.target.value)}
-                    placeholder={gbookL.msgPh}
-                    rows={3}
-                    style={{
-                      background: '#FFFFFF', border: `1px dashed ${TH.primary}66`, borderRadius: 16,
-                      padding: '14px 18px', fontSize: 13, color: TH.text, fontFamily: sans,
-                      outline: 'none', resize: 'none',
-                    }}
-                  />
-                  <button
-                    type="submit"
-                    disabled={!gbook.canSubmit}
-                    data-press
-                    style={{
-                      minHeight: 46, borderRadius: 100, border: 'none', background: TH.primary,
-                      color: TH.background, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed',
-                      fontSize: 10.5, letterSpacing: '.14em', textTransform: 'uppercase', fontFamily: sans,
-                      opacity: gbook.canSubmit ? 1 : .35,
-                    }}
-                  >
-                    {gbook.sending ? gbookL.sending : gbookL.btn}
-                  </button>
-                  {gbook.error && <p role="alert" style={{ margin: 0, fontSize: 12, textAlign: 'center', color: TH.text, fontFamily: sans }}>⚠ {gbookL.error}</p>}
-                </form>
-
-                <Stagger base={110} style={{ display: 'grid', gap: 10 }}>
-                  {gbook.messages.map((raw, i) => {
-                    const m = gbook.readMessage(raw)
-                    return (
-                      <div key={m.name + i} style={{ background: TH.surface, borderRadius: 16, padding: 18 }}>
-                        <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 16, color: '#4A4139', lineHeight: 1.65 }}>
-                          “{m.text}”
-                        </div>
-                        <div style={{ fontSize: 11, color: TH.muted, marginTop: 8 }}>
-                          — {m.name}{m.date ? ` · ${gbook.formatDate(m.date)}` : ''}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </Stagger>
-              </Reveal>
-            </section>
-            )}
-
-            {/* 12.5 — SİFARİŞ CTA (yalnız builder önbaxışında; şərt komponentin içindədir) */}
+            {/* 12.5 — SİFARİŞ CTA (yalnız builder önbaxışında) */}
             <OrderCta
               theme={TH} weddingData={weddingData} lang={lang}
               pageSlug={gallery.pageSlug} isDemoMode={isDemoMode}
               effectiveSlug={gallery.effectiveSlug} serif={serif}
             />
 
-            {/* 13 — SON HİSSƏ: demo CTA + footer (9 şablonun ortağı) */}
+            {/* 13 — SON HİSSƏ: demo CTA + footer */}
             <TemplateOutro
               theme={TH} weddingData={weddingData} lang={lang}
               isDemoMode={isDemoMode} isCouple={isCouple} isCorp={isCorp}
@@ -1214,5 +1009,16 @@ export default function FloralGardenTemplate({
         )}
       </AnimatePresence>
     </div>
+  )
+}
+
+/* Xəritənin mərkəzində kiçik çiçək nişanı */
+function BlossomPin() {
+  return (
+    <span aria-hidden="true" style={{
+      position: 'absolute', left: '50%', top: '50%', width: 30, height: 30, marginLeft: -15, marginTop: -15,
+      backgroundImage: BLOSSOM_DATA_URI, backgroundSize: 'contain',
+      filter: 'drop-shadow(0 3px 5px rgba(33,50,41,.3))', pointerEvents: 'none',
+    }} />
   )
 }

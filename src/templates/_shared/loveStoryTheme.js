@@ -33,6 +33,13 @@ const F = {
   cinzel:     FONT_STACKS.cinzel,
   bask:       FONT_STACKS.baskerville,
   inter:      FONT_STACKS.inter,
+  notoDisplay: FONT_STACKS.notoDisplay,
+  hanken:     FONT_STACKS.hanken,
+  fraunces:   FONT_STACKS.fraunces,
+  mulish:     FONT_STACKS.mulish,
+  /* Floral Garden: rus dilində şablon başlıq şriftini Cormorant-a keçirir
+     (Fraunces-də kiril yoxdur) — dəyişən şablonun kök elementindədir */
+  fgSerif:    `var(--fg-serif, ${FONT_STACKS.fraunces})`,
 }
 export const STORY_FONTS = F
 
@@ -46,9 +53,9 @@ const BASE = {
 }
 
 const T = {
-  'royal-gold':      { bg: 'radial-gradient(120% 60% at 50% 0%,#1C1509,#0B0906 72%)', surf: '#16110A', ink: '#F3EADA', mute: '#C6B59C', hi: '#C5A059', line: '#C5A059', paper: '#F3EADA', paperInk: '#5C4A3A', head: F.cormorant, body: F.dm, cap: F.vibes, script: true, titleFont: F.vibes, titleSize: 56, frame: 'polaroid', hero: 'arch', tilt: true },
+  'royal-gold':      { bg: 'radial-gradient(120% 60% at 50% 0%,#1C1509,#0B0906 72%)', surf: '#16110A', ink: '#F3EADA', mute: '#C6B59C', hi: '#C5A059', line: '#C5A059', paper: '#F3EADA', paperInk: '#5C4A3A', head: F.notoDisplay, body: F.hanken, cap: F.vibes, script: true, titleFont: F.vibes, titleSize: 56, frame: 'mat', hero: 'arch', tilt: false },
   'simple-luxury':   { bg: 'linear-gradient(170deg,#FDFAF4,#F2EAD6)', surf: '#FFFFFF', ink: '#1A1A1A', mute: '#5C4A3A', hi: '#8A6A2E', line: '#C5A059', paper: '#FFFFFF', paperInk: '#5C4A3A', head: F.cormorant, body: F.inter, cap: F.vibes, script: true, titleFont: F.vibes, titleSize: 56, frame: 'polaroid', hero: 'arch', tilt: true },
-  'floral-garden':   { bg: 'linear-gradient(170deg,#FBF7F2,#EFE7DE)', surf: '#F3EFE8', ink: '#3E3730', mute: '#6F6960', hi: '#5F6E52', line: '#C98F84', paper: '#FFFFFF', paperInk: '#6F6960', head: F.cormorant, body: F.jost, cap: F.vibes, script: true, titleFont: F.vibes, titleSize: 54, frame: 'polaroid', hero: 'oval', tilt: true },
+  'floral-garden':   { bg: 'linear-gradient(170deg,#F4F6EF,#E8EEE4)', surf: '#FFFFFF', ink: '#213229', mute: '#5D6B61', hi: '#5E7C6B', line: '#C9768A', paper: '#FFFFFF', paperInk: '#5D6B61', head: F.fgSerif, body: F.mulish, cap: F.vibes, script: true, titleFont: F.vibes, titleSize: 54, frame: 'polaroid', hero: 'oval', tilt: true },
   'modern-black':    { bg: '#050505', surf: '#111111', ink: '#FFFFFF', mute: '#A3A3A3', hi: '#FFFFFF', line: '#FFFFFF', paper: '#FFFFFF', paperInk: '#0A0A0A', head: F.archivo, body: F.archivo, cap: F.instrument, titleFont: F.instrument, titleItalic: true, titleSize: 50, frame: 'minimal', hero: 'rect', labels: 'num2', dash: '0', textItalic: false },
   'white-elegance':  { bg: '#F2EFEA', surf: '#FAF8F5', ink: '#2B2723', mute: '#6F665C', hi: '#6F665C', line: '#8B8175', paper: '#FFFFFF', paperInk: '#6F665C', head: F.marcellus, body: F.jost, cap: F.cormorant, titleFont: F.marcellus, titleSize: 38, frame: 'mat', hero: 'arch', dash: '1 5' },
   'night-sky':       { bg: 'radial-gradient(130% 70% at 50% 110%,#1B2340,#070B18 70%)', surf: '#0F1526', ink: '#E4E9F5', mute: '#A2A8BC', hi: '#C8CEE0', line: '#C8CEE0', head: F.cormorant, body: F.jost, cap: F.cormorant, titleFont: F.cormorant, titleItalic: true, titleSize: 46, frame: 'glow', hero: 'circle', dash: '1 7', labels: 'star' },

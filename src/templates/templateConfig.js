@@ -161,6 +161,17 @@ export const FONT_STACKS = {
   /* Bebas kondensasiya olunmuş majuskuldur; Archivo dizaynın öz mətn
      şriftidir və `Ə`-si var → təbii ehtiyatdır. */
   bebas:      "'Bebas Neue', 'Archivo', Impact, system-ui, sans-serif",
+
+  /* ── Premium redizayn (Royal Gold · Floral Garden) ──
+     Hamısı Ə/Ğ/Ş/İ daxil tam əhatəlidir (fonttools ilə glyph cədvəlindən
+     yoxlanılıb) — ikinci pillə yalnız şrift yüklənənə qədərki ehtiyatdır. */
+  notoDisplay: "'Noto Serif Display', 'Cormorant Garamond', Georgia, serif",
+  hanken:      "'Hanken Grotesk', 'Inter', system-ui, sans-serif",
+  /* Ballet — yalnız Royal Gold-un «&» kalliqrafiyası (mis qələm burulğanı) */
+  ballet:      "'Ballet', 'Great Vibes', 'Cormorant Garamond', cursive",
+  fraunces:    "'Fraunces', 'Cormorant Garamond', Georgia, serif",
+  /* Mulish — Floral Garden mətni; Ə və kiril tam (Albert Sans-da kiril yox idi) */
+  mulish:      "'Mulish', 'Inter', system-ui, sans-serif",
 }
 
 /* Brauzerdə ÖLÇÜLƏRƏK təsdiqlənmiş siyahı: bu ailələrdə `Ə` glyph-i yoxdur.
@@ -179,8 +190,8 @@ export const TEMPLATES = [
   {
     id: 'royal-gold',
     name: 'Royal Gold',
-    tagline: 'Qızıl · Zərf möhürü · Gecə',
-    description: 'Klassik Bakı toyunun rəqəmsal versiyası — möhürlənmiş zərf, tünd fon, qızıl folqa.',
+    tagline: 'Qızıl gravür · Guilloche · Lak qara',
+    description: 'Qızıl gravürün dili — sikkə medalyonu, guilloche naxışı, xronoqraf sayğac və fil sümüyü cavab kartı.',
     shortDescription: { az: 'Klassik lüks toy üslubu', en: 'Classic luxury wedding style' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'luxury',
@@ -197,7 +208,7 @@ export const TEMPLATES = [
       mapTint:  '#C5A059',
       footerBg:  '#14100B',
       footerText: '#C5A059',
-      fonts: { heading: FONT_STACKS.cormorant, body: FONT_STACKS.dmsans },
+      fonts: { heading: FONT_STACKS.notoDisplay, body: FONT_STACKS.hanken },
     },
     preview: {
       accent: '#C5A059',
@@ -208,30 +219,31 @@ export const TEMPLATES = [
   {
     id: 'floral-garden',
     name: 'Floral Garden',
-    tagline: 'Adaçayı · Tozlu qızılgül · Botanik',
-    description: 'Gündüz, açıq havada, ot üzərində keçən toy. Qızıl yox — işıq və bitki.',
+    tagline: 'Pion · Evkalipt · Bağ yolu',
+    description: 'Floristin bağ mərasimi — açan pionlar, evkalipt budaqları və qonağı bölmədən bölməyə aparan yaşıl bağ yolu.',
     shortDescription: { az: 'Botanik bağ mərasimi üslubu', en: 'Botanical garden ceremony style' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'classic',
     version: 1,
     previewRoute: '/demo/template/floral-garden',
     theme: {
-      primary:   '#7E8C6E',
-      accent:    '#C98F84',
-      secondary: '#E7CFC8',
-      background: '#FBF7F2',
-      surface:   '#F3EFE8',
-      text:      '#3E3730',
-      muted:     '#6F6960',
-      mapTint:  '#7E8C6E',
-      footerBg:  '#3E4A3A',
-      footerText: '#E7CFC8',
-      fonts: { heading: FONT_STACKS.cormorant, body: FONT_STACKS.jost },
+      primary:   '#5E7C6B',
+      accent:    '#C9768A',
+      secondary: '#3F5E4C',
+      background: '#F4F6EF',
+      surface:   '#FFFFFF',
+      text:      '#213229',
+      muted:     '#5D6B61',
+      mapTint:  '#5E7C6B',
+      footerBg:  '#213229',
+      footerText: '#F6DCE2',
+      footerAccent: '#F3C3CD',
+      fonts: { heading: FONT_STACKS.fraunces, body: FONT_STACKS.mulish },
     },
     preview: {
-      accent: '#C98F84',
-      background: 'linear-gradient(170deg, #FBF7F2, #EFE7DE)',
-      swatches: ['#7E8C6E', '#C98F84', '#FBF7F2'],
+      accent: '#C9768A',
+      background: 'linear-gradient(170deg, #F4F6EF, #E6EDE3)',
+      swatches: ['#5E7C6B', '#C9768A', '#F4F6EF'],
     },
   },
   {

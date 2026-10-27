@@ -85,6 +85,24 @@ export function formatDayMonthYear(dateString, lang = 'az') {
   return `${date.getDate()} ${month} ${date.getFullYear()}`
 }
 
+/**
+ * Tarixin hissələri ayrıca — klassik dəvətnamə tarix blokunu
+ * («Şənbə | 13 | Mart») qurmaq üçün. Tarix yoxdursa / səhvdirsə null.
+ * az → { day: 13, month: 'Mart', year: 2027, weekday: 'Şənbə' }
+ */
+export function dateParts(dateString, lang = 'az') {
+  if (!dateString) return null
+  const date = new Date(dateString + 'T00:00:00')
+  if (isNaN(date.getTime())) return null
+  const dict = DATE_DICT[lang] || DATE_DICT.az
+  return {
+    day: date.getDate(),
+    month: dict.months[date.getMonth()],
+    year: date.getFullYear(),
+    weekday: dict.days[date.getDay()],
+  }
+}
+
 /** @deprecated Use formatFullDateByLang instead */
 export function formatAzFullDate(dateString, lang = 'az') {
   return formatFullDateByLang(dateString, lang)
