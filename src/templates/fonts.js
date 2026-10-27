@@ -3,40 +3,94 @@
 
    ⚠ Bu şriftlər QƏSDƏN index.html-də deyil: simple-luxury (bütün mövcud
    müştərilər) yalnız Cormorant Garamond + Inter işlədir və onlar artıq
-   index.html-dədir. Əlavə 8 ailəni hər səhifə yükləsəydi landing-in LCP-si
+   index.html-dədir. Əlavə ailələri hər səhifə yükləsəydi landing-in LCP-si
    pisləşərdi.
 
-   Bu funksiya yalnız (a) builder-in "Dizayn seç" qalereyası açılanda,
-   (b) simple-luxury-dən fərqli şablon render olunanda çağırılır.
+   PREMİUM REDİZAYN (2026-10): hər şablonun öz şrift cütü var, ona görə
+   dəvətnamə YALNIZ öz ailələrini yükləyir (`ensureTemplateFonts(id)`) —
+   bütün 30-a yaxın ailəni bir CSS-də çəkmək mənasız yük olardı.
+   Arqumentsiz çağırış (şablon qalereyası, admin şrift override-ı) hamısını
+   yükləyir — əvvəlki davranış.
+
+   ⚠ Yeni ailə əlavə edəndə `Ə` yoxlanmalıdır (tests/az_glyph_test.mjs).
    ───────────────────────────────────────────────────────────────────────── */
 
-const FONT_HREF =
-  'https://fonts.googleapis.com/css2' +
-  '?family=Marcellus' +
-  '&family=Instrument+Serif:ital@0;1' +
-  '&family=Newsreader:ital,opsz,wght@0,6..72,200..500;1,6..72,200..400' +
-  '&family=Italiana' +
-  '&family=Amiri:ital,wght@0,400;0,700;1,400' +
-  '&family=Archivo:wght@300;400;500;600' +
-  '&family=Jost:wght@200;300;400;500' +
-  '&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500' +
-  /* Phase 41 — Claude Design «Seçilmiş 7» dəsti üçün.
-     Çəkilər QƏSDƏN dardır: dizayn faylının işlətdiyi variantlar qədər,
-     bir dənə də artıq deyil (lazy dəstə olsa da hər ailə bir fayldır). */
-  '&family=Space+Grotesk:wght@300;400;500;700' +   /* Boarding Pass, Vinyl   */
-  '&family=JetBrains+Mono:wght@300;400;500' +      /* Boarding Pass, Vinyl   */
-  '&family=Bebas+Neue' +                            /* Cinema Premiere        */
-  '&family=Cinzel:wght@400;500;600' +               /* Royal Palace           */
-  '&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400' + /* Gazette        */
-  /* Premium redizayn — Royal Gold (gravür) və Floral Garden (bağ) */
-  '&family=Noto+Serif+Display:ital,wght@0,300;0,400;1,300;1,400' + /* Royal Gold */
-  '&family=Hanken+Grotesk:wght@300;400;500' +                        /* Royal Gold */
-  '&family=Ballet' +                                                 /* Royal Gold «&» */
-  '&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..500,0..100;1,9..144,300..500,0..100' + /* Floral */
-  '&family=Mulish:wght@300;400;500;600' +                            /* Floral */
-  '&display=swap'
+/* Google Fonts css2 `family=` dəyərləri — çəkilər dizaynın işlətdiyi qədər */
+const FAMILY = {
+  /* köhnə dəst — admin şrift seçicisi və hekayə temaları üçün qalır */
+  marcellus:    'Marcellus',
+  instrument:   'Instrument+Serif:ital@0;1',
+  newsreader:   'Newsreader:ital,opsz,wght@0,6..72,200..500;1,6..72,200..400',
+  italiana:     'Italiana',
+  amiri:        'Amiri:ital,wght@0,400;0,700;1,400',
+  archivo:      'Archivo:wght@300;400;500;600',
+  jost:         'Jost:wght@200;300;400;500',
+  dmsans:       'DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500',
+  spacegrotesk: 'Space+Grotesk:wght@300;400;500;700',
+  jetbrains:    'JetBrains+Mono:wght@300;400;500',
+  bebas:        'Bebas+Neue',
+  cinzel:       'Cinzel:wght@400;500;600',
+  baskerville:  'Libre+Baskerville:ital,wght@0,400;0,700;1,400',
 
+  /* premium redizayn */
+  notoDisplay:  'Noto+Serif+Display:ital,wght@0,300;0,400;1,300;1,400',
+  hanken:       'Hanken+Grotesk:wght@300;400;500',
+  ballet:       'Ballet',
+  fraunces:     'Fraunces:ital,opsz,wght,SOFT@0,9..144,300..500,0..100;1,9..144,300..500,0..100',
+  mulish:       'Mulish:wght@300;400;500;600',
+  unbounded:    'Unbounded:wght@200;300;400',
+  interTight:   'Inter+Tight:wght@300;400;500',
+  spectral:     'Spectral:ital,wght@0,200;0,300;0,400;1,200;1,300;1,400',
+  sourceSerif:  'Source+Serif+4:ital,opsz,wght@0,8..60,200..500;1,8..60,200..500',
+  commissioner: 'Commissioner:wght@200;300;400;500',
+  reemKufi:     'Reem+Kufi:wght@400;500;600',
+  alegreya:     'Alegreya:ital,wght@0,400;0,500;1,400',
+  vollkorn:     'Vollkorn:ital,wght@0,400;0,600;1,400',
+  geologica:    'Geologica:wght@300;400;500',
+  josefin:      'Josefin+Sans:wght@100;200;300;400',
+  onest:        'Onest:wght@300;400;500',
+  oswald:       'Oswald:wght@300;400;500;600',
+  plexSans:     'IBM+Plex+Sans:wght@300;400;500',
+  plexMono:     'IBM+Plex+Mono:wght@400;500',
+  bigShoulders: 'Big+Shoulders+Display:wght@500;700;800',
+  playfair:     'Playfair+Display:ital,wght@0,400;0,700;0,900;1,400',
+  youngSerif:   'Young+Serif',
+  montserrat:   'Montserrat:wght@300;400;500;600',
+  cormorantSC:  'Cormorant+SC:wght@400;500;600',
+  ebGaramond:   'EB+Garamond:ital,wght@0,400;0,500;1,400',
+  imperial:     'Imperial+Script',
+  libreBodoni:  'Libre+Bodoni:ital,wght@0,400;0,500;1,400;1,500',
+  literata:     'Literata:ital,opsz,wght@0,7..72,300..500;1,7..72,300..500',
+  oldStandard:  'Old+Standard+TT:ital,wght@0,400;0,700;1,400',
+  libreCaslon:  'Libre+Caslon+Display',
+  raleway:      'Raleway:wght@200;300;400;500',
+}
+
+/* Hər şablonun öz ailələri */
+const TEMPLATE_FONTS = {
+  'royal-gold':      ['notoDisplay', 'hanken', 'ballet'],
+  'floral-garden':   ['fraunces', 'mulish'],
+  'modern-black':    ['unbounded', 'interTight'],
+  'white-elegance':  ['spectral'],
+  'night-sky':       ['sourceSerif', 'commissioner'],
+  'oriental-luxe':   ['reemKufi', 'alegreya'],
+  'nature-touch':    ['vollkorn', 'geologica'],
+  'crystal-glass':   ['josefin', 'onest'],
+  'boarding-pass':   ['oswald', 'plexSans', 'plexMono'],
+  'cinema-premiere': ['bigShoulders', 'playfair', 'oswald'],
+  'vinyl-record':    ['youngSerif', 'montserrat'],
+  'royal-palace':    ['cormorantSC', 'ebGaramond', 'imperial'],
+  'mediterranean':   ['libreBodoni', 'literata'],
+  'gazette':         ['playfair', 'sourceSerif', 'oldStandard'],
+  'luxury-jewelry':  ['libreCaslon', 'raleway'],
+}
+
+const ALL = Object.keys(FAMILY)
 const LINK_ID = 'digitoy-template-fonts'
+
+function hrefFor(keys) {
+  return 'https://fonts.googleapis.com/css2?' + keys.map((k) => `family=${FAMILY[k]}`).join('&') + '&display=swap'
+}
 
 /* ── «Bizim Hekayəmiz» əl yazısı şrifti (Phase 44) ──
    Great Vibes yalnız hekayə bölməsinin başlıq/şəkil altı yazılarında işlənir.
@@ -55,14 +109,22 @@ export function ensureScriptFont() {
   document.head.appendChild(link)
 }
 
-/** Şablon şrift dəstini bir dəfə <head>-ə əlavə edir (idempotent). */
-export function ensureTemplateFonts() {
+/**
+ * Şablon şriftlərini bir dəfə <head>-ə əlavə edir (idempotent).
+ * @param {string} [templateId] verilibsə yalnız o şablonun ailələri;
+ *        verilməyibsə (qalereya, admin şrift override-ı) — hamısı.
+ */
+export function ensureTemplateFonts(templateId) {
   if (typeof document === 'undefined') return
+  /* Tam dəst artıq yüklənibsə heç nə lazım deyil */
   if (document.getElementById(LINK_ID)) return
+  const own = templateId && TEMPLATE_FONTS[templateId]
+  const id = own ? `${LINK_ID}-${templateId}` : LINK_ID
+  if (document.getElementById(id)) return
 
   const link = document.createElement('link')
-  link.id   = LINK_ID
+  link.id   = id
   link.rel  = 'stylesheet'
-  link.href = FONT_HREF
+  link.href = hrefFor(own || ALL)
   document.head.appendChild(link)
 }

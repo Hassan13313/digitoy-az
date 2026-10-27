@@ -40,6 +40,32 @@ const F = {
   /* Floral Garden: rus dilində şablon başlıq şriftini Cormorant-a keçirir
      (Fraunces-də kiril yoxdur) — dəyişən şablonun kök elementindədir */
   fgSerif:    `var(--fg-serif, ${FONT_STACKS.fraunces})`,
+  /* Premium redizayn (2026-10) — hər şablon öz cütünü yükləyir (fonts.js) */
+  unbounded:  FONT_STACKS.unbounded,
+  interTight: FONT_STACKS.interTight,
+  spectral:   FONT_STACKS.spectral,
+  sourceSerif: FONT_STACKS.sourceSerif,
+  commissioner: FONT_STACKS.commissioner,
+  reemKufi:   FONT_STACKS.reemKufi,
+  alegreya:   FONT_STACKS.alegreya,
+  vollkorn:   FONT_STACKS.vollkorn,
+  geologica:  FONT_STACKS.geologica,
+  josefin:    FONT_STACKS.josefin,
+  onest:      FONT_STACKS.onest,
+  oswald:     FONT_STACKS.oswald,
+  plexSans:   FONT_STACKS.plexSans,
+  plexMono:   FONT_STACKS.plexMono,
+  bigShoulders: FONT_STACKS.bigShoulders,
+  playfair:   FONT_STACKS.playfair,
+  youngSerif: FONT_STACKS.youngSerif,
+  montserrat: FONT_STACKS.montserrat,
+  cormorantSC: FONT_STACKS.cormorantSC,
+  ebGaramond: FONT_STACKS.ebGaramond,
+  imperial:   FONT_STACKS.imperial,
+  libreBodoni: FONT_STACKS.libreBodoni,
+  literata:   FONT_STACKS.literata,
+  libreCaslon: FONT_STACKS.libreCaslon,
+  raleway:    FONT_STACKS.raleway,
 }
 export const STORY_FONTS = F
 
@@ -56,19 +82,19 @@ const T = {
   'royal-gold':      { bg: 'radial-gradient(120% 60% at 50% 0%,#1C1509,#0B0906 72%)', surf: '#16110A', ink: '#F3EADA', mute: '#C6B59C', hi: '#C5A059', line: '#C5A059', paper: '#F3EADA', paperInk: '#5C4A3A', head: F.notoDisplay, body: F.hanken, cap: F.vibes, script: true, titleFont: F.vibes, titleSize: 56, frame: 'mat', hero: 'arch', tilt: false },
   'simple-luxury':   { bg: 'linear-gradient(170deg,#FDFAF4,#F2EAD6)', surf: '#FFFFFF', ink: '#1A1A1A', mute: '#5C4A3A', hi: '#8A6A2E', line: '#C5A059', paper: '#FFFFFF', paperInk: '#5C4A3A', head: F.cormorant, body: F.inter, cap: F.vibes, script: true, titleFont: F.vibes, titleSize: 56, frame: 'polaroid', hero: 'arch', tilt: true },
   'floral-garden':   { bg: 'linear-gradient(170deg,#F4F6EF,#E8EEE4)', surf: '#FFFFFF', ink: '#213229', mute: '#5D6B61', hi: '#5E7C6B', line: '#C9768A', paper: '#FFFFFF', paperInk: '#5D6B61', head: F.fgSerif, body: F.mulish, cap: F.vibes, script: true, titleFont: F.vibes, titleSize: 54, frame: 'polaroid', hero: 'oval', tilt: true },
-  'modern-black':    { bg: '#050505', surf: '#111111', ink: '#FFFFFF', mute: '#A3A3A3', hi: '#FFFFFF', line: '#FFFFFF', paper: '#FFFFFF', paperInk: '#0A0A0A', head: F.archivo, body: F.archivo, cap: F.instrument, titleFont: F.instrument, titleItalic: true, titleSize: 50, frame: 'minimal', hero: 'rect', labels: 'num2', dash: '0', textItalic: false },
-  'white-elegance':  { bg: '#F2EFEA', surf: '#FAF8F5', ink: '#2B2723', mute: '#6F665C', hi: '#6F665C', line: '#8B8175', paper: '#FFFFFF', paperInk: '#6F665C', head: F.marcellus, body: F.jost, cap: F.cormorant, titleFont: F.marcellus, titleSize: 38, frame: 'mat', hero: 'arch', dash: '1 5' },
-  'night-sky':       { bg: 'radial-gradient(130% 70% at 50% 110%,#1B2340,#070B18 70%)', surf: '#0F1526', ink: '#E4E9F5', mute: '#A2A8BC', hi: '#C8CEE0', line: '#C8CEE0', head: F.cormorant, body: F.jost, cap: F.cormorant, titleFont: F.cormorant, titleItalic: true, titleSize: 46, frame: 'glow', hero: 'circle', dash: '1 7', labels: 'star' },
-  'oriental-luxe':   { bg: 'linear-gradient(180deg,#4A0F1C,#38080F)', surf: '#3E0C17', ink: '#F1DDB4', mute: '#C79E86', hi: '#D9B36C', line: '#D9B36C', paper: '#F1DDB4', paperInk: '#4A0F1C', head: F.amiri, body: F.jost, cap: F.vibes, script: true, titleFont: F.amiri, titleSize: 42, frame: 'heraldic', hero: 'arch' },
-  'nature-touch':    { bg: 'linear-gradient(165deg,#EDE8DE,#DCD5C6)', surf: '#E3DED1', ink: '#2F3A2C', mute: '#5E5A4E', hi: '#9A5530', line: '#7D8A6B', paper: '#F7F4EC', paperInk: '#3E4A3A', head: F.newsreader, body: F.jost, cap: F.vibes, script: true, titleFont: F.newsreader, titleItalic: true, titleSize: 44, frame: 'polaroid', hero: 'arch', tilt: true },
-  'crystal-glass':   { bg: 'linear-gradient(150deg,#F4F7FA,#DCE6EE 60%,#EAF0F4)', surf: 'rgba(255,255,255,0.55)', ink: '#2E3A44', mute: '#5C6873', hi: '#5A6874', line: '#5A6874', head: F.cormorant, body: F.jost, cap: F.cormorant, titleFont: F.cormorant, titleSize: 46, frame: 'glass', hero: 'rounded', dash: '2 6' },
-  'boarding-pass':   { bg: 'linear-gradient(160deg,#12191D,#0E1418 60%,#0B1216)', surf: '#111A1F', ink: '#F2F5F4', mute: '#A3AFB4', hi: '#E2542F', line: '#5E7078', paper: '#F2F5F4', paperInk: '#0E1418', head: F.sg, body: F.mono, cap: F.mono, capItalic: false, titleFont: F.sg, titleSize: 38, titleUpper: true, frame: 'ticket', hero: 'rect', labels: 'num2', kpre: true, textItalic: false, dash: '6 6', bigSize: 32 },
-  'cinema-premiere': { bg: 'linear-gradient(180deg,#101215,#07080A)', surf: '#14161A', ink: '#F2F0EC', mute: '#A4A9AE', hi: '#D9A441', line: '#D9A441', head: F.amiri, body: F.inter, cap: F.amiri, titleFont: F.bebas, titleSize: 64, frame: 'film', hero: 'letterbox', labels: 'num2', kpre: true, dash: '0' },
-  'vinyl-record':    { bg: 'radial-gradient(circle at 50% 20%,#2A2A2A,#191919 38%,#0E0E0E)', surf: '#191919', ink: '#F5EFE4', mute: '#A39E92', hi: '#C9472F', line: '#C9A24A', head: F.sg, body: F.mono, cap: F.mono, capItalic: false, titleFont: F.sg, titleSize: 40, frame: 'sleeve', hero: 'disc', record: true, labels: 'vinyl', kpre: true, textItalic: false, bigSize: 32 },
-  'royal-palace':    { bg: 'radial-gradient(120% 60% at 50% 0%,#1B2246,#0F1326 74%)', surf: '#141A33', ink: '#F0EAD9', mute: '#A0A8BE', hi: '#D6B76E', line: '#D6B76E', head: F.cinzel, body: F.inter, cap: F.cormorant, titleFont: F.cinzel, titleSize: 34, frame: 'heraldic', hero: 'arch' },
-  'mediterranean':   { bg: 'linear-gradient(180deg,#EAF1F2 0%,#FCFAF5 40%)', surf: '#F2EFE7', ink: '#20343A', mute: '#56666B', hi: '#2E6E78', line: '#D98E5A', paper: '#FFFFFF', paperInk: '#56666B', head: F.cormorant, body: F.inter, cap: F.cormorant, titleFont: F.cormorant, titleItalic: true, titleSize: 48, frame: 'mat', hero: 'arch' },
-  'gazette':         { bg: '#FBFAF6', surf: '#F0EDE6', ink: '#161512', mute: '#57534A', hi: '#8A2B22', line: '#161512', paper: '#FFFFFF', paperInk: '#57534A', head: F.bask, body: F.inter, cap: F.bask, titleFont: F.bask, titleSize: 34, frame: 'clipping', hero: 'rect', labels: 'num', kpre: true, dash: '0', textItalic: false, bigSize: 32 },
-  'luxury-jewelry':  { bg: 'radial-gradient(110% 60% at 50% 30%,#123029,#0A1513 72%)', surf: '#0E1F1B', ink: '#EFF6F3', mute: '#9DB5AE', hi: '#A3D6C7', line: '#A3D6C7', head: F.cormorant, body: F.inter, cap: F.cormorant, titleFont: F.cormorant, titleSize: 46, frame: 'gem', hero: 'octagon' },
+  'modern-black':    { bg: '#000000', surf: '#0D0D0D', ink: '#FFFFFF', mute: '#A3A3A3', hi: '#FFFFFF', line: '#FFFFFF', paper: '#FFFFFF', paperInk: '#0A0A0A', head: F.interTight, body: F.interTight, cap: F.interTight, capItalic: false, titleFont: F.unbounded, titleUpper: true, titleSize: 36, frame: 'minimal', hero: 'rect', labels: 'num2', dash: '0', textItalic: false },
+  'white-elegance':  { bg: '#F6F4F0', surf: '#FBFAF7', ink: '#2B2723', mute: '#7A7166', hi: '#5A534B', line: '#8B8175', paper: '#FFFFFF', paperInk: '#7A7166', head: F.spectral, body: F.spectral, cap: F.spectral, titleFont: F.spectral, titleItalic: true, titleSize: 42, frame: 'mat', hero: 'arch', dash: '1 5' },
+  'night-sky':       { bg: 'radial-gradient(130% 70% at 50% 110%,#1B2340,#070B18 70%)', surf: '#0F1526', ink: '#E4E9F5', mute: '#A2A8BC', hi: '#F2D9A6', line: '#C8CEE0', head: F.sourceSerif, body: F.commissioner, cap: F.sourceSerif, titleFont: F.sourceSerif, titleItalic: true, titleSize: 44, frame: 'glow', hero: 'circle', dash: '1 7', labels: 'star' },
+  'oriental-luxe':   { bg: 'radial-gradient(140% 70% at 50% 0%,#5C1424,#4A0F1C 45%,#2E0710)', surf: '#3E0C17', ink: '#F3E4C4', mute: '#CDA88E', hi: '#D9B36C', line: '#D9B36C', paper: '#F3E4C4', paperInk: '#4A0F1C', head: F.reemKufi, body: F.alegreya, cap: F.alegreya, titleFont: F.reemKufi, titleSize: 36, frame: 'heraldic', hero: 'arch' },
+  'nature-touch':    { bg: '#E8E2D3', surf: '#F6F2E7', ink: '#2F3A2C', mute: '#5C6B4C', hi: '#9A5530', line: '#5C6B4C', paper: '#F6F2E7', paperInk: '#3E4A3A', head: F.vollkorn, body: F.geologica, cap: F.vollkorn, titleFont: F.vollkorn, titleItalic: true, titleSize: 40, frame: 'polaroid', hero: 'arch', tilt: true },
+  'crystal-glass':   { bg: 'linear-gradient(180deg,#F7F9FB,#EEF2F6 40%,#E9EEF2)', surf: 'rgba(255,255,255,0.6)', ink: '#23303B', mute: '#5A6772', hi: '#23303B', line: '#AEB9C3', head: F.josefin, body: F.onest, cap: F.josefin, capItalic: false, titleFont: F.josefin, titleSize: 40, frame: 'glass', hero: 'rounded', dash: '2 6', textItalic: false },
+  'boarding-pass':   { bg: 'linear-gradient(180deg,#0E1B2E,#08111E)', surf: '#14243B', ink: '#F4EFE4', mute: '#9AA6B6', hi: '#D2A262', line: '#9AA6B6', paper: '#F4EFE4', paperInk: '#14243B', head: F.oswald, body: F.plexSans, cap: F.plexMono, capItalic: false, titleFont: F.oswald, titleSize: 40, titleUpper: true, frame: 'ticket', hero: 'rect', labels: 'num2', kpre: true, textItalic: false, dash: '6 6', bigSize: 32 },
+  'cinema-premiere': { bg: 'radial-gradient(120% 50% at 50% 0%,#2A0A0F,#0B0A0C 60%)', surf: '#141215', ink: '#F2EBDD', mute: '#A9A39A', hi: '#D9A441', line: '#D9A441', head: F.playfair, body: F.playfair, cap: F.playfair, titleFont: F.bigShoulders, titleSize: 58, titleUpper: true, frame: 'film', hero: 'letterbox', labels: 'num2', kpre: true, dash: '0' },
+  'vinyl-record':    { bg: 'radial-gradient(120% 50% at 50% 0%,#2A2420,#151312 60%)', surf: '#1E1B19', ink: '#F1E8D6', mute: '#B3A894', hi: '#D2642F', line: '#E2A93B', head: F.youngSerif, body: F.montserrat, cap: F.montserrat, capItalic: false, titleFont: F.youngSerif, titleSize: 40, frame: 'sleeve', hero: 'disc', record: true, labels: 'vinyl', kpre: true, textItalic: false, bigSize: 32 },
+  'royal-palace':    { bg: 'linear-gradient(180deg,#141B3A,#0C1128)', surf: '#141B3A', ink: '#F3ECDD', mute: '#AAB0CC', hi: '#F0DCA0', line: '#D6B76E', paper: '#EFE3C8', paperInk: '#2A2340', head: F.cormorantSC, body: F.ebGaramond, cap: F.imperial, script: true, titleFont: F.cormorantSC, titleSize: 36, frame: 'heraldic', hero: 'arch' },
+  'mediterranean':   { bg: '#FBF8F1', surf: '#F1E7D3', ink: '#1E3348', mute: '#5A6B7A', hi: '#1F5FA6', line: '#D7774E', paper: '#FFFFFF', paperInk: '#5A6B7A', head: F.libreBodoni, body: F.literata, cap: F.libreBodoni, titleFont: F.libreBodoni, titleItalic: true, titleSize: 44, frame: 'mat', hero: 'arch' },
+  'gazette':         { bg: '#F3EEE2', surf: '#FBF9F3', ink: '#1A1917', mute: '#55514A', hi: '#B3261E', line: '#1A1917', paper: '#FBF9F3', paperInk: '#55514A', head: F.playfair, body: F.sourceSerif, cap: F.sourceSerif, titleFont: F.playfair, titleSize: 36, frame: 'clipping', hero: 'rect', labels: 'num', kpre: true, dash: '0', textItalic: false, bigSize: 32 },
+  'luxury-jewelry':  { bg: 'radial-gradient(120% 50% at 50% 0%,#143A31,#07110E 60%)', surf: '#0E2A23', ink: '#F4F1EA', mute: '#9DB5AE', hi: '#A3D6C7', line: '#D9DEE0', head: F.libreCaslon, body: F.raleway, cap: F.libreCaslon, titleFont: F.libreCaslon, titleSize: 42, frame: 'gem', hero: 'octagon' },
 }
 
 /* ── Mətnlər (AZ/EN/RU) ── dizayndakı şablon adlandırmaları */
@@ -219,7 +245,7 @@ export function frameStyle(t, rot, ratio) {
     case 'heraldic': Object.assign(box, { background: t.surf, border: '1px solid ' + t.line, outline: '1px solid ' + t.line + '66', outlineOffset: 4, padding: 8, boxShadow: sh }); Object.assign(cap, { color: t.hi, fontSize: t.script ? 22 : 17 }); break
     case 'glass': Object.assign(box, { background: 'rgba(255,255,255,0.55)', border: '1px solid rgba(255,255,255,0.95)', borderRadius: 18, padding: '8px 8px 6px', boxShadow: '0 20px 44px rgba(46,58,68,0.16)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }); inner.borderRadius = 12; cap.fontSize = 17; break
     case 'ticket': Object.assign(box, { background: t.paper, borderRadius: 10, padding: '8px 8px 10px', boxShadow: sh }); inner.borderRadius = 6
-      cap = { fontFamily: F.mono, fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: t.paperInk, borderTop: '1px dashed ' + t.paperInk + '66', marginTop: 10, padding: '10px 2px 26px', backgroundImage: `repeating-linear-gradient(90deg,${t.paperInk} 0 2px,transparent 2px 4px,${t.paperInk} 4px 5px,transparent 5px 8px)`, backgroundSize: '100% 14px', backgroundRepeat: 'no-repeat', backgroundPosition: 'bottom', overflowWrap: 'anywhere' }
+      cap = { fontFamily: t.cap, fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: t.paperInk, borderTop: '1px dashed ' + t.paperInk + '66', marginTop: 10, padding: '10px 2px 26px', backgroundImage: `repeating-linear-gradient(90deg,${t.paperInk} 0 2px,transparent 2px 4px,${t.paperInk} 4px 5px,transparent 5px 8px)`, backgroundSize: '100% 14px', backgroundRepeat: 'no-repeat', backgroundPosition: 'bottom', overflowWrap: 'anywhere' }
       break
     case 'film': {
       const holes = 'repeating-linear-gradient(90deg,#F2F0EC66 0 7px,transparent 7px 15px)'
@@ -227,7 +253,7 @@ export function frameStyle(t, rot, ratio) {
       Object.assign(cap, { color: t.hi, fontSize: 16 })
       break
     }
-    case 'sleeve': Object.assign(box, { background: t.surf, border: '1px solid ' + t.line + '55', padding: '8px 8px 10px', boxShadow: sh }); cap = { fontFamily: F.mono, fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: t.mute, paddingTop: 10, overflowWrap: 'anywhere' }; break
+    case 'sleeve': Object.assign(box, { background: t.surf, border: '1px solid ' + t.line + '55', padding: '8px 8px 10px', boxShadow: sh }); cap = { fontFamily: t.cap, fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: t.mute, paddingTop: 10, overflowWrap: 'anywhere' }; break
     case 'clipping': Object.assign(box, { background: t.paper, border: '1px solid ' + t.ink, padding: '6px 6px 8px', boxShadow: '3px 3px 0 rgba(0,0,0,0.08)' }); inner.filter = 'grayscale(1) contrast(1.05)'; Object.assign(cap, { fontSize: 12, textAlign: 'left', paddingTop: 6 }); break
     case 'gem': outer = { background: t.line, padding: 1.5, clipPath: OCT }; Object.assign(inner, { clipPath: OCT, background: t.surf }); Object.assign(cap, { color: t.hi, fontSize: 17, paddingTop: 10 }); break
     default: break

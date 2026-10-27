@@ -1,257 +1,474 @@
-import TemplateShell, { alpha } from '../_shared/TemplateShell'
-import OpeningFrame, { NameRow, OpeningMeta } from '../_shared/OpeningFrame'
-import { Ambient } from '../_shared/motion'
+import { motion } from 'framer-motion'
+import { QRCodeSVG } from 'qrcode.react'
+import LanguageSwitcher from '../../components/LanguageSwitcher'
+import DressCodeSection from '../_shared/DressCodeSection'
+import MapSection from '../_shared/MapSection'
+import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
+import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
+import { useInvitation, useGate, openingNames, seatInputProps, rsvpInputProps, rsvpOptions, rsvpState, alpha } from '../_shared/useInvitation'
+import { MusicFab, EqBars, SeatSuggest, RsvpSuggest, RsvpStatus, StoryBlock, InvitationEnd } from '../_shared/invitationKit'
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   GAZETTE — Claude Design «Seçilmiş 7» · 06
+   GAZETTE — «Təcili buraxılış» (premium redizayn, 2026-10)
 
-   Design dili: qəzetin xüsusi buraxılışı. Kağız ağı (#FBFAF6), klişe
-   qırmızısı (#8A2B22), qalın qara başlıq qaydaları və Libre Baskerville
-   mətn yığımı. Sütunlu görüntü, hər şey xəttlə ayrılıb.
-
-   Açılış: qəzetin başlığı (masthead) yazılır, altından qalın qayda xətti
-   çəkilir, sütunlar yığılır, sonra əsas xəbər başlığı — cütlüyün adı —
-   düşür. Çıxış `up` — səhifə çevrilir.
-
-   ⚠ BU AÇIQ FONLU ŞABLONDUR (`dark: false`) — ambient məzmunun altındadır.
-   ⚠ Qəzet dili «ornamentsizdir»: `radius: 0`, halqa/parıltı YOXDUR, yalnız
-   xətt və tipoqrafiya. Ona görə `orbs="none"` və ambient çox sakitdir.
+   Konsept: 1930-cu illərin böyük formatlı qəzeti. Açılış — kinodakı kimi
+   fırlanaraq ekrana uçan qəzet: manşetdə adlar, rastr (halftone) şəkil,
+   sütunlarda real xəbər mətni. Toxunanda qəzet fırlanıb uzaqlaşır. Daxildə
+   hər bölmə qəzetin bir rubrikasıdır:
+     hero      → birinci səhifə + «hava proqnozu» qutusu
+     sayğac    → «Geri sayım» xəbər qutusu
+     məkan     → rastrlı foto, foto altı yazı
+     proqram   → teleproqram cədvəli
+     masa      → elanlar (classifieds)
+     RSVP      → kəsilib göndərilən kupon ✂
+     arzular   → oxucu məktubları
+   Rəng: qəzet kağızı, mətbəə qarası, bir rəngli qırmızı.
+   Şriftlər: Old Standard TT (manşet) · Playfair Display · Source Serif 4.
    ───────────────────────────────────────────────────────────────────────── */
 
-const TH = getTemplateTheme('gazette')
+const BASE = getTemplateTheme('gazette')
+const ID = 'gazette'
 
-const DISP = TH.fonts.heading   /* Libre Baskerville */
+const LABELS = {
+  countdown: { title: { az: 'Geri sayım başladı', en: 'The countdown is on', ru: 'Обратный отсчёт начался' } },
+  venue:     { title: { az: 'Hadisə yeri', en: 'Scene of the event', ru: 'Место события' } },
+  program:   { title: { az: 'Axşamın proqramı', en: 'Tonight’s listings', ru: 'Программа вечера' } },
+  dresscode: { title: { az: 'Moda rubrikası', en: 'Fashion column', ru: 'Модная рубрика' } },
+  seating:   { title: { az: 'Elanlar: masanız', en: 'Classifieds: your table', ru: 'Объявления: ваш стол' } },
+  gallery:   { title: { az: 'Foto reportaj', en: 'Photo report', ru: 'Фоторепортаж' } },
+  rsvp:      { title: { az: 'Kuponu doldurun', en: 'Fill in the coupon', ru: 'Заполните купон' } },
+  guestbook: { title: { az: 'Oxucu məktubları', en: 'Letters to the editor', ru: 'Письма читателей' } },
+}
+
+const TXT = {
+  az: {
+    page: 'Səhifə', price: 'Qiyməti: pulsuz', weather: 'Hava proqnozu', forecast: 'Günəşli. Sevgi ehtimalı — 100%.',
+    lead: (v, d, n, t) => `${v} — ${d}. Redaksiyamıza daxil olan xəbərə görə, ${n} məclisi${t ? ` saat ${t}-da` : ''} başlayacaq. Qonaqları musiqi, ziyafət və unudulmaz bir axşam gözləyir. Ətraflı məlumat növbəti səhifələrdə.`,
+    caption: 'Şəkil', cut: 'Buradan kəsin', table: 'Masa', mates: 'Masa yoldaşları', and: 'və', city: 'Bakı',
+  },
+  en: {
+    page: 'Page', price: 'Price: free', weather: 'Weather', forecast: 'Sunny. 100% chance of love.',
+    lead: (v, d, n, t) => `${v} — ${d}. Word has reached our newsroom that the celebration of ${n} will begin${t ? ` at ${t}` : ''}. Guests can expect music, a banquet and an unforgettable evening. Full details on the following pages.`,
+    caption: 'Pictured', cut: 'Cut here', table: 'Table', mates: 'Table companions', and: 'and', city: 'Baku',
+  },
+  ru: {
+    page: 'Стр.', price: 'Цена: бесплатно', weather: 'Прогноз погоды', forecast: 'Солнечно. Вероятность любви — 100%.',
+    lead: (v, d, n, t) => `${v} — ${d}. Как стало известно редакции, торжество ${n} начнётся${t ? ` в ${t}` : ''}. Гостей ждут музыка, банкет и незабываемый вечер. Подробности — на следующих страницах.`,
+    caption: 'На снимке', cut: 'Отрезать здесь', table: 'Стол', mates: 'Соседи по столу', and: 'и', city: 'Баку',
+  },
+}
+
+const PAPER = '#F3EEE2'
+const INK = '#1A1917'
+const GREY = '#55514A'
+const RED = '#B3261E'
+const RULE = `linear-gradient(${INK}, ${INK}) top / 100% 3px no-repeat, linear-gradient(${INK}, ${INK}) 0 5px / 100% 1px no-repeat`
+const DOTS = (c = INK, s = 4) => `radial-gradient(circle, ${c} 0.9px, transparent 1.3px) 0 0 / ${s}px ${s}px`
 
 const KEYFRAMES = `
-@keyframes tpl-hint  { 0%,100% { transform: translateY(0); opacity:.35 } 50% { transform: translateY(6px); opacity:1 } }
-@keyframes tpl-eq    { 0%,100% { transform: scaleY(.35) } 50% { transform: scaleY(1) } }
-/* Sütun sətirləri bir-bir yığılır */
-@keyframes gz-line   { from { opacity:0; transform: scaleX(0) } to { opacity:1; transform: scaleX(1) } }
-/* Kağız dənəsi — çox zəif */
-@keyframes gz-grain  { 0%,100% { opacity:.05 } 50% { opacity:.1 } }
+@keyframes gz-spin { from { transform: rotate(-1080deg) scale(.04); opacity: 0 } 15% { opacity: 1 } to { transform: rotate(-2deg) scale(1); opacity: 1 } }
+@keyframes gz-rise { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
+@keyframes gz-fade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes gz-hint { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
+[data-gz] span[aria-hidden="true"], [data-gz] svg[aria-hidden="true"], [data-gz] div[aria-hidden="true"] { pointer-events: none; }
+[data-gz] ::placeholder { color: rgba(85,81,74,.55); }
+[data-gz] input:focus-visible, [data-gz] textarea:focus-visible { border-color: ${INK} !important; outline: none; background: #fff !important; }
+[data-gz] button:focus-visible, [data-gz] a:focus-visible, [data-gz] [role="button"]:focus-visible { outline: 2px solid ${INK}; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { [data-gz] *, [data-gz] { animation: none !important; transition: none !important; } }
 `
 
-/* Sütun «mətni» — dekorativ sətirlər (real mətn deyil, yığım təsviri).
-   Enlər sabitdir: təsadüfi olsaydı hər render-də sıçrayardı. */
-const COL_A = [100, 92, 97, 86, 100, 74]
-const COL_B = [100, 88, 95, 100, 81]
+const upper = (s, lang) => String(s || '').toLocaleUpperCase(lang === 'ru' ? 'ru' : lang === 'en' ? 'en' : 'az')
 
-function Column({ widths, delay, color }) {
+/* Rastr «foto» — iki üzük; nöqtə ekranı ilə çap olunmuş kimi */
+function HalftoneRings({ height = 150 }) {
   return (
-    <span aria-hidden="true" style={{ flex: 1, display: 'block' }}>
-      {widths.map((w, i) => (
-        <span key={i} style={{
-          display: 'block', width: `${w}%`, height: 2, marginBottom: 4,
-          background: color, transformOrigin: 'left',
-          animation: `gz-line .5s ease-out ${(delay + i * 0.07).toFixed(2)}s both`,
-        }} />
-      ))}
-    </span>
+    <svg viewBox="0 0 300 150" width="100%" height={height} preserveAspectRatio="xMidYMid slice" aria-hidden="true" style={{ display: 'block' }}>
+      <defs>
+        <pattern id="gz-dot" width="4" height="4" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.15" fill={INK} /></pattern>
+        <pattern id="gz-dot2" width="4" height="4" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".65" fill={INK} /></pattern>
+        <radialGradient id="gz-vig" r=".75"><stop offset=".5" stopColor="#fff" stopOpacity="0" /><stop offset="1" stopColor="#000" stopOpacity=".35" /></radialGradient>
+      </defs>
+      <rect width="300" height="150" fill="url(#gz-dot2)" />
+      <rect width="300" height="150" fill="url(#gz-vig)" />
+      <circle cx="128" cy="78" r="38" fill="none" stroke="url(#gz-dot)" strokeWidth="14" />
+      <circle cx="172" cy="78" r="38" fill="none" stroke="url(#gz-dot)" strokeWidth="14" />
+      <circle cx="128" cy="78" r="38" fill="none" stroke={PAPER} strokeWidth="2.4" strokeDasharray="30 210" strokeDashoffset="-20" />
+      <circle cx="172" cy="78" r="38" fill="none" stroke={PAPER} strokeWidth="2.4" strokeDasharray="30 210" strokeDashoffset="-150" />
+      <path d="M128 40l6-10h-12z" fill="url(#gz-dot)" />
+    </svg>
   )
 }
 
-function Opening(props) {
-  const { theme, weddingData, isCouple, ot } = props
-
-  const dateStr = String(weddingData.date || '').split('-').reverse().join('.')
-
+/* Birinci səhifə — açılışda və hero-da eyni */
+function FrontPage({ inv, weddingData, T, edition, masthead, rubric, title, venue, meta, compact = false }) {
+  const { lang } = inv
+  const head = "'Old Standard TT', 'Playfair Display', Georgia, serif"
+  const disp = inv.theme.fonts.heading
+  const body = inv.theme.fonts.body
+  const nameStr = inv.isCouple ? `${inv.groom} ${T.and} ${inv.bride}` : inv.single
+  const lead = T.lead(weddingData.venueName || T.city, inv.fullDate, inv.heroTitle || nameStr, inv.time)
   return (
-    <OpeningFrame
-      {...props}
-      exit="up"
-      duration={900}
-      label={ot.text('cta')}
-      hint={ot.text('hint')}
-      ctaDelay={3.9}
-      hintDelay={4.4}
-      orbs="none"
-      veil="#FBFAF6"
-      background="linear-gradient(170deg, #FBFAF6 0%, #F0EDE6 60%, #E4E0D7 100%)"
-      ctaStyle={{
-        border: `1px solid ${theme.accent}`,
-        color: theme.accent, background: 'rgba(255,255,255,.7)',
-        fontFamily: DISP, letterSpacing: '.16em', textTransform: 'uppercase',
-      }}
-      ctaGleam="rgba(255,255,255,.9)"
-      hintColor={alpha(theme.muted, 0.95)}
-    >
-      {/* ── QƏZET SƏHİFƏSİ ── */}
-      <div style={{
-        position: 'relative', width: 'min(86vw, 300px)', marginInline: 'auto',
-        background: '#FBFAF6', padding: '16px 15px 18px',
-        boxShadow: '0 24px 54px rgba(22,21,18,.2)',
-        animation: 'tpl-rise .9s cubic-bezier(.22,.61,.36,1) .7s both',
-      }}>
-        {/* Üst xırda sətir — buraxılış məlumatı */}
-        <div style={{
-          display: 'flex', justifyContent: 'space-between',
-          fontSize: 7, letterSpacing: '.18em', textTransform: 'uppercase', color: theme.muted,
-          animation: 'tpl-rise .6s ease-out 1.1s both',
-        }}>
-          <span>{ot.text('edition')}</span>
-          <span>{dateStr}</span>
-        </div>
-
-        {/* MASTHEAD */}
-        {ot.show('masthead') && (
-          <div style={{
-            fontFamily: DISP, fontWeight: 700, fontSize: 'clamp(16px, 5.6vw, 21px)',
-            letterSpacing: '-.02em', color: theme.accent, textAlign: 'center', marginTop: 7,
-            animation: 'tpl-rise .8s ease-out 1.3s both',
-          }}>{ot.text('masthead')}</div>
-        )}
-
-        {/* Qalın qayda xətti */}
-        <span aria-hidden="true" style={{
-          display: 'block', height: 2, background: theme.accent, margin: '7px 0 4px',
-          transformOrigin: 'left', animation: 'tpl-drawx .7s cubic-bezier(.22,.61,.36,1) 1.7s both',
-        }} />
-        <span aria-hidden="true" style={{
-          display: 'block', height: 1, background: alpha(theme.accent, 0.4), marginBottom: 12,
-          transformOrigin: 'left', animation: 'tpl-drawx .7s cubic-bezier(.22,.61,.36,1) 1.85s both',
-        }} />
-
-        {/* Klişe qırmızısı ilə rubrika — tədbir növünə görə (bax openingSpec) */}
-        {ot.show('sub') && (
-          <div style={{
-            fontSize: 7.5, letterSpacing: '.24em', textTransform: 'uppercase',
-            color: theme.primary, textAlign: 'center', marginBottom: 9,
-            animation: 'tpl-rise .6s ease-out 2.0s both',
-          }}>{ot.text('sub')}</div>
-        )}
-
-        {/* ƏSAS XƏBƏR BAŞLIĞI — adlar */}
-        <NameRow
-          theme={theme} weddingData={weddingData} isCouple={isCouple}
-          text={ot.override('title')}
-          delay={2.3} step={0.2} stacked
-          size="clamp(19px, 6.6vw, 25px)" ampSize="clamp(14px, 4.8vw, 18px)"
-          font={DISP} color={theme.accent} ampColor={theme.primary}
-          style={{ fontWeight: 700, lineHeight: 1.2, textAlign: 'center' }}
-        />
-
-        {/* Sütunlar — yığım təsviri */}
-        <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
-          <Column widths={COL_A} delay={3.0} color={alpha(theme.muted, 0.45)} />
-          <span aria-hidden="true" style={{
-            width: 1, background: alpha(theme.accent, 0.2), transformOrigin: 'top',
-            animation: 'tpl-drawy .6s ease-out 3.0s both',
-          }} />
-          <Column widths={COL_B} delay={3.15} color={alpha(theme.muted, 0.45)} />
-        </div>
-
-        {/* Alt qayda + məkan */}
-        <span aria-hidden="true" style={{
-          display: 'block', height: 1, background: alpha(theme.accent, 0.35), margin: '12px 0 8px',
-          transformOrigin: 'left', animation: 'tpl-drawx .6s ease-out 3.5s both',
-        }} />
-        <div style={{
-          fontFamily: DISP, fontSize: 9, color: theme.secondary, textAlign: 'center',
-          animation: 'tpl-rise .6s ease-out 3.6s both',
-        }}>{ot.text('venue')}</div>
+    <div style={{ color: INK, fontFamily: body }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, fontSize: 10.5, letterSpacing: '.08em', paddingBottom: 6, borderBottom: `1px solid ${INK}` }}>
+        <span>{edition}</span><span>{inv.formattedDate || inv.fullDate}</span><span>{T.price}</span>
       </div>
-
-      {ot.show('meta') && (
-        <OpeningMeta
-          text={ot.text('meta')}
-          color={alpha(theme.muted, 0.95)}
-          delay={3.8}
-          style={{ marginTop: 20, letterSpacing: '.26em' }}
-        />
+      {masthead !== null && <div style={{ fontFamily: head, fontWeight: 700, fontSize: compact ? 'clamp(34px, 11vw, 46px)' : 'clamp(38px, 12.5vw, 54px)', lineHeight: 1, letterSpacing: '-.01em', textAlign: 'center', padding: '10px 0 8px' }}>{masthead}</div>}
+      <div style={{ height: 7, background: RULE }} />
+      {rubric && <div style={{ marginTop: 10, textAlign: 'center', fontSize: 12, letterSpacing: '.22em', color: RED, fontWeight: 600 }}>{upper(rubric, lang)}</div>}
+      {title !== '' && (
+        <h1 style={{ margin: '6px 0 0', textAlign: 'center', fontFamily: disp, fontWeight: 900, fontSize: compact ? 'clamp(34px, 11vw, 46px)' : 'clamp(38px, 12vw, 54px)', lineHeight: 0.98, letterSpacing: '-.01em', textWrap: 'balance' }}>
+          {upper(title, lang)}
+        </h1>
       )}
-    </OpeningFrame>
+      {(venue || meta) && <div style={{ marginTop: 8, textAlign: 'center', fontStyle: 'italic', fontSize: 16, color: GREY }}>{[venue, meta].filter(Boolean).join(' — ')}</div>}
+      <div style={{ marginTop: 12, borderTop: `1px solid ${INK}`, borderBottom: `1px solid ${INK}`, padding: '6px 0' }}>
+        <HalftoneRings height={compact ? 120 : 140} />
+      </div>
+      <div style={{ marginTop: 4, fontSize: 11, fontStyle: 'italic', color: GREY }}>{T.caption}: {nameStr}</div>
+      <div style={{ marginTop: 10, columnCount: 2, columnGap: 16, columnRule: `1px solid ${alpha(INK, 0.3)}`, fontSize: 12.5, lineHeight: 1.45, textAlign: 'left' }}>
+        <span style={{ float: 'left', fontFamily: disp, fontWeight: 900, fontSize: 40, lineHeight: 0.8, padding: '4px 6px 0 0' }}>{lead.charAt(0)}</span>{lead.slice(1)}
+      </div>
+    </div>
   )
 }
 
-export default function GazetteTemplate(props) {
+/* ═══ 01 — AÇILIŞ: fırlanan qəzet ═══ */
+function SpinOpening({ inv, theme, weddingData, T }) {
+  const { ot } = inv
+  const gate = useGate({ inv, ms: 1050 })
+  if (gate.gone) return null
+  const { titleOv, first, second } = openingNames(inv)
+  const title = titleOv !== undefined ? titleOv : (second ? `${first} & ${second}` : first)
   return (
-    <TemplateShell
-      {...props}
-      templateId="gazette"
-      theme={TH}
-      /* ⚠ Açıq fonlu şablon — blend qatı kağız ağını çirkləndirir */
-      ambientBlend="none"
-      Opening={Opening}
-      keyframes={KEYFRAMES}
-      ambient={
-        <Ambient>
-          {/* Kağız dənəsi — qəzet kağızının toxuması */}
-          <span aria-hidden="true" style={{
-            position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.07,
-            backgroundImage: `radial-gradient(circle at 22% 34%, ${alpha(TH.accent, 0.5)} 0 .6px, transparent 1px), radial-gradient(circle at 71% 68%, ${alpha(TH.secondary, 0.4)} 0 .5px, transparent 1px)`,
-            backgroundSize: '8px 8px, 12px 12px',
-            animation: 'gz-grain 5s steps(3) infinite',
-          }} />
-          {/* Klişe qırmızısının çox zəif izi */}
-          <span style={{
-            position: 'absolute', right: '-10%', top: '18%', width: 300, height: 300,
-            borderRadius: '50%', opacity: 0.08,
-            background: `radial-gradient(circle, ${TH.primary}, transparent 66%)`,
-            filter: 'blur(54px)', animation: 'ab-pulse 21s ease-in-out infinite',
-          }} />
-          {/* Kağızın kölgəsi — soldan zəif boz */}
-          <span style={{
-            position: 'absolute', left: '-12%', bottom: '10%', width: 320, height: 260,
-            borderRadius: '50%', opacity: 0.1,
-            background: `radial-gradient(ellipse, ${TH.secondary}, transparent 68%)`,
-            filter: 'blur(50px)', animation: 'ab-pulse 26s ease-in-out 7s infinite',
-          }} />
-        </Ambient>
-      }
-      /* ── Bölmə adları — Claude Design-dakı metafora (Phase 41) ──────────
-         AZ mətnlər birbaşa dizayn faylındandır; EN/RU həmin metaforanın
-         qarşılığıdır. Verilməyən bölmə sistemin öz tərcüməsini işlədir.
-         ⚠ `kicker` sətirdir (hər üç dildə eyni qalır — qısa etiketdir),
-         `title` isə {az,en,ru} obyektidir. */
-      sectionLabels={{
-        countdown: { kicker: 'EDITION',
-                    title: { az: 'Nəşrə qalan', en: 'Until publication', ru: 'До выхода номера' } },
-        venue:     { kicker: 'PAGE 4',
-                    title: { az: 'Hadisə yeri', en: 'Scene of the event', ru: 'Место события' } },
-        program:   { kicker: 'SCHEDULE',
-                    title: { az: 'Günün cədvəli', en: 'Schedule of the day', ru: 'Расписание дня' } },
-        dresscode: { kicker: 'NOTICE',
-                    title: { az: 'Geyim elanı', en: 'Dress notice', ru: 'Объявление о дресс-коде' } },
-        seating:   { kicker: 'SEATING',
-                    title: { az: 'Oxucu yeri', en: 'Reader’s seat', ru: 'Место читателя' } },
-        gallery:   { kicker: 'PHOTO NEWS',
-                    title: { az: 'Fotoxəbər', en: 'Photo report', ru: 'Фоторепортаж' } },
-        rsvp:      { kicker: 'REPLY',
-                    title: { az: 'Redaksiyaya cavab', en: 'Reply to the editor', ru: 'Ответ в редакцию' } },
-        guestbook: { kicker: 'LETTERS',
-                    title: { az: 'Oxucu məktubları', en: 'Letters to the editor', ru: 'Письма читателей' } },
-      }}
-      design={{
-        /* ── Vizual şəxsiyyət (Phase 42) ─────────────────────────────
-           Qəzet kağızı: yuxarıda təmiz vərəq, klişe qırmızısının izi, altda mürəkkəb kölgəsi.
-           Tonlar dizayn faylındakı bölmə fonlarıdır; `pageWash` isə
-           preview kartı ilə eyni dildə imza qradiyentidir — beləliklə
-           vitrindəki görüntü ilə dəvətnamənin içi uyğun gəlir. */
-        sectionTones: ['transparent', '#F0EDE6', 'transparent', '#E9E5DC'],
-        pageWash:
-          'radial-gradient(100% 45% at 50% 0%, rgba(251,250,246,.95), transparent 58%), '
-          + 'radial-gradient(70% 35% at 96% 16%, rgba(138,43,34,.07), transparent 70%), '
-          + 'linear-gradient(180deg, transparent 60%, rgba(22,21,18,.07) 100%)',
-        programStyle: 'table',
-        /* Location — xeritə şəklinin şablona məxsus rəng emalı (bax MapSection) */
-        /* Xəritənin rəng emalı — Claude Design-dakı DƏQİQ filter zənciri.
-           ⚠ tintOpacity 0-dır: dizayn ayrıca tint QATI işlətmir, rəngi
-           filter-in özü verir. Tint qatı vivid aksentlə xəritəni
-           boyayıb küçə adlarını oxunmaz edirdi. */
-        map: { opacity: 0.9, filter: 'grayscale(1) contrast(1.3) brightness(1.06)', tintOpacity: 0 },
-        radius: 0,
-        buttonRadius: 0,
-        align: 'left',
-        headingTransform: 'none',
-        kicker: '.24em',
-        dark: false,
-        alternate: true,
-        headingColor: TH.accent,
-        accentColor: TH.primary,
-        ctaBg: TH.accent,
-        ctaText: '#FBFAF6',
-      }}
-    />
+    <motion.div {...gate.gateProps} data-gz
+      animate={gate.opening ? { opacity: 0 } : {}}
+      transition={{ duration: 0.3, delay: 0.75 }}
+      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: `radial-gradient(80% 60% at 50% 45%, #3A3833, #121110)`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 14px', fontFamily: theme.fonts.body }}>
+      <motion.div animate={gate.opening ? { rotate: 540, scale: 0.05, opacity: 0 } : {}} transition={{ duration: 0.9, ease: [0.6, 0, 0.8, 0.4] }}
+        style={{ width: 'min(100%, 380px)' }}>
+        <div style={{ padding: '14px 14px 16px', background: `linear-gradient(160deg, #F7F3E8, ${PAPER} 60%, #E9E2D0)`, boxShadow: '0 30px 60px rgba(0,0,0,.6)', animation: 'gz-spin 1.3s cubic-bezier(.2,.7,.2,1) .15s both' }}>
+          <FrontPage inv={inv} weddingData={weddingData} T={T} compact
+            edition={ot.show('edition') ? ot.text('edition') : ''} masthead={ot.show('masthead') ? ot.text('masthead') : null}
+            rubric={ot.show('sub') ? ot.text('sub') : ''} title={title}
+            venue={ot.show('venue') ? ot.text('venue') : ''} meta={ot.show('meta') ? ot.text('meta') : ''} />
+        </div>
+      </motion.div>
+      <motion.div animate={gate.opening ? { opacity: 0 } : {}} transition={{ duration: 0.25 }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        {ot.show('cta') && (
+          <div style={{ marginTop: 22, minHeight: 48, padding: '12px 26px', display: 'inline-flex', alignItems: 'center', background: RED, color: '#FFF8EE', fontFamily: theme.fonts.heading, fontWeight: 700, fontSize: 16, letterSpacing: '.06em', animation: 'gz-rise .7s ease-out 1.5s both' }}>
+            {upper(ot.text('cta'), inv.lang)}
+          </div>
+        )}
+        {ot.show('hint') && <div style={{ marginTop: 10, fontSize: 13, fontStyle: 'italic', color: '#CFC8B8', animation: 'gz-fade .8s ease-out 1.9s both, gz-hint 3s ease-in-out 2.7s infinite' }}>{ot.text('hint')}</div>}
+      </motion.div>
+    </motion.div>
+  )
+}
+
+/* Rubrika — qalın+nazik qayda, rubrika adı, səhifə nömrəsi */
+function Column({ id, section, title, kicker, sub, children, disp, page, T, lang }) {
+  return (
+    <section id={id} data-section={section} style={{ position: 'relative', padding: '40px 18px 46px' }}>
+      <Reveal style={{ maxWidth: 520, margin: '0 auto' }}>
+        {(title || kicker) && (
+          <div style={{ marginBottom: 22 }}>
+            <div style={{ height: 7, background: RULE }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 10, gap: 12 }}>
+              {title && <h2 style={{ margin: 0, fontFamily: disp, fontWeight: 900, fontSize: 'clamp(28px, 8.4vw, 36px)', lineHeight: 1.02, letterSpacing: '-.01em', textWrap: 'balance' }}>{title}</h2>}
+              {page && <span style={{ flex: 'none', fontSize: 11.5, letterSpacing: '.12em', color: GREY }}>{upper(T.page, lang)} {page}</span>}
+            </div>
+            {kicker && <div style={{ marginTop: 6, fontStyle: 'italic', fontSize: 15, color: GREY }}>{kicker}</div>}
+            {sub && <p style={{ margin: '6px 0 0', fontSize: 15, color: GREY, lineHeight: 1.5 }}>{sub}</p>}
+          </div>
+        )}
+        {children}
+      </Reveal>
+    </section>
+  )
+}
+
+const field = {
+  width: '100%', background: '#FBF9F3', border: `1px solid ${INK}`, borderRadius: 0,
+  padding: '13px 14px', fontSize: 16, color: INK, outline: 'none',
+}
+const btn = (on, disp) => ({
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 20px', borderRadius: 0,
+  fontFamily: disp, fontWeight: 700, fontSize: 15.5, letterSpacing: '.02em', textDecoration: 'none', cursor: 'pointer',
+  background: on ? INK : 'transparent', color: on ? PAPER : INK, border: `1.5px solid ${INK}`,
+})
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+export default function GazetteTemplate(props) {
+  const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
+  const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const { theme, tr, L, K, S, cd, timeline, seating, rsvp, gbook, gallery, rsvpL, gbookL, seatingL, ot } = inv
+  const disp = theme.fonts.heading
+  const body = theme.fonts.body
+  const T = TXT[lang] || TXT.az
+  let pg = 1
+  const P = { disp, T, lang }
+  const nextPage = () => ++pg
+
+  return (
+    <div data-gz data-enter={enterDirection(ID)} style={{
+      backgroundColor: PAPER, backgroundImage: `radial-gradient(${alpha('#8A7F66', 0.08)} 1px, transparent 1.2px)`, backgroundSize: '5px 5px',
+      minHeight: '100vh', fontFamily: body, color: INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
+      fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(INK, 0.15),
+    }}>
+      <style>{KEYFRAMES}</style>
+      {!inv.opened && <SpinOpening inv={inv} theme={theme} weddingData={weddingData} T={T} />}
+
+      <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: 0, background: PAPER, border: `1.5px solid ${INK}` }}>
+        {({ playing }) => <EqBars playing={playing} color={INK} idle={alpha(INK, 0.3)} />}
+      </MusicFab>
+
+      {inv.opened && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7 }} style={{ position: 'relative', zIndex: 1 }}>
+          <header style={{
+            position: 'sticky', top: 0, zIndex: 40, height: 52, padding: '0 16px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            background: alpha(PAPER, 0.94), backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+            borderBottom: `1.5px solid ${INK}`,
+          }}>
+            <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: INK, fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
+              <span aria-hidden="true">←</span>{tr.btn_back}
+            </button>
+            <div style={{ fontFamily: "'Old Standard TT', Georgia, serif", fontWeight: 700, fontSize: 18 }}>{ot.text('masthead') || 'The Gazette'}</div>
+            <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
+          </header>
+
+          {/* HERO — birinci səhifə */}
+          <section style={{ padding: '22px 16px 10px' }}>
+            <div style={{ maxWidth: 520, margin: '0 auto' }}>
+              <FrontPage inv={inv} weddingData={weddingData} T={T}
+                edition={ot.text('edition')} masthead={ot.text('masthead') || 'The Gazette'}
+                rubric={L('hero', 'kicker', ot.text('sub'))} title={inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)}
+                venue={weddingData.venueName} meta={inv.time} />
+              {inv.isCorp && weddingData.organizer?.trim() && <div style={{ marginTop: 10, fontSize: 14, color: GREY }}>{tr.organizer_display}: {weddingData.organizer}</div>}
+              <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: '1fr auto', gap: 14, alignItems: 'stretch' }}>
+                <p style={{ margin: 0, fontFamily: disp, fontStyle: 'italic', fontSize: 17, lineHeight: 1.45 }}>{tr.inv_join}</p>
+                <div style={{ width: 118, border: `1.5px solid ${INK}`, padding: '8px 10px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 10.5, letterSpacing: '.14em', fontWeight: 700 }}>{upper(T.weather, lang)}</div>
+                  <svg viewBox="0 0 40 26" width="44" height="28" aria-hidden="true" style={{ margin: '4px auto 2px', display: 'block' }}>
+                    <circle cx="14" cy="12" r="6" fill="none" stroke={INK} strokeWidth="1.4" />
+                    {Array.from({ length: 8 }, (_, k) => { const a = k * Math.PI / 4; return <path key={k} d={`M${14 + Math.cos(a) * 8.5} ${12 + Math.sin(a) * 8.5}L${14 + Math.cos(a) * 11} ${12 + Math.sin(a) * 11}`} stroke={INK} strokeWidth="1.2" /> })}
+                    <path d="M27 15c-2.4-3 2-7 6-5" fill="none" stroke={RED} strokeWidth="1.6" /><path d="M33 10c4-2 7 3 3 6l-6 5-5-6" fill="none" stroke={RED} strokeWidth="1.6" />
+                  </svg>
+                  <div style={{ fontSize: 11.5, lineHeight: 1.35, fontStyle: 'italic' }}>{T.forecast}</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* SAYĞAC */}
+          {S.countdown && (
+            <Column {...P} page={nextPage()} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', border: `1.5px solid ${INK}` }}>
+                {[
+                  { v: cd.days, l: cd.labels.days },
+                  { v: cd.hours, l: cd.labels.hours },
+                  { v: cd.minutes, l: cd.labels.minutes },
+                  { v: cd.seconds, l: cd.labels.seconds, pop: true },
+                ].map(({ v, l, pop }, i) => (
+                  <div key={l} style={{ padding: '14px 4px 10px', textAlign: 'center', borderLeft: i ? `1px solid ${INK}` : 'none', background: pop ? INK : 'transparent', color: pop ? PAPER : INK }}>
+                    <div style={{ fontFamily: disp, fontWeight: 900, fontSize: 'clamp(30px, 9vw, 42px)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}><PopDigit value={v} pop={pop} /></div>
+                    <div style={{ marginTop: 6, fontSize: 11.5, letterSpacing: '.1em' }}>{upper(l, lang)}</div>
+                  </div>
+                ))}
+              </div>
+            </Column>
+          )}
+
+          <StoryBlock inv={inv} templateId={ID} weddingData={weddingData} lang={lang} />
+
+          {/* MƏKAN — rastrlı foto */}
+          {S.venue && (
+            <Column {...P} page={nextPage()} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+              <div style={{ position: 'relative', border: `1.5px solid ${INK}` }}>
+                <MapSection
+                  weddingData={weddingData} theme={theme} accent={RED} height="clamp(220px, 60vw, 290px)"
+                  map={{ opacity: 0.9, filter: 'grayscale(1) contrast(1.5) brightness(1.05)', tintOpacity: 0 }}
+                  frame={<span aria-hidden="true" style={{ position: 'absolute', inset: 0, background: DOTS(alpha(INK, 0.35), 3), mixBlendMode: 'multiply' }}><NewsPin /></span>}
+                  fallback={<div style={{ height: 'clamp(220px, 60vw, 290px)', position: 'relative', background: `${DOTS(alpha(INK, 0.25), 4)}, #E8E2D2` }}><NewsPin /></div>}
+                />
+              </div>
+              <div style={{ marginTop: 6, fontSize: 12.5, fontStyle: 'italic', color: GREY }}>{T.caption}: {weddingData.venueName}{weddingData.venueNote ? ` — ${weddingData.venueNote}` : ''}</div>
+              <div style={{ marginTop: 14, fontFamily: disp, fontWeight: 900, fontSize: 26, lineHeight: 1.1 }}>{weddingData.venueName}</div>
+              <div style={{ display: 'flex', gap: 8, marginTop: 16, flexWrap: 'wrap' }}>
+                {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(true, disp)}>{tr.inv_directions_btn}</a>}
+                {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(!inv.dirUrl, disp)}>Maps</a>}
+                {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(false, disp)}>Waze</a>}
+                {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(false, disp)}>Apple</a>}
+              </div>
+            </Column>
+          )}
+
+          {/* PROQRAM — teleproqram */}
+          {S.program && (
+            <Column {...P} page={nextPage()} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+              <div style={{ borderTop: `1.5px solid ${INK}` }}>
+                {timeline.events.map((ev, i) => (
+                  <div key={i} style={{ display: 'grid', gridTemplateColumns: '64px 1fr', gap: 12, padding: '12px 0', borderBottom: `1px solid ${alpha(INK, 0.3)}`, alignItems: 'baseline' }}>
+                    <span style={{ fontFamily: disp, fontWeight: 900, fontSize: 21, fontVariantNumeric: 'tabular-nums', color: i === 0 ? RED : INK }}>{ev.time}</span>
+                    <span style={{ fontSize: 17, lineHeight: 1.35, minWidth: 0 }}>{ev.label}</span>
+                  </div>
+                ))}
+              </div>
+            </Column>
+          )}
+
+          {S.dresscode && (
+            <Column {...P} page={nextPage()} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+              <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
+                customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={disp} align="left" />
+            </Column>
+          )}
+
+          {/* MASA — elanlar */}
+          {S.seating && !seating.isEmpty && (
+            <Column {...P} page={nextPage()} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+              <input {...seatInputProps(inv, 'gz-seat-list')} style={field} />
+              <SeatSuggest inv={inv} id="gz-seat-list" c={{ bg: '#FBF9F3', border: `1px solid ${INK}`, active: alpha(INK, 0.07), text: INK, table: RED, radius: 0, font: body }} />
+              {seating.showNotFound && <div style={{ marginTop: 10, fontStyle: 'italic', fontSize: 15, color: GREY }}>{tr.inv_seat_fullname}</div>}
+              {seating.selected && (
+                <div style={{ marginTop: 22, border: `1.5px solid ${INK}`, padding: 4, animation: 'gz-rise .5s ease-out both' }}>
+                  <div style={{ border: `1px solid ${INK}`, padding: '12px 14px', display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 14, alignItems: 'center' }}>
+                    <div style={{ textAlign: 'center', paddingRight: 14, borderRight: `1px solid ${INK}` }}>
+                      <div style={{ fontSize: 11, letterSpacing: '.14em', fontWeight: 700 }}>{upper(T.table, lang)}</div>
+                      <div style={{ fontFamily: disp, fontWeight: 900, fontSize: 52, lineHeight: 1, color: RED }}>{seating.selected.table_id}</div>
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontFamily: disp, fontWeight: 900, fontSize: 20, lineHeight: 1.15 }}>{upper(seating.selected.full_name, lang)}</div>
+                      {seating.tablemates.length > 0 && <div style={{ marginTop: 6, fontSize: 13.5, lineHeight: 1.45, color: GREY }}><b style={{ color: INK }}>{T.mates}:</b> {seating.tablemates.map((g) => g.full_name).join(', ')}</div>}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {seating.selected && (
+                <button onClick={seating.reset} data-press style={{ marginTop: 8, padding: 0, background: 'none', border: 'none', color: INK, fontSize: 14.5, minHeight: 44, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 4, fontFamily: body }}>
+                  {seatingL.again || 'Yenidən axtar'}
+                </button>
+              )}
+            </Column>
+          )}
+
+          {/* FOTO REPORTAJ */}
+          {S.gallery && (
+            <Column id="gallery-section" {...P} page={nextPage()} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+              {gallery.demoPhotos.length > 0 && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8, marginBottom: 24 }}>
+                  {gallery.demoPhotos.map((url, i) => (
+                    <figure key={i} style={{ margin: 0 }}>
+                      <div style={{ position: 'relative', aspectRatio: '4 / 5', overflow: 'hidden', border: `1px solid ${INK}`, background: '#DDD6C4' }}>
+                        <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: 'grayscale(1) contrast(1.3)' }} />
+                        <span aria-hidden="true" style={{ position: 'absolute', inset: 0, background: DOTS(alpha(INK, 0.3), 3), mixBlendMode: 'multiply' }} />
+                      </div>
+                    </figure>
+                  ))}
+                </div>
+              )}
+              <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 16, alignItems: 'center', border: `1.5px solid ${INK}`, padding: 12 }}>
+                <QRCodeSVG value={gallery.photoShareUrl} size={108} bgColor={PAPER} fgColor={INK} level="M" />
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontFamily: disp, fontWeight: 900, fontSize: 18, lineHeight: 1.15 }}>{tr.inv_scan_upload}</div>
+                  <a data-press href={gallery.photoShareUrl} style={{ ...btn(true, disp), marginTop: 10 }}>{tr.inv_gallery_btn}</a>
+                </div>
+              </div>
+              <p style={{ margin: '14px 0 0', fontSize: 15, color: GREY, lineHeight: 1.6 }}>{tr.inv_gallery_desc}</p>
+            </Column>
+          )}
+
+          {/* RSVP — kupon */}
+          {S.rsvp && (
+            <Column {...P} page={nextPage()} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+              <div style={{ position: 'relative', border: `2px dashed ${INK}`, padding: '24px clamp(14px, 4vw, 20px) 20px', background: '#FBF8EF' }}>
+                <span aria-hidden="true" style={{ position: 'absolute', top: -13, left: 18, padding: '0 6px', background: PAPER, fontSize: 18, lineHeight: '24px' }}>✂</span>
+                <span aria-hidden="true" style={{ position: 'absolute', top: -9, right: 18, padding: '0 6px', background: PAPER, fontSize: 10.5, letterSpacing: '.12em', color: GREY }}>{upper(T.cut, lang)}</span>
+                <RsvpStatus inv={inv} render={({ title, sub }) => (
+                  <div style={{ textAlign: 'center', padding: '6px 0' }}>
+                    <div style={{ display: 'inline-block', padding: '6px 14px', border: `2.5px solid ${RED}`, color: RED, fontFamily: disp, fontWeight: 900, fontSize: 22, transform: 'rotate(-3deg)' }}>{title}</div>
+                    {sub && <div style={{ marginTop: 10, fontSize: 15, color: GREY }}>{sub}</div>}
+                  </div>
+                )} />
+                {rsvpState(rsvp) === 'form' && (
+                  <form onSubmit={rsvp.handleSubmit}>
+                    <input {...rsvpInputProps(inv)} style={field} />
+                    <RsvpSuggest inv={inv} c={{ bg: '#FBF9F3', border: `1px solid ${INK}`, active: alpha(INK, 0.07), text: INK, table: RED, radius: 0, font: body }} />
+                    {rsvp.showNotFound && <div style={{ marginTop: 8, fontSize: 14, color: RED }}>{rsvpL.not_in_list}</div>}
+                    <div role="radiogroup" aria-label={L('rsvp', 'title', rsvpL.title)} style={{ display: 'grid', marginTop: 14 }}>
+                      {rsvpOptions(inv).map(({ val, label }) => {
+                        const active = rsvp.status === val
+                        return (
+                          <button key={val} type="button" role="radio" aria-checked={active} onClick={() => rsvp.chooseStatus(val)} data-press style={{
+                            display: 'flex', alignItems: 'center', gap: 12, minHeight: 48, padding: 0, background: 'none', border: 'none',
+                            cursor: 'pointer', color: INK, fontFamily: body, fontSize: 17, textAlign: 'left',
+                          }}>
+                            <span aria-hidden="true" style={{ width: 22, height: 22, flex: 'none', border: `1.5px solid ${INK}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: disp, fontWeight: 900, fontSize: 17, color: RED, lineHeight: 1 }}>{active ? '✕' : ''}</span>
+                            {label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                    {rsvp.status === 'yes' && (
+                      <div style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+                        <span style={{ fontSize: 15, color: GREY }}>{rsvpL.plusq}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} data-press aria-label="Azalt" style={{ width: 44, height: 44, border: `1.5px solid ${INK}`, background: 'transparent', color: INK, fontSize: 19, cursor: 'pointer', opacity: rsvp.plusOne === 0 ? 0.35 : 1 }}>−</button>
+                          <span style={{ width: 32, textAlign: 'center', fontFamily: disp, fontWeight: 900, fontSize: 26 }}>{rsvp.plusOne}</span>
+                          <button type="button" onClick={rsvp.incPlusOne} disabled={rsvp.plusOne === rsvp.maxExtraGuests} data-press aria-label="Artır" style={{ width: 44, height: 44, border: `1.5px solid ${INK}`, background: 'transparent', color: INK, fontSize: 19, cursor: 'pointer', opacity: rsvp.plusOne === rsvp.maxExtraGuests ? 0.35 : 1 }}>+</button>
+                        </div>
+                      </div>
+                    )}
+                    <button type="submit" disabled={!rsvp.canSubmit} data-press style={{
+                      ...btn(true, disp), width: '100%', marginTop: 18, minHeight: 52, background: RED, border: `1.5px solid ${RED}`, color: '#FFF8EE',
+                      opacity: rsvp.canSubmit ? 1 : 0.4, cursor: rsvp.canSubmit ? 'pointer' : 'not-allowed',
+                    }}>
+                      {rsvp.sending ? '…' : rsvpL.send}
+                    </button>
+                  </form>
+                )}
+              </div>
+            </Column>
+          )}
+
+          {/* OXUCU MƏKTUBLARI */}
+          {S.guestbook && (
+            <Column {...P} page={nextPage()} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+              <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 26 }}>
+                <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbookL.namePh} style={field} />
+                <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbookL.msgPh} rows={3} style={{ ...field, resize: 'none', lineHeight: 1.5 }} />
+                <button type="submit" disabled={!gbook.canSubmit} data-press style={{ ...btn(gbook.canSubmit, disp), width: '100%', opacity: gbook.canSubmit ? 1 : 0.45, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed' }}>
+                  {gbook.sending ? gbookL.sending : gbookL.btn}
+                </button>
+                {gbook.error && <p role="alert" style={{ margin: 0, fontSize: 14, color: RED }}>⚠ {gbookL.error}</p>}
+              </form>
+              <div style={{ columnCount: 2, columnGap: 18, columnRule: `1px solid ${alpha(INK, 0.3)}` }}>
+                {gbook.messages.map((raw, i) => {
+                  const msg = gbook.readMessage(raw)
+                  return (
+                    <figure key={msg.name + i} style={{ margin: '0 0 16px', breakInside: 'avoid', paddingBottom: 14, borderBottom: `1px solid ${alpha(INK, 0.2)}` }}>
+                      <blockquote style={{ margin: 0, fontSize: 14.5, lineHeight: 1.5 }}>{msg.text}</blockquote>
+                      <figcaption style={{ marginTop: 6, fontFamily: disp, fontWeight: 700, fontStyle: 'italic', fontSize: 14 }}>— {msg.name}{msg.date ? <span style={{ fontFamily: body, fontWeight: 400, fontStyle: 'normal', color: GREY }}>{`, ${gbook.formatDate(msg.date)}`}</span> : null}</figcaption>
+                    </figure>
+                  )
+                })}
+              </div>
+            </Column>
+          )}
+
+          <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={disp} />
+        </motion.div>
+      )}
+    </div>
+  )
+}
+
+function NewsPin() {
+  return (
+    <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
+      <span style={{ position: 'absolute', left: -22, top: -22, width: 44, height: 44, borderRadius: '50%', border: `3px solid ${RED}` }} />
+      <span style={{ position: 'absolute', left: -4, top: -4, width: 8, height: 8, borderRadius: '50%', background: RED }} />
+    </span>
   )
 }

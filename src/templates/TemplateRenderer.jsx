@@ -43,11 +43,6 @@ export default function TemplateRenderer({ template, isPreview = false, weddingD
   const templateId = resolveTemplateId(template, { allowDisabled: isPreview })
   const didFallback = !!template && templateId !== template
 
-  /* simple-luxury-dən başqa şablonlar öz şrift ailələrini işlədir — render
-     anında yüklənir. simple-luxury heç vaxt bura düşmür → mövcud müştərilərin
-     yüklənmə profili dəyişmir. */
-  if (templateId !== DEFAULT_TEMPLATE_ID) ensureTemplateFonts()
-
   /* Analitika (hələ göndərilmir — bax templateAnalytics.js) */
   useEffect(() => {
     trackTemplateView(templateId, { is_preview: isPreview })
@@ -77,6 +72,12 @@ export default function TemplateRenderer({ template, isPreview = false, weddingD
     () => readOverrides(localizedWedding),
     [localizedWedding],
   )
+
+  /* Şriftlər: simple-luxury-dən başqa şablonlar render anında ÖZ ailələrini
+     yükləyir (simple-luxury bura düşmür → mövcud müştərilərin yüklənmə
+     profili dəyişmir). Admin şrift override-ı varsa istənilən
+     ailə lazım ola bilər — o halda tam dəst yüklənir. */
+  if (templateId !== DEFAULT_TEMPLATE_ID) ensureTemplateFonts(adminOverrides?.fonts ? undefined : templateId)
 
   /* ── Phase 45: HEKAYƏ OVERRIDE-LARI ──
      Admin-in fəsil düzəlişləri (mətn, tarix, stiker, şəkillər, gizlətmə,

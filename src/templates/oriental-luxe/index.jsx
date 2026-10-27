@@ -1,213 +1,594 @@
-import TemplateShell, { alpha } from '../_shared/TemplateShell'
-import OpeningFrame, { Kicker, NameRow, Ornament, OpeningMeta, MonoContent } from '../_shared/OpeningFrame'
-import { Ambient, Blob, Particles, RotRing } from '../_shared/motion'
+import { motion } from 'framer-motion'
+import { QRCodeSVG } from 'qrcode.react'
+import LanguageSwitcher from '../../components/LanguageSwitcher'
+import DressCodeSection from '../_shared/DressCodeSection'
+import MapSection from '../_shared/MapSection'
+import { MonoContent } from '../_shared/MonoContent'
+import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
+import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
+import { useInvitation, useGate, openingNames, seatInputProps, rsvpInputProps, rsvpOptions, rsvpState, alpha } from '../_shared/useInvitation'
+import { MusicFab, EqBars, SeatSuggest, RsvpSuggest, RsvpStatus, StoryBlock, InvitationEnd } from '../_shared/invitationKit'
+import { lattice, starPoints, shamsaPath, golPath, BUTA, BUTA_IN, HASIYE_URI, RHOMB_URI, GIRIH_URI } from './ornaments'
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   ORIENTAL LUXE — Claude Design · t6
+   ORIENTAL LUXE — «Şəbəkə və xalça» (premium redizayn, 2026-10)
 
-   Design story: Azərbaycan toyunun öz dili — buta, girih, nar rəngi — 2025
-   interfeys disiplini ilə. Ənənəvi motivlər ornament kimi deyil, sistem kimi.
-
-   «Açılış Ekranı düzəliş V1»: açılış artıq MEHRAB TAĞIDIR. Nar rəngi pərdə
-   əriyir, iki tağ konturu mərkəzdən yanlara açılır (or-open), lampa işığı
-   nəfəs alır, romb monoqram fırlanaraq yerinə oturur (or-spin) — sonra adlar.
-   Daxili fonda girih halqaları dönür, ulduzlar tağın ətrafında dolanır.
-
-   Design mobil qeydi: pattern tile 18px-dən kiçik olmamalı (moiré) → 18px.
-
-   ⚠ Rənglər theme token-lərindən (templateConfig · oriental-luxe).
+   Konsept: Azərbaycan məclisinin öz sənəti. Açılış — Şəki Xan sarayının
+   şəbəkə pəncərəsi: ağac qəfəsdə yüzlərlə rəngli şüşə mərkəzdən halqa-halqa
+   işıqlanır, ortada şəmsə medalyonunda adlar. Toxunanda iki tay pəncərə
+   içəri açılır. Daxildə hər şey xalçanın dilindədir:
+     hero      → xalça: romb haşiyə, ortada pilləli göl medalyonu, künclərdə buta
+     bölmələr  → xalça haşiyəsi zolağı ilə ayrılır
+     sayğac    → səkkizguşəli kaşı ulduzları
+     məkan     → şəbəkə tağı formasında pəncərə
+     proqram   → göl medalyonlarının sütunu (xalçanın mərkəz oxu kimi)
+     masa      → səkkizguşəli ulduzda süfrə nömrəsi
+     RSVP      → ipək kart, nar emblemi
+   Rəng: nar qırmızısı, qızıl, ipək fil sümüyü. Şriftlər: Reem Kufi (kufi
+   xəttindən gələn həndəsi başlıq) · Alegreya (kalliqrafik mətn).
    ───────────────────────────────────────────────────────────────────────── */
 
-const TH = getTemplateTheme('oriental-luxe')
+const BASE = getTemplateTheme('oriental-luxe')
+const ID = 'oriental-luxe'
+
+const LABELS = {
+  countdown: { title: { az: 'Xoş saata qədər', en: 'Until the happy hour', ru: 'До счастливого часа' } },
+  venue:     { title: { az: 'Məclisin ünvanı', en: 'Where we gather', ru: 'Где мы соберёмся' } },
+  program:   { title: { az: 'Məclisin gedişi', en: 'Order of the feast', ru: 'Ход торжества' } },
+  dresscode: { title: { az: 'Geyim qaydası', en: 'Attire', ru: 'Дресс-код' } },
+  seating:   { title: { az: 'Süfrədəki yeriniz', en: 'Your place at the table', ru: 'Ваше место за столом' } },
+  gallery:   { title: { az: 'Xatirə albomu', en: 'Album of memories', ru: 'Альбом воспоминаний' } },
+  rsvp:      { title: { az: 'Məclisimizə gələcəksinizmi?', en: 'Will you join our feast?', ru: 'Придёте на наше торжество?' } },
+  guestbook: { title: { az: 'Xeyir-dualar', en: 'Blessings', ru: 'Благопожелания' } },
+}
+
+const NAR = '#4A0F1C'
+const DEEP = '#2E0710'
+const GOLD = '#D9B36C'
+const IVORY = '#F3E4C4'
+const SILK = '#F6EBD3'
+const MUTED = '#CDA88E'
+const WOOD = '#22100A'
+
+const LAT = lattice({ w: 400, h: 880, s: 36 })
+const STAR8 = starPoints(0, 0, 10)
+const CHAMFER = 'polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px)'
+const ARCH = 'M0 1V.36C0 .2 .3 .15 .5 0 .7 .15 1 .2 1 .36V1Z'
+const ARCH100 = 'M0 100V36C0 20 30 15 50 0 70 15 100 20 100 36V100Z'
 
 const KEYFRAMES = `
-@keyframes tpl-hint { 0%,100% { transform: translateY(0); opacity:.35 } 50% { transform: translateY(6px); opacity:1 } }
-@keyframes tpl-eq   { 0%,100% { transform: scaleY(.35) } 50% { transform: scaleY(1) } }
-@keyframes or-open  { from { clip-path: inset(0 50% 0 50%) } to { clip-path: inset(0 0 0 0) } }
-@keyframes or-spin  { from { opacity:0; transform:translate(-50%,-50%) rotate(-110deg) scale(.45) } to { opacity:1; transform:translate(-50%,-50%) rotate(0) scale(1) } }
-@keyframes or-lamp  { 0%,100% { opacity:.4 } 50% { opacity:.85 } }
+@keyframes ol-lit  { from { opacity: .08 } to { opacity: 1 } }
+@keyframes ol-rise { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: none } }
+@keyframes ol-fade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes ol-sun  { 0%,100% { transform: translate(-6%, -2%) } 50% { transform: translate(6%, 3%) } }
+@keyframes ol-seal { from { opacity: 0; transform: scale(.86) rotate(-8deg) } to { opacity: 1; transform: none } }
+@keyframes ol-hint { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
+[data-ol] span[aria-hidden="true"], [data-ol] svg[aria-hidden="true"], [data-ol] div[aria-hidden="true"] { pointer-events: none; }
+[data-ol] ::placeholder { color: rgba(205,168,142,.6); }
+[data-ol] .ol-silk ::placeholder { color: rgba(74,15,28,.45); }
+[data-ol] input:focus-visible, [data-ol] textarea:focus-visible { background: rgba(243,228,196,.13) !important; outline: none; }
+[data-ol] .ol-silk input:focus-visible { background: rgba(74,15,28,.05) !important; }
+[data-ol] button:focus-visible, [data-ol] a:focus-visible, [data-ol] [role="button"]:focus-visible { outline: 1px solid ${GOLD}; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { [data-ol] *, [data-ol] { animation: none !important; transition: none !important; } }
 `
 
-/* Girih nöqtə şəbəkəsi — 18px tile (design mobil qeydi) */
-function GirihPattern({ theme, opacity = 0.22 }) {
+/* ─── Kiçik motivlər ─── */
+function Star8({ size = 14, color = GOLD, fill = 'none', sw = 1.4, style }) {
   return (
-    <span style={{
-      position: 'absolute', inset: 0, opacity, pointerEvents: 'none',
-      backgroundImage: `radial-gradient(circle at 50% 50%, ${theme.accent} 1px, transparent 1.6px)`,
-      backgroundSize: '18px 18px',
-    }} />
-  )
-}
-
-/* Səkkizguşəli girih ulduzu — ambient orbitində dolanır */
-function GirihStar({ size, color, duration, delay }) {
-  return (
-    <span style={{
-      position: 'absolute', left: '50%', top: '38%', width: size, height: size,
-      margin: `${-size / 2}px 0 0 ${-size / 2}px`,
-      animation: `ab-orbit ${duration}s linear ${delay}s infinite`,
-    }}>
-      <svg viewBox="0 0 32 32" width={size} height={size} fill="none" stroke={color} strokeWidth=".8" aria-hidden="true">
-        <path d="M16 2 L22 10 L30 16 L22 22 L16 30 L10 22 L2 16 L10 10 Z" />
-        <path d="M16 8 L20 13 L25 16 L20 19 L16 24 L12 19 L7 16 L12 13 Z" />
-      </svg>
-    </span>
-  )
-}
-
-/* Korporativ/digər tədbirdə monoqramın içi — baş hərf əvəzinə kiçik girih
-   ulduzu (Phase 45). Tədbir adının ilk hərfi mənasız idi: «Əliyev…» → «Ə». */
-function GirihMark({ color }) {
-  return (
-    <svg viewBox="0 0 32 32" width="22" height="22" fill="none" stroke={color} strokeWidth="1.2" aria-hidden="true">
-      <path d="M16 2 L22 10 L30 16 L22 22 L16 30 L10 22 L2 16 L10 10 Z" />
-      <path d="M16 9 L19.5 13.5 L24 16 L19.5 18.5 L16 23 L12.5 18.5 L8 16 L12.5 13.5 Z" />
+    <svg viewBox="-11 -11 22 22" width={size} height={size} aria-hidden="true" style={{ display: 'block', overflow: 'visible', ...style }}>
+      <path d={STAR8} fill={fill} stroke={color} strokeWidth={sw} strokeLinejoin="round" />
     </svg>
   )
 }
 
-function Opening(props) {
-  const { theme, weddingData, isCouple, ot } = props
-
-  /* Mehrab tağı — yuxarısı yarımdairə, aşağısı düz künc */
-  const arch = (w, h, r, border, delay) => ({
-    position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)',
-    width: w, height: h, maxWidth: '72vw', pointerEvents: 'none',
-    border: `1px solid ${border}`, borderRadius: `${r}px ${r}px 6px 6px`,
-    animation: `or-open 1.5s cubic-bezier(.22,.61,.36,1) ${delay}s both`,
-  })
-
+function Buta({ size = 24, color = GOLD, style }) {
   return (
-    <OpeningFrame
-      {...props}
-      exit="iris"
-      duration={950}
-      label={ot.text('cta')}
-      hint={ot.text('hint')}
-      ctaDelay={4.3}
-      hintDelay={4.8}
-      ctaStyle={{
-        border: `1px solid ${alpha(theme.accent, 0.55)}`,
-        color: theme.text, background: alpha(theme.accent, 0.1),
-      }}
-      orbs="none"
-      veil={theme.background}
-      background={`radial-gradient(120% 82% at 50% 38%, ${theme.secondary}, ${theme.background} 76%)`}
-    >
-      <GirihPattern theme={theme} opacity={0.14} />
-
-      {/* Vinyet — diqqəti tağın içinə yığır */}
-      <span aria-hidden="true" style={{
-        position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)',
-        width: 'min(84vw, 300px)', height: 420, pointerEvents: 'none',
-        background: `radial-gradient(ellipse at 50% 50%, ${alpha(theme.background, 0.82)}, transparent 72%)`,
-      }} />
-
-      {/* Lampa işığı — nəfəs alır */}
-      <span aria-hidden="true" style={{
-        position: 'absolute', left: '50%', top: '42%', transform: 'translate(-50%,-50%)',
-        width: 'min(92vw, 330px)', height: 'min(92vw, 330px)', borderRadius: '50%', pointerEvents: 'none',
-        background: `radial-gradient(circle, ${alpha(theme.accent, 0.26)}, transparent 68%)`,
-        filter: 'blur(28px)', animation: 'or-lamp 7s ease-in-out 1.2s infinite',
-      }} />
-
-      <span style={arch(236, 400, 118, alpha(theme.accent, 0.4), 0.7)} />
-      <span style={arch(212, 376, 106, alpha(theme.accent, 0.2), 0.95)} />
-
-      <div style={{ position: 'relative' }}>
-        {/* Romb monoqram — iki kvadrat fırlanaraq üst-üstə düşür */}
-        <div style={{ position: 'relative', width: 64, height: 64, margin: '0 auto' }}>
-          <span style={{
-            position: 'absolute', left: '50%', top: '50%', width: 64, height: 64,
-            border: `1px solid ${alpha(theme.accent, 0.55)}`,
-            transform: 'translate(-50%,-50%) rotate(45deg)',
-            animation: 'or-spin 1.5s cubic-bezier(.2,.9,.25,1) 1.8s both',
-          }} />
-          <span style={{
-            position: 'absolute', left: '50%', top: '50%', width: 64, height: 64,
-            border: `1px solid ${alpha(theme.accent, 0.35)}`,
-            transform: 'translate(-50%,-50%)',
-            animation: 'or-spin 1.5s cubic-bezier(.2,.9,.25,1) 2s both',
-          }} />
-          <span style={{
-            position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: theme.fonts?.heading, fontSize: 17, lineHeight: 1, color: theme.text,
-            animation: 'tpl-cta 1s ease-out 2.6s both',
-          }}>
-            {/* Şəkil/loqo çərçivənin içində, xəttə toxunmadan (48px) oturur */}
-            <MonoContent
-              mono={ot.mono}
-              ornament={<GirihMark color={theme.text} />}
-              imgStyle={{ width: 48, height: 48 }}
-            />
-          </span>
-        </div>
-
-        {ot.show('kicker') && (
-          <Kicker text={ot.text('kicker')} color={theme.muted} delay={2.8} style={{ marginTop: 30 }} />
-        )}
-
-        <NameRow
-          theme={theme} weddingData={weddingData} isCouple={isCouple}
-          text={ot.override('title')}
-          delay={3.1} step={0.2}
-          size="clamp(26px, 9.5vw, 36px)" ampSize="clamp(17px, 6vw, 23px)"
-          color={theme.text} ampColor={theme.accent}
-          style={{ marginTop: 20, lineHeight: 1.3 }}
-        />
-
-        <Ornament color={theme.accent} mark="rhomb" delay={3.8} width={26} gap={8} style={{ marginTop: 18 }} />
-
-        {ot.show('meta') && (
-          <OpeningMeta text={ot.text('meta')} color={theme.muted} delay={4} style={{ marginTop: 14 }} />
-        )}
-      </div>
-    </OpeningFrame>
+    <svg viewBox="0 0 24 32" width={size} height={size * 1.33} aria-hidden="true" style={{ display: 'block', ...style }}>
+      <path d={BUTA} fill="none" stroke={color} strokeWidth="1.1" />
+      <path d={BUTA_IN} fill="none" stroke={color} strokeWidth=".8" strokeOpacity=".7" />
+      <circle cx="12" cy="20" r="2" fill={color} />
+    </svg>
   )
 }
 
-export default function OrientalLuxeTemplate(props) {
+/* Nar — bolluq və xoşbəxtliyin rəmzi */
+function Pomegranate({ size = 54, color = NAR, seed = GOLD }) {
   return (
-    <TemplateShell
-      {...props}
-      templateId="oriental-luxe"
-      theme={TH}
-      Opening={Opening}
-      keyframes={KEYFRAMES}
-      /* Daxili arxa fon — lampa işığı, dönən girih halqaları, orbitdə ulduzlar */
-      ambientBlend="screen"
-      ambient={
-        <Ambient>
-          <span style={{
-            position: 'absolute', left: '50%', top: '-14%', width: 320, height: 320, marginLeft: -160,
-            borderRadius: '50%', background: `radial-gradient(circle, ${alpha(TH.accent, 0.4)}, transparent 66%)`,
-            filter: 'blur(38px)', animation: 'ab-pulse 5.5s ease-in-out infinite',
-          }} />
-          <Blob color="rgba(199,124,88,.24)" right="-22%" bottom="10%" w="66%" h="30%" blur={44} duration={24} delay={7} reverse />
-          <RotRing color={alpha(TH.accent, 0.16)} size={330} duration={48} dashed />
-          <RotRing color={alpha(TH.accent, 0.1)} size={230} duration={38} reverse />
-          <GirihStar size={26} color="rgba(232,201,138,.5)" duration={26} delay={0} />
-          <GirihStar size={20} color="rgba(232,201,138,.35)" duration={34} delay={8} />
-          <GirihStar size={16} color="rgba(232,201,138,.3)" duration={44} delay={16} />
-          <Particles kind="up" count={4} color="#E8C98A" size={2} seed={13} minDur={13} maxDur={16} />
-        </Ambient>
-      }
-      design={{
-        /* Location — xeritə şəklinin şablona məxsus rəng emalı (bax MapSection) */
-        map: { opacity: 0.45, filter: 'grayscale(1) brightness(.45) contrast(1.2)', tintOpacity: 0.55 },
-        radius: 4,
-        buttonRadius: 0,
-        align: 'center',
-        headingTransform: 'none',
-        kicker: '.2em',
-        dark: true,
-        alternate: true,
-        headingColor: TH.text,
-        accentColor: TH.accent,
-        ctaBg: TH.accent,
-        ctaText: TH.primary,
-      }}
-    />
+    <svg viewBox="0 0 60 64" width={size} height={size * 1.07} aria-hidden="true" style={{ display: 'block' }}>
+      <path d="M23 18C10 21 5 33 8 44C11 55 21 61 30 61C39 61 49 55 52 44C55 33 50 21 37 18" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M23 19L21 8.5L25.6 12.6L27.4 5.4L30 11L32.6 5.4L34.4 12.6L39 8.5L37 19" fill="none" stroke={color} strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M14 42C16 50 22 55 29 56" fill="none" stroke={color} strokeWidth="1" strokeOpacity=".5" strokeLinecap="round" />
+      {[[30, 34], [24, 39], [36, 39], [30, 44], [24, 48.5], [36, 48.5], [42, 33], [18, 33]].map(([x, y], i) => (
+        <ellipse key={i} cx={x} cy={y} rx="2.3" ry="2.9" fill={seed} transform={`rotate(${(i * 37) % 60 - 30} ${x} ${y})`} />
+      ))}
+    </svg>
+  )
+}
+
+function Hasiye({ style }) {
+  return <div aria-hidden="true" style={{ height: 22, backgroundImage: HASIYE_URI, backgroundRepeat: 'repeat-x', backgroundPosition: 'center', opacity: 0.85, ...style }} />
+}
+
+/* ─── Şəbəkə pəncərəsi ─── */
+function Shebeke() {
+  return (
+    <svg viewBox={`0 0 ${LAT.w} ${LAT.h}`} preserveAspectRatio="xMidYMid slice" aria-hidden="true"
+      style={{ position: 'absolute', top: 0, width: '200%', height: '100%', display: 'block' }}>
+      <defs>
+        <radialGradient id="ol-glow" cx="50%" cy="44%" r="62%">
+          <stop offset="0" stopColor="#FFF0C8" stopOpacity=".42" />
+          <stop offset=".38" stopColor="#FFD58A" stopOpacity=".05" />
+          <stop offset=".8" stopColor="#120404" stopOpacity=".45" />
+          <stop offset="1" stopColor="#120404" stopOpacity=".7" />
+        </radialGradient>
+      </defs>
+      <rect width={LAT.w} height={LAT.h} fill={WOOD} />
+      {LAT.rings.map((rg, n) => (
+        <g key={`g${n}`} style={{ animation: `ol-lit 1.1s ease-out ${(0.15 + n * 0.07).toFixed(2)}s both` }}>
+          {Object.entries(rg.gaps).map(([c, d]) => <path key={c} d={d} fill={c} />)}
+        </g>
+      ))}
+      {LAT.rings.map((rg, n) => (
+        <g key={`s${n}`} style={{ animation: `ol-lit 1.1s ease-out ${(0.15 + n * 0.07).toFixed(2)}s both` }}>
+          {Object.entries(rg.stars).map(([c, d]) => <path key={c} d={d} fill={c} />)}
+        </g>
+      ))}
+      <rect width={LAT.w} height={LAT.h} fill="url(#ol-glow)" />
+      <path d={LAT.outline} fill="none" stroke={WOOD} strokeWidth="4.6" strokeLinejoin="round" />
+      <path d={LAT.outline} fill="none" stroke="#C9A35E" strokeWidth=".7" strokeOpacity=".5" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+/* ═══ 01 — AÇILIŞ ═══ */
+function ShebekeOpening({ inv, theme }) {
+  const { ot } = inv
+  const gate = useGate({ inv, ms: 1500 })
+  if (gate.gone) return null
+  const { titleOv, first, second } = openingNames(inv)
+  const head = theme.fonts.heading
+  const longest = Math.max(String(first || '').length, String(second || '').length, 1)
+  const nameSize = Math.round(Math.max(22, Math.min(38, 250 / (longest * 0.6))))
+  const swing = { duration: 1.05, ease: [0.55, 0, 0.3, 1], delay: 0.3 }
+  return (
+    <motion.div {...gate.gateProps} data-ol
+      animate={gate.opening ? { opacity: 0 } : {}}
+      transition={{ duration: 0.4, delay: 1.1 }}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden',
+        background: `radial-gradient(90% 60% at 50% 42%, #7A2234, ${NAR} 55%, ${DEEP})`,
+        perspective: 1400, color: IVORY, fontFamily: theme.fonts.body,
+      }}>
+      {/* iki tay pəncərə */}
+      {[0, 1].map((side) => (
+        <motion.div key={side}
+          animate={gate.opening ? { rotateY: side ? 100 : -100 } : {}}
+          transition={swing}
+          style={{
+            position: 'absolute', top: 0, bottom: 0, width: '50%', left: side ? '50%' : 0, overflow: 'hidden',
+            transformOrigin: side ? 'right center' : 'left center', backfaceVisibility: 'hidden',
+            boxShadow: `inset 0 0 0 7px ${WOOD}, inset 0 0 0 8px rgba(201,163,94,.55), inset 0 0 0 11px ${WOOD}`,
+          }}>
+          <div style={{ position: 'absolute', inset: 0, left: side ? '-100%' : 0, width: '200%' }}>
+            <Shebeke />
+          </div>
+          <span aria-hidden="true" style={{ position: 'absolute', inset: 0, boxShadow: `inset 0 0 0 7px ${WOOD}, inset 0 0 0 8px rgba(201,163,94,.55)`, pointerEvents: 'none' }} />
+        </motion.div>
+      ))}
+
+      {/* günəş parıltısı — şüşədən keçən işıq */}
+      <motion.span aria-hidden="true" animate={gate.opening ? { opacity: 0 } : {}} transition={{ duration: 0.3 }}
+        style={{ position: 'absolute', inset: '-10%', pointerEvents: 'none', mixBlendMode: 'soft-light', background: 'radial-gradient(40% 30% at 50% 42%, rgba(255,240,200,.75), transparent 70%)', animation: 'ol-sun 14s ease-in-out infinite' }} />
+      {/* aşağı kölgə — yazılar oxunsun */}
+      <motion.span aria-hidden="true" animate={gate.opening ? { opacity: 0 } : {}} transition={{ duration: 0.3 }}
+        style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '44%', pointerEvents: 'none', background: `linear-gradient(transparent, ${alpha(DEEP, 0.86)} 45%, ${alpha(DEEP, 0.96)})`, animation: 'ol-fade 1.2s ease-out 1.6s both' }} />
+
+      <motion.div animate={gate.opening ? { opacity: 0, scale: 0.92 } : {}} transition={{ duration: 0.35 }}
+        style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 20px', textAlign: 'center' }}>
+        {/* Şəmsə medalyonu */}
+        <div style={{ position: 'relative', width: 'min(80vw, 318px)', aspectRatio: '1', animation: 'ol-seal 1.3s cubic-bezier(.2,.8,.2,1) 1.25s both' }}>
+          <svg viewBox="-110 -110 220 220" width="100%" height="100%" aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'visible', filter: 'drop-shadow(0 18px 30px rgba(20,3,6,.6))' }}>
+            <defs>
+              <radialGradient id="ol-sh" r=".75">
+                <stop offset="0" stopColor="#6A1A2B" />
+                <stop offset="1" stopColor="#3A0A14" />
+              </radialGradient>
+            </defs>
+            <path d={shamsaPath(104, 28, 0.7)} fill="url(#ol-sh)" stroke={GOLD} strokeWidth="1.6" />
+            <circle r="92" fill="none" stroke={GOLD} strokeWidth=".7" strokeOpacity=".8" />
+            <circle r="87" fill="none" stroke={GOLD} strokeWidth="1.6" strokeOpacity=".55" strokeDasharray="0.1 5.2" strokeLinecap="round" />
+            <circle r="81" fill="none" stroke={GOLD} strokeWidth=".5" strokeOpacity=".6" />
+          </svg>
+          <div style={{ position: 'absolute', inset: '14%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ position: 'relative', width: 56, height: 56, display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'ol-fade 1s ease-out 1.9s both' }}>
+              <Star8 size={56} sw={0.8} style={{ position: 'absolute', inset: 0 }} />
+              <span style={{ position: 'relative', width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderRadius: '50%', fontFamily: head, fontSize: 12, color: GOLD, whiteSpace: 'nowrap' }}>
+                <MonoContent mono={ot.mono} ornament={<Star8 size={10} fill={GOLD} sw={0} />} imgStyle={{ borderRadius: '50%' }} />
+              </span>
+            </div>
+            {ot.show('kicker') && <div style={{ marginTop: 10, fontStyle: 'italic', fontSize: 15, color: MUTED, animation: 'ol-rise .9s ease-out 2.1s both' }}>{ot.text('kicker')}</div>}
+            {titleOv !== '' && (
+              <div style={{ marginTop: 8, fontFamily: head, fontWeight: 500, fontSize: nameSize, lineHeight: 1.12, color: IVORY, animation: 'ol-rise 1s ease-out 2.3s both' }}>
+                {first}
+                {second && <><span style={{ display: 'block', fontFamily: theme.fonts.body, fontStyle: 'italic', fontWeight: 400, fontSize: '.55em', color: GOLD, margin: '2px 0' }}>&amp;</span>{second}</>}
+              </div>
+            )}
+          </div>
+        </div>
+        {ot.show('meta') && <div style={{ marginTop: 22, fontSize: 15.5, color: IVORY, textShadow: `0 1px 8px ${DEEP}`, animation: 'ol-rise .9s ease-out 2.7s both' }}>{ot.text('meta')}</div>}
+        {ot.show('cta') && (
+          <div style={{ marginTop: 18, minHeight: 48, padding: '13px 30px', display: 'inline-flex', alignItems: 'center', background: DEEP, color: GOLD, fontFamily: head, fontSize: 15, letterSpacing: '.05em', clipPath: CHAMFER, boxShadow: `inset 0 0 0 1px ${GOLD}`, animation: 'ol-rise .9s ease-out 3s both' }}>
+            {ot.text('cta')}
+          </div>
+        )}
+        {ot.show('hint') && <div style={{ marginTop: 12, fontSize: 13, fontStyle: 'italic', color: MUTED, animation: 'ol-fade .8s ease-out 3.4s both, ol-hint 3s ease-in-out 4.2s infinite' }}>{ot.text('hint')}</div>}
+      </motion.div>
+    </motion.div>
+  )
+}
+
+/* Bölmə — xalça haşiyəsi zolağı + səkkizguşəli ulduz + başlıq */
+function Majlis({ id, section, title, kicker, sub, children, head }) {
+  return (
+    <section id={id} data-section={section} style={{ position: 'relative', paddingBottom: 60 }}>
+      <Hasiye />
+      <Reveal style={{ maxWidth: 500, margin: '0 auto', padding: '44px 20px 0' }}>
+        {(title || kicker) && (
+          <div style={{ textAlign: 'center', marginBottom: 30 }}>
+            <Star8 size={18} style={{ margin: '0 auto 14px' }} />
+            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 500, fontSize: 'clamp(26px, 7.6vw, 32px)', lineHeight: 1.2, color: GOLD, textWrap: 'balance' }}>{title}</h2>}
+            {kicker && <div style={{ marginTop: 8, fontStyle: 'italic', fontSize: 15, color: MUTED }}>{kicker}</div>}
+            {sub && <p style={{ margin: '8px auto 0', maxWidth: 320, fontSize: 16, color: MUTED, lineHeight: 1.5 }}>{sub}</p>}
+          </div>
+        )}
+        {children}
+      </Reveal>
+    </section>
+  )
+}
+
+const field = {
+  width: '100%', background: 'rgba(243,228,196,.07)', border: 'none', clipPath: CHAMFER,
+  boxShadow: `inset 0 -1px 0 ${alpha(GOLD, 0.6)}`, padding: '15px 18px', fontSize: 16.5, color: IVORY, outline: 'none',
+}
+const btn = (on, dark = false) => ({
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 22px',
+  fontSize: 15, letterSpacing: '.04em', textDecoration: 'none', cursor: 'pointer', border: 'none', clipPath: CHAMFER,
+  background: on ? (dark ? NAR : GOLD) : 'transparent', color: on ? (dark ? IVORY : DEEP) : GOLD,
+  boxShadow: on ? 'none' : `inset 0 0 0 1px ${alpha(GOLD, 0.7)}`,
+})
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+export default function OrientalLuxeTemplate(props) {
+  const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
+  const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const { theme, tr, L, K, S, cd, timeline, seating, rsvp, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const head = theme.fonts.heading
+  const body = theme.fonts.body
+
+  const longest = Math.max(String(inv.groom || inv.single || '').length, String(inv.bride || '').length, 1)
+  const heroSize = Math.round(Math.max(28, Math.min(48, 230 / (longest * 0.58))))
+
+  return (
+    <div data-ol data-enter={enterDirection(ID)} style={{
+      backgroundColor: DEEP,
+      backgroundImage: `${GIRIH_URI}, radial-gradient(140% 70% at 50% 0%, #5C1424, ${NAR} 45%, ${DEEP})`,
+      backgroundSize: '56px 56px, 100% 100%',
+      minHeight: '100vh', fontFamily: body, color: IVORY, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
+      fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(GOLD, 0.3),
+    }}>
+      <style>{KEYFRAMES}</style>
+      <svg width="0" height="0" aria-hidden="true" style={{ position: 'absolute' }}>
+        <clipPath id="ol-arch" clipPathUnits="objectBoundingBox"><path d={ARCH} /></clipPath>
+      </svg>
+      {!inv.opened && <ShebekeOpening inv={inv} theme={theme} />}
+
+      <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: 0, clipPath: CHAMFER, background: DEEP, border: 'none', boxShadow: `inset 0 0 0 1px ${alpha(GOLD, 0.6)}` }}>
+        {({ playing }) => <EqBars playing={playing} color={GOLD} idle={alpha(GOLD, 0.4)} />}
+      </MusicFab>
+
+      {inv.opened && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }} style={{ position: 'relative', zIndex: 1 }}>
+          <header style={{
+            position: 'sticky', top: 0, zIndex: 40, height: 52, padding: '0 16px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            background: alpha(DEEP, 0.9), backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
+            borderBottom: `1px solid ${alpha(GOLD, 0.25)}`,
+          }}>
+            <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: MUTED, fontSize: 15, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
+              <span aria-hidden="true">←</span>{tr.btn_back}
+            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: head, fontSize: 15, color: GOLD, letterSpacing: '.06em' }}><Star8 size={11} />Digitoy</div>
+            <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
+          </header>
+
+          {/* HERO — xalça */}
+          <section style={{ padding: '26px 14px 54px' }}>
+            <div style={{ padding: 12, backgroundColor: DEEP, backgroundImage: RHOMB_URI, backgroundSize: '14px 14px', backgroundPosition: 'center', border: `1px solid ${GOLD}`, boxShadow: '0 40px 60px -34px rgba(0,0,0,.7)' }}>
+              <div style={{
+                position: 'relative', overflow: 'hidden', textAlign: 'center', padding: '36px 18px 34px',
+                background: `radial-gradient(90% 60% at 50% 50%, #651a2c, ${NAR} 70%)`,
+                border: `1px solid ${GOLD}`, boxShadow: `inset 0 0 0 6px ${NAR}, inset 0 0 0 7px ${alpha(GOLD, 0.45)}`,
+              }}>
+                {[0, 1, 2, 3].map((c) => (
+                  <Buta key={c} size={20} color={alpha(GOLD, 0.75)} style={{
+                    position: 'absolute', [c < 2 ? 'top' : 'bottom']: 16, [c % 2 ? 'right' : 'left']: 16,
+                    transform: `rotate(${[-35, 35, -145, 145][c]}deg)`,
+                  }} />
+                ))}
+                <div style={{ fontStyle: 'italic', fontSize: 16, color: MUTED }}>{L('hero', 'kicker', inv.eventLabel)}</div>
+                <p style={{ margin: '8px auto 0', maxWidth: 280, fontSize: 16.5, lineHeight: 1.5, color: IVORY }}>{tr.inv_join}</p>
+
+                <div style={{ position: 'relative', margin: '22px auto 0', width: '100%', maxWidth: 300, aspectRatio: '300 / 380' }}>
+                  <svg viewBox="0 0 300 380" width="100%" height="100%" aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'visible' }}>
+                    <path d={golPath(300, 380, 7)} fill={alpha(DEEP, 0.55)} stroke={GOLD} strokeWidth="1.3" />
+                    <path d={golPath(300, 380, 7)} fill="none" stroke={GOLD} strokeOpacity=".45" strokeWidth=".8" transform="translate(30 38) scale(.8)" />
+                    {[[150, -8], [150, 388], [-8, 190], [308, 190]].map(([x, y], i) => (
+                      <path key={i} d={`M${x} ${y - 7}L${x + 7} ${y}L${x} ${y + 7}L${x - 7} ${y}Z`} fill={GOLD} />
+                    ))}
+                    <g transform="translate(150 60)"><path d={STAR8} transform="scale(.9)" fill="none" stroke={GOLD} strokeWidth="1.2" /></g>
+                    <g transform="translate(150 320)"><path d={STAR8} transform="scale(.9)" fill="none" stroke={GOLD} strokeWidth="1.2" /></g>
+                  </svg>
+                  <h1 style={{ position: 'absolute', inset: '0 12%', margin: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: head, fontWeight: 500, fontSize: inv.heroTitle ? 'clamp(24px, 7vw, 32px)' : heroSize, lineHeight: 1.1, color: IVORY, textWrap: 'balance' }}>
+                    {inv.heroTitle ? inv.heroTitle : inv.isCouple ? (
+                      <>{inv.groom}<span style={{ fontFamily: body, fontStyle: 'italic', fontWeight: 400, fontSize: '.55em', color: GOLD, margin: '4px 0' }}>&amp;</span>{inv.bride}</>
+                    ) : inv.single}
+                  </h1>
+                </div>
+
+                {inv.isCorp && weddingData.organizer?.trim() && <div style={{ marginTop: 16, fontSize: 15, color: MUTED }}>{tr.organizer_display}: {weddingData.organizer}</div>}
+                <div style={{ marginTop: 24, fontFamily: head, fontSize: 19, color: GOLD, letterSpacing: '.02em' }}>{inv.fullDate}</div>
+                <div style={{ marginTop: 6, fontSize: 16, color: IVORY }}>{[inv.time, weddingData.venueName].filter(Boolean).join(' · ')}</div>
+              </div>
+            </div>
+          </section>
+
+          {/* SAYĞAC — kaşı ulduzları */}
+          {S.countdown && (
+            <Majlis head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 'clamp(6px, 2.4vw, 12px)' }}>
+                {[
+                  { v: cd.days, l: cd.labels.days },
+                  { v: cd.hours, l: cd.labels.hours },
+                  { v: cd.minutes, l: cd.labels.minutes },
+                  { v: cd.seconds, l: cd.labels.seconds, pop: true },
+                ].map(({ v, l, pop }) => (
+                  <div key={l} style={{ textAlign: 'center' }}>
+                    <div style={{ position: 'relative', width: 'clamp(70px, 20vw, 84px)', aspectRatio: '1' }}>
+                      <svg viewBox="-52 -52 104 104" width="100%" height="100%" aria-hidden="true" style={{ position: 'absolute', inset: 0 }}>
+                        <defs>
+                          <radialGradient id={`ol-k${l}`} r=".8"><stop offset="0" stopColor="#FBF1DC" /><stop offset="1" stopColor="#E6CFA1" /></radialGradient>
+                        </defs>
+                        <path d={starPoints(0, 0, 50)} fill={pop ? GOLD : `url(#ol-k${l})`} stroke={GOLD} strokeWidth="1.5" strokeLinejoin="round" />
+                        <path d={starPoints(0, 0, 41)} fill="none" stroke={NAR} strokeOpacity=".35" strokeWidth=".8" strokeLinejoin="round" />
+                      </svg>
+                      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: head, fontSize: 'clamp(22px, 6.4vw, 27px)', color: NAR, fontVariantNumeric: 'tabular-nums' }}>
+                        <PopDigit value={v} pop={pop} />
+                      </div>
+                    </div>
+                    <div style={{ marginTop: 8, fontSize: 14, color: MUTED }}>{l}</div>
+                  </div>
+                ))}
+              </div>
+            </Majlis>
+          )}
+
+          <StoryBlock inv={inv} templateId={ID} weddingData={weddingData} lang={lang} before={<Hasiye />} />
+
+          {/* MƏKAN — şəbəkə tağı */}
+          {S.venue && (
+            <Majlis head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+              <div style={{ position: 'relative', maxWidth: 320, margin: '0 auto', height: 'clamp(300px, 86vw, 360px)' }}>
+                <div style={{ position: 'absolute', inset: 0, clipPath: 'url(#ol-arch)', background: DEEP }}>
+                  <MapSection
+                    weddingData={weddingData} theme={theme} accent={GOLD} height="100%"
+                    map={{ opacity: 0.6, filter: 'grayscale(1) sepia(.5) brightness(.6) contrast(1.15)', tintOpacity: 0.45, tint: NAR, blend: 'multiply' }}
+                    frame={<ArchPin />}
+                    fallback={<div style={{ height: '100%', position: 'relative', backgroundColor: DEEP, backgroundImage: RHOMB_URI, backgroundSize: '14px 14px' }}><span style={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at 50% 58%, transparent 20%, ${DEEP} 75%)` }} /><ArchPin /></div>}
+                  />
+                </div>
+                <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible', pointerEvents: 'none' }}>
+                  <path d={ARCH100} fill="none" stroke={GOLD} strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+                  <path d={ARCH100} fill="none" stroke={GOLD} strokeWidth=".7" strokeOpacity=".5" vectorEffect="non-scaling-stroke" transform="translate(4 4) scale(.92)" />
+                </svg>
+              </div>
+              <div style={{ textAlign: 'center', marginTop: 22, fontFamily: head, fontSize: 23, lineHeight: 1.3, color: IVORY }}>{weddingData.venueName}</div>
+              {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontSize: 16, fontStyle: 'italic', color: MUTED }}>{weddingData.venueNote}</div>}
+              <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
+                {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(true)}>{tr.inv_directions_btn}</a>}
+                {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(!inv.dirUrl)}>Maps</a>}
+                {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Waze</a>}
+                {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Apple</a>}
+              </div>
+            </Majlis>
+          )}
+
+          {/* PROQRAM — göl sütunu */}
+          {S.program && (
+            <Majlis head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+              <ol style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                {timeline.events.map((ev, i) => (
+                  <li key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    {i > 0 && (
+                      <svg width="12" height="34" viewBox="0 0 12 34" aria-hidden="true" style={{ display: 'block', margin: '6px 0' }}>
+                        <path d="M6 0V11M6 23V34" stroke={GOLD} strokeOpacity=".5" strokeWidth="1" />
+                        <path d="M6 13L10 17L6 21L2 17Z" fill={GOLD} />
+                      </svg>
+                    )}
+                    <div style={{ position: 'relative', width: 112, height: 58, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg viewBox="-4 -4 120 66" width="120" height="66" aria-hidden="true" style={{ position: 'absolute', left: -4, top: -4 }}>
+                        <path d={golPath(112, 58, 4)} fill={i % 2 ? alpha(GOLD, 0.14) : DEEP} stroke={GOLD} strokeWidth="1.2" />
+                      </svg>
+                      <span style={{ position: 'relative', fontFamily: head, fontSize: 16, color: GOLD, letterSpacing: '.04em', fontVariantNumeric: 'tabular-nums' }}>{ev.time}</span>
+                    </div>
+                    <div style={{ marginTop: 10, maxWidth: 300, fontSize: 19, lineHeight: 1.35, color: IVORY }}>{ev.label}</div>
+                  </li>
+                ))}
+              </ol>
+            </Majlis>
+          )}
+
+          {S.dresscode && (
+            <Majlis head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+              <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
+                customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" onDark />
+            </Majlis>
+          )}
+
+          {/* MASA — səkkizguşəli ulduz */}
+          {S.seating && !seating.isEmpty && (
+            <Majlis head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+              <input {...seatInputProps(inv, 'ol-seat-list')} style={field} />
+              <SeatSuggest inv={inv} id="ol-seat-list" c={{ bg: DEEP, border: `1px solid ${alpha(GOLD, 0.4)}`, active: alpha(GOLD, 0.12), text: IVORY, table: GOLD, radius: 0, font: body }} />
+              {seating.showNotFound && <div style={{ marginTop: 12, fontStyle: 'italic', fontSize: 15, color: MUTED, textAlign: 'center' }}>{tr.inv_seat_fullname}</div>}
+              {seating.selected && (
+                <div style={{ marginTop: 28, textAlign: 'center' }}>
+                  <div style={{ fontSize: 17, color: IVORY }}>{seating.selected.full_name}</div>
+                  <div style={{ position: 'relative', width: 168, height: 168, margin: '14px auto 0', animation: 'ol-seal .9s cubic-bezier(.2,.8,.2,1) both' }}>
+                    <svg viewBox="-56 -56 112 112" width="168" height="168" aria-hidden="true" style={{ position: 'absolute', inset: 0 }}>
+                      <path d={starPoints(0, 0, 54)} fill={SILK} stroke={GOLD} strokeWidth="1.4" strokeLinejoin="round" />
+                      <path d={starPoints(0, 0, 46)} fill="none" stroke={NAR} strokeOpacity=".4" strokeWidth=".8" strokeLinejoin="round" />
+                      <circle r="30" fill="none" stroke={NAR} strokeOpacity=".25" strokeWidth=".6" />
+                    </svg>
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: head, fontSize: 50, lineHeight: 1, color: NAR }}>{seating.selected.table_id}</div>
+                  </div>
+                  {seating.tablemates.length > 0 && <div style={{ marginTop: 16, fontSize: 16, fontStyle: 'italic', color: MUTED, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}
+                  <button onClick={seating.reset} data-press style={{ marginTop: 6, background: 'none', border: 'none', color: GOLD, fontSize: 15, minHeight: 44, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 4, fontFamily: body }}>
+                    {seatingL.again || 'Yenidən axtar'}
+                  </button>
+                </div>
+              )}
+            </Majlis>
+          )}
+
+          {/* FOTOLAR — tağlı çərçivələr */}
+          {S.gallery && (
+            <Majlis id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+              {gallery.demoPhotos.length > 0 && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 28 }}>
+                  {gallery.demoPhotos.map((url, i) => (
+                    <div key={i} style={{ aspectRatio: '3 / 4', clipPath: 'url(#ol-arch)', background: alpha(GOLD, 0.18) }}>
+                      <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: 'sepia(.15) saturate(.9)' }} />
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ display: 'inline-block', padding: 14, background: SILK, boxShadow: `0 0 0 1px ${GOLD}, 0 0 0 6px ${DEEP}, 0 0 0 7px ${alpha(GOLD, 0.5)}` }}>
+                  <QRCodeSVG value={gallery.photoShareUrl} size={128} bgColor={SILK} fgColor={NAR} level="M" />
+                </div>
+                <div style={{ marginTop: 16, fontSize: 15, color: MUTED }}>{tr.inv_scan_upload}</div>
+                <a data-press href={gallery.photoShareUrl} style={{ ...btn(true), marginTop: 16 }}>{tr.inv_gallery_btn}</a>
+                <p style={{ margin: '16px auto 0', maxWidth: 340, fontSize: 16, color: MUTED, lineHeight: 1.6 }}>{tr.inv_gallery_desc}</p>
+              </div>
+            </Majlis>
+          )}
+
+          {/* RSVP — ipək kart */}
+          {S.rsvp && (
+            <Majlis head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+              <div className="ol-silk" style={{
+                position: 'relative', padding: '30px clamp(18px, 6vw, 28px) 28px', background: `linear-gradient(160deg, #FBF3E2, ${SILK} 50%, #EEDDB9)`, color: NAR,
+                border: `1px solid ${GOLD}`, boxShadow: `inset 0 0 0 6px ${SILK}, inset 0 0 0 7px ${alpha(NAR, 0.35)}, 0 30px 50px -28px rgba(0,0,0,.65)`,
+              }}>
+                {[0, 1, 2, 3].map((c) => (
+                  <Star8 key={c} size={12} color={alpha(NAR, 0.45)} style={{ position: 'absolute', [c < 2 ? 'top' : 'bottom']: 16, [c % 2 ? 'right' : 'left']: 16 }} />
+                ))}
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}><Pomegranate size={46} /></div>
+                <RsvpStatus inv={inv} render={({ title, sub }) => (
+                  <div style={{ textAlign: 'center', padding: '4px 0 8px' }}>
+                    <div style={{ fontFamily: head, fontSize: 23, lineHeight: 1.3 }}>{title}</div>
+                    {sub && <div style={{ marginTop: 6, fontSize: 16, fontStyle: 'italic', color: alpha(NAR, 0.75) }}>{sub}</div>}
+                  </div>
+                )} />
+                {rsvpState(rsvp) === 'form' && (
+                  <form onSubmit={rsvp.handleSubmit}>
+                    <input {...rsvpInputProps(inv)} style={{ ...field, background: 'rgba(74,15,28,.04)', color: NAR, boxShadow: `inset 0 -1px 0 ${alpha(NAR, 0.5)}` }} />
+                    <RsvpSuggest inv={inv} c={{ bg: SILK, border: `1px solid ${alpha(NAR, 0.3)}`, active: alpha(NAR, 0.07), text: NAR, table: '#8A5A2B', radius: 0, font: body }} />
+                    {rsvp.showNotFound && <div style={{ marginTop: 8, fontSize: 14.5, fontStyle: 'italic', color: alpha(NAR, 0.8) }}>{rsvpL.not_in_list}</div>}
+                    <div role="radiogroup" aria-label={L('rsvp', 'title', rsvpL.title)} style={{ display: 'grid', gap: 2, marginTop: 16 }}>
+                      {rsvpOptions(inv).map(({ val, label }) => {
+                        const active = rsvp.status === val
+                        return (
+                          <button key={val} type="button" role="radio" aria-checked={active} onClick={() => rsvp.chooseStatus(val)} data-press style={{
+                            display: 'flex', alignItems: 'center', gap: 14, minHeight: 50, padding: '0 6px', cursor: 'pointer',
+                            background: 'none', border: 'none', borderBottom: `1px solid ${alpha(NAR, 0.14)}`, color: NAR, fontFamily: body, fontSize: 17, textAlign: 'left',
+                          }}>
+                            <svg width="18" height="18" viewBox="-9 -9 18 18" aria-hidden="true" style={{ flex: 'none' }}>
+                              <path d="M0 -8L8 0L0 8L-8 0Z" fill="none" stroke={NAR} strokeWidth="1.1" />
+                              {active && <path d="M0 -4.4L4.4 0L0 4.4L-4.4 0Z" fill={NAR} />}
+                            </svg>
+                            <span style={{ fontWeight: active ? 500 : 400 }}>{label}</span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                    {rsvp.status === 'yes' && (
+                      <div style={{ marginTop: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+                        <span style={{ fontSize: 16, fontStyle: 'italic' }}>{rsvpL.plusq}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} data-press aria-label="Azalt" style={{ width: 44, height: 44, border: 'none', clipPath: CHAMFER, background: alpha(NAR, 0.08), color: NAR, fontSize: 19, cursor: 'pointer', opacity: rsvp.plusOne === 0 ? 0.35 : 1 }}>−</button>
+                          <span style={{ width: 30, textAlign: 'center', fontFamily: head, fontSize: 24 }}>{rsvp.plusOne}</span>
+                          <button type="button" onClick={rsvp.incPlusOne} disabled={rsvp.plusOne === rsvp.maxExtraGuests} data-press aria-label="Artır" style={{ width: 44, height: 44, border: 'none', clipPath: CHAMFER, background: alpha(NAR, 0.08), color: NAR, fontSize: 19, cursor: 'pointer', opacity: rsvp.plusOne === rsvp.maxExtraGuests ? 0.35 : 1 }}>+</button>
+                        </div>
+                      </div>
+                    )}
+                    <button type="submit" disabled={!rsvp.canSubmit} data-press style={{
+                      ...btn(true, true), width: '100%', marginTop: 22, minHeight: 54, fontFamily: head, fontSize: 16, color: GOLD,
+                      opacity: rsvp.canSubmit ? 1 : 0.4, cursor: rsvp.canSubmit ? 'pointer' : 'not-allowed',
+                    }}>
+                      {rsvp.sending ? '…' : rsvpL.send}
+                    </button>
+                  </form>
+                )}
+              </div>
+            </Majlis>
+          )}
+
+          {/* XEYİR-DUALAR */}
+          {S.guestbook && (
+            <Majlis head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+              <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 34 }}>
+                <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbookL.namePh} style={field} />
+                <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbookL.msgPh} rows={3} style={{ ...field, resize: 'none', lineHeight: 1.5 }} />
+                <button type="submit" disabled={!gbook.canSubmit} data-press style={{ ...btn(gbook.canSubmit), width: '100%', fontFamily: head, opacity: gbook.canSubmit ? 1 : 0.5, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed' }}>
+                  {gbook.sending ? gbookL.sending : gbookL.btn}
+                </button>
+                {gbook.error && <p role="alert" style={{ margin: 0, fontSize: 14 }}>⚠ {gbookL.error}</p>}
+              </form>
+              <div style={{ display: 'grid', gap: 0, textAlign: 'center' }}>
+                {gbook.messages.map((raw, i) => {
+                  const m = gbook.readMessage(raw)
+                  return (
+                    <figure key={m.name + i} style={{ margin: 0 }}>
+                      {i > 0 && (
+                        <div aria-hidden="true" style={{ display: 'flex', justifyContent: 'center', gap: 6, margin: '22px 0' }}>
+                          {[0, 1, 2].map((k) => <span key={k} style={{ width: 6, height: 6, transform: 'rotate(45deg)', background: k === 1 ? GOLD : alpha(GOLD, 0.45) }} />)}
+                        </div>
+                      )}
+                      <blockquote style={{ margin: 0, fontStyle: 'italic', fontSize: 19, lineHeight: 1.55, color: IVORY }}>{m.text}</blockquote>
+                      <figcaption style={{ marginTop: 10, fontFamily: head, fontSize: 14.5, letterSpacing: '.04em', color: GOLD }}>{m.name}{m.date ? <span style={{ fontFamily: body, color: MUTED, letterSpacing: 0 }}>{`, ${gbook.formatDate(m.date)}`}</span> : null}</figcaption>
+                    </figure>
+                  )
+                })}
+              </div>
+            </Majlis>
+          )}
+
+          <Hasiye />
+          <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
+        </motion.div>
+      )}
+    </div>
+  )
+}
+
+function ArchPin() {
+  return (
+    <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '58%', transform: 'translate(-50%,-50%)', pointerEvents: 'none' }}>
+      <span style={{ position: 'absolute', width: 64, height: 64, left: -32, top: -32, borderRadius: '50%', background: `radial-gradient(circle, ${alpha(GOLD, 0.35)}, transparent 70%)` }} />
+      <Star8 size={30} fill={NAR} color={GOLD} sw={1.6} style={{ position: 'absolute', left: -15, top: -15 }} />
+    </span>
   )
 }
