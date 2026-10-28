@@ -185,8 +185,9 @@ function decodeData(encoded) {
 }
 
 /* Phase 27: /demo marşrutunun şablonu. Landing-dəki bütün "Nümunə dəvətnamə"
-   CTA-ları da bura gəlir — tək mənbə budur, dəyişmək üçün yalnız bu sətir. */
-const DEMO_TEMPLATE_ID = 'floral-garden'
+   CTA-ları da bura gəlir — tək mənbə budur, dəyişmək üçün yalnız bu sətir.
+   2026-10-28: premium redizayndan sonra nümunə Oriental Luxe-dur (istifadəçi seçimi). */
+const DEMO_TEMPLATE_ID = 'oriental-luxe'
 
 /* ── /demo/template/:id — daxili şablon önbaxışı (production linklərinə toxunmur) ── */
 function parseTemplatePreviewId() {
