@@ -42,6 +42,11 @@ RedirectMatch 404 ^/api/migrations/
     Require all denied
 </Files>
 
+# 2026-10-28 — sablon versiyasi qaydalari (yalniz include)
+<Files "template_version.php">
+    Require all denied
+</Files>
+
 # Phase 45 — acilis/hekaye override-larinin yoxlama qaydalari (yalniz include)
 <Files "admin_content_rules.php">
     Require all denied
