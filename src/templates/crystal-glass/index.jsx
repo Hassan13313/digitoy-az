@@ -10,6 +10,7 @@ import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { tableParts, tableFontPx } from '../_shared/tableBadge'
 import { LABELS, TXT } from './copy'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -240,7 +241,7 @@ function ChandelierOpening({ inv, theme }) {
             </div>
             {ot.show('kicker') && <div style={{ marginTop: 12, fontFamily: head, fontWeight: 300, fontSize: 12.5, letterSpacing: '.32em', textTransform: 'uppercase', paddingLeft: '.32em', color: C.STEEL }}>{ot.text('kicker')}</div>}
             {titleOv !== '' && (
-              <div style={{ marginTop: 10, fontFamily: head, fontWeight: 200, fontSize: 'clamp(30px, 9.4vw, 40px)', lineHeight: 1.15, color: C.INK }}>
+              <div data-fit style={{ marginTop: 10, fontFamily: head, fontWeight: 200, fontSize: 'clamp(30px, 9.4vw, 40px)', lineHeight: 1.15, color: C.INK }}>
                 {first}{second && <><span style={{ fontWeight: 300, margin: '0 .28em', background: SPEC_LINE, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>{ot.text('and')}</span>{second}</>}
               </div>
             )}
@@ -295,6 +296,7 @@ export default function CrystalGlassTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
   const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const tb = tableParts(seating.selected?.table_id)
   const T = inv.copy(TXT)
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -337,7 +339,7 @@ export default function CrystalGlassTemplate(props) {
                 <Brilliant size={26} color={C.STEEL} style={{ margin: '0 auto' }} />
                 <div style={{ marginTop: 16, fontFamily: head, fontWeight: 300, fontSize: 12.5, letterSpacing: '.32em', textTransform: 'uppercase', paddingLeft: '.32em', color: C.STEEL }}>{L('hero', 'kicker', inv.eventLabel)}</div>
                 <p style={{ margin: '12px auto 0', maxWidth: 280, fontSize: 15.5, lineHeight: 1.55, color: C.STEEL }}>{tr.inv_join}</p>
-                <h1 style={{ margin: '24px 0 0', fontFamily: head, fontWeight: 200, fontSize: 'clamp(40px, 12.5vw, 56px)', lineHeight: 1.08, color: C.INK, textWrap: 'balance' }}>
+                <h1 data-fit style={{ margin: '24px 0 0', fontFamily: head, fontWeight: 200, fontSize: 'clamp(40px, 12.5vw, 56px)', lineHeight: 1.08, color: C.INK, textWrap: 'balance' }}>
                   {inv.heroTitle ? inv.heroTitle : inv.isCouple ? (
                     <>{inv.groom}<span style={{ display: 'block', fontWeight: 300, fontSize: '.6em', margin: '4px 0', background: SPEC_LINE, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>{inv.and}</span>{inv.bride}</>
                   ) : inv.single}
@@ -447,7 +449,7 @@ export default function CrystalGlassTemplate(props) {
                   <div style={{ maxWidth: 280, margin: '28px auto 0', animation: 'cg-rise .6s ease-out both' }}>
                     <Acrylic pad="26px 20px 18px" style={{ textAlign: 'center' }}>
                       <div style={{ fontSize: 15, color: C.STEEL }}>{seating.selected.full_name}</div>
-                      <div style={{ marginTop: 6, fontFamily: head, fontWeight: 200, fontSize: 68, lineHeight: 1 }}>{seating.selected.table_id}</div>
+                      <div style={{ marginTop: 6, fontFamily: head, fontWeight: 200, fontSize: tableFontPx(tb.num, 68), lineHeight: 1 }}>{tb.hasWord && <span style={{ display: 'block', fontSize: 12, fontWeight: 400, letterSpacing: '.18em', color: C.STEEL, marginBottom: 6 }}>{tr.inv_table}</span>}{tb.num}</div>
                       <div aria-hidden="true" style={{ width: 48, height: 1.5, margin: '10px auto 0', background: SPEC_LINE }} />
                       {seating.tablemates.length > 0 && <div style={{ marginTop: 12, fontSize: 14.5, color: C.STEEL, lineHeight: 1.55 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}
                       <button onClick={seating.reset} data-press style={{ marginTop: 6, background: 'none', border: 'none', color: C.INK, fontSize: 14.5, minHeight: 44, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 4, fontFamily: body }}>

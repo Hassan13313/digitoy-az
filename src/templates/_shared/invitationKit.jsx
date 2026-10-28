@@ -236,7 +236,7 @@ export function InvitationEnd({ inv, theme, weddingData, lang, isDemoMode, serif
         theme={theme} weddingData={weddingData} lang={lang}
         isDemoMode={isDemoMode} isCouple={inv.isCouple} isCorp={inv.isCorp}
         eventLabel={inv.eventLabel} serif={serif}
-        footer={inv.footer}
+        footer={inv.footer} wrapNames
       />
     </>
   )

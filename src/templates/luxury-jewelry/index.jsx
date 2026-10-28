@@ -11,6 +11,7 @@ import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { brilliant, brilliantSide, stepCut, pearCut } from './gems'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { tableParts, tableFontPx } from '../_shared/tableBadge'
 import { LABELS, TXT } from './copy'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -209,7 +210,7 @@ function RingBoxOpening({ inv, theme }) {
         style={{ marginTop: 'clamp(26px, 5vh, 40px)', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         {ot.show('kicker') && <div style={{ fontSize: 11.5, letterSpacing: '.36em', paddingLeft: '.36em', color: C.MUTED, animation: 'lj-rise .8s ease-out .9s both' }}>{String(ot.text('kicker')).toLocaleUpperCase(inv.lang === 'az' ? 'az' : inv.lang)}</div>}
         {titleOv !== '' && (
-          <div style={{ marginTop: 12, fontFamily: disp, fontSize: 'clamp(32px, 10vw, 42px)', lineHeight: 1.1, color: C.IVORY, animation: 'lj-rise 1s ease-out 1.1s both' }}>
+          <div data-fit style={{ marginTop: 12, fontFamily: disp, fontSize: 'clamp(32px, 10vw, 42px)', lineHeight: 1.1, color: C.IVORY, animation: 'lj-rise 1s ease-out 1.1s both' }}>
             {first}{second && <><span style={{ fontStyle: 'italic', color: C.MINT, margin: '0 .25em', fontSize: '.8em' }}>{ot.text('and')}</span>{second}</>}
           </div>
         )}
@@ -261,6 +262,7 @@ export default function LuxuryJewelryTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
   const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const tb = tableParts(seating.selected?.table_id)
   const disp = theme.fonts.heading
   const body = theme.fonts.body
   const T = inv.copy(TXT)
@@ -307,7 +309,7 @@ export default function LuxuryJewelryTemplate(props) {
               </div>
               <div style={{ marginTop: 26, fontSize: 11.5, letterSpacing: '.34em', paddingLeft: '.34em', color: C.MUTED }}>{String(`${T.collection} ${year}`).toLocaleUpperCase(lang === 'az' ? 'az' : lang)}</div>
               <div style={{ marginTop: 6, fontSize: 14.5, color: C.MINT }}>{L('hero', 'kicker', inv.eventLabel)}</div>
-              <h1 style={{ margin: '16px 0 0', fontFamily: disp, fontWeight: 400, fontSize: 'clamp(42px, 13vw, 60px)', lineHeight: 1.04, color: C.IVORY, textWrap: 'balance' }}>
+              <h1 data-fit style={{ margin: '16px 0 0', fontFamily: disp, fontWeight: 400, fontSize: 'clamp(42px, 13vw, 60px)', lineHeight: 1.04, color: C.IVORY, textWrap: 'balance' }}>
                 {inv.heroTitle ? inv.heroTitle : inv.isCouple ? <>{inv.groom}<span style={{ display: 'block', fontStyle: 'italic', fontSize: '.5em', color: C.MINT, margin: '4px 0' }}>{inv.and}</span>{inv.bride}</> : inv.single}
               </h1>
               {inv.isCorp && weddingData.organizer?.trim() && <div style={{ marginTop: 12, fontSize: 14.5, color: C.MUTED }}>{tr.organizer_display}: {weddingData.organizer}</div>}
@@ -404,7 +406,7 @@ export default function LuxuryJewelryTemplate(props) {
                     <div style={{ display: 'inline-block', marginTop: 14, padding: 2, background: PLAT_GRAD, borderRadius: 4 }}>
                       <div style={{ padding: '12px 30px', borderRadius: 3, background: 'linear-gradient(180deg, #F4F6F7, #C9CFD2)', color: C.VELVET }}>
                         <div style={{ fontSize: 10.5, letterSpacing: '.3em' }}>{T.table.toUpperCase()}</div>
-                        <div style={{ fontFamily: disp, fontSize: 52, lineHeight: 1 }}>{seating.selected.table_id}</div>
+                        <div style={{ fontFamily: disp, fontSize: tableFontPx(tb.num, 52), lineHeight: 1 }}>{tb.num}</div>
                       </div>
                     </div>
                     {seating.tablemates.length > 0 && <div style={{ marginTop: 16, fontSize: 14, color: C.MUTED, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(' · ')}</div>}

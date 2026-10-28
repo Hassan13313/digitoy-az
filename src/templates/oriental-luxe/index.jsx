@@ -12,6 +12,7 @@ import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { lattice, starPoints, shamsaPath, golPath, BUTA, BUTA_IN, HASIYE_URI, RHOMB_URI, GIRIH_URI } from './ornaments'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { tableParts, tableFontPx } from '../_shared/tableBadge'
 import { LABELS, TXT } from './copy'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -253,7 +254,7 @@ function ShebekeOpening({ inv, theme }) {
             </div>
             {ot.show('kicker') && <div style={{ marginTop: 10, fontStyle: 'italic', fontSize: 15, color: C.MUTED, animation: 'ol-rise .9s ease-out 2.1s both' }}>{ot.text('kicker')}</div>}
             {titleOv !== '' && (
-              <div style={{ marginTop: 8, fontFamily: head, fontWeight: 500, fontSize: nameSize, lineHeight: 1.12, color: C.IVORY, animation: 'ol-rise 1s ease-out 2.3s both' }}>
+              <div data-fit style={{ marginTop: 8, fontFamily: head, fontWeight: 500, fontSize: nameSize, lineHeight: 1.12, color: C.IVORY, animation: 'ol-rise 1s ease-out 2.3s both' }}>
                 {first}
                 {second && <><span style={{ display: 'block', fontFamily: theme.fonts.body, fontStyle: 'italic', fontWeight: 400, fontSize: '.55em', color: C.GOLD, margin: '2px 0' }}>{ot.text('and')}</span>{second}</>}
               </div>
@@ -310,6 +311,7 @@ export default function OrientalLuxeTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
   const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const tb = tableParts(seating.selected?.table_id)
   const T = inv.copy(TXT)
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -381,7 +383,7 @@ export default function OrientalLuxeTemplate(props) {
                       <g transform="translate(150 60)"><path d={STAR8} transform="scale(.9)" fill="none" stroke={C.GOLD} strokeWidth="1.2" /></g>
                       <g transform="translate(150 320)"><path d={STAR8} transform="scale(.9)" fill="none" stroke={C.GOLD} strokeWidth="1.2" /></g>
                     </svg>
-                    <h1 style={{ position: 'absolute', inset: '0 12%', margin: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: head, fontWeight: 500, fontSize: inv.heroTitle ? 'clamp(24px, 7vw, 32px)' : heroSize, lineHeight: 1.1, color: C.IVORY, textWrap: 'balance' }}>
+                    <h1 data-fit style={{ position: 'absolute', inset: '0 12%', margin: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: head, fontWeight: 500, fontSize: inv.heroTitle ? 'clamp(24px, 7vw, 32px)' : heroSize, lineHeight: 1.1, color: C.IVORY, textWrap: 'balance' }}>
                       {inv.heroTitle ? inv.heroTitle : inv.isCouple ? (
                         <>{inv.groom}<span style={{ fontFamily: body, fontStyle: 'italic', fontWeight: 400, fontSize: '.55em', color: C.GOLD, margin: '4px 0' }}>{inv.and}</span>{inv.bride}</>
                       ) : inv.single}
@@ -502,7 +504,7 @@ export default function OrientalLuxeTemplate(props) {
                         <path d={starPoints(0, 0, 46)} fill="none" stroke={C.NAR} strokeOpacity=".4" strokeWidth=".8" strokeLinejoin="round" />
                         <circle r="30" fill="none" stroke={C.NAR} strokeOpacity=".25" strokeWidth=".6" />
                       </svg>
-                      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: head, fontSize: 50, lineHeight: 1, color: C.NAR }}>{seating.selected.table_id}</div>
+                      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 4, fontFamily: head, fontSize: tableFontPx(tb.num, 50), lineHeight: 1, color: C.NAR, textAlign: 'center', padding: '0 34px' }}>{tb.hasWord && <span style={{ display: 'block', fontSize: 12, letterSpacing: '.12em', color: alpha(C.NAR, 0.7) }}>{tr.inv_table}</span>}{tb.num}</div>
                     </div>
                     {seating.tablemates.length > 0 && <div style={{ marginTop: 16, fontSize: 16, fontStyle: 'italic', color: C.MUTED, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}
                     <button onClick={seating.reset} data-press style={{ marginTop: 6, background: 'none', border: 'none', color: C.GOLD, fontSize: 15, minHeight: 44, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 4, fontFamily: body }}>

@@ -10,6 +10,7 @@ import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { tableParts, tableFontPx } from '../_shared/tableBadge'
 import { LABELS, TXT } from './copy'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -177,7 +178,7 @@ function DecreeOpening({ inv, theme }) {
               </span>
             </div>
             {titleOv !== '' && (
-              <div style={{ marginTop: 14, fontFamily: script, fontSize: 'clamp(38px, 12vw, 50px)', lineHeight: 1.05, color: C.INK }}>
+              <div data-fit style={{ marginTop: 14, fontFamily: script, fontSize: 'clamp(38px, 12vw, 50px)', lineHeight: 1.05, color: C.INK }}>
                 {first}{second && <><span style={{ display: 'block', fontFamily: capsF, fontSize: '.36em', letterSpacing: '.2em', color: '#7A5A20', margin: '4px 0' }}>{ot.text('and')}</span>{second}</>}
               </div>
             )}
@@ -234,6 +235,7 @@ export default function RoyalPalaceTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
   const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const tb = tableParts(seating.selected?.table_id)
   const capsF = theme.fonts.heading
   const body = theme.fonts.body
   const script = theme.fonts.script || "'Imperial Script', 'Great Vibes', cursive"
@@ -285,7 +287,7 @@ export default function RoyalPalaceTemplate(props) {
                 </div>
               </div>
               <div style={{ marginTop: 22, fontFamily: capsF, fontSize: 15, letterSpacing: '.22em', color: C.GOLD }}>{L('hero', 'kicker', inv.eventLabel)}</div>
-              <h1 style={{ margin: '12px 0 0', fontFamily: script, fontWeight: 400, fontSize: 'clamp(46px, 15vw, 66px)', lineHeight: 1.05, color: C.GOLD_L, textWrap: 'balance' }}>
+              <h1 data-fit style={{ margin: '12px 0 0', fontFamily: script, fontWeight: 400, fontSize: 'clamp(46px, 15vw, 66px)', lineHeight: 1.05, color: C.GOLD_L, textWrap: 'balance' }}>
                 {inv.heroTitle ? inv.heroTitle : inv.isCouple ? <>{inv.groom}<span style={{ display: 'block', fontFamily: capsF, fontSize: '.32em', letterSpacing: '.2em', color: C.GOLD, margin: '6px 0' }}>{inv.and}</span>{inv.bride}</> : inv.single}
               </h1>
               {inv.isCouple && <div style={{ marginTop: 14, fontStyle: 'italic', fontSize: 18, color: C.IVORY }}>{T.honour}</div>}
@@ -385,8 +387,8 @@ export default function RoyalPalaceTemplate(props) {
                     <div className="rp-parch" style={{ display: 'inline-block', minWidth: 230, padding: '20px 26px 18px', background: `linear-gradient(180deg, #F6EDD6, ${C.PARCH})`, color: C.INK, borderRadius: '50% / 18%', boxShadow: `0 0 0 3px ${C.GOLD}, 0 0 0 6px ${C.DEEP}, 0 0 0 7px ${alpha(C.GOLD, 0.6)}, 0 24px 40px -20px #000` }}>
                       <div style={{ fontFamily: script, fontSize: 30, lineHeight: 1.1 }}>{seating.selected.full_name}</div>
                       <div style={{ marginTop: 8, fontFamily: capsF, fontSize: 13.5, letterSpacing: '.24em', color: '#7A5A20' }}>{T.table}</div>
-                      <div style={{ fontFamily: capsF, fontWeight: 600, fontSize: 48, lineHeight: 1 }}>{roman(seating.selected.table_id) || seating.selected.table_id}</div>
-                      {roman(seating.selected.table_id) && <div style={{ fontSize: 14, color: '#5A4A33' }}>{seating.selected.table_id}</div>}
+                      <div style={{ fontFamily: capsF, fontWeight: 600, fontSize: tableFontPx(roman(tb.num) || tb.num, 48), lineHeight: 1 }}>{roman(tb.num) || tb.num}</div>
+                      {roman(tb.num) && <div style={{ fontSize: 14, color: '#5A4A33' }}>{tb.num}</div>}
                     </div>
                     {seating.tablemates.length > 0 && <div style={{ marginTop: 18, fontStyle: 'italic', fontSize: 16.5, color: C.MUTED, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}
                     <button onClick={seating.reset} data-press style={{ marginTop: 6, background: 'none', border: 'none', color: C.GOLD_L, fontSize: 16, minHeight: 44, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 4, fontFamily: body }}>

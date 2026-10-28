@@ -6,6 +6,7 @@ import { DEFAULT_TEMPLATE_ID, resolveTemplateId } from './templateConfig'
 import { ensureTemplateFonts } from './fonts'
 import { ensureTemplateFonts as ensureLegacyFonts } from './legacy/fonts'
 import { isLegacyInvitation, getLegacyComponent } from './legacy/registry'
+import { useAutoFit } from './_shared/fitText'
 import { trackTemplateView, trackTemplateFallback } from './templateAnalytics'
 import { resolveWeddingContent } from '../data/contentI18n'
 import { readOverrides, applyStoryOverrides } from '../data/adminOverrides'
@@ -84,6 +85,8 @@ export default function TemplateRenderer({ template, isPreview = false, weddingD
      köhnə görünüşdə qalır — kod `legacy/`-dədir (bax legacy/registry.js).
      Builder, demo və kataloq datasında açar yoxdur → həmişə yeni versiya. */
   const legacy = isLegacyInvitation(weddingData, templateId)
+  /* Uzun ad/başlıq çərçivədən çıxmasın — yalnız `data-fit` elementləri (bax _shared/fitText.js) */
+  useAutoFit()
 
   if (templateId !== DEFAULT_TEMPLATE_ID) {
     if (legacy) ensureLegacyFonts()

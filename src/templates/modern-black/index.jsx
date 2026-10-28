@@ -9,6 +9,7 @@ import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { tableParts } from '../_shared/tableBadge'
 import { LABELS, TXT } from './copy'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -121,7 +122,7 @@ function PosterOpening({ inv, theme }) {
           )}
           {titleOv !== '' && (
             <MaskLine delay={0.5}>
-              <div style={{ fontFamily: display, fontWeight: 300, fontSize: fit(first), lineHeight: 1.12, letterSpacing: '-.01em', whiteSpace: 'nowrap' }}>
+              <div data-fit style={{ fontFamily: display, fontWeight: 300, fontSize: fit(first), lineHeight: 1.12, letterSpacing: '-.01em', whiteSpace: /\s/.test(String(first)) ? 'normal' : 'nowrap' }}>
                 {upper(first, lang)}
               </div>
             </MaskLine>
@@ -145,7 +146,7 @@ function PosterOpening({ inv, theme }) {
                 </MaskLine>
               )}
               <MaskLine delay={0.8} style={{ textAlign: 'right', marginTop: 6 }}>
-                <div style={{ fontFamily: display, fontWeight: 300, fontSize: fit(second), lineHeight: 1.12, letterSpacing: '-.01em', whiteSpace: 'nowrap' }}>
+                <div data-fit style={{ fontFamily: display, fontWeight: 300, fontSize: fit(second), lineHeight: 1.12, letterSpacing: '-.01em', whiteSpace: /\s/.test(String(second)) ? 'normal' : 'nowrap' }}>
                   {upper(second, lang)}
                 </div>
               </MaskLine>
@@ -230,6 +231,7 @@ export default function ModernBlackTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
   const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const tb = tableParts(seating.selected?.table_id)
   const display = theme.fonts.heading
   const sans = theme.fonts.body
   const spec = inv.copy(TXT)
@@ -275,15 +277,15 @@ export default function ModernBlackTemplate(props) {
               </div>
               <h1 style={{ margin: '40px 0', fontFamily: display, fontWeight: 300, lineHeight: 0.95, letterSpacing: '-.015em' }}>
                 {inv.heroTitle ? (
-                  <span style={{ display: 'block', fontSize: fit(inv.heroTitle, 92, 72) }}>{upper(inv.heroTitle, lang)}</span>
+                  <span data-fit style={{ display: 'block', fontSize: fit(inv.heroTitle, 92, 72) }}>{upper(inv.heroTitle, lang)}</span>
                 ) : inv.isCouple ? (
                   <>
-                    <span style={{ display: 'block', fontSize: fit(inv.groom, 92) }}>{upper(inv.groom, lang)}</span>
+                    <span data-fit style={{ display: 'block', fontSize: fit(inv.groom, 92) }}>{upper(inv.groom, lang)}</span>
                     <span style={{ display: 'block', fontWeight: 200, fontSize: 'clamp(28px, 9vw, 44px)', margin: '8px 0', color: '#8C8C8C' }}>{inv.and}</span>
-                    <span style={{ display: 'block', fontSize: fit(inv.bride, 92) }}>{upper(inv.bride, lang)}</span>
+                    <span data-fit style={{ display: 'block', fontSize: fit(inv.bride, 92) }}>{upper(inv.bride, lang)}</span>
                   </>
                 ) : (
-                  <span style={{ display: 'block', fontSize: fit(inv.single, 92, 72) }}>{upper(inv.single, lang)}</span>
+                  <span data-fit style={{ display: 'block', fontSize: fit(inv.single, 92, 72) }}>{upper(inv.single, lang)}</span>
                 )}
               </h1>
               {inv.isCorp && weddingData.organizer?.trim() && (
@@ -316,7 +318,7 @@ export default function ModernBlackTemplate(props) {
                     { v: cd.seconds, l: cd.labels.seconds, pop: true },
                   ].map(({ v, l, pop }, i) => (
                     <div key={l} style={{ padding: i < 2 ? '6px 16px 22px 0' : '22px 16px 6px 0', paddingLeft: i % 2 ? 18 : 0 }}>
-                      <div style={{ fontFamily: display, fontWeight: 200, fontSize: 'clamp(46px, 15vw, 72px)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+                      <div style={{ fontFamily: display, fontWeight: 200, fontSize: 'clamp(44px, 13.5vw, 72px)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
                         <PopDigit value={v} pop={pop} />
                       </div>
                       <div style={{ fontSize: 13, color: '#8C8C8C', marginTop: 6 }}>{l}</div>
@@ -388,8 +390,9 @@ export default function ModernBlackTemplate(props) {
                 {seating.selected && (
                   <div style={{ marginTop: 34 }}>
                     <div style={{ fontSize: 15, color: '#A3A3A3' }}>{seating.selected.full_name}</div>
-                    <div style={{ fontFamily: display, fontWeight: 300, fontSize: fit(seating.selected.table_id, 90, 110), lineHeight: 1, marginTop: 6 }}>
-                      {upper(seating.selected.table_id, lang)}
+                    <div style={{ fontFamily: display, fontWeight: 300, fontSize: fit(tb.num, 90, 110), lineHeight: 1, marginTop: 6 }}>
+                      {tb.hasWord && <span style={{ display: 'block', fontSize: 12, letterSpacing: '.24em', color: C.SILVER, marginBottom: 8 }}>{tr.inv_table}</span>}
+                      {upper(tb.num, lang)}
                     </div>
                     {seating.tablemates.length > 0 && (
                       <div style={{ marginTop: 18, paddingTop: 14, borderTop: '1px solid rgba(255,255,255,.2)', fontSize: 15, lineHeight: 1.6, color: '#D4D4D4' }}>

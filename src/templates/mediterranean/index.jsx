@@ -9,6 +9,7 @@ import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { tableParts, tableFontPx } from '../_shared/tableBadge'
 import { LABELS, TXT } from './copy'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -168,7 +169,7 @@ function TileOpening({ inv, theme }) {
           <LemonBranch width={96} flip style={{ position: 'absolute', right: -30, bottom: -58, transform: 'scale(-1,-1)' }} />
           {ot.show('kicker') && <div style={{ fontStyle: 'italic', fontSize: 16, color: C.SEA, animation: 'md-rise .8s ease-out 1.4s both' }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
-            <div style={{ marginTop: 10, fontFamily: serif, fontStyle: 'italic', fontSize: 'clamp(34px, 10.5vw, 44px)', lineHeight: 1.08, color: C.AZURE, animation: 'md-rise 1s ease-out 1.6s both' }}>
+            <div data-fit style={{ marginTop: 10, fontFamily: serif, fontStyle: 'italic', fontSize: 'clamp(34px, 10.5vw, 44px)', lineHeight: 1.08, color: C.AZURE, animation: 'md-rise 1s ease-out 1.6s both' }}>
               {first}{second && <><span style={{ display: 'block', fontSize: '.5em', color: C.TERRA, margin: '2px 0' }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
@@ -221,6 +222,7 @@ export default function MediterraneanTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
   const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const tb = tableParts(seating.selected?.table_id)
   const serif = theme.fonts.heading
   const body = theme.fonts.body
   const T = inv.copy(TXT)
@@ -261,7 +263,7 @@ export default function MediterraneanTemplate(props) {
                 <LemonBranch width={170} style={{ position: 'absolute', left: -20, top: -6 }} />
                 <div style={{ position: 'absolute', left: 0, right: 0, top: '15%', textAlign: 'center', padding: '0 20px' }}>
                   <div style={{ fontStyle: 'italic', fontSize: 16, color: C.INK }}>{L('hero', 'kicker', inv.eventLabel)}</div>
-                  <h1 style={{ margin: '8px 0 0', fontFamily: serif, fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(42px, 13vw, 60px)', lineHeight: 1.02, color: C.AZURE, textWrap: 'balance', textShadow: '0 1px 0 rgba(255,255,255,.4)' }}>
+                  <h1 data-fit style={{ margin: '8px 0 0', fontFamily: serif, fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(42px, 13vw, 60px)', lineHeight: 1.02, color: C.AZURE, textWrap: 'balance', textShadow: '0 1px 0 rgba(255,255,255,.4)' }}>
                     {inv.heroTitle ? inv.heroTitle : inv.isCouple ? <>{inv.groom} <span style={{ color: C.TERRA }}>{inv.and}</span><br />{inv.bride}</> : inv.single}
                   </h1>
                 </div>
@@ -379,7 +381,7 @@ export default function MediterraneanTemplate(props) {
                       </svg>
                       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                         <span style={{ fontSize: 12.5, letterSpacing: '.18em', color: C.SEA }}>{T.table}</span>
-                        <span style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 58, lineHeight: 1, color: C.AZURE }}>{seating.selected.table_id}</span>
+                        <span style={{ fontFamily: serif, fontStyle: 'italic', fontSize: tableFontPx(tb.num, 58), lineHeight: 1, color: C.AZURE }}>{tb.num}</span>
                       </div>
                     </div>
                     {seating.tablemates.length > 0 && <div style={{ marginTop: 16, fontSize: 15, color: C.MUTED, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}

@@ -29,6 +29,7 @@ import t from '../../data/translations'
 import { applyThemeOverrides, mergeSectionLabels, withStringOverrides, makeLabelResolver, sectionHead } from '../../data/adminOverrides'
 import { makeOpeningText, phrase } from '../_shared/openingSpec'
 import { scaleFont } from '../_shared/palette'
+import { tableParts, tableFontPx } from '../_shared/tableBadge'
 import { EmblemSlot } from '../_shared/MonoContent'
 import {
   cornerBouquet, smallBouquet, cardBouquet, sprigMark, singleBloom,
@@ -218,7 +219,7 @@ function GardenGate({ weddingData, isCouple, ot, onOpen, onOpenStart }) {
         )}
 
         {titleOv !== '' && (
-          <div style={{
+          <div data-fit style={{
             marginTop: 10, fontFamily: serif, fontStyle: 'italic', fontWeight: 300,
             fontSize: 'clamp(40px, 13vw, 56px)', lineHeight: 1.02, color: INK,
             fontVariationSettings: SOFT, letterSpacing: '-.01em',
@@ -459,6 +460,7 @@ export default function FloralGardenTemplate({
   const rsvpL    = withStringOverrides(rsvp.labels,    adminStrings, lang, 'rsvp.')
   const gbookL   = withStringOverrides(gbook.labels,   adminStrings, lang, 'gbook.')
   const seatingL = withStringOverrides(seating.labels, adminStrings, lang, 'seating.')
+  const tb = tableParts(seating.selected?.table_id)
   const heroTitle = L('hero', 'title', null)
 
   useEffect(() => {
@@ -552,7 +554,7 @@ export default function FloralGardenTemplate({
                   {tr.inv_join}
                 </p>
 
-                <h1 style={{
+                <h1 data-fit style={{
                   margin: '22px 0 0', fontFamily: serif, fontWeight: 300, lineHeight: 0.98, color: INK,
                   fontSize: heroTitle || !isCouple ? 'clamp(44px, 13vw, 64px)' : 'clamp(54px, 17.5vw, 82px)',
                   letterSpacing: '-.02em', fontVariationSettings: SOFT,
@@ -763,10 +765,11 @@ export default function FloralGardenTemplate({
                       {svgBox(SPRIG, { position: 'absolute', right: 16, top: 14, width: 40, height: 40 })}
                       <div style={{ fontSize: 13.5, color: MUTED }}>{seating.selected.full_name}</div>
                       <div style={{
-                        marginTop: 6, fontFamily: serif, fontStyle: 'italic', fontWeight: 300, fontSize: 44, lineHeight: 1,
-                        color: ROSE_TXT, fontVariationSettings: SOFT,
+                        marginTop: 6, fontFamily: serif, fontStyle: 'italic', fontWeight: 300, fontSize: tableFontPx(tb.num, 44, 18), lineHeight: 1.1,
+                        color: ROSE_TXT, fontVariationSettings: SOFT, overflowWrap: 'anywhere',
                       }}>
-                        {seating.selected.table_id}
+                        {tb.hasWord && <span style={{ display: 'block', fontFamily: sans, fontStyle: 'normal', fontSize: 12, letterSpacing: '.16em', textTransform: 'uppercase', color: MUTED, marginBottom: 6 }}>{tr.inv_table}</span>}
+                        {tb.num}
                       </div>
                       {seating.tablemates.length > 0 && (
                         <div style={{ fontSize: 13.5, color: MUTED, marginTop: 14, lineHeight: 1.6 }}>
@@ -1009,7 +1012,7 @@ export default function FloralGardenTemplate({
               theme={TH} weddingData={weddingData} lang={lang}
               isDemoMode={isDemoMode} isCouple={isCouple} isCorp={isCorp}
               eventLabel={eventLabel} serif={serif}
-              footer={sectionHead(L, 'footer')}
+              footer={sectionHead(L, 'footer')} wrapNames
             />
           </motion.div>
         )}

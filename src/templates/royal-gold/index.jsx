@@ -30,6 +30,7 @@ import { applyThemeOverrides, mergeSectionLabels, withStringOverrides, makeLabel
 import { makeOpeningText, phrase } from '../_shared/openingSpec'
 import { MonoContent } from '../_shared/MonoContent'
 import { scaleFont } from '../_shared/palette'
+import { tableParts, tableFontPx } from '../_shared/tableBadge'
 import { Rosette, RosetteMark, GuillocheBand, ChronoDial, CoinLegend } from './guilloche'
 import { FOIL } from './foil'
 
@@ -209,7 +210,7 @@ function CoinOpening({ weddingData, isCouple, isCorp, ot, onOpen, onOpenStart })
         style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
       >
         {titleOv !== '' && (
-          <div style={{
+          <div data-fit style={{
             display: 'flex', alignItems: 'baseline', justifyContent: 'center', flexWrap: 'wrap',
             columnGap: 12, marginTop: 'clamp(26px, 6vh, 40px)', maxWidth: 360,
             fontFamily: display, fontWeight: 300, fontSize: 'clamp(30px, 9.4vw, 40px)', lineHeight: 1.08,
@@ -492,6 +493,7 @@ export default function RoyalGoldTemplate({
   const rsvpL    = withStringOverrides(rsvp.labels,    adminStrings, lang, 'rsvp.')
   const gbookL   = withStringOverrides(gbook.labels,   adminStrings, lang, 'gbook.')
   const seatingL = withStringOverrides(seating.labels, adminStrings, lang, 'seating.')
+  const tb = tableParts(seating.selected?.table_id)
   const heroTitle = L('hero', 'title', null)
 
   useEffect(() => {
@@ -599,19 +601,19 @@ export default function RoyalGoldTemplate({
 
                 <h1 style={{ margin: '26px 0 0', fontWeight: 300, lineHeight: 1 }}>
                   {heroTitle ? (
-                    <span style={{ ...foil, fontFamily: display, fontSize: 'clamp(40px, 12vw, 58px)', display: 'block', animation: 'rg-sheen 3.4s ease-out .4s 1 both' }}>{heroTitle}</span>
+                    <span data-fit style={{ ...foil, fontFamily: display, fontSize: 'clamp(40px, 12vw, 58px)', display: 'block', animation: 'rg-sheen 3.4s ease-out .4s 1 both' }}>{heroTitle}</span>
                   ) : isCouple ? (
                     <>
-                      <span style={{ ...foil, fontFamily: display, fontSize: 'clamp(44px, 14.5vw, 66px)', display: 'block', animation: 'rg-sheen 3.4s ease-out .4s 1 both' }}>
+                      <span data-fit style={{ ...foil, fontFamily: display, fontSize: 'clamp(44px, 14.5vw, 66px)', display: 'block', animation: 'rg-sheen 3.4s ease-out .4s 1 both' }}>
                         {weddingData.groomName}
                       </span>
                       <span style={{ fontFamily: script, fontSize: 'clamp(38px, 11vw, 52px)', color: TH.primary, display: 'block', lineHeight: 1, margin: '2px 0 0' }}>{adminStrings?.inv_and ? tr.inv_and : '&'}</span>
-                      <span style={{ ...foil, fontFamily: display, fontSize: 'clamp(44px, 14.5vw, 66px)', display: 'block', animation: 'rg-sheen 3.4s ease-out .7s 1 both' }}>
+                      <span data-fit style={{ ...foil, fontFamily: display, fontSize: 'clamp(44px, 14.5vw, 66px)', display: 'block', animation: 'rg-sheen 3.4s ease-out .7s 1 both' }}>
                         {weddingData.brideName}
                       </span>
                     </>
                   ) : (
-                    <span style={{ ...foil, fontFamily: display, fontSize: 'clamp(40px, 12vw, 58px)', display: 'block' }}>
+                    <span data-fit style={{ ...foil, fontFamily: display, fontSize: 'clamp(40px, 12vw, 58px)', display: 'block' }}>
                       {weddingData.eventName || weddingData.brideName}
                     </span>
                   )}
@@ -849,8 +851,9 @@ export default function RoyalGoldTemplate({
                       {seating.selected.full_name}
                     </div>
                     <div aria-hidden="true" style={{ width: 56, height: 1, background: FOIL, margin: '14px auto' }} />
-                    <div style={{ fontFamily: display, fontWeight: 300, fontSize: 44, lineHeight: 1, color: '#7A5A22' }}>
-                      {seating.selected.table_id}
+                    <div style={{ fontFamily: display, fontWeight: 300, fontSize: tableFontPx(tb.num, 44, 18), lineHeight: 1.1, color: '#7A5A22', overflowWrap: 'anywhere' }}>
+                      {tb.hasWord && <span style={{ display: 'block', fontFamily: sans, fontSize: 11.5, letterSpacing: '.2em', textTransform: 'uppercase', color: BRONZE, marginBottom: 8 }}>{tr.inv_table}</span>}
+                      {tb.num}
                     </div>
                     {seating.tablemates.length > 0 && (
                       <div style={{ fontSize: 13, color: INK_SOFT, marginTop: 16, lineHeight: 1.65 }}>
@@ -1084,7 +1087,7 @@ export default function RoyalGoldTemplate({
               theme={TH} weddingData={weddingData} lang={lang}
               isDemoMode={isDemoMode} isCouple={isCouple} isCorp={isCorp}
               eventLabel={eventLabel} serif={display}
-              footer={sectionHead(L, 'footer')}
+              footer={sectionHead(L, 'footer')} wrapNames
             />
           </motion.div>
         )}

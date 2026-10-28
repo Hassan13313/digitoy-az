@@ -9,6 +9,7 @@ import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { tableParts, tableFontPx } from '../_shared/tableBadge'
 import { LABELS, TXT } from './copy'
 import { fill } from '../_shared/copyText'
 
@@ -102,7 +103,7 @@ function FrontPage({ inv, weddingData, T, edition, masthead, rubric, title, venu
       <div style={{ height: 7, background: RULE(C) }} />
       {rubric && <div style={{ marginTop: 10, textAlign: 'center', fontSize: 12, letterSpacing: '.22em', color: C.RED, fontWeight: 600 }}>{upper(rubric, lang)}</div>}
       {title !== '' && (
-        <h1 style={{ margin: '6px 0 0', textAlign: 'center', fontFamily: disp, fontWeight: 900, fontSize: compact ? 'clamp(34px, 11vw, 46px)' : 'clamp(38px, 12vw, 54px)', lineHeight: 0.98, letterSpacing: '-.01em', textWrap: 'balance' }}>
+        <h1 data-fit style={{ margin: '6px 0 0', textAlign: 'center', fontFamily: disp, fontWeight: 900, fontSize: compact ? 'clamp(34px, 11vw, 46px)' : 'clamp(38px, 12vw, 54px)', lineHeight: 0.98, letterSpacing: '-.01em', textWrap: 'balance' }}>
           {upper(title, lang)}
         </h1>
       )}
@@ -191,6 +192,7 @@ export default function GazetteTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
   const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL, ot } = inv
+  const tb = tableParts(seating.selected?.table_id)
   const disp = theme.fonts.heading
   const body = theme.fonts.body
   const T = inv.copy(TXT)
@@ -323,9 +325,9 @@ export default function GazetteTemplate(props) {
                 {seating.selected && (
                   <div style={{ marginTop: 22, border: `1.5px solid ${C.INK}`, padding: 4, animation: 'gz-rise .5s ease-out both' }}>
                     <div style={{ border: `1px solid ${C.INK}`, padding: '12px 14px', display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 14, alignItems: 'center' }}>
-                      <div style={{ textAlign: 'center', paddingRight: 14, borderRight: `1px solid ${C.INK}` }}>
+                      <div style={{ textAlign: 'center', paddingRight: 14, borderRight: `1px solid ${C.INK}`, maxWidth: 124, overflowWrap: 'anywhere' }}>
                         <div style={{ fontSize: 11, letterSpacing: '.14em', fontWeight: 700 }}>{upper(T.table, lang)}</div>
-                        <div style={{ fontFamily: disp, fontWeight: 900, fontSize: 52, lineHeight: 1, color: C.RED }}>{seating.selected.table_id}</div>
+                        <div style={{ fontFamily: disp, fontWeight: 900, fontSize: tableFontPx(tb.num, 52), lineHeight: 1, color: C.RED }}>{tb.num}</div>
                       </div>
                       <div style={{ minWidth: 0 }}>
                         <div style={{ fontFamily: disp, fontWeight: 900, fontSize: 20, lineHeight: 1.15 }}>{upper(seating.selected.full_name, lang)}</div>

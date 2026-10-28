@@ -10,6 +10,7 @@ import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { tableParts, tableFontPx } from '../_shared/tableBadge'
 import { LABELS, TXT } from './copy'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -272,6 +273,7 @@ export default function BoardingPassTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
   const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const tb = tableParts(seating.selected?.table_id)
   const head = theme.fonts.heading
   const body = theme.fonts.body
   const mono = theme.fonts.mono || "'IBM Plex Mono', ui-monospace, monospace"
@@ -326,7 +328,7 @@ export default function BoardingPassTemplate(props) {
                   </div>
                   <div style={{ padding: '20px 18px 18px' }}>
                     <div style={{ fontFamily: mono, fontSize: 10.5, letterSpacing: '.16em', color: alpha(C.INK, 0.6) }}>{upper(inv.isCouple ? T.pax : T.paxOne, lang)}</div>
-                    <h1 style={{ margin: '4px 0 0', fontFamily: head, fontWeight: 500, fontSize: 'clamp(30px, 9.6vw, 42px)', lineHeight: 1.05, letterSpacing: '.01em', color: C.INK, textWrap: 'balance' }}>
+                    <h1 data-fit style={{ margin: '4px 0 0', fontFamily: head, fontWeight: 500, fontSize: 'clamp(30px, 9.6vw, 42px)', lineHeight: 1.05, letterSpacing: '.01em', color: C.INK, textWrap: 'balance' }}>
                       {upper(inv.heroTitle ? inv.heroTitle : inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single, lang)}
                     </h1>
                     {inv.isCorp && weddingData.organizer?.trim() && <div style={{ marginTop: 6, fontSize: 14, color: alpha(C.INK, 0.7) }}>{tr.organizer_display}: {weddingData.organizer}</div>}
@@ -480,7 +482,7 @@ export default function BoardingPassTemplate(props) {
                     </div>
                     <div style={{ padding: '16px 18px', background: C.INK, color: C.IVORY, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderLeft: `2px dashed ${alpha(C.IVORY, 0.4)}` }}>
                       <span style={{ fontFamily: mono, fontSize: 10.5, letterSpacing: '.16em', color: C.BRASS }}>{upper(T.table, lang)}</span>
-                      <span style={{ fontFamily: head, fontWeight: 500, fontSize: 52, lineHeight: 1 }}>{seating.selected.table_id}</span>
+                      <span style={{ fontFamily: head, fontWeight: 500, fontSize: tableFontPx(tb.num, 52), lineHeight: 1 }}>{tb.num}</span>
                     </div>
                   </div>
                 )}

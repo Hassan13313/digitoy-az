@@ -10,6 +10,7 @@ import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { tableParts, tableFontPx } from '../_shared/tableBadge'
 import { LABELS, TXT } from './copy'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -157,7 +158,7 @@ function TurntableOpening({ inv, theme }) {
         style={{ marginTop: 'clamp(28px, 6vh, 46px)', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         {ot.show('kicker') && <div style={{ fontSize: 12, letterSpacing: '.3em', color: C.MUSTARD, animation: 'vr-rise .8s ease-out .8s both' }}>{upper(ot.text('kicker'), lang)}</div>}
         {titleOv !== '' && (
-          <div style={{ marginTop: 10, fontFamily: head, fontSize: 'clamp(30px, 9.6vw, 40px)', lineHeight: 1.1, color: C.CREAM, animation: 'vr-rise 1s ease-out 1s both' }}>
+          <div data-fit style={{ marginTop: 10, fontFamily: head, fontSize: 'clamp(30px, 9.6vw, 40px)', lineHeight: 1.1, color: C.CREAM, animation: 'vr-rise 1s ease-out 1s both' }}>
             {first}{second && <><span style={{ color: C.ORANGE, margin: '0 .25em' }}>{ot.text('and')}</span>{second}</>}
           </div>
         )}
@@ -212,6 +213,7 @@ export default function VinylRecordTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
   const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const tb = tableParts(seating.selected?.table_id)
   const head = theme.fonts.heading
   const body = theme.fonts.body
   const T = inv.copy(TXT)
@@ -270,7 +272,7 @@ export default function VinylRecordTemplate(props) {
                   <span style={{ position: 'absolute', top: 12, right: 12, padding: '3px 7px', border: `1.2px solid ${C.CREAM}`, fontSize: 10, fontWeight: 700, letterSpacing: '.2em', color: C.CREAM }}>{T.stereo}</span>
                   <div style={{ position: 'absolute', left: '7%', right: '7%', bottom: '7%' }}>
                     <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: '.22em', color: C.MUSTARD }}>{upper(L('hero', 'kicker', inv.eventLabel), lang)}</div>
-                    <h1 style={{ margin: '6px 0 0', fontFamily: head, fontWeight: 400, fontSize: 'clamp(30px, 9vw, 42px)', lineHeight: 1.02, color: C.CREAM, textWrap: 'balance' }}>
+                    <h1 data-fit style={{ margin: '6px 0 0', fontFamily: head, fontWeight: 400, fontSize: 'clamp(30px, 9vw, 42px)', lineHeight: 1.02, color: C.CREAM, textWrap: 'balance' }}>
                       {inv.heroTitle ? inv.heroTitle : inv.isCouple ? <>{inv.groom}<br /><span style={{ color: C.MUSTARD }}>{inv.and}</span> {inv.bride}</> : inv.single}
                     </h1>
                   </div>
@@ -400,9 +402,9 @@ export default function VinylRecordTemplate(props) {
                   <div className="vr-paper" style={{ marginTop: 26, maxWidth: 360, background: C.CREAM, color: C.CHAR, borderRadius: 6, overflow: 'hidden', boxShadow: '0 20px 40px -20px #000', animation: 'vr-rise .6s ease-out both' }}>
                     <div style={{ height: 10, background: C.ORANGE }} />
                     <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', alignItems: 'center' }}>
-                      <div style={{ padding: '14px 18px', borderRight: `1.5px solid ${alpha(C.CHAR, 0.2)}`, textAlign: 'center' }}>
+                      <div style={{ padding: '14px 18px', borderRight: `1.5px solid ${alpha(C.CHAR, 0.2)}`, textAlign: 'center', maxWidth: 132, overflowWrap: 'anywhere' }}>
                         <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.18em', color: C.TEAL }}>{upper(T.table, lang)}</div>
-                        <div style={{ fontFamily: head, fontSize: 46, lineHeight: 1 }}>{seating.selected.table_id}</div>
+                        <div style={{ fontFamily: head, fontSize: tableFontPx(tb.num, 46), lineHeight: 1 }}>{tb.num}</div>
                       </div>
                       <div style={{ padding: '14px 16px', minWidth: 0 }}>
                         <div style={{ fontFamily: head, fontSize: 19, lineHeight: 1.2 }}>{seating.selected.full_name}</div>

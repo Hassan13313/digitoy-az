@@ -12,6 +12,7 @@ import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { computeSky, faintStars, moonPath, dms } from './sky'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { tableParts, tableFontPx } from '../_shared/tableBadge'
 import { LABELS, TXT } from './copy'
 import { fill } from '../_shared/copyText'
 
@@ -159,7 +160,7 @@ function SkyOpening({ inv, theme, sky, faint }) {
           <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 16, color: C.SILVER, animation: 'ns-rise 1s ease-out 2s both' }}>{ot.text('kicker')}</div>
         )}
         {titleOv !== '' && (
-          <div style={{ marginTop: 10, fontFamily: serif, fontStyle: 'italic', fontWeight: 300, fontSize: 'clamp(32px, 10vw, 42px)', lineHeight: 1.1, color: C.STARGOLD, animation: 'ns-rise 1.1s ease-out 2.3s both' }}>
+          <div data-fit style={{ marginTop: 10, fontFamily: serif, fontStyle: 'italic', fontWeight: 300, fontSize: 'clamp(32px, 10vw, 42px)', lineHeight: 1.1, color: C.STARGOLD, animation: 'ns-rise 1.1s ease-out 2.3s both' }}>
             {first}{second && <><span style={{ color: C.SILVER, fontSize: '.7em', margin: '0 .3em' }}>{ot.text('and')}</span>{second}</>}
           </div>
         )}
@@ -211,6 +212,7 @@ export default function NightSkyTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
   const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const tb = tableParts(seating.selected?.table_id)
   const T = inv.copy(TXT)
   const serif = theme.fonts.heading
   const sans = theme.fonts.body
@@ -263,7 +265,7 @@ export default function NightSkyTemplate(props) {
               </div>
               <div style={{ marginTop: 26, fontSize: 13.5, color: C.SILVER }}>{L('hero', 'kicker', inv.eventLabel)}</div>
               <p style={{ margin: '8px auto 0', maxWidth: 290, fontFamily: serif, fontStyle: 'italic', fontWeight: 300, fontSize: 16.5, lineHeight: 1.5, color: C.MUTED }}>{tr.inv_join}</p>
-              <h1 style={{ margin: '22px 0 0', fontFamily: serif, fontStyle: 'italic', fontWeight: 300, fontSize: 'clamp(42px, 13vw, 60px)', lineHeight: 1.05, color: C.STARGOLD }}>
+              <h1 data-fit style={{ margin: '22px 0 0', fontFamily: serif, fontStyle: 'italic', fontWeight: 300, fontSize: 'clamp(42px, 13vw, 60px)', lineHeight: 1.05, color: C.STARGOLD }}>
                 {inv.heroTitle ? inv.heroTitle : inv.isCouple ? (
                   <>{inv.groom}<span style={{ display: 'block', fontSize: '.5em', color: C.SILVER, margin: '6px 0' }}>{inv.and}</span>{inv.bride}</>
                 ) : inv.single}
@@ -389,7 +391,7 @@ export default function NightSkyTemplate(props) {
                   <div style={{ marginTop: 26, textAlign: 'center', padding: '28px 20px', borderRadius: 22, background: `radial-gradient(90% 90% at 50% 20%, ${alpha(C.STARGOLD, 0.12)}, ${alpha(C.DEEP, 0.9)})`, border: `1px solid ${alpha(C.SILVER, 0.2)}` }}>
                     <Sparkle size={30} style={{ margin: '0 auto' }} />
                     <div style={{ marginTop: 12, fontSize: 15, color: C.SILVER }}>{seating.selected.full_name}</div>
-                    <div style={{ marginTop: 6, fontFamily: serif, fontStyle: 'italic', fontWeight: 300, fontSize: 44, lineHeight: 1, color: C.STARGOLD }}>{seating.selected.table_id}</div>
+                    <div style={{ marginTop: 6, fontFamily: serif, fontStyle: 'italic', fontWeight: 300, fontSize: tableFontPx(tb.num, 44), lineHeight: 1, color: C.STARGOLD }}>{tb.hasWord && <span style={{ display: 'block', fontSize: 12, fontStyle: 'normal', letterSpacing: '.18em', color: C.SILVER, marginBottom: 6 }}>{tr.inv_table}</span>}{tb.num}</div>
                     {seating.tablemates.length > 0 && <div style={{ marginTop: 14, fontSize: 14.5, color: C.MUTED, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}
                     <button onClick={seating.reset} data-press style={{ marginTop: 8, background: 'none', border: 'none', color: C.MOON, fontSize: 14, minHeight: 44, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 4, fontFamily: sans }}>
                       {seatingL.again || 'Yenidən axtar'}

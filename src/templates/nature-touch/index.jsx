@@ -12,6 +12,7 @@ import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { frond, leafPath, contours, dms, woodRings, landscape, LINEN_URI, PAPER_URI } from './specimen'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { tableParts, tableFontPx } from '../_shared/tableBadge'
 import { LABELS, TXT } from './copy'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -165,7 +166,7 @@ function FolioOpening({ inv, theme }) {
             </EmblemSlot>
           </div>
           {titleOv !== '' && (
-            <div style={{ marginTop: 14, fontFamily: serif, fontStyle: 'italic', fontSize: 'clamp(28px, 9vw, 36px)', lineHeight: 1.15, animation: 'nt-rise 1s ease-out 1.1s both' }}>
+            <div data-fit style={{ marginTop: 14, fontFamily: serif, fontStyle: 'italic', fontSize: 'clamp(28px, 9vw, 36px)', lineHeight: 1.15, animation: 'nt-rise 1s ease-out 1.1s both' }}>
               {first}{second && <><span style={{ fontStyle: 'normal', fontSize: '.6em', color: C.TERRA, margin: '0 .3em' }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
@@ -299,6 +300,7 @@ export default function NatureTouchTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
   const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, gbookL, seatingL } = inv
+  const tb = tableParts(seating.selected?.table_id)
   const serif = theme.fonts.heading
   const sans = theme.fonts.body
   const SL = inv.copy(TXT)
@@ -341,7 +343,7 @@ export default function NatureTouchTemplate(props) {
                 <Meadow />
                 <div style={{ position: 'absolute', left: 0, right: 0, top: '9%', textAlign: 'center', padding: '0 22px', animation: 'nt-rise 1.2s ease-out .2s both' }}>
                   <div style={{ fontSize: 14, letterSpacing: '.04em', color: C.MOSS }}>{L('hero', 'kicker', inv.eventLabel)}</div>
-                  <h1 style={{ margin: '10px 0 0', fontFamily: serif, fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(44px, 13.5vw, 62px)', lineHeight: 1.02, color: C.INK, textWrap: 'balance' }}>
+                  <h1 data-fit style={{ margin: '10px 0 0', fontFamily: serif, fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(44px, 13.5vw, 62px)', lineHeight: 1.02, color: C.INK, textWrap: 'balance' }}>
                     {inv.heroTitle ? inv.heroTitle : inv.isCouple ? <>{inv.groom}<span style={{ display: 'block', fontStyle: 'normal', fontSize: '.42em', color: C.TERRA, margin: '6px 0' }}>{inv.and}</span>{inv.bride}</> : inv.single}
                   </h1>
                 </div>
@@ -450,7 +452,7 @@ export default function NatureTouchTemplate(props) {
                     <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 20 }}>{seating.selected.full_name}</div>
                     <WoodSlice size={176} uid="seat" style={{ margin: '16px auto 0' }}>
                       <span style={{ fontSize: 12, letterSpacing: '.2em', color: '#6B4A30' }}>{SL.table}</span>
-                      <span style={{ fontFamily: serif, fontSize: 58, lineHeight: 1, color: '#4A3220', textShadow: '0 1px 0 rgba(255,240,210,.8), 0 -1px 0 rgba(90,60,30,.25)' }}>{seating.selected.table_id}</span>
+                      <span style={{ fontFamily: serif, fontSize: tableFontPx(tb.num, 58), lineHeight: 1, color: '#4A3220', textShadow: '0 1px 0 rgba(255,240,210,.8), 0 -1px 0 rgba(90,60,30,.25)' }}>{tb.num}</span>
                     </WoodSlice>
                     {seating.tablemates.length > 0 && <div style={{ marginTop: 16, fontSize: 15, color: C.MOSS, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}
                     <button onClick={seating.reset} data-press style={{ marginTop: 6, background: 'none', border: 'none', color: C.INK, fontSize: 14.5, minHeight: 44, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 4, fontFamily: sans }}>

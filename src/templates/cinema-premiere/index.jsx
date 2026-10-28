@@ -9,6 +9,7 @@ import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { tableParts, tableFontPx } from '../_shared/tableBadge'
 import { LABELS, TXT } from './copy'
 import { fill } from '../_shared/copyText'
 
@@ -218,6 +219,7 @@ export default function CinemaPremiereTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
   const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const tb = tableParts(seating.selected?.table_id)
   const head = theme.fonts.heading
   const body = theme.fonts.body
   const CR = inv.copy(TXT)
@@ -269,7 +271,7 @@ export default function CinemaPremiereTemplate(props) {
                 <div style={{ fontFamily: head, fontWeight: 700, fontSize: 14, letterSpacing: '.3em', color: C.GOLD_L }}>{CR.studio}</div>
                 <div style={{ marginTop: 4, fontStyle: 'italic', fontSize: 15, color: C.MUTED }}>{CR.presents}</div>
                 <div style={{ marginTop: 26, fontStyle: 'italic', fontSize: 16, color: C.IVORY }}>{L('hero', 'kicker', inv.eventLabel)}</div>
-                <h1 style={{ margin: '10px 0 0', fontFamily: head, fontWeight: 800, fontSize: 'clamp(46px, 15vw, 72px)', lineHeight: 0.95, letterSpacing: '.02em', background: GOLD_TEXT(C), WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', textWrap: 'balance' }}>
+                <h1 data-fit style={{ margin: '10px 0 0', fontFamily: head, fontWeight: 800, fontSize: 'clamp(46px, 15vw, 72px)', lineHeight: 0.95, letterSpacing: '.02em', background: GOLD_TEXT(C), WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', textWrap: 'balance' }}>
                   {inv.heroTitle ? upper(inv.heroTitle, lang) : inv.isCouple ? <>{upper(inv.groom, lang)}<span style={{ display: 'block', fontFamily: body, fontStyle: 'italic', fontWeight: 400, fontSize: '.42em', lineHeight: 1.4 }}>{inv.and}</span>{upper(inv.bride, lang)}</> : upper(inv.single, lang)}
                 </h1>
                 {inv.ot.show('sub') && <div style={{ marginTop: 16, fontStyle: 'italic', fontSize: 19, color: C.IVORY }}>{inv.ot.text('sub')}</div>}
@@ -389,7 +391,7 @@ export default function CinemaPremiereTemplate(props) {
                       <div style={{ marginTop: 8, fontSize: 15 }}>{seating.selected.full_name}</div>
                       <div style={{ marginTop: 4, display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 10 }}>
                         <span style={{ fontFamily: head, fontWeight: 700, fontSize: 16, letterSpacing: '.2em' }}>{upper(CR.table, lang)}</span>
-                        <span style={{ fontFamily: head, fontWeight: 800, fontSize: 64, lineHeight: 1 }}>{seating.selected.table_id}</span>
+                        <span style={{ fontFamily: head, fontWeight: 800, fontSize: tableFontPx(tb.num, 64), lineHeight: 1 }}>{tb.num}</span>
                       </div>
                       {seating.tablemates.length > 0 && <div style={{ marginTop: 8, fontSize: 14, lineHeight: 1.5, opacity: 0.9 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}
                     </div>

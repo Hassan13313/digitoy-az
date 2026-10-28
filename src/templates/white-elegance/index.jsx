@@ -10,6 +10,7 @@ import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { tableParts, tableFontPx } from '../_shared/tableBadge'
 import { LABELS, TXT } from './copy'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -143,7 +144,7 @@ function CardOpening({ inv, theme }) {
             </div>
           )}
           {titleOv !== '' && (
-            <div style={{ marginTop: 14, fontWeight: 300, fontSize: 'clamp(26px, 8vw, 32px)', lineHeight: 1.15, animation: 'we-rise 1s ease-out 1.45s both' }}>
+            <div data-fit style={{ marginTop: 14, fontWeight: 300, fontSize: 'clamp(26px, 8vw, 32px)', lineHeight: 1.15, animation: 'we-rise 1s ease-out 1.45s both' }}>
               {first}
               {second && <><span style={{ fontStyle: 'italic', color: C.GREY, margin: '0 .3em' }}>{ot.text('and')}</span>{second}</>}
             </div>
@@ -202,6 +203,7 @@ export default function WhiteEleganceTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
   const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const tb = tableParts(seating.selected?.table_id)
   const T = inv.copy(TXT)
   const f = theme.fonts.heading
 
@@ -241,7 +243,7 @@ export default function WhiteEleganceTemplate(props) {
                 <span aria-hidden="true" style={{ position: 'absolute', inset: 14, boxShadow: 'inset 1px 1px 0 rgba(60,48,36,.14), inset -1px -1px 0 #FFF, 1px 1px 0 #FFF, -1px -1px 0 rgba(60,48,36,.1)' }} />
                 <div style={{ fontSize: 12, letterSpacing: '.36em', textTransform: 'uppercase', color: C.GREY, paddingLeft: '.36em' }}>{L('hero', 'kicker', inv.eventLabel)}</div>
                 <p style={{ margin: '16px auto 0', maxWidth: 260, fontStyle: 'italic', fontWeight: 300, fontSize: 17, lineHeight: 1.5, color: C.GREY }}>{tr.inv_join}</p>
-                <h1 style={{ margin: '30px 0 0', fontWeight: 200, lineHeight: 1.04, fontSize: 'clamp(44px, 13.5vw, 64px)', color: C.INK }}>
+                <h1 data-fit style={{ margin: '30px 0 0', fontWeight: 200, lineHeight: 1.04, fontSize: 'clamp(44px, 13.5vw, 64px)', color: C.INK }}>
                   {inv.heroTitle ? inv.heroTitle : inv.isCouple ? (
                     <>
                       <span style={{ display: 'block' }}>{inv.groom}</span>
@@ -347,7 +349,7 @@ export default function WhiteEleganceTemplate(props) {
                     <div style={{ height: 34, background: 'linear-gradient(#F1EEE8, #FBFAF7)', transform: 'rotateX(52deg)', transformOrigin: '50% 100%', boxShadow: '0 -1px 0 rgba(60,48,36,.06)' }} />
                     <div style={{ background: C.PAPER, padding: '20px 18px 16px', boxShadow: '0 22px 30px -18px rgba(43,39,35,.35), inset 0 1px 0 rgba(60,48,36,.08)' }}>
                       <div style={{ fontStyle: 'italic', fontSize: 18 }}>{seating.selected.full_name}</div>
-                      <div style={{ marginTop: 8, fontWeight: 200, fontSize: 46, lineHeight: 1, ...EMBOSS }}>{seating.selected.table_id}</div>
+                      <div style={{ marginTop: 8, fontWeight: 200, fontSize: tableFontPx(tb.num, 46), lineHeight: 1, ...EMBOSS }}>{tb.hasWord && <span style={{ display: 'block', fontSize: 12, fontWeight: 400, letterSpacing: '.18em', marginBottom: 6 }}>{tr.inv_table}</span>}{tb.num}</div>
                       {seating.tablemates.length > 0 && (
                         <div style={{ marginTop: 12, fontSize: 14.5, color: C.GREY, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(' · ')}</div>
                       )}

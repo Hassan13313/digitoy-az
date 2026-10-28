@@ -92,6 +92,9 @@ export default function TemplateOutro({
   theme, weddingData, lang = 'az', isDemoMode = false,
   isCouple = true, isCorp = false, eventLabel = '', serif,
   footer = null,
+  /* Adlar arasında sətir sonu imkanı (boşluqlar) — premium şablonlar ötürür.
+     ⚠ Default false: simple-luxury-nin (köhnə dəvətnamələr) görünüşü dəyişmir. */
+  wrapNames = false,
 }) {
   const tr  = t[lang] || t.az
   const cta = CTA[lang] || CTA.az
@@ -179,9 +182,11 @@ export default function TemplateOutro({
         }}>
           {footer?.title ? footer.title : names.length === 2 ? (
             <>
-              {names[0]}
-              <span style={{ color: alpha(footerText, 0.28), margin: '0 12px', fontStyle: 'italic' }}>&</span>
-              {names[1]}
+              {/* `wrapNames`: boşluqlarla — onlarsız «Ad&Ad» bölünməyən tək parçadır və
+                  uzun adlar dar telefonda ekrandan çıxırdı (2026-10-28) */}
+              {names[0]}{wrapNames ? ' ' : null}
+              <span style={{ color: alpha(footerText, 0.28), margin: wrapNames ? '0 6px' : '0 12px', fontStyle: 'italic' }}>&</span>
+              {wrapNames ? ' ' : null}{names[1]}
             </>
           ) : (names[0] || '')}
         </div>
