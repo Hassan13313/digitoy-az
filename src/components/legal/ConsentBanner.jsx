@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react'
+import { useEffect, useSyncExternalStore } from 'react'
 import { consent } from '../../utils/consent'
 import { legalUi } from '../../data/legal/ui'
 import { spaClick } from '../../utils/siteRoutes'
@@ -18,10 +18,18 @@ import CookieBanner from '../landing/v2/CookieBanner'
    ───────────────────────────────────────────────────────────────────────── */
 
 const MORE_HREF = '/mexfilik#kuki'
+/* Açılış ekranlı səhifələrdə banner dəvətnamə açılana qədər gözləyir (bax
+   utils/consent.js › CONSENT_DEFER_VIEWS); açılış siqnalı gəlməsə (məs. video
+   açılışlı Simple Luxury) bu vaxtdan sonra özü çıxır. */
+const DEFER_FALLBACK_MS = 20000
 
 export default function ConsentBanner() {
   const snap = useSyncExternalStore(consent.subscribe, consent.getSnapshot, consent.getSnapshot)
   const t = legalUi(snap.lang).consent
+  useEffect(() => {
+    const timer = setTimeout(() => consent.reveal(), DEFER_FALLBACK_MS)
+    return () => clearTimeout(timer)
+  }, [])
 
   return (
     <CookieBanner

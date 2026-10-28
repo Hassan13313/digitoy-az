@@ -9,7 +9,7 @@
 
    İşə salmaq: node tests/consent_test.mjs
    ───────────────────────────────────────────────────────────────────────── */
-import { createConsentStore, safeStorage, readStatus, CONSENT_KEY, CONSENT_PROMPT_VIEWS } from '../src/utils/consent.js'
+import { createConsentStore, safeStorage, readStatus, CONSENT_KEY, CONSENT_PROMPT_VIEWS, CONSENT_DEFER_VIEWS } from '../src/utils/consent.js'
 
 let fail = 0
 let pass = 0
@@ -57,10 +57,20 @@ const NOW = Date.UTC(2026, 9, 6)
 {
   const s = createConsentStore({ storage: safeStorage(() => memLs()), now: () => NOW })
   ok('yüklənərkən çıxmır, amma hadisələr gözləyə bilər', !s.getSnapshot().showBanner && s.getSnapshot().promptable)
-  for (const v of ['landing', 'legal', 'not-found', 'templates', 'demo']) {
+  for (const v of ['landing', 'legal', 'not-found', 'templates']) {
     s.setContext({ view: v })
     ok(`banner çıxır: ${v}`, s.getSnapshot().showBanner)
   }
+  /* Açılış ekranlı səhifələr (2026-10-28): banner açılışı örtməsin — dəvətnamə açılana qədər gözləyir */
+  for (const v of CONSENT_DEFER_VIEWS) {
+    s.setContext({ view: v })
+    ok(`açılışda gözləyir: ${v}`, !s.getSnapshot().showBanner && s.getSnapshot().promptable)
+  }
+  s.setContext({ view: 'demo' })
+  s.reveal()
+  ok('dəvətnamə açılandan sonra çıxır: demo', s.getSnapshot().showBanner)
+  s.setContext({ view: 'template-preview' })
+  ok('bir dəfə açılandan sonra digər önbaxışlarda da çıxır', s.getSnapshot().showBanner)
   for (const v of ['invite', 'photo', 'gallery-page', 'slideshow', 'admin-panel', 'admin-login', 'admin-review', 'live-preview', 'invite-disabled', 'invite-not-found']) {
     s.setContext({ view: v })
     ok(`banner çıxmır: ${v}`, !s.getSnapshot().showBanner && !s.getSnapshot().promptable)

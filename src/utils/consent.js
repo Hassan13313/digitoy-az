@@ -20,6 +20,15 @@ export const CONSENT_MAX_AGE_MS = 365 * 86400000
    'invite', 'photo', 'gallery-page', 'slideshow' əlavə et. */
 export const CONSENT_PROMPT_VIEWS = ['landing', 'invitation', 'demo', 'templates', 'template-preview', 'legal', 'guide', 'not-found']
 
+/* Açılış ekranı olan view-lar (2026-10-28): banner dəvətnamənin açılış ekranının
+   alt yarısını — «Dəvətnaməni aç» düyməsini — örtürdü. Instagram-dan gələn demo
+   qonaqları açılışı «xəta» kimi görürdü. Bu view-larda banner dəvətnamə
+   açılandan sonra (`reveal()`) çıxır. Razılıq olmadan analitika onsuz da
+   yüklənmir, hadisələr gözləyir (`promptable`) — məxfilik dəyişmir. */
+export const CONSENT_DEFER_VIEWS = ['demo', 'template-preview', 'invitation']
+/** Dəvətnamə açılanda şablon bu hadisəni göndərir (templates/_shared/useInvitation.js) */
+export const INVITATION_OPENED_EVENT = 'digitoy:invitation-opened'
+
 const STATUSES = ['granted', 'denied']
 
 /** localStorage → try/catch; əlçatmazdırsa yaddaşda (Map) saxlanılır. */
@@ -53,16 +62,18 @@ export function createConsentStore({ storage = safeStorage(), now = () => Date.n
   let view = 'loading'
   let lang = 'az'
   let settingsOpen = false
+  let revealed = false
   const subs = new Set()
 
   /* 'loading' da soruşula bilən sayılır (hadisələr gözləyir): uşaq komponentin
      effekti (məs. LandingPage-in landing_view-u) App view-u ötürməzdən ƏVVƏL işləyir. */
   const build = () => {
     const prompt = CONSENT_PROMPT_VIEWS.includes(view)
+    const deferred = CONSENT_DEFER_VIEWS.includes(view) && !revealed && !settingsOpen
     return {
       status, lang,
       promptable: prompt || view === 'loading',
-      showBanner: prompt && (status === 'unknown' || settingsOpen),
+      showBanner: prompt && !deferred && (status === 'unknown' || settingsOpen),
     }
   }
   let snap = build()
@@ -91,8 +102,11 @@ export function createConsentStore({ storage = safeStorage(), now = () => Date.n
       emit()
     },
     openSettings() { settingsOpen = true; emit() },
+    /** Açılış ekranı bağlandı (və ya ehtiyat vaxtı keçdi) — gözləyən banner çıxa bilər */
+    reveal() { if (revealed) return; revealed = true; emit() },
   }
 }
 
 /* Brauzer üçün tək nüsxə */
 export const consent = createConsentStore()
+if (typeof window !== 'undefined') window.addEventListener(INVITATION_OPENED_EVENT, () => consent.reveal())

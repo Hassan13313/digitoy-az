@@ -423,6 +423,8 @@ export default function FloralGardenTemplate({
   const tr = withStringOverrides(t[lang] || t.az, adminStrings, lang)
   const L = makeLabelResolver(mergeSectionLabels(null, adminOverrides), lang)
   const [opened, setOpened] = useState(startOpened)
+  /* Dəvətnamə açıldı — demo/önbaxışda gözləyən kuki banneri indi çıxa bilər (utils/consent.js) */
+  useEffect(() => { if (opened) window.dispatchEvent(new Event('digitoy:invitation-opened')) }, [opened])
   const musicRef = useRef(null)
 
   const isCouple = ['toy', 'nishan'].includes(weddingData.eventType)

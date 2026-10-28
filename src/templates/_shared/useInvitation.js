@@ -82,6 +82,11 @@ export function useInvitation({
   const music = useMusicPlayer({ lang, music: invMusic, autoStart: opened && autoPlay })
   const [musicPrompt, dismissMusicPrompt] = useMusicPrompt({ enabled: opened && music.hasMusic })
 
+  /* Dəvətnamə açıldı — demo/önbaxışda gözləyən kuki banneri indi çıxa bilər (utils/consent.js) */
+  useEffect(() => {
+    if (opened) window.dispatchEvent(new Event('digitoy:invitation-opened'))
+  }, [opened])
+
   useEffect(() => {
     if (!isDemoMode) trackEvent('invitation_opened', { lang, event_type: weddingData?.eventType })
     // eslint-disable-next-line react-hooks/exhaustive-deps
