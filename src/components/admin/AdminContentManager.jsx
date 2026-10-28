@@ -47,6 +47,12 @@ const LANG_IDS = ['az', 'en', 'ru']
 const isEmptyObj = (o) => !o || Object.keys(o).length === 0
 const sameJson = (a, b) => JSON.stringify(a ?? {}) === JSON.stringify(b ?? {})
 
+/* Bölmə başlığının köhnə (sistem) sətri — şablonun öz başlığı onu əvəz edir */
+const SHADOWED_TITLE = {
+  venue: 'inv_location', dresscode: 'inv_dresscode', gallery: 'inv_gallery',
+  seating: 'seating.title', rsvp: 'rsvp.title', guestbook: 'gbook.title',
+}
+
 /* Placeholder: bölmə başlığının sistem mətni (şablonun öz başlığı yoxdursa) */
 function sectionTitleDefault(key, lg, wd, systemText) {
   if (key === 'hero' || key === 'footer') {
@@ -311,7 +317,11 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
         fields: [
           { key: `k:${sec.key}`, label: 'Üst etiket', short: true },
           { key: `t:${sec.key}`, label: 'Başlıq', localized: true, short: true },
-          ...(STRING_CATALOG[sec.key] || []).map(([key, name]) => ({ key: `s:${key}`, label: name, localized: true })),
+          ...(STRING_CATALOG[sec.key] || [])
+            /* Şablonun öz başlığı varsa köhnə «bölmə adı» sətri dəvətnamədə görünmür
+               (yalnız `L(…, fallback)`-dır) — sahə göstərilmir, «Başlıq» işləyir */
+            .filter(([key]) => !(tplLabels?.[sec.key]?.title && SHADOWED_TITLE[sec.key] === key))
+            .map(([key, name]) => ({ key: `s:${key}`, label: name, localized: true })),
           ...copyFields.filter((f) => f.section === sec.key).map((f) => ({
             key: `s:${f.key}`, label: f.label, localized: true, hint: f.hint || undefined,
             multiline: (f.defaults.az || '').length > 90,
@@ -330,7 +340,7 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
         ? `«${getTemplateName(templateId)}» şablonunda rəng və şrift dəyişikliyi işləmir — bu şablon öz markup-ını yazır və rənglər/şriftlər kodun içindədir. Mətn düzəlişləri və bölmə görünürlüyü isə normal işləyir.`
         : undefined,
     }
-  }, [bespoke, templateId, copyFields])
+  }, [bespoke, templateId, copyFields, tplLabels])
 
   /* ── Yeni görünüşdən gələn dəyişiklik → köhnə model ── */
   const handleChange = (next, path) => {
