@@ -1,4 +1,4 @@
-import { useRef, Suspense } from 'react'
+import { Component, useRef, Suspense } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls, Environment } from '@react-three/drei'
 
@@ -92,9 +92,20 @@ function PremiumRings() {
   )
 }
 
+/* 3D səhnə uğursuz olarsa (məs. `Environment` HDR faylı kənar CDN-dən — raw.githack —
+   yüklənmədi) yalnız üzüklər boş qalır; əvvəl xəta bütün dəvətnaməni çökdürürdü
+   (canlıda 2026-10-28 görüldü). Normal halda DOM eynidir — boundary element yaratmır. */
+class SceneBoundary extends Component {
+  constructor(props) { super(props); this.state = { failed: false } }
+  static getDerivedStateFromError() { return { failed: true } }
+  componentDidCatch(error) { console.warn('[3D] səhnə yüklənmədi:', error?.message || error) }
+  render() { return this.state.failed ? null : this.props.children }
+}
+
 function GoldenRingsCanvas() {
   return (
     <div className="w-full pointer-events-auto" style={{ height: 230, cursor: 'grab' }}>
+      <SceneBoundary>
       <Canvas camera={{ position: [0, 0.1, 3.5], fov: 38 }} dpr={[1, 2]} shadows>
         {/* Environment — HDR-like, metal colors show realistically */}
         <Environment preset="sunset" />
@@ -108,6 +119,7 @@ function GoldenRingsCanvas() {
         </Suspense>
         <OrbitControls enableZoom={false} enablePan={false} />
       </Canvas>
+      </SceneBoundary>
     </div>
   )
 }
