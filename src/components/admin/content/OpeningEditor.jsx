@@ -2,9 +2,10 @@ import { useMemo } from 'react'
 import { RotateCcw } from 'lucide-react'
 import t from '../../../data/translations'
 import { resolveWeddingContent } from '../../../data/contentI18n'
-import {
-  getOpeningSpec, openingDefaults, autoMonogram, OPENING_SLOT_LABELS,
-} from '../../../templates/_shared/openingSpec'
+import * as currentSpec from '../../../templates/_shared/openingSpec'
+/* Köhnə versiyada (v1) qalan dəvətnamənin açılışı köhnə kodla çəkilir — sahələr
+   və defolt mətnlər də onun öz spesifikasiyasından gəlir */
+import * as legacySpec from '../../../templates/legacy/_shared/openingSpec'
 import { MONO_TEXT_MAX } from '../../../data/adminOverrides'
 import { Card, FieldRow, Segmented, StickerPicker, ImageUpload, Thumb } from './ui'
 import { C } from './style'
@@ -40,8 +41,9 @@ const EMBLEM_NAMES = {
 }
 
 export default function OpeningEditor({
-  templateId, wedding, lang, opening, setOpening, slug, narrow, onFocusPreview,
+  templateId, wedding, lang, opening, setOpening, slug, narrow, onFocusPreview, legacy = false,
 }) {
+  const { getOpeningSpec, openingDefaults, autoMonogram, OPENING_SLOT_LABELS } = legacy ? legacySpec : currentSpec
   const spec = getOpeningSpec(templateId)
 
   /* Dəvətnamədə indi görünən mətnlər (override-sız) — placeholder üçün */
@@ -56,7 +58,7 @@ export default function OpeningEditor({
     })[wd.eventType] || tr.event_toy
     return { weddingData: wd, lang, isCouple, isCorp, eventLabel }
   }, [wedding, lang])
-  const defaults = useMemo(() => openingDefaults(templateId, ctx), [templateId, ctx])
+  const defaults = useMemo(() => openingDefaults(templateId, ctx), [templateId, ctx, openingDefaults])
 
   const mono = opening.mono || { mode: 'auto' }
   const hide = opening.hide || []

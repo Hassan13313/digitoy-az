@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/template_version.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
@@ -62,5 +63,8 @@ if (empty($data['templateId'])) {
     /* Sutun QESDEN oxunmur — miqrasiya isleməyibse belə bu endpoint qirilmasin */
     $data['templateId'] = DEFAULT_TEMPLATE_ID;
 }
+
+/* Şablon versiyası: açarı olmayan (redizayndan əvvəlki) dəvətnamə köhnə görünüşdə qalır */
+$data = tvForRead($data);
 
 echo json_encode(['ok' => true, 'slug' => $slug, 'active' => true, 'data' => $data]);

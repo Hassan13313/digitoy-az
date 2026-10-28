@@ -1,0 +1,1033 @@
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { QRCodeSVG } from 'qrcode.react'
+import LanguageSwitcher from '../../../components/LanguageSwitcher'
+import DressCodeSection from './DressCodeSection'
+import LoveStorySection from './LoveStorySection'
+import { getStoryTheme } from './loveStoryTheme'
+import MapSection, { MapRings } from './MapSection'
+import { directionsUrl, openMapUrl } from './geo'
+import { OrderCta, MusicStartBubble } from './TemplateActions'
+import TemplateOutro from './TemplateOutro'
+import { buildPresetMusic, PRESET_TRACKS, MUSIC_PLAY_MODES, shouldAutoPlay } from '../../../data/music'
+import { getSectionVisibility } from '../../../data/sections'
+import { formatAzDate, formatTime24 } from '../../../utils/dateFormat'
+import { trackEvent } from '../../../utils/analytics'
+import { Reveal, Stagger, PopDigit, enterDirection, AmbientLayer } from './motion'
+import { hidePhoto } from '../../../utils/photoGallery'
+import { useCountdown } from '../../../hooks/useCountdown'
+import { useTimeline } from '../../../hooks/useTimeline'
+import { useSeating } from '../../../hooks/useSeating'
+import { useRsvp } from '../../../hooks/useRsvp'
+import { useGuestbook } from '../../../hooks/useGuestbook'
+import { useGallery } from '../../../hooks/useGallery'
+import { useMusicPlayer } from '../../../hooks/useMusicPlayer'
+import { useMusicPrompt } from '../../../hooks/useMusicPrompt'
+import t from '../../../data/translations'
+import { applyThemeOverrides, mergeSectionLabels, withStringOverrides, makeLabelResolver, sectionHead } from '../../../data/adminOverrides'
+import { makeOpeningText } from './openingSpec'
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   TEMPLATE SHELL — 13 bölməlik ortaq dəvətnamə skeleti.
+
+   NƏ ÜÇÜN: simple-luxury / royal-gold / floral-garden hər biri öz markup-ını
+   yazır (tarixi səbəb + fərdi dizayn dili). Qalan şablonlar üçün eyni 800
+   sətri təkrarlamaq həm baxımsızdır, həm də bir bölmə düzəlişi 6 yerdə
+   təkrarlanardı. Bu shell strukturu bir yerdə saxlayır; hər şablon yalnız
+   ÖZ vizual dilini (`design` knob-ları + öz açılış ekranı) verir.
+
+   ⚠ MÜQAVİLƏLƏR TOXUNULMUR:
+     • TemplateRenderer / TemplateProvider / registry → dəyişmir
+     • Hook contract → 7 hook olduğu kimi çağırılır, yeni biznes məntiqi YOXDUR
+     • Şablon props → { lang, setLang, weddingData, onBack, isDemoMode,
+                        initialGuestbook, isPreview }
+
+   ⚠ RƏNGLƏR: bütün rənglər `theme` token-lərindən gəlir (templateConfig).
+   Bu faylda heç bir hardcode rəng yoxdur — yalnız ağ/qara alpha overlay-lər
+   `theme` üzərində hesablanır.
+   ───────────────────────────────────────────────────────────────────────── */
+
+const DEFAULT_MUSIC = buildPresetMusic(PRESET_TRACKS[0], { playMode: MUSIC_PLAY_MODES.AUTO })
+
+/* Hex + alpha → rgba (token üzərində şəffaflıq, hardcode rəng deyil) */
+function alpha(hex, a) {
+  const h = String(hex || '').replace('#', '')
+  if (h.length !== 6) return hex
+  const n = parseInt(h, 16)
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`
+}
+
+/* Başlıq ölçüsünü admin əmsalına vurur (Phase 42 · PART 5).
+
+   ⚠ `clamp()` DAXİLİNDƏ olan responsiv davranış QORUNUR: `calc()` bütöv
+   clamp dəyərini bir ədəd kimi qəbul edir, ona görə mobil/desktop
+   uyğunlaşması pozulmur — yalnız bütöv miqyas sürüşür.
+   ⚠ Əmsal yoxdursa (və ya 1-dirsə) ORİJİNAL sətir qayıdır — köhnə
+   dəvətnamələrin CSS-i zərrə qədər dəyişmir. */
+function scaleFont(size, scale) {
+  if (!scale || scale === 1 || typeof size !== 'string') return size
+  return `calc(${size} * ${scale})`
+}
+
+/* Bölmə başlığı — MODUL səviyyəsində (render daxilində yaradılsa,
+   hər render-də yeni komponent tipi olar və subtree remount edilər). */
+function SectionHead({ kicker, title, sub, theme, design, serif, headScale }) {
+  return (
+    <div style={{ marginBottom: 18, textAlign: design.align }}>
+      <div style={{ fontSize: 10, letterSpacing: design.kicker, textTransform: 'uppercase', color: design.accentColor || theme.primary }}>{kicker}</div>
+      <div style={{
+        fontFamily: serif, fontStyle: design.headingStyle, fontWeight: 300,
+        fontSize: scaleFont('clamp(21px, 6vw, 26px)', headScale), color: design.headingColor || theme.accent, marginTop: 6, lineHeight: 1.25,
+        textTransform: design.headingTransform,
+        letterSpacing: design.headingTransform === 'uppercase' ? '.08em' : 'normal',
+      }}>{title}</div>
+      {sub && <div style={{ fontSize: 11, color: theme.muted, marginTop: 6 }}>{sub}</div>}
+    </div>
+  )
+}
+
+export default function TemplateShell({
+  /* şablon propsları */
+  lang, setLang, weddingData, onBack, isDemoMode = false, initialGuestbook,
+  /* şablona məxsus */
+  templateId, theme: rawTheme, design = {}, Opening, keyframes = '', ambient = null, ambientBlend = null,
+  /* ── Bölmə adlarının şablona məxsus qarşılığı (Phase 41) ────────────────
+     Claude Design-da hər şablon bölmələri ÖZ metaforasında adlandırır:
+     Boarding Pass-da proqram «Uçuş cədvəli», Vinyl-də «Tracklist · Side A»,
+     Gazette-də «Günün cədvəli»-dir. Bu prop həmin adları verir.
+
+     Forma:
+       sectionLabels={{
+         program: {
+           kicker: { az:'Schedule', en:'Schedule', ru:'Расписание' },
+           title:  { az:'Uçuş cədvəli', en:'Flight schedule', ru:'Расписание рейса' },
+         },
+       }}
+
+     ⚠ TƏRCÜMƏ SİSTEMİ POZULMUR: dəyər həmişə {az,en,ru} obyektidir və
+     aktiv dilə görə seçilir. Verilməyən bölmə/dil üçün MÖVCUD tərcümə
+     (`tr.*`, hook etiketləri) işlənir — yəni 9 köhnə şablon bu propu
+     ötürmür və çıxışları ZƏRRƏ QƏDƏR dəyişmir. */
+  sectionLabels: rawSectionLabels = null,
+  /* ── Admin override-ları (Phase 42) ────────────────────────────────────
+     `TemplateRenderer` `form_data.admin`-dən oxuyub ötürür. Rəng, şrift və
+     bölmə adları YALNIZ həmin dəvətnamə üçün şablonun üstünə qoyulur.
+     ⚠ null olanda hər şey əvvəlki kimidir (eyni referanslar, remount yox). */
+  adminOverrides = null,
+  /* ── Açılış ekranını atla (Phase 43 · ISSUE #5) ────────────────────────
+     Admin «Məzmun meneceri»ndəki canlı önbaxış üçün. Önbaxışda zərf
+     açılışı göstərilsə admin redaktə etdiyi bölmələri ÜMUMİYYƏTLƏ görmür
+     (komponentin `key`-i dəyişmədiyinə görə açılış heç vaxt keçmir).
+     ⚠ Müştəri dəvətnaməsində HEÇ VAXT true olmur — default false. */
+  startOpened = false,
+}) {
+  const rawTr = t[lang] || t.az
+  const [opened, setOpened] = useState(startOpened)
+
+  /* ⚠ Adı dəyişdirilib: aşağıdakı bütün kod `theme` adını işlədir, ona görə
+     override tətbiqindən SONRAKI obyekt həmin adı alır. Override yoxdursa
+     `applyThemeOverrides` EYNİ referansı qaytarır. */
+  const theme = applyThemeOverrides(rawTheme, adminOverrides)
+  const sectionLabels = mergeSectionLabels(rawSectionLabels, adminOverrides)
+
+  /* ── Mətn override-ları (Phase 42.1 · #7) ──────────────────────────────
+     `tr.*` və hook etiketləri ~38 yerdə işlənir. Hər çağırış nöqtəsini əl ilə
+     sarımaq əvəzinə obyektin ÖZÜ nazik Proxy ilə örtülür — çağırışlar
+     olduğu kimi qalır (`tr.inv_location`, `rsvpL.yes`…).
+     ⚠ Override yoxdursa Proxy YARADILMIR, eyni referans qayıdır. */
+  const adminStrings = adminOverrides?.strings || null
+  const tr = withStringOverrides(rawTr, adminStrings, lang)
+
+  const D = {
+    radius: 16,
+    align: 'center',
+    headingTransform: 'none',
+    headingStyle: 'normal',
+    kicker: '.2em',
+    dark: false,
+    alternate: true,
+    buttonRadius: 100,
+    ...design,
+  }
+
+  /* ⚠ KONTRAST: bəzi şablonlarda `theme.primary` fon rəngidir (modern-black
+     #0A0A0A, white-elegance #FFFFFF). Kiçik aksent mətnlər üçün oxunaqlı token
+     şablonun özü seçir; default olaraq primary qalır. */
+  const ACC     = D.accentColor || theme.primary
+  const HEAD    = D.headingColor || theme.accent
+  const CTA_BG  = D.ctaBg   || theme.primary
+  const CTA_TXT = D.ctaText || (D.dark ? theme.text : theme.background)
+
+  const serif = theme.fonts?.heading
+  const sans  = theme.fonts?.body
+
+  /**
+   * Bölmə adını həll et: şablon öz adını veribsə onu, verməyibsə mövcud
+   * tərcüməni qaytarır. Dəyər sətir də ola bilər (hər üç dildə eyni qalır).
+   * ⚠ Fallback ZƏNCİRİ: şablonun aktiv dili → şablonun AZ-ı → sistemin öz
+   * tərcüməsi. Beləliklə yarımçıq tərcümə boş başlıq yaratmır.
+   */
+  const L = makeLabelResolver(sectionLabels, lang)
+
+  /* Location: naviqasiya linkləri tək mənbədən (MapSection) gəlir —
+     hədəf yoxdursa `null` olur və düymə render edilmir. */
+  const dirUrl = directionsUrl(weddingData)
+  const mapUrl = openMapUrl(weddingData)
+
+  const isCouple = ['toy', 'nishan'].includes(weddingData.eventType)
+  const isCorp   = ['corporate', 'other'].includes(weddingData.eventType)
+
+  const eventLabels = {
+    toy: tr.event_toy, nishan: tr.event_nishan,
+    birthday: tr.event_birthday, corporate: tr.event_corporate,
+    other: weddingData.eventName || tr.event_other,
+  }
+  const eventLabel = eventLabels[weddingData.eventType] || tr.event_toy
+
+  /* ── Açılış ekranının mətnləri və monoqramı (Phase 45) ──
+     Defoltlar `openingSpec`-dədir (AZ/EN/RU); admin override-ı varsa üstünə
+     qoyulur. Override yoxdursa açılış əvvəlki kimi görünür. */
+  const ot = makeOpeningText(
+    templateId,
+    { weddingData, lang, isCouple, isCorp, eventLabel },
+    adminOverrides?.opening || null,
+  )
+
+  const activePkgId = isDemoMode ? 'PREMIUM' : (weddingData.package || 'SADE')
+
+  /* ── Phase 35 — bölmə görünürlüyü: paket icazəsi AND cütlüyün seçimi ──
+     `getSectionVisibility` iki qaydanı birləşdirir (bax data/sections.js).
+     `sections` sahəsi olmayan KÖHNƏ dəvətnamələrdə hamısı `true` qayıdır,
+     yəni davranış Phase 34-dəki ilə eynidir. */
+  const S = getSectionVisibility(weddingData, activePkgId)
+
+  /* ── Phase 43 — «Bizim Hekayəmiz» bölməsinin ton sürüşməsi ──
+     `sectionStyle(i)` fonları növbələşdirir (transparent ↔ surface, ya da
+     `design.sectionTones` dövrü). Hekayə geri sayımla məkan arasına girir,
+     ona görə ondan SONRAKI bölmələrin indeksi bir addım sürüşməlidir —
+     əks halda iki qonşu bölmə eyni fonla qalır və ayırıcı itir.
+
+     ⚠ REGRESSİYA YOXDUR: hekayə DEFAULT BAĞLIDIR, yəni `lsShift` mövcud
+     bütün dəvətnamələrdə 0-dır və indekslər Phase 42-dəki kimi qalır. */
+  const showStory = S.lovestory && Array.isArray(weddingData.loveStory)
+                    && weddingData.loveStory.length > 0
+  const lsShift = showStory ? 1 : 0
+  const storyBg = showStory ? getStoryTheme(templateId, adminOverrides?.theme).bg : undefined
+
+  const canShowSeating = S.seating
+  const canShowGallery = S.gallery
+  const canShowRsvp    = S.rsvp
+
+  /* Musiqi söndürülübsə mənbə `null`-dır → `useMusicPlayer.hasMusic` false,
+     nə <audio>, nə üzən düymə, nə də başlat balonu render olunur. */
+  const invMusic  = S.music ? (weddingData?.music || DEFAULT_MUSIC) : null
+
+  /* ── 7 HOOK — biznes məntiqinin YEGANƏ mənbəyi ── */
+  const cd       = useCountdown({ date: weddingData.date, time: weddingData.time, lang, eventType: weddingData.eventType, eventName: weddingData.eventName })
+  const timeline = useTimeline({ lang, eventType: weddingData.eventType, programSteps: weddingData.programSteps })
+  const { inputRef: seatInputRef, ...seating } = useSeating({ seatingPlan: weddingData.seatingPlan, lang })
+  const { inputRef: rsvpInputRef, ...rsvp }    = useRsvp({ lang, weddingData })
+  const gbook    = useGuestbook({ lang, initialMessages: initialGuestbook })
+
+  /* ⚠ Hook etiketləri `translations.js`-də DEYİL — `useRsvp` öz daxili
+     lüğətini saxlayır, `useSeating`/`useGuestbook` isə öz etiketlərini
+     qurur. Ona görə onların `labels` obyektləri ayrıca, prefiksli açarlarla
+     sarılır (`rsvp.yes`, `gbook.btn`, `seating.title`…).
+     Override yoxdursa hər üçü EYNİ referansı saxlayır. */
+  /* ⚠ Hook-un qaytardığı obyekt MUTASİYA EDİLMİR — ayrıca dəyişənlər.
+     `rsvpL.yes` → `rsvpL.yes` (aşağıda çağırışlar da yeniləndi). */
+  const rsvpL    = withStringOverrides(rsvp.labels,    adminStrings, lang, 'rsvp.')
+  const gbookL   = withStringOverrides(gbook.labels,   adminStrings, lang, 'gbook.')
+  const seatingL = withStringOverrides(seating.labels, adminStrings, lang, 'seating.')
+  const gallery  = useGallery({ weddingData, isCouple, isCorp })
+  /* ⚠ Autoplay YALNIZ builder-də "Dəvətnamə açılan kimi" seçiləndə (və ya
+     musiqi seçilməyib default preset işlədiləndə). Tövsiyə olunan "düymə ilə"
+     rejimində səs qonağın toxunuşunu gözləyir — bax data/music.js. */
+  const autoPlay = shouldAutoPlay(invMusic)
+  const music    = useMusicPlayer({ lang, music: invMusic, autoStart: opened && autoPlay })
+
+  /* Bubble: açılışdan 900ms sonra çıxır, İLK SCROLL-da və ya ona toxunanda
+     yox olur (9 şablonda eyni qayda — bax hooks/useMusicPrompt.js). */
+  const [showMusicPrompt, dismissMusicPrompt] = useMusicPrompt({
+    enabled: opened && music.hasMusic,
+  })
+
+  useEffect(() => {
+    if (!isDemoMode) trackEvent('invitation_opened', { lang, event_type: weddingData?.eventType })
+  }, [])
+
+  const { formattedDate, dayName } = formatAzDate(weddingData.date, lang)
+
+  /* ── Ortaq stil yardımçıları (hamısı token əsaslı) ── */
+  const line   = alpha(theme.accent, 0.28)
+  const soft   = alpha(theme.accent, 0.12)
+  const card   = D.dark ? alpha(theme.accent, 0.06) : alpha(theme.background, 1)
+  const field  = D.dark ? alpha(theme.accent, 0.07) : alpha(theme.background, 1)
+
+  /* ── Bölmə fonu (Phase 42) ────────────────────────────────────────────
+     `design.sectionTones` verilibsə fonlar həmin siyahı üzrə dövr edir —
+     şablona öz ritmini verir. Verilməyibsə KÖHNƏ davranış: transparent ↔
+     theme.surface növbələşməsi (16 şablonun 9-u bu yoldadır, çıxışları
+     dəyişmir).
+     ⚠ 'transparent' xüsusi dəyərdir: altdakı `pageWash` görünsün deyə. */
+  const sectionStyle = (i) => {
+    const tones = D.sectionTones
+    const bg = (Array.isArray(tones) && tones.length)
+      ? tones[i % tones.length]
+      : (D.alternate && i % 2 === 1 ? theme.surface : 'transparent')
+    return {
+      padding: 'clamp(28px, 7vw, 36px) clamp(18px, 6vw, 28px)',
+      background: bg,
+      borderBottom: D.alternate ? 'none' : `1px solid ${alpha(theme.accent, 0.1)}`,
+      /* Ton qatı `pageWash`-un üstündədir, amma ambient-in altında qalır */
+      position: 'relative',
+    }
+  }
+  const inner = { maxWidth: 560, margin: '0 auto', textAlign: D.align }
+
+  /* ── HERO HƏMİŞƏ MƏRKƏZDƏ (Phase 43 · ISSUE #3) ───────────────────────
+     Bəzi şablonlarda `design.align` 'left'-dir (boarding-pass, gazette,
+     vinyl-record, modern-black) və bu, hero-nu da sola yığırdı — cütlüyün
+     adı kənarda qalırdı. Referans Royal Palace hero-sudur: badge, giriş
+     mətni, adlar, ayırıcı, tarix və məkan MƏRKƏZDƏ.
+     ⚠ Yalnız HERO dəyişir — qalan bölmələr öz `align` dilini saxlayır,
+     yəni şablonun xarakteri itmir. */
+  const heroInner = { ...inner, textAlign: 'center' }
+
+  const btn = (filled) => ({
+    flex: 1, minWidth: 88, textAlign: 'center', display: 'block',
+    padding: 'clamp(11px, 3vw, 13px) 6px', borderRadius: D.buttonRadius,
+    fontSize: 'clamp(10px, 2.4vw, 9.5px)', letterSpacing: '.14em', textTransform: 'uppercase',
+    fontFamily: sans, cursor: 'pointer', textDecoration: 'none',
+    background: filled ? CTA_BG : 'transparent',
+    color: filled ? CTA_TXT : theme.accent,
+    border: filled ? '1px solid transparent' : `1px solid ${alpha(theme.accent, 0.35)}`,
+  })
+
+  const inputStyle = {
+    width: '100%', background: field, border: `1px solid ${alpha(theme.accent, 0.3)}`,
+    borderRadius: D.buttonRadius === 0 ? 0 : 100, padding: '13px 16px',
+    fontSize: 13, color: theme.text, fontFamily: sans, outline: 'none',
+  }
+
+  const names = isCouple
+    ? `${weddingData.groomName || ''}\n${weddingData.brideName || ''}`
+    : (weddingData.eventName || weddingData.brideName || '')
+  /* Admin «Hero › Başlıq» — adlar sətrinin əvəzi (yoxdursa null) */
+  const heroTitle = L('hero', 'title', null)
+
+  return (
+    <div
+      data-tpl={templateId}
+      data-enter={enterDirection(templateId)}
+      style={{
+        /* ⚠ `pageWash` şablonun imza qradiyentidir (preview kartı ilə eyni
+           dil) və HƏMİŞƏ `theme.background` rənginin ÜSTÜNƏ qoyulur — belədə
+           qradiyent şəffaf olsa da arxada heç vaxt ağ boşluq qalmır. */
+        background: D.pageWash
+          ? `${D.pageWash}, ${theme.background}`
+          : theme.background,
+        /* ⚠ `background-attachment: fixed` QƏSDƏN İŞLƏDİLMİR: iOS Safari-də
+           etibarsızdır (çox vaxt `scroll` kimi davranır) və hər scroll
+           kadrında tam repaint tələb edir — mobil-first məhsulda bahalıdır.
+           Wash sənədin ÖZÜ boyunca uzanır: yuxarıdan aşağı bir səyahət
+           (məs. Mediterranean-də səmadan dənizə). */
+        backgroundRepeat: D.pageWash ? 'no-repeat' : undefined,
+        minHeight: '100vh', fontFamily: sans, color: theme.text,
+        overflowX: 'hidden', position: 'relative',
+        /* ⚠ `isolation` ambient qatının blend rejimini bu köke bağlayır —
+           olmasa `mix-blend-mode` səhifədən kənara (body) sızır. */
+        isolation: 'isolate',
+        /* Basma/hover işığının rəngi — bax index.css › [data-press] */
+        '--tpl-glow': alpha(theme.accent, 0.3),
+        /* ⚠ Tipoqrafiya ƏMSALI (Phase 42) — sabit piksel DEYİL.
+           Şablonlarda ölçülər `clamp(...vw...)` şəklindədir; `font-size`
+           əvəzinə kökdə `zoom`-a bənzər miqyas qursaq responsivlik sınardı.
+           Ona görə əmsal yalnız başlıq/mətn ailələrinin ÖZ ölçüsünə
+           `em` üzərindən təsir edir — struktur toxunulmaz qalır. */
+        fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined,
+      }}
+    >
+      <style>{`
+        @media (prefers-reduced-motion: reduce) {
+          [data-tpl="${templateId}"], [data-tpl="${templateId}"] * { animation: none !important; transition: none !important; }
+        }
+        ${keyframes}
+      `}</style>
+
+      {/* 01 — ZƏRF AÇILIŞI */}
+      {!opened && Opening && (
+        <Opening
+          theme={theme} weddingData={weddingData} isCouple={isCouple} isCorp={isCorp}
+          eventLabel={eventLabel} lang={lang} ot={ot}
+          onOpen={() => setOpened(true)}
+          onOpenStart={autoPlay ? music.play : undefined}
+        />
+      )}
+
+      {/* Ambient işıq/naxış qatları — səhifə boyu scroll-a əks istiqamətdə sürüşür.
+          ⚠ Qat `position: fixed` olduğu üçün element riyaziyyatı sıfır verir,
+          ona görə parallaks `page` rejimindədir.
+
+          `ambientBlend` artıq BLEND REJİMİ deyil, qatın YERİNİ seçir —
+          bax motion.jsx › AmbientLayer. `mix-blend-mode` Phase 30-dakı donmanın
+          kök səbəbi idi (blend qatın içindəki elementlərin GPU qatına
+          qalxmasını bloklayır → hər kadrda bütün ekran yenidən çəkilir), ona
+          görə tamam götürülüb.
+            screen (TÜND şablonlar) → qat məzmunun ÜSTÜNDƏ, adi alfa ilə.
+                Tünd fonda screen ilə adi alfa arasında göz fərq görmür.
+            qalan hamısı (AÇIQ şablonlar: multiply, none, verilməyib)
+                → qat məzmunun ALTINDA. Açıq fonda işıqlı duman məzmunun
+                üstündə qalsaydı mətni ağardardı — oxunaqlılıq itərdi.
+          ⚠ Üstdə qalanda zIndex 3-dür: məzmundan (1) yuxarı, amma sticky
+          başlıq (40) və idarə düymələrindən (54–55) aşağı. */}
+      {opened && ambient && (
+        <AmbientLayer below={ambientBlend !== 'screen'}>
+          {ambient}
+        </AmbientLayer>
+      )}
+
+      {/* ⚠ <audio> zərf açılmamışdan ƏVVƏL də mount olunur: açılış toxunuşunda
+          play() sinxron çağırılsın deyə (bax OpeningFrame › onOpenStart). */}
+      {music.hasMusic && <audio {...music.audioProps} />}
+
+      {/* 03 — MUSİQİ TOGGLE */}
+      {opened && music.hasMusic && (
+        <>
+          <button
+            onClick={music.toggle}
+            data-press
+            aria-label={music.playing ? 'Musiqini dayandır' : 'Musiqini başlat'}
+            style={{
+              position: 'fixed', bottom: 'calc(max(20px, env(safe-area-inset-bottom, 20px)) + var(--dt-preview-offset, 0px))', right: 20, zIndex: 55,
+              width: 46, height: 46, borderRadius: '50%',
+              border: `1px solid ${alpha(theme.accent, 0.4)}`, background: D.dark ? alpha(theme.accent, 0.12) : alpha(theme.surface, 0.95),
+              backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3, cursor: 'pointer',
+            }}
+          >
+            {[0, 0.18, 0.36].map((d) => (
+              <span key={d} style={{
+                width: 2.5, height: 12, background: music.playing ? ACC : alpha(theme.muted, 0.6),
+                transformOrigin: 'bottom', display: 'block',
+                animation: music.playing ? `tpl-eq 1s ease-in-out ${d}s infinite` : 'none',
+                transform: music.playing ? undefined : 'scaleY(.45)',
+              }} />
+            ))}
+          </button>
+
+          {/* Musiqini başlat bubble — YALNIZ start helper-idir:
+              musiqi artıq çalırsa klik heç nə etmir (pause/stop YOX). */}
+          <MusicStartBubble
+            theme={theme} lang={lang} visible={showMusicPrompt} playing={music.playing}
+            onStart={() => { if (!music.playing) music.play(); dismissMusicPrompt() }}
+          />
+        </>
+      )}
+
+      <AnimatePresence>
+        {opened && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            style={{ position: 'relative', zIndex: 1 }}
+          >
+            {/* 02 — STICKY HEADER */}
+            <header style={{
+              position: 'sticky', top: 0, zIndex: 40, height: 52, padding: '0 16px',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: alpha(theme.background, 0.9), backdropFilter: 'blur(10px)',
+              borderBottom: `1px solid ${alpha(theme.accent, 0.18)}`,
+            }}>
+              <button onClick={onBack} style={{
+                display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none',
+                fontSize: 10, letterSpacing: '.14em', textTransform: 'uppercase', color: theme.muted,
+                cursor: 'pointer', fontFamily: sans, minHeight: 44, padding: '0 8px 0 0',
+              }}>
+                <span>←</span>{tr.btn_back}
+              </button>
+              <div style={{ fontFamily: serif, fontSize: 14, letterSpacing: '.06em' }}>
+                <span style={{ color: ACC }}>Digitoy</span>
+                <span style={{ color: alpha(theme.muted, 0.6) }}>.az</span>
+              </div>
+              {/* Phase 36: ACC = design.accentColor || theme.primary — modern-black /
+                  white-elegance kimi şablonlarda kontrast qorunsun deyə */}
+              <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} accent={ACC} radius={D.buttonRadius} />
+            </header>
+
+            {/* 04 — HERO
+                ⚠ Phase 45: admin «Mətnlər › Hero» sahələri (üst etiket, başlıq)
+                əvvəl heç yerdə tətbiq olunmurdu. İndi üst etiket tədbir adını,
+                başlıq isə adlar sətrini əvəz edir; boşdursa əvvəlki kimi. */}
+            <section data-section="hero" style={{ ...sectionStyle(0), padding: 'clamp(40px, 10vw, 56px) clamp(18px, 6vw, 28px) clamp(34px, 8vw, 48px)' }}>
+              <div style={heroInner}>
+                <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: ACC, marginBottom: 12 }}>
+                  {L('hero', 'kicker', eventLabel)}
+                </div>
+                <div style={{ fontFamily: serif, fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', color: theme.muted }}>
+                  {tr.inv_join}
+                </div>
+                <h1 style={{
+                  fontFamily: serif, fontStyle: D.headingStyle, fontWeight: 300,
+                  fontSize: 'clamp(34px, 11vw, 52px)', lineHeight: 1.08, color: HEAD,
+                  margin: '16px 0 0', whiteSpace: 'pre-line',
+                  textTransform: D.headingTransform,
+                  letterSpacing: D.headingTransform === 'uppercase' ? '-.02em' : 'normal',
+                }}>
+                  {heroTitle ? heroTitle : isCouple ? (
+                    <>
+                      {weddingData.groomName}
+                      <span style={{ display: 'block', fontSize: '.5em', color: ACC, margin: '2px 0', fontStyle: 'italic' }}>{tr.inv_and}</span>
+                      {weddingData.brideName}
+                    </>
+                  ) : names}
+                </h1>
+
+                {isCorp && weddingData.organizer?.trim() && (
+                  <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: ACC, marginTop: 10 }}>
+                    {tr.organizer_display}: {weddingData.organizer}
+                  </div>
+                )}
+
+                {D.ornament ? <div style={{ margin: '20px 0' }}>{D.ornament}</div> : (
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, margin: '20px 0' }}>
+                    <span style={{ width: 44, height: 1, background: alpha(theme.accent, 0.5) }} />
+                    <span style={{ width: 4, height: 4, background: ACC, transform: 'rotate(45deg)' }} />
+                    <span style={{ width: 44, height: 1, background: alpha(theme.accent, 0.5) }} />
+                  </div>
+                )}
+
+                <div style={{ fontSize: 13, color: theme.text }}>{formattedDate}</div>
+                <div style={{ fontSize: 10, letterSpacing: '.22em', textTransform: 'uppercase', color: ACC, marginTop: 5 }}>
+                  {[dayName, weddingData.time ? formatTime24(weddingData.time) : ''].filter(Boolean).join(' · ')}
+                </div>
+                {weddingData.venueName && (
+                  <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: theme.muted, marginTop: 14 }}>
+                    {weddingData.venueName}
+                  </div>
+                )}
+
+                <div style={{
+                  margin: D.align === 'left' ? '28px 0 0' : '28px auto 0', width: 40, height: 40,
+                  border: `1px solid ${alpha(theme.accent, 0.3)}`, borderRadius: '50%',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 14, color: ACC, animation: 'tpl-hint 2.8s ease-in-out infinite',
+                }}>⌄</div>
+              </div>
+            </section>
+
+            {/* 05 — COUNTDOWN */}
+            {S.countdown && (
+            <section data-section="countdown" style={sectionStyle(1)}>
+              <Reveal style={inner}>
+                <SectionHead kicker={L('countdown', 'kicker', 'Countdown')} title={L('countdown', 'title', cd.title)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
+                <Stagger base={55} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'clamp(6px, 2vw, 8px)' }}>
+                  {[
+                    { v: cd.days, l: cd.labels.days },
+                    { v: cd.hours, l: cd.labels.hours },
+                    { v: cd.minutes, l: cd.labels.minutes },
+                    { v: cd.seconds, l: cd.labels.seconds, pop: true },
+                  ].map(({ v, l, pop }) => (
+                    <div key={l} style={{
+                      background: soft, border: `1px solid ${alpha(theme.accent, 0.18)}`,
+                      borderRadius: D.radius === 0 ? 0 : 10, padding: 'clamp(10px, 3vw, 14px) 2px', textAlign: 'center',
+                    }}>
+                      <div style={{ fontFamily: serif, fontSize: scaleFont('clamp(20px, 6vw, 26px)', theme.headingScale), color: HEAD, fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
+                        {/* Yalnız saniyə xanası döyünür — dəqiqə/saat/gün sakit qalır */}
+                        <PopDigit value={v} pop={pop} />
+                      </div>
+                      <div style={{ fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase', color: theme.muted, marginTop: 5 }}>{l}</div>
+                    </div>
+                  ))}
+                </Stagger>
+              </Reveal>
+            </section>
+            )}
+
+            {/* 05b — BİZİM HEKAYƏMİZ (Phase 43) ────────────────────────
+                Zaman xətti üzrə hekayə blokları. Mətnlər `resolveWeddingContent`
+                tərəfindən ARTIQ seçilmiş dildə gəlir (bax data/contentI18n.js),
+                ona görə burada tərcümə məntiqi YOXDUR.
+                Bölmə boşdursa `showStory` false olur və heç nə render olunmur. */}
+            {/* Phase 44 — Claude Design «Love Story»: başlığı, fonu və fəsil
+                maketlərini bölmə ÖZÜ çəkir (hər şablonun öz çərçivə dili var,
+                bax _shared/loveStoryTheme.js). Şablonun `sectionLabels`-i
+                verilibsə başlıq mətni ondan gəlir. */}
+            {showStory && (
+            <section data-section="lovestory" style={{ ...sectionStyle(2), background: storyBg, paddingTop: 'clamp(48px, 12vw, 64px)', paddingBottom: 'clamp(56px, 14vw, 80px)' }}>
+              <Reveal style={inner}>
+                <LoveStorySection
+                  story={weddingData.loveStory}
+                  templateId={templateId}
+                  lang={lang}
+                  kicker={L('lovestory', 'kicker', null)}
+                  title={L('lovestory', 'title', null)}
+                  adminTheme={adminOverrides?.theme || null}
+                  copyOverrides={adminOverrides?.story?.text || null}
+                />
+              </Reveal>
+            </section>
+            )}
+
+            {/* 06 — LOCATION */}
+            {S.venue && (
+            <section data-section="venue" style={sectionStyle(2 + lsShift)}>
+              <Reveal style={inner}>
+                <SectionHead kicker={L('venue', 'kicker', 'LOCATION')} title={L('venue', 'title', tr.inv_location)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
+                <div style={{ borderRadius: D.radius, overflow: 'hidden', border: `1px solid ${line}` }}>
+                  {/* Canlı Google Maps — hədəf/açar yoxdursa MapSection özü
+                      dekorativ kartı verir (heç vaxt boş blok olmur). */}
+                  <div style={{
+                    position: 'relative', overflow: 'hidden',
+                    background: `radial-gradient(120% 120% at 50% 50%, ${alpha(theme.primary, 0.22)}, ${alpha(theme.background, 0.9)})`,
+                    borderBottom: `1px solid ${alpha(theme.primary, 0.22)}`,
+                  }}>
+                    <MapSection
+                      weddingData={weddingData}
+                      theme={theme}
+                      accent={ACC}
+                      map={D.map}
+                      frame={<MapRings accent={ACC} />}
+                    />
+                  </div>
+                  <div style={{ padding: 'clamp(14px, 4vw, 18px)', background: card }}>
+                    <div style={{ fontFamily: serif, fontSize: 'clamp(17px, 5vw, 20px)', color: theme.text }}>
+                      {weddingData.venueName || tr.inv_location}
+                    </div>
+                    {/* Məkan qeydi (zal/mərtəbə) — YALNIZ doludursa; boş sətir yaranmır */}
+                    {weddingData.venueNote && (
+                      <div style={{ fontSize: 12.5, color: theme.muted, marginTop: 5, lineHeight: 1.5 }}>
+                        {weddingData.venueNote}
+                      </div>
+                    )}
+                    <Stagger base={110} style={{ display: 'flex', gap: 6, marginTop: 14, flexWrap: 'wrap' }}>
+                      {/* Yol göstər — hədəf yoxdursa düymə ÜMUMİYYƏTLƏ çıxmır
+                          (əvvəllər `href="#"` ilə ölü düymə qalırdı). */}
+                      {dirUrl && (
+                        <a data-press href={dirUrl} target="_blank" rel="noopener noreferrer" style={btn(true)}>{tr.inv_directions_btn}</a>
+                      )}
+                      {mapUrl && (
+                        <a data-press href={mapUrl} target="_blank" rel="noopener noreferrer" style={btn(!dirUrl)}>Maps</a>
+                      )}
+                      {weddingData.wazeUrl && (
+                        <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Waze</a>
+                      )}
+                      {weddingData.appleMapsUrl && (
+                        <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Apple</a>
+                      )}
+                    </Stagger>
+                  </div>
+                </div>
+              </Reveal>
+            </section>
+            )}
+
+            {/* 07 — PROQRAM */}
+            {S.program && (
+            <section data-section="program" style={sectionStyle(3 + lsShift)}>
+              <Reveal style={inner}>
+                <SectionHead kicker={L('program', 'kicker', 'Schedule')} title={L('program', 'title', timeline.sectionLabel)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
+                {/* ── Proqramın vizual variantı (Phase 41) ────────────────
+                    Claude Design-da hər şablon cədvəli ÖZ dilində qurur:
+                      'timeline'  — ikon + saat + ad (default, 9 köhnə şablon)
+                      'table'     — saat | ad, aralarında qayda xətti
+                                    (Boarding Pass uçuş cədvəli, Gazette)
+                      'tracklist' — A1 | ad | saat (Vinyl plyonka trekləri)
+                    ⚠ DATA EYNİDİR: hər üç variant `timeline.events`-i oxuyur.
+                    Knob verilməyəndə 'timeline' qalır → köhnə şablonlar
+                    zərrə qədər dəyişmir. */}
+                <Stagger base={55} style={{ display: 'flex', flexDirection: 'column', gap: D.programStyle ? 0 : 16, textAlign: 'left' }}>
+                  {timeline.events.map((ev, i) => {
+                    const last = i === timeline.events.length - 1
+                    const rule = `1px ${D.programRule || 'solid'} ${alpha(theme.accent, 0.22)}`
+
+                    if (D.programStyle === 'table') {
+                      return (
+                        <div key={i} style={{
+                          display: 'flex', gap: 'clamp(10px, 3.5vw, 14px)', alignItems: 'baseline',
+                          padding: '11px 0', borderBottom: rule,
+                        }}>
+                          <span style={{
+                            flex: '0 0 auto', minWidth: 46, fontFamily: serif, fontWeight: 700,
+                            fontSize: 'clamp(14px, 4.2vw, 15px)', color: ACC, fontVariantNumeric: 'tabular-nums',
+                          }}>{ev.time}</span>
+                          <span style={{
+                            fontFamily: sans, fontSize: 'clamp(11.5px, 3.4vw, 12.5px)',
+                            color: theme.text, lineHeight: 1.5, minWidth: 0,
+                          }}>{ev.label}</span>
+                        </div>
+                      )
+                    }
+
+                    if (D.programStyle === 'tracklist') {
+                      return (
+                        <div key={i} style={{
+                          display: 'flex', alignItems: 'center', gap: 12,
+                          padding: '11px 0', borderBottom: last ? 'none' : rule,
+                        }}>
+                          <span style={{
+                            flex: '0 0 auto', minWidth: 22, fontFamily: sans, fontSize: 10,
+                            color: D.programIndexColor || ACC, letterSpacing: '.08em',
+                          }}>
+                            {`${D.programPrefix || ''}${i + 1}`}
+                          </span>
+                          <span style={{
+                            flex: 1, fontFamily: serif, fontWeight: 500,
+                            fontSize: 'clamp(13px, 4vw, 14px)', color: theme.text, minWidth: 0,
+                          }}>{ev.label}</span>
+                          <span style={{
+                            flex: '0 0 auto', fontFamily: sans, fontSize: 10, color: theme.muted,
+                            fontVariantNumeric: 'tabular-nums',
+                          }}>{ev.time}</span>
+                        </div>
+                      )
+                    }
+
+                    /* default — ikonlu zaman xətti (dəyişməyib) */
+                    return (
+                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 'clamp(10px, 3vw, 14px)' }}>
+                        <span style={{ width: 44, flex: '0 0 auto', fontSize: 10, letterSpacing: '.1em', color: theme.muted, paddingTop: 9, textAlign: 'right' }}>
+                          {ev.time}
+                        </span>
+                        <span style={{
+                          width: 32, height: 32, flex: '0 0 auto', border: `1px solid ${alpha(theme.accent, 0.3)}`,
+                          borderRadius: D.radius === 0 ? 0 : 8, background: card,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14,
+                        }}>{ev.icon}</span>
+                        <span style={{ paddingTop: 6, fontFamily: serif, fontSize: 'clamp(15px, 4.4vw, 17px)', color: theme.text, minWidth: 0 }}>
+                          {ev.label}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </Stagger>
+              </Reveal>
+            </section>
+            )}
+
+            {/* 08 — DRESS CODE (ortaq komponent) */}
+            {S.dresscode && (
+            <section data-section="dresscode" style={sectionStyle(4 + lsShift)}>
+              <Reveal style={inner}>
+                <SectionHead kicker={L('dresscode', 'kicker', 'STYLE')} title={L('dresscode', 'title', tr.inv_dresscode)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
+                <DressCodeSection
+                  theme={theme}
+                  paletteId={weddingData.dressCodePalette}
+                  customLabels={weddingData.dressCodeLabels}
+                  customGenders={weddingData.dressCodeGenders}
+                  note={weddingData.dressCodeDescription}
+                  lang={lang}
+                  serif={serif}
+                  align={D.align}
+                  onDark={D.dark}
+                />
+              </Reveal>
+            </section>
+            )}
+
+            {/* 09 — OTURMA PLANI */}
+            {canShowSeating && !seating.isEmpty && (
+              <section data-section="seating" style={sectionStyle(5 + lsShift)}>
+                <Reveal style={inner}>
+                  <SectionHead kicker={L('seating', 'kicker', 'SEATING')} title={L('seating', 'title', seatingL.title)} sub={seatingL.sub} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
+                  {/* ⚠ Təkliflər siyahısı normal document flow-da — overlap olmur */}
+                  <Stagger base={55} style={{ textAlign: 'left' }}>
+                    <input
+                      ref={seatInputRef}
+                      type="text"
+                      value={seating.query}
+                      onChange={(e) => { seating.setQuery(e.target.value); seating.setActiveIdx(-1); if (seating.selected) seating.setSelected(null) }}
+                      onKeyDown={seating.onKeyDown}
+                      placeholder={seatingL.hint}
+                      role="combobox"
+                      aria-expanded={seating.suggestions.length > 0}
+                      aria-controls={`${templateId}-seating-list`}
+                      aria-autocomplete="list"
+                      autoComplete="off"
+                      style={inputStyle}
+                    />
+                    {seating.suggestions.length > 0 && (
+                      <ul id={`${templateId}-seating-list`} role="listbox" style={{
+                        listStyle: 'none', margin: '8px 0 0', padding: 4,
+                        background: card, border: `1px solid ${alpha(theme.accent, 0.3)}`,
+                        borderRadius: D.radius, maxHeight: 300, overflowY: 'auto',
+                      }}>
+                        {seating.suggestions.map((g, i) => (
+                          <li
+                            key={g.id ?? `${g.full_name}-${i}`}
+                            role="option"
+                            aria-selected={i === seating.activeIdx}
+                            onMouseEnter={() => seating.setActiveIdx(i)}
+                            onMouseDown={(e) => { e.preventDefault(); seating.pick(g) }}
+                            style={{
+                              display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10,
+                              padding: '11px 12px', cursor: 'pointer', borderRadius: D.radius === 0 ? 0 : 10,
+                              background: i === seating.activeIdx ? soft : 'transparent',
+                            }}
+                          >
+                            <span style={{ fontSize: 13, color: theme.text, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{g.full_name}</span>
+                            <span style={{
+                              background: CTA_BG, color: CTA_TXT,
+                              fontSize: 10, letterSpacing: '.1em', padding: '4px 9px',
+                              borderRadius: D.buttonRadius === 0 ? 0 : 100, whiteSpace: 'nowrap', flexShrink: 0,
+                            }}>{g.table_id}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {seating.showNotFound && (
+                      <div style={{ marginTop: 12, fontSize: 12.5, color: theme.muted }}>{tr.inv_seat_fullname}</div>
+                    )}
+
+                    {seating.selected && (
+                      <div style={{ marginTop: 12, background: card, border: `1px solid ${alpha(theme.primary, 0.35)}`, borderRadius: D.radius, padding: 16 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: 13, color: theme.text }}>{seating.selected.full_name}</span>
+                          <span style={{
+                            background: CTA_BG, color: CTA_TXT, fontSize: 10,
+                            letterSpacing: '.1em', padding: '4px 10px', borderRadius: D.buttonRadius === 0 ? 0 : 100,
+                            textTransform: 'uppercase', whiteSpace: 'nowrap',
+                          }}>{seating.selected.table_id}</span>
+                        </div>
+                        <div style={{ fontSize: 11, color: theme.muted, marginTop: 10, lineHeight: 1.6 }}>
+                          {seating.selected.table_id}: {seating.tablemates.map((g) => g.full_name).join(', ')}
+                        </div>
+                        <button onClick={seating.reset} data-press style={{
+                          marginTop: 6, background: 'none', border: 'none', cursor: 'pointer',
+                          fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase',
+                          color: ACC, fontFamily: sans, minHeight: 44, padding: '0 8px 0 0',
+                        }}>{seatingL.again || 'Yenidən axtar'}</button>
+                      </div>
+                    )}
+                  </Stagger>
+                </Reveal>
+              </section>
+            )}
+
+            {/* 10 — QALEREYA + QR */}
+            {canShowGallery && (
+              <section id="gallery-section" data-section="gallery" style={sectionStyle(6 + lsShift)}>
+                <Reveal style={inner}>
+                  <Stagger base={0} style={{ background: card, border: `1px solid ${line}`, borderRadius: D.radius, padding: 'clamp(16px, 5vw, 22px)', textAlign: 'center' }}>
+                    <SectionHead kicker={L('gallery', 'kicker', 'Gallery')} title={L('gallery', 'title', tr.inv_gallery)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
+
+                    {gallery.demoPhotos.length > 0 && (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 18 }}>
+                        {gallery.demoPhotos.map((url, i) => (
+                          <div key={i} style={{ aspectRatio: '3/2', overflow: 'hidden', background: theme.surface, borderRadius: D.radius === 0 ? 0 : 6 }}>
+                            {/* ⚠ Şəkil serverdən silinibsə sınıq ikon qalmasın — xana gizlədilir. */}
+                            <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div style={{
+                      width: 128, height: 128, margin: '4px auto 0', borderRadius: D.radius === 0 ? 0 : 12,
+                      background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      border: `1px solid ${alpha(theme.accent, 0.25)}`,
+                    }}>
+                      <QRCodeSVG value={gallery.photoShareUrl} size={104} bgColor="#FFFFFF" fgColor="#1A1A1A" level="M" />
+                    </div>
+                    <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: theme.muted, marginTop: 12 }}>
+                      {tr.inv_scan_upload}
+                    </div>
+
+                    <a data-press href={gallery.photoShareUrl} style={{ ...btn(true), marginTop: 14, padding: 13 }}>📷 {tr.inv_gallery_btn}</a>
+                    {/* ⚠ Phase 27: "Masa kartını yüklə" tamamilə silindi (QR + foto paylaşımı qalır) */}
+
+                    <div style={{ fontSize: 12.5, color: theme.muted, marginTop: 14, lineHeight: 1.8 }}>{tr.inv_gallery_desc}</div>
+                  </Stagger>
+                </Reveal>
+              </section>
+            )}
+
+            {/* 11 — RSVP */}
+            {canShowRsvp && (
+              <section data-section="rsvp" style={sectionStyle(7 + lsShift)}>
+                <Reveal style={inner}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: ACC }}>
+                    <span style={{ width: 22, height: 1, background: alpha(ACC, 0.6) }} />{L('rsvp', 'kicker', tr.inv_rsvp)}
+                    <span style={{ width: 22, height: 1, background: alpha(ACC, 0.6) }} />
+                  </div>
+                  <div style={{ fontFamily: serif, fontStyle: D.headingStyle, fontSize: scaleFont('clamp(22px, 6.5vw, 28px)', theme.headingScale), color: HEAD, marginTop: 12, lineHeight: 1.3 }}>
+                    {L('rsvp', 'title', rsvpL.title)}
+                  </div>
+                  <div style={{ fontSize: 12.5, color: theme.muted, margin: '10px 0 20px' }}>{rsvpL.subtitle}</div>
+
+                  {rsvp.rsvpClosed && !rsvp.submitted ? (
+                    <div style={{ background: card, border: `1px solid ${line}`, borderRadius: D.radius, padding: 22 }}>
+                      <div style={{ fontFamily: serif, fontSize: 18, color: theme.text }}>{tr.rsvp_closed_title}</div>
+                      <div style={{ fontSize: 11, color: theme.muted, marginTop: 6 }}>{tr.rsvp_closed_desc}</div>
+                    </div>
+                  ) : rsvp.alreadyDone ? (
+                    <div style={{ background: card, border: `1px solid ${line}`, borderRadius: D.radius, padding: 22 }}>
+                      <div style={{ fontFamily: serif, fontSize: 18, color: theme.text }}>{rsvpL.already_done}</div>
+                      <div style={{ fontSize: 11, color: theme.muted, marginTop: 6 }}>{rsvp.selected?.full_name}</div>
+                    </div>
+                  ) : rsvp.submitted ? (
+                    <div style={{ background: card, border: `1px solid ${line}`, borderRadius: D.radius, padding: 22 }}>
+                      <div style={{ fontFamily: serif, fontStyle: D.headingStyle, fontSize: 20, color: HEAD }}>{rsvp.thanksMsg}</div>
+                      <div style={{ fontSize: 11, color: theme.muted, marginTop: 6 }}>{rsvpL.thanks_sub}</div>
+                    </div>
+                  ) : (
+                    <form onSubmit={rsvp.handleSubmit}>
+                      <div style={{ marginBottom: 12, textAlign: 'left' }}>
+                        <input
+                          ref={rsvpInputRef}
+                          type="text"
+                          value={rsvp.query}
+                          onChange={(e) => { rsvp.setQuery(e.target.value); rsvp.setActiveIdx(-1); if (rsvp.selected) rsvp.setSelected(null) }}
+                          onKeyDown={rsvp.onKeyDown}
+                          placeholder={rsvpL.namePh}
+                          required={!rsvp.useGuestMode}
+                          autoComplete="off"
+                          style={{ ...inputStyle, textAlign: D.align === 'left' ? 'left' : 'center' }}
+                        />
+                        {rsvp.suggestions.length > 0 && (
+                          <ul role="listbox" style={{
+                            listStyle: 'none', margin: '8px 0 0', padding: 4,
+                            background: card, border: `1px solid ${alpha(theme.accent, 0.3)}`,
+                            borderRadius: D.radius, maxHeight: 260, overflowY: 'auto',
+                          }}>
+                            {rsvp.suggestions.map((g, i) => (
+                              <li
+                                key={g.id ?? `${g.full_name}-${i}`}
+                                role="option"
+                                aria-selected={i === rsvp.activeIdx}
+                                onMouseEnter={() => rsvp.setActiveIdx(i)}
+                                onMouseDown={(e) => { e.preventDefault(); rsvp.pick(g) }}
+                                style={{
+                                  display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10,
+                                  padding: '11px 12px', cursor: 'pointer', borderRadius: D.radius === 0 ? 0 : 10,
+                                  background: i === rsvp.activeIdx ? soft : 'transparent',
+                                }}
+                              >
+                                <span style={{ fontSize: 13, color: theme.text }}>{g.full_name}</span>
+                                <span style={{ fontSize: 10, letterSpacing: '.1em', color: ACC }}>{g.table_id}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        {rsvp.showNotFound && (
+                          <div style={{ fontSize: 10, color: ACC, marginTop: 6 }}>{rsvpL.not_in_list}</div>
+                        )}
+                      </div>
+
+                      <Stagger base={220} style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        {[
+                          { val: 'yes',   label: rsvpL.yes },
+                          { val: 'no',    label: rsvpL.no },
+                          { val: 'maybe', label: rsvpL.maybe },
+                        ].map(({ val, label }) => {
+                          const active = rsvp.status === val
+                          return (
+                            <button
+                              key={val} type="button" onClick={() => rsvp.chooseStatus(val)}
+                              data-press
+                              style={{
+                                flex: '1 1 40%', minWidth: 110, minHeight: 48, cursor: 'pointer',
+                                borderRadius: D.buttonRadius, padding: '13px 8px',
+                                fontSize: 'clamp(10px, 2.6vw, 10.5px)', letterSpacing: '.12em',
+                                textTransform: 'uppercase', fontFamily: sans,
+                                background: active ? CTA_BG : 'transparent',
+                                color: active ? CTA_TXT : theme.accent,
+                                border: active ? '1px solid transparent' : `1px solid ${alpha(theme.accent, 0.35)}`,
+                              }}
+                            >{label}</button>
+                          )
+                        })}
+                      </Stagger>
+
+                      {rsvp.status === 'yes' && (
+                        <div style={{ marginTop: 12, background: card, border: `1px solid ${line}`, borderRadius: D.radius, padding: 20, textAlign: 'center' }}>
+                          <div style={{ fontSize: 10, letterSpacing: '.2em', textTransform: 'uppercase', color: theme.muted }}>{rsvpL.plusq}</div>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 24, marginTop: 16 }}>
+                            <button type="button" onClick={rsvp.decPlusOne} disabled={rsvp.plusOne === 0} data-press aria-label="Azalt"
+                              style={{ width: 40, height: 40, border: `1px solid ${alpha(theme.accent, 0.3)}`, borderRadius: D.buttonRadius === 0 ? 0 : '50%', background: 'none', color: theme.muted, cursor: 'pointer', opacity: rsvp.plusOne === 0 ? 0.35 : 1 }}>−</button>
+                            <span style={{ fontFamily: serif, fontSize: 32, color: HEAD, width: 40, fontVariantNumeric: 'tabular-nums' }}>{rsvp.plusOne}</span>
+                            <button type="button" onClick={rsvp.incPlusOne} disabled={rsvp.plusOne === rsvp.maxExtraGuests} data-press aria-label="Artır"
+                              style={{ width: 40, height: 40, border: `1px solid ${alpha(theme.accent, 0.3)}`, borderRadius: D.buttonRadius === 0 ? 0 : '50%', background: 'none', color: ACC, cursor: 'pointer', opacity: rsvp.plusOne === rsvp.maxExtraGuests ? 0.35 : 1 }}>+</button>
+                          </div>
+                        </div>
+                      )}
+
+                      <button type="submit" disabled={!rsvp.canSubmit} data-press style={{
+                        marginTop: 12, width: '100%', minHeight: 50, border: 'none', borderRadius: D.buttonRadius,
+                        background: CTA_BG, color: CTA_TXT,
+                        cursor: rsvp.canSubmit ? 'pointer' : 'not-allowed',
+                        fontSize: 11, letterSpacing: '.14em', textTransform: 'uppercase', fontFamily: sans,
+                        opacity: rsvp.canSubmit ? 1 : 0.35,
+                      }}>{rsvp.sending ? '…' : rsvpL.send}</button>
+                    </form>
+                  )}
+
+                  {/* ⚠ Phase 27: RSVP statistika paneli SİLİNDİ — qonaq digər
+                      qonaqların cavablarını görməməlidir. `rsvp.stats` hook-da
+                      qalır (API dəyişmir), sadəcə render olunmur. */}
+                </Reveal>
+              </section>
+            )}
+
+            {/* 12 — QONAQ DƏFTƏRİ */}
+            {S.guestbook && (
+            <section data-section="guestbook" style={sectionStyle(8 + lsShift)}>
+              <Reveal style={inner}>
+                <SectionHead kicker={L('guestbook', 'kicker', 'Guestbook')} title={L('guestbook', 'title', gbookL.title)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
+                <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 18, textAlign: 'left' }}>
+                  <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbookL.namePh} style={inputStyle} />
+                  <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbookL.msgPh} rows={3}
+                    style={{ ...inputStyle, borderRadius: D.radius, resize: 'none' }} />
+                  <button type="submit" disabled={!gbook.canSubmit} data-press style={{
+                    minHeight: 46, border: 'none', borderRadius: D.buttonRadius, background: CTA_BG,
+                    color: CTA_TXT, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed',
+                    fontSize: 10.5, letterSpacing: '.14em', textTransform: 'uppercase', fontFamily: sans,
+                    opacity: gbook.canSubmit ? 1 : 0.35,
+                  }}>{gbook.sending ? gbookL.sending : gbookL.btn}</button>
+                  {gbook.error && <p role="alert" style={{ margin: 0, fontSize: 12, textAlign: 'center', color: theme.text, fontFamily: sans }}>⚠ {gbookL.error}</p>}
+                </form>
+
+                <Stagger base={110} style={{ display: 'grid', gap: 10, textAlign: 'left' }}>
+                  {gbook.messages.map((raw, i) => {
+                    const m = gbook.readMessage(raw)
+                    return (
+                      <div key={m.name + i} style={{
+                        background: D.dark ? 'transparent' : theme.surface,
+                        borderLeft: D.dark ? `1px solid ${alpha(theme.accent, 0.35)}` : 'none',
+                        borderRadius: D.dark ? 0 : D.radius,
+                        padding: D.dark ? '6px 0 6px 14px' : 16,
+                      }}>
+                        <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 15, color: theme.text, lineHeight: 1.65 }}>“{m.text}”</div>
+                        <div style={{ fontSize: 11, color: theme.muted, marginTop: 8 }}>
+                          — {m.name}{m.date ? ` · ${gbook.formatDate(m.date)}` : ''}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </Stagger>
+              </Reveal>
+            </section>
+            )}
+
+            {/* 12.5 — SİFARİŞ CTA (yalnız builder önbaxışında; şərt komponentin içindədir) */}
+            <OrderCta
+              theme={theme} weddingData={weddingData} lang={lang}
+              pageSlug={gallery.pageSlug} isDemoMode={isDemoMode}
+              effectiveSlug={gallery.effectiveSlug} serif={serif}
+            />
+
+            {/* 13 — SON HİSSƏ: demo CTA + footer (9 şablonun ortağı) */}
+            <TemplateOutro
+              theme={theme} weddingData={weddingData} lang={lang}
+              isDemoMode={isDemoMode} isCouple={isCouple} isCorp={isCorp}
+              eventLabel={eventLabel} serif={serif}
+              footer={sectionHead(L, 'footer')}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+export { alpha }

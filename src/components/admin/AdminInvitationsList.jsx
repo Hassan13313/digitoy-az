@@ -8,7 +8,7 @@ import { RotateOwnerLinkDialog } from './OwnerPanelLinkCard'
 import { setInvitationActive, getAdminToken } from '../../utils/api'
 import { getOwnerLink, rotateOwnerLink } from '../../utils/ownerApi'
 import { azDate } from './adminFormat'
-import { templateMeta } from './templateMeta'
+import { templateMetaVersioned } from './templateMeta'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Dəvətnamələr — UI redesign 2026-10 (görünüş v2/InvitationsList)
@@ -109,7 +109,7 @@ export default function AdminInvitationsList() {
     id: inv.slug,
     slug: inv.slug,
     names: inv.names || '—',
-    template: templateMeta(inv.template_id),
+    template: templateMetaVersioned(inv.template_id, inv.template_version),
     kind: EVENT_LABELS[inv.event_type] || inv.event_type || '—',
     venue: inv.venue || '—',
     created: azDate(inv.created_at),

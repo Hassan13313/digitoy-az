@@ -1,0 +1,62 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   ŞABLON ŞRİFTLƏRİ — tələb olunduqda yüklənir.
+
+   ⚠ Bu şriftlər QƏSDƏN index.html-də deyil: simple-luxury (bütün mövcud
+   müştərilər) yalnız Cormorant Garamond + Inter işlədir və onlar artıq
+   index.html-dədir. Əlavə 8 ailəni hər səhifə yükləsəydi landing-in LCP-si
+   pisləşərdi.
+
+   Bu funksiya yalnız (a) builder-in "Dizayn seç" qalereyası açılanda,
+   (b) simple-luxury-dən fərqli şablon render olunanda çağırılır.
+   ───────────────────────────────────────────────────────────────────────── */
+
+const FONT_HREF =
+  'https://fonts.googleapis.com/css2' +
+  '?family=Marcellus' +
+  '&family=Instrument+Serif:ital@0;1' +
+  '&family=Newsreader:ital,opsz,wght@0,6..72,200..500;1,6..72,200..400' +
+  '&family=Italiana' +
+  '&family=Amiri:ital,wght@0,400;0,700;1,400' +
+  '&family=Archivo:wght@300;400;500;600' +
+  '&family=Jost:wght@200;300;400;500' +
+  '&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500' +
+  /* Phase 41 — Claude Design «Seçilmiş 7» dəsti üçün.
+     Çəkilər QƏSDƏN dardır: dizayn faylının işlətdiyi variantlar qədər,
+     bir dənə də artıq deyil (lazy dəstə olsa da hər ailə bir fayldır). */
+  '&family=Space+Grotesk:wght@300;400;500;700' +   /* Boarding Pass, Vinyl   */
+  '&family=JetBrains+Mono:wght@300;400;500' +      /* Boarding Pass, Vinyl   */
+  '&family=Bebas+Neue' +                            /* Cinema Premiere        */
+  '&family=Cinzel:wght@400;500;600' +               /* Royal Palace           */
+  '&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400' + /* Gazette        */
+  '&display=swap'
+
+const LINK_ID = 'digitoy-template-fonts-v1'   /* köhnə versiya — yeni yükləyici ilə toqquşmasın */
+
+/* ── «Bizim Hekayəmiz» əl yazısı şrifti (Phase 44) ──
+   Great Vibes yalnız hekayə bölməsinin başlıq/şəkil altı yazılarında işlənir.
+   Ayrı link-dir: bölmə olmayan dəvətnamələr (default bağlıdır) onu HEÇ VAXT
+   yükləmir, simple-luxury-nin yuxarıdakı dəstdən asılı olmaması da qorunur. */
+const SCRIPT_HREF = 'https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap'
+const SCRIPT_LINK_ID = 'digitoy-script-font-v1'
+
+export function ensureScriptFont() {
+  if (typeof document === 'undefined') return
+  if (document.getElementById(SCRIPT_LINK_ID)) return
+  const link = document.createElement('link')
+  link.id   = SCRIPT_LINK_ID
+  link.rel  = 'stylesheet'
+  link.href = SCRIPT_HREF
+  document.head.appendChild(link)
+}
+
+/** Şablon şrift dəstini bir dəfə <head>-ə əlavə edir (idempotent). */
+export function ensureTemplateFonts() {
+  if (typeof document === 'undefined') return
+  if (document.getElementById(LINK_ID)) return
+
+  const link = document.createElement('link')
+  link.id   = LINK_ID
+  link.rel  = 'stylesheet'
+  link.href = FONT_HREF
+  document.head.appendChild(link)
+}

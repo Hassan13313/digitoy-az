@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Play } from 'lucide-react'
-import { getInvitationContent, saveInvitationContent, getInvitation } from '../../utils/api'
+import { getInvitationContent, saveInvitationContent, getInvitation, setInvitationTemplateVersion } from '../../utils/api'
 import { getTemplateTheme, getTemplateName, FONT_STACKS } from '../../templates/templateConfig'
 import {
   CONTENT_SECTIONS, THEME_KEYS, THEME_LABELS, FONT_CHOICES,
@@ -8,8 +8,11 @@ import {
 } from '../../data/adminOverrides'
 import { SECTION_DEFS, isSectionOn } from '../../data/sections'
 import { templateCopyFields, templateLabels } from '../../templates/templateCopy'
+import { hasLegacyVersion, TEMPLATE_VERSION_LEGACY } from '../../templates/legacy/registry'
 import OpeningEditor from './content/OpeningEditor'
 import StoryEditor from './content/StoryEditor'
+import VersionNotice from './content/VersionNotice'
+import { SHADOWED_TITLE, sectionTitleDefault, sectionKickerDefault } from './content/textDefaults'
 import translations from '../../data/translations'
 import { buildRsvpLabels } from '../../hooks/useRsvp'
 import { GUESTBOOK_LABELS } from '../../hooks/useGuestbook'
@@ -43,38 +46,11 @@ import { Button, Modal, Notice, Spinner, useMediaQuery } from './v2/adminUi'
 
 /* Royal Gold və Floral Garden 2026-10-28-dən temanı kontekstdən oxuyur — rəng/şrift orada da işləyir */
 const BESPOKE_TEMPLATES = new Set(['simple-luxury'])
+/* Köhnə versiyada (v1) bu ikisi hələ öz markup-ını yazır — rəng/şrift orada işləmir */
+const LEGACY_BESPOKE = new Set(['royal-gold', 'floral-garden'])
 const LANG_IDS = ['az', 'en', 'ru']
 const isEmptyObj = (o) => !o || Object.keys(o).length === 0
 const sameJson = (a, b) => JSON.stringify(a ?? {}) === JSON.stringify(b ?? {})
-
-/* Bölmə başlığının köhnə (sistem) sətri — şablonun öz başlığı onu əvəz edir */
-const SHADOWED_TITLE = {
-  venue: 'inv_location', dresscode: 'inv_dresscode', gallery: 'inv_gallery',
-  seating: 'seating.title', rsvp: 'rsvp.title', guestbook: 'gbook.title',
-}
-
-/* Placeholder: bölmə başlığının sistem mətni (şablonun öz başlığı yoxdursa) */
-function sectionTitleDefault(key, lg, wd, systemText) {
-  if (key === 'hero' || key === 'footer') {
-    if (!wd) return ''
-    return ['toy', 'nishan'].includes(wd.eventType)
-      ? [wd.groomName, wd.brideName].filter(Boolean).join(' & ')
-      : (wd.eventName || wd.brideName || '')
-  }
-  const sys = { venue: 'inv_location', dresscode: 'inv_dresscode', gallery: 'inv_gallery', seating: 'seating.title', rsvp: 'rsvp.title', guestbook: 'gbook.title' }[key]
-  return sys ? systemText(sys, lg) : ''
-}
-
-/* Placeholder: üst etiketin dəvətnamədə görünən mətni (yalnız defoltu olanlar) */
-function sectionKickerDefault(key, lg, wd) {
-  const tr = translations[lg] || translations.az
-  if (key === 'hero') {
-    const type = wd?.eventType || 'toy'
-    return type === 'other' ? (wd?.eventName || tr.event_other) : (tr[`event_${type}`] || tr.event_toy)
-  }
-  if (key === 'rsvp') return tr.inv_rsvp || '—'
-  return '—'
-}
 
 export default function AdminContentManager({ slug, onClose, onSaved }) {
   const [loading, setLoading]     = useState(true)
@@ -136,10 +112,27 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
     return () => { alive = false }
   }, [slug])
 
-  const bespoke = templateId && BESPOKE_TEMPLATES.has(templateId)
-  /* Şablonun öz sətirləri və bölmə başlıqları (copy.js) */
-  const copyFields = useMemo(() => templateCopyFields(templateId), [templateId])
-  const tplLabels = useMemo(() => templateLabels(templateId), [templateId])
+  /* Redizayndan əvvəl təsdiqlənmiş dəvətnamə köhnə kodla göstərilir (v1) —
+     onda yeni dizaynın sahələri (copy.js, Royal Gold/Floral rəngləri) işləmir */
+  const legacy = Number(wedding?.templateVersion) === TEMPLATE_VERSION_LEGACY && !!templateId && hasLegacyVersion(templateId)
+  const bespoke = templateId && (BESPOKE_TEMPLATES.has(templateId) || (legacy && LEGACY_BESPOKE.has(templateId)))
+  /* Şablonun öz sətirləri və bölmə başlıqları (copy.js) — yalnız yeni versiyada */
+  const copyFields = useMemo(() => (legacy ? [] : templateCopyFields(templateId)), [templateId, legacy])
+  const tplLabels = useMemo(() => (legacy ? null : templateLabels(templateId)), [templateId, legacy])
+  const [versionState, setVersionState] = useState({ busy: false, confirm: false, error: '' })
+
+  /* Dizayn versiyasını dəyiş — yalnız `templateVersion` yazılır, redaktordakı
+     saxlanmamış dəyişikliklərə toxunulmur; önbaxış dərhal yenilənir */
+  const switchVersion = async (version) => {
+    setVersionState({ busy: true, confirm: false, error: '' })
+    try {
+      await setInvitationTemplateVersion(slug, version)
+      setWedding((w) => (w ? { ...w, templateVersion: version } : w))
+      setVersionState({ busy: false, confirm: false, error: '' })
+    } catch (e) {
+      setVersionState({ busy: false, confirm: false, error: e?.message || 'Versiya dəyişmədi' })
+    }
+  }
   const baseTheme = useMemo(() => (templateId ? getTemplateTheme(templateId) : null) || {}, [templateId])
 
   /* Saxlanılacaq / önbaxışa gedəcək `admin` obyekti — boş açarlar düşmür */
@@ -437,6 +430,9 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
       /* Cihaz dəyişəndə iframe yenidən yaranır — «hazıram» siqnalını yenidən gözlə */
       onDevice={(d) => { setFrameReady(false); setDevice(d) }}
       onFocusSection={focusSection}
+      topNotice={templateId && hasLegacyVersion(templateId) ? (
+        <VersionNotice legacy={legacy} state={versionState} setState={setVersionState} onSwitch={switchVersion} />
+      ) : null}
       extraDirty={{
         opening: sameJson(opening, saved.opening) ? 0 : 1,
         story: sameJson(story, saved.story) ? 0 : 1,
@@ -448,7 +444,7 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
               <Button size="sm" icon={Play} onClick={replayOpening}>Açılışı yenidən oynat</Button>
             </div>
             <OpeningEditor
-              templateId={templateId} wedding={wedding} lang={lang}
+              templateId={templateId} wedding={wedding} lang={lang} legacy={legacy}
               opening={opening} setOpening={(fn) => { setSaveState('idle'); setOpening(fn) }}
               slug={slug} narrow={isNarrow}
             />

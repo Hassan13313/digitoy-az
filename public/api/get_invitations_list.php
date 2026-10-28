@@ -2,6 +2,7 @@
 /* ── get_invitations_list.php — Admin: approved dəvətnamələr ── */
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/template_version.php';
 
 requireAdmin();
 
@@ -79,6 +80,8 @@ foreach ($rows as $row) {
         'venue'      => $fd['venueName'] ?? '',
         'package'     => $fd['package'] ?? '',
         'template_id' => !empty($fd['templateId']) ? $fd['templateId'] : ($row['template_id'] ?? DEFAULT_TEMPLATE_ID),
+        /* 2026-10-28 — 1: redizayndan əvvəlki görünüş, 2: yeni (bax template_version.php) */
+        'template_version' => tvForRead(is_array($fd) ? $fd : [])['templateVersion'],
         /* Sutun yoxdursa AKTIV sayilir — kohne sxemde link baglanmis gorunmesin */
         'is_active'  => !array_key_exists('is_active', $row) || (int)$row['is_active'] === 1,
         /* Phase 36 — hansi dillerde elle terceume var? (yalniz nisan, blob deyil) */

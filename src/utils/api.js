@@ -243,6 +243,18 @@ export async function saveInvitationContent(slug, admin, sections = null) {
   return res.json() /* { ok, admin, sections } */
 }
 
+/* ── 2026-10-28: şablon versiyası (1 = redizayndan əvvəlki görünüş, 2 = yeni) ──
+   YALNIZ `form_data.templateVersion` dəyişir (bax api/admin_template_version.php). */
+export async function setInvitationTemplateVersion(slug, version) {
+  const res = await fetch(`${BASE}/admin_template_version.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminHeaders() },
+    body: JSON.stringify({ slug, version }),
+  })
+  if (!res.ok) throw await toApiError(res, 'Versiya dəyişmədi')
+  return res.json() /* { ok, slug, templateVersion } */
+}
+
 /* ── Phase 45: admin şəkli (açılış monoqramı, hekayə fəsli) ──
    Admin tokeni tələb olunur; fayl `uploads/_admin/<slug>/` qovluğuna düşür.
    @param {Blob} blob  artıq hazırlanmış şəkil (bax imageResize › prepareAdminImage)

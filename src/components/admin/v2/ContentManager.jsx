@@ -127,6 +127,7 @@ const EMBLEM_MODES = [
  * @param {object} p
  * @param {boolean} p.open  @param {()=>void} p.onClose  Saxlanmamış dəyişiklik varsa əvvəlcə xəbərdarlıq çıxır
  * @param {string} p.slug  @param {string} [p.templateName]  Başlıqda: «/slug · Royal Gold»
+ * @param {import('react').ReactNode} [p.topNotice]  Bütün tabların üstündə (məs. şablon versiyası)
  * @param {ContentValues} p.values  @param {ContentValues} p.savedValues  @param {ContentValues} p.defaults
  * @param {ContentSchema} p.schema
  * @param {(next:ContentValues, path:(string|number)[])=>void} p.onChange
@@ -172,6 +173,7 @@ export default function ContentManager({
   customTabs = {},
   extraDirty = {},
   onFocusSection,
+  topNotice = null,
 }) {
   const [tabInner, setTabInner] = useState('texts');
   const [langInner, setLangInner] = useState('az');
@@ -340,6 +342,7 @@ export default function ContentManager({
                 aria-labelledby={`cm-tab-${tab}`}
                 className="space-y-4 px-5 py-5 sm:px-6"
               >
+                {topNotice}
                 {tab === 'texts' && <TextsTab {...ctx} />}
                 {tab === 'opening' && customTabs.opening}
                 {tab === 'opening' && !customTabs.opening && (

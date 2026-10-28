@@ -4,6 +4,8 @@ import TemplateBoundary from './TemplateBoundary'
 import { getTemplateComponent } from './registry'
 import { DEFAULT_TEMPLATE_ID, resolveTemplateId } from './templateConfig'
 import { ensureTemplateFonts } from './fonts'
+import { ensureTemplateFonts as ensureLegacyFonts } from './legacy/fonts'
+import { isLegacyInvitation, getLegacyComponent } from './legacy/registry'
 import { trackTemplateView, trackTemplateFallback } from './templateAnalytics'
 import { resolveWeddingContent } from '../data/contentI18n'
 import { readOverrides, applyStoryOverrides } from '../data/adminOverrides'
@@ -77,7 +79,16 @@ export default function TemplateRenderer({ template, isPreview = false, weddingD
      yükləyir (simple-luxury bura düşmür → mövcud müştərilərin yüklənmə
      profili dəyişmir). Admin şrift override-ı varsa istənilən
      ailə lazım ola bilər — o halda tam dəst yüklənir. */
-  if (templateId !== DEFAULT_TEMPLATE_ID) ensureTemplateFonts(adminOverrides?.fonts ? undefined : templateId)
+  /* ── 2026-10-28: ŞABLON VERSİYASI ──
+     Premium redizayndan əvvəl təsdiqlənmiş dəvətnamələr (`templateVersion: 1`)
+     köhnə görünüşdə qalır — kod `legacy/`-dədir (bax legacy/registry.js).
+     Builder, demo və kataloq datasında açar yoxdur → həmişə yeni versiya. */
+  const legacy = isLegacyInvitation(weddingData, templateId)
+
+  if (templateId !== DEFAULT_TEMPLATE_ID) {
+    if (legacy) ensureLegacyFonts()
+    else ensureTemplateFonts(adminOverrides?.fonts ? undefined : templateId)
+  }
 
   /* ── Phase 45: HEKAYƏ OVERRIDE-LARI ──
      Admin-in fəsil düzəlişləri (mətn, tarix, stiker, şəkillər, gizlətmə,
@@ -94,7 +105,7 @@ export default function TemplateRenderer({ template, isPreview = false, weddingD
   /* createElement — komponent registry-dən (modul səviyyəsində sabit obyekt)
      gəlir, render zamanı yaradılmır; JSX yazılışı linter-i yanlış xəbərdarlığa
      salır, ona görə birbaşa createElement istifadə olunur. */
-  const content = createElement(getTemplateComponent(templateId), {
+  const content = createElement(legacy ? getLegacyComponent(templateId) : getTemplateComponent(templateId), {
     ...localizedProps,
     isPreview,
   })

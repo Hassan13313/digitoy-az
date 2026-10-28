@@ -3,6 +3,7 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/slug_alloc.php';
 require_once __DIR__ . '/i18n_merge.php';
+require_once __DIR__ . '/template_version.php';
 
 requireAdmin();
 
@@ -66,6 +67,8 @@ function invitationJsonWithMergedI18n(PDO $db, string $column, $value, array $in
     if (!is_array($stored)) $stored = [];
 
     $merged = mergeInvitationI18n($stored, $incomingFd);
+    /* Şablon versiyası: açar gəlməyibsə saxlanılmış dəyər qorunur (bax template_version.php) */
+    $merged = tvForSave($merged, $raw === false ? null : $stored);
     $out = json_encode($merged, JSON_UNESCAPED_UNICODE);
     /* Kodlama uğursuz olsa BİRLƏŞDİRMƏSİZ orijinala düşürük — dəvətnamənin
        özü heç bir halda saxlanılmamış qalmasın. */
@@ -111,7 +114,8 @@ if ($res['action'] === 'update_code') {
 try {
     /* Yeni sətir: saxlanılan yoxdur, amma eyni funksiyadan keçirilir ki,
        `i18n`/`i18nMeta` forması bütün yollarda EYNİ normallaşdırılsın. */
-    $insJson = json_encode(mergeInvitationI18n([], $formData), JSON_UNESCAPED_UNICODE);
+    /* Yeni dəvətnamə yeni şablon versiyası ilə yaranır (açıq dəyər gəlməyibsə) */
+    $insJson = json_encode(tvForSave(mergeInvitationI18n([], $formData), null), JSON_UNESCAPED_UNICODE);
     if ($insJson === false) $insJson = $json;
 
     $ins = $db->prepare("INSERT INTO invitations (slug, form_data, template_id, draft_code) VALUES (:slug, :data, :tpl, :code)");
