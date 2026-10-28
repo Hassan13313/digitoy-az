@@ -10,6 +10,7 @@ import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { LABELS, TXT } from './copy'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    VINYL RECORD — «Məhdud tirajlı LP» (premium redizayn, 2026-10)
@@ -32,23 +33,6 @@ import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_share
 
 const BASE = getTemplateTheme('vinyl-record')
 const ID = 'vinyl-record'
-
-const LABELS = {
-  countdown: { title: { az: 'Plyonka başlayana qədər', en: 'Until the needle drops', ru: 'Пока не опустится игла' } },
-  venue:     { title: { az: 'Səhnə', en: 'The stage', ru: 'Сцена' } },
-  program:   { title: { az: 'Trek siyahısı', en: 'Tracklist', ru: 'Треклист' } },
-  dresscode: { title: { az: 'Səhnə geyimi', en: 'Stage attire', ru: 'Сценический образ' } },
-  seating:   { title: { az: 'Sizin masanız', en: 'Your table', ru: 'Ваш стол' } },
-  gallery:   { title: { az: 'Albom fotoları', en: 'Album photos', ru: 'Фото альбома' } },
-  rsvp:      { title: { az: 'Konsertə gəlirsiniz?', en: 'Coming to the show?', ru: 'Придёте на концерт?' } },
-  guestbook: { title: { az: 'Layner qeydləri', en: 'Liner notes', ru: 'Заметки на конверте' } },
-}
-
-const TXT = {
-  az: { track: 'Trek', side: 'Tərəf', table: 'Masa', remain: 'Qalan vaxt' },
-  en: { track: 'Track', side: 'Side', table: 'Table', remain: 'Time remaining' },
-  ru: { track: 'Трек', side: 'Сторона', table: 'Стол', remain: 'Осталось' },
-}
 
 const PAL = {
   CHAR: '#151312',
@@ -135,7 +119,7 @@ function TurntableOpening({ inv, theme }) {
   if (gate.gone) return null
   const { titleOv, first, second } = openingNames(inv)
   const head = theme.fonts.heading
-  const arc = upper(`${titleOv !== undefined ? titleOv : [first, second].filter(Boolean).join(' & ')} · ${ot.text('kicker') || 'Side A'} · 33⅓`, lang)
+  const arc = upper(`${titleOv !== undefined ? titleOv : [first, second].filter(Boolean).join(` ${ot.text('and') || '&'} `)} · ${ot.text('kicker') || 'Side A'} · 33⅓`, lang)
   return (
     <motion.div {...gate.gateProps} data-vr
       animate={gate.opening ? { opacity: 0 } : {}}
@@ -174,7 +158,7 @@ function TurntableOpening({ inv, theme }) {
         {ot.show('kicker') && <div style={{ fontSize: 12, letterSpacing: '.3em', color: C.MUSTARD, animation: 'vr-rise .8s ease-out .8s both' }}>{upper(ot.text('kicker'), lang)}</div>}
         {titleOv !== '' && (
           <div style={{ marginTop: 10, fontFamily: head, fontSize: 'clamp(30px, 9.6vw, 40px)', lineHeight: 1.1, color: C.CREAM, animation: 'vr-rise 1s ease-out 1s both' }}>
-            {first}{second && <><span style={{ color: C.ORANGE, margin: '0 .25em' }}>&amp;</span>{second}</>}
+            {first}{second && <><span style={{ color: C.ORANGE, margin: '0 .25em' }}>{ot.text('and')}</span>{second}</>}
           </div>
         )}
         {ot.show('meta') && <div style={{ marginTop: 10, fontSize: 14, letterSpacing: '.12em', color: C.MUTED, animation: 'vr-rise .8s ease-out 1.3s both' }}>{ot.text('meta')}</div>}
@@ -230,7 +214,7 @@ export default function VinylRecordTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
+  const T = inv.copy(TXT)
   let tn = 0
   const next = () => ++tn
   const P = { head, T }
@@ -263,7 +247,7 @@ export default function VinylRecordTemplate(props) {
               <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 14, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
                 <span aria-hidden="true">←</span>{tr.btn_back}
               </button>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: head, fontSize: 16 }}><Disc size={16} />Digitoy Records</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: head, fontSize: 16 }}><Disc size={16} />{T.label}</div>
               <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
             </header>
 
@@ -283,7 +267,7 @@ export default function VinylRecordTemplate(props) {
                     <circle cx="74" cy="56" r="11" fill="none" stroke={C.CREAM} strokeWidth="2.6" />
                     {[0, 1, 2, 3, 4].map((k) => <path key={k} d={`M${52 + k * 6} 70V100`} stroke={C.CREAM} strokeOpacity=".22" strokeWidth="2" />)}
                   </svg>
-                  <span style={{ position: 'absolute', top: 12, right: 12, padding: '3px 7px', border: `1.2px solid ${C.CREAM}`, fontSize: 10, fontWeight: 700, letterSpacing: '.2em', color: C.CREAM }}>STEREO</span>
+                  <span style={{ position: 'absolute', top: 12, right: 12, padding: '3px 7px', border: `1.2px solid ${C.CREAM}`, fontSize: 10, fontWeight: 700, letterSpacing: '.2em', color: C.CREAM }}>{T.stereo}</span>
                   <div style={{ position: 'absolute', left: '7%', right: '7%', bottom: '7%' }}>
                     <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: '.22em', color: C.MUSTARD }}>{upper(L('hero', 'kicker', inv.eventLabel), lang)}</div>
                     <h1 style={{ margin: '6px 0 0', fontFamily: head, fontWeight: 400, fontSize: 'clamp(30px, 9vw, 42px)', lineHeight: 1.02, color: C.CREAM, textWrap: 'balance' }}>
@@ -315,7 +299,7 @@ export default function VinylRecordTemplate(props) {
                         const a = (-140 + i * (100 / 12)) * Math.PI / 180
                         return <path key={i} d={`M${(Math.cos(a) * 80).toFixed(1)} ${(Math.sin(a) * 80 + 10).toFixed(1)}L${(Math.cos(a) * (i % 3 ? 74 : 70)).toFixed(1)} ${(Math.sin(a) * (i % 3 ? 74 : 70) + 10).toFixed(1)}`} stroke="#0A1E2E" strokeWidth="1" />
                       })}
-                      <text y="-30" textAnchor="middle" fontFamily={body} fontSize="9" letterSpacing="2" fill="#0A1E2E">VU</text>
+                      <text y="-30" textAnchor="middle" fontFamily={body} fontSize="9" letterSpacing="2" fill="#0A1E2E">{T.vu}</text>
                       <g style={{ transform: `rotate(${needle}deg)`, transformOrigin: '0px 10px', transition: 'transform .5s cubic-bezier(.3,1.6,.5,1)' }}>
                         <path d="M0 10L0 -78" stroke="#111" strokeWidth="1.4" />
                       </g>
@@ -393,7 +377,7 @@ export default function VinylRecordTemplate(props) {
                     )
                   })}
                   <div style={{ marginTop: 14, display: 'flex', justifyContent: 'space-between', fontSize: 10, fontWeight: 600, letterSpacing: '.18em', color: alpha(C.CHAR, 0.55) }}>
-                    <span>DIGITOY RECORDS</span><span>STEREO · 33⅓</span>
+                    <span>{String(T.label).toLocaleUpperCase('en')}</span><span>{`${T.stereo} · 33⅓`}</span>
                   </div>
                 </div>
               </Track>

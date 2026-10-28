@@ -15,9 +15,11 @@
    şablonun konsepsiyasına uyğundur (Night Sky → «Axşamın bürcü», Gazette →
    «Oxucu məktubları»…). Admin-in bölmə adı override-ları əvvəlki kimi
    üstündədir (mergeSectionLabels). Kicker-lər artıq LABELS-də deyil.
+   ⚠ 2026-10-28: LABELS şablonun `copy.js` faylına köçdü (admin paneli
+   placeholder üçün oradan oxuyur) — index.jsx onu idxal edir.
 
    Yoxlayır (redizayn edilmiş 13 şablon):
-     1. `const LABELS` var və `useInvitation`-a ötürülür
+     1. `copy.js`-də `LABELS` var, index.jsx onu idxal edib `useInvitation`-a ötürür
      2. Hər başlıqda üç dilin ÜÇÜ də var və heç biri boş deyil
      3. AZ və RU mətnləri fərqlidir (kopyala-yapışdır tərcümə qalmayıb)
    ───────────────────────────────────────────────────────────────────────── */
@@ -36,9 +38,11 @@ const ok = (name, cond, extra = '') => {
 
 for (const id of REDESIGNED) {
   const src = readFileSync(`src/templates/${id}/index.jsx`, 'utf8')
+  const copy = readFileSync(`src/templates/${id}/copy.js`, 'utf8')
 
-  const block = src.match(/const LABELS = \{([\s\S]*?)\n\}/)
-  ok(`${id}: LABELS mövcuddur`, !!block)
+  const block = copy.match(/export const LABELS = \{([\s\S]*?)\n\}/)
+  ok(`${id}: LABELS mövcuddur (copy.js)`, !!block)
+  ok(`${id}: LABELS copy.js-dən idxal olunur`, /import \{[^}]*\bLABELS\b[^}]*\} from '\.\/copy'/.test(src))
   ok(`${id}: LABELS useInvitation-a ötürülür`, /sectionLabels:\s*LABELS/.test(src))
   if (!block) continue
   const body = block[1]

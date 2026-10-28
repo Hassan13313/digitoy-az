@@ -9,6 +9,8 @@ import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { LABELS, TXT } from './copy'
+import { fill } from '../_shared/copyText'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    CINEMA PREMIERE — «Qırmızı xalça premyerası» (premium redizayn, 2026-10)
@@ -30,23 +32,6 @@ import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_share
 
 const BASE = getTemplateTheme('cinema-premiere')
 const ID = 'cinema-premiere'
-
-const LABELS = {
-  countdown: { title: { az: 'Seansa qalıb', en: 'Until showtime', ru: 'До сеанса' } },
-  venue:     { title: { az: 'Kinoteatr', en: 'The theatre', ru: 'Кинотеатр' } },
-  program:   { title: { az: 'Seanslar', en: 'Showtimes', ru: 'Сеансы' } },
-  dresscode: { title: { az: 'Qırmızı xalça', en: 'Red carpet', ru: 'Красная дорожка' } },
-  seating:   { title: { az: 'Yeriniz', en: 'Your seat', ru: 'Ваше место' } },
-  gallery:   { title: { az: 'Kadrlar', en: 'Stills', ru: 'Кадры' } },
-  rsvp:      { title: { az: 'Biletinizi təsdiqləyin', en: 'Confirm your ticket', ru: 'Подтвердите билет' } },
-  guestbook: { title: { az: 'Tamaşaçı rəyləri', en: 'Audience reviews', ru: 'Отзывы зрителей' } },
-}
-
-const CREDITS = {
-  az: { presents: 'təqdim edir', star: (n) => `Baş rollarda ${n}`, rest: ['Ssenari: Sevgi', 'Rejissor: Tale', 'Musiqi: Ürək döyüntüsü'], premiere: 'Premyera', admit: 'Bir nəfərlik', table: 'Masa', hall: 'Zal' },
-  en: { presents: 'presents', star: (n) => `Starring ${n}`, rest: ['Written by Love', 'Directed by Fate', 'Music by Heartbeat'], premiere: 'Premiere', admit: 'Admit one', table: 'Table', hall: 'Hall' },
-  ru: { presents: 'представляет', star: (n) => `В главных ролях ${n}`, rest: ['Сценарий: Любовь', 'Режиссёр: Судьба', 'Музыка: Сердцебиение'], premiere: 'Премьера', admit: 'Входной билет', table: 'Стол', hall: 'Зал' },
-}
 
 const PAL = {
   BLACK: '#0B0A0C',
@@ -235,7 +220,7 @@ export default function CinemaPremiereTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const CR = CREDITS[lang] || CREDITS.az
+  const CR = inv.copy(TXT)
   const names = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const [y, m, d] = String(weddingData.date || '').split('-')
   const dotted = d ? `${d}.${m}.${y}` : ''
@@ -266,7 +251,7 @@ export default function CinemaPremiereTemplate(props) {
               <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
                 <span aria-hidden="true">←</span>{tr.btn_back}
               </button>
-              <div style={{ fontFamily: head, fontWeight: 800, fontSize: 17, letterSpacing: '.16em', color: C.GOLD }}>DIGITOY PICTURES</div>
+              <div style={{ fontFamily: head, fontWeight: 800, fontSize: 17, letterSpacing: '.16em', color: C.GOLD }}>{CR.studio}</div>
               <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
             </header>
 
@@ -281,7 +266,7 @@ export default function CinemaPremiereTemplate(props) {
                     <path d="M0 30V10H10V0H30M5 30V15H15V5H30" fill="none" stroke={C.GOLD} strokeWidth="1.2" />
                   </svg>
                 ))}
-                <div style={{ fontFamily: head, fontWeight: 700, fontSize: 14, letterSpacing: '.3em', color: C.GOLD_L }}>DIGITOY PICTURES</div>
+                <div style={{ fontFamily: head, fontWeight: 700, fontSize: 14, letterSpacing: '.3em', color: C.GOLD_L }}>{CR.studio}</div>
                 <div style={{ marginTop: 4, fontStyle: 'italic', fontSize: 15, color: C.MUTED }}>{CR.presents}</div>
                 <div style={{ marginTop: 26, fontStyle: 'italic', fontSize: 16, color: C.IVORY }}>{L('hero', 'kicker', inv.eventLabel)}</div>
                 <h1 style={{ margin: '10px 0 0', fontFamily: head, fontWeight: 800, fontSize: 'clamp(46px, 15vw, 72px)', lineHeight: 0.95, letterSpacing: '.02em', background: GOLD_TEXT(C), WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', textWrap: 'balance' }}>
@@ -295,7 +280,7 @@ export default function CinemaPremiereTemplate(props) {
                 {inv.isCorp && weddingData.organizer?.trim() && <div style={{ marginTop: 8, fontSize: 14.5, color: C.MUTED }}>{tr.organizer_display}: {weddingData.organizer}</div>}
                 {/* billing block */}
                 <div style={{ marginTop: 26, paddingTop: 14, borderTop: `1px solid ${alpha(C.GOLD, 0.3)}`, fontFamily: head, fontWeight: 500, fontSize: 12.5, lineHeight: 1.5, letterSpacing: '.12em', color: alpha(C.IVORY, 0.7), textWrap: 'balance' }}>
-                  {upper([CR.star(names), ...CR.rest, `${CR.premiere} ${dotted}`].join(' · '), lang)}
+                  {upper([fill(CR.star, { names }), CR.rest1, CR.rest2, CR.rest3, `${CR.premiere} ${dotted}`].filter(Boolean).join(' · '), lang)}
                 </div>
               </div>
               <p style={{ margin: '26px auto 0', maxWidth: 320, textAlign: 'center', fontStyle: 'italic', fontSize: 17, lineHeight: 1.55, color: C.MUTED }}>{tr.inv_join}</p>

@@ -9,6 +9,7 @@ import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { LABELS, TXT } from './copy'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    MODERN BLACK — «Moda evinin tipoqrafik afişası» (premium redizayn, 2026-10)
@@ -32,23 +33,7 @@ import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_share
 const BASE = getTemplateTheme('modern-black')
 const ID = 'modern-black'
 
-const LABELS = {
-  countdown: { title: { az: 'Qalan vaxt', en: 'Time left', ru: 'Осталось' } },
-  venue:     { title: { az: 'Məkan', en: 'Venue', ru: 'Место' } },
-  program:   { title: { az: 'Proqram', en: 'Programme', ru: 'Программа' } },
-  dresscode: { title: { az: 'Geyim kodu', en: 'Dress code', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Masanız', en: 'Your table', ru: 'Ваш стол' } },
-  gallery:   { title: { az: 'Fotolar', en: 'Photos', ru: 'Фото' } },
-  guestbook: { title: { az: 'Təbriklər', en: 'Wishes', ru: 'Поздравления' } },
-}
-
 /* Spesifikasiya cədvəlinin sahə adları */
-const SPEC = {
-  az: { date: 'Tarix', time: 'Saat', place: 'Məkan' },
-  en: { date: 'Date', time: 'Time', place: 'Venue' },
-  ru: { date: 'Дата', time: 'Время', place: 'Место' },
-}
-
 const PAL = {
   BLACK: '#000000',
   WHITE: '#FFFFFF',
@@ -247,7 +232,7 @@ export default function ModernBlackTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const display = theme.fonts.heading
   const sans = theme.fonts.body
-  const spec = SPEC[lang] || SPEC.az
+  const spec = inv.copy(TXT)
   const dateLine = inv.dp
     ? `${String(inv.dp.day).padStart(2, '0')} ${inv.dp.month} ${inv.dp.year}`
     : inv.formattedDate
@@ -278,7 +263,7 @@ export default function ModernBlackTemplate(props) {
               <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.SILVER, fontSize: 14, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: sans }}>
                 <span aria-hidden="true">←</span>{tr.btn_back}
               </button>
-              <div style={{ fontFamily: display, fontWeight: 300, fontSize: 13, letterSpacing: '.08em' }}>DIGITOY</div>
+              <div style={{ fontFamily: display, fontWeight: 300, fontSize: 13, letterSpacing: '.08em' }}>{spec.brand}</div>
               <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
             </header>
 

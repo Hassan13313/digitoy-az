@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { createContext, useContext, useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { QRCodeSVG } from 'qrcode.react'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
@@ -26,8 +26,9 @@ import { useGallery } from '../../hooks/useGallery'
 import { useMusicPlayer } from '../../hooks/useMusicPlayer'
 import { useMusicPrompt } from '../../hooks/useMusicPrompt'
 import t from '../../data/translations'
-import { mergeSectionLabels, withStringOverrides, makeLabelResolver, sectionHead } from '../../data/adminOverrides'
+import { applyThemeOverrides, mergeSectionLabels, withStringOverrides, makeLabelResolver, sectionHead } from '../../data/adminOverrides'
 import { makeOpeningText, phrase } from '../_shared/openingSpec'
+import { scaleFont } from '../_shared/palette'
 import { EmblemSlot } from '../_shared/MonoContent'
 import {
   cornerBouquet, smallBouquet, cardBouquet, sprigMark, singleBloom,
@@ -60,20 +61,19 @@ import {
    ⚠ Bu fayl YALNIZ UI qatıdır — bütün biznes məntiqi hook-lardadır.
    ───────────────────────────────────────────────────────────────────────── */
 
-const TH = getTemplateTheme('floral-garden')
+const BASE_TH = getTemplateTheme('floral-garden')
+/* Admin rəng/şrift override-ları tətbiq olunmuş tema (bax default export) —
+   komponentlər onu kontekstdən oxuyur; override yoxdursa BASE_TH-nin özüdür. */
+const ThemeCtx = createContext(BASE_TH)
+const useTH = () => useContext(ThemeCtx)
 const DEFAULT_MUSIC = buildPresetMusic(PRESET_TRACKS[0], { playMode: MUSIC_PLAY_MODES.AUTO })
 
 /* Başlıq şrifti CSS dəyişənidir: Fraunces-də kiril olmadığı üçün rus dilində
    kök element onu bütövlükdə Cormorant-a keçirir (bir sətirdə iki şrift
    qarışmasın deyə — hərf-hərf ehtiyat yox). */
 const serif = 'var(--fg-serif)'
-const sans  = TH.fonts.body
 
-const INK      = TH.text          /* #213229 */
-const EUCA     = TH.primary       /* #5E7C6B */
-const PEONY    = TH.accent        /* #C9768A — dekor və böyük mətn */
 const ROSE_TXT = '#A4526A'        /* kiçik mətn üçün kontrastlı qızılgül */
-const MUTED    = TH.muted
 const LINE     = 'rgba(94,124,107,.32)'
 const SOFT     = "'SOFT' 100, 'WONK' 0"
 
@@ -97,7 +97,7 @@ const svgBox = (art, style) => (
   <div aria-hidden="true" style={{ lineHeight: 0, pointerEvents: 'none', ...style }} dangerouslySetInnerHTML={art} />
 )
 
-const KEYFRAMES = `
+const KEYFRAMESOf = (TH) => (`
 @keyframes fg-in    { from { opacity: 0; transform: scale(.94) } to { opacity: 1; transform: none } }
 @keyframes fg-bloom { from { opacity: 0; transform: scale(.2) rotate(-50deg) } to { opacity: 1; transform: none } }
 @keyframes fg-grow  { from { opacity: 0; transform: scale(.35) } to { opacity: 1; transform: none } }
@@ -109,13 +109,13 @@ const KEYFRAMES = `
 [data-fg] .fg-anim .fgb { transform-box: fill-box; transform-origin: 50% 50%; animation: fg-bloom 1.3s cubic-bezier(.2,.8,.2,1) 1.1s both; }
 [data-fg] .fg-anim .fgl { transform-box: fill-box; transform-origin: 50% 100%; animation: fg-grow 1.2s cubic-bezier(.2,.8,.2,1) .15s both; }
 [data-fg] ::placeholder { color: rgba(93,107,97,.62); }
-[data-fg] input:focus-visible, [data-fg] textarea:focus-visible { border-color: ${EUCA} !important; box-shadow: 0 0 0 3px rgba(94,124,107,.16); outline: none; }
-[data-fg] button:focus-visible, [data-fg] a:focus-visible, [data-fg] [role="button"]:focus-visible { outline: 2px solid ${EUCA}; outline-offset: 3px; }
+[data-fg] input:focus-visible, [data-fg] textarea:focus-visible { border-color: ${TH.primary} !important; box-shadow: 0 0 0 3px rgba(94,124,107,.16); outline: none; }
+[data-fg] button:focus-visible, [data-fg] a:focus-visible, [data-fg] [role="button"]:focus-visible { outline: 2px solid ${TH.primary}; outline-offset: 3px; }
 
 @media (prefers-reduced-motion: reduce) {
   [data-fg] *, [data-fg] { animation: none !important; transition: none !important; }
 }
-`
+`)
 
 /* ═══════════════════════════════════════════════════════════════════════════
    01 — AÇILIŞ: çiçək qapısı
@@ -127,6 +127,12 @@ const KEYFRAMES = `
    ⚠ `onOpenStart` MÜTLƏQ toxunuş hadisəsinin içində çağırılır (iOS musiqi).
    ═══════════════════════════════════════════════════════════════════════════ */
 function GardenGate({ weddingData, isCouple, ot, onOpen, onOpenStart }) {
+  const TH = useTH()
+  const sans = TH.fonts.body
+  const INK = TH.text
+  const EUCA = TH.primary
+  const PEONY = TH.accent
+  const MUTED = TH.muted
   const [opening, setOpening] = useState(false)
   const [gone, setGone] = useState(false)
 
@@ -221,7 +227,7 @@ function GardenGate({ weddingData, isCouple, ot, onOpen, onOpenStart }) {
             <div>{first}</div>
             {second && (
               <>
-                <div style={{ fontSize: '.66em', color: PEONY, margin: '2px 0' }}>&amp;</div>
+                <div style={{ fontSize: '.66em', color: PEONY, margin: '2px 0' }}>{ot.text('and')}</div>
                 <div>{second}</div>
               </>
             )}
@@ -238,7 +244,7 @@ function GardenGate({ weddingData, isCouple, ot, onOpen, onOpenStart }) {
           <div style={{
             marginTop: 26, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
             minHeight: 50, padding: '14px 28px', borderRadius: 999,
-            background: EUCA, color: '#FFFFFF', fontSize: 15, fontWeight: 500, letterSpacing: '.01em',
+            background: EUCA, color: TH.surface, fontSize: 15, fontWeight: 500, letterSpacing: '.01em',
             boxShadow: '0 12px 26px rgba(47,74,59,.28)',
             animation: 'fg-rise .9s ease-out 2.85s both',
           }}>
@@ -260,6 +266,9 @@ function GardenGate({ weddingData, isCouple, ot, onOpen, onOpenStart }) {
    MUSİQİ — ağ dairə, evkalipt rəngli ekvalayzer
    ═══════════════════════════════════════════════════════════════════════════ */
 function GardenMusic({ lang, music, playerRef, visible = false, autoPlay = false }) {
+  const TH = useTH()
+  const EUCA = TH.primary
+  const MUTED = TH.muted
   const { audioProps, playing, play, pause, toggle, hasMusic } = useMusicPlayer({
     lang, music, autoStart: visible && autoPlay,
   })
@@ -315,6 +324,9 @@ function GardenMusic({ lang, music, playerRef, visible = false, autoPlay = false
    məzmun gövdənin sağında. `kicker` yalnız admin yazanda görünür.
    ═══════════════════════════════════════════════════════════════════════════ */
 function Bed({ id, section, title, kicker, sub, children, style = {} }) {
+  const TH = useTH()
+  const INK = TH.text
+  const MUTED = TH.muted
   return (
     <section id={id} data-section={section} style={{ position: 'relative', padding: '44px 24px 52px 58px', ...style }}>
       <Reveal style={{ maxWidth: 460 }}>
@@ -323,7 +335,7 @@ function Bed({ id, section, title, kicker, sub, children, style = {} }) {
             {title && (
               <h2 style={{
                 margin: 0, fontFamily: serif, fontStyle: 'italic', fontWeight: 300,
-                fontSize: 'clamp(30px, 8.8vw, 38px)', lineHeight: 1.08, color: INK,
+                fontSize: scaleFont('clamp(30px, 8.8vw, 38px)', TH.headingScale), lineHeight: 1.08, color: INK,
                 fontVariationSettings: SOFT, letterSpacing: '-.01em',
               }}>
                 {title}
@@ -340,20 +352,20 @@ function Bed({ id, section, title, kicker, sub, children, style = {} }) {
 }
 
 /* Düymələr — həb formalı */
-const pill = (filled) => ({
+const pill = (TH, filled) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
   minHeight: 46, padding: '12px 20px', borderRadius: 999, textDecoration: 'none', cursor: 'pointer',
-  fontFamily: sans, fontSize: 14, fontWeight: 500,
-  background: filled ? EUCA : 'rgba(255,255,255,.7)',
-  color: filled ? '#FFFFFF' : INK,
+  fontFamily: TH.fonts.body, fontSize: 14, fontWeight: 500,
+  background: filled ? TH.primary : 'rgba(255,255,255,.7)',
+  color: filled ? TH.surface : TH.text,
   border: filled ? '1px solid transparent' : `1px solid ${LINE}`,
   boxShadow: filled ? '0 8px 18px rgba(47,74,59,.2)' : 'none',
 })
 
-const field = {
+const fieldOf = (TH) => ({
   width: '100%', background: '#FFFFFF', border: `1px solid ${LINE}`, borderRadius: 999,
-  padding: '14px 20px', fontFamily: sans, fontSize: 15, color: INK, outline: 'none',
-}
+  padding: '14px 20px', fontFamily: TH.fonts.body, fontSize: 15, color: TH.text, outline: 'none',
+})
 
 /* Ağ kart — yalnız iki yerdə: yer kartı və RSVP */
 const card = {
@@ -362,11 +374,13 @@ const card = {
 }
 
 function SuggestList({ id, items, activeIdx, setActiveIdx, onPick }) {
+  const TH = useTH()
+  const INK = TH.text
   if (!items.length) return null
   return (
     <ul id={id} role="listbox" style={{
       listStyle: 'none', margin: '8px 0 0', padding: 6, textAlign: 'left',
-      background: '#FFFFFF', border: `1px solid ${LINE}`, borderRadius: 18,
+      background: TH.surface, border: `1px solid ${LINE}`, borderRadius: 18,
       boxShadow: '0 16px 30px -16px rgba(33,50,41,.25)', maxHeight: 280, overflowY: 'auto',
     }}>
       {items.map((g, i) => (
@@ -395,6 +409,15 @@ export default function FloralGardenTemplate({
   lang, setLang, weddingData, onBack, isDemoMode = false, initialGuestbook,
   adminOverrides = null, startOpened = false,
 }) {
+  /* Admin rəng/şrift override-ları (yoxdursa BASE_TH-nin özü — render dəyişmir) */
+  const TH = applyThemeOverrides(BASE_TH, adminOverrides)
+  const sans = TH.fonts.body
+  const INK = TH.text
+  const EUCA = TH.primary
+  const PEONY = TH.accent
+  const MUTED = TH.muted
+  const KEYFRAMES = KEYFRAMESOf(TH)
+  const field = fieldOf(TH)
   const adminStrings = adminOverrides?.strings || null
   const tr = withStringOverrides(t[lang] || t.az, adminStrings, lang)
   const L = makeLabelResolver(mergeSectionLabels(null, adminOverrides), lang)
@@ -448,15 +471,18 @@ export default function FloralGardenTemplate({
   const K = (key) => L(key, 'kicker', null)
 
   return (
-    <div
+    <ThemeCtx.Provider value={TH}>
+<div
       data-fg
       data-enter={enterDirection('floral-garden')}
       style={{
         backgroundColor: TH.background, backgroundImage: PAPER_DATA_URI,
         minHeight: '100vh', fontFamily: sans, color: INK,
+        fontSize: TH.bodyScale ? `${TH.bodyScale}em` : undefined,
         overflowX: 'hidden', position: 'relative', isolation: 'isolate',
         '--tpl-glow': `${TH.accent}40`,
-        '--fg-serif': lang === 'ru' ? FONT_STACKS.cormorant : TH.fonts.heading,
+        /* RU-da Cormorant — amma admin başlıq şriftini dəyişibsə onun seçimi */
+        '--fg-serif': lang === 'ru' && TH.fonts.heading === BASE_TH.fonts.heading ? FONT_STACKS.cormorant : TH.fonts.heading,
       }}
     >
       <style>{KEYFRAMES}</style>
@@ -535,7 +561,7 @@ export default function FloralGardenTemplate({
                     <>
                       <span style={{ display: 'block' }}>{weddingData.groomName}</span>
                       <span style={{ display: 'block', paddingLeft: '.42em' }}>
-                        <span style={{ fontStyle: 'italic', color: PEONY, fontSize: '.72em', marginRight: '.18em' }}>&amp;</span>
+                        <span style={{ fontStyle: 'italic', color: PEONY, fontSize: '.72em', marginRight: '.18em' }}>{adminStrings?.inv_and ? tr.inv_and : '&'}</span>
                         {weddingData.brideName}
                       </span>
                     </>
@@ -655,11 +681,11 @@ export default function FloralGardenTemplate({
                     <div style={{ marginTop: 6, fontSize: 14.5, color: MUTED, lineHeight: 1.55 }}>{weddingData.venueNote}</div>
                   )}
                   <div style={{ display: 'flex', gap: 8, marginTop: 18, flexWrap: 'wrap' }}>
-                    {dirUrl && <a data-press href={dirUrl} target="_blank" rel="noopener noreferrer" style={pill(true)}>{tr.inv_directions_btn}</a>}
-                    {mapUrl && <a data-press href={mapUrl} target="_blank" rel="noopener noreferrer" style={pill(!dirUrl)}>Maps</a>}
-                    {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={pill(false)}>Waze</a>}
+                    {dirUrl && <a data-press href={dirUrl} target="_blank" rel="noopener noreferrer" style={pill(TH, true)}>{tr.inv_directions_btn}</a>}
+                    {mapUrl && <a data-press href={mapUrl} target="_blank" rel="noopener noreferrer" style={pill(TH, !dirUrl)}>Maps</a>}
+                    {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={pill(TH, false)}>Waze</a>}
                     {weddingData.appleMapsUrl && (
-                      <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={pill(false)}>Apple</a>
+                      <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={pill(TH, false)}>Apple</a>
                     )}
                   </div>
                 </Bed>
@@ -782,18 +808,18 @@ export default function FloralGardenTemplate({
 
                   <div style={{ display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap' }}>
                     <div style={{
-                      width: 148, height: 148, flex: '0 0 auto', borderRadius: 22, background: '#FFFFFF',
+                      width: 148, height: 148, flex: '0 0 auto', borderRadius: 22, background: TH.surface,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       boxShadow: '0 18px 34px -18px rgba(33,50,41,.35)',
                     }}>
-                      <QRCodeSVG value={gallery.photoShareUrl} size={112} bgColor="#FFFFFF" fgColor={INK} level="M" />
+                      <QRCodeSVG value={gallery.photoShareUrl} size={112} bgColor={TH.surface} fgColor={INK} level="M" />
                     </div>
                     <div style={{ flex: '1 1 140px', fontSize: 14, color: MUTED, lineHeight: 1.5 }}>
                       {tr.inv_scan_upload}
                     </div>
                   </div>
 
-                  <a data-press href={gallery.photoShareUrl} style={{ ...pill(true), marginTop: 20 }}>
+                  <a data-press href={gallery.photoShareUrl} style={{ ...pill(TH, true), marginTop: 20 }}>
                     {tr.inv_gallery_btn}
                   </a>
 
@@ -936,7 +962,7 @@ export default function FloralGardenTemplate({
                       disabled={!gbook.canSubmit}
                       data-press
                       style={{
-                        ...pill(true), width: '100%', minHeight: 50, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed',
+                        ...pill(TH, true), width: '100%', minHeight: 50, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed',
                         ...(gbook.canSubmit ? {} : { background: '#E3E9E1', color: '#7D8A81', boxShadow: 'none' }),
                       }}
                     >
@@ -989,6 +1015,7 @@ export default function FloralGardenTemplate({
         )}
       </AnimatePresence>
     </div>
+</ThemeCtx.Provider>
   )
 }
 

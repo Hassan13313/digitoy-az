@@ -10,6 +10,7 @@ import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { LABELS, TXT } from './copy'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    CRYSTAL GLASS — «Çilçıraq» (premium redizayn, 2026-10)
@@ -29,17 +30,6 @@ import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_share
 
 const BASE = getTemplateTheme('crystal-glass')
 const ID = 'crystal-glass'
-
-const LABELS = {
-  countdown: { title: { az: 'İşıqlar yanana qədər', en: 'Until the lights come on', ru: 'Пока не зажгутся огни' } },
-  venue:     { title: { az: 'Salon', en: 'The hall', ru: 'Зал' } },
-  program:   { title: { az: 'Axşamın spektri', en: 'Spectrum of the evening', ru: 'Спектр вечера' } },
-  dresscode: { title: { az: 'Geyim', en: 'Attire', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Masanız', en: 'Your table', ru: 'Ваш стол' } },
-  gallery:   { title: { az: 'Əks olunanlar', en: 'Reflections', ru: 'Отражения' } },
-  rsvp:      { title: { az: 'Bizimlə olacaqsınızmı?', en: 'Will you be with us?', ru: 'Вы будете с нами?' } },
-  guestbook: { title: { az: 'Arzular', en: 'Wishes', ru: 'Пожелания' } },
-}
 
 const PAL = {
   ICE: '#EEF2F6',
@@ -251,7 +241,7 @@ function ChandelierOpening({ inv, theme }) {
             {ot.show('kicker') && <div style={{ marginTop: 12, fontFamily: head, fontWeight: 300, fontSize: 12.5, letterSpacing: '.32em', textTransform: 'uppercase', paddingLeft: '.32em', color: C.STEEL }}>{ot.text('kicker')}</div>}
             {titleOv !== '' && (
               <div style={{ marginTop: 10, fontFamily: head, fontWeight: 200, fontSize: 'clamp(30px, 9.4vw, 40px)', lineHeight: 1.15, color: C.INK }}>
-                {first}{second && <><span style={{ fontWeight: 300, margin: '0 .28em', background: SPEC_LINE, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>&amp;</span>{second}</>}
+                {first}{second && <><span style={{ fontWeight: 300, margin: '0 .28em', background: SPEC_LINE, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>{ot.text('and')}</span>{second}</>}
               </div>
             )}
             {ot.show('meta') && <div style={{ marginTop: 12, fontSize: 13.5, color: C.STEEL }}>{ot.text('meta')}</div>}
@@ -305,6 +295,7 @@ export default function CrystalGlassTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
   const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const T = inv.copy(TXT)
   const head = theme.fonts.heading
   const body = theme.fonts.body
   const n = timeline.events.length
@@ -336,7 +327,7 @@ export default function CrystalGlassTemplate(props) {
               <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.STEEL, fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
                 <span aria-hidden="true">←</span>{tr.btn_back}
               </button>
-              <div style={{ fontFamily: head, fontWeight: 300, fontSize: 16, letterSpacing: '.2em' }}>DIGITOY</div>
+              <div style={{ fontFamily: head, fontWeight: 300, fontSize: 16, letterSpacing: '.2em' }}>{T.brand}</div>
               <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
             </header>
 

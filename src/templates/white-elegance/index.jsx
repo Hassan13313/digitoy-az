@@ -10,6 +10,7 @@ import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { LABELS, TXT } from './copy'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    WHITE ELEGANCE — «Pambıq kağız, rəngsiz qabartma» (premium redizayn, 2026-10)
@@ -33,16 +34,6 @@ import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_share
 
 const BASE = getTemplateTheme('white-elegance')
 const ID = 'white-elegance'
-
-const LABELS = {
-  countdown: { title: { az: 'Günləri sayırıq', en: 'Counting the days', ru: 'Считаем дни' } },
-  venue:     { title: { az: 'Məkan', en: 'The venue', ru: 'Место' } },
-  program:   { title: { az: 'Axşamın sırası', en: 'Order of the evening', ru: 'Порядок вечера' } },
-  dresscode: { title: { az: 'Geyim', en: 'Attire', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Yer kartınız', en: 'Your place card', ru: 'Ваша карточка' } },
-  gallery:   { title: { az: 'Xatirə albomu', en: 'Keepsake album', ru: 'Альбом на память' } },
-  guestbook: { title: { az: 'Xoş sözlər', en: 'Kind words', ru: 'Добрые слова' } },
-}
 
 const PAL = {
   PAPER: '#FBFAF7',
@@ -154,7 +145,7 @@ function CardOpening({ inv, theme }) {
           {titleOv !== '' && (
             <div style={{ marginTop: 14, fontWeight: 300, fontSize: 'clamp(26px, 8vw, 32px)', lineHeight: 1.15, animation: 'we-rise 1s ease-out 1.45s both' }}>
               {first}
-              {second && <><span style={{ fontStyle: 'italic', color: C.GREY, margin: '0 .3em' }}>&amp;</span>{second}</>}
+              {second && <><span style={{ fontStyle: 'italic', color: C.GREY, margin: '0 .3em' }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
           {ot.show('meta') && (
@@ -211,6 +202,7 @@ export default function WhiteEleganceTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
   const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const T = inv.copy(TXT)
   const f = theme.fonts.heading
 
   return (
@@ -239,7 +231,7 @@ export default function WhiteEleganceTemplate(props) {
               <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.GREY, fontSize: 15, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: f }}>
                 <span aria-hidden="true">←</span>{tr.btn_back}
               </button>
-              <div style={{ fontStyle: 'italic', fontSize: 17 }}>Digitoy</div>
+              <div style={{ fontStyle: 'italic', fontSize: 17 }}>{T.brand}</div>
               <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
             </header>
 

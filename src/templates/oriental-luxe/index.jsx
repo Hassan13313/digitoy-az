@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion'
+import { memo, useEffect, useState } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
 import { QRCodeSVG } from 'qrcode.react'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
 import DressCodeSection from '../_shared/DressCodeSection'
@@ -11,6 +12,7 @@ import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { lattice, starPoints, shamsaPath, golPath, BUTA, BUTA_IN, HASIYE_URI, RHOMB_URI, GIRIH_URI } from './ornaments'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { LABELS, TXT } from './copy'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    ORIENTAL LUXE — «Şəbəkə və xalça» (premium redizayn, 2026-10)
@@ -33,17 +35,6 @@ import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_share
 const BASE = getTemplateTheme('oriental-luxe')
 const ID = 'oriental-luxe'
 
-const LABELS = {
-  countdown: { title: { az: 'Xoş saata qədər', en: 'Until the happy hour', ru: 'До счастливого часа' } },
-  venue:     { title: { az: 'Məclisin ünvanı', en: 'Where we gather', ru: 'Где мы соберёмся' } },
-  program:   { title: { az: 'Məclisin gedişi', en: 'Order of the feast', ru: 'Ход торжества' } },
-  dresscode: { title: { az: 'Geyim qaydası', en: 'Attire', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Süfrədəki yeriniz', en: 'Your place at the table', ru: 'Ваше место за столом' } },
-  gallery:   { title: { az: 'Xatirə albomu', en: 'Album of memories', ru: 'Альбом воспоминаний' } },
-  rsvp:      { title: { az: 'Məclisimizə gələcəksinizmi?', en: 'Will you join our feast?', ru: 'Придёте на наше торжество?' } },
-  guestbook: { title: { az: 'Xeyir-dualar', en: 'Blessings', ru: 'Благопожелания' } },
-}
-
 const PAL = {
   NAR: '#4A0F1C',
   DEEP: '#2E0710',
@@ -58,7 +49,11 @@ const PAL = {
    Override yoxdursa PAL olduğu kimi qalır. */
 const LINKS = { primary: ['NAR'], accent: ['GOLD'], background: ['DEEP'], text: ['IVORY'] }
 
-const LAT = lattice({ w: 400, h: 880, s: 36 })
+/* Şəbəkə: 80 vahidlik hücrə → mərkəz ulduzu iki tayın tam ortasına düşür
+   (taylar simmetrik bölünür). ⚠ Hücrə əvvəl 36 idi və SVG 200% enində çəkilirdi:
+   naxışın mərkəzi ekranın sağ kənarına düşürdü, telefonda isə hər tay ~200 KB
+   path datasını hər kadrda yenidən rasterləşdirirdi — açılış ilişirdi. */
+const LAT = lattice({ w: 400, h: 880, s: 80 })
 const STAR8 = starPoints(0, 0, 10)
 const CHAMFER = 'polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px)'
 const ARCH = 'M0 1V.36C0 .2 .3 .15 .5 0 .7 .15 1 .2 1 .36V1Z'
@@ -71,6 +66,10 @@ const KEYFRAMES = (C) => `
 @keyframes ol-sun  { 0%,100% { transform: translate(-6%, -2%) } 50% { transform: translate(6%, 3%) } }
 @keyframes ol-seal { from { opacity: 0; transform: scale(.86) rotate(-8deg) } to { opacity: 1; transform: none } }
 @keyframes ol-hint { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
+@keyframes ol-swing-l { from { transform: rotateY(0) } to { transform: rotateY(-100deg) } }
+@keyframes ol-swing-r { from { transform: rotateY(0) } to { transform: rotateY(100deg) } }
+@keyframes ol-out    { to { opacity: 0 } }
+@keyframes ol-shrink { to { opacity: 0; transform: scale(.92) } }
 [data-ol] span[aria-hidden="true"], [data-ol] svg[aria-hidden="true"], [data-ol] div[aria-hidden="true"] { pointer-events: none; }
 [data-ol] ::placeholder { color: rgba(205,168,142,.6); }
 [data-ol] .ol-silk ::placeholder { color: rgba(74,15,28,.45); }
@@ -123,12 +122,13 @@ function Hasiye({ style }) {
   return <div aria-hidden="true" style={{ height: 22, backgroundImage: HASIYE_URI, backgroundRepeat: 'repeat-x', backgroundPosition: 'center', opacity: 0.85, ...style }} />
 }
 
-/* ─── Şəbəkə pəncərəsi ─── */
-function Shebeke() {
+/* ─── Şəbəkə pəncərəsi ───
+   `memo`: açılış toxunuşda yenidən render olunur, bu ağır SVG isə dəyişmir. */
+const Shebeke = memo(function Shebeke() {
   const C = usePalette()
   return (
     <svg viewBox={`0 0 ${LAT.w} ${LAT.h}`} preserveAspectRatio="xMidYMid slice" aria-hidden="true"
-      style={{ position: 'absolute', top: 0, width: '200%', height: '100%', display: 'block' }}>
+      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'block' }}>
       <defs>
         <radialGradient id="ol-glow" cx="50%" cy="44%" r="62%">
           <stop offset="0" stopColor="#FFF0C8" stopOpacity=".42" />
@@ -139,68 +139,97 @@ function Shebeke() {
       </defs>
       <rect width={LAT.w} height={LAT.h} fill={C.WOOD} />
       {LAT.rings.map((rg, n) => (
-        <g key={`g${n}`} style={{ animation: `ol-lit 1.1s ease-out ${(0.15 + n * 0.07).toFixed(2)}s both` }}>
+        <g key={`g${n}`} style={{ animation: `ol-lit 1.1s ease-out ${(0.15 + n * 0.14).toFixed(2)}s both` }}>
           {Object.entries(rg.gaps).map(([c, d]) => <path key={c} d={d} fill={c} />)}
         </g>
       ))}
       {LAT.rings.map((rg, n) => (
-        <g key={`s${n}`} style={{ animation: `ol-lit 1.1s ease-out ${(0.15 + n * 0.07).toFixed(2)}s both` }}>
+        <g key={`s${n}`} style={{ animation: `ol-lit 1.1s ease-out ${(0.15 + n * 0.14).toFixed(2)}s both` }}>
           {Object.entries(rg.stars).map(([c, d]) => <path key={c} d={d} fill={c} />)}
         </g>
       ))}
       <rect width={LAT.w} height={LAT.h} fill="url(#ol-glow)" />
-      <path d={LAT.outline} fill="none" stroke={C.WOOD} strokeWidth="4.6" strokeLinejoin="round" />
-      <path d={LAT.outline} fill="none" stroke="#C9A35E" strokeWidth=".7" strokeOpacity=".5" strokeLinejoin="round" />
+      <path d={LAT.outline} fill="none" stroke={C.WOOD} strokeWidth="9.2" strokeLinejoin="round" />
+      <path d={LAT.outline} fill="none" stroke="#C9A35E" strokeWidth="1.4" strokeOpacity=".5" strokeLinejoin="round" />
     </svg>
   )
-}
+})
 
-/* ═══ 01 — AÇILIŞ ═══ */
+/* ═══ 01 — AÇILIŞ ═══
+   ⚠ TELEFON (2026-10-28): toxunuşdan sonrakı hərəkətlərin HAMISI CSS
+   animasiyasıdır (transform/opacity) — brauzer onları kompozitor axınında
+   oynadır, ona görə dəvətnamə eyni anda pərdənin altında render olunanda da
+   taylar ilişmədən açılır. Taylar `will-change` ilə əvvəlcədən ayrı qatdadır:
+   toxunuş anında şəbəkə yenidən rasterləşdirilmir. Dəvətnamə toxunuşdan
+   `REVEAL_MS` sonra pərdənin altında hazırlanır (`useGate › revealAt`) və
+   pərdə YALNIZ iki şərtlə çəkilir: taylar açılıb qurtarıb VƏ dəvətnamə artıq
+   render olunub. Zəif telefonda render uzun çəksə belə boş fon görünmür.
+   `SAFETY_MS` — dəvətnamə hazır olandan sonra animasiya hadisəsi gəlməsə
+   (məs. «azaldılmış hərəkət» rejimində animasiyalar söndürülüb) açılış bu
+   vaxtdan sonra özü bitir. ⚠ Taymer toxunuşdan yox, MƏZMUN HAZIR OLANDAN
+   sayılır: render uzun çəkəndə gecikmiş taymer pərdəni yarıda kəsməsin. */
+const REVEAL_MS = 150
+const SAFETY_MS = 3000
+
 function ShebekeOpening({ inv, theme }) {
   const C = usePalette()
   const { ot } = inv
-  const gate = useGate({ inv, ms: 1500 })
+  const reduce = useReducedMotion()
+  const gate = useGate({ inv, ms: null, revealAt: REVEAL_MS })
+  const [swung, setSwung] = useState(false)
+  const ready = gate.opening && inv.opened
+  const { finish } = gate
+  useEffect(() => {
+    if (!ready) return undefined
+    const t = setTimeout(finish, reduce ? 0 : SAFETY_MS)
+    return () => clearTimeout(t)
+  }, [ready, reduce, finish])
   if (gate.gone) return null
   const { titleOv, first, second } = openingNames(inv)
   const head = theme.fonts.heading
   const longest = Math.max(String(first || '').length, String(second || '').length, 1)
   const nameSize = Math.round(Math.max(22, Math.min(38, 250 / (longest * 0.6))))
-  const swing = { duration: 1.05, ease: [0.55, 0, 0.3, 1], delay: 0.3 }
+  const on = gate.opening
+  const fading = ready && swung
+  const swing = (side) => `${side ? 'ol-swing-r' : 'ol-swing-l'} 1.05s cubic-bezier(.55,0,.3,1) .3s both`
+  const onAnimationEnd = (e) => {
+    if (e.animationName === 'ol-swing-r') setSwung(true)
+    else if (e.animationName === 'ol-out' && e.target === e.currentTarget) gate.finish()
+  }
   return (
-    <motion.div {...gate.gateProps} data-ol
-      animate={gate.opening ? { opacity: 0 } : {}}
-      transition={{ duration: 0.4, delay: 1.1 }}
+    <div {...gate.gateProps} data-ol onAnimationEnd={onAnimationEnd}
       style={{
         position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden',
         background: `radial-gradient(90% 60% at 50% 42%, #7A2234, ${C.NAR} 55%, ${C.DEEP})`,
         perspective: 1400, color: C.IVORY, fontFamily: theme.fonts.body,
+        animation: fading ? 'ol-out .4s ease both' : undefined,
       }}>
       {/* iki tay pəncərə */}
       {[0, 1].map((side) => (
-        <motion.div key={side}
-          animate={gate.opening ? { rotateY: side ? 100 : -100 } : {}}
-          transition={swing}
+        <div key={side}
           style={{
             position: 'absolute', top: 0, bottom: 0, width: '50%', left: side ? '50%' : 0, overflow: 'hidden',
-            transformOrigin: side ? 'right center' : 'left center', backfaceVisibility: 'hidden',
+            transformOrigin: side ? 'right center' : 'left center',
+            backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', willChange: 'transform',
+            animation: on ? swing(side) : undefined,
             boxShadow: `inset 0 0 0 7px ${C.WOOD}, inset 0 0 0 8px rgba(201,163,94,.55), inset 0 0 0 11px ${C.WOOD}`,
           }}>
           <div style={{ position: 'absolute', inset: 0, left: side ? '-100%' : 0, width: '200%' }}>
             <Shebeke />
           </div>
           <span aria-hidden="true" style={{ position: 'absolute', inset: 0, boxShadow: `inset 0 0 0 7px ${C.WOOD}, inset 0 0 0 8px rgba(201,163,94,.55)`, pointerEvents: 'none' }} />
-        </motion.div>
+        </div>
       ))}
 
       {/* günəş parıltısı — şüşədən keçən işıq */}
-      <motion.span aria-hidden="true" animate={gate.opening ? { opacity: 0 } : {}} transition={{ duration: 0.3 }}
-        style={{ position: 'absolute', inset: '-10%', pointerEvents: 'none', mixBlendMode: 'soft-light', background: 'radial-gradient(40% 30% at 50% 42%, rgba(255,240,200,.75), transparent 70%)', animation: 'ol-sun 14s ease-in-out infinite' }} />
+      <span aria-hidden="true"
+        style={{ position: 'absolute', inset: '-10%', pointerEvents: 'none', mixBlendMode: 'soft-light', background: 'radial-gradient(40% 30% at 50% 42%, rgba(255,240,200,.75), transparent 70%)', animation: on ? 'ol-out .3s ease both' : 'ol-sun 14s ease-in-out infinite' }} />
       {/* aşağı kölgə — yazılar oxunsun */}
-      <motion.span aria-hidden="true" animate={gate.opening ? { opacity: 0 } : {}} transition={{ duration: 0.3 }}
-        style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '44%', pointerEvents: 'none', background: `linear-gradient(transparent, ${alpha(C.DEEP, 0.86)} 45%, ${alpha(C.DEEP, 0.96)})`, animation: 'ol-fade 1.2s ease-out 1.6s both' }} />
+      <span aria-hidden="true"
+        style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '44%', pointerEvents: 'none', background: `linear-gradient(transparent, ${alpha(C.DEEP, 0.86)} 45%, ${alpha(C.DEEP, 0.96)})`, animation: on ? 'ol-out .3s ease both' : 'ol-fade 1.2s ease-out 1.6s both' }} />
 
-      <motion.div animate={gate.opening ? { opacity: 0, scale: 0.92 } : {}} transition={{ duration: 0.35 }}
-        style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 20px', textAlign: 'center' }}>
+      <div
+        style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 20px', textAlign: 'center', animation: on ? 'ol-shrink .35s ease both' : undefined }}>
         {/* Şəmsə medalyonu */}
         <div style={{ position: 'relative', width: 'min(80vw, 318px)', aspectRatio: '1', animation: 'ol-seal 1.3s cubic-bezier(.2,.8,.2,1) 1.25s both' }}>
           <svg viewBox="-110 -110 220 220" width="100%" height="100%" aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'visible', filter: 'drop-shadow(0 18px 30px rgba(20,3,6,.6))' }}>
@@ -226,7 +255,7 @@ function ShebekeOpening({ inv, theme }) {
             {titleOv !== '' && (
               <div style={{ marginTop: 8, fontFamily: head, fontWeight: 500, fontSize: nameSize, lineHeight: 1.12, color: C.IVORY, animation: 'ol-rise 1s ease-out 2.3s both' }}>
                 {first}
-                {second && <><span style={{ display: 'block', fontFamily: theme.fonts.body, fontStyle: 'italic', fontWeight: 400, fontSize: '.55em', color: C.GOLD, margin: '2px 0' }}>&amp;</span>{second}</>}
+                {second && <><span style={{ display: 'block', fontFamily: theme.fonts.body, fontStyle: 'italic', fontWeight: 400, fontSize: '.55em', color: C.GOLD, margin: '2px 0' }}>{ot.text('and')}</span>{second}</>}
               </div>
             )}
           </div>
@@ -238,8 +267,8 @@ function ShebekeOpening({ inv, theme }) {
           </div>
         )}
         {ot.show('hint') && <div style={{ marginTop: 12, fontSize: 13, fontStyle: 'italic', color: C.MUTED, animation: 'ol-fade .8s ease-out 3.4s both, ol-hint 3s ease-in-out 4.2s infinite' }}>{ot.text('hint')}</div>}
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   )
 }
 
@@ -281,11 +310,15 @@ export default function OrientalLuxeTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
   const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const T = inv.copy(TXT)
   const head = theme.fonts.heading
   const body = theme.fonts.body
 
   const longest = Math.max(String(inv.groom || inv.single || '').length, String(inv.bride || '').length, 1)
   const heroSize = Math.round(Math.max(28, Math.min(48, 230 / (longest * 0.58))))
+  /* Açılış `inv.opened`-ə görə yox, öz `gone` vəziyyətinə görə yox olur —
+     dəvətnamə pərdənin altında artıq render olunur (bax ShebekeOpening) */
+  const [veil] = useState(() => !inv.opened)
 
   return (
     <PaletteContext.Provider value={C}>
@@ -300,7 +333,7 @@ export default function OrientalLuxeTemplate(props) {
         <svg width="0" height="0" aria-hidden="true" style={{ position: 'absolute' }}>
           <clipPath id="ol-arch" clipPathUnits="objectBoundingBox"><path d={ARCH} /></clipPath>
         </svg>
-        {!inv.opened && <ShebekeOpening inv={inv} theme={theme} />}
+        {veil && <ShebekeOpening inv={inv} theme={theme} />}
 
         <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: 0, clipPath: CHAMFER, background: C.DEEP, border: 'none', boxShadow: `inset 0 0 0 1px ${alpha(C.GOLD, 0.6)}` }}>
           {({ playing }) => <EqBars playing={playing} color={C.GOLD} idle={alpha(C.GOLD, 0.4)} />}
@@ -317,7 +350,7 @@ export default function OrientalLuxeTemplate(props) {
               <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 15, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
                 <span aria-hidden="true">←</span>{tr.btn_back}
               </button>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: head, fontSize: 15, color: C.GOLD, letterSpacing: '.06em' }}><Star8 size={11} />Digitoy</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: head, fontSize: 15, color: C.GOLD, letterSpacing: '.06em' }}><Star8 size={11} />{T.brand}</div>
               <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
             </header>
 

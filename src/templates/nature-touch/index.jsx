@@ -12,6 +12,7 @@ import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { frond, leafPath, contours, dms, woodRings, landscape, LINEN_URI, PAPER_URI } from './specimen'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { LABELS, TXT } from './copy'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    NATURE TOUCH — «Herbari qovluğu → dağ çəmənliyi» (premium redizayn, 2026-10)
@@ -32,23 +33,6 @@ import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_share
 
 const BASE = getTemplateTheme('nature-touch')
 const ID = 'nature-touch'
-
-const LABELS = {
-  countdown: { title: { az: 'Görüşə qədər', en: 'Until we meet', ru: 'До встречи' } },
-  venue:     { title: { az: 'Bizi burada tapın', en: 'Find us here', ru: 'Найдите нас здесь' } },
-  program:   { title: { az: 'Cığır boyunca', en: 'Along the trail', ru: 'По тропинке' } },
-  dresscode: { title: { az: 'Geyim', en: 'Attire', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Sizin masanız', en: 'Your table', ru: 'Ваш стол' } },
-  gallery:   { title: { az: 'Anlar', en: 'Moments', ru: 'Мгновения' } },
-  rsvp:      { title: { az: 'Bizimlə olacaqsınızmı?', en: 'Will you join us?', ru: 'Будете с нами?' } },
-  guestbook: { title: { az: 'Xoş sözlər', en: 'Kind words', ru: 'Тёплые слова' } },
-}
-
-const SHEET_LABELS = {
-  az: { names: 'Adlar', name: 'Ad', event: 'Tədbir', date: 'Tarix', time: 'Saat', place: 'Məkan', plate: 'Lövhə', table: 'Masa', scale: 'gün · saat · dəqiqə · saniyə' },
-  en: { names: 'Names', name: 'Name', event: 'Event', date: 'Date', time: 'Time', place: 'Place', plate: 'Plate', table: 'Table', scale: 'days · hours · minutes · seconds' },
-  ru: { names: 'Имена', name: 'Имя', event: 'Событие', date: 'Дата', time: 'Время', place: 'Место', plate: 'Таблица', table: 'Стол', scale: 'дни · часы · минуты · секунды' },
-}
 
 const PAL = {
   PAPER: '#F6F2E7',
@@ -182,7 +166,7 @@ function FolioOpening({ inv, theme }) {
           </div>
           {titleOv !== '' && (
             <div style={{ marginTop: 14, fontFamily: serif, fontStyle: 'italic', fontSize: 'clamp(28px, 9vw, 36px)', lineHeight: 1.15, animation: 'nt-rise 1s ease-out 1.1s both' }}>
-              {first}{second && <><span style={{ fontStyle: 'normal', fontSize: '.6em', color: C.TERRA, margin: '0 .3em' }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ fontStyle: 'normal', fontSize: '.6em', color: C.TERRA, margin: '0 .3em' }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
           <div aria-hidden="true" style={{ width: 40, height: 1, background: alpha(C.INK, 0.4), margin: '14px auto 12px' }} />
@@ -317,7 +301,7 @@ export default function NatureTouchTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, gbookL, seatingL } = inv
   const serif = theme.fonts.heading
   const sans = theme.fonts.body
-  const SL = SHEET_LABELS[lang] || SHEET_LABELS.az
+  const SL = inv.copy(TXT)
 
   const ll = parseLatLon(weddingData)
   const coords = ll ? `${dms(ll[0], 'N', 'S')}  ${dms(ll[1], 'E', 'W')}` : ''
@@ -347,7 +331,7 @@ export default function NatureTouchTemplate(props) {
               <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MOSS, fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: sans }}>
                 <span aria-hidden="true">←</span>{tr.btn_back}
               </button>
-              <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 18 }}>Digitoy</div>
+              <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 18 }}>{SL.brand}</div>
               <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
             </header>
 

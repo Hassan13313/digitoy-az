@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { createContext, useContext, useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { QRCodeSVG } from 'qrcode.react'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
@@ -26,9 +26,10 @@ import { useGallery } from '../../hooks/useGallery'
 import { useMusicPlayer } from '../../hooks/useMusicPlayer'
 import { useMusicPrompt } from '../../hooks/useMusicPrompt'
 import t from '../../data/translations'
-import { mergeSectionLabels, withStringOverrides, makeLabelResolver, sectionHead } from '../../data/adminOverrides'
+import { applyThemeOverrides, mergeSectionLabels, withStringOverrides, makeLabelResolver, sectionHead } from '../../data/adminOverrides'
 import { makeOpeningText, phrase } from '../_shared/openingSpec'
 import { MonoContent } from '../_shared/MonoContent'
+import { scaleFont } from '../_shared/palette'
 import { Rosette, RosetteMark, GuillocheBand, ChronoDial, CoinLegend } from './guilloche'
 import { FOIL } from './foil'
 
@@ -60,26 +61,27 @@ import { FOIL } from './foil'
    musiqi, dil, admin override-ları) əvvəlki ilə EYNİ hook-ları çağırır.
    ───────────────────────────────────────────────────────────────────────── */
 
-const TH = getTemplateTheme('royal-gold')
+const BASE_TH = getTemplateTheme('royal-gold')
+/* Admin rəng/şrift override-ları tətbiq olunmuş tema (bax default export) —
+   komponentlər onu kontekstdən oxuyur; override yoxdursa BASE_TH-nin özüdür. */
+const ThemeCtx = createContext(BASE_TH)
+const useTH = () => useContext(ThemeCtx)
 const DEFAULT_MUSIC = buildPresetMusic(PRESET_TRACKS[0], { playMode: MUSIC_PLAY_MODES.AUTO })
 
-const display = TH.fonts.heading
-const sans    = TH.fonts.body
 const script  = FONT_STACKS.ballet
 
 /* Fil sümüyü kart (yer kartı, cavab kartı) */
 const IVORY    = 'linear-gradient(162deg, #F8F0DF 0%, #F1E6CC 55%, #E7D7B4 100%)'
 const INK      = '#2A2012'
 const INK_SOFT = '#6B5A40'
-const BRONZE   = '#8A6A2E'
 const LINE     = 'rgba(197,160,89,.42)'
 
 /* Folqa mətn — fon mətnin formasına kəsilir */
-const foil = {
+const foilOf = (TH) => ({
   background: FOIL, backgroundSize: '200% 100%',
   WebkitBackgroundClip: 'text', backgroundClip: 'text',
   WebkitTextFillColor: 'transparent', color: TH.accent,
-}
+})
 
 /* Şablona məxsus keyframe-lər — prefiks `rg-` */
 const KEYFRAMES = `
@@ -118,6 +120,10 @@ const KEYFRAMES = `
    ⚠ `onOpenStart` MÜTLƏQ toxunuş hadisəsinin içində çağırılır (iOS musiqi).
    ═══════════════════════════════════════════════════════════════════════════ */
 function CoinOpening({ weddingData, isCouple, isCorp, ot, onOpen, onOpenStart }) {
+  const TH = useTH()
+  const display = TH.fonts.heading
+  const sans = TH.fonts.body
+  const foil = foilOf(TH)
   const [opening, setOpening] = useState(false)
   const [gone, setGone] = useState(false)
 
@@ -173,8 +179,8 @@ function CoinOpening({ weddingData, isCouple, isCorp, ot, onOpen, onOpenStart })
         {/* Mərkəz diski + sikkə yazıları */}
         <svg viewBox="-170 -170 340 340" aria-hidden="true"
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible', animation: 'rg-fade 1s ease-out 1.5s both' }}>
-          <circle r="72" fill="#0B0906" stroke="#C5A059" strokeWidth="1" />
-          <circle r="66" fill="none" stroke="#C5A059" strokeOpacity=".35" strokeWidth=".6" />
+          <circle r="72" fill={TH.background} stroke={TH.primary} strokeWidth="1" />
+          <circle r="66" fill="none" stroke={TH.primary} strokeOpacity=".35" strokeWidth=".6" />
           <CoinLegend r={55} text={anno} lang={ot.lang} position="top" font={sans} />
           <CoinLegend r={62} text={kicker} lang={ot.lang} position="bottom" font={sans} />
         </svg>
@@ -212,7 +218,7 @@ function CoinOpening({ weddingData, isCouple, isCorp, ot, onOpen, onOpenStart })
             <span style={foil}>{first}</span>
             {second && (
               <>
-                <span style={{ fontFamily: script, fontSize: '1.08em', color: TH.primary, lineHeight: 0.8 }}>&amp;</span>
+                <span style={{ fontFamily: script, fontSize: '1.08em', color: TH.primary, lineHeight: 0.8 }}>{ot.text('and')}</span>
                 <span style={foil}>{second}</span>
               </>
             )}
@@ -259,6 +265,7 @@ function CoinOpening({ weddingData, isCouple, isCorp, ot, onOpen, onOpenStart })
    MUSİQİ — folqa halqalı dairə, içində ekvalayzer
    ═══════════════════════════════════════════════════════════════════════════ */
 function GoldMusic({ lang, music, playerRef, visible = false, autoPlay = false }) {
+  const TH = useTH()
   const { audioProps, playing, play, pause, toggle, hasMusic } = useMusicPlayer({
     lang, music, autoStart: visible && autoPlay,
   })
@@ -322,6 +329,8 @@ function GoldMusic({ lang, music, playerRef, visible = false, autoPlay = false }
    yoxdur — başlığı rozet emblemi daşıyır).
    ═══════════════════════════════════════════════════════════════════════════ */
 function PlateHead({ title, kicker, sub }) {
+  const TH = useTH()
+  const display = TH.fonts.heading
   return (
     <div style={{ textAlign: 'center', marginBottom: 30 }}>
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
@@ -330,7 +339,7 @@ function PlateHead({ title, kicker, sub }) {
       {title && (
         <h2 style={{
           fontFamily: display, fontStyle: 'italic', fontWeight: 300, margin: 0,
-          fontSize: 'clamp(28px, 8.4vw, 34px)', lineHeight: 1.15, color: TH.accent,
+          fontSize: scaleFont('clamp(28px, 8.4vw, 34px)', TH.headingScale), lineHeight: 1.15, color: TH.accent,
         }}>
           {title}
         </h2>
@@ -360,24 +369,26 @@ function Plate({ id, section, title, kicker, sub, children, style = {} }) {
 }
 
 /* Düymələr — folqa (əsas) və gravür kontur (ikinci dərəcəli) */
-const btn = (filled) => ({
+const btn = (TH, filled) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
   minHeight: 46, padding: '12px 20px', textDecoration: 'none', cursor: 'pointer',
-  fontFamily: sans, fontSize: 13, fontWeight: 500, letterSpacing: '.04em',
+  fontFamily: TH.fonts.body, fontSize: 13, fontWeight: 500, letterSpacing: '.04em',
   background: filled ? FOIL : 'transparent',
   color: filled ? '#1A1408' : TH.accent,
   border: filled ? 'none' : `1px solid ${LINE}`,
 })
 
 /* Tünd fonda sətir sahəsi — yalnız alt xətt (qələm xətti) */
-const lineInput = {
+const lineInputOf = (TH) => ({
   width: '100%', background: 'transparent', border: 'none', borderRadius: 0,
   borderBottom: `1px solid ${LINE}`, padding: '12px 6px',
-  fontFamily: display, fontStyle: 'italic', fontSize: 19, color: TH.accent, outline: 'none',
-}
+  fontFamily: TH.fonts.heading, fontStyle: 'italic', fontSize: 19, color: TH.accent, outline: 'none',
+})
 
 /* Fil sümüyü kart qabı */
 function IvoryCard({ children, style = {} }) {
+  const TH = useTH()
+  const BRONZE = TH.secondary
   return (
     <div className="rg-card" style={{
       position: 'relative', background: IVORY, color: INK, textAlign: 'center',
@@ -393,6 +404,8 @@ function IvoryCard({ children, style = {} }) {
 
 /* Təklif siyahısı (masa və RSVP axtarışı) */
 function SuggestList({ id, items, activeIdx, setActiveIdx, onPick, light = false, showTable = true }) {
+  const TH = useTH()
+  const BRONZE = TH.secondary
   if (!items.length) return null
   return (
     <ul id={id} role="listbox" style={{
@@ -430,6 +443,13 @@ export default function RoyalGoldTemplate({
   /* Phase 45 — admin override-ları və admin önbaxışında açılışı atlamaq */
   adminOverrides = null, startOpened = false,
 }) {
+  /* Admin rəng/şrift override-ları (yoxdursa BASE_TH-nin özü — render dəyişmir) */
+  const TH = applyThemeOverrides(BASE_TH, adminOverrides)
+  const display = TH.fonts.heading
+  const sans = TH.fonts.body
+  const BRONZE = TH.secondary
+  const foil = foilOf(TH)
+  const lineInput = lineInputOf(TH)
   const adminStrings = adminOverrides?.strings || null
   const tr = withStringOverrides(t[lang] || t.az, adminStrings, lang)
   const L = makeLabelResolver(mergeSectionLabels(null, adminOverrides), lang)
@@ -486,11 +506,13 @@ export default function RoyalGoldTemplate({
   const MAP_BOX = 'min(80vw, 320px)'
 
   return (
-    <div
+    <ThemeCtx.Provider value={TH}>
+<div
       data-rg
       data-enter={enterDirection('royal-gold')}
       style={{
         background: TH.background, minHeight: '100vh', fontFamily: sans, color: TH.text,
+        fontSize: TH.bodyScale ? `${TH.bodyScale}em` : undefined,
         overflowX: 'hidden', position: 'relative', isolation: 'isolate',
         '--tpl-glow': `${TH.primary}47`,
       }}
@@ -583,7 +605,7 @@ export default function RoyalGoldTemplate({
                       <span style={{ ...foil, fontFamily: display, fontSize: 'clamp(44px, 14.5vw, 66px)', display: 'block', animation: 'rg-sheen 3.4s ease-out .4s 1 both' }}>
                         {weddingData.groomName}
                       </span>
-                      <span style={{ fontFamily: script, fontSize: 'clamp(38px, 11vw, 52px)', color: TH.primary, display: 'block', lineHeight: 1, margin: '2px 0 0' }}>&amp;</span>
+                      <span style={{ fontFamily: script, fontSize: 'clamp(38px, 11vw, 52px)', color: TH.primary, display: 'block', lineHeight: 1, margin: '2px 0 0' }}>{adminStrings?.inv_and ? tr.inv_and : '&'}</span>
                       <span style={{ ...foil, fontFamily: display, fontSize: 'clamp(44px, 14.5vw, 66px)', display: 'block', animation: 'rg-sheen 3.4s ease-out .7s 1 both' }}>
                         {weddingData.brideName}
                       </span>
@@ -737,11 +759,11 @@ export default function RoyalGoldTemplate({
                   </div>
                 )}
                 <div style={{ display: 'flex', gap: 8, marginTop: 22, flexWrap: 'wrap', justifyContent: 'center' }}>
-                  {dirUrl && <a data-press href={dirUrl} target="_blank" rel="noopener noreferrer" style={btn(true)}>{tr.inv_directions_btn}</a>}
-                  {mapUrl && <a data-press href={mapUrl} target="_blank" rel="noopener noreferrer" style={btn(!dirUrl)}>Maps</a>}
-                  {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Waze</a>}
+                  {dirUrl && <a data-press href={dirUrl} target="_blank" rel="noopener noreferrer" style={btn(TH, true)}>{tr.inv_directions_btn}</a>}
+                  {mapUrl && <a data-press href={mapUrl} target="_blank" rel="noopener noreferrer" style={btn(TH, !dirUrl)}>Maps</a>}
+                  {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(TH, false)}>Waze</a>}
                   {weddingData.appleMapsUrl && (
-                    <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Apple</a>
+                    <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(TH, false)}>Apple</a>
                   )}
                 </div>
               </Plate>
@@ -873,7 +895,7 @@ export default function RoyalGoldTemplate({
                     {tr.inv_scan_upload}
                   </div>
 
-                  <a data-press href={gallery.photoShareUrl} style={{ ...btn(true), marginTop: 20, minWidth: 220 }}>
+                  <a data-press href={gallery.photoShareUrl} style={{ ...btn(TH, true), marginTop: 20, minWidth: 220 }}>
                     {tr.inv_gallery_btn}
                   </a>
 
@@ -1019,7 +1041,7 @@ export default function RoyalGoldTemplate({
                     type="submit"
                     disabled={!gbook.canSubmit}
                     data-press
-                    style={{ ...btn(gbook.canSubmit), width: '100%', minHeight: 50, opacity: gbook.canSubmit ? 1 : 0.6, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed' }}
+                    style={{ ...btn(TH, gbook.canSubmit), width: '100%', minHeight: 50, opacity: gbook.canSubmit ? 1 : 0.6, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed' }}
                   >
                     {gbook.sending ? gbookL.sending : gbookL.btn}
                   </button>
@@ -1068,6 +1090,7 @@ export default function RoyalGoldTemplate({
         )}
       </AnimatePresence>
     </div>
+</ThemeCtx.Provider>
   )
 }
 

@@ -11,6 +11,7 @@ import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { brilliant, brilliantSide, stepCut, pearCut } from './gems'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { LABELS, TXT } from './copy'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    LUXURY JEWELRY — «Zərgərlik evi» (premium redizayn, 2026-10)
@@ -32,22 +33,6 @@ import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_share
 
 const BASE = getTemplateTheme('luxury-jewelry')
 const ID = 'luxury-jewelry'
-
-const LABELS = {
-  countdown: { title: { az: 'Təqdimata qədər', en: 'Until the unveiling', ru: 'До презентации' } },
-  venue:     { title: { az: 'Butik', en: 'The maison', ru: 'Бутик' } },
-  program:   { title: { az: 'Axşamın kataloqu', en: 'Catalogue of the evening', ru: 'Каталог вечера' } },
-  dresscode: { title: { az: 'Geyim', en: 'Attire', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Sizin vitrininiz', en: 'Your showcase', ru: 'Ваша витрина' } },
-  gallery:   { title: { az: 'Kolleksiya', en: 'The collection', ru: 'Коллекция' } },
-  rsvp:      { title: { az: 'Görüşünüzü təsdiqləyin', en: 'Confirm your appointment', ru: 'Подтвердите визит' } },
-  guestbook: { title: { az: 'Hədiyyə kartları', en: 'Gift cards', ru: 'Подарочные открытки' } },
-}
-const TXT = {
-  az: { lot: 'Lot', table: 'Masa', collection: 'Kolleksiya', maison: 'Zərgərlik evi' },
-  en: { lot: 'Lot', table: 'Table', collection: 'Collection', maison: 'Maison' },
-  ru: { lot: 'Лот', table: 'Стол', collection: 'Коллекция', maison: 'Ювелирный дом' },
-}
 
 const PAL = {
   NIGHT: '#07110E',
@@ -196,8 +181,8 @@ function RingBoxOpening({ inv, theme }) {
               <EmblemSlot mono={ot.mono} size={50} border={`1px solid ${alpha('#9C7A33', 0.6)}`} background="transparent" color="#8A6A2A" font={disp} style={{ animation: 'none' }}>
                 <BrilliantTop size={30} uid="lid" />
               </EmblemSlot>
-              <div style={{ marginTop: 8, fontFamily: disp, fontSize: 15, letterSpacing: '.24em', color: '#8A6A2A' }}>DIGITOY</div>
-              <div style={{ fontSize: 9.5, letterSpacing: '.3em', color: '#8A6A2A' }}>MAISON</div>
+              {ot.show('brand') && <div style={{ marginTop: 8, fontFamily: disp, fontSize: 15, letterSpacing: '.24em', color: '#8A6A2A' }}>{ot.text('brand')}</div>}
+              {ot.show('sub') && <div style={{ fontSize: 9.5, letterSpacing: '.3em', color: '#8A6A2A' }}>{ot.text('sub')}</div>}
             </div>
           </motion.div>
         </div>
@@ -225,7 +210,7 @@ function RingBoxOpening({ inv, theme }) {
         {ot.show('kicker') && <div style={{ fontSize: 11.5, letterSpacing: '.36em', paddingLeft: '.36em', color: C.MUTED, animation: 'lj-rise .8s ease-out .9s both' }}>{String(ot.text('kicker')).toLocaleUpperCase(inv.lang === 'az' ? 'az' : inv.lang)}</div>}
         {titleOv !== '' && (
           <div style={{ marginTop: 12, fontFamily: disp, fontSize: 'clamp(32px, 10vw, 42px)', lineHeight: 1.1, color: C.IVORY, animation: 'lj-rise 1s ease-out 1.1s both' }}>
-            {first}{second && <><span style={{ fontStyle: 'italic', color: C.MINT, margin: '0 .25em', fontSize: '.8em' }}>&amp;</span>{second}</>}
+            {first}{second && <><span style={{ fontStyle: 'italic', color: C.MINT, margin: '0 .25em', fontSize: '.8em' }}>{ot.text('and')}</span>{second}</>}
           </div>
         )}
         {ot.show('meta') && <div style={{ marginTop: 10, fontSize: 13.5, letterSpacing: '.14em', color: C.MUTED, animation: 'lj-rise .8s ease-out 1.3s both' }}>{ot.text('meta')}</div>}
@@ -278,7 +263,7 @@ export default function LuxuryJewelryTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const disp = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
+  const T = inv.copy(TXT)
   const year = String(weddingData.date || '').slice(0, 4)
   const OCT = 'polygon(14% 0, 86% 0, 100% 11%, 100% 89%, 86% 100%, 14% 100%, 0 89%, 0 11%)'
 
@@ -307,7 +292,7 @@ export default function LuxuryJewelryTemplate(props) {
               <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 14, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
                 <span aria-hidden="true">←</span>{tr.btn_back}
               </button>
-              <div style={{ fontFamily: disp, fontSize: 16, letterSpacing: '.3em', paddingLeft: '.3em' }}>DIGITOY</div>
+              <div style={{ fontFamily: disp, fontSize: 16, letterSpacing: '.3em', paddingLeft: '.3em' }}>{T.brand}</div>
               <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
             </header>
 

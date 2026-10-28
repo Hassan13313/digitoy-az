@@ -12,6 +12,8 @@ import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { computeSky, faintStars, moonPath, dms } from './sky'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { LABELS, TXT } from './copy'
+import { fill } from '../_shared/copyText'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    NIGHT SKY ROMANCE — «O gecənin səması» (premium redizayn, 2026-10)
@@ -33,17 +35,6 @@ import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_share
 const BASE = getTemplateTheme('night-sky')
 const ID = 'night-sky'
 
-const LABELS = {
-  countdown: { title: { az: 'O gecəyə qədər', en: 'Until that night', ru: 'До той ночи' } },
-  venue:     { title: { az: 'Göyün altındakı yer', en: 'Under this sky', ru: 'Под этим небом' } },
-  program:   { title: { az: 'Axşamın bürcü', en: 'The evening’s constellation', ru: 'Созвездие вечера' } },
-  dresscode: { title: { az: 'Gecə geyimi', en: 'Evening attire', ru: 'Вечерний дресс-код' } },
-  seating:   { title: { az: 'Sizin ulduzunuz', en: 'Your star', ru: 'Ваша звезда' } },
-  gallery:   { title: { az: 'Gecənin kadrları', en: 'Frames of the night', ru: 'Кадры ночи' } },
-  rsvp:      { title: { az: 'Bizimlə olacaqsınızmı?', en: 'Will you be with us?', ru: 'Вы будете с нами?' } },
-  guestbook: { title: { az: 'Ulduzlara dilək', en: 'Wishes on a star', ru: 'Желания звёздам' } },
-}
-
 const PAL = {
   NIGHT: '#070B18',
   DEEP: '#0F1526',
@@ -56,17 +47,6 @@ const PAL = {
 /* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
    Override yoxdursa PAL olduğu kimi qalır. */
 const LINKS = { primary: ['STARGOLD'], secondary: ['MUTED'], accent: ['SILVER'], background: ['NIGHT'], text: ['MOON'] }
-
-const DIRS = {
-  az: ['Şimal', 'Şərq', 'Cənub', 'Qərb'],
-  en: ['North', 'East', 'South', 'West'],
-  ru: ['Север', 'Восток', 'Юг', 'Запад'],
-}
-const MOON_LABEL = {
-  az: (p) => `O gecə Ay ${p}% işıqlı olacaq`,
-  en: (p) => `The moon will be ${p}% lit that night`,
-  ru: (p) => `В ту ночь Луна будет освещена на ${p}%`,
-}
 
 const KEYFRAMES = (C) => `
 @keyframes ns-tw   { 0% { opacity: 0 } 60% { opacity: 1 } 100% { opacity: var(--o, 1) } }
@@ -97,10 +77,9 @@ function Sparkle(props) {
 }
 
 /* ═══ Planisfer — o gecənin səması ═══ */
-function StarChart({ sky, faint, lang, animate = true, size = '100%' }) {
+function StarChart({ sky, faint, dirs, animate = true, size = '100%' }) {
   const C = usePalette()
   const R = 150
-  const dirs = DIRS[lang] || DIRS.az
   return (
     <svg viewBox="-180 -180 360 360" width={size} height={size} aria-hidden="true" style={{ display: 'block', overflow: 'visible' }}>
       <defs>
@@ -120,10 +99,10 @@ function StarChart({ sky, faint, lang, animate = true, size = '100%' }) {
       <circle r={R * (2 / 3)} fill="none" stroke={C.SILVER} strokeOpacity=".1" strokeWidth=".5" strokeDasharray="2 4" />
       <circle r={R / 3} fill="none" stroke={C.SILVER} strokeOpacity=".1" strokeWidth=".5" strokeDasharray="2 4" />
       <g fontSize="8.5" fill={C.SILVER} fillOpacity=".75" textAnchor="middle" style={{ letterSpacing: '.18em', textTransform: 'uppercase' }}>
-        <text y={-R - 16}>{dirs[0]}</text>
-        <text y={R + 24}>{dirs[2]}</text>
-        <text x={-R - 18} y="3" transform={`rotate(-90 ${-R - 18} 0)`}>{dirs[1]}</text>
-        <text x={R + 18} y="3" transform={`rotate(90 ${R + 18} 0)`}>{dirs[3]}</text>
+        <text y={-R - 16}>{dirs.dirN}</text>
+        <text y={R + 24}>{dirs.dirS}</text>
+        <text x={-R - 18} y="3" transform={`rotate(-90 ${-R - 18} 0)`}>{dirs.dirE}</text>
+        <text x={R + 18} y="3" transform={`rotate(90 ${R + 18} 0)`}>{dirs.dirW}</text>
       </g>
       {faint.map((s, i) => (
         <circle key={`f${i}`} cx={(s.x * R * 0.97).toFixed(1)} cy={(s.y * R * 0.97).toFixed(1)} r={s.s} fill={C.MOON}
@@ -150,7 +129,7 @@ function StarChart({ sky, faint, lang, animate = true, size = '100%' }) {
 /* ═══ 01 — AÇILIŞ ═══ */
 function SkyOpening({ inv, theme, sky, faint }) {
   const C = usePalette()
-  const { ot, lang } = inv
+  const { ot } = inv
   const gate = useGate({ inv, ms: 1300 })
   if (gate.gone) return null
   const { titleOv, first, second } = openingNames(inv)
@@ -171,7 +150,7 @@ function SkyOpening({ inv, theme, sky, faint }) {
         style={{ width: 'min(84vw, 340px)', aspectRatio: '1', animation: 'ns-fade 1s ease-out both' }}
       >
         <div style={{ width: '100%', height: '100%', animation: 'ns-spin 600s linear 3s infinite' }}>
-          <StarChart sky={sky} faint={faint} lang={lang} />
+          <StarChart sky={sky} faint={faint} dirs={inv.copy(TXT)} />
         </div>
       </motion.div>
       <motion.div animate={gate.opening ? { opacity: 0, y: 14 } : {}} transition={{ duration: 0.45 }}
@@ -181,7 +160,7 @@ function SkyOpening({ inv, theme, sky, faint }) {
         )}
         {titleOv !== '' && (
           <div style={{ marginTop: 10, fontFamily: serif, fontStyle: 'italic', fontWeight: 300, fontSize: 'clamp(32px, 10vw, 42px)', lineHeight: 1.1, color: C.STARGOLD, animation: 'ns-rise 1.1s ease-out 2.3s both' }}>
-            {first}{second && <><span style={{ color: C.SILVER, fontSize: '.7em', margin: '0 .3em' }}>&amp;</span>{second}</>}
+            {first}{second && <><span style={{ color: C.SILVER, fontSize: '.7em', margin: '0 .3em' }}>{ot.text('and')}</span>{second}</>}
           </div>
         )}
         {ot.show('meta') && <div style={{ marginTop: 12, fontSize: 13, letterSpacing: '.06em', color: C.MUTED, animation: 'ns-rise .9s ease-out 2.6s both' }}>{ot.text('meta')}</div>}
@@ -232,6 +211,7 @@ export default function NightSkyTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
   const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
+  const T = inv.copy(TXT)
   const serif = theme.fonts.heading
   const sans = theme.fonts.body
 
@@ -272,14 +252,14 @@ export default function NightSkyTemplate(props) {
               <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 14, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: sans }}>
                 <span aria-hidden="true">←</span>{tr.btn_back}
               </button>
-              <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 17, color: C.SILVER }}>Digitoy</div>
+              <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 17, color: C.SILVER }}>{T.brand}</div>
               <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
             </header>
 
             {/* HERO */}
             <section data-section="hero" style={{ position: 'relative', padding: '40px 22px 64px', textAlign: 'center' }}>
               <div style={{ width: 'min(70vw, 280px)', margin: '0 auto', opacity: 0.9 }}>
-                <StarChart sky={sky} faint={faint.slice(0, 120)} lang={lang} animate={false} />
+                <StarChart sky={sky} faint={faint.slice(0, 120)} dirs={T} animate={false} />
               </div>
               <div style={{ marginTop: 26, fontSize: 13.5, color: C.SILVER }}>{L('hero', 'kicker', inv.eventLabel)}</div>
               <p style={{ margin: '8px auto 0', maxWidth: 290, fontFamily: serif, fontStyle: 'italic', fontWeight: 300, fontSize: 16.5, lineHeight: 1.5, color: C.MUTED }}>{tr.inv_join}</p>
@@ -312,7 +292,7 @@ export default function NightSkyTemplate(props) {
                     <path d={moonPath(46, sky.moon.illum, sky.moon.waxing)} fill="url(#ns-moon)" />
                     <circle r="46" fill="none" stroke={C.SILVER} strokeOpacity=".25" strokeWidth=".6" />
                   </svg>
-                  <div style={{ marginTop: 10, fontFamily: serif, fontStyle: 'italic', fontSize: 15.5, color: C.SILVER }}>{(MOON_LABEL[lang] || MOON_LABEL.az)(moonPct)}</div>
+                  <div style={{ marginTop: 10, fontFamily: serif, fontStyle: 'italic', fontSize: 15.5, color: C.SILVER }}>{fill(T.moon, { pct: moonPct })}</div>
                   <div style={{ marginTop: 26, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', gap: 'clamp(10px, 4vw, 18px)' }}>
                     {[
                       { v: cd.days, l: cd.labels.days },

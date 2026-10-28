@@ -28,6 +28,7 @@
    `.js` hər iki mühitdə işləyir. */
 import { FONT_STACKS } from '../templates/templateConfig.js'
 import { OPENING_SLOT_LABELS } from '../templates/_shared/openingSpec.js'
+import { TEMPLATE_COPY_KEYS } from '../templates/templateCopy.js'
 
 /* Admin-in dəyişə bildiyi theme token-ləri (PART 4).
    ⚠ Bu siyahı QƏSDƏN dardır: `surface`, `muted`, `footerBg` kimi törəmə
@@ -443,8 +444,9 @@ export function normalizeOverrides(raw) {
     const S = {}
     for (const [key, val] of Object.entries(raw.strings)) {
       /* ⚠ Yalnız KATALOQDAKI açarlar: ixtiyari açar qəbul etsək admin
-         sistem mətnini də əvəz edə bilərdi. */
-      if (!STRING_KEY_SET.has(key) || !val || typeof val !== 'object') continue
+         sistem mətnini də əvəz edə bilərdi. Şablonun öz sətirləri
+         (`tpl_<şablon>.<açar>`, bax templates/templateCopy.js) da ağ siyahıdadır. */
+      if ((!STRING_KEY_SET.has(key) && !TEMPLATE_COPY_KEYS.has(key)) || !val || typeof val !== 'object') continue
       const bucket = {}
       for (const lang of LANGS) {
         const t = safeText(val[lang], 400)

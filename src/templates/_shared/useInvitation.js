@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { buildPresetMusic, PRESET_TRACKS, MUSIC_PLAY_MODES, shouldAutoPlay } from '../../data/music'
 import { getSectionVisibility } from '../../data/sections'
 import { formatAzDate, formatTime24, formatFullDateByLang, dateParts } from '../../utils/dateFormat'
@@ -16,6 +16,7 @@ import t from '../../data/translations'
 import { applyThemeOverrides, mergeSectionLabels, withStringOverrides, makeLabelResolver, sectionHead } from '../../data/adminOverrides'
 import { directionsUrl, openMapUrl } from './geo'
 import { makeOpeningText, phrase } from './openingSpec'
+import { copyPrefix } from './copyText'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    useInvitation — premium redizayn şablonlarının ORTAQ MƏNTİQ QATI (UI yox)
@@ -113,6 +114,9 @@ export function useInvitation({
        bu sətri həmişə `tr.inv_and`-dən göstərirdi). */
     and: adminStrings?.inv_and ? tr.inv_and : '&',
     footer: sectionHead(L, 'footer'),
+    /* Şablonun öz mətnləri (`<şablon>/copy.js › TXT`) + admin override-ları
+       (`strings['tpl_<id>.<açar>']`): aktiv dil → AZ → şablonun mətni */
+    copy: (dict) => withStringOverrides(dict[lang] || dict.az, adminStrings, lang, copyPrefix(templateId)),
     storyAdminTheme: adminOverrides?.theme || null,
     storyCopy: adminOverrides?.story?.text || null,
   }
@@ -123,18 +127,30 @@ export function useInvitation({
  * və `ms` sonra dəvətnamənin açılması. Şablon yalnız `opening` vəziyyətinə
  * görə öz animasiyasını çəkir.
  * ⚠ `onOpenStart` toxunuş hadisəsinin İÇİNDƏ çağırılır (iOS Safari səs icazəsi).
+ *
+ * `revealAt` (ms, ixtiyari) — dəvətnamə pərdə çəkilənə qədər GÖZLƏMİR, bu andan
+ * pərdənin ALTINDA render olunur. Ağır açılışı olan telefonlarda pərdə
+ * çəkiləndə boş fon görünməsin deyə. Bunu işlədən şablon açılışı `inv.opened`-ə
+ * görə yox, `gone`-a görə gizlətməlidir (bax oriental-luxe).
+ * `finish()` — açılışı bitirir (sabit referans). `ms: null` olarsa taymer
+ * qurulmur: şablon `finish()`-i özü çağırır (məs. pərdənin CSS animasiyası
+ * bitəndə).
  */
-export function useGate({ inv, ms = 1300, label }) {
+export function useGate({ inv, ms = 1300, label, revealAt = null }) {
   const [opening, setOpening] = useState(false)
   const [gone, setGone] = useState(false)
   const timer = useRef(null)
-  useEffect(() => () => clearTimeout(timer.current), [])
+  const reveal = useRef(null)
+  useEffect(() => () => { clearTimeout(timer.current); clearTimeout(reveal.current) }, [])
+  const { setOpened } = inv
+  const finish = useCallback(() => { clearTimeout(timer.current); setGone(true); setOpened(true) }, [setOpened])
   const start = () => {
     if (opening) return
     unlockAudio()
     if (inv.autoPlay) inv.music.play()
     setOpening(true)
-    timer.current = setTimeout(() => { setGone(true); inv.setOpened(true) }, ms)
+    if (revealAt != null) reveal.current = setTimeout(() => setOpened(true), revealAt)
+    if (ms != null) timer.current = setTimeout(finish, ms)
   }
   const gateProps = {
     onClick: start,
@@ -143,7 +159,7 @@ export function useGate({ inv, ms = 1300, label }) {
     onKeyDown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); start() } },
     'aria-label': label || inv.ot.text('cta') || phrase('open', inv.ot.lang),
   }
-  return { opening, gone, start, gateProps }
+  return { opening, gone, start, finish, gateProps }
 }
 
 /** Açılışdakı ad sətri — admin override-ı varsa tək sətir, yoxsa «Ad & Ad» */

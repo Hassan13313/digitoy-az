@@ -10,6 +10,7 @@ import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { LABELS, TXT } from './copy'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    BOARDING PASS — «Birinci sinif» (premium redizayn, 2026-10)
@@ -32,22 +33,6 @@ import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_share
 const BASE = getTemplateTheme('boarding-pass')
 const ID = 'boarding-pass'
 
-const LABELS = {
-  countdown: { title: { az: 'Uçuşa qalıb', en: 'Time to departure', ru: 'До вылета' } },
-  venue:     { title: { az: 'Təyinat', en: 'Destination', ru: 'Пункт назначения' } },
-  program:   { title: { az: 'Uçuş planı', en: 'Flight plan', ru: 'План полёта' } },
-  dresscode: { title: { az: 'Geyim', en: 'Dress code', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Yeriniz', en: 'Your seat', ru: 'Ваше место' } },
-  gallery:   { title: { az: 'Səyahət albomu', en: 'Travel album', ru: 'Альбом путешествия' } },
-  rsvp:      { title: { az: 'Check-in', en: 'Check-in', ru: 'Регистрация' } },
-  guestbook: { title: { az: 'Hava poçtu', en: 'Air mail', ru: 'Авиапочта' } },
-}
-
-const TXT = {
-  az: { pax: 'Sərnişinlər', paxOne: 'Sərnişin', flight: 'Uçuş', date: 'Tarix', boarding: 'Minmə', place: 'Məkan', cls: 'Birinci sinif', table: 'Masa', status: 'Vaxtında', from: 'Bakı', gate: 'Qapı' },
-  en: { pax: 'Passengers', paxOne: 'Passenger', flight: 'Flight', date: 'Date', boarding: 'Boarding', place: 'Venue', cls: 'First class', table: 'Table', status: 'On time', from: 'Baku', gate: 'Gate' },
-  ru: { pax: 'Пассажиры', paxOne: 'Пассажир', flight: 'Рейс', date: 'Дата', boarding: 'Посадка', place: 'Место', cls: 'Первый класс', table: 'Стол', status: 'По расписанию', from: 'Баку', gate: 'Выход' },
-}
 const MONTHS = {
   az: ['YAN', 'FEV', 'MAR', 'APR', 'MAY', 'İYN', 'İYL', 'AVQ', 'SEN', 'OKT', 'NOY', 'DEK'],
   en: ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'],
@@ -226,7 +211,7 @@ function BoardOpening({ inv, theme, weddingData }) {
             {[
               ot.show('fDate') && [ot.text('fDate'), dateV],
               ot.show('fTime') && [ot.text('fTime'), weddingData.time || ''],
-              ot.show('fGate') && [ot.text('fGate'), 'VIP'],
+              ot.show('fGate') && [ot.text('fGate'), inv.copy(TXT).gateNo],
             ].filter(Boolean).map(([lab, val], i) => (
               <div key={lab} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <span style={{ fontFamily: mono, fontSize: 10.5, letterSpacing: '.16em', color: C.MUTED }}>{upper(lab, lang)}</span>
@@ -290,7 +275,7 @@ export default function BoardingPassTemplate(props) {
   const head = theme.fonts.heading
   const body = theme.fonts.body
   const mono = theme.fonts.mono || "'IBM Plex Mono', ui-monospace, monospace"
-  const T = TXT[lang] || TXT.az
+  const T = inv.copy(TXT)
   const [y, m, d] = String(weddingData.date || '').split('-')
   const flight = `DT ${d || '00'}${m || '00'}`
   const dateTicket = d ? `${d} ${(MONTHS[lang] || MONTHS.az)[Number(m) - 1] || ''} ${y}` : ''
@@ -335,7 +320,7 @@ export default function BoardingPassTemplate(props) {
                   <div style={{ background: C.INK, color: C.IVORY, padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <Crest size={18} color={C.BRASS} />
-                      <span style={{ fontFamily: head, fontWeight: 500, fontSize: 15, letterSpacing: '.14em' }}>DIGITOY AIR</span>
+                      <span style={{ fontFamily: head, fontWeight: 500, fontSize: 15, letterSpacing: '.14em' }}>{T.airline}</span>
                     </div>
                     <span style={{ fontFamily: mono, fontSize: 11, letterSpacing: '.14em', color: C.BRASS }}>{upper(T.cls, lang)}</span>
                   </div>
@@ -348,7 +333,7 @@ export default function BoardingPassTemplate(props) {
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', margin: '20px 0 4px' }}>
                       <div>
-                        <div style={{ fontFamily: head, fontWeight: 500, fontSize: 46, lineHeight: 1 }}>GYD</div>
+                        <div style={{ fontFamily: head, fontWeight: 500, fontSize: 46, lineHeight: 1 }}>{T.code}</div>
                         <div style={{ fontSize: 13, color: alpha(C.INK, 0.65) }}>{T.from}</div>
                       </div>
                       <div aria-hidden="true" style={{ display: 'flex', alignItems: 'center', gap: 6, color: C.COPPER, padding: '0 8px' }}>
@@ -367,7 +352,7 @@ export default function BoardingPassTemplate(props) {
                         [T.flight, flight],
                         [T.date, dateTicket],
                         [T.boarding, inv.time],
-                        [T.gate, 'VIP'],
+                        [T.gate, T.gateNo],
                       ].map(([k, v]) => (
                         <div key={k}>
                           <dt style={{ fontFamily: mono, fontSize: 10.5, letterSpacing: '.16em', color: alpha(C.INK, 0.55) }}>{upper(k, lang)}</dt>
@@ -431,8 +416,8 @@ export default function BoardingPassTemplate(props) {
                   <MapSection
                     weddingData={weddingData} theme={theme} accent={C.BRASS} height="clamp(230px, 64vw, 300px)"
                     map={{ opacity: 0.55, filter: 'grayscale(1) brightness(.55) contrast(1.2)', tintOpacity: 0.5, tint: '#1B3456', blend: 'color' }}
-                    frame={<FlightArc />}
-                    fallback={<div style={{ height: 'clamp(230px, 64vw, 300px)', position: 'relative', background: `radial-gradient(${alpha('#FFFFFF', 0.12)} 1px, transparent 1.3px) 0 0 / 12px 12px, ${C.NAVY}` }}><FlightArc /></div>}
+                    frame={<FlightArc code={T.code} />}
+                    fallback={<div style={{ height: 'clamp(230px, 64vw, 300px)', position: 'relative', background: `radial-gradient(${alpha('#FFFFFF', 0.12)} 1px, transparent 1.3px) 0 0 / 12px 12px, ${C.NAVY}` }}><FlightArc code={T.code} /></div>}
                   />
                 </div>
                 <div style={{ marginTop: 20, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
@@ -555,7 +540,7 @@ export default function BoardingPassTemplate(props) {
                         background: `repeating-linear-gradient(135deg, ${C.RED} 0 12px, ${C.IVORY} 12px 18px, ${C.BLUE} 18px 30px, ${C.IVORY} 30px 36px)`,
                       }}>
                         <div style={{ position: 'relative', background: C.IVORY, color: C.INK, padding: '16px 16px 14px' }}>
-                          <span aria-hidden="true" style={{ position: 'absolute', right: 12, top: 10, fontFamily: mono, fontSize: 9.5, letterSpacing: '.14em', color: C.BLUE }}>PAR AVION</span>
+                          <span aria-hidden="true" style={{ position: 'absolute', right: 12, top: 10, fontFamily: mono, fontSize: 9.5, letterSpacing: '.14em', color: C.BLUE }}>{T.parAvion}</span>
                           <blockquote style={{ margin: '10px 0 0', fontSize: 16.5, lineHeight: 1.55 }}>{m2.text}</blockquote>
                           <figcaption style={{ marginTop: 8, fontFamily: mono, fontSize: 12, color: alpha(C.INK, 0.65) }}>— {m2.name}{m2.date ? `, ${gbook.formatDate(m2.date)}` : ''}</figcaption>
                         </div>
@@ -574,14 +559,14 @@ export default function BoardingPassTemplate(props) {
   )
 }
 
-function FlightArc() {
+function FlightArc({ code = 'GYD' }) {
   const C = usePalette()
   const path = 'M30 150 Q150 10 270 90'
   return (
     <svg viewBox="0 0 300 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
       <path d={path} fill="none" stroke={C.BRASS} strokeWidth="1.4" strokeDasharray="4 5" />
       <circle cx="30" cy="150" r="4" fill={C.IVORY} />
-      <text x="30" y="172" textAnchor="middle" fontFamily="'IBM Plex Mono', monospace" fontSize="11" fill={C.IVORY}>GYD</text>
+      <text x="30" y="172" textAnchor="middle" fontFamily="'IBM Plex Mono', monospace" fontSize="11" fill={C.IVORY}>{code}</text>
       <circle cx="270" cy="90" r="9" fill="none" stroke={C.RED} strokeWidth="1.4" />
       <circle cx="270" cy="90" r="4" fill={C.RED} />
       <g style={{ offsetPath: `path('${path}')`, offsetRotate: 'auto', animation: 'bp-fly 6s ease-in-out infinite' }}>

@@ -7,6 +7,7 @@ import {
   FONT_SCALE_MIN, FONT_SCALE_MAX, safeColor, STRING_CATALOG,
 } from '../../data/adminOverrides'
 import { SECTION_DEFS, isSectionOn } from '../../data/sections'
+import { templateCopyFields, templateLabels } from '../../templates/templateCopy'
 import OpeningEditor from './content/OpeningEditor'
 import StoryEditor from './content/StoryEditor'
 import translations from '../../data/translations'
@@ -28,17 +29,46 @@ import { Button, Modal, Notice, Spinner, useMediaQuery } from './v2/adminUi'
    story, sections. Yeni görünüşün sahələri bu modelə burada xəritələnir.
    «Açılış» və «Love Story» tablarında Phase 45 redaktorları işləyir.
 
-   ⚠ RƏNG/ŞRİFT MƏHDUDİYYƏTİ: `simple-luxury`, `royal-gold`, `floral-garden`
-   öz markup-larını yazır — orada rəng/şrift tabları açıq izahla bağlanır.
+   ⚠ ŞABLONUN ÖZ MƏTNLƏRİ (2026-10-28): «Mətnlər» tabında hər bölmədə həmin
+   şablona aid sətirlər də var (`templates/<id>/copy.js` › FIELDS, açar
+   `strings['tpl_<id>.<açar>']`). Placeholder-larda dəvətnamədə HAZIRDA görünən
+   mətn göstərilir — şablonun öz bölmə başlıqları daxil.
+
+   ⚠ RƏNG/ŞRİFT MƏHDUDİYYƏTİ: yalnız `simple-luxury` (video açılışlı, öz
+   markup-ı) — orada rəng/şrift tabları açıq izahla bağlanır.
 
    ⚠ CANLI ÖNBAXIŞ ayrıca sənəddir (iframe /preview/live): data postMessage
    ilə 90 ms debounce-la gedir — yazmaq rəvan qalır, `vw` iframe eninə görədir.
    ───────────────────────────────────────────────────────────────────────── */
 
-const BESPOKE_TEMPLATES = new Set(['simple-luxury', 'royal-gold', 'floral-garden'])
+/* Royal Gold və Floral Garden 2026-10-28-dən temanı kontekstdən oxuyur — rəng/şrift orada da işləyir */
+const BESPOKE_TEMPLATES = new Set(['simple-luxury'])
 const LANG_IDS = ['az', 'en', 'ru']
 const isEmptyObj = (o) => !o || Object.keys(o).length === 0
 const sameJson = (a, b) => JSON.stringify(a ?? {}) === JSON.stringify(b ?? {})
+
+/* Placeholder: bölmə başlığının sistem mətni (şablonun öz başlığı yoxdursa) */
+function sectionTitleDefault(key, lg, wd, systemText) {
+  if (key === 'hero' || key === 'footer') {
+    if (!wd) return ''
+    return ['toy', 'nishan'].includes(wd.eventType)
+      ? [wd.groomName, wd.brideName].filter(Boolean).join(' & ')
+      : (wd.eventName || wd.brideName || '')
+  }
+  const sys = { venue: 'inv_location', dresscode: 'inv_dresscode', gallery: 'inv_gallery', seating: 'seating.title', rsvp: 'rsvp.title', guestbook: 'gbook.title' }[key]
+  return sys ? systemText(sys, lg) : ''
+}
+
+/* Placeholder: üst etiketin dəvətnamədə görünən mətni (yalnız defoltu olanlar) */
+function sectionKickerDefault(key, lg, wd) {
+  const tr = translations[lg] || translations.az
+  if (key === 'hero') {
+    const type = wd?.eventType || 'toy'
+    return type === 'other' ? (wd?.eventName || tr.event_other) : (tr[`event_${type}`] || tr.event_toy)
+  }
+  if (key === 'rsvp') return tr.inv_rsvp || '—'
+  return '—'
+}
 
 export default function AdminContentManager({ slug, onClose, onSaved }) {
   const [loading, setLoading]     = useState(true)
@@ -101,6 +131,9 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
   }, [slug])
 
   const bespoke = templateId && BESPOKE_TEMPLATES.has(templateId)
+  /* Şablonun öz sətirləri və bölmə başlıqları (copy.js) */
+  const copyFields = useMemo(() => templateCopyFields(templateId), [templateId])
+  const tplLabels = useMemo(() => templateLabels(templateId), [templateId])
   const baseTheme = useMemo(() => (templateId ? getTemplateTheme(templateId) : null) || {}, [templateId])
 
   /* Saxlanılacaq / önbaxışa gedəcək `admin` obyekti — boş açarlar düşmür */
@@ -227,6 +260,7 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
         t[`t:${sec.key}`] = s.labels[sec.key]?.title?.[lg] || ''
         for (const [key] of STRING_CATALOG[sec.key] || []) t[`s:${key}`] = s.strings[key]?.[lg] || ''
       }
+      for (const f of copyFields) t[`s:${f.key}`] = s.strings[f.key]?.[lg] || ''
       texts[lg] = t
     }
     const colors = {}
@@ -242,7 +276,7 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
     const secs = {}
     for (const def of SECTION_DEFS) secs[def.id] = isSectionOn({ sections: s.sections }, def.id)
     return { texts, colors, typography, sections: secs }
-  }, [baseTheme])
+  }, [baseTheme, copyFields])
 
   const current = { theme, fonts, labels, strings, sections }
   const values = toView(current)
@@ -253,14 +287,16 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
     for (const lg of LANG_IDS) {
       const t = {}
       for (const sec of CONTENT_SECTIONS) {
-        t[`k:${sec.key}`] = '—'
-        t[`t:${sec.key}`] = 'Şablonun öz mətni'
+        t[`k:${sec.key}`] = sectionKickerDefault(sec.key, lg, wedding)
+        t[`t:${sec.key}`] = tplLabels?.[sec.key]?.title?.[lg] || tplLabels?.[sec.key]?.title?.az
+          || sectionTitleDefault(sec.key, lg, wedding, systemText) || 'Şablonun öz mətni'
         for (const [key] of STRING_CATALOG[sec.key] || []) t[`s:${key}`] = systemText(key, lg) || 'Sistemin öz mətni'
       }
+      for (const f of copyFields) t[`s:${f.key}`] = f.defaults[lg] || f.defaults.az || ''
       texts[lg] = t
     }
     return { texts, colors: { ...baseTheme }, typography: { heading: '', body: '' } }
-  }, [systemText, baseTheme])
+  }, [systemText, baseTheme, tplLabels, copyFields, wedding])
 
   const schema = useMemo(() => {
     const fontOptions = [
@@ -276,6 +312,10 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
           { key: `k:${sec.key}`, label: 'Üst etiket', short: true },
           { key: `t:${sec.key}`, label: 'Başlıq', localized: true, short: true },
           ...(STRING_CATALOG[sec.key] || []).map(([key, name]) => ({ key: `s:${key}`, label: name, localized: true })),
+          ...copyFields.filter((f) => f.section === sec.key).map((f) => ({
+            key: `s:${f.key}`, label: f.label, localized: true, hint: f.hint || undefined,
+            multiline: (f.defaults.az || '').length > 90,
+          })),
         ],
       })),
       colorTokens: THEME_KEYS.map((k) => ({ key: k, label: THEME_LABELS[k]?.az || k })),
@@ -290,7 +330,7 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
         ? `«${getTemplateName(templateId)}» şablonunda rəng və şrift dəyişikliyi işləmir — bu şablon öz markup-ını yazır və rənglər/şriftlər kodun içindədir. Mətn düzəlişləri və bölmə görünürlüyü isə normal işləyir.`
         : undefined,
     }
-  }, [bespoke, templateId])
+  }, [bespoke, templateId, copyFields])
 
   /* ── Yeni görünüşdən gələn dəyişiklik → köhnə model ── */
   const handleChange = (next, path) => {

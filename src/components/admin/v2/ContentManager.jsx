@@ -103,7 +103,7 @@ const EMBLEM_MODES = [
 
 /**
  * @typedef {object} ContentSchema
- * @property {{id:string,title:string,hint?:string,fields:{key:string,label:string,localized?:boolean,multiline?:boolean,short?:boolean}[]}[]} textSections
+ * @property {{id:string,title:string,hint?:string,fields:{key:string,label:string,localized?:boolean,multiline?:boolean,short?:boolean,hint?:string}[]}[]} textSections
  *           «Mətnlər» tabının kartları (Hero, Sayğac, Məkan / Xəritə, Proqram …). `localized` — labelə «(AZ)» əlavə olunur.
  * @property {{key:string,label:string}[]} openingFields  Açılış yazıları (üst yazı, adlar, tarix, düymə, ipucu)
  * @property {string[]} [stickers]  Stiker seçimləri (emoji və ya qısa simvol)
@@ -516,6 +516,7 @@ function TextField({
   hidden,
   onToggleHidden,
   lang,
+  hint,
 }) {
   const fid = useId();
   const hasValue = Boolean(value);
@@ -558,6 +559,7 @@ function TextField({
         rows={multiline ? 3 : undefined}
         className={short ? 'sm:max-w-[260px]' : ''}
       />
+      {hint && <p className="mt-1 text-[12px] leading-snug text-[#6B5E54]">{hint}</p>}
     </div>
   );
 }
@@ -570,7 +572,7 @@ function TextsTab({ values, defaults, schema, lang, set, changed, onFocusSection
   return (
     <>
       <Notice tone="info">
-        Bölmə başlıqlarını dəyişə bilərsiniz. Boş buraxılan sahə şablonun öz mətnini saxlayır — heç nə itmir.
+        Dəvətnamədəki bütün yazıları — bölmə başlıqlarını və bu şablona məxsus sətirləri — dəyişə bilərsiniz. Boz mətn hazırda görünən mətndir; boş buraxılan sahə şablonun öz mətnini saxlayır — heç nə itmir.
       </Notice>
       {schema.textSections.map((sec) => {
         const n = sec.fields.filter((f) => changed(['texts', lang, f.key])).length;
@@ -601,6 +603,7 @@ function TextsTab({ values, defaults, schema, lang, set, changed, onFocusSection
                     changed={changed(['texts', lang, f.key])}
                     multiline={f.multiline}
                     lang={LANGS[lang].lang}
+                    hint={f.hint}
                   />
                 </div>
               ))}

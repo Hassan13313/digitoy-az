@@ -85,7 +85,7 @@ export const OPENING_SLOT_LABELS = {
   masthead: 'Qəzetin adı',
   venue:    'Məkan sətri',
   no:       'Nömrə',
-  and:      '«VƏ» bağlayıcısı',
+  and:      'Adların arasındakı bağlayıcı («&» / «VƏ»)',
   skip:     '«Keç» düyməsi',
 }
 
@@ -97,21 +97,21 @@ export const OPENING_SLOT_LABELS = {
      null       — açılışda belə yer yoxdur
    `slots` — ekranda yuxarıdan aşağı sıra ilə (admin formu da bu sırada). */
 export const OPENING_SPEC = {
-  'royal-gold':      { mono: 'initials', slots: ['kicker', 'sub', 'title', 'meta', 'cta', 'hint'], hints: { sub: '«Anno …» ili' } },
-  'oriental-luxe':   { mono: 'initials', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
-  'white-elegance':  { mono: 'initials', slots: ['sub', 'title', 'meta', 'cta', 'hint'], hints: { sub: 'Monoqramın altındakı «Dəvətnamə»' } },
-  'vinyl-record':    { mono: 'initials', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
-  'royal-palace':    { mono: 'initials', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
-  'crystal-glass':   { mono: 'emblem',   slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
-  'luxury-jewelry':  { mono: 'emblem',   slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
-  'nature-touch':    { mono: 'emblem',   slots: ['title', 'meta', 'cta', 'hint'] },
-  'floral-garden':   { mono: 'emblem',   slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'royal-gold':      { mono: 'initials', slots: ['kicker', 'sub', 'title', 'and', 'meta', 'cta', 'hint'], hints: { sub: '«Anno …» ili' } },
+  'oriental-luxe':   { mono: 'initials', slots: ['kicker', 'title', 'and', 'meta', 'cta', 'hint'] },
+  'white-elegance':  { mono: 'initials', slots: ['sub', 'title', 'and', 'meta', 'cta', 'hint'], hints: { sub: 'Monoqramın altındakı «Dəvətnamə»' } },
+  'vinyl-record':    { mono: 'initials', slots: ['kicker', 'title', 'and', 'meta', 'cta', 'hint'] },
+  'royal-palace':    { mono: 'initials', slots: ['kicker', 'title', 'and', 'meta', 'cta', 'hint'] },
+  'crystal-glass':   { mono: 'emblem',   slots: ['kicker', 'title', 'and', 'meta', 'cta', 'hint'] },
+  'luxury-jewelry':  { mono: 'emblem',   slots: ['brand', 'sub', 'kicker', 'title', 'and', 'meta', 'cta', 'hint'], hints: { brand: 'Qutunun qapağındakı yazı', sub: 'Brendin altındakı kiçik yazı' } },
+  'nature-touch':    { mono: 'emblem',   slots: ['title', 'and', 'meta', 'cta', 'hint'] },
+  'floral-garden':   { mono: 'emblem',   slots: ['kicker', 'title', 'and', 'meta', 'cta', 'hint'] },
   'boarding-pass':   { mono: null, slots: ['brand', 'pass', 'route', 'title', 'fDate', 'fTime', 'fGate', 'kicker', 'meta', 'cta', 'hint'] },
   'cinema-premiere': { mono: null, slots: ['title', 'sub', 'kicker', 'meta', 'cta', 'hint'], hints: { sub: 'Kadrın altındakı kiçik yazı' } },
   'gazette':         { mono: null, slots: ['edition', 'masthead', 'sub', 'title', 'venue', 'meta', 'cta', 'hint'], hints: { sub: 'Rubrika' } },
-  'mediterranean':   { mono: null, slots: ['title', 'kicker', 'meta', 'cta', 'hint'] },
+  'mediterranean':   { mono: null, slots: ['title', 'and', 'kicker', 'meta', 'cta', 'hint'] },
   'modern-black':    { mono: null, slots: ['brand', 'no', 'kicker', 'title', 'and', 'meta', 'cta', 'hint'] },
-  'night-sky':       { mono: null, slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'night-sky':       { mono: null, slots: ['kicker', 'title', 'and', 'meta', 'cta', 'hint'] },
   /* Simple Luxury açılışı videodur — mətnlər yalnız video gecikəndə görünən
      afişada və «Keç» düyməsindədir. */
   'simple-luxury':   { mono: null, slots: ['brand', 'title', 'sub', 'skip'], hints: { sub: 'Afişadakı şüar', title: 'Yalnız video gecikəndə görünür' } },
@@ -172,7 +172,8 @@ export function openingDefaults(templateId, ctx) {
   const P = (k) => phrase(k, lang)
   const names = openingNames(wd, ctx.isCouple)
   const fullDate = formatFullDateByLang(wd.date, lang)
-  const base = { title: names, cta: P('open'), hint: P('tap') }
+  /* `and` — açılışda adların arasındakı bağlayıcı (premium dizaynlarda «&») */
+  const base = { title: names, and: '&', cta: P('open'), hint: P('tap') }
 
   switch (templateId) {
     case 'royal-gold': {
@@ -192,7 +193,8 @@ export function openingDefaults(templateId, ctx) {
     case 'crystal-glass':
     case 'luxury-jewelry':
       return { ...base, kicker: P('invitation'), meta: dotDate(wd, ' · '),
-        cta: templateId === 'luxury-jewelry' ? P('openBox') : P('open') }
+        cta: templateId === 'luxury-jewelry' ? P('openBox') : P('open'),
+        ...(templateId === 'luxury-jewelry' ? { brand: 'DIGITOY', sub: 'MAISON' } : {}) }
     case 'nature-touch':
       return { ...base, meta: [placeOf(wd), fullDate].filter(Boolean).join(' · ') }
     case 'floral-garden':

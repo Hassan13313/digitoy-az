@@ -10,6 +10,7 @@ import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { LABELS, TXT } from './copy'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    ROYAL PALACE — «Saray fərmanı» (premium redizayn, 2026-10)
@@ -31,22 +32,6 @@ import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_share
 
 const BASE = getTemplateTheme('royal-palace')
 const ID = 'royal-palace'
-
-const LABELS = {
-  countdown: { title: { az: 'Mərasimə qədər', en: 'Until the ceremony', ru: 'До церемонии' } },
-  venue:     { title: { az: 'Saray', en: 'The palace', ru: 'Дворец' } },
-  program:   { title: { az: 'Mərasim protokolu', en: 'Order of ceremony', ru: 'Протокол церемонии' } },
-  dresscode: { title: { az: 'Saray etiketi', en: 'Court etiquette', ru: 'Дворцовый этикет' } },
-  seating:   { title: { az: 'Ziyafət masanız', en: 'Your banquet table', ru: 'Ваш стол на банкете' } },
-  gallery:   { title: { az: 'Portret qalereyası', en: 'Portrait gallery', ru: 'Портретная галерея' } },
-  rsvp:      { title: { az: 'Cavabınızı gözləyirik', en: 'Your reply, please', ru: 'Ждём вашего ответа' } },
-  guestbook: { title: { az: 'Saray dəftəri', en: 'The court register', ru: 'Дворцовая книга' } },
-}
-const TXT = {
-  az: { table: 'Masa', honour: 'sizi şərəfli qonağımız olmağa dəvət edir' },
-  en: { table: 'Table', honour: 'request the honour of your presence' },
-  ru: { table: 'Стол', honour: 'имеют честь пригласить вас' },
-}
 
 const PAL = {
   NAVY: '#141B3A',
@@ -193,7 +178,7 @@ function DecreeOpening({ inv, theme }) {
             </div>
             {titleOv !== '' && (
               <div style={{ marginTop: 14, fontFamily: script, fontSize: 'clamp(38px, 12vw, 50px)', lineHeight: 1.05, color: C.INK }}>
-                {first}{second && <><span style={{ display: 'block', fontFamily: capsF, fontSize: '.36em', letterSpacing: '.2em', color: '#7A5A20', margin: '4px 0' }}>&amp;</span>{second}</>}
+                {first}{second && <><span style={{ display: 'block', fontFamily: capsF, fontSize: '.36em', letterSpacing: '.2em', color: '#7A5A20', margin: '4px 0' }}>{ot.text('and')}</span>{second}</>}
               </div>
             )}
             {ot.show('meta') && <div style={{ marginTop: 18, fontFamily: capsF, fontSize: 15, letterSpacing: '.16em', color: '#5A4A33' }}>{ot.text('meta')}</div>}
@@ -252,7 +237,7 @@ export default function RoyalPalaceTemplate(props) {
   const capsF = theme.fonts.heading
   const body = theme.fonts.body
   const script = theme.fonts.script || "'Imperial Script', 'Great Vibes', cursive"
-  const T = TXT[lang] || TXT.az
+  const T = inv.copy(TXT)
   const P = { capsF }
 
   return (
@@ -280,7 +265,7 @@ export default function RoyalPalaceTemplate(props) {
               <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 15, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
                 <span aria-hidden="true">←</span>{tr.btn_back}
               </button>
-              <div style={{ fontFamily: capsF, fontSize: 16, letterSpacing: '.18em', color: C.GOLD }}>Digitoy</div>
+              <div style={{ fontFamily: capsF, fontSize: 16, letterSpacing: '.18em', color: C.GOLD }}>{T.brand}</div>
               <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
             </header>
 

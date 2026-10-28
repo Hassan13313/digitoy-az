@@ -9,6 +9,8 @@ import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { LABELS, TXT } from './copy'
+import { fill } from '../_shared/copyText'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    GAZETTE — «Təcili buraxılış» (premium redizayn, 2026-10)
@@ -30,35 +32,6 @@ import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_share
 
 const BASE = getTemplateTheme('gazette')
 const ID = 'gazette'
-
-const LABELS = {
-  countdown: { title: { az: 'Geri sayım başladı', en: 'The countdown is on', ru: 'Обратный отсчёт начался' } },
-  venue:     { title: { az: 'Hadisə yeri', en: 'Scene of the event', ru: 'Место события' } },
-  program:   { title: { az: 'Axşamın proqramı', en: 'Tonight’s listings', ru: 'Программа вечера' } },
-  dresscode: { title: { az: 'Moda rubrikası', en: 'Fashion column', ru: 'Модная рубрика' } },
-  seating:   { title: { az: 'Elanlar: masanız', en: 'Classifieds: your table', ru: 'Объявления: ваш стол' } },
-  gallery:   { title: { az: 'Foto reportaj', en: 'Photo report', ru: 'Фоторепортаж' } },
-  rsvp:      { title: { az: 'Kuponu doldurun', en: 'Fill in the coupon', ru: 'Заполните купон' } },
-  guestbook: { title: { az: 'Oxucu məktubları', en: 'Letters to the editor', ru: 'Письма читателей' } },
-}
-
-const TXT = {
-  az: {
-    page: 'Səhifə', price: 'Qiyməti: pulsuz', weather: 'Hava proqnozu', forecast: 'Günəşli. Sevgi ehtimalı — 100%.',
-    lead: (v, d, n, t) => `${v} — ${d}. Redaksiyamıza daxil olan xəbərə görə, ${n} məclisi${t ? ` saat ${t}-da` : ''} başlayacaq. Qonaqları musiqi, ziyafət və unudulmaz bir axşam gözləyir. Ətraflı məlumat növbəti səhifələrdə.`,
-    caption: 'Şəkil', cut: 'Buradan kəsin', table: 'Masa', mates: 'Masa yoldaşları', and: 'və', city: 'Bakı',
-  },
-  en: {
-    page: 'Page', price: 'Price: free', weather: 'Weather', forecast: 'Sunny. 100% chance of love.',
-    lead: (v, d, n, t) => `${v} — ${d}. Word has reached our newsroom that the celebration of ${n} will begin${t ? ` at ${t}` : ''}. Guests can expect music, a banquet and an unforgettable evening. Full details on the following pages.`,
-    caption: 'Pictured', cut: 'Cut here', table: 'Table', mates: 'Table companions', and: 'and', city: 'Baku',
-  },
-  ru: {
-    page: 'Стр.', price: 'Цена: бесплатно', weather: 'Прогноз погоды', forecast: 'Солнечно. Вероятность любви — 100%.',
-    lead: (v, d, n, t) => `${v} — ${d}. Как стало известно редакции, торжество ${n} начнётся${t ? ` в ${t}` : ''}. Гостей ждут музыка, банкет и незабываемый вечер. Подробности — на следующих страницах.`,
-    caption: 'На снимке', cut: 'Отрезать здесь', table: 'Стол', mates: 'Соседи по столу', and: 'и', city: 'Баку',
-  },
-}
 
 const PAL = {
   PAPER: '#F3EEE2',
@@ -116,7 +89,10 @@ function FrontPage({ inv, weddingData, T, edition, masthead, rubric, title, venu
   const disp = inv.theme.fonts.heading
   const body = inv.theme.fonts.body
   const nameStr = inv.isCouple ? `${inv.groom} ${T.and} ${inv.bride}` : inv.single
-  const lead = T.lead(weddingData.venueName || T.city, inv.fullDate, inv.heroTitle || nameStr, inv.time)
+  const lead = fill(T.lead, {
+    venue: weddingData.venueName || T.city, date: inv.fullDate, names: inv.heroTitle || nameStr,
+    at: inv.time ? ` ${fill(T.leadAt, { time: inv.time }).trim()}` : '',
+  })
   return (
     <div style={{ color: C.INK, fontFamily: body }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, fontSize: 10.5, letterSpacing: '.08em', paddingBottom: 6, borderBottom: `1px solid ${C.INK}` }}>
@@ -217,7 +193,7 @@ export default function GazetteTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL, ot } = inv
   const disp = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
+  const T = inv.copy(TXT)
   let pg = 1
   const P = { disp, T, lang }
   const nextPage = () => ++pg

@@ -9,6 +9,7 @@ import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import { LABELS, TXT } from './copy'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    MEDITERRANEAN — «Riviera: limon və mayolika» (premium redizayn, 2026-10)
@@ -31,22 +32,6 @@ import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_share
 
 const BASE = getTemplateTheme('mediterranean')
 const ID = 'mediterranean'
-
-const LABELS = {
-  countdown: { title: { az: 'Yaya qədər', en: 'Until summer comes', ru: 'До нашего лета' } },
-  venue:     { title: { az: 'Villa', en: 'The villa', ru: 'Вилла' } },
-  program:   { title: { az: 'Gün batana qədər', en: 'Until sunset', ru: 'До заката' } },
-  dresscode: { title: { az: 'Yay geyimi', en: 'Summer attire', ru: 'Летний дресс-код' } },
-  seating:   { title: { az: 'Masanız', en: 'Your table', ru: 'Ваш стол' } },
-  gallery:   { title: { az: 'Sahildən kartlar', en: 'Postcards from the coast', ru: 'Открытки с побережья' } },
-  rsvp:      { title: { az: 'Cavab kartı', en: 'Reply postcard', ru: 'Открытка-ответ' } },
-  guestbook: { title: { az: 'Dənizdən məktublar', en: 'Letters by the sea', ru: 'Письма у моря' } },
-}
-const TXT = {
-  az: { table: 'Masa', greet: 'Sahildən salamlar' },
-  en: { table: 'Table', greet: 'Greetings from the coast' },
-  ru: { table: 'Стол', greet: 'Привет с побережья' },
-}
 
 const PAL = {
   PLASTER: '#FBF8F1',
@@ -184,7 +169,7 @@ function TileOpening({ inv, theme }) {
           {ot.show('kicker') && <div style={{ fontStyle: 'italic', fontSize: 16, color: C.SEA, animation: 'md-rise .8s ease-out 1.4s both' }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 10, fontFamily: serif, fontStyle: 'italic', fontSize: 'clamp(34px, 10.5vw, 44px)', lineHeight: 1.08, color: C.AZURE, animation: 'md-rise 1s ease-out 1.6s both' }}>
-              {first}{second && <><span style={{ display: 'block', fontSize: '.5em', color: C.TERRA, margin: '2px 0' }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'block', fontSize: '.5em', color: C.TERRA, margin: '2px 0' }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
           {ot.show('meta') && <div style={{ marginTop: 14, fontSize: 14, color: C.MUTED, animation: 'md-rise .8s ease-out 1.9s both' }}>{ot.text('meta')}</div>}
@@ -238,7 +223,7 @@ export default function MediterraneanTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const serif = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
+  const T = inv.copy(TXT)
 
   return (
     <PaletteContext.Provider value={C}>
@@ -265,7 +250,7 @@ export default function MediterraneanTemplate(props) {
               <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
                 <span aria-hidden="true">←</span>{tr.btn_back}
               </button>
-              <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 19, color: C.AZURE }}>Digitoy</div>
+              <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 19, color: C.AZURE }}>{T.brand}</div>
               <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
             </header>
 
