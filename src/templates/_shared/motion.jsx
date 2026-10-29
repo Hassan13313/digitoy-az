@@ -60,6 +60,12 @@ const ENTER = {
   'first-paper': 'up',
   'retro-polaroid': 'up',
   'love-letters': 'up',
+  /* 2026-10 — «Məzuniyyət» konsepti */
+  'caps-toss': 'up',
+  'yearbook': 'up',
+  'last-bell': 'up',
+  'chalkboard': 'up',
+  'paper-plane': 'up',
 }
 
 /** templateId → giriş istiqaməti (`data-enter` üçün). */

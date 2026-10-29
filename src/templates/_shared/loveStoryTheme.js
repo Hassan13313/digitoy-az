@@ -105,6 +105,17 @@ const F = {
   pangolin: FONT_STACKS.pangolin,
   bellotaText: FONT_STACKS.bellotaText,
   greatVibes: FONT_STACKS.greatVibes,
+  alegreyaSC: FONT_STACKS.alegreyaSC,
+  firaXC: FONT_STACKS.firaXC,
+  firaC: FONT_STACKS.firaC,
+  comforterBrush: FONT_STACKS.comforterBrush,
+  robotoSerif: FONT_STACKS.robotoSerif,
+  notoSans: FONT_STACKS.notoSans,
+  comforter: FONT_STACKS.comforter,
+  amatic: FONT_STACKS.amatic,
+  ysabeauOffice: FONT_STACKS.ysabeauOffice,
+  ysabeau: FONT_STACKS.ysabeau,
+  martianMono: FONT_STACKS.martianMono,
 }
 export const STORY_FONTS = F
 
@@ -169,6 +180,12 @@ const T = {
   'first-paper': { bg: '#F8F6F1', surf: '#FFFFFF', ink: '#232B4A', mute: '#737A8A', hi: '#3561C9', line: '#A9C0EE', paper: '#FFFFFF', paperInk: '#737A8A', head: F.piazzolla, body: F.didact, cap: F.piazzolla, titleFont: F.piazzolla, titleItalic: true, titleSize: 40, frame: 'clipping', hero: 'rect', labels: 'num', textItalic: false },
   'retro-polaroid': { bg: '#F4EAD5', surf: '#FFFDF8', ink: '#3B2418', mute: '#8A6E58', hi: '#E07A2E', line: '#E2B33C', paper: '#FFFDF8', paperInk: '#8A6E58', head: F.marmelad, body: F.bellotaText, cap: F.pangolin, capItalic: false, titleFont: F.marmelad, titleSize: 40, frame: 'polaroid', hero: 'rect', labels: 'num', tilt: true, textItalic: false },
   'love-letters': { bg: '#EFE6D8', surf: '#FBF6EC', ink: '#2F3550', mute: '#7D7468', hi: '#9C4A4A', line: '#C98B8B', paper: '#FBF6EC', paperInk: '#7D7468', head: F.ebGaramond, body: F.ebGaramond, cap: F.ebGaramond, titleFont: F.greatVibes, titleSize: 54, frame: 'mat', hero: 'oval', labels: 'roman' },
+  /* 2026-10 — «Məzuniyyət» konsepti */
+  'caps-toss': { bg: 'linear-gradient(180deg,#1F3160,#14213D)', surf: '#1F3160', ink: '#F7F4EC', mute: '#AEB6CC', hi: '#F6DC92', line: '#E5B94E', head: F.sourceSerif, body: F.sourceSerif, cap: F.alegreyaSC, capItalic: false, titleFont: F.alegreyaSC, titleSize: 36, frame: 'mat', hero: 'arch', labels: 'num' },
+  'yearbook': { bg: '#FFFFFF', surf: '#F7F8FB', ink: '#14182B', mute: '#69708A', hi: '#1F4FD1', line: '#FFC629', paper: '#FFFFFF', paperInk: '#69708A', head: F.firaXC, body: F.firaC, cap: F.comforterBrush, capItalic: false, titleFont: F.firaXC, titleUpper: true, titleSize: 44, frame: 'polaroid', hero: 'rect', labels: 'num2', tilt: true, textItalic: false },
+  'last-bell': { bg: '#FFFFFF', surf: '#F5F6F9', ink: '#1C2A4A', mute: '#6A7387', hi: '#C8102E', line: '#E2BD6A', paper: '#FFFFFF', paperInk: '#6A7387', head: F.robotoSerif, body: F.notoSans, cap: F.comforter, capItalic: false, titleFont: F.robotoSerif, titleSize: 36, frame: 'clipping', hero: 'rounded', labels: 'num', textItalic: false },
+  'chalkboard': { bg: 'linear-gradient(180deg,#2A4B42,#22403A)', surf: '#1A322C', ink: '#F3F0E6', mute: 'rgba(243,240,230,.65)', hi: '#F5DE7A', line: '#F3A9B9', head: F.ysabeauOffice, body: F.ysabeauOffice, cap: F.amatic, capItalic: false, titleFont: F.amatic, titleSize: 56, frame: 'minimal', hero: 'rect', labels: 'num', dash: '6 4', textItalic: false },
+  'paper-plane': { bg: 'linear-gradient(180deg,#CFE8F8,#FFFFFF)', surf: '#FFFFFF', ink: '#1B2D4F', mute: '#5E7290', hi: '#2F6FDB', line: '#E0483E', paper: '#FFFFFF', paperInk: '#5E7290', head: F.ysabeau, body: F.ysabeauOffice, cap: F.martianMono, capItalic: false, titleFont: F.ysabeau, titleSize: 38, frame: 'ticket', hero: 'rounded', labels: 'num2', textItalic: false },
 }
 
 /* ── Mətnlər (AZ/EN/RU) ── dizayndakı şablon adlandırmaları */
@@ -392,6 +409,47 @@ const COPY = {
     sub:    { az: 'İlk görüşdən bu günə qədər', en: 'From our first meeting to today', ru: 'С первой встречи до сегодняшнего дня' },
     end:    { az: '…və hekayəmiz davam edir', en: '…and our story goes on', ru: '…и наша история продолжается' },
     endSub: { az: 'Bu ildönümünü sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this anniversary with you.', ru: 'Мы хотим отметить эту годовщину вместе с вами.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  /* 2026-10 — «Məzuniyyət» konsepti */
+  'caps-toss': {
+    kicker: { az: 'Xatirələr', en: 'Memories', ru: 'Воспоминания' },
+    title:  { az: 'Məktəb illərim', en: 'My school years', ru: 'Мои школьные годы' },
+    sub:    { az: 'Birinci sinifdən bu günə qədər', en: 'From first grade to today', ru: 'С первого класса до сегодняшнего дня' },
+    end:    { az: '…və qarşıda yeni yol var', en: '…and a new road lies ahead', ru: '…а впереди новый путь' },
+    endSub: { az: 'Bu günü sizinlə qeyd etmək istəyirəm.', en: 'I want to celebrate this day with you.', ru: 'Я хочу отметить этот день вместе с вами.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  'yearbook': {
+    kicker: { az: 'Xatirələr', en: 'Memories', ru: 'Воспоминания' },
+    title:  { az: 'Məktəb illərim', en: 'My school years', ru: 'Мои школьные годы' },
+    sub:    { az: 'Birinci sinifdən bu günə qədər', en: 'From first grade to today', ru: 'С первого класса до сегодняшнего дня' },
+    end:    { az: '…və qarşıda yeni yol var', en: '…and a new road lies ahead', ru: '…а впереди новый путь' },
+    endSub: { az: 'Bu günü sizinlə qeyd etmək istəyirəm.', en: 'I want to celebrate this day with you.', ru: 'Я хочу отметить этот день вместе с вами.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  'last-bell': {
+    kicker: { az: 'Xatirələr', en: 'Memories', ru: 'Воспоминания' },
+    title:  { az: 'Məktəb illərim', en: 'My school years', ru: 'Мои школьные годы' },
+    sub:    { az: 'Birinci sinifdən bu günə qədər', en: 'From first grade to today', ru: 'С первого класса до сегодняшнего дня' },
+    end:    { az: '…və qarşıda yeni yol var', en: '…and a new road lies ahead', ru: '…а впереди новый путь' },
+    endSub: { az: 'Bu günü sizinlə qeyd etmək istəyirəm.', en: 'I want to celebrate this day with you.', ru: 'Я хочу отметить этот день вместе с вами.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  'chalkboard': {
+    kicker: { az: 'Xatirələr', en: 'Memories', ru: 'Воспоминания' },
+    title:  { az: 'Məktəb illərim', en: 'My school years', ru: 'Мои школьные годы' },
+    sub:    { az: 'Birinci sinifdən bu günə qədər', en: 'From first grade to today', ru: 'С первого класса до сегодняшнего дня' },
+    end:    { az: '…və qarşıda yeni yol var', en: '…and a new road lies ahead', ru: '…а впереди новый путь' },
+    endSub: { az: 'Bu günü sizinlə qeyd etmək istəyirəm.', en: 'I want to celebrate this day with you.', ru: 'Я хочу отметить этот день вместе с вами.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  'paper-plane': {
+    kicker: { az: 'Xatirələr', en: 'Memories', ru: 'Воспоминания' },
+    title:  { az: 'Məktəb illərim', en: 'My school years', ru: 'Мои школьные годы' },
+    sub:    { az: 'Birinci sinifdən bu günə qədər', en: 'From first grade to today', ru: 'С первого класса до сегодняшнего дня' },
+    end:    { az: '…və qarşıda yeni yol var', en: '…and a new road lies ahead', ru: '…а впереди новый путь' },
+    endSub: { az: 'Bu günü sizinlə qeyd etmək istəyirəm.', en: 'I want to celebrate this day with you.', ru: 'Я хочу отметить этот день вместе с вами.' },
     kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
   },
 }

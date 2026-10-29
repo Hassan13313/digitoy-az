@@ -103,6 +103,17 @@ const FAMILY = {
   marmelad: 'Marmelad',
   pangolin: 'Pangolin',
   bellotaText: 'Bellota+Text:wght@400;700',
+  alegreyaSC: 'Alegreya+SC:wght@400;500;700',
+  firaXC: 'Fira+Sans+Extra+Condensed:wght@600;700;800',
+  firaC: 'Fira+Sans+Condensed:wght@400;600',
+  comforterBrush: 'Comforter+Brush',
+  robotoSerif: 'Roboto+Serif:ital,wght@0,500;0,600;0,700;1,700',
+  notoSans: 'Noto+Sans:wght@400;600',
+  comforter: 'Comforter',
+  amatic: 'Amatic+SC:wght@400;700',
+  ysabeauOffice: 'Ysabeau+Office:wght@400;600',
+  ysabeau: 'Ysabeau:ital,wght@0,600;0,700;0,800;1,700',
+  martianMono: 'Martian+Mono:wght@400;600',
 }
 
 /* Hər şablonun öz ailələri */
@@ -157,6 +168,12 @@ const TEMPLATE_FONTS = {
   'first-paper': ['piazzolla', 'didact'],
   'retro-polaroid': ['marmelad', 'pangolin', 'bellotaText'],
   'love-letters': ['greatVibes', 'ebGaramond'],
+  /* 2026-10 — «Məzuniyyət» konsepti */
+  'caps-toss': ['alegreyaSC', 'sourceSerif'],
+  'yearbook': ['firaXC', 'firaC', 'comforterBrush'],
+  'last-bell': ['robotoSerif', 'notoSans', 'comforter'],
+  'chalkboard': ['amatic', 'ysabeauOffice'],
+  'paper-plane': ['ysabeau', 'ysabeauOffice', 'martianMono'],
 }
 
 const ALL = Object.keys(FAMILY)

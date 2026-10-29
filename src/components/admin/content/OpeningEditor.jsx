@@ -66,6 +66,11 @@ const EMBLEM_NAMES = {
   'first-paper': 'origami ürək',
   'retro-polaroid': 'kamera obyektivi',
   'love-letters': 'poçt markası',
+  'caps-toss': 'məzun papağı',
+  'yearbook': 'albom şəkli',
+  'last-bell': 'məktəb zəngi',
+  'chalkboard': 'təbaşir dairə',
+  'paper-plane': 'poçt möhürü',
 }
 
 export default function OpeningEditor({

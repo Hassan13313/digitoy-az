@@ -80,6 +80,11 @@ export const OPENING_PHRASES = {
   unfoldPaper: { az: 'Vərəqi aç', en: 'Unfold the paper', ru: 'Развернуть лист' },
   takePhoto: { az: 'Şəkil çək', en: 'Take a photo', ru: 'Сделать снимок' },
   untieLetters: { az: 'Məktubları aç', en: 'Untie the letters', ru: 'Развязать письма' },
+  tossCaps: { az: 'Papaqları at', en: 'Toss the caps', ru: 'Подбросить шапочки' },
+  signYearbook: { az: 'Albomu imzala', en: 'Sign the yearbook', ru: 'Подписать альбом' },
+  ringBell: { az: 'Zəngi çal', en: 'Ring the bell', ru: 'Дать звонок' },
+  writeChalk: { az: 'Lövhəyə yaz', en: 'Write on the board', ru: 'Написать на доске' },
+  launchPlane: { az: 'Təyyarəni burax', en: 'Launch the plane', ru: 'Запустить самолётик' },
 }
 
 /* Gazette rubrikası — tədbir növünə görə (əvvəl hər tədbirdə «Toy elanı» idi) */
@@ -191,6 +196,12 @@ export const OPENING_SPEC = {
   'first-paper': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
   'retro-polaroid': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
   'love-letters': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  /* 2026-10 — «Məzuniyyət» konsepti */
+  'caps-toss': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'yearbook': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'last-bell': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'chalkboard': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'paper-plane': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
 }
 
 /** Şablonun açılış təsviri (naməlum id → simple-luxury) */
@@ -360,6 +371,16 @@ export function openingDefaults(templateId, ctx) {
       return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('takePhoto') }
     case 'love-letters':
       return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('untieLetters') }
+    case 'caps-toss':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('tossCaps') }
+    case 'yearbook':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('signYearbook') }
+    case 'last-bell':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('ringBell') }
+    case 'chalkboard':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('writeChalk') }
+    case 'paper-plane':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('launchPlane') }
     case 'simple-luxury':
     default:
       return { brand: 'Digitoy.az',

@@ -58,6 +58,12 @@ const REDESIGNED = [
   'first-paper',
   'retro-polaroid',
   'love-letters',
+  /* 2026-10 — «Məzuniyyət» konsepti */
+  'caps-toss',
+  'yearbook',
+  'last-bell',
+  'chalkboard',
+  'paper-plane',
 ]
 const SECTIONS = ['countdown', 'venue', 'program', 'dresscode', 'seating', 'gallery', 'rsvp', 'guestbook', 'hero', 'story']
 

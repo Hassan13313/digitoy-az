@@ -68,6 +68,12 @@ const COMPONENTS = {
   'first-paper': lazy(() => import('./first-paper')),
   'retro-polaroid': lazy(() => import('./retro-polaroid')),
   'love-letters': lazy(() => import('./love-letters')),
+  /* 2026-10 — «Məzuniyyət» konsepti */
+  'caps-toss': lazy(() => import('./caps-toss')),
+  'yearbook': lazy(() => import('./yearbook')),
+  'last-bell': lazy(() => import('./last-bell')),
+  'chalkboard': lazy(() => import('./chalkboard')),
+  'paper-plane': lazy(() => import('./paper-plane')),
 }
 
 /** Şablonun öz komponenti varmı (yoxsa scaffold göstəriləcək)? */
