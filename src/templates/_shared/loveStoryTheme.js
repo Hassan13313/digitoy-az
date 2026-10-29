@@ -88,6 +88,12 @@ const F = {
   nunitoSans: FONT_STACKS.nunitoSans,
   montserratAlt: FONT_STACKS.montserratAlt,
   nunito: FONT_STACKS.nunito,
+  cormorantInfant: FONT_STACKS.cormorantInfant,
+  caveat: FONT_STACKS.caveat,
+  comfortaa: FONT_STACKS.comfortaa,
+  playpen: FONT_STACKS.playpen,
+  oldStandard: FONT_STACKS.oldStandard,
+  ysabeauInfant: FONT_STACKS.ysabeauInfant,
 }
 export const STORY_FONTS = F
 
@@ -134,6 +140,12 @@ const T = {
   'mashallah': { bg: 'linear-gradient(180deg,#F6F2E8,#EDE6D6)', surf: '#FFFFFF', ink: '#0E1F3D', mute: '#56677F', hi: '#0D3B8E', line: '#27B0C8', paper: '#FFFFFF', paperInk: '#56677F', head: F.literata, body: F.nunitoSans, cap: F.literata, titleFont: F.literata, titleItalic: true, titleSize: 40, frame: 'polaroid', hero: 'circle', tilt: true, textItalic: false },
   'little-pilot': { bg: 'linear-gradient(180deg,#CDEEFC,#FFF9EE)', surf: '#FFFFFF', ink: '#18324F', mute: '#5C6F85', hi: '#E5533D', line: '#3B95D6', paper: '#FFFFFF', paperInk: '#5C6F85', head: F.montserratAlt, body: F.nunito, cap: F.nunito, capItalic: false, titleFont: F.montserratAlt, titleSize: 32, frame: 'polaroid', hero: 'circle', tilt: true, labels: 'num', kpre: true, textItalic: false },
   'football-star': { bg: 'linear-gradient(180deg,#EEF5EC,#DCEBD9)', surf: '#FFFFFF', ink: '#0C1B2C', mute: '#586878', hi: '#145A2B', line: '#0E2A47', paper: '#FFFFFF', paperInk: '#586878', head: F.oswald, body: F.interTight, cap: F.interTight, capItalic: false, titleFont: F.oswald, titleUpper: true, titleSize: 36, frame: 'polaroid', hero: 'circle', labels: 'num2', kpre: true, textItalic: false, dash: '0' },
+  /* 2026-10 — «Baby shower» konsepti */
+  'pastel-bloom': { bg: 'linear-gradient(180deg,#FCF8F2,#F4EDE2)', surf: '#FFFFFF', ink: '#4E3F45', mute: '#85737A', hi: '#D98E93', line: '#A9C2A2', paper: '#FFFFFF', paperInk: '#85737A', head: F.cormorantInfant, body: F.nunitoSans, cap: F.caveat, capItalic: false, titleFont: F.cormorantInfant, titleSize: 44, frame: 'polaroid', hero: 'oval', tilt: true },
+  'teddy-bear': { bg: 'linear-gradient(180deg,#FBF5EC,#F2E8DA)', surf: '#FFFFFF', ink: '#5B4332', mute: '#8F7765', hi: '#8E6440', line: '#7FAAC8', paper: '#FFFFFF', paperInk: '#8F7765', head: F.comfortaa, body: F.nunito, cap: F.nunito, capItalic: false, titleFont: F.comfortaa, titleSize: 32, frame: 'polaroid', hero: 'circle', tilt: true, labels: 'num', textItalic: false },
+  'gender-reveal': { bg: 'linear-gradient(180deg,#FFFBF7,#F4F0FA)', surf: '#FFFFFF', ink: '#33365C', mute: '#6E7091', hi: '#E0659C', line: '#3F8CD8', paper: '#FFFFFF', paperInk: '#6E7091', head: F.playpen, body: F.onest, cap: F.playpen, capItalic: false, titleFont: F.playpen, titleSize: 32, frame: 'polaroid', hero: 'circle', tilt: true, labels: 'num', textItalic: false },
+  'stork-letter': { bg: 'linear-gradient(180deg,#F3EBDD,#E6D9C3)', surf: '#FBF6EC', ink: '#3E3A36', mute: '#776C61', hi: '#A9473A', line: '#7C97AE', paper: '#FBF6EC', paperInk: '#776C61', head: F.oldStandard, body: F.vollkorn, cap: F.vibes, script: true, titleFont: F.vibes, titleSize: 50, frame: 'mat', hero: 'rect', tilt: true },
+  'baby-mobile': { bg: 'linear-gradient(180deg,#F8F1E6,#EDE4D3)', surf: '#FFFFFF', ink: '#2A2F4A', mute: '#6B6F88', hi: '#2E3A63', line: '#E9B949', paper: '#FFFFFF', paperInk: '#6B6F88', head: F.ysabeauInfant, body: F.mulish, cap: F.ysabeauInfant, titleFont: F.ysabeauInfant, titleSize: 38, frame: 'polaroid', hero: 'circle', tilt: true, textItalic: false },
 }
 
 /* ── Mətnlər (AZ/EN/RU) ── dizayndakı şablon adlandırmaları */
@@ -255,6 +267,27 @@ const COPY = {
     end:    { az: 'Ən böyük qol hələ qabaqdadır', en: 'The best goal is yet to come', ru: 'Лучший гол ещё впереди' },
     endSub: { az: 'Bu matçda sizi tribunada görmək istəyirik.', en: 'We want to see you in the stands.', ru: 'Ждём вас на трибунах.' },
     kpre:   { az: 'Mövsüm', en: 'Season', ru: 'Сезон' },
+  },
+  /* 2026-10 — «Baby shower» konsepti */
+  'pastel-bloom': {
+    end:    { az: '…və tezliklə üç nəfər olacağıq', en: '…and soon we will be three', ru: '…и скоро нас будет трое' },
+    endSub: { az: 'Bu sevinci sizinlə bölüşmək istəyirik.', en: 'We want to share this joy with you.', ru: 'Мы хотим разделить эту радость с вами.' },
+  },
+  'teddy-bear': {
+    end:    { az: '…və tezliklə üç nəfər olacağıq', en: '…and soon we will be three', ru: '…и скоро нас будет трое' },
+    endSub: { az: 'Bu sevinci sizinlə bölüşmək istəyirik.', en: 'We want to share this joy with you.', ru: 'Мы хотим разделить эту радость с вами.' },
+  },
+  'gender-reveal': {
+    end:    { az: '…və tezliklə üç nəfər olacağıq', en: '…and soon we will be three', ru: '…и скоро нас будет трое' },
+    endSub: { az: 'Sirri sizinlə birlikdə açmaq istəyirik.', en: 'We want to reveal the secret together with you.', ru: 'Мы хотим раскрыть секрет вместе с вами.' },
+  },
+  'stork-letter': {
+    end:    { az: '…və leylək artıq yoldadır', en: '…and the stork is already on its way', ru: '…и аист уже в пути' },
+    endSub: { az: 'Bu sevinci sizinlə bölüşmək istəyirik.', en: 'We want to share this joy with you.', ru: 'Мы хотим разделить эту радость с вами.' },
+  },
+  'baby-mobile': {
+    end:    { az: '…və tezliklə üç nəfər olacağıq', en: '…and soon we will be three', ru: '…и скоро нас будет трое' },
+    endSub: { az: 'Bu sevinci sizinlə bölüşmək istəyirik.', en: 'We want to share this joy with you.', ru: 'Мы хотим разделить эту радость с вами.' },
   },
 }
 

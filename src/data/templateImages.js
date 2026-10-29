@@ -27,6 +27,12 @@ const WITH_IMAGE = new Set([
   'mashallah',
   'little-pilot',
   'football-star',
+  /* 2026-10 — «Baby shower» konsepti */
+  'pastel-bloom',
+  'teddy-bear',
+  'gender-reveal',
+  'stork-letter',
+  'baby-mobile',
 ])
 
 export const TEMPLATE_IMAGE_SIZE = { width: 780, height: 1688 }

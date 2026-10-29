@@ -40,6 +40,12 @@ const REDESIGNED = [
   'mashallah',
   'little-pilot',
   'football-star',
+  /* 2026-10 — «Baby shower» konsepti */
+  'pastel-bloom',
+  'teddy-bear',
+  'gender-reveal',
+  'stork-letter',
+  'baby-mobile',
 ]
 const SECTIONS = ['countdown', 'venue', 'program', 'dresscode', 'seating', 'gallery', 'rsvp', 'guestbook', 'hero', 'story']
 

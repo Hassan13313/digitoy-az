@@ -65,6 +65,11 @@ export const OPENING_PHRASES = {
   touchCharm: { az: 'Muncuğa toxun', en: 'Touch the charm', ru: 'Коснуться оберега' },
   takeOff: { az: 'Uçuşa başla', en: 'Take off', ru: 'На взлёт' },
   takeShot: { az: 'Zərbəni vur', en: 'Take the shot', ru: 'Пробить' },
+  letBloom: { az: 'Çiçəkləri aç', en: 'Let it bloom', ru: 'Пусть расцветёт' },
+  wakeTeddy: { az: 'Ayıcığı oyat', en: 'Wake the teddy', ru: 'Разбудить мишку' },
+  breakSeal: { az: 'Möhürü aç', en: 'Break the seal', ru: 'Вскрыть печать' },
+  spinMobile: { az: 'Mobili fırlat', en: 'Spin the mobile', ru: 'Закружить мобиль' },
+  openGift: { az: 'Hədiyyəni aç', en: 'Open the gift', ru: 'Открыть подарок' },
 }
 
 /* Gazette rubrikası — tədbir növünə görə (əvvəl hər tədbirdə «Toy elanı» idi) */
@@ -158,6 +163,12 @@ export const OPENING_SPEC = {
   'mashallah': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
   'little-pilot': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
   'football-star': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  /* 2026-10 — «Baby shower» konsepti */
+  'pastel-bloom': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'teddy-bear': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'gender-reveal': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'stork-letter': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'baby-mobile': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
 }
 
 /** Şablonun açılış təsviri (naməlum id → simple-luxury) */
@@ -297,6 +308,16 @@ export function openingDefaults(templateId, ctx) {
       return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('takeOff') }
     case 'football-star':
       return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('takeShot') }
+    case 'pastel-bloom':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('letBloom') }
+    case 'teddy-bear':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('wakeTeddy') }
+    case 'gender-reveal':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('openGift') }
+    case 'stork-letter':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('breakSeal') }
+    case 'baby-mobile':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('spinMobile') }
     case 'simple-luxury':
     default:
       return { brand: 'Digitoy.az',

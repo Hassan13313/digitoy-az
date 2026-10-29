@@ -50,6 +50,12 @@ const COMPONENTS = {
   'mashallah': lazy(() => import('./mashallah')),
   'little-pilot': lazy(() => import('./little-pilot')),
   'football-star': lazy(() => import('./football-star')),
+  /* 2026-10 — «Baby shower» konsepti */
+  'pastel-bloom': lazy(() => import('./pastel-bloom')),
+  'teddy-bear': lazy(() => import('./teddy-bear')),
+  'gender-reveal': lazy(() => import('./gender-reveal')),
+  'stork-letter': lazy(() => import('./stork-letter')),
+  'baby-mobile': lazy(() => import('./baby-mobile')),
 }
 
 /** Şablonun öz komponenti varmı (yoxsa scaffold göstəriləcək)? */

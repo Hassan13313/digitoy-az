@@ -51,6 +51,11 @@ const EMBLEM_NAMES = {
   'mashallah': 'göz muncuğu',
   'little-pilot': 'təyyarə',
   'football-star': 'top',
+  'pastel-bloom': 'akvarel çiçək',
+  'teddy-bear': 'ürəkcik',
+  'gender-reveal': 'sual işarəsi',
+  'stork-letter': 'leylək',
+  'baby-mobile': 'keçə ay',
 }
 
 export default function OpeningEditor({

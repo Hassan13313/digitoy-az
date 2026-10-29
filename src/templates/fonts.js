@@ -88,6 +88,11 @@ const FAMILY = {
   nunitoSans: 'Nunito+Sans:ital,wght@0,400;0,600;0,700;1,400',
   montserratAlt: 'Montserrat+Alternates:wght@500;600;700;800',
   nunito: 'Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400',
+  cormorantInfant: 'Cormorant+Infant:ital,wght@0,400;0,500;0,600;1,400',
+  caveat: 'Caveat:wght@400;500;600',
+  comfortaa: 'Comfortaa:wght@500;600;700',
+  playpen: 'Playpen+Sans:wght@400;600;700;800',
+  ysabeauInfant: 'Ysabeau+Infant:ital,wght@0,400;0,600;0,700;1,400',
 }
 
 /* Hər şablonun öz ailələri */
@@ -124,6 +129,12 @@ const TEMPLATE_FONTS = {
   'mashallah': ['literata', 'nunitoSans'],
   'little-pilot': ['montserratAlt', 'nunito'],
   'football-star': ['oswald', 'interTight', 'tektur'],
+  /* 2026-10 — «Baby shower» konsepti */
+  'pastel-bloom': ['cormorantInfant', 'nunitoSans', 'caveat'],
+  'teddy-bear': ['comfortaa', 'nunito'],
+  'gender-reveal': ['playpen', 'onest'],
+  'stork-letter': ['oldStandard', 'vollkorn', 'greatVibes'],
+  'baby-mobile': ['ysabeauInfant', 'mulish'],
 }
 
 const ALL = Object.keys(FAMILY)

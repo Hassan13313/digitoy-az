@@ -42,6 +42,12 @@ const ENTER = {
   'mashallah': 'left',
   'little-pilot': 'right',
   'football-star': 'up',
+  /* 2026-10 — «Baby shower» konsepti */
+  'pastel-bloom': 'zoom',
+  'teddy-bear': 'down',
+  'gender-reveal': 'left',
+  'stork-letter': 'right',
+  'baby-mobile': 'down',
 }
 
 /** templateId → giriş istiqaməti (`data-enter` üçün). */
