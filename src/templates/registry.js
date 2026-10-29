@@ -86,6 +86,12 @@ const COMPONENTS = {
   'midnight-clock': lazy(() => import('./midnight-clock')),
   'snow-globe': lazy(() => import('./snow-globe')),
   'masquerade-ball': lazy(() => import('./masquerade-ball')),
+  /* 2026-10 — «Qız gecəsi» konsepti */
+  'pink-champagne': lazy(() => import('./pink-champagne')),
+  'disco-ball': lazy(() => import('./disco-ball')),
+  'pajama-spa': lazy(() => import('./pajama-spa')),
+  'paris-night': lazy(() => import('./paris-night')),
+  'boho-sunset': lazy(() => import('./boho-sunset')),
 }
 
 /** Şablonun öz komponenti varmı (yoxsa scaffold göstəriləcək)? */

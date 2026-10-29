@@ -63,6 +63,12 @@ const WITH_IMAGE = new Set([
   'midnight-clock',
   'snow-globe',
   'masquerade-ball',
+  /* 2026-10 — «Qız gecəsi» konsepti */
+  'pink-champagne',
+  'disco-ball',
+  'pajama-spa',
+  'paris-night',
+  'boho-sunset',
 ])
 
 export const TEMPLATE_IMAGE_SIZE = { width: 780, height: 1688 }

@@ -126,6 +126,9 @@ const F = {
   robotoSlab: FONT_STACKS.robotoSlab,
   bellota: FONT_STACKS.bellota,
   cormorantFull: FONT_STACKS.cormorantFull,
+  exo2Heavy: FONT_STACKS.exo2Heavy,
+  alumniPin: FONT_STACKS.alumniPin,
+  notoSerifL: FONT_STACKS.notoSerifL,
 }
 export const STORY_FONTS = F
 
@@ -208,6 +211,12 @@ const T = {
   'midnight-clock': { bg: 'linear-gradient(180deg,#1A2350,#0E1430)', surf: '#1A2350', ink: '#F6E7C1', mute: '#B9BCCB', hi: '#F8E6B0', line: '#E8C46A', head: F.ysabeauOffice, body: F.ysabeauOffice, cap: F.cormorantFull, capItalic: true, titleFont: F.cormorantFull, titleSize: 42, frame: 'glow', hero: 'circle', labels: 'roman' },
   'snow-globe': { bg: 'linear-gradient(180deg,#2C4F7C,#1E3A5F)', surf: '#1E3A5F', ink: '#FFFFFF', mute: '#C4D6EA', hi: '#E2B65C', line: '#DCEBF7', head: F.nunito, body: F.nunito, cap: F.pacifico, capItalic: false, titleFont: F.pacifico, titleSize: 38, frame: 'polaroid', hero: 'circle', labels: 'num', textItalic: false },
   'masquerade-ball': { bg: 'linear-gradient(180deg,#1A0E18,#0D0A10)', surf: '#22091C', ink: '#F5EEE3', mute: '#C2B1BC', hi: '#F4DC9C', line: '#D9B25F', head: F.cormorant, body: F.cormorant, cap: F.playfairSC, capItalic: false, titleFont: F.playfairSC, titleSize: 34, frame: 'heraldic', hero: 'oval', labels: 'roman' },
+  /* 2026-10 — «Qız gecəsi» konsepti */
+  'pink-champagne': { bg: '#F9E3E7', surf: '#FFFFFF', ink: '#3A1622', mute: '#8E6B75', hi: '#C25470', line: '#E2BE78', paper: '#FFFFFF', paperInk: '#8E6B75', head: F.montserrat, body: F.montserrat, cap: F.playfair, capItalic: true, titleFont: F.playfair, titleItalic: true, titleSize: 42, frame: 'polaroid', hero: 'arch', labels: 'num', tilt: true, textItalic: false },
+  'disco-ball': { bg: 'linear-gradient(180deg,#24154D,#140B2E)', surf: '#24154D', ink: '#FFFFFF', mute: '#C2B6DE', hi: '#FFC94A', line: '#FF3EA5', head: F.onest, body: F.onest, cap: F.exo2Heavy, capItalic: true, titleFont: F.exo2Heavy, titleItalic: true, titleSize: 40, frame: 'glow', hero: 'circle', labels: 'num2', textItalic: false },
+  'pajama-spa': { bg: 'linear-gradient(180deg,#4A3A70,#2A2044)', surf: '#3B2E5A', ink: '#FFFFFF', mute: '#E9E0FB', hi: '#BDEBD9', line: '#C9B6F2', head: F.nunito, body: F.nunito, cap: F.pangolin, capItalic: false, titleFont: F.pangolin, titleItalic: false, titleSize: 42, frame: 'polaroid', hero: 'circle', tilt: true, labels: 'num2', textItalic: false },
+  'paris-night': { bg: 'linear-gradient(180deg,#0F1229,#1C2140)', surf: '#262C55', ink: '#FFFFFF', mute: '#F7D6DC', hi: '#E1BC78', line: '#E58FA3', head: F.ysabeauOffice, body: F.ysabeauOffice, cap: F.comforterBrush, script: true, titleFont: F.alumniPin, titleUpper: true, titleItalic: false, titleSize: 52, frame: 'mat', hero: 'arch', labels: 'num2', textItalic: false },
+  'boho-sunset': { bg: 'linear-gradient(180deg,#2B1B33,#4E2C3B)', surf: '#3A2433', ink: '#FBF4EA', mute: '#EAD9BF', hi: '#D9A441', line: '#C8754F', head: F.alegreyaSans, body: F.alegreyaSans, cap: F.notoSerifL, capItalic: true, titleFont: F.notoSerifL, titleItalic: true, titleSize: 44, frame: 'mat', hero: 'arch', labels: 'num2', textItalic: false },
 }
 
 /* ── Mətnlər (AZ/EN/RU) ── dizayndakı şablon adlandırmaları */
@@ -554,6 +563,47 @@ const COPY = {
     sub:    { az: 'İllər boyu bizimlə olan bayram anları', en: 'Festive moments that stayed with us over the years', ru: 'Праздничные моменты, которые с нами годами' },
     end:    { az: '…və yeni bayram başlayır', en: '…and a new celebration begins', ru: '…и начинается новый праздник' },
     endSub: { az: 'Bu bayramı sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this holiday with you.', ru: 'Мы хотим отметить этот праздник вместе с вами.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  /* 2026-10 — «Qız gecəsi» konsepti */
+  'pink-champagne': {
+    kicker: { az: 'Bizim qızlar', en: 'Our girls', ru: 'Наши девочки' },
+    title:  { az: 'Dostluğumuz', en: 'Our friendship', ru: 'Наша дружба' },
+    sub:    { az: 'Məktəb illərindən bu günə qədər', en: 'From school days to today', ru: 'Со школьных лет до сегодня' },
+    end:    { az: '…və ən gözəl gəlin sənsən', en: '…and you are the most beautiful bride', ru: '…и ты самая красивая невеста' },
+    endSub: { az: 'Bu gecəni sənin üçün təşkil edirik.', en: 'We are throwing this night for you.', ru: 'Мы устраиваем этот вечер для тебя.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  'disco-ball': {
+    kicker: { az: 'Bizim qızlar', en: 'Our girls', ru: 'Наши девочки' },
+    title:  { az: 'Dostluğumuz', en: 'Our friendship', ru: 'Наша дружба' },
+    sub:    { az: 'Məktəb illərindən bu günə qədər', en: 'From school days to today', ru: 'Со школьных лет до сегодня' },
+    end:    { az: '…və ən gözəl gəlin sənsən', en: '…and you are the most beautiful bride', ru: '…и ты самая красивая невеста' },
+    endSub: { az: 'Bu gecəni sənin üçün təşkil edirik.', en: 'We are throwing this night for you.', ru: 'Мы устраиваем этот вечер для тебя.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  'pajama-spa': {
+    kicker: { az: 'Bizim qızlar', en: 'Our girls', ru: 'Наши девочки' },
+    title:  { az: 'Dostluğumuz', en: 'Our friendship', ru: 'Наша дружба' },
+    sub:    { az: 'Məktəb illərindən bu günə qədər', en: 'From school days to today', ru: 'Со школьных лет до сегодня' },
+    end:    { az: '…və ən gözəl gəlin sənsən', en: '…and you are the most beautiful bride', ru: '…и ты самая красивая невеста' },
+    endSub: { az: 'Bu gecəni sənin üçün təşkil edirik.', en: 'We are throwing this night for you.', ru: 'Мы устраиваем этот вечер для тебя.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  'paris-night': {
+    kicker: { az: 'Bizim qızlar', en: 'Our girls', ru: 'Наши девочки' },
+    title:  { az: 'Dostluğumuz', en: 'Our friendship', ru: 'Наша дружба' },
+    sub:    { az: 'Məktəb illərindən bu günə qədər', en: 'From school days to today', ru: 'Со школьных лет до сегодня' },
+    end:    { az: '…və ən gözəl gəlin sənsən', en: '…and you are the most beautiful bride', ru: '…и ты самая красивая невеста' },
+    endSub: { az: 'Bu gecəni sənin üçün təşkil edirik.', en: 'We are throwing this night for you.', ru: 'Мы устраиваем этот вечер для тебя.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  'boho-sunset': {
+    kicker: { az: 'Bizim qızlar', en: 'Our girls', ru: 'Наши девочки' },
+    title:  { az: 'Dostluğumuz', en: 'Our friendship', ru: 'Наша дружба' },
+    sub:    { az: 'Məktəb illərindən bu günə qədər', en: 'From school days to today', ru: 'Со школьных лет до сегодня' },
+    end:    { az: '…və ən gözəl gəlin sənsən', en: '…and you are the most beautiful bride', ru: '…и ты самая красивая невеста' },
+    endSub: { az: 'Bu gecəni sənin üçün təşkil edirik.', en: 'We are throwing this night for you.', ru: 'Мы устраиваем этот вечер для тебя.' },
     kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
   },
 }

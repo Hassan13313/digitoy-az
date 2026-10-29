@@ -78,6 +78,12 @@ const ENTER = {
   'midnight-clock': 'up',
   'snow-globe': 'up',
   'masquerade-ball': 'up',
+  /* 2026-10 — «Qız gecəsi» konsepti */
+  'pink-champagne': 'up',
+  'disco-ball': 'up',
+  'pajama-spa': 'up',
+  'paris-night': 'up',
+  'boho-sunset': 'up',
 }
 
 /** templateId → giriş istiqaməti (`data-enter` üçün). */

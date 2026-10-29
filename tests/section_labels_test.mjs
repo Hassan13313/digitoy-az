@@ -76,6 +76,12 @@ const REDESIGNED = [
   'midnight-clock',
   'snow-globe',
   'masquerade-ball',
+  /* 2026-10 — «Qız gecəsi» konsepti */
+  'pink-champagne',
+  'disco-ball',
+  'pajama-spa',
+  'paris-night',
+  'boho-sunset',
 ]
 const SECTIONS = ['countdown', 'venue', 'program', 'dresscode', 'seating', 'gallery', 'rsvp', 'guestbook', 'hero', 'story']
 

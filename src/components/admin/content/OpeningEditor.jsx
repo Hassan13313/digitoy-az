@@ -81,6 +81,11 @@ const EMBLEM_NAMES = {
   'midnight-clock': 'saat mərkəzi',
   'snow-globe': 'qar dənəsi',
   'masquerade-ball': 'maska monoqramı',
+  'pink-champagne': 'butulka etiketi',
+  'disco-ball': 'disko nişanı',
+  'pajama-spa': 'yuxu maskası',
+  'paris-night': 'şlyapa qutusu',
+  'boho-sunset': 'gün batımı tağı',
 }
 
 export default function OpeningEditor({

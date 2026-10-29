@@ -101,6 +101,14 @@ export const OPENING_PHRASES = {
   shakeGlobe: { az: 'Kürəni silkələ', en: 'Shake the globe', ru: 'Встряхнуть шар' },
   masqueradeBall: { az: 'Maskarad balı', en: 'Masquerade ball', ru: 'Бал-маскарад' },
   wearMask: { az: 'Maskanı tax', en: 'Put on the mask', ru: 'Надеть маску' },
+  popChampagne: { az: 'Şampanı aç', en: 'Pop the champagne', ru: 'Открыть шампанское' },
+  lightsOn: { az: 'İşıqları yandır!', en: 'Lights on!', ru: 'Включить свет!' },
+  pillowFight: { az: 'Yastıq davası!', en: 'Pillow fight!', ru: 'Бой подушками!' },
+  pajamaParty: { az: 'Pijama gecəsi', en: 'Pajama night', ru: 'Пижамная ночь' },
+  parisNight: { az: 'Paris gecəsi', en: 'A night in Paris', ru: 'Ночь в Париже' },
+  openHatbox: { az: 'Qutunu aç', en: 'Open the hatbox', ru: 'Открыть коробку' },
+  sunsetParty: { az: 'Gün batımı gecəsi', en: 'Sunset soirée', ru: 'Вечер на закате' },
+  watchSunset: { az: 'Gün batımına bax', en: 'Watch the sunset', ru: 'Смотреть закат' },
 }
 
 /* Gazette rubrikası — tədbir növünə görə (əvvəl hər tədbirdə «Toy elanı» idi) */
@@ -230,6 +238,12 @@ export const OPENING_SPEC = {
   'midnight-clock': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
   'snow-globe': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
   'masquerade-ball': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  /* 2026-10 — «Qız gecəsi» konsepti */
+  'pink-champagne': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'disco-ball': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'pajama-spa': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'paris-night': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'boho-sunset': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
 }
 
 /** Şablonun açılış təsviri (naməlum id → simple-luxury) */
@@ -429,6 +443,16 @@ export function openingDefaults(templateId, ctx) {
       return { ...base, kicker: P('happyNewYear'), meta: fullDate, cta: P('shakeGlobe') }
     case 'masquerade-ball':
       return { ...base, kicker: P('masqueradeBall'), meta: fullDate, cta: P('wearMask') }
+    case 'pink-champagne':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('popChampagne') }
+    case 'disco-ball':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('lightsOn') }
+    case 'pajama-spa':
+      return { ...base, kicker: P('pajamaParty'), meta: fullDate, cta: P('pillowFight') }
+    case 'paris-night':
+      return { ...base, kicker: P('parisNight'), meta: fullDate, cta: P('openHatbox') }
+    case 'boho-sunset':
+      return { ...base, kicker: P('sunsetParty'), meta: fullDate, cta: P('watchSunset') }
     case 'simple-luxury':
     default:
       return { brand: 'Digitoy.az',
