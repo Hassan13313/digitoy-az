@@ -67,10 +67,13 @@ export function TemplatesIntro({
 export function FilterBar({
   statuses = [],
   categories = [],
+  concepts = [],
   status,
   category,
+  concept,
   onStatus,
   onCategory,
+  onConcept,
   total,
   visibleCount,
   onReset,
@@ -78,14 +81,25 @@ export function FilterBar({
   allId = 'all',
   statusLegend = 'Vəziyyət',
   categoryLegend = 'Kateqoriya',
+  conceptLegend = 'Tədbir',
   resetLabel = 'Filtri sıfırla',
   formatCount = (v, t) => (v === t ? `${t} şablon` : `${v} / ${t} şablon`),
   bleedClassName = '-mx-5 px-5 sm:mx-0 sm:px-0',
   lang = 'az',
 }) {
-  const filtered = isFiltered ?? (status !== allId || category !== allId);
+  const filtered = isFiltered ?? (status !== allId || category !== allId || (concept !== undefined && concept !== allId));
   return (
     <div lang={lang} className="space-y-5">
+      {/* 2026-10: tədbir (konsept) ilk sıradadır — müştəri əvvəlcə öz tədbirini seçir */}
+      {concepts.length > 0 && (
+        <ChipRow
+          legend={conceptLegend}
+          options={concepts}
+          value={concept}
+          onChange={onConcept}
+          bleedClassName={bleedClassName}
+        />
+      )}
       {statuses.length > 0 && (
         <ChipRow
           legend={statusLegend}
@@ -123,7 +137,7 @@ export function FilterBar({
   );
 }
 
-function ChipRow({ legend, options, value, onChange, bleedClassName }) {
+export function ChipRow({ legend, options, value, onChange, bleedClassName }) {
   const id = useId();
   return (
     <div role="group" aria-labelledby={id}>

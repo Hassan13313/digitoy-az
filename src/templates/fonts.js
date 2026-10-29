@@ -38,7 +38,7 @@ const FAMILY = {
   ballet:       'Ballet',
   fraunces:     'Fraunces:ital,opsz,wght,SOFT@0,9..144,300..500,0..100;1,9..144,300..500,0..100',
   mulish:       'Mulish:wght@300;400;500;600',
-  unbounded:    'Unbounded:wght@200;300;400',
+  unbounded:    'Unbounded:wght@200;300;400;700;800',
   interTight:   'Inter+Tight:wght@300;400;500',
   spectral:     'Spectral:ital,wght@0,200;0,300;0,400;1,200;1,300;1,400',
   sourceSerif:  'Source+Serif+4:ital,opsz,wght@0,8..60,200..500;1,8..60,200..500',
@@ -64,6 +64,18 @@ const FAMILY = {
   oldStandard:  'Old+Standard+TT:ital,wght@0,400;0,700;1,400',
   libreCaslon:  'Libre+Caslon+Display',
   raleway:      'Raleway:wght@200;300;400;500',
+
+  /* uşaq ad günü konsepti (2026-10) */
+  cormorantUnicase: 'Cormorant+Unicase:wght@500;600;700',
+  bonaNova:     'Bona+Nova:ital,wght@0,400;0,700;1,400',
+  tektur:       'Tektur:wght@700;800',
+  exo2:         'Exo+2:ital,wght@0,400;0,500;0,600;1,400',
+  oi:           'Oi',
+  podkova:      'Podkova:wght@400;500;700;800',
+  shantell:     'Shantell+Sans:ital,wght@0,400;0,600;0,800;1,400',
+  andika:       'Andika:ital,wght@0,400;0,700;1,400',
+  mplusRounded: 'M+PLUS+Rounded+1c:wght@400;500;700;800;900',
+  pacifico:     'Pacifico',
 }
 
 /* Hər şablonun öz ailələri */
@@ -83,6 +95,11 @@ const TEMPLATE_FONTS = {
   'mediterranean':   ['libreBodoni', 'literata'],
   'gazette':         ['playfair', 'sourceSerif', 'oldStandard'],
   'luxury-jewelry':  ['libreCaslon', 'raleway'],
+  'fairy-tale':      ['cormorantUnicase', 'bonaNova'],
+  'space-mission':   ['unbounded', 'tektur', 'exo2'],
+  'circus-show':     ['oi', 'podkova'],
+  'dino-adventure':  ['shantell', 'andika'],
+  'balloon-party':   ['mplusRounded', 'pacifico'],
 }
 
 const ALL = Object.keys(FAMILY)

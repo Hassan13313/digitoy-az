@@ -26,6 +26,8 @@ import { readFileSync } from 'node:fs'
 const REDESIGNED = [
   'modern-black', 'white-elegance', 'night-sky', 'oriental-luxe', 'nature-touch', 'crystal-glass',
   'boarding-pass', 'cinema-premiere', 'vinyl-record', 'royal-palace', 'mediterranean', 'gazette', 'luxury-jewelry',
+  /* 2026-10 — «Uşaq ad günü» konsepti */
+  'fairy-tale', 'space-mission', 'circus-show', 'dino-adventure', 'balloon-party',
 ]
 const SECTIONS = ['countdown', 'venue', 'program', 'dresscode', 'seating', 'gallery', 'rsvp', 'guestbook', 'hero', 'story']
 

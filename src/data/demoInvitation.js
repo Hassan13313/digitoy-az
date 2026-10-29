@@ -171,3 +171,102 @@ export const demoGuestbook = [
     text: 'Əziz Nicat və Aysel, toy gününüz mübarək! Birlikdə dünya qədər xoşbəxtlik tapasınız.',
   },
 ]
+
+/* ── KONSEPTƏ GÖRƏ DEMO (2026-10) ─────────────────────────────────────────
+   Şablon önbaxışı (/demo/template/:id) əvvəl HƏR şablonu toy datası ilə
+   açırdı — uşaq ad günü şablonunda «Nicat & Aysel» görünərdi. İndi şablonun
+   `concept`-inə uyğun demo verilir; konsepti olmayan/naməlum şablon əvvəlki
+   kimi toy demosunu alır. */
+function demoPhoto(id, w = 900) {
+  return `https://images.unsplash.com/photo-${id}?w=${w}&q=75&auto=format&fit=crop`
+}
+
+export const demoKidsInvitation = {
+  ...demoInvitation,
+  eventType: 'birthday',
+  brideName: 'Ayan',
+  groomName: '',
+  eventName: '',
+  age: 5,
+  time: '15:00',
+  venueName: 'Nağıl Parkı, Bakı',
+  venueNote: 'Şənlik zalı',
+  googleMapsUrl: 'https://www.google.com/maps/search/Baku+Boulevard/@40.3667,49.8352',
+  wazeUrl: 'https://waze.com/ul?q=Baku+Boulevard&navigate=yes',
+  dressCodePalette: 'creative',
+  dressCodeDescription: 'Sevdiyiniz nağıl qəhrəmanının kostyumunda gəlin — ən maraqlı kostyuma kiçik hədiyyə var!',
+  seatingPlan: [
+    'Masa 1: Ayan Məmmədov, Elmir Həsənov, Nərgiz Əliyeva, Tural Quliyev',
+    'Masa 2: Səbinə Məmmədova, Rauf Həsənov, Lalə Əliyeva, Kamran Quliyev',
+    'Masa 3: Aylin Kərimova, Murad İsmayılov, Zəhra Babayeva, Emil Nəcəfov',
+  ].join('; '),
+  music: { ...demoInvitation.music, id: 'canon-in-d', title: 'Canon in D', artist: 'Pachelbel', file: '/music/canon-in-d.mp3', duration: 302 },
+  demoPhotos: [
+    demoPhoto('1608790672275-309c02d888ff', 600),
+    demoPhoto('1530103862676-de8c9debad1d', 600),
+    demoPhoto('1578922864601-79dcc7cbcea9', 600),
+  ],
+  sections: { lovestory: true },
+  loveStory: [
+    { id: 'demo-kid-1', date: '2021-03-13', icon: '👶', title: 'Dünyaya gəldim', text: 'Bahar səhəri ailəmizin ən balaca üzvü oldum.', caption: 'ilk gün', photos: [demoPhoto('1604917621956-10dfa7cce2e7')] },
+    {
+      id: 'demo-kid-2', date: '2022-04', icon: '👣', title: 'İlk addımlar', text: 'Bir gün ayağa qalxdım və bütün evi gəzməyə başladım.', caption: 'kəşflər',
+      photos: [demoPhoto('1503919545889-aef636e10ad4'), demoPhoto('1515488042361-ee00e0ddd4e4'), demoPhoto('1501686637-b7aa9c48a882'), demoPhoto('1554343594-1c9d305bd51f')],
+    },
+    { id: 'demo-kid-3', date: '2022-03-13', icon: '🎂', title: 'İlk ad günüm', text: 'Bir şamı üfürmək o qədər də asan deyilmiş!', photos: [demoPhoto('1516668557604-c8e814fdb184')] },
+    { id: 'demo-kid-4', date: '2025-09', icon: '🐶', title: 'Ən yaxın dostum', text: 'İndi hər səhər birlikdə oyuna qaçırıq.', caption: 'dostluq', photos: [demoPhoto('1769117438397-ba08341b7d60')] },
+  ],
+  i18n: {
+    en: {
+      dressCodeDescription: 'Come dressed as your favourite storybook hero — the most creative costume wins a little prize!',
+      venueName: 'Fairy Tale Park, Baku', venueNote: 'Party hall',
+      loveStory: {
+        0: { title: 'I was born', text: 'One spring morning I became the smallest member of our family.', caption: 'day one' },
+        1: { title: 'First steps', text: 'One day I stood up and set off to explore the whole house.', caption: 'discoveries' },
+        2: { title: 'My first birthday', text: 'Blowing out one candle turned out to be harder than it looks!' },
+        3: { title: 'My best friend', text: 'Now we race out to play together every morning.', caption: 'friendship' },
+      },
+      programSteps: { 0: 'Welcome', 1: 'Games with the animators', 2: 'Magic show', 3: 'Cake & candles', 4: 'Presents', 5: 'Dancing & surprises' },
+    },
+    ru: {
+      dressCodeDescription: 'Приходите в костюме любимого сказочного героя — за самый интересный костюм маленький подарок!',
+      venueName: 'Сказочный парк, Баку', venueNote: 'Праздничный зал',
+      loveStory: {
+        0: { title: 'Я появился на свет', text: 'Весенним утром в нашей семье стало на одного малыша больше.', caption: 'первый день' },
+        1: { title: 'Первые шаги', text: 'Однажды я встал на ножки и отправился исследовать весь дом.', caption: 'открытия' },
+        2: { title: 'Мой первый день рождения', text: 'Задуть одну свечку оказалось не так-то просто!' },
+        3: { title: 'Мой лучший друг', text: 'Теперь каждое утро мы вместе бежим играть.', caption: 'дружба' },
+      },
+      programSteps: { 0: 'Встреча гостей', 1: 'Игры с аниматорами', 2: 'Шоу фокусника', 3: 'Торт и свечи', 4: 'Подарки', 5: 'Танцы и сюрпризы' },
+    },
+  },
+  programSteps: [
+    { time: '15:00', icon: '🎈', activity: 'Qonaqların qarşılanması' },
+    { time: '15:30', icon: '🎲', activity: 'Animatorlarla oyunlar' },
+    { time: '16:15', icon: '🎩', activity: 'Sehrbaz şousu' },
+    { time: '17:00', icon: '🎂', activity: 'Tort və şamlar' },
+    { time: '17:30', icon: '🎁', activity: 'Hədiyyələr' },
+    { time: '18:00', icon: '💃', activity: 'Rəqs və sürprizlər' },
+  ],
+}
+
+export const demoKidsGuestbook = [
+  { name: 'Nənə və baba', text: 'Əziz Ayan, ad günün mübarək! Həmişə belə şən, sağlam və maraqlı qal.' },
+  { name: 'Aylin və ailəsi', text: 'Bayramına gəlmək üçün səbirsizlənirik! Ən böyük tortu sənə arzulayırıq.' },
+  { name: 'Müəllimə Səbinə', text: 'Sənin kimi şagirdlə fəxr edirik. Bütün arzuların çin olsun!' },
+  { name: 'Emil', text: 'Ad günün mübarək, dostum! Birlikdə çox oynayacağıq.' },
+]
+
+/* Konsept → demo dəsti. Yeni konsept demosu = bura bir sətir. */
+const DEMO_BY_CONCEPT = {
+  kids: { weddingData: demoKidsInvitation, guestbook: demoKidsGuestbook },
+}
+
+/**
+ * Şablon önbaxışının demo datası.
+ * @param {string|null} concept şablonun `concept`-i (templateConfig)
+ * @returns {{ weddingData: object, guestbook: Array }}
+ */
+export function demoForConcept(concept) {
+  return DEMO_BY_CONCEPT[concept] || { weddingData: demoInvitation, guestbook: demoGuestbook }
+}

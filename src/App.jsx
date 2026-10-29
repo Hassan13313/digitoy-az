@@ -22,8 +22,8 @@ const GuidePage        = lazy(() => import('./components/guides/GuidePage'))
    preview marşrutu üçün ayrıca chunk yaratmağa ehtiyac yoxdur. */
 import TemplateRenderer from './templates/TemplateRenderer'
 import { defaultWedding } from './data/defaultWedding'
-import { demoInvitation, demoGuestbook } from './data/demoInvitation'
-import { DEFAULT_TEMPLATE_ID, resolveTemplateId, isTemplateSelectable } from './templates/templateConfig'
+import { demoInvitation, demoGuestbook, demoForConcept } from './data/demoInvitation'
+import { DEFAULT_TEMPLATE_ID, resolveTemplateId, isTemplateSelectable, getTemplateConfig } from './templates/templateConfig'
 import { getInvitation, adminLogin, getDraftByCode } from './utils/api'
 import { unlockAudio } from './utils/audioUnlock'
 import ScrollProgress from './components/ui/ScrollProgress'
@@ -399,7 +399,7 @@ export default function App() {
       /* Vitrin öz vəziyyətini mount-da bu açardan oxuyur */
       try {
         sessionStorage.setItem('digitoy_templates_restore', JSON.stringify({
-          status: ctx.status, category: ctx.category, scrollY: ctx.scrollY,
+          status: ctx.status, category: ctx.category, concept: ctx.concept, scrollY: ctx.scrollY,
         }))
       } catch { /* private mode */ }
     }
@@ -685,15 +685,17 @@ export default function App() {
      builder/admin/production invite marşrutlarından tam təcrid olunub.
      isPreview={true} → hazırlanmaqda olan (enabled=false) şablonlar da açılır. */
   if (view === 'template-preview') {
+    /* 2026-10: demo şablonun konseptinə uyğundur (uşaq şablonu → uşaq ad günü) */
+    const demo = demoForConcept(getTemplateConfig(previewTemplateId)?.concept)
     return (
       <div className="min-h-screen bg-cream">
         <TemplateRenderer
           template={previewTemplateId}
           isPreview={true}
           lang={lang} setLang={setLang}
-          weddingData={demoInvitation}
+          weddingData={demo.weddingData}
           isDemoMode={true}
-          initialGuestbook={demoGuestbook}
+          initialGuestbook={demo.guestbook}
           onBack={goBackFromPreview}
         />
         {/* UI redesign: köhnə yazı zolağının yerinə önbaxış paneli */}

@@ -1,6 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Check, Lock } from 'lucide-react'
-import { listTemplates, isTemplateSelectable, getTemplateTheme } from '../../templates/templateConfig'
+import { listTemplates, listTemplateFacets, isTemplateSelectable, getTemplateTheme } from '../../templates/templateConfig'
+import { ChipRow } from '../public/templates'
 import { DEMO_DATE } from '../../data/demoInvitation'
 import { trackTemplateSelected, trackTemplatePreviewed } from '../../templates/templateAnalytics'
 import { ensureTemplateFonts } from '../../templates/fonts'
@@ -19,9 +20,9 @@ import { templateImage } from '../../data/templateImages'
    ───────────────────────────────────────────────────────────────────────── */
 
 const UI = {
-  az: { preview: 'Önbaxış', title: 'Dizayn seç', hint: 'Dəvətnamənizin görünüşünü seçin. Yeni dizaynlar mütəmadi əlavə olunur.', soon: 'Tezliklə', selected: 'Seçildi' },
-  en: { preview: 'Preview', title: 'Choose a design', hint: 'Pick how your invitation looks. New designs are added regularly.', soon: 'Soon', selected: 'Selected' },
-  ru: { preview: 'Просмотр', title: 'Выберите дизайн', hint: 'Выберите оформление приглашения. Новые дизайны добавляются регулярно.', soon: 'Скоро', selected: 'Выбрано' },
+  az: { preview: 'Önbaxış', title: 'Dizayn seç', hint: 'Dəvətnamənizin görünüşünü seçin. Yeni dizaynlar mütəmadi əlavə olunur.', soon: 'Tezliklə', selected: 'Seçildi', event: 'Tədbir', all: 'Hamısı' },
+  en: { preview: 'Preview', title: 'Choose a design', hint: 'Pick how your invitation looks. New designs are added regularly.', soon: 'Soon', selected: 'Selected', event: 'Event', all: 'All' },
+  ru: { preview: 'Просмотр', title: 'Выберите дизайн', hint: 'Выберите оформление приглашения. Новые дизайны добавляются регулярно.', soon: 'Скоро', selected: 'Выбрано', event: 'Событие', all: 'Все' },
 }
 
 /* Nümunə cütlük — design faylındakı ilə eyni */
@@ -220,7 +221,12 @@ function TemplateThumbnail({ tpl, selected, locked }) {
    söndürülür. Digər istifadə yerlərində (varsa) davranış dəyişmir. */
 export default function TemplateSelect({ value, onChange, lang = 'az', hideHeading = false }) {
   const ui = UI[lang] || UI.az
-  const templates = listTemplates()
+  const all = listTemplates()
+  /* 2026-10 — tədbir (konsept) çipləri: müştəri əvvəlcə tədbirini seçir.
+     Seçim yalnız bu blokun lokal vəziyyətidir, `data`-ya yazılmır. */
+  const concepts = useMemo(() => listTemplateFacets(lang).concepts, [lang])
+  const [concept, setConcept] = useState('all')
+  const templates = concept === 'all' ? all : all.filter((tpl) => tpl.concept === concept)
 
   /* Thumbnail-lar 8 fərqli şrift ailəsi işlədir — yalnız bu blok
      görünəndə yüklənir, landing-in ilk yüklənməsinə təsir etmir. */
@@ -237,6 +243,18 @@ export default function TemplateSelect({ value, onChange, lang = 'az', hideHeadi
           <p className="text-[11.5px] text-brown-muted/55 font-sans font-light leading-relaxed">
             {ui.hint}
           </p>
+        </div>
+      )}
+
+      {concepts.length > 1 && (
+        <div className="mb-5">
+          <ChipRow
+            legend={ui.event}
+            options={[{ id: 'all', label: ui.all, count: all.length }, ...concepts]}
+            value={concept}
+            onChange={setConcept}
+            bleedClassName="-mx-4 px-4 sm:mx-0 sm:px-0"
+          />
         </div>
       )}
 

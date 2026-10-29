@@ -25,6 +25,11 @@ const ENTER = {
   'oriental-luxe':  'zoom',
   'nature-touch':   'left',
   'crystal-glass':  'right',
+  'fairy-tale':     'zoom',
+  'space-mission':  'up',
+  'circus-show':    'zoom',
+  'dino-adventure': 'up',
+  'balloon-party':  'down',
 }
 
 /** templateId → giriş istiqaməti (`data-enter` üçün). */

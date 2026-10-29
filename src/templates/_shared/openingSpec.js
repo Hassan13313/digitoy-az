@@ -46,6 +46,14 @@ export const OPENING_PHRASES = {
   openSeal:     { az: 'Möhürü aç',               en: 'Break the seal',          ru: 'Открыть печать' },
   tagline:      { az: 'Bir Dəvətnamədən Daha Artığı', en: 'MORE THAN AN INVITATION', ru: 'БОЛЬШЕ, ЧЕМ ПРИГЛАШЕНИЕ' },
   skip:         { az: 'Keç →',                   en: 'Skip →',                  ru: 'Пропустить →' },
+  /* Uşaq ad günü konsepti (2026-10) */
+  onceUpon:     { az: 'Biri var idi, biri yox idi…', en: 'Once upon a time…',   ru: 'Жили-были…' },
+  openTale:     { az: 'Nağılı aç',               en: 'Open the story',          ru: 'Открыть сказку' },
+  launch:       { az: 'Raketi burax',            en: 'Launch the rocket',       ru: 'Запустить ракету' },
+  rollUp:       { az: 'Diqqət, diqqət!',         en: 'Roll up, roll up!',       ru: 'Внимание, внимание!' },
+  showBegin:    { az: 'Şou başlasın!',           en: 'Let the show begin!',     ru: 'Шоу начинается!' },
+  hatch:        { az: 'Yumurtanı çatlat',        en: 'Hatch the egg',           ru: 'Разбить скорлупу' },
+  letGo:        { az: 'Şarları burax',           en: 'Let the balloons go',     ru: 'Отпустить шарики' },
 }
 
 /* Gazette rubrikası — tədbir növünə görə (əvvəl hər tədbirdə «Toy elanı» idi) */
@@ -112,6 +120,12 @@ export const OPENING_SPEC = {
   'mediterranean':   { mono: null, slots: ['title', 'kicker', 'meta', 'cta', 'hint'] },
   'modern-black':    { mono: null, slots: ['brand', 'no', 'kicker', 'title', 'and', 'meta', 'cta', 'hint'] },
   'night-sky':       { mono: null, slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  /* Uşaq ad günü konsepti (2026-10) */
+  'fairy-tale':      { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'], hints: { kicker: 'Kitabın üstündəki nağıl başlanğıcı' } },
+  'space-mission':   { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'circus-show':     { mono: null,     slots: ['kicker', 'sub', 'title', 'meta', 'cta', 'hint'], hints: { sub: 'Adın üstündəki lent' } },
+  'dino-adventure':  { mono: null,     slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'balloon-party':   { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
   /* Simple Luxury açılışı videodur — mətnlər yalnız video gecikəndə görünən
      afişada və «Keç» düyməsindədir. */
   'simple-luxury':   { mono: null, slots: ['brand', 'title', 'sub', 'skip'], hints: { sub: 'Afişadakı şüar', title: 'Yalnız video gecikəndə görünür' } },
@@ -222,6 +236,18 @@ export function openingDefaults(templateId, ctx) {
         cta: P('openShort') }
     case 'night-sky':
       return { ...base, kicker: P('skyNight'), meta: `${fullDate} · ${nightCoords(wd)}` }
+    /* ── Uşaq ad günü konsepti ── */
+    case 'fairy-tale':
+      return { ...base, kicker: P('onceUpon'), meta: fullDate, cta: P('openTale') }
+    case 'space-mission':
+      return { ...base, kicker: ctx.eventLabel || '', meta: dotDate(wd, ' · '), cta: P('launch') }
+    case 'circus-show':
+      return { ...base, kicker: P('rollUp'), sub: ctx.eventLabel || '',
+        meta: [fullDate, wd.time ? formatTime24(wd.time) : ''].filter(Boolean).join(' · '), cta: P('showBegin') }
+    case 'dino-adventure':
+      return { ...base, kicker: ctx.eventLabel || '', meta: dotDate(wd, ' · '), cta: P('hatch') }
+    case 'balloon-party':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('letGo') }
     case 'simple-luxury':
     default:
       return { brand: 'Digitoy.az',

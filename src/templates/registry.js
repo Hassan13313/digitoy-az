@@ -32,6 +32,12 @@ const COMPONENTS = {
   'mediterranean':   lazy(() => import('./mediterranean')),
   'gazette':         lazy(() => import('./gazette')),
   'luxury-jewelry':  lazy(() => import('./luxury-jewelry')),
+  /* 2026-10 — «Uşaq ad günü» konsepti */
+  'fairy-tale':      lazy(() => import('./fairy-tale')),
+  'space-mission':   lazy(() => import('./space-mission')),
+  'circus-show':     lazy(() => import('./circus-show')),
+  'dino-adventure':  lazy(() => import('./dino-adventure')),
+  'balloon-party':   lazy(() => import('./balloon-party')),
 }
 
 /** Şablonun öz komponenti varmı (yoxsa scaffold göstəriləcək)? */

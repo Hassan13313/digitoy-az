@@ -66,6 +66,17 @@ const F = {
   literata:   FONT_STACKS.literata,
   libreCaslon: FONT_STACKS.libreCaslon,
   raleway:    FONT_STACKS.raleway,
+  /* Uşaq ad günü konsepti (2026-10) */
+  cormorantUnicase: FONT_STACKS.cormorantUnicase,
+  bonaNova:   FONT_STACKS.bonaNova,
+  tektur:     FONT_STACKS.tektur,
+  exo2:       FONT_STACKS.exo2,
+  oi:         FONT_STACKS.oi,
+  podkova:    FONT_STACKS.podkova,
+  shantell:   FONT_STACKS.shantell,
+  andika:     FONT_STACKS.andika,
+  mplusRounded: FONT_STACKS.mplusRounded,
+  pacifico:   FONT_STACKS.pacifico,
 }
 export const STORY_FONTS = F
 
@@ -94,6 +105,11 @@ const T = {
   'royal-palace':    { bg: 'linear-gradient(180deg,#141B3A,#0C1128)', surf: '#141B3A', ink: '#F3ECDD', mute: '#AAB0CC', hi: '#F0DCA0', line: '#D6B76E', paper: '#EFE3C8', paperInk: '#2A2340', head: F.cormorantSC, body: F.ebGaramond, cap: F.imperial, script: true, titleFont: F.cormorantSC, titleSize: 36, frame: 'heraldic', hero: 'arch' },
   'mediterranean':   { bg: '#FBF8F1', surf: '#F1E7D3', ink: '#1E3348', mute: '#5A6B7A', hi: '#1F5FA6', line: '#D7774E', paper: '#FFFFFF', paperInk: '#5A6B7A', head: F.libreBodoni, body: F.literata, cap: F.libreBodoni, titleFont: F.libreBodoni, titleItalic: true, titleSize: 44, frame: 'mat', hero: 'arch' },
   'gazette':         { bg: '#F3EEE2', surf: '#FBF9F3', ink: '#1A1917', mute: '#55514A', hi: '#B3261E', line: '#1A1917', paper: '#FBF9F3', paperInk: '#55514A', head: F.playfair, body: F.sourceSerif, cap: F.sourceSerif, titleFont: F.playfair, titleSize: 36, frame: 'clipping', hero: 'rect', labels: 'num', kpre: true, dash: '0', textItalic: false, bigSize: 32 },
+  'fairy-tale':      { bg: 'linear-gradient(180deg,#FBF5EA,#F3E7D1)', surf: '#FFFFFF', ink: '#2D2A4A', mute: '#625C7C', hi: '#5E4A9C', line: '#C8A15A', paper: '#FFFFFF', paperInk: '#625C7C', head: F.bonaNova, body: F.bonaNova, cap: F.bonaNova, titleFont: F.cormorantUnicase, titleSize: 40, frame: 'mat', hero: 'arch' },
+  'space-mission':   { bg: 'radial-gradient(130% 70% at 50% 0%,#2A2466,#141A3C 60%)', surf: '#1C2350', ink: '#F5F3FF', mute: '#AEB4D8', hi: '#FFC94D', line: '#5FE0B7', head: F.unbounded, body: F.exo2, cap: F.exo2, capItalic: false, titleFont: F.unbounded, titleUpper: false, titleSize: 30, frame: 'glow', hero: 'circle', labels: 'num2', kpre: true, textItalic: false, dash: '2 7' },
+  'circus-show':     { bg: '#F7ECD6', surf: '#FFF8EA', ink: '#2A1E1A', mute: '#6A5546', hi: '#C62537', line: '#1E2A57', paper: '#FFFFFF', paperInk: '#6A5546', head: F.podkova, body: F.podkova, cap: F.podkova, capItalic: false, titleFont: F.oi, titleSize: 34, frame: 'polaroid', hero: 'rect', labels: 'num', kpre: true, dash: '0', textItalic: false, tilt: true },
+  'dino-adventure':  { bg: '#F5EBD3', surf: '#FBF4E2', ink: '#2B2A20', mute: '#615C47', hi: '#3E7A3A', line: '#E4683A', paper: '#FFFFFF', paperInk: '#615C47', head: F.shantell, body: F.andika, cap: F.shantell, capItalic: false, titleFont: F.shantell, titleSize: 38, frame: 'polaroid', hero: 'arch', tilt: true, labels: 'num', textItalic: false },
+  'balloon-party':   { bg: 'linear-gradient(170deg,#FFF8F3,#FBEAF0)', surf: '#FFFFFF', ink: '#4A3046', mute: '#7D6479', hi: '#C9577C', line: '#EF8FA8', paper: '#FFFFFF', paperInk: '#7D6479', head: F.mplusRounded, body: F.mplusRounded, cap: F.pacifico, capItalic: false, titleFont: F.pacifico, titleSize: 42, frame: 'polaroid', hero: 'circle', tilt: true, labels: 'num', textItalic: false },
   'luxury-jewelry':  { bg: 'radial-gradient(120% 50% at 50% 0%,#143A31,#07110E 60%)', surf: '#0E2A23', ink: '#F4F1EA', mute: '#9DB5AE', hi: '#A3D6C7', line: '#D9DEE0', head: F.libreCaslon, body: F.raleway, cap: F.libreCaslon, titleFont: F.libreCaslon, titleSize: 42, frame: 'gem', hero: 'octagon' },
 }
 
@@ -139,6 +155,45 @@ const COPY = {
     kpre:   { az: 'Səh.', en: 'P.', ru: 'Стр.' },
   },
   'luxury-jewelry':  { kicker: { az: 'Kolleksiya', en: 'Collection', ru: 'Коллекция' } },
+  /* Uşaq ad günü konsepti — hekayə uşağın öz böyümə hekayəsidir */
+  'fairy-tale': {
+    kicker: { az: 'Nağıl', en: 'A tale', ru: 'Сказка' },
+    title:  { az: 'Mənim nağılım', en: 'My fairy tale', ru: 'Моя сказка' },
+    sub:    { az: 'Doğulduğum gündən bu günə qədər', en: 'From the day I was born until today', ru: 'С самого первого дня и до сегодня' },
+    end:    { az: '…və nağıl davam edir', en: '…and the tale goes on', ru: '…и сказка продолжается' },
+    endSub: { az: 'Bu fəsli sizinlə yazmaq istəyirik.', en: 'We want to write this chapter with you.', ru: 'Эту главу мы хотим написать вместе с вами.' },
+  },
+  'space-mission': {
+    kicker: { az: 'Bort jurnalı', en: 'Ship’s log', ru: 'Бортовой журнал' },
+    title:  { az: 'Mənim orbitim', en: 'My orbit', ru: 'Моя орбита' },
+    sub:    { az: 'Doğulduğum gündən bu günə qədər', en: 'From the day I was born until today', ru: 'С самого первого дня и до сегодня' },
+    end:    { az: 'Növbəti missiya: bu ad günü', en: 'Next mission: this birthday', ru: 'Следующая миссия: этот день рождения' },
+    endSub: { az: 'Ekipajımızda sizi də görmək istəyirik.', en: 'We want you on our crew.', ru: 'Ждём вас в нашем экипаже.' },
+    kpre:   { az: 'Missiya', en: 'Mission', ru: 'Миссия' },
+  },
+  'circus-show': {
+    kicker: { az: 'Böyük şou', en: 'The big show', ru: 'Большое шоу' },
+    title:  { az: 'Mənim şoum', en: 'My show', ru: 'Моё шоу' },
+    sub:    { az: 'Doğulduğum gündən bu günə qədər', en: 'From the day I was born until today', ru: 'С самого первого дня и до сегодня' },
+    end:    { az: 'Ən böyük nömrə hələ qabaqdadır', en: 'The best act is yet to come', ru: 'Лучший номер ещё впереди' },
+    endSub: { az: 'Alqışlarınızı gözləyirik.', en: 'We are waiting for your applause.', ru: 'Ждём ваших аплодисментов.' },
+    kpre:   { az: 'Nömrə', en: 'Act', ru: 'Номер' },
+  },
+  'dino-adventure': {
+    kicker: { az: 'Ekspedisiya gündəliyi', en: 'Expedition journal', ru: 'Дневник экспедиции' },
+    title:  { az: 'Mənim izlərim', en: 'My footprints', ru: 'Мои следы' },
+    sub:    { az: 'Doğulduğum gündən bu günə qədər', en: 'From the day I was born until today', ru: 'С самого первого дня и до сегодня' },
+    end:    { az: 'Yeni kəşflər qabaqdadır', en: 'New discoveries ahead', ru: 'Впереди новые открытия' },
+    endSub: { az: 'Növbəti kəşfə bizimlə gəlin.', en: 'Join us for the next discovery.', ru: 'Присоединяйтесь к следующему открытию.' },
+    kpre:   { az: 'Tapıntı', en: 'Find', ru: 'Находка' },
+  },
+  'balloon-party': {
+    kicker: { az: 'Albom', en: 'Album', ru: 'Альбом' },
+    title:  { az: 'Mənim albomum', en: 'My album', ru: 'Мой альбом' },
+    sub:    { az: 'Doğulduğum gündən bu günə qədər', en: 'From the day I was born until today', ru: 'С самого первого дня и до сегодня' },
+    end:    { az: '…və bayram davam edir', en: '…and the party goes on', ru: '…и праздник продолжается' },
+    endSub: { az: 'Bu səhifəni sizinlə doldurmaq istəyirik.', en: 'We want to fill this page with you.', ru: 'Эту страницу мы хотим заполнить вместе с вами.' },
+  },
 }
 
 /** Aktiv dil üçün mətnlər: şablon → baza, dil → AZ. */

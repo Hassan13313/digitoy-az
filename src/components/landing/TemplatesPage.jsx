@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { listTemplates, listTemplateFacets, isTemplateSelectable, getStatusMeta, getTemplateTheme, getCategoryLabel } from '../../templates/templateConfig'
+import { listTemplates, listTemplateFacets, isTemplateSelectable, getStatusMeta, getTemplateTheme, getCategoryLabel, getConceptLabel } from '../../templates/templateConfig'
 import { ensureTemplateFonts } from '../../templates/fonts'
 import { trackTemplatePreviewed } from '../../templates/templateAnalytics'
 import LanguageSwitcher from '../LanguageSwitcher'
@@ -27,7 +27,7 @@ const UI = {
   az: {
     kicker: 'Dizayn kolleksiyası',
     title: 'Dəvətnamə Şablonları',
-    intro: 'Toy, nişan və ad günü üçün online dəvətnamə şablonları. Hər şablon ayrıca dizayn dilidir — rəng, şrift, animasiya və açılış ekranı fərqlidir. Bəyəndiyinizi seçin, məlumatlarınız eyni qalır.',
+    intro: 'Toy, nişan, ad günü və uşaq ad günü üçün online dəvətnamə şablonları. Əvvəlcə tədbirinizi seçin: hər tədbirin öz dizaynları var — rəng, şrift, animasiya və açılış ekranı fərqlidir.',
     preview: 'Önbaxış',
     back: 'Ana səhifə',
     cta: 'Dəvətnaməni hazırla',
@@ -35,7 +35,8 @@ const UI = {
     ctaText: 'Şablonu sifariş formasının ilk addımında da seçə və dəyişə bilərsiniz.',
     count: (v, t) => (v === t ? `${t} şablon` : `${v} / ${t} şablon`),
     filterStatus: 'Vəziyyət',
-    filterCategory: 'Kateqoriya',
+    filterCategory: 'Üslub',
+    filterConcept: 'Tədbir',
     all: 'Hamısı',
     reset: 'Filtri sıfırla',
     empty: 'Bu filtrə uyğun şablon tapılmadı.',
@@ -47,7 +48,7 @@ const UI = {
   en: {
     kicker: 'Design collection',
     title: 'Invitation Templates',
-    intro: 'Online invitation templates for weddings, engagements and birthdays. Each template is its own design language — colours, type, motion and opening screen all differ. Pick the one you like; your details stay the same.',
+    intro: 'Online invitation templates for weddings, engagements, birthdays and kids’ parties. Start with your event: each one has its own designs, with different colours, type, motion and opening screens.',
     preview: 'Preview',
     back: 'Home',
     cta: 'Create your invitation',
@@ -55,7 +56,8 @@ const UI = {
     ctaText: 'You can also choose and change the template in the first step of the order form.',
     count: (v, t) => (v === t ? `${t} templates` : `${v} / ${t} templates`),
     filterStatus: 'Status',
-    filterCategory: 'Category',
+    filterCategory: 'Style',
+    filterConcept: 'Event',
     all: 'All',
     reset: 'Reset filters',
     empty: 'No templates match this filter.',
@@ -67,7 +69,7 @@ const UI = {
   ru: {
     kicker: 'Коллекция дизайнов',
     title: 'Шаблоны приглашений',
-    intro: 'Шаблоны онлайн-приглашений на свадьбу, помолвку и день рождения. Каждый шаблон — отдельный язык дизайна: цвета, шрифты, анимация и экран открытия. Выберите понравившийся, ваши данные останутся теми же.',
+    intro: 'Шаблоны онлайн-приглашений на свадьбу, помолвку, день рождения и детский праздник. Начните с события: у каждого свои дизайны — цвета, шрифты, анимация и экран открытия.',
     preview: 'Просмотр',
     back: 'На главную',
     cta: 'Создать приглашение',
@@ -75,7 +77,8 @@ const UI = {
     ctaText: 'Шаблон можно выбрать и изменить и на первом шаге формы заказа.',
     count: (v, t) => (v === t ? `${t} шаблонов` : `${v} / ${t} шаблонов`),
     filterStatus: 'Статус',
-    filterCategory: 'Категория',
+    filterCategory: 'Стиль',
+    filterConcept: 'Событие',
     all: 'Все',
     reset: 'Сбросить фильтры',
     empty: 'Нет шаблонов по этому фильтру.',
@@ -109,14 +112,16 @@ export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCrea
   /* Filtr seçimləri — 'all' = filtrsiz */
   const [status, setStatus] = useState(restore?.status || 'all')
   const [category, setCategory] = useState(restore?.category || 'all')
+  const [concept, setConcept] = useState(restore?.concept || 'all')
 
   /* Çiplər mövcud şablonlardan hesablanır → boş filtr heç vaxt görünmür. */
   const facets = useMemo(() => listTemplateFacets(lang), [lang])
 
   const visible = useMemo(() => templates.filter((tpl) => (
     (status === 'all' || tpl.status === status) &&
-    (category === 'all' || tpl.category === category)
-  )), [templates, status, category])
+    (category === 'all' || tpl.category === category) &&
+    (concept === 'all' || tpl.concept === concept)
+  )), [templates, status, category, concept])
 
   /* Kart yer tutucuları şablon şriftlərini işlədə bilər — bu səhifədə yüklə */
   useEffect(() => { ensureTemplateFonts() }, [])
@@ -137,13 +142,13 @@ export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCrea
         origin: 'templates',
         templateId: tpl.id,
         scrollY: Math.round(window.scrollY),
-        status, category,
+        status, category, concept,
       }))
     } catch { /* private mode — vəziyyət bərpa olunmayacaq */ }
     onPreview(tpl)
   }
 
-  const resetFilters = () => { setStatus('all'); setCategory('all') }
+  const resetFilters = () => { setStatus('all'); setCategory('all'); setConcept('all') }
   const legal = legalUi(lang).links
 
   return (
@@ -163,15 +168,19 @@ export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCrea
             lang={lang}
             statuses={[{ id: 'all', label: ui.all, count: templates.length }, ...facets.statuses]}
             categories={[{ id: 'all', label: ui.all, count: templates.length }, ...facets.categories]}
+            concepts={[{ id: 'all', label: ui.all, count: templates.length }, ...facets.concepts]}
             status={status}
             category={category}
+            concept={concept}
             onStatus={setStatus}
             onCategory={setCategory}
+            onConcept={setConcept}
             total={templates.length}
             visibleCount={visible.length}
             onReset={resetFilters}
             statusLegend={ui.filterStatus}
             categoryLegend={ui.filterCategory}
+            conceptLegend={ui.filterConcept}
             resetLabel={ui.reset}
             formatCount={ui.count}
             bleedClassName="-mx-4 px-4 sm:mx-0 sm:px-0"
@@ -193,7 +202,7 @@ export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCrea
                     name={tpl.name}
                     statusLabel={badge.label}
                     statusTone={badge.tone}
-                    categoryLabel={getCategoryLabel(tpl.category, lang)}
+                    categoryLabel={tpl.concept ? getConceptLabel(tpl.concept, lang) : getCategoryLabel(tpl.category, lang)}
                     description={tpl.shortDescription?.[lang] || tpl.shortDescription?.az || tpl.tagline}
                     image={templateImage(tpl.id) || undefined}
                     imageWidth={TEMPLATE_IMAGE_SIZE.width}

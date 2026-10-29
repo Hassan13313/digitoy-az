@@ -16,6 +16,7 @@ import t from '../../data/translations'
 import { applyThemeOverrides, mergeSectionLabels, withStringOverrides, makeLabelResolver, sectionHead } from '../../data/adminOverrides'
 import { directionsUrl, openMapUrl } from './geo'
 import { makeOpeningText, phrase } from './openingSpec'
+import { parseAge } from './kids'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    useInvitation — premium redizayn şablonlarının ORTAQ MƏNTİQ QATI (UI yox)
@@ -107,6 +108,8 @@ export function useInvitation({
     dirUrl: directionsUrl(weddingData), mapUrl: openMapUrl(weddingData),
     formattedDate, dayName, dp, time, fullDate,
     heroTitle, single,
+    /* Ad günü: istəyə bağlı yaş (1–120), yoxdursa null — bax _shared/kids.js */
+    age: weddingData.eventType === 'birthday' ? parseAge(weddingData.age) : null,
     groom: weddingData.groomName || '', bride: weddingData.brideName || '',
     footer: sectionHead(L, 'footer'),
     storyAdminTheme: adminOverrides?.theme || null,

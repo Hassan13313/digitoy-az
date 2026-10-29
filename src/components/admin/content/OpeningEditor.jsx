@@ -34,9 +34,13 @@ const MODES = [
 
 const EMBLEM_NAMES = {
   'crystal-glass':  'brilyant',
-  'luxury-jewelry': 'zümrüd daş',
+  'luxury-jewelry': 'brilyant daş',
   'nature-touch':   'yarpaq nişanı',
   'floral-garden':  'açan çiçək',
+  'fairy-tale':     'qəsr nişanı',
+  'space-mission':  'planet nişanı',
+  'dino-adventure': 'yumurta nişanı',
+  'balloon-party':  'şar nişanı',
 }
 
 export default function OpeningEditor({

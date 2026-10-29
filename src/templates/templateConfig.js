@@ -66,8 +66,46 @@ export const CATEGORY_META = {
   nature:    { az: 'Təbiət',     en: 'Nature',     ru: 'Природа'     },
   vintage:   { az: 'Vintage',    en: 'Vintage',    ru: 'Винтаж'      },
   editorial: { az: 'Editorial',  en: 'Editorial',  ru: 'Editorial'   },
+  playful:   { az: 'Əyləncəli',  en: 'Playful',    ru: 'Игривый'     },
 }
 
+/* ── KONSEPT (tədbir növü) — 2026-10 ────────────────────────────────────────
+   Qonaq rəyi: şablonlar ümumi idi, müştəri öz tədbirinə uyğun olanı tapa
+   bilmirdi. İndi hər şablonun bir `concept`-i var və vitrin/builder əvvəlcə
+   konseptə görə süzür («Uşaq ad günü» → yalnız uşaq şablonları).
+   ⚠ `category` (üslub: Lüks, Vintage…) QALIR — konsept ondan ayrı oxdur.
+   Sıra burada sabitdir (vitrində bu ardıcıllıqla görünür); şablonu olmayan
+   konsept çipi göstərilmir (bax listTemplateFacets).
+   `eventType` — builder-də bu konseptin şablonu seçiləndə formanın ilkin
+   tədbir növü (müştəri 1-ci addımda yenə dəyişə bilər). */
+export const CONCEPT_META = {
+  toy:          { az: 'Toy',            en: 'Wedding',           ru: 'Свадьба',            eventType: 'toy' },
+  nishan:       { az: 'Nişan',          en: 'Engagement',        ru: 'Помолвка',           eventType: 'nishan' },
+  birthday:     { az: 'Ad günü',        en: 'Birthday',          ru: 'День рождения',      eventType: 'birthday' },
+  kids:         { az: 'Uşaq ad günü',   en: 'Kids’ birthday',    ru: 'Детский праздник',   eventType: 'birthday' },
+  xina:         { az: 'Xına gecəsi',    en: 'Henna night',       ru: 'Вечер хны',          eventType: 'other' },
+  sunnet:       { az: 'Sünnət toyu',    en: 'Sunnat celebration', ru: 'Сюннет-той',        eventType: 'other' },
+  baby:         { az: 'Baby shower',    en: 'Baby shower',       ru: 'Бэби шауэр',         eventType: 'other' },
+  corporate:    { az: 'Korporativ',     en: 'Corporate',         ru: 'Корпоратив',         eventType: 'corporate' },
+  anniversary:  { az: 'İldönümü',       en: 'Anniversary',       ru: 'Годовщина',          eventType: 'other' },
+  graduation:   { az: 'Məzuniyyət',     en: 'Graduation',        ru: 'Выпускной',          eventType: 'other' },
+  opening:      { az: 'Açılış',         en: 'Grand opening',     ru: 'Открытие',           eventType: 'corporate' },
+  holiday:      { az: 'Bayram gecəsi',  en: 'Holiday party',     ru: 'Праздничный вечер',  eventType: 'other' },
+  bachelorette: { az: 'Qız gecəsi',     en: 'Bachelorette',      ru: 'Девичник',           eventType: 'other' },
+}
+const CONCEPT_ORDER = Object.keys(CONCEPT_META)
+
+/** Konsept id → görünən ad (naməlum id-də id-nin özü) */
+export function getConceptLabel(concept, lang = 'az') {
+  const m = CONCEPT_META[concept]
+  return m ? (m[lang] || m.az) : (concept || '')
+}
+
+/** Şablonun konseptinə uyğun ilkin tədbir növü (yoxdursa null) */
+export function conceptEventType(templateId) {
+  const c = BY_ID[templateId]?.concept
+  return (c && CONCEPT_META[c]?.eventType) || null
+}
 
 /** Kateqoriya id → görünən ad (naməlum id-də id-nin özü) */
 export function getCategoryLabel(category, lang = 'az') {
@@ -106,7 +144,14 @@ export function listTemplateFacets(lang = 'az') {
     .map(([id, count]) => ({ id, label: getCategoryLabel(id, lang), count }))
     .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, 'az'))
 
-  return { statuses, categories }
+  /* Konseptlər CONCEPT_META sırası ilə (sayına görə yox) — müştəri tədbirini
+     həmişə eyni yerdə tapsın */
+  const kMap = tally('concept')
+  const concepts = CONCEPT_ORDER
+    .filter((k) => kMap.has(k))
+    .map((k) => ({ id: k, label: getConceptLabel(k, lang), count: kMap.get(k) }))
+
+  return { statuses, categories, concepts }
 }
 
 /** Status badge metası (naməlum statusda coming_soon) */
@@ -203,6 +248,20 @@ export const FONT_STACKS = {
   oldStandard:  "'Old Standard TT', 'Playfair Display', Georgia, serif",
   libreCaslon:  "'Libre Caslon Display', 'Playfair Display', Georgia, serif",
   raleway:      "'Raleway', 'Inter', system-ui, sans-serif",
+
+  /* ── Uşaq ad günü konsepti (2026-10) ──
+     Hamısında Ə/ğ/ı/İ/ş VƏ kiril var (fonttools ilə glyph cədvəlindən
+     yoxlanılıb) — rus dilində də başqa şriftə düşmür. */
+  cormorantUnicase: "'Cormorant Unicase', 'Cormorant Garamond', Georgia, serif",
+  bonaNova:     "'Bona Nova', 'Cormorant Garamond', Georgia, serif",
+  tektur:       "'Tektur', 'Inter', system-ui, sans-serif",
+  exo2:         "'Exo 2', 'Inter', system-ui, sans-serif",
+  oi:           "'Oi', 'Playfair Display', Georgia, serif",
+  podkova:      "'Podkova', 'Playfair Display', Georgia, serif",
+  shantell:     "'Shantell Sans', 'Inter', system-ui, sans-serif",
+  andika:       "'Andika', 'Inter', system-ui, sans-serif",
+  mplusRounded: "'M PLUS Rounded 1c', 'Inter', system-ui, sans-serif",
+  pacifico:     "'Pacifico', 'Great Vibes', 'Cormorant Garamond', cursive",
 }
 
 /* Brauzerdə ÖLÇÜLƏRƏK təsdiqlənmiş siyahı: bu ailələrdə `Ə` glyph-i yoxdur.
@@ -226,6 +285,7 @@ export const TEMPLATES = [
     shortDescription: { az: 'Klassik lüks toy üslubu', en: 'Classic luxury wedding style' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'luxury',
+    concept: 'toy',
     version: 1,
     previewRoute: '/demo/template/royal-gold',
     theme: {
@@ -255,6 +315,7 @@ export const TEMPLATES = [
     shortDescription: { az: 'Botanik bağ mərasimi üslubu', en: 'Botanical garden ceremony style' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'classic',
+    concept: 'nishan',
     version: 1,
     previewRoute: '/demo/template/floral-garden',
     theme: {
@@ -285,6 +346,7 @@ export const TEMPLATES = [
     shortDescription: { az: 'Minimalist tipoqrafik dizayn', en: 'Minimalist typographic design' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'minimal',
+    concept: 'birthday',
     version: 0,
     previewRoute: '/demo/template/modern-black',
     theme: {
@@ -314,6 +376,7 @@ export const TEMPLATES = [
     shortDescription: { az: 'Ağ kağız üzərində zəriflik', en: 'Elegance on white paper' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'minimal',
+    concept: 'toy',
     version: 0,
     previewRoute: '/demo/template/white-elegance',
     theme: {
@@ -344,6 +407,7 @@ export const TEMPLATES = [
     shortDescription: { az: 'Gecə səması və ulduz xəritəsi', en: 'Night sky and star map' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'celestial',
+    concept: 'nishan',
     version: 0,
     previewRoute: '/demo/template/night-sky',
     theme: {
@@ -374,6 +438,7 @@ export const TEMPLATES = [
     shortDescription: { az: 'Şərq ornamentləri və nar tonları', en: 'Oriental ornaments and pomegranate tones' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'luxury',
+    concept: 'toy',
     version: 0,
     previewRoute: '/demo/template/oriental-luxe',
     theme: {
@@ -404,6 +469,7 @@ export const TEMPLATES = [
     shortDescription: { az: 'Kətan və meşə yaşılı təbiət üslubu', en: 'Linen and forest green nature style' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'nature',
+    concept: 'nishan',
     version: 0,
     previewRoute: '/demo/template/nature-touch',
     theme: {
@@ -434,6 +500,7 @@ export const TEMPLATES = [
     shortDescription: { az: 'Kristal refraksiya və şüşə effekti', en: 'Crystal refraction and glass effect' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'celestial',
+    concept: 'toy',
     version: 0,
     previewRoute: '/demo/template/crystal-glass',
     theme: {
@@ -472,6 +539,7 @@ export const TEMPLATES = [
     shortDescription: { az: 'Uçuş bileti üslubunda mono dizayn', en: 'Boarding-pass styled mono design' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'editorial',
+    concept: 'birthday',
     version: 1,
     previewRoute: '/demo/template/boarding-pass',
     theme: {
@@ -502,6 +570,7 @@ export const TEMPLATES = [
     shortDescription: { az: 'Film premyerası üslubu', en: 'Film premiere styling' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'vintage',
+    concept: 'birthday',
     version: 1,
     previewRoute: '/demo/template/cinema-premiere',
     theme: {
@@ -532,6 +601,7 @@ export const TEMPLATES = [
     shortDescription: { az: 'Vinil plyonka üslubu', en: 'Vinyl record styling' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'vintage',
+    concept: 'birthday',
     version: 1,
     previewRoute: '/demo/template/vinyl-record',
     theme: {
@@ -562,6 +632,7 @@ export const TEMPLATES = [
     shortDescription: { az: 'Saray heraldikası, gecə mavisi', en: 'Palace heraldry on midnight blue' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'luxury',
+    concept: 'toy',
     version: 1,
     previewRoute: '/demo/template/royal-palace',
     theme: {
@@ -592,6 +663,7 @@ export const TEMPLATES = [
     shortDescription: { az: 'Aralıq dənizi sahil üslubu', en: 'Mediterranean coastal style' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'nature',
+    concept: 'nishan',
     version: 1,
     previewRoute: '/demo/template/mediterranean',
     theme: {
@@ -622,6 +694,7 @@ export const TEMPLATES = [
     shortDescription: { az: 'Qəzet xüsusi buraxılışı', en: 'Newspaper special edition' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'editorial',
+    concept: 'birthday',
     version: 1,
     previewRoute: '/demo/template/gazette',
     theme: {
@@ -652,6 +725,7 @@ export const TEMPLATES = [
     shortDescription: { az: 'Zümrüd zərgərlik vitrini', en: 'Emerald jewelry showcase' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'luxury',
+    concept: 'nishan',
     version: 1,
     previewRoute: '/demo/template/luxury-jewelry',
     theme: {
@@ -674,6 +748,162 @@ export const TEMPLATES = [
       swatches: ['#0E2A23', '#1F7A5C', '#D9DEE0'],
     },
   },
+  /* ── UŞAQ AD GÜNÜ konsepti (2026-10) — 5 şablon ── */
+  {
+    id: 'fairy-tale',
+    name: 'Fairy Tale',
+    tagline: 'Nağıl kitabı · Pop-up qəsr · Sehrli güzgü',
+    description: '«Biri var idi, biri yox idi…» — açılan nağıl kitabından qalxan pop-up qəsr, fəsil-fəsil proqram və masanı göstərən sehrli güzgü.',
+    shortDescription: { az: 'Nağıl kitabı üslubunda uşaq ad günü', en: 'Storybook-style kids’ birthday' },
+    status: TEMPLATE_STATUS.LIVE,
+    category: 'playful',
+    concept: 'kids',
+    version: 1,
+    previewRoute: '/demo/template/fairy-tale',
+    theme: {
+      primary:   '#5E4A9C',
+      accent:    '#C8A15A',
+      secondary: '#1F2A52',
+      background: '#FBF5EA',
+      surface:   '#F3E7D1',
+      text:      '#2D2A4A',
+      muted:     '#625C7C',
+      mapTint:  '#5E4A9C',
+      footerBg:  '#1F2A52',
+      footerText: '#F3E7D1',
+      footerAccent: '#E2C27E',
+      fonts: { heading: FONT_STACKS.cormorantUnicase, body: FONT_STACKS.bonaNova },
+    },
+    preview: {
+      accent: '#C8A15A',
+      background: 'radial-gradient(120% 80% at 50% 20%, #3B3A7A, #1F2A52 70%)',
+      swatches: ['#1F2A52', '#B7A3D9', '#C8A15A'],
+    },
+  },
+  {
+    id: 'space-mission',
+    name: 'Space Mission',
+    tagline: 'Raket buraxılışı · Missiya pultu · Planet orbiti',
+    description: 'Kosmik səyahət — «3·2·1» ilə buraxılan raket, missiya pultu sayğacı, radar ekranında xəritə və planetlərlə uçuş planı.',
+    shortDescription: { az: 'Kosmik səyahət üslubunda uşaq ad günü', en: 'Space-voyage kids’ birthday' },
+    status: TEMPLATE_STATUS.LIVE,
+    category: 'playful',
+    concept: 'kids',
+    version: 1,
+    previewRoute: '/demo/template/space-mission',
+    theme: {
+      primary:   '#FF8A3D',
+      accent:    '#FFC94D',
+      secondary: '#5FE0B7',
+      background: '#141A3C',
+      surface:   '#1C2350',
+      text:      '#F5F3FF',
+      muted:     '#AEB4D8',
+      mapTint:  '#3B2F7A',
+      footerBg:  '#0C1029',
+      footerText: '#F5F3FF',
+      footerAccent: '#FFC94D',
+      fonts: { heading: FONT_STACKS.unbounded, body: FONT_STACKS.exo2 },
+    },
+    preview: {
+      accent: '#FF8A3D',
+      background: 'radial-gradient(120% 80% at 50% 110%, #3B2F7A, #141A3C 55%, #0C1029)',
+      swatches: ['#141A3C', '#FF8A3D', '#5FE0B7'],
+    },
+  },
+  {
+    id: 'circus-show',
+    name: 'Circus Show',
+    tagline: 'Sirk çadırı · Taxta şrift afişa · Şou proqramı',
+    description: 'Köhnə sirk afişasının dili — zolaqlı çadır, nağara ilə açılan şou, nömrə-nömrə proqram və alqış kartları.',
+    shortDescription: { az: 'Vintage sirk afişası üslubunda uşaq ad günü', en: 'Vintage circus-poster kids’ birthday' },
+    status: TEMPLATE_STATUS.LIVE,
+    category: 'playful',
+    concept: 'kids',
+    version: 1,
+    previewRoute: '/demo/template/circus-show',
+    theme: {
+      primary:   '#C62537',
+      accent:    '#F2B23A',
+      secondary: '#1E2A57',
+      background: '#F7ECD6',
+      surface:   '#FFF8EA',
+      text:      '#2A1E1A',
+      muted:     '#6A5546',
+      mapTint:  '#1E2A57',
+      footerBg:  '#1E2A57',
+      footerText: '#F7ECD6',
+      footerAccent: '#F2B23A',
+      fonts: { heading: FONT_STACKS.oi, body: FONT_STACKS.podkova },
+    },
+    preview: {
+      accent: '#C62537',
+      background: 'repeating-linear-gradient(90deg, #C62537 0 14%, #F7ECD6 14% 28%)',
+      swatches: ['#C62537', '#F7ECD6', '#1E2A57'],
+    },
+  },
+  {
+    id: 'dino-adventure',
+    name: 'Dino Adventure',
+    tagline: 'Dinozavr yumurtası · Vulkan · İz cığırı',
+    description: 'Dinozavr ekspedisiyası — çatlayan yumurtadan çıxan balaca dino, vulkanlı cəngəllik, iz cığırı ilə proqram və qazıntıdan çıxan masa nömrəsi.',
+    shortDescription: { az: 'Dinozavr ekspedisiyası üslubunda uşaq ad günü', en: 'Dinosaur-expedition kids’ birthday' },
+    status: TEMPLATE_STATUS.LIVE,
+    category: 'playful',
+    concept: 'kids',
+    version: 1,
+    previewRoute: '/demo/template/dino-adventure',
+    theme: {
+      primary:   '#3E7A3A',
+      accent:    '#E4683A',
+      secondary: '#24452F',
+      background: '#F5EBD3',
+      surface:   '#FBF4E2',
+      text:      '#2B2A20',
+      muted:     '#615C47',
+      mapTint:  '#3E7A3A',
+      footerBg:  '#24452F',
+      footerText: '#F5EBD3',
+      footerAccent: '#F2A65A',
+      fonts: { heading: FONT_STACKS.shantell, body: FONT_STACKS.andika },
+    },
+    preview: {
+      accent: '#E4683A',
+      background: 'linear-gradient(180deg, #BFE3DA, #F5EBD3 60%, #8CC084)',
+      swatches: ['#3E7A3A', '#E4683A', '#F5EBD3'],
+    },
+  },
+  {
+    id: 'balloon-party',
+    name: 'Balloon Party',
+    tagline: 'Folqa şarlar · Qatlı tort · Saqqız avtomatı',
+    description: 'Şirin bayram — havaya qalxan şar dəstəsi, folqa hərflərlə ad, qatlı tort kimi proqram və masa nömrəsini verən saqqız avtomatı.',
+    shortDescription: { az: 'Şar və şirniyyat üslubunda uşaq ad günü', en: 'Balloons & candy kids’ birthday' },
+    status: TEMPLATE_STATUS.LIVE,
+    category: 'playful',
+    concept: 'kids',
+    version: 1,
+    previewRoute: '/demo/template/balloon-party',
+    theme: {
+      primary:   '#C9577C',
+      accent:    '#D8A64A',
+      secondary: '#7FC8B0',
+      background: '#FFF8F3',
+      surface:   '#FFFFFF',
+      text:      '#4A3046',
+      muted:     '#7D6479',
+      mapTint:  '#C9577C',
+      footerBg:  '#4A3046',
+      footerText: '#FFF1F4',
+      footerAccent: '#F6C3CF',
+      fonts: { heading: FONT_STACKS.mplusRounded, body: FONT_STACKS.mplusRounded },
+    },
+    preview: {
+      accent: '#EF8FA8',
+      background: 'linear-gradient(170deg, #FFF8F3, #F6E1EA 60%, #E6F4EE)',
+      swatches: ['#EF8FA8', '#BDE8D7', '#D8A64A'],
+    },
+  },
   {
     id: 'simple-luxury',
     name: 'Simple Luxury',
@@ -682,6 +912,7 @@ export const TEMPLATES = [
     shortDescription: { az: 'Digitoy klassik krem-qızıl dizayn', en: 'Digitoy classic cream & gold style' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'classic',
+    concept: 'toy',
     version: 1,
     previewRoute: '/demo/template/simple-luxury',
     theme: {
@@ -757,10 +988,11 @@ export function resolveTemplateId(id, { allowDisabled = false } = {}) {
  * Reyestrdəki şablonlar.
  * @param {{ onlySelectable?: boolean, category?: string }} opts
  */
-export function listTemplates({ onlySelectable = false, category = null } = {}) {
+export function listTemplates({ onlySelectable = false, category = null, concept = null } = {}) {
   let list = TEMPLATES.filter((tpl) => tpl.status !== TEMPLATE_STATUS.DISABLED)
   if (onlySelectable) list = list.filter((tpl) => SELECTABLE_STATUSES.includes(tpl.status))
   if (category) list = list.filter((tpl) => tpl.category === category)
+  if (concept) list = list.filter((tpl) => tpl.concept === concept)
   return list
 }
 

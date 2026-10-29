@@ -33,7 +33,7 @@ import LoveStoryStep from './LoveStoryStep'
 import { ACTIVE_PARTNERS } from '../../data/partners'
 import MusicStep from './MusicStep'
 import TemplateSelect from './TemplateSelect'
-import { resolveBuilderTemplateId } from '../../templates/templateConfig'
+import { resolveBuilderTemplateId, conceptEventType } from '../../templates/templateConfig'
 import { computeInviteSlug } from '../../utils/inviteSlug'
 import { defaultWedding } from '../../data/defaultWedding'
 import { buildShortLiveLink } from '../../utils/whatsappOrder'
@@ -1493,7 +1493,15 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
      → invitations.form_data zəncirinin hamısından keçir və reload-dan sonra
      bərpa olunur. Boş dəyər: bax templateConfig › resolveBuilderTemplateId. */
   const selectedTemplate = resolveBuilderTemplateId(data.templateId, { isAdmin })
-  const setSelectedTemplate = (id) => set('templateId', id)
+  /* 2026-10 — konseptli şablon (məs. «Uşaq ad günü») seçiləndə formanın
+     tədbir növü də ona uyğun gəlir. YALNIZ ad sahələri hələ boşdursa:
+     müştəri 1-ci addımı doldurubsa onun seçiminə toxunulmur. */
+  const setSelectedTemplate = (id) => {
+    set('templateId', id)
+    const ev = conceptEventType(id)
+    const fresh = ![data.brideName, data.groomName, data.eventName].some((v) => String(v || '').trim())
+    if (ev && fresh && data.eventType !== ev) set('eventType', ev)
+  }
   /* Phase 45.1 — builder-dən çıxan data (autosave draft, önbaxış → sifariş)
      `templateId: selectedTemplate` daşıyır: boş dəyər server-də simple-luxury
      olurdu, müştəri isə Royal Gold-u «Seçildi» görürdü. */
@@ -1978,15 +1986,29 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
                 </div>
               </div>
             ) : (
-              /* Ad günü — tək ad */
-              <div>
-                <Label required>{tr.person_name_label}</Label>
-                <Input
-                  value={data.brideName}
-                  onChange={(e) => set('brideName', e.target.value)}
-                  placeholder={tr.person_name_label}
-                  invalid={!!errors.brideName}
-                />
+              /* Ad günü — tək ad + istəyə bağlı yaş (2026-10: uşaq şablonları
+                 yaşı böyük rəqəmlə göstərir; boşdursa heç yerdə görünmür) */
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8">
+                <div>
+                  <Label required>{tr.person_name_label}</Label>
+                  <Input
+                    value={data.brideName}
+                    onChange={(e) => set('brideName', e.target.value)}
+                    placeholder={tr.person_name_label}
+                    invalid={!!errors.brideName}
+                  />
+                </div>
+                <div>
+                  <Label>{tr.age_label}</Label>
+                  <Input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={3}
+                    value={data.age || ''}
+                    onChange={(e) => set('age', e.target.value.replace(/\D/g, '').slice(0, 3))}
+                    placeholder={tr.age_placeholder}
+                  />
+                </div>
               </div>
             )}
 
