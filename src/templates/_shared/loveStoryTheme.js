@@ -94,6 +94,9 @@ const F = {
   playpen: FONT_STACKS.playpen,
   oldStandard: FONT_STACKS.oldStandard,
   ysabeauInfant: FONT_STACKS.ysabeauInfant,
+  interTightBold: FONT_STACKS.interTightBold,
+  jura: FONT_STACKS.jura,
+  lobster: FONT_STACKS.lobster,
 }
 export const STORY_FONTS = F
 
@@ -146,6 +149,12 @@ const T = {
   'gender-reveal': { bg: 'linear-gradient(180deg,#FFFBF7,#F4F0FA)', surf: '#FFFFFF', ink: '#33365C', mute: '#6E7091', hi: '#E0659C', line: '#3F8CD8', paper: '#FFFFFF', paperInk: '#6E7091', head: F.playpen, body: F.onest, cap: F.playpen, capItalic: false, titleFont: F.playpen, titleSize: 32, frame: 'polaroid', hero: 'circle', tilt: true, labels: 'num', textItalic: false },
   'stork-letter': { bg: 'linear-gradient(180deg,#F3EBDD,#E6D9C3)', surf: '#FBF6EC', ink: '#3E3A36', mute: '#776C61', hi: '#A9473A', line: '#7C97AE', paper: '#FBF6EC', paperInk: '#776C61', head: F.oldStandard, body: F.vollkorn, cap: F.vibes, script: true, titleFont: F.vibes, titleSize: 50, frame: 'mat', hero: 'rect', tilt: true },
   'baby-mobile': { bg: 'linear-gradient(180deg,#F8F1E6,#EDE4D3)', surf: '#FFFFFF', ink: '#2A2F4A', mute: '#6B6F88', hi: '#2E3A63', line: '#E9B949', paper: '#FFFFFF', paperInk: '#6B6F88', head: F.ysabeauInfant, body: F.mulish, cap: F.ysabeauInfant, titleFont: F.ysabeauInfant, titleSize: 38, frame: 'polaroid', hero: 'circle', tilt: true, textItalic: false },
+  /* 2026-10 — «Korporativ» konsepti */
+  'gala-night': { bg: 'linear-gradient(180deg,#151311,#0B0A09)', surf: '#1E1B18', ink: '#F5EFE3', mute: '#A99F8E', hi: '#F1DCA4', line: '#D4AF61', head: F.playfair, body: F.montserrat, cap: F.playfair, titleFont: F.playfair, titleItalic: true, titleSize: 40, frame: 'glow', hero: 'rect', labels: 'num2', kpre: true },
+  'keynote': { bg: 'linear-gradient(180deg,#0C1324,#060A14)', surf: '#111A30', ink: '#F3F6FC', mute: '#8A97B4', hi: '#22D3EE', line: '#3D7BFF', head: F.geologica, body: F.onest, cap: F.mono, capItalic: false, titleFont: F.geologica, titleSize: 34, frame: 'glass', hero: 'rounded', labels: 'num2', kpre: true, textItalic: false, dash: '2 6' },
+  'award-night': { bg: 'linear-gradient(180deg,#4E0D1A,#2A060E)', surf: '#3A0912', ink: '#F7EEDC', mute: '#CDB1A8', hi: '#F6DD95', line: '#E1B54E', head: F.cormorantSC, body: F.raleway, cap: F.cormorantSC, titleFont: F.cormorantSC, titleSize: 36, frame: 'heraldic', hero: 'arch', labels: 'roman' },
+  'business-card': { bg: '#F4F3EF', surf: '#FFFFFF', ink: '#121212', mute: '#76756F', hi: '#2438E8', line: '#121212', paper: '#FFFFFF', paperInk: '#76756F', head: F.interTightBold, body: F.interTight, cap: F.mono, capItalic: false, titleFont: F.interTightBold, titleSize: 36, frame: 'minimal', hero: 'rect', labels: 'num2', dash: '0', textItalic: false },
+  'neon-party': { bg: 'linear-gradient(180deg,#1B1428,#0D0A15)', surf: '#1B1428', ink: '#F6F0FF', mute: '#A99CC4', hi: '#FF4FD8', line: '#3CF2FF', head: F.jura, body: F.jura, cap: F.lobster, capItalic: false, titleFont: F.lobster, titleSize: 44, frame: 'glow', hero: 'circle', textItalic: false },
 }
 
 /* ── Mətnlər (AZ/EN/RU) ── dizayndakı şablon adlandırmaları */
@@ -288,6 +297,47 @@ const COPY = {
   'baby-mobile': {
     end:    { az: '…və tezliklə üç nəfər olacağıq', en: '…and soon we will be three', ru: '…и скоро нас будет трое' },
     endSub: { az: 'Bu sevinci sizinlə bölüşmək istəyirik.', en: 'We want to share this joy with you.', ru: 'Мы хотим разделить эту радость с вами.' },
+  },
+  /* 2026-10 — «Korporativ» konsepti */
+  'gala-night': {
+    kicker: { az: 'Tarixçə', en: 'History', ru: 'История' },
+    title:  { az: 'Bizim yolumuz', en: 'Our journey', ru: 'Наш путь' },
+    sub:    { az: 'İlk gündən bu günə qədər', en: 'From day one to today', ru: 'С первого дня до сегодня' },
+    end:    { az: '…və yeni zirvələr qabaqdadır', en: '…and new heights lie ahead', ru: '…и впереди новые вершины' },
+    endSub: { az: 'Bu uğuru sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this success with you.', ru: 'Мы хотим отметить этот успех вместе с вами.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  'keynote': {
+    kicker: { az: 'Tarixçə', en: 'History', ru: 'История' },
+    title:  { az: 'Bizim yolumuz', en: 'Our journey', ru: 'Наш путь' },
+    sub:    { az: 'İlk gündən bu günə qədər', en: 'From day one to today', ru: 'С первого дня до сегодня' },
+    end:    { az: '…və yeni zirvələr qabaqdadır', en: '…and new heights lie ahead', ru: '…и впереди новые вершины' },
+    endSub: { az: 'Bu uğuru sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this success with you.', ru: 'Мы хотим отметить этот успех вместе с вами.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  'award-night': {
+    kicker: { az: 'Tarixçə', en: 'History', ru: 'История' },
+    title:  { az: 'Bizim yolumuz', en: 'Our journey', ru: 'Наш путь' },
+    sub:    { az: 'İlk gündən bu günə qədər', en: 'From day one to today', ru: 'С первого дня до сегодня' },
+    end:    { az: '…və yeni zirvələr qabaqdadır', en: '…and new heights lie ahead', ru: '…и впереди новые вершины' },
+    endSub: { az: 'Bu uğuru sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this success with you.', ru: 'Мы хотим отметить этот успех вместе с вами.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  'business-card': {
+    kicker: { az: 'Tarixçə', en: 'History', ru: 'История' },
+    title:  { az: 'Bizim yolumuz', en: 'Our journey', ru: 'Наш путь' },
+    sub:    { az: 'İlk gündən bu günə qədər', en: 'From day one to today', ru: 'С первого дня до сегодня' },
+    end:    { az: '…və yeni zirvələr qabaqdadır', en: '…and new heights lie ahead', ru: '…и впереди новые вершины' },
+    endSub: { az: 'Bu uğuru sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this success with you.', ru: 'Мы хотим отметить этот успех вместе с вами.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  'neon-party': {
+    kicker: { az: 'Tarixçə', en: 'History', ru: 'История' },
+    title:  { az: 'Bizim yolumuz', en: 'Our journey', ru: 'Наш путь' },
+    sub:    { az: 'İlk gündən bu günə qədər', en: 'From day one to today', ru: 'С первого дня до сегодня' },
+    end:    { az: '…və yeni zirvələr qabaqdadır', en: '…and new heights lie ahead', ru: '…и впереди новые вершины' },
+    endSub: { az: 'Bu uğuru sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this success with you.', ru: 'Мы хотим отметить этот успех вместе с вами.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
   },
 }
 

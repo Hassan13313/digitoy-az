@@ -48,6 +48,12 @@ const ENTER = {
   'gender-reveal': 'left',
   'stork-letter': 'right',
   'baby-mobile': 'down',
+  /* 2026-10 — «Korporativ» konsepti */
+  'gala-night': 'zoom',
+  'keynote': 'up',
+  'award-night': 'left',
+  'business-card': 'right',
+  'neon-party': 'down',
 }
 
 /** templateId → giriş istiqaməti (`data-enter` üçün). */

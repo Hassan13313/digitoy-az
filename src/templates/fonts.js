@@ -93,6 +93,9 @@ const FAMILY = {
   comfortaa: 'Comfortaa:wght@500;600;700',
   playpen: 'Playpen+Sans:wght@400;600;700;800',
   ysabeauInfant: 'Ysabeau+Infant:ital,wght@0,400;0,600;0,700;1,400',
+  interTightBold: 'Inter+Tight:wght@400;500;600;700',
+  lobster: 'Lobster',
+  jura: 'Jura:wght@400;500;600;700',
 }
 
 /* Hər şablonun öz ailələri */
@@ -135,6 +138,12 @@ const TEMPLATE_FONTS = {
   'gender-reveal': ['playpen', 'onest'],
   'stork-letter': ['oldStandard', 'vollkorn', 'greatVibes'],
   'baby-mobile': ['ysabeauInfant', 'mulish'],
+  /* 2026-10 — «Korporativ» konsepti */
+  'gala-night': ['playfair', 'montserrat'],
+  'keynote': ['geologica', 'onest', 'jetbrains'],
+  'award-night': ['cormorantSC', 'raleway'],
+  'business-card': ['interTightBold', 'jetbrains'],
+  'neon-party': ['lobster', 'jura'],
 }
 
 const ALL = Object.keys(FAMILY)

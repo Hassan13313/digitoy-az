@@ -46,6 +46,12 @@ const REDESIGNED = [
   'gender-reveal',
   'stork-letter',
   'baby-mobile',
+  /* 2026-10 — «Korporativ» konsepti */
+  'gala-night',
+  'keynote',
+  'award-night',
+  'business-card',
+  'neon-party',
 ]
 const SECTIONS = ['countdown', 'venue', 'program', 'dresscode', 'seating', 'gallery', 'rsvp', 'guestbook', 'hero', 'story']
 

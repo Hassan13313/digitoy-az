@@ -70,6 +70,11 @@ export const OPENING_PHRASES = {
   breakSeal: { az: 'Möhürü aç', en: 'Break the seal', ru: 'Вскрыть печать' },
   spinMobile: { az: 'Mobili fırlat', en: 'Spin the mobile', ru: 'Закружить мобиль' },
   openGift: { az: 'Hədiyyəni aç', en: 'Open the gift', ru: 'Открыть подарок' },
+  fillGlasses: { az: 'Qədəhləri doldur', en: 'Fill the glasses', ru: 'Наполнить бокалы' },
+  goLive: { az: 'Ekranı yandır', en: 'Go live', ru: 'Включить экран' },
+  unveilAward: { az: 'Mükafatı aç', en: 'Unveil the award', ru: 'Открыть награду' },
+  flipCard: { az: 'Kartı çevir', en: 'Flip the card', ru: 'Перевернуть карточку' },
+  switchOn: { az: 'İşıqları yandır', en: 'Switch on the lights', ru: 'Включить свет' },
 }
 
 /* Gazette rubrikası — tədbir növünə görə (əvvəl hər tədbirdə «Toy elanı» idi) */
@@ -169,6 +174,12 @@ export const OPENING_SPEC = {
   'gender-reveal': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
   'stork-letter': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
   'baby-mobile': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  /* 2026-10 — «Korporativ» konsepti */
+  'gala-night': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'keynote': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'award-night': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'business-card': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'neon-party': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
 }
 
 /** Şablonun açılış təsviri (naməlum id → simple-luxury) */
@@ -318,6 +329,16 @@ export function openingDefaults(templateId, ctx) {
       return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('breakSeal') }
     case 'baby-mobile':
       return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('spinMobile') }
+    case 'gala-night':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('fillGlasses') }
+    case 'keynote':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('goLive') }
+    case 'award-night':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('unveilAward') }
+    case 'business-card':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('flipCard') }
+    case 'neon-party':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('switchOn') }
     case 'simple-luxury':
     default:
       return { brand: 'Digitoy.az',

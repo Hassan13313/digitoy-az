@@ -56,6 +56,12 @@ const COMPONENTS = {
   'gender-reveal': lazy(() => import('./gender-reveal')),
   'stork-letter': lazy(() => import('./stork-letter')),
   'baby-mobile': lazy(() => import('./baby-mobile')),
+  /* 2026-10 — «Korporativ» konsepti */
+  'gala-night': lazy(() => import('./gala-night')),
+  'keynote': lazy(() => import('./keynote')),
+  'award-night': lazy(() => import('./award-night')),
+  'business-card': lazy(() => import('./business-card')),
+  'neon-party': lazy(() => import('./neon-party')),
 }
 
 /** Şablonun öz komponenti varmı (yoxsa scaffold göstəriləcək)? */

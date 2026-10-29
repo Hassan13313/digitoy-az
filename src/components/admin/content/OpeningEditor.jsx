@@ -56,6 +56,11 @@ const EMBLEM_NAMES = {
   'gender-reveal': 'sual işarəsi',
   'stork-letter': 'leylək',
   'baby-mobile': 'keçə ay',
+  'gala-night': 'deco yelpik',
+  'keynote': 'ekran nişanı',
+  'award-night': 'dəfnə çələngi',
+  'business-card': 'kvadrat nişan',
+  'neon-party': 'neon ulduz',
 }
 
 export default function OpeningEditor({
