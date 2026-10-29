@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, CREAM_BG, NIGHT_BG, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Pillow, Feather, FeatherBurst, SleepMask, Cucumber, Moon } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -26,22 +27,6 @@ import { Pillow, Feather, FeatherBurst, SleepMask, Cucumber, Moon } from './art'
 
 const BASE = getTemplateTheme('pajama-spa')
 const ID = 'pajama-spa'
-
-const LABELS = {
-  countdown: { title: { az: 'Pijamaları hazırla', en: 'Get your pajamas ready', ru: 'Готовь пижаму' } },
-  venue:     { title: { az: 'Harada?', en: 'Where?', ru: 'Где?' } },
-  program:   { title: { az: 'Gecənin planı', en: 'The plan', ru: 'План вечера' } },
-  dresscode: { title: { az: 'Geyim', en: 'Dress code', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Yerin hazırdır', en: 'Your spot', ru: 'Твоё место' } },
-  gallery:   { title: { az: 'Gecə şəkilləri', en: 'Night snaps', ru: 'Ночные фото' } },
-  rsvp:      { title: { az: 'Gəlirsən?', en: 'Coming?', ru: 'Придёшь?' } },
-  guestbook: { title: { az: 'Gəlinə sözlər', en: 'Notes for the bride', ru: 'Слова невесте' } },
-}
-const TXT = {
-  az: { table: 'Masa', party: 'Pijama partisi!', zzz: 'z z z' },
-  en: { table: 'Table', party: 'Pajama party!', zzz: 'z z z' },
-  ru: { table: 'Стол', party: 'Пижамная вечеринка!', zzz: 'z z z' },
-}
 
 const KEYFRAMES = `
 @keyframes ps-in { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -67,7 +52,7 @@ function PillowOpening({ inv, theme, lang }) {
   const { titleOv, first, second } = openingNames(inv)
   const go = gate.opening
   const head = theme.fonts.heading
-  const T = TXT[lang] || TXT.az
+  const T = inv.copy(TXT)
   return (
     <motion.div {...gate.gateProps} data-ps
       animate={go ? { opacity: 0 } : {}}
@@ -79,7 +64,7 @@ function PillowOpening({ inv, theme, lang }) {
           {ot.show('kicker') && <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '.22em', textTransform: 'uppercase', color: C.LILAC_D }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 4, fontFamily: head, fontSize: 'clamp(50px, 15vw, 72px)', lineHeight: 1.05, overflowWrap: 'anywhere', color: C.INK }}>
-              {first}{second && <> &amp; {second}</>}
+              {first}{second && <> {ot.text('and')} {second}</>}
             </div>
           )}
         </div>
@@ -157,8 +142,8 @@ export default function PajamaSpaTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const PASTELS = [C.LILAC, C.MINT, C.PEACH, C.LILAC_L]
 
   return (
@@ -184,12 +169,12 @@ export default function PajamaSpaTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 15.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontSize: 23, color: C.INK }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontSize: 23, color: C.INK }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — yastıqlar */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: CREAM_BG, padding: '30px 22px 64px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: CREAM_BG, padding: '30px 22px 64px', textAlign: 'center' }}>
             <Moon size={44} style={{ position: 'absolute', right: '12%', top: 24 }} />
             <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', height: 'min(50vw, 200px)' }}>
               <Pillow width="min(46vw, 180px)" style={{ position: 'absolute', left: '50%', bottom: 0, transform: 'translateX(-86%) rotate(-8deg)' }} />
@@ -208,7 +193,7 @@ export default function PajamaSpaTemplate(props) {
 
           {/* SAYĞAC — yastıqlar */}
           {S.countdown && (
-            <Panel head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <div key={l} style={{ textAlign: 'center' }}>
@@ -226,7 +211,7 @@ export default function PajamaSpaTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', padding: 8, borderRadius: 32, background: alpha('#FFFFFF', 0.92), boxShadow: '0 24px 36px -22px rgba(0,0,0,.6)' }}>
                 <div style={{ borderRadius: 26, overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
@@ -245,7 +230,7 @@ export default function PajamaSpaTemplate(props) {
 
           {/* PROQRAM — xiyar dilimləri */}
           {S.program && (
-            <Panel head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 400, margin: '0 auto', display: 'grid', gap: 12 }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '40px 64px minmax(0, 1fr)', gap: 8, alignItems: 'center', padding: '12px 16px 12px 10px', borderRadius: 22, background: '#FFFFFF', boxShadow: `inset 0 0 0 2px ${PASTELS[i % 4]}, 0 10px 18px -14px rgba(59,46,90,.4)` }}>
@@ -259,7 +244,7 @@ export default function PajamaSpaTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={body} align="center" />
             </Panel>
@@ -267,7 +252,7 @@ export default function PajamaSpaTemplate(props) {
 
           {/* MASA — yuxu maskası */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="ps-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.LILAC_L, 0.8)} accent={C.MINT}
                 nameStyle={{ fontFamily: head, fontSize: 30, color: '#FFFFFF' }}
                 card={(num) => (
@@ -285,7 +270,7 @@ export default function PajamaSpaTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 16, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -302,7 +287,7 @@ export default function PajamaSpaTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: C.LINE, hair: alpha(C.LINE, 0.7), accent: C.LILAC_D,
                 font: body, display: head, displayItalic: false, btnFont: head,
@@ -315,7 +300,7 @@ export default function PajamaSpaTemplate(props) {
 
           {/* SÖZLƏR — danışıq buludları */}
           {S.guestbook && (
-            <Panel head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.MINT} />
               <div style={{ display: 'grid', gap: 18 }}>
                 {gbook.messages.map((raw, i) => {

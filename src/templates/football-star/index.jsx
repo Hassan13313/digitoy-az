@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, ageWord } from '../_shared/kids'
 import { C, PITCH_BG, NIGHT_BG, GOAL_WORD, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Ball, Goal, Jersey, Whistle } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -31,22 +32,6 @@ import { Ball, Goal, Jersey, Whistle } from './art'
 const BASE = getTemplateTheme('football-star')
 const ID = 'football-star'
 const LED = "'Tektur', 'Oswald', system-ui, sans-serif"
-
-const LABELS = {
-  countdown: { title: { az: 'Matça qədər', en: 'Until kick-off', ru: 'До начала матча' } },
-  venue:     { title: { az: 'Stadion', en: 'The stadium', ru: 'Стадион' } },
-  program:   { title: { az: 'Matçın gedişi', en: 'Match timeline', ru: 'Ход матча' } },
-  dresscode: { title: { az: 'Azarkeş forması', en: 'Fan kit', ru: 'Форма болельщика' } },
-  seating:   { title: { az: 'Tribunada yeriniz', en: 'Your seat in the stands', ru: 'Ваше место на трибуне' } },
-  gallery:   { title: { az: 'Kolleksiya kartları', en: 'Collector cards', ru: 'Коллекционные карточки' } },
-  rsvp:      { title: { az: 'Komandadasınız?', en: 'Are you in the squad?', ru: 'Вы в составе?' } },
-  guestbook: { title: { az: 'Azarkeş sözləri', en: 'Words from the fans', ru: 'Слова болельщиков' } },
-}
-const TXT = {
-  az: { table: 'Masa', home: 'EV', away: 'QONAQ' },
-  en: { table: 'Table', home: 'HOME', away: 'AWAY' },
-  ru: { table: 'Стол', home: 'ХОЗЯЕВА', away: 'ГОСТИ' },
-}
 
 const KEYFRAMES = `
 @keyframes fs-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -98,7 +83,7 @@ function GoalOpening({ inv, theme, lang }) {
         {ot.show('kicker') && <div style={{ fontFamily: head, fontWeight: 500, fontSize: 15, letterSpacing: '.22em', textTransform: 'uppercase', color: C.GOLD }}>{ot.text('kicker')}</div>}
         {titleOv !== '' && (
           <div style={{ marginTop: 6, fontFamily: head, fontWeight: 600, fontSize: 'clamp(44px, 13vw, 64px)', lineHeight: 1, textTransform: 'uppercase', color: C.WHITE, overflowWrap: 'anywhere', textShadow: '0 4px 0 rgba(0,0,0,.3)' }}>
-            {first}{second && <><span style={{ display: 'block', fontSize: '.45em', color: C.GOLD }}>&amp;</span>{second}</>}
+            {first}{second && <><span style={{ display: 'block', fontSize: '.45em', color: C.GOLD }}>{ot.text('and')}</span>{second}</>}
           </div>
         )}
         {ot.show('meta') && <div style={{ marginTop: 10, fontSize: 15, fontWeight: 500, color: alpha(C.WHITE, 0.8) }}>{ot.text('meta')}</div>}
@@ -158,8 +143,8 @@ export default function FootballStarTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const age = inv.age
 
   return (
@@ -185,12 +170,12 @@ export default function FootballStarTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.WHITE, 0.8), fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 600, fontSize: 18, letterSpacing: '.12em', textTransform: 'uppercase', color: C.GOLD }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontWeight: 600, fontSize: 18, letterSpacing: '.12em', textTransform: 'uppercase', color: C.GOLD }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — forma */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: NIGHT_BG, padding: '40px 20px 56px', textAlign: 'center', color: C.WHITE }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: NIGHT_BG, padding: '40px 20px 56px', textAlign: 'center', color: C.WHITE }}>
             <div style={{ fontFamily: head, fontWeight: 500, fontSize: 15, letterSpacing: '.24em', textTransform: 'uppercase', color: C.GOLD }}>{L('hero', 'kicker', inv.eventLabel)}</div>
             <h1 style={{ margin: '6px 0 0', fontFamily: head, fontWeight: 600, fontSize: nameSize(heroName), lineHeight: 1, textTransform: 'uppercase', color: C.WHITE, overflowWrap: 'anywhere', textShadow: '0 4px 0 rgba(0,0,0,.3)', animation: 'fs-rise 1s ease-out .2s both' }}>{heroName}</h1>
             <div style={{ perspective: 800, marginTop: 22 }}>
@@ -209,7 +194,7 @@ export default function FootballStarTemplate(props) {
 
           {/* SAYĞAC — tablo */}
           {S.countdown && (
-            <Panel head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ maxWidth: 420, margin: '0 auto', padding: '16px 14px 18px', borderRadius: 16, background: `linear-gradient(180deg, #1A2430, ${C.INK})`, border: `4px solid #2E3B4A`, boxShadow: '0 22px 36px -22px rgba(0,0,0,.7)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px 12px', fontFamily: head, fontWeight: 500, fontSize: 13, letterSpacing: '.18em', color: alpha(C.WHITE, 0.55) }}><span>{T.home}</span><span>{T.away}</span></div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8 }}>
@@ -230,7 +215,7 @@ export default function FootballStarTemplate(props) {
 
           {/* MƏKAN — meydança çərçivəsi */}
           {S.venue && (
-            <Panel head={head} pitch title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} pitch title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ position: 'relative', maxWidth: 430, margin: '0 auto', padding: 10, borderRadius: 10, background: C.PITCH_D, boxShadow: `inset 0 0 0 3px ${C.LINE}, 0 24px 40px -24px rgba(0,0,0,.6)` }}>
                 <div style={{ borderRadius: 4, overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
@@ -249,7 +234,7 @@ export default function FootballStarTemplate(props) {
 
           {/* PROQRAM — matçın gedişi */}
           {S.program && (
-            <Panel head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 400, margin: '0 auto', borderRadius: 16, overflow: 'hidden', background: C.WHITE, boxShadow: '0 18px 32px -24px rgba(8,26,46,.6)' }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '74px 32px minmax(0, 1fr)', alignItems: 'center', minHeight: 60, borderBottom: i < timeline.events.length - 1 ? `1px solid ${alpha(C.NAVY, 0.1)}` : 'none' }}>
@@ -263,7 +248,7 @@ export default function FootballStarTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -271,7 +256,7 @@ export default function FootballStarTemplate(props) {
 
           {/* MASA — forma */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} pitch title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} pitch title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="fs-seat-list" field={field} suggest={suggest} font={body} muted={alpha(C.WHITE, 0.85)} accent={C.GOLD}
                 nameStyle={{ fontFamily: head, fontWeight: 600, fontSize: 20, letterSpacing: '.04em', textTransform: 'uppercase' }}
                 card={(num) => (
@@ -284,7 +269,7 @@ export default function FootballStarTemplate(props) {
 
           {/* FOTOLAR — kartlar */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 10, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -301,7 +286,7 @@ export default function FootballStarTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.NAVY, 0.4), hair: alpha(C.NAVY, 0.15), accent: C.PITCH,
                 font: body, display: head, btnFont: head,
@@ -314,7 +299,7 @@ export default function FootballStarTemplate(props) {
 
           {/* AZARKEŞ SÖZLƏRİ */}
           {S.guestbook && (
-            <Panel head={head} pitch title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} pitch title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={field} btn={(on) => ({ ...btn(on), background: on ? C.GOLD : C.WHITE, color: C.NAVY, border: `2px solid ${on ? C.GOLD : C.WHITE}` })} errorColor={C.GOLD} />
               <div style={{ display: 'grid', gap: 12 }}>
                 {gbook.messages.map((raw, i) => {

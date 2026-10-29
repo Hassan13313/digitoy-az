@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize, ageWord } from '../_shared/kids'
 import { C, DOTS, SPEED, OUTLINE, SFX, BURST_SHARP, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Emblem, Burst, Bubble, Caption } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -30,21 +31,6 @@ import { Emblem, Burst, Bubble, Caption } from './art'
 const BASE = getTemplateTheme('hero-comic')
 const ID = 'hero-comic'
 
-const LABELS = {
-  countdown: { title: { az: 'Böyük macəraya qədər', en: 'Until the big adventure', ru: 'До большого приключения' } },
-  venue:     { title: { az: 'Qərargah', en: 'Headquarters', ru: 'Штаб-квартира' } },
-  program:   { title: { az: 'Günün süjeti', en: 'Today’s storyline', ru: 'Сюжет дня' } },
-  dresscode: { title: { az: 'Qəhrəman kostyumu', en: 'Hero costume', ru: 'Костюм героя' } },
-  seating:   { title: { az: 'Sizin missiyanız', en: 'Your mission', ru: 'Ваша миссия' } },
-  gallery:   { title: { az: 'Kadr-kadr', en: 'Frame by frame', ru: 'Кадр за кадром' } },
-  rsvp:      { title: { az: 'Komandaya qoşulursunuz?', en: 'Joining the team?', ru: 'Присоединитесь к команде?' } },
-  guestbook: { title: { az: 'Qəhrəmana mesaj', en: 'Message to the hero', ru: 'Послание герою' } },
-}
-const TXT = {
-  az: { table: 'Masa', mission: 'Missiya' },
-  en: { table: 'Table', mission: 'Mission' },
-  ru: { table: 'Стол', mission: 'Миссия' },
-}
 const PANEL_COLORS = [C.RED, C.BLUE, C.YELLOW, C.SKY]
 
 const KEYFRAMES = `
@@ -77,7 +63,7 @@ function Cover({ inv, head, hidden }) {
       {ot.show('kicker') && <Caption head={head} rotate={-3}>{ot.text('kicker')}</Caption>}
       {titleOv !== '' && (
         <div style={{ marginTop: 16, fontFamily: head, fontWeight: 800, fontSize: 'clamp(46px, 14vw, 66px)', lineHeight: 1, color: C.YELLOW, transform: 'rotate(-4deg) skewX(-6deg)', overflowWrap: 'anywhere', ...OUTLINE(4, 6) }}>
-          {first}{second && <><span style={{ display: 'block', fontSize: '.45em', color: C.WHITE }}>&amp;</span>{second}</>}
+          {first}{second && <><span style={{ display: 'block', fontSize: '.45em', color: C.WHITE }}>{ot.text('and')}</span>{second}</>}
         </div>
       )}
       {ot.show('meta') && (
@@ -167,8 +153,8 @@ export default function HeroComicTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const age = inv.age
 
   return (
@@ -193,12 +179,12 @@ export default function HeroComicTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.INK, fontWeight: 700, fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 800, fontSize: 16, color: C.RED, ...OUTLINE(1, 2) }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontWeight: 800, fontSize: 16, color: C.RED, ...OUTLINE(1, 2) }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — üz qabığı */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: `${DOTS('rgba(255,255,255,.14)', 9)}, ${SPEED()}`, padding: '40px 18px 56px', textAlign: 'center', borderBottom: `4px solid ${C.INK}` }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: `${DOTS('rgba(255,255,255,.14)', 9)}, ${SPEED()}`, padding: '40px 18px 56px', textAlign: 'center', borderBottom: `4px solid ${C.INK}` }}>
             <Emblem size={84} style={{ margin: '0 auto', animation: 'hc-wobble 3s ease-in-out infinite' }} />
             <div style={{ marginTop: 16 }}><Caption head={head} rotate={-3}>{L('hero', 'kicker', inv.eventLabel)}</Caption></div>
             <h1 style={{ margin: '20px 0 0', fontFamily: head, fontWeight: 800, fontSize: nameSize(heroName), lineHeight: 1, color: C.YELLOW, transform: 'rotate(-4deg) skewX(-6deg)', overflowWrap: 'anywhere', ...OUTLINE(4, 6) }}>{heroName}</h1>
@@ -220,7 +206,7 @@ export default function HeroComicTemplate(props) {
 
           {/* SAYĞAC — rəngli panellər */}
           {S.countdown && (
-            <Page head={head} panel={false} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Page section="countdown" head={head} panel={false} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12, maxWidth: 360, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <div key={l} style={{ position: 'relative', padding: '18px 10px 14px', textAlign: 'center', background: `${DOTS('rgba(255,255,255,.22)', 7)}, ${PANEL_COLORS[i]}`, border: `3px solid ${C.INK}`, boxShadow: `5px 5px 0 ${C.INK}`, transform: `rotate(${[-1.5, 1, 1.5, -1][i]}deg)` }}>
@@ -236,7 +222,7 @@ export default function HeroComicTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Page head={head} tint="#E9F4FB" panel={false} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Page section="venue" head={head} tint="#E9F4FB" panel={false} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ border: `3px solid ${C.INK}`, boxShadow: `7px 7px 0 ${C.INK}`, background: C.WHITE, overflow: 'hidden', isolation: 'isolate' }}>
                 <MapSection
                   weddingData={weddingData} theme={theme} accent={C.RED} height="clamp(250px, 70vw, 320px)"
@@ -253,7 +239,7 @@ export default function HeroComicTemplate(props) {
 
           {/* PROQRAM — komiks lenti */}
           {S.program && (
-            <Page head={head} panel={false} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Page section="program" head={head} panel={false} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 }}>
                 {timeline.events.map((ev, i) => {
                   const last = i === timeline.events.length - 1 && timeline.events.length % 2 === 1
@@ -272,7 +258,7 @@ export default function HeroComicTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Page head={head} tint="#FFF1B8" title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Page section="dresscode" head={head} tint="#FFF1B8" title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Page>
@@ -280,7 +266,7 @@ export default function HeroComicTemplate(props) {
 
           {/* MASA — missiya partlayışı */}
           {S.seating && !seating.isEmpty && (
-            <Page head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Page section="seating" head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="hc-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.RED}
                 nameStyle={{ fontFamily: head, fontWeight: 800, fontSize: 19, color: C.INK }}
                 card={(num) => (
@@ -294,7 +280,7 @@ export default function HeroComicTemplate(props) {
 
           {/* FOTOLAR — kadrlar */}
           {S.gallery && (
-            <Page id="gallery-section" head={head} tint="#E9F4FB" title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Page section="gallery" id="gallery-section" head={head} tint="#E9F4FB" title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8, marginBottom: 26 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -311,7 +297,7 @@ export default function HeroComicTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Page head={head} tint="#FFE1E3" title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Page section="rsvp" head={head} tint="#FFE1E3" title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: C.INK, hair: alpha(C.INK, 0.25), accent: C.RED,
                 font: body, display: head, btnFont: head,
@@ -324,7 +310,7 @@ export default function HeroComicTemplate(props) {
 
           {/* ARZULAR — balonlar */}
           {S.guestbook && (
-            <Page head={head} panel={false} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Page section="guestbook" head={head} panel={false} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <div style={{ background: C.WHITE, border: `3px solid ${C.INK}`, boxShadow: `7px 7px 0 ${C.INK}`, padding: '20px 16px 0', marginBottom: 30 }}>
                 <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.RED} />
               </div>

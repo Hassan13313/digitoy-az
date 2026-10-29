@@ -11,6 +11,8 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, BOARD_BG, PAPER_BG, chalky, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
+import { fill } from '../_shared/copyText'
 import { WoodFrame, ChalkTray, ChalkDoodle, ChalkLine } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -26,22 +28,6 @@ import { WoodFrame, ChalkTray, ChalkDoodle, ChalkLine } from './art'
 
 const BASE = getTemplateTheme('chalkboard')
 const ID = 'chalkboard'
-
-const LABELS = {
-  countdown: { title: { az: 'Zəngə nə qədər qaldı?', en: 'How long till the bell?', ru: 'Сколько до звонка?' } },
-  venue:     { title: { az: 'Ünvan', en: 'Address', ru: 'Адрес' } },
-  program:   { title: { az: 'Bu axşamın dərsləri', en: 'Tonight’s lessons', ru: 'Уроки этого вечера' } },
-  dresscode: { title: { az: 'Geyim forması', en: 'Uniform', ru: 'Форма одежды' } },
-  seating:   { title: { az: 'Yerin hardadır?', en: 'Where do you sit?', ru: 'Где твоё место?' } },
-  gallery:   { title: { az: 'Sinif lövhəsi', en: 'Class board', ru: 'Классная доска' } },
-  rsvp:      { title: { az: 'Yoxlama', en: 'Roll call', ru: 'Перекличка' } },
-  guestbook: { title: { az: 'Lövhəyə yaz', en: 'Write on the board', ru: 'Напиши на доске' } },
-}
-const TXT = {
-  az: { table: 'Masa', classOf: (y) => `Məzun ${y}` },
-  en: { table: 'Table', classOf: (y) => `Class of ${y}` },
-  ru: { table: 'Стол', classOf: (y) => `Выпуск ${y}` },
-}
 
 const KEYFRAMES = `
 @keyframes cb-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -76,7 +62,7 @@ function ChalkOpening({ inv, theme, lang, year }) {
   const { titleOv, first, second } = openingNames(inv)
   const go = gate.opening
   const head = theme.fonts.heading
-  const T = TXT[lang] || TXT.az
+  const T = inv.copy(TXT)
   return (
     <motion.div {...gate.gateProps} data-cb
       animate={go ? { opacity: 0 } : {}}
@@ -92,12 +78,12 @@ function ChalkOpening({ inv, theme, lang, year }) {
           </EmblemSlot>
           {year && (
             <div style={{ fontFamily: head, fontWeight: 700, fontSize: 'clamp(40px, 12vw, 56px)', lineHeight: 1, color: C.YELLOW, ...chalky }}>
-              <WriteLine on={go} delay={0.1} dur={0.55} ghost>{T.classOf(year)}</WriteLine>
+              <WriteLine on={go} delay={0.1} dur={0.55} ghost>{fill(T.classOf, { y: year })}</WriteLine>
             </div>
           )}
           {titleOv !== '' && (
             <div style={{ marginTop: 6, fontFamily: head, fontWeight: 700, fontSize: 'clamp(70px, 22vw, 104px)', lineHeight: 0.95, overflowWrap: 'anywhere', color: C.CHALK, ...chalky }}>
-              <WriteLine on={go} delay={0.7} dur={0.75} ghost>{first}{second ? ` & ${second}` : ''}</WriteLine>
+              <WriteLine on={go} delay={0.7} dur={0.75} ghost>{first}{second ? ` ${ot.text('and')} ${second}` : ''}</WriteLine>
             </div>
           )}
           <ChalkLine width={210} draw={go} delay={1.4} color={C.PINK} style={{ marginTop: 6 }} />
@@ -161,8 +147,8 @@ export default function ChalkboardTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const year = inv.dp?.year || ''
 
   return (
@@ -188,19 +174,19 @@ export default function ChalkboardTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.CHALK, 0.8), fontSize: 16, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 700, fontSize: 30, lineHeight: 1, color: C.CHALK }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontWeight: 700, fontSize: 30, lineHeight: 1, color: C.CHALK }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — yazılmış lövhə */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: BOARD_BG, padding: '66px 30px 92px', textAlign: 'center', color: C.CHALK }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: BOARD_BG, padding: '66px 30px 92px', textAlign: 'center', color: C.CHALK }}>
             <WoodFrame thick={12} />
             <ChalkDoodle kind="star" size={38} color={C.YELLOW} style={{ position: 'absolute', left: '9%', top: '12%' }} />
             <ChalkDoodle kind="cap" size={44} color={C.BLUE} style={{ position: 'absolute', right: '9%', top: '10%' }} />
             <ChalkDoodle kind="sun" size={34} color={C.YELLOW} style={{ position: 'absolute', left: '10%', bottom: 44 }} />
             <div style={{ position: 'relative' }}>
               <div style={{ fontFamily: head, fontWeight: 700, fontSize: 26, letterSpacing: '.08em', color: C.CHALK_DIM, ...chalky }}>{L('hero', 'kicker', inv.eventLabel)}</div>
-              {year && <div style={{ marginTop: 4, fontFamily: head, fontWeight: 700, fontSize: 'clamp(40px, 12vw, 54px)', lineHeight: 1, color: C.YELLOW, ...chalky }}>{T.classOf(year)}</div>}
+              {year && <div style={{ marginTop: 4, fontFamily: head, fontWeight: 700, fontSize: 'clamp(40px, 12vw, 54px)', lineHeight: 1, color: C.YELLOW, ...chalky }}>{fill(T.classOf, { y: year })}</div>}
               <h1 style={{ margin: '6px 0 0', fontFamily: head, fontWeight: 700, fontSize: nameSize(heroName), lineHeight: 0.95, overflowWrap: 'anywhere', color: C.CHALK, ...chalky }}>{heroName}</h1>
               <ChalkLine width={220} color={C.PINK} style={{ marginTop: 4 }} />
               <div style={{ marginTop: 18, fontFamily: head, fontWeight: 700, fontSize: 'clamp(28px, 8vw, 34px)', lineHeight: 1.1, color: C.CHALK, ...chalky }}>{inv.fullDate}</div>
@@ -213,7 +199,7 @@ export default function ChalkboardTemplate(props) {
 
           {/* SAYĞAC — təbaşir qutuları */}
           {S.countdown && (
-            <Panel head={head} doodle="sun" title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} doodle="sun" title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <div key={l} style={{ textAlign: 'center' }}>
@@ -231,7 +217,7 @@ export default function ChalkboardTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} dark doodle="arrow" title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} dark doodle="arrow" title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', padding: 6, borderRadius: 4, border: `2.5px dashed ${alpha(C.CHALK, 0.6)}` }}>
                 <div style={{ overflow: 'hidden', isolation: 'isolate', borderRadius: 2 }}>
                   <MapSection
@@ -250,7 +236,7 @@ export default function ChalkboardTemplate(props) {
 
           {/* PROQRAM — oxlu siyahı */}
           {S.program && (
-            <Panel head={head} dark doodle="aplus" title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} dark doodle="aplus" title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 380, margin: '0 auto' }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '80px 36px minmax(0, 1fr)', alignItems: 'center', gap: 4, padding: '8px 0' }}>
@@ -264,7 +250,7 @@ export default function ChalkboardTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} doodle="heart" title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} doodle="heart" title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={body} align="center" />
             </Panel>
@@ -272,7 +258,7 @@ export default function ChalkboardTemplate(props) {
 
           {/* MASA — kiçik lövhə */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} doodle="star" title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} doodle="star" title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="cb-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.WOOD_D}
                 nameStyle={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
                 card={(num) => (
@@ -289,7 +275,7 @@ export default function ChalkboardTemplate(props) {
 
           {/* FOTOLAR — maqnitlər */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} dark doodle="heart" title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} dark doodle="heart" title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 18, marginBottom: 34, paddingTop: 8 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -307,7 +293,7 @@ export default function ChalkboardTemplate(props) {
 
           {/* RSVP — yoxlama */}
           {S.rsvp && (
-            <Panel head={head} doodle="aplus" title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} doodle="aplus" title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: C.LINE, hair: alpha(C.LINE, 0.7), accent: C.BOARD,
                 font: body, display: head, displayItalic: false, btnFont: head,
@@ -320,7 +306,7 @@ export default function ChalkboardTemplate(props) {
 
           {/* ARZULAR — lövhəyə yazılanlar */}
           {S.guestbook && (
-            <Panel head={head} dark doodle="heart" title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} dark doodle="heart" title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.PINK} />
               <div style={{ display: 'grid', gap: 22, marginTop: 6 }}>
                 {gbook.messages.map((raw, i) => {

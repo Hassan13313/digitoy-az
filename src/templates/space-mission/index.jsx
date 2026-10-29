@@ -12,6 +12,7 @@ import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { ageSentence, ageWord, kidsGalleryDesc, tableNum, tableSize } from '../_shared/kids'
 import { C } from './palette'
+import { LABELS, TXT } from './copy'
 import { Stars, Rocket, Planet, Gantry, Smoke, RadarGrid, MissionPatch, Helmet, StarMark, OrbitIcon, Comet } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -36,22 +37,6 @@ const ID = 'space-mission'
 /* Tektur — yalnız rəqəmlər üçün (LED ekranlar). Hərflərdə «Y» «V»-yə bənzəyir,
    ona görə adlar və başlıqlar Unbounded, kiçik etiketlər Exo 2 ilə yazılır. */
 const LED = FONT_STACKS.tektur
-
-const LABELS = {
-  countdown: { title: { az: 'Starta qədər', en: 'Countdown to launch', ru: 'До старта' } },
-  venue:     { title: { az: 'Eniş nöqtəsi', en: 'Landing site', ru: 'Место посадки' } },
-  program:   { title: { az: 'Uçuş planı', en: 'Flight plan', ru: 'План полёта' } },
-  dresscode: { title: { az: 'Ekipaj forması', en: 'Crew uniform', ru: 'Форма экипажа' } },
-  seating:   { title: { az: 'Bortdakı yeriniz', en: 'Your seat on board', ru: 'Ваше место на борту' } },
-  gallery:   { title: { az: 'İlluminatorlar', en: 'Portholes', ru: 'Иллюминаторы' } },
-  rsvp:      { title: { az: 'Ekipaja qoşulun', en: 'Join the crew', ru: 'Присоединяйтесь к экипажу' } },
-  guestbook: { title: { az: 'Kosmosdan siqnallar', en: 'Signals from space', ru: 'Сигналы из космоса' } },
-}
-const TXT = {
-  az: { table: 'Masa', crew: 'EKİPAJ ÜZVÜ', mission: 'MİSSİYA', signal: 'SİQNAL', date: 'Tarix', time: 'Saat', place: 'Məkan', status: 'Bütün sistemlər hazırdır' },
-  en: { table: 'Table', crew: 'CREW MEMBER', mission: 'MISSION', signal: 'SIGNAL', date: 'Date', time: 'Time', place: 'Venue', status: 'All systems go' },
-  ru: { table: 'Стол', crew: 'ЧЛЕН ЭКИПАЖА', mission: 'МИССИЯ', signal: 'СИГНАЛ', date: 'Дата', time: 'Время', place: 'Место', status: 'Все системы готовы' },
-}
 
 const KEYFRAMES = `
 @keyframes sm-twinkle { 0%,100% { opacity: .3 } 50% { opacity: 1 } }
@@ -155,7 +140,7 @@ function LaunchOpening({ inv, theme }) {
         {ot.show('kicker') && <div style={{ fontFamily: theme.fonts.body, fontWeight: 700, fontSize: 13, letterSpacing: '.24em', color: C.MINT, animation: 'sm-rise .8s ease-out .2s both' }}>{upAz(ot.text('kicker'), inv.lang)}</div>}
         {titleOv !== '' && (
           <div style={{ marginTop: 8, fontFamily: disp, fontWeight: 800, fontSize: 'clamp(34px, 11vw, 54px)', lineHeight: 1, color: C.WHITE, textShadow: `0 0 24px ${alpha(C.SUN, 0.45)}`, overflowWrap: 'anywhere', animation: 'sm-rise .9s ease-out .35s both' }}>
-            {first}{second && <><span style={{ display: 'block', fontSize: '.45em', color: C.SUN, margin: '4px 0' }}>&amp;</span>{second}</>}
+            {first}{second && <><span style={{ display: 'block', fontSize: '.45em', color: C.SUN, margin: '4px 0' }}>{ot.text('and')}</span>{second}</>}
           </div>
         )}
         {ot.show('meta') && <div style={{ marginTop: 10, fontFamily: LED, fontSize: 15, letterSpacing: '.14em', color: alpha(C.WHITE, 0.85), animation: 'sm-rise .8s ease-out .5s both' }}>{ot.text('meta')}</div>}
@@ -213,7 +198,7 @@ export default function SpaceMissionTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const disp = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
+  const T = inv.copy(TXT)
   const age = inv.age
   const ll = parseLatLon(weddingData)
   const coords = ll ? `${Math.abs(ll[0]).toFixed(4)}° ${ll[0] >= 0 ? 'N' : 'S'} · ${Math.abs(ll[1]).toFixed(4)}° ${ll[1] >= 0 ? 'E' : 'W'}` : ''
@@ -243,12 +228,12 @@ export default function SpaceMissionTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: disp, fontWeight: 700, fontSize: 15, letterSpacing: '.06em', color: C.SUN }}>DIGITOY</div>
+            <div style={{ fontFamily: disp, fontWeight: 700, fontSize: 15, letterSpacing: '.06em', color: C.SUN }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — halqalı planet */}
-          <section style={{ position: 'relative', overflow: 'hidden', padding: '34px 20px 44px', background: `radial-gradient(110% 60% at 85% 8%, ${C.VIOLET}, ${C.SPACE} 52%, ${C.DEEP})` }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', padding: '34px 20px 44px', background: `radial-gradient(110% 60% at 85% 8%, ${C.VIOLET}, ${C.SPACE} 52%, ${C.DEEP})` }}>
             <Stars count={60} />
             <Comet width={110} style={{ position: 'absolute', left: '4%', top: 70, transform: 'rotate(-14deg)', opacity: 0.8 }} />
             <Planet size={46} c1={C.MINT} c2="#2BAE8A" craters style={{ position: 'absolute', left: '8%', top: '44%', animation: 'sm-drift 8s ease-in-out infinite' }} />
@@ -257,7 +242,7 @@ export default function SpaceMissionTemplate(props) {
             <div style={{ position: 'relative', textAlign: 'center' }}>
               <div style={{ fontFamily: body, fontWeight: 700, fontSize: 13, letterSpacing: '.26em', color: C.MINT }}>{upAz(L('hero', 'kicker', `${T.mission} · ${inv.eventLabel}`), lang)}</div>
               <h1 style={{ margin: '10px 0 0', fontFamily: disp, fontWeight: 800, fontSize: 'clamp(38px, 12vw, 58px)', lineHeight: 1, color: C.WHITE, textShadow: `0 0 30px ${alpha(C.SUN, 0.35)}`, textWrap: 'balance', overflowWrap: 'anywhere' }}>
-                {inv.heroTitle ? inv.heroTitle : inv.isCouple ? <>{inv.groom} <span style={{ color: C.SUN }}>&amp;</span> {inv.bride}</> : inv.single}
+                {inv.heroTitle ? inv.heroTitle : inv.isCouple ? <>{inv.groom} <span style={{ color: C.SUN }}>{inv.and}</span> {inv.bride}</> : inv.single}
               </h1>
               {age && <div style={{ marginTop: 10, fontSize: 17, color: C.MUTED }}>{ageSentence(age, lang)}</div>}
             </div>
@@ -301,7 +286,7 @@ export default function SpaceMissionTemplate(props) {
 
           {/* SAYĞAC — missiya pultu */}
           {S.countdown && (
-            <Deck disp={disp} deep title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Deck section="countdown" disp={disp} deep title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ maxWidth: 400, margin: '0 auto', padding: '14px 14px 16px', borderRadius: 22, background: `linear-gradient(180deg, ${C.PANEL_L}, ${C.PANEL})`, border: `1px solid ${alpha(C.WHITE, 0.08)}`, boxShadow: 'inset 0 1px 0 rgba(255,255,255,.12), 0 24px 44px -22px rgba(0,0,0,.8)' }}>
                 <div aria-hidden="true" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, padding: '0 4px' }}>
                   <div style={{ display: 'flex', gap: 6 }}>
@@ -340,7 +325,7 @@ export default function SpaceMissionTemplate(props) {
 
           {/* MƏKAN — radar ekranı */}
           {S.venue && (
-            <Deck disp={disp} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Deck section="venue" disp={disp} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ position: 'relative', width: 'min(84vw, 340px)', margin: '0 auto', padding: 10, borderRadius: '50%', background: `radial-gradient(circle, ${C.PANEL_L}, ${C.PANEL})`, boxShadow: `0 0 0 2px ${alpha(C.MINT, 0.5)}, 0 0 44px ${alpha(C.MINT, 0.22)}` }}>
                 <div style={{ borderRadius: '50%', overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
@@ -365,7 +350,7 @@ export default function SpaceMissionTemplate(props) {
 
           {/* PROQRAM — uçuş planı */}
           {S.program && (
-            <Deck disp={disp} deep title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Deck section="program" disp={disp} deep title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <ol style={{ position: 'relative', listStyle: 'none', margin: '0 auto', padding: 0, maxWidth: 400 }}>
                 <span aria-hidden="true" style={{ position: 'absolute', left: 31, top: 30, bottom: 30, borderLeft: `2px dashed ${alpha(C.WHITE, 0.22)}` }} />
                 {timeline.events.map((ev, i) => {
@@ -388,7 +373,7 @@ export default function SpaceMissionTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Deck disp={disp} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Deck section="dresscode" disp={disp} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={disp} align="center" />
             </Deck>
@@ -396,7 +381,7 @@ export default function SpaceMissionTemplate(props) {
 
           {/* MASA — missiya nişanı */}
           {S.seating && !seating.isEmpty && (
-            <Deck disp={disp} deep title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Deck section="seating" disp={disp} deep title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <input {...seatInputProps(inv, 'sm-seat-list')} style={field} />
               <SeatSuggest inv={inv} id="sm-seat-list" c={{ ...suggest, font: body }} />
               {seating.showNotFound && <div style={{ marginTop: 12, fontSize: 15, color: C.MUTED, textAlign: 'center' }}>{tr.inv_seat_fullname}</div>}
@@ -418,7 +403,7 @@ export default function SpaceMissionTemplate(props) {
 
           {/* FOTOLAR — illuminatorlar */}
           {S.gallery && (
-            <Deck id="gallery-section" disp={disp} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Deck section="gallery" id="gallery-section" disp={disp} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8, marginBottom: 30 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -443,7 +428,7 @@ export default function SpaceMissionTemplate(props) {
 
           {/* RSVP — ekipaja qoşulun */}
           {S.rsvp && (
-            <Deck disp={disp} deep title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Deck section="rsvp" disp={disp} deep title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.WHITE, muted: C.MUTED, line: alpha(C.WHITE, 0.35), hair: alpha(C.WHITE, 0.12), accent: C.SUN,
                 font: body, display: disp, btnFont: body, btnUpper: true, btnTracking: '.12em',
@@ -455,7 +440,7 @@ export default function SpaceMissionTemplate(props) {
 
           {/* KOSMOSDAN SİQNALLAR */}
           {S.guestbook && (
-            <Deck disp={disp} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Deck section="guestbook" disp={disp} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 30 }}>
                 <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbookL.namePh} style={field} />
                 <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbookL.msgPh} rows={3} style={{ ...field, resize: 'none', lineHeight: 1.5 }} />

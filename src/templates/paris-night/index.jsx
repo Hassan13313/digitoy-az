@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, NIGHT_BG, PAPER_BG, MACARONS, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { EiffelTower, Macaron, HatBox, Bow, Awning, Postmark, Rooftops } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -28,22 +29,6 @@ import { EiffelTower, Macaron, HatBox, Bow, Awning, Postmark, Rooftops } from '.
 const BASE = getTemplateTheme('paris-night')
 const ID = 'paris-night'
 const SCRIPT = "'Comforter Brush', 'Caveat', cursive"
-
-const LABELS = {
-  countdown: { title: { az: 'Parisə qədər', en: 'Until Paris', ru: 'До Парижа' } },
-  venue:     { title: { az: 'Görüş yeri', en: 'Rendez-vous', ru: 'Место встречи' } },
-  program:   { title: { az: 'Gecənin menyusu', en: 'Tonight’s menu', ru: 'Меню вечера' } },
-  dresscode: { title: { az: 'Geyim', en: 'Dress code', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Masan hazırdır', en: 'Your table', ru: 'Твой стол' } },
-  gallery:   { title: { az: 'Paris xatirələri', en: 'Paris memories', ru: 'Парижские снимки' } },
-  rsvp:      { title: { az: 'Gəlirsən?', en: 'Will you come?', ru: 'Придёшь?' } },
-  guestbook: { title: { az: 'Gəlinə məktublar', en: 'Letters to the bride', ru: 'Письма невесте' } },
-}
-const TXT = {
-  az: { table: 'Masa', ooh: 'Ooh là là!', menu: 'Menyu' },
-  en: { table: 'Table', ooh: 'Ooh là là!', menu: 'Menu' },
-  ru: { table: 'Стол', ooh: 'Ooh là là!', menu: 'Меню' },
-}
 
 const KEYFRAMES = `
 @keyframes pn-in { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -83,7 +68,7 @@ function HatboxOpening({ inv, theme }) {
           {ot.show('kicker') && <div style={{ fontFamily: SCRIPT, fontSize: 40, lineHeight: 1, color: C.ROSE }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 6, fontFamily: head, fontSize: 'clamp(58px, 18vw, 84px)', lineHeight: 1, textTransform: 'uppercase', letterSpacing: '.04em', overflowWrap: 'anywhere', color: C.GOLD, textShadow: '0 0 18px rgba(225,188,120,.35)' }}>
-              {first}{second && <> &amp; {second}</>}
+              {first}{second && <> {ot.text('and')} {second}</>}
             </div>
           )}
         </div>
@@ -152,8 +137,8 @@ export default function ParisNightTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
     <div data-pn lang={lang} data-enter={enterDirection(ID)} style={{
@@ -178,12 +163,12 @@ export default function ParisNightTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.BLUSH, fontSize: 15.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontSize: 28, letterSpacing: '.08em', textTransform: 'uppercase', color: C.GOLD }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontSize: 28, letterSpacing: '.08em', textTransform: 'uppercase', color: C.GOLD }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — gecə Parisi */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: NIGHT_BG, padding: '26px 22px 0', textAlign: 'center', color: C.BLUSH }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: NIGHT_BG, padding: '26px 22px 0', textAlign: 'center', color: C.BLUSH }}>
             <span aria-hidden="true" style={{ position: 'absolute', left: '14%', top: 40, width: 40, height: 40, borderRadius: '50%', boxShadow: `-9px 4px 0 0 ${C.MOON}`, transform: 'rotate(-20deg)' }} />
             <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
               <EiffelTower height="min(74vw, 300px)" sparkle />
@@ -206,7 +191,7 @@ export default function ParisNightTemplate(props) {
 
           {/* SAYĞAC — makaronlar */}
           {S.countdown && (
-            <Panel head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <div key={l} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -224,7 +209,7 @@ export default function ParisNightTemplate(props) {
 
           {/* MƏKAN — qızılı çərçivə */}
           {S.venue && (
-            <Panel head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', padding: 6, border: `1px solid ${C.GOLD}`, borderRadius: 4 }}>
                 <div style={{ padding: 6, border: `3px double ${alpha(C.GOLD, 0.8)}`, borderRadius: 2 }}>
                   <div style={{ overflow: 'hidden', isolation: 'isolate' }}>
@@ -245,7 +230,7 @@ export default function ParisNightTemplate(props) {
 
           {/* PROQRAM — bistro menyusu */}
           {S.program && (
-            <Panel head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 420, margin: '0 auto', borderRadius: '0 0 18px 18px', background: '#FFFFFF', boxShadow: '0 22px 34px -24px rgba(28,33,64,.5)', overflow: 'hidden' }}>
                 <Awning />
                 <div style={{ padding: '14px 22px 26px' }}>
@@ -266,7 +251,7 @@ export default function ParisNightTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={body} align="center" />
             </Panel>
@@ -274,7 +259,7 @@ export default function ParisNightTemplate(props) {
 
           {/* MASA — şirniyyat qutusu */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="pn-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.BLUSH, 0.8)} accent={C.ROSE}
                 nameStyle={{ fontFamily: head, fontSize: 38, letterSpacing: '.04em', textTransform: 'uppercase', color: C.GOLD }}
                 card={(num) => (
@@ -292,7 +277,7 @@ export default function ParisNightTemplate(props) {
 
           {/* FOTOLAR — açıqcalar */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 18, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -310,7 +295,7 @@ export default function ParisNightTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: C.LINE, hair: alpha(C.LINE, 0.8), accent: C.ROSE_D,
                 font: body, display: head, displayItalic: false, btnFont: body,
@@ -323,7 +308,7 @@ export default function ParisNightTemplate(props) {
 
           {/* MƏKTUBLAR */}
           {S.guestbook && (
-            <Panel head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.ROSE} />
               <div style={{ display: 'grid', gap: 18 }}>
                 {gbook.messages.map((raw, i) => {

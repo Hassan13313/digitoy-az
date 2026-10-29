@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, BRICKS, glow, boxGlow, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { NeonStar, NeonFrame, NeonRule } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -30,21 +31,6 @@ const BASE = getTemplateTheme('neon-party')
 const ID = 'neon-party'
 const NEON = "'Lobster', 'Pacifico', cursive"
 
-const LABELS = {
-  countdown: { title: { az: 'Partiyə qədər', en: 'Until the party', ru: 'До вечеринки' } },
-  venue:     { title: { az: 'Harada?', en: 'Where?', ru: 'Где?' } },
-  program:   { title: { az: 'Gecənin ritmi', en: 'Rhythm of the night', ru: 'Ритм ночи' } },
-  dresscode: { title: { az: 'Geyim', en: 'Dress code', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Masanız', en: 'Your table', ru: 'Ваш стол' } },
-  gallery:   { title: { az: 'Neon kadrlar', en: 'Neon shots', ru: 'Неоновые кадры' } },
-  rsvp:      { title: { az: 'Gəlirsiniz?', en: 'Are you in?', ru: 'Вы с нами?' } },
-  guestbook: { title: { az: 'Divara yazın', en: 'Write on the wall', ru: 'Напишите на стене' } },
-}
-const TXT = {
-  az: { table: 'Masa', host: 'Təşkilatçı' },
-  en: { table: 'Table', host: 'Hosted by' },
-  ru: { table: 'Стол', host: 'Организатор' },
-}
 const RING = [C.PINK, C.CYAN, C.VIOLET, C.YELLOW]
 
 const KEYFRAMES = `
@@ -90,7 +76,7 @@ function NeonOpening({ inv, theme }) {
           {ot.show('kicker') && <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: '.3em', textTransform: 'uppercase', ...neonText(C.CYAN, go, 0.7), animation: fl(0.15) }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 8, fontFamily: NEON, fontSize: 'clamp(42px, 13vw, 62px)', lineHeight: 1.08, overflowWrap: 'anywhere', ...neonText(C.PINK, go), animation: fl(0.3) }}>
-              {first}{second && <><span style={{ display: 'block', fontSize: '.5em', ...neonText(C.VIOLET, go) }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'block', fontSize: '.5em', ...neonText(C.VIOLET, go) }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
           {ot.show('meta') && <div style={{ marginTop: 12, fontSize: 15, fontWeight: 500, letterSpacing: '.08em', ...neonText(C.YELLOW, go, 0.5), animation: fl(0.45) }}>{ot.text('meta')}</div>}
@@ -145,8 +131,8 @@ export default function NeonPartyTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const host = inv.isCorp ? weddingData.organizer?.trim() : ''
 
   return (
@@ -172,12 +158,12 @@ export default function NeonPartyTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: NEON, fontSize: 22, ...neonText(C.PINK, true, 0.6) }}>Digitoy</div>
+            <div style={{ fontFamily: NEON, fontSize: 22, ...neonText(C.PINK, true, 0.6) }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — neon lövhə */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: WALL_BG, padding: '46px 20px 58px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: WALL_BG, padding: '46px 20px 58px', textAlign: 'center' }}>
             <NeonFrame color={C.CYAN} radius={30} style={{ maxWidth: 420, margin: '0 auto', padding: '36px 20px 32px', animation: 'np-buzz 6s linear infinite' }}>
               <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: '.3em', textTransform: 'uppercase', ...neonText(C.CYAN, true, 0.7) }}>{L('hero', 'kicker', inv.eventLabel)}</div>
               <h1 style={{ margin: '10px 0 0', fontFamily: NEON, fontWeight: 400, fontSize: nameSize(heroName), lineHeight: 1.08, overflowWrap: 'anywhere', ...neonText(C.PINK), animation: 'np-rise .9s ease-out .2s both' }}>{heroName}</h1>
@@ -193,7 +179,7 @@ export default function NeonPartyTemplate(props) {
 
           {/* SAYĞAC */}
           {S.countdown && (
-            <Panel head={head} alt tone={C.CYAN} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} alt tone={C.CYAN} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <NeonFrame key={l} color={RING[i]} radius={16} style={{ padding: '18px 4px 12px', textAlign: 'center' }}>
@@ -209,7 +195,7 @@ export default function NeonPartyTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} tone={C.VIOLET} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} tone={C.VIOLET} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <NeonFrame color={C.VIOLET} radius={22} style={{ maxWidth: 430, margin: '0 auto', padding: 6 }}>
                 <div style={{ borderRadius: 16, overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
@@ -228,7 +214,7 @@ export default function NeonPartyTemplate(props) {
 
           {/* PROQRAM */}
           {S.program && (
-            <Panel head={head} alt tone={C.YELLOW} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} alt tone={C.YELLOW} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ position: 'relative', maxWidth: 380, margin: '0 auto' }}>
                 <span aria-hidden="true" style={{ position: 'absolute', left: 21, top: 14, bottom: 14, width: 2, borderRadius: 2, background: '#FFFFFF', boxShadow: `0 0 6px ${C.VIOLET}, 0 0 14px ${C.VIOLET}` }} />
                 {timeline.events.map((ev, i) => (
@@ -245,7 +231,7 @@ export default function NeonPartyTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} tone={C.PINK} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} tone={C.PINK} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -253,7 +239,7 @@ export default function NeonPartyTemplate(props) {
 
           {/* MASA — neon lövhə */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} alt tone={C.CYAN} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} alt tone={C.CYAN} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="np-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.CYAN}
                 nameStyle={{ fontWeight: 700, fontSize: 19 }}
                 card={(num) => (
@@ -267,7 +253,7 @@ export default function NeonPartyTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} tone={C.VIOLET} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} tone={C.VIOLET} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 14, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -284,7 +270,7 @@ export default function NeonPartyTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} alt tone={C.PINK} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} alt tone={C.PINK} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.WHITE, muted: C.MUTED, line: alpha(C.VIOLET, 0.6), hair: alpha(C.VIOLET, 0.3), accent: C.PINK,
                 font: body, display: NEON, btnFont: body,
@@ -297,7 +283,7 @@ export default function NeonPartyTemplate(props) {
 
           {/* DİVARA YAZIN */}
           {S.guestbook && (
-            <Panel head={head} tone={C.YELLOW} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} tone={C.YELLOW} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.PINK} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

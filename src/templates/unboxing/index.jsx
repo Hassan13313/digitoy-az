@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, STAGE_BG, PEARL_BG, VIOLET_GRAD, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Rays, Orb, GiftBox, NewChip } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -26,22 +27,6 @@ import { Rays, Orb, GiftBox, NewChip } from './art'
 
 const BASE = getTemplateTheme('unboxing')
 const ID = 'unboxing'
-
-const LABELS = {
-  countdown: { title: { az: 'Təqdimata qədər', en: 'Until the reveal', ru: 'До презентации' } },
-  venue:     { title: { az: 'Məkan', en: 'Venue', ru: 'Место' } },
-  program:   { title: { az: 'Təqdimat planı', en: 'Launch agenda', ru: 'План презентации' } },
-  dresscode: { title: { az: 'Geyim', en: 'Dress code', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Giriş kartınız', en: 'Your pass', ru: 'Ваш пропуск' } },
-  gallery:   { title: { az: 'Təqdimat anları', en: 'Launch moments', ru: 'Моменты презентации' } },
-  rsvp:      { title: { az: 'Yerinizi təsdiqləyin', en: 'Reserve your spot', ru: 'Подтвердите место' } },
-  guestbook: { title: { az: 'Rəyləriniz', en: 'Your words', ru: 'Ваши отзывы' } },
-}
-const TXT = {
-  az: { table: 'Masa', fresh: 'Yeni', launch: 'Təqdimat', pass: 'Giriş kartı' },
-  en: { table: 'Table', fresh: 'New', launch: 'Launch', pass: 'Access pass' },
-  ru: { table: 'Стол', fresh: 'Новинка', launch: 'Презентация', pass: 'Пропуск' },
-}
 
 const KEYFRAMES = `
 @keyframes ub-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -68,7 +53,7 @@ function UnboxOpening({ inv, theme, lang }) {
   const { titleOv, first, second } = openingNames(inv)
   const go = gate.opening
   const head = theme.fonts.heading
-  const T = TXT[lang] || TXT.az
+  const T = inv.copy(TXT)
   return (
     <motion.div {...gate.gateProps} data-ub
       animate={go ? { opacity: 0 } : {}}
@@ -80,7 +65,7 @@ function UnboxOpening({ inv, theme, lang }) {
           {ot.show('kicker') && <div style={{ fontSize: 12.5, fontWeight: 600, letterSpacing: '.3em', textTransform: 'uppercase', color: C.VIOLET_L }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 10, fontWeight: 800, fontSize: 'clamp(32px, 9.6vw, 46px)', lineHeight: 1.04, letterSpacing: '-.01em', overflowWrap: 'anywhere', ...violetText }}>
-              {first}{second && <> &amp; {second}</>}
+              {first}{second && <> {ot.text('and')} {second}</>}
             </div>
           )}
         </div>
@@ -152,8 +137,8 @@ export default function UnboxingTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
     <div data-ub lang={lang} data-enter={enterDirection(ID)} style={{
@@ -178,12 +163,12 @@ export default function UnboxingTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.PEARL, 0.7), fontSize: 15, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontWeight: 800, fontSize: 19, letterSpacing: '-.01em', color: C.PEARL }}>Digitoy</div>
+            <div style={{ fontWeight: 800, fontSize: 19, letterSpacing: '-.01em', color: C.PEARL }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — açılmış qutu, havada məhsul */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: STAGE_BG, padding: '30px 22px 66px', textAlign: 'center', color: C.PEARL }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: STAGE_BG, padding: '30px 22px 66px', textAlign: 'center', color: C.PEARL }}>
             <div style={{ position: 'relative', width: 'min(48vw, 190px)', margin: '0 auto', paddingTop: 'calc(min(48vw, 190px) * .8)' }}>
               <Rays size={380} style={{ top: '30%' }} />
               <div style={{ position: 'absolute', left: '50%', top: 0, transform: 'translateX(-50%)', animation: 'ub-float 4s ease-in-out infinite' }}><Orb size={88} /></div>
@@ -199,7 +184,7 @@ export default function UnboxingTemplate(props) {
 
           {/* SAYĞAC — şüşə kartlar */}
           {S.countdown && (
-            <Panel dark title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" dark title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop]) => (
                   <div key={l} style={{ padding: '18px 0 14px', borderRadius: 18, textAlign: 'center', background: 'linear-gradient(160deg, rgba(255,255,255,.12), rgba(255,255,255,.03))', border: `1px solid ${alpha(C.VIOLET_L, 0.25)}`, backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
@@ -215,7 +200,7 @@ export default function UnboxingTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', borderRadius: 24, overflow: 'hidden', isolation: 'isolate', boxShadow: '0 30px 50px -30px rgba(21,21,48,.5)' }}>
                 <MapSection
                   weddingData={weddingData} theme={theme} accent={C.VIOLET} height="clamp(240px, 66vw, 300px)"
@@ -232,7 +217,7 @@ export default function UnboxingTemplate(props) {
 
           {/* PROQRAM — göstəricilər cədvəli */}
           {S.program && (
-            <Panel title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 420, margin: '0 auto', borderTop: `1px solid ${C.LINE}` }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '84px minmax(0, 1fr)', gap: 12, alignItems: 'baseline', padding: '18px 4px', borderBottom: `1px solid ${C.LINE}` }}>
@@ -245,7 +230,7 @@ export default function UnboxingTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={body} align="center" />
             </Panel>
@@ -253,7 +238,7 @@ export default function UnboxingTemplate(props) {
 
           {/* MASA — giriş kartı */}
           {S.seating && !seating.isEmpty && (
-            <Panel dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="ub-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.PEARL, 0.7)} accent={C.VIOLET_L}
                 nameStyle={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
                 card={(num) => (
@@ -275,7 +260,7 @@ export default function UnboxingTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12, marginBottom: 34 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -292,7 +277,7 @@ export default function UnboxingTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: C.LINE, hair: alpha(C.LINE, 0.7), accent: C.VIOLET,
                 font: body, display: body, displayItalic: false, btnFont: body,
@@ -305,7 +290,7 @@ export default function UnboxingTemplate(props) {
 
           {/* RƏYLƏR */}
           {S.guestbook && (
-            <Panel dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.VIOLET_L} />
               <div style={{ display: 'grid', gap: 12 }}>
                 {gbook.messages.map((raw, i) => {

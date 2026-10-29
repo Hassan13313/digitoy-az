@@ -11,6 +11,8 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, SKY_BG, NIGHT_BG, LINED, AIRMAIL, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
+import { fill } from '../_shared/copyText'
 import { Plane, Cloud, Trail, Airmail, Postmark } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -26,22 +28,6 @@ import { Plane, Cloud, Trail, Airmail, Postmark } from './art'
 
 const BASE = getTemplateTheme('paper-plane')
 const ID = 'paper-plane'
-
-const LABELS = {
-  countdown: { title: { az: 'Uçuşa qədər', en: 'Until take-off', ru: 'До вылета' } },
-  venue:     { title: { az: 'Eniş nöqtəsi', en: 'Landing point', ru: 'Точка посадки' } },
-  program:   { title: { az: 'Gecənin marşrutu', en: 'Route of the night', ru: 'Маршрут вечера' } },
-  dresscode: { title: { az: 'Geyim', en: 'Dress code', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Sizin ünvanınız', en: 'Your destination', ru: 'Ваш адрес' } },
-  gallery:   { title: { az: 'Yol boyu kadrlar', en: 'Snapshots on the way', ru: 'Кадры в пути' } },
-  rsvp:      { title: { az: 'Bizimlə uçursunuz?', en: 'Flying with us?', ru: 'Летите с нами?' } },
-  guestbook: { title: { az: 'Gələcəyə arzular', en: 'Wishes for the future', ru: 'Пожелания в будущее' } },
-}
-const TXT = {
-  az: { table: 'Masa', classOf: (y) => `Məzun ${y}`, letter: 'Gələcəyə məktub', air: 'Hava poçtu' },
-  en: { table: 'Table', classOf: (y) => `Class of ${y}`, letter: 'A letter to the future', air: 'Par avion' },
-  ru: { table: 'Стол', classOf: (y) => `Выпуск ${y}`, letter: 'Письмо в будущее', air: 'Авиа' },
-}
 
 const KEYFRAMES = `
 @keyframes pp-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -66,7 +52,7 @@ function PlaneOpening({ inv, theme, lang, year, mono }) {
   const { titleOv, first, second } = openingNames(inv)
   const go = gate.opening
   const head = theme.fonts.heading
-  const T = TXT[lang] || TXT.az
+  const T = inv.copy(TXT)
   return (
     <motion.div {...gate.gateProps} data-pp
       animate={go ? { opacity: 0 } : {}}
@@ -104,10 +90,10 @@ function PlaneOpening({ inv, theme, lang, year, mono }) {
         <div style={{ marginTop: 28, animation: 'pp-rise 1s ease-out .3s both' }}>
           {titleOv !== '' && (
             <div style={{ fontFamily: head, fontWeight: 800, fontSize: 'clamp(40px, 12vw, 58px)', lineHeight: 1.04, overflowWrap: 'anywhere', color: C.NAVY }}>
-              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .2em', color: C.RED }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .2em', color: C.RED }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
-          {year && <div style={{ marginTop: 6, fontFamily: mono, fontSize: 13, letterSpacing: '.18em', textTransform: 'uppercase', color: C.BLUE_D }}>{T.classOf(year)}</div>}
+          {year && <div style={{ marginTop: 6, fontFamily: mono, fontSize: 13, letterSpacing: '.18em', textTransform: 'uppercase', color: C.BLUE_D }}>{fill(T.classOf, { y: year })}</div>}
           {ot.show('meta') && <div style={{ marginTop: 6, fontSize: 16, color: C.MUTED }}>{ot.text('meta')}</div>}
         </div>
         <motion.div animate={go ? { opacity: 0, y: 8 } : {}} transition={{ duration: 0.25 }} style={{ marginTop: 20 }}>
@@ -163,8 +149,8 @@ export default function PaperPlaneTemplate(props) {
   const head = theme.fonts.heading
   const body = theme.fonts.body
   const mono = "'Martian Mono', ui-monospace, monospace"
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const year = inv.dp?.year || ''
 
   return (
@@ -190,12 +176,12 @@ export default function PaperPlaneTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 15.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 800, fontSize: 21, color: C.NAVY }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontWeight: 800, fontSize: 21, color: C.NAVY }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — səmada təyyarə */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: SKY_BG, padding: '120px 22px 64px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: SKY_BG, padding: '120px 22px 64px', textAlign: 'center' }}>
             <Cloud w={130} style={{ left: '-5%', top: '18%', animation: 'pp-drift 6s ease-in-out infinite alternate' }} />
             <Cloud w={100} opacity={0.75} style={{ right: '-3%', top: '46%', animation: 'pp-drift 7s ease-in-out -3s infinite alternate' }} />
             <Trail style={{ left: '4%', top: '6%', width: '70%', height: '18%' }} d="M0 140C80 150 140 60 220 80S340 40 400 10" />
@@ -204,7 +190,7 @@ export default function PaperPlaneTemplate(props) {
               <div style={{ fontFamily: mono, fontSize: 12.5, letterSpacing: '.22em', textTransform: 'uppercase', color: C.BLUE_D }}>{L('hero', 'kicker', inv.eventLabel)}</div>
               <div style={{ marginTop: 10, fontFamily: head, fontStyle: 'italic', fontWeight: 700, fontSize: 'clamp(22px, 6.4vw, 28px)', color: C.BLUE }}>{T.letter}</div>
               <h1 style={{ margin: '6px 0 0', fontFamily: head, fontWeight: 800, fontSize: nameSize(heroName), lineHeight: 1.02, overflowWrap: 'anywhere', color: C.NAVY, animation: 'pp-rise 1s ease-out .2s both' }}>{heroName}</h1>
-              {year && <div style={{ display: 'inline-block', marginTop: 14, padding: 4, borderRadius: 8, background: AIRMAIL }}><div style={{ padding: '6px 14px', borderRadius: 5, background: '#FFFFFF', fontFamily: mono, fontSize: 13, fontWeight: 600, letterSpacing: '.16em', textTransform: 'uppercase', color: C.NAVY }}>{T.classOf(year)}</div></div>}
+              {year && <div style={{ display: 'inline-block', marginTop: 14, padding: 4, borderRadius: 8, background: AIRMAIL }}><div style={{ padding: '6px 14px', borderRadius: 5, background: '#FFFFFF', fontFamily: mono, fontSize: 13, fontWeight: 600, letterSpacing: '.16em', textTransform: 'uppercase', color: C.NAVY }}>{fill(T.classOf, { y: year })}</div></div>}
               <div style={{ marginTop: 18, fontFamily: head, fontWeight: 700, fontSize: 'clamp(20px, 5.6vw, 24px)', color: C.NAVY }}>{inv.fullDate}</div>
               <div style={{ marginTop: 6, fontSize: 16, color: C.MUTED }}>{[inv.time, weddingData.venueName].filter(Boolean).join(' · ')}</div>
               {inv.isCorp && weddingData.organizer?.trim() && <div style={{ marginTop: 6, fontSize: 15.5, color: C.MUTED }}>{tr.organizer_display}: {weddingData.organizer}</div>}
@@ -214,7 +200,7 @@ export default function PaperPlaneTemplate(props) {
 
           {/* SAYĞAC — hava poçtu */}
           {S.countdown && (
-            <Panel head={head} mono={mono} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} mono={mono} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop]) => (
                   <Airmail key={l} pad={5} radius={10}>
@@ -232,7 +218,7 @@ export default function PaperPlaneTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} mono={mono} sky title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} mono={mono} sky title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <Airmail pad={7} radius={20} style={{ maxWidth: 430, margin: '0 auto' }}>
                 <div style={{ isolation: 'isolate' }}>
                   <MapSection
@@ -251,7 +237,7 @@ export default function PaperPlaneTemplate(props) {
 
           {/* PROQRAM — marşrut */}
           {S.program && (
-            <Panel head={head} mono={mono} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} mono={mono} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ position: 'relative', maxWidth: 380, margin: '0 auto' }}>
                 <span aria-hidden="true" style={{ position: 'absolute', left: 17, top: 18, bottom: 18, width: 0, borderLeft: `2.5px dashed ${alpha(C.BLUE, 0.45)}` }} />
                 {timeline.events.map((ev, i) => {
@@ -273,7 +259,7 @@ export default function PaperPlaneTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} mono={mono} sky title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} mono={mono} sky title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -281,7 +267,7 @@ export default function PaperPlaneTemplate(props) {
 
           {/* MASA — açıqca */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} mono={mono} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} mono={mono} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="pp-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.BLUE}
                 nameStyle={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
                 card={(num) => (
@@ -306,7 +292,7 @@ export default function PaperPlaneTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} mono={mono} sky title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} mono={mono} sky title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 16, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -323,7 +309,7 @@ export default function PaperPlaneTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} mono={mono} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} mono={mono} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: C.LINE, hair: alpha(C.LINE, 0.7), accent: C.BLUE,
                 font: body, display: head, displayItalic: false, btnFont: head,
@@ -336,7 +322,7 @@ export default function PaperPlaneTemplate(props) {
 
           {/* ARZULAR — gecə səması */}
           {S.guestbook && (
-            <Panel head={head} mono={mono} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} mono={mono} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.SUN} />
               <div style={{ display: 'grid', gap: 16 }}>
                 {gbook.messages.map((raw, i) => {

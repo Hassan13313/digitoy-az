@@ -11,6 +11,8 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, MARKERS, PAGE_BG, BLUE_BG, SIGNS, varsity, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
+import { fill } from '../_shared/copyText'
 import { Doodle, Patch, Signature } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -27,22 +29,6 @@ import { Doodle, Patch, Signature } from './art'
 
 const BASE = getTemplateTheme('yearbook')
 const ID = 'yearbook'
-
-const LABELS = {
-  countdown: { title: { az: 'Zəngə qədər', en: 'Until the bell', ru: 'До звонка' } },
-  venue:     { title: { az: 'Görüş nöqtəsi', en: 'Meeting point', ru: 'Место встречи' } },
-  program:   { title: { az: 'Gecənin planı', en: 'Tonight’s plan', ru: 'План вечера' } },
-  dresscode: { title: { az: 'Geyim', en: 'Dress code', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Sənin masan', en: 'Your table', ru: 'Твой стол' } },
-  gallery:   { title: { az: 'Albomun səhifələri', en: 'Yearbook pages', ru: 'Страницы альбома' } },
-  rsvp:      { title: { az: 'Gəlirsən?', en: 'You coming?', ru: 'Придёшь?' } },
-  guestbook: { title: { az: 'Albomuma yaz', en: 'Sign my yearbook', ru: 'Подпиши мой альбом' } },
-}
-const TXT = {
-  az: { table: 'Masa', classOf: (y) => `Məzun ${y}` },
-  en: { table: 'Table', classOf: (y) => `Class of ${y}` },
-  ru: { table: 'Стол', classOf: (y) => `Выпуск ${y}` },
-}
 
 const KEYFRAMES = `
 @keyframes yb-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -96,7 +82,7 @@ function YearbookOpening({ inv, theme, lang, year, sign }) {
   const { titleOv, first, second } = openingNames(inv)
   const go = gate.opening
   const head = theme.fonts.heading
-  const T = TXT[lang] || TXT.az
+  const T = inv.copy(TXT)
   const signs = SIGNS[lang] || SIGNS.az
   return (
     <motion.div {...gate.gateProps} data-yb
@@ -123,10 +109,10 @@ function YearbookOpening({ inv, theme, lang, year, sign }) {
         <div style={{ marginTop: 28, animation: 'yb-rise 1s ease-out .3s both' }}>
           {titleOv !== '' && (
             <div style={{ fontFamily: head, fontWeight: 800, fontSize: 'clamp(46px, 14vw, 66px)', lineHeight: 0.95, textTransform: 'uppercase', overflowWrap: 'anywhere', color: C.BLUE }}>
-              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .2em', color: C.RED }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .2em', color: C.RED }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
-          {year && <div style={{ marginTop: 8, fontFamily: head, fontWeight: 700, fontSize: 19, letterSpacing: '.1em', textTransform: 'uppercase', color: C.INK }}>{T.classOf(year)}</div>}
+          {year && <div style={{ marginTop: 8, fontFamily: head, fontWeight: 700, fontSize: 19, letterSpacing: '.1em', textTransform: 'uppercase', color: C.INK }}>{fill(T.classOf, { y: year })}</div>}
           {ot.show('meta') && <div style={{ marginTop: 4, fontSize: 15.5, color: C.MUTED }}>{ot.text('meta')}</div>}
         </div>
         <motion.div animate={go ? { opacity: 0, y: 8 } : {}} transition={{ duration: 0.25 }} style={{ marginTop: 22 }}>
@@ -184,8 +170,8 @@ export default function YearbookTemplate(props) {
   const head = theme.fonts.heading
   const body = theme.fonts.body
   const sign = "'Comforter Brush', 'Caveat', cursive"
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const year = inv.dp?.year || ''
   const signs = SIGNS[lang] || SIGNS.az
 
@@ -212,12 +198,12 @@ export default function YearbookTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.WHITE, 0.8), fontSize: 16, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 800, fontSize: 22, letterSpacing: '.04em', textTransform: 'uppercase', color: C.YELLOW }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontWeight: 800, fontSize: 22, letterSpacing: '.04em', textTransform: 'uppercase', color: C.YELLOW }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — imzalanmış vərəq */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: PAGE_BG, padding: '58px 22px 60px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: PAGE_BG, padding: '58px 22px 60px', textAlign: 'center' }}>
             {signs.slice(0, 2).map((t, i) => <Signature key={i} text={t} font={sign} color={MARKERS[i]} rot={SIGN_POS[i].rot} size={34} style={{ ...SIGN_POS[i], top: SIGN_POS[i].top ? `calc(${SIGN_POS[i].top} - 6%)` : undefined, bottom: SIGN_POS[i].bottom ? `calc(${SIGN_POS[i].bottom} + 4%)` : undefined }} />)}
             {DOODLES.slice(0, 2).map((d, i) => (
               <span key={i} aria-hidden="true" style={{ position: 'absolute', left: d.left, right: d.right, top: d.top, bottom: d.bottom }}><Doodle kind={d.kind} color={d.c} size={30} /></span>
@@ -231,7 +217,7 @@ export default function YearbookTemplate(props) {
             </div>
             <div style={{ position: 'relative', marginTop: 34, fontFamily: head, fontWeight: 700, fontSize: 16, letterSpacing: '.2em', textTransform: 'uppercase', color: C.RED }}>{L('hero', 'kicker', inv.eventLabel)}</div>
             <h1 style={{ position: 'relative', margin: '6px 0 0', fontFamily: head, fontWeight: 800, fontSize: nameSize(heroName), lineHeight: 0.95, textTransform: 'uppercase', overflowWrap: 'anywhere', color: C.BLUE, animation: 'yb-rise 1s ease-out .2s both' }}>{heroName}</h1>
-            {year && <div style={{ position: 'relative', display: 'inline-block', marginTop: 12, padding: '5px 14px', background: C.YELLOW, color: C.BLUE_DD, fontFamily: head, fontWeight: 800, fontSize: 18, letterSpacing: '.08em', textTransform: 'uppercase', transform: 'rotate(-2deg)' }}>{T.classOf(year)}</div>}
+            {year && <div style={{ position: 'relative', display: 'inline-block', marginTop: 12, padding: '5px 14px', background: C.YELLOW, color: C.BLUE_DD, fontFamily: head, fontWeight: 800, fontSize: 18, letterSpacing: '.08em', textTransform: 'uppercase', transform: 'rotate(-2deg)' }}>{fill(T.classOf, { y: year })}</div>}
             <div style={{ position: 'relative', marginTop: 18, fontFamily: head, fontWeight: 700, fontSize: 'clamp(22px, 6.2vw, 27px)', color: C.INK }}>{inv.fullDate}</div>
             <div style={{ position: 'relative', marginTop: 4, fontSize: 17, color: C.MUTED }}>{[inv.time, weddingData.venueName].filter(Boolean).join(' · ')}</div>
             {inv.isCorp && weddingData.organizer?.trim() && <div style={{ position: 'relative', marginTop: 6, fontSize: 16, color: C.MUTED }}>{tr.organizer_display}: {weddingData.organizer}</div>}
@@ -240,7 +226,7 @@ export default function YearbookTemplate(props) {
 
           {/* SAYĞAC — forma nömrələri */}
           {S.countdown && (
-            <Panel head={head} dark title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} dark title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop]) => (
                   <div key={l} style={{ textAlign: 'center' }}>
@@ -258,7 +244,7 @@ export default function YearbookTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} mark={1} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} mark={1} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ position: 'relative', maxWidth: 430, margin: '0 auto', padding: 8, background: C.WHITE, boxShadow: '0 18px 30px -18px rgba(20,24,43,.5)', transform: 'rotate(-1deg)' }}>
                 <span aria-hidden="true" style={{ position: 'absolute', left: 16, top: -10, width: 64, height: 20, zIndex: 2, transform: 'rotate(-6deg)', background: 'rgba(255,198,41,.75)' }} />
                 <div style={{ overflow: 'hidden', isolation: 'isolate' }}>
@@ -278,7 +264,7 @@ export default function YearbookTemplate(props) {
 
           {/* PROQRAM — işarələnən siyahı */}
           {S.program && (
-            <Panel head={head} mark={2} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} mark={2} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 400, margin: '0 auto' }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '34px 70px minmax(0, 1fr)', gap: 8, alignItems: 'center', padding: '12px 0', borderBottom: `2px dashed ${C.LINE}` }}>
@@ -295,7 +281,7 @@ export default function YearbookTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} mark={3} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} mark={3} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -303,7 +289,7 @@ export default function YearbookTemplate(props) {
 
           {/* MASA — varsity yamağı */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="yb-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.WHITE, 0.75)} accent={C.YELLOW}
                 nameStyle={{ fontFamily: sign, fontSize: 34, color: C.WHITE }}
                 card={(num) => (
@@ -319,7 +305,7 @@ export default function YearbookTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} mark={1} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} mark={1} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 18, marginBottom: 34 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -336,7 +322,7 @@ export default function YearbookTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} mark={0} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} mark={0} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: C.LINE, hair: alpha(C.LINE, 0.7), accent: C.BLUE,
                 font: body, display: head, displayItalic: false, btnFont: head,
@@ -354,7 +340,7 @@ export default function YearbookTemplate(props) {
 
           {/* ARZULAR — imzalar */}
           {S.guestbook && (
-            <Panel head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.YELLOW} />
               <div style={{ display: 'grid', gap: 16 }}>
                 {gbook.messages.map((raw, i) => {

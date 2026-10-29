@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, PAPER_BG, OPEN_BLOOMS, WREATH, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { WatercolorDefs, Bloom, Dab, Sprig } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -31,21 +32,6 @@ const BASE = getTemplateTheme('pastel-bloom')
 const ID = 'pastel-bloom'
 const HAND = "'Caveat', 'Cormorant Garamond', cursive"
 
-const LABELS = {
-  countdown: { title: { az: 'Görüşə az qalıb', en: 'Almost time', ru: 'Совсем скоро' } },
-  venue:     { title: { az: 'Harada görüşürük?', en: 'Where we meet', ru: 'Где встречаемся?' } },
-  program:   { title: { az: 'Günün planı', en: 'The plan for the day', ru: 'План дня' } },
-  dresscode: { title: { az: 'Geyim', en: 'What to wear', ru: 'Что надеть' } },
-  seating:   { title: { az: 'Masanız', en: 'Your table', ru: 'Ваш стол' } },
-  gallery:   { title: { az: 'Çiçəkli anlar', en: 'Blooming moments', ru: 'Цветущие мгновения' } },
-  rsvp:      { title: { az: 'Gələcəksiniz?', en: 'Will you come?', ru: 'Вы придёте?' } },
-  guestbook: { title: { az: 'Körpəyə arzular', en: 'Wishes for the baby', ru: 'Пожелания малышу' } },
-}
-const TXT = {
-  az: { table: 'Masa' },
-  en: { table: 'Table' },
-  ru: { table: 'Стол' },
-}
 const TONE_ROW = ['blush', 'sage', 'butter', 'lavender']
 
 const KEYFRAMES = `
@@ -87,7 +73,7 @@ function BloomOpening({ inv, theme }) {
           {ot.show('kicker') && <div style={{ fontFamily: HAND, fontSize: 28, color: C.BLUSH_D }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 4, fontFamily: head, fontWeight: 500, fontSize: 'clamp(42px, 12.4vw, 58px)', lineHeight: 1.04, color: C.INK, overflowWrap: 'anywhere' }}>
-              {first}{second && <><span style={{ display: 'block', fontFamily: HAND, fontSize: '.6em', color: C.SAGE_D }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'block', fontFamily: HAND, fontSize: '.6em', color: C.SAGE_D }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
           {ot.show('meta') && <div style={{ marginTop: 10, fontSize: 15, color: C.MUTED }}>{ot.text('meta')}</div>}
@@ -143,8 +129,8 @@ export default function PastelBloomTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
     <div data-pb lang={lang} data-enter={enterDirection(ID)} style={{
@@ -170,12 +156,12 @@ export default function PastelBloomTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: HAND, fontSize: 24, color: C.BLUSH_D }}>Digitoy</div>
+            <div style={{ fontFamily: HAND, fontSize: 24, color: C.BLUSH_D }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — çiçək çələngi */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: PAPER_BG, padding: '40px 18px 58px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: PAPER_BG, padding: '40px 18px 58px', textAlign: 'center' }}>
             <div style={{ position: 'relative', width: 'min(92vw, 380px)', aspectRatio: '1', margin: '0 auto' }}>
               {WREATH.map((w, i) => (
                 <div key={i} aria-hidden="true" style={{ position: 'absolute', left: `${w.x}%`, top: `${w.y}%`, transform: 'translate(-50%, -50%)', animation: `pb-paint 1s cubic-bezier(.3,.7,.3,1) ${(0.1 + i * 0.08).toFixed(2)}s both` }}>
@@ -195,7 +181,7 @@ export default function PastelBloomTemplate(props) {
 
           {/* SAYĞAC — akvarel ləkələri */}
           {S.countdown && (
-            <Panel head={head} tint={ALT} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} tint={ALT} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(6px, 2.4vw, 12px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <Dab key={l} size="min(22vw, 92px)" tone={TONE_ROW[i]}>
@@ -211,7 +197,7 @@ export default function PastelBloomTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ position: 'relative', maxWidth: 430, margin: '0 auto' }}>
                 <div aria-hidden="true" style={{ position: 'absolute', left: -26, top: -30 }}><Bloom size={92} tone="blush" rotate={20} /></div>
                 <div aria-hidden="true" style={{ position: 'absolute', right: -22, bottom: -26 }}><Bloom size={80} tone="lavender" rotate={-30} /></div>
@@ -234,7 +220,7 @@ export default function PastelBloomTemplate(props) {
 
           {/* PROQRAM */}
           {S.program && (
-            <Panel head={head} tint={ALT} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} tint={ALT} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 380, margin: '0 auto', display: 'grid', gap: 12 }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '62px minmax(0, 1fr)', gap: 12, alignItems: 'center', padding: '8px 14px 8px 6px', borderRadius: 999, background: alpha('#FFFFFF', 0.7) }}>
@@ -249,7 +235,7 @@ export default function PastelBloomTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -257,7 +243,7 @@ export default function PastelBloomTemplate(props) {
 
           {/* MASA — çiçəyin ortasında */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} tint={ALT} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} tint={ALT} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="pb-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.BLUSH_D}
                 nameStyle={{ fontFamily: HAND, fontSize: 28 }}
                 card={(num) => (
@@ -274,7 +260,7 @@ export default function PastelBloomTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -291,7 +277,7 @@ export default function PastelBloomTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} tint={ALT} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} tint={ALT} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.BLUSH_D, 0.4), hair: alpha(C.BLUSH_D, 0.2), accent: C.BLUSH_D,
                 font: body, display: head, btnFont: body,
@@ -304,7 +290,7 @@ export default function PastelBloomTemplate(props) {
 
           {/* ARZULAR */}
           {S.guestbook && (
-            <Panel head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.BLUSH_D} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

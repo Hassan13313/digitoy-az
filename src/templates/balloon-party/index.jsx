@@ -11,6 +11,7 @@ import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { ageSentence, kidsGalleryDesc, tableNum, tableSize } from '../_shared/kids'
 import { C, FOIL, ROSE_FOIL, BUNCH, letterSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Balloon, Confetti, Garland, CandyJar, GumballMachine, Candle } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -32,22 +33,6 @@ import { Balloon, Confetti, Garland, CandyJar, GumballMachine, Candle } from './
 const BASE = getTemplateTheme('balloon-party')
 const ID = 'balloon-party'
 const SCRIPT = "'Pacifico', 'Great Vibes', cursive"
-
-const LABELS = {
-  countdown: { title: { az: 'Bayrama qədər', en: 'Until the party', ru: 'До праздника' } },
-  venue:     { title: { az: 'Bayram harada?', en: 'Where is the party?', ru: 'Где праздник?' } },
-  program:   { title: { az: 'Bayram tortu', en: 'The party cake', ru: 'Праздничный торт' } },
-  dresscode: { title: { az: 'Bayram geyimi', en: 'Party outfit', ru: 'Праздничный наряд' } },
-  seating:   { title: { az: 'Şirin sürpriz', en: 'A sweet surprise', ru: 'Сладкий сюрприз' } },
-  gallery:   { title: { az: 'Bayram anları', en: 'Party moments', ru: 'Моменты праздника' } },
-  rsvp:      { title: { az: 'Bayrama gələcəksiniz?', en: 'Coming to the party?', ru: 'Придёте на праздник?' } },
-  guestbook: { title: { az: 'Arzu şarları', en: 'Wish balloons', ru: 'Шарики с пожеланиями' } },
-}
-const TXT = {
-  az: { table: 'Masa' },
-  en: { table: 'Table' },
-  ru: { table: 'Стол' },
-}
 
 const KEYFRAMES = `
 @keyframes bp-bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-6px) } }
@@ -144,7 +129,7 @@ function BalloonOpening({ inv, theme }) {
               {ot.show('kicker') && <div style={{ fontFamily: SCRIPT, fontSize: 20, color: C.PINK_D }}>{ot.text('kicker')}</div>}
               {titleOv !== '' && (
                 <div style={{ marginTop: 4, fontFamily: disp, fontWeight: 900, fontSize: 'clamp(34px, 11vw, 46px)', lineHeight: 1.05, color: C.PLUM, overflowWrap: 'anywhere' }}>
-                  {first}{second && <><span style={{ display: 'block', fontSize: '.45em', color: C.PINK, margin: '2px 0' }}>&amp;</span>{second}</>}
+                  {first}{second && <><span style={{ display: 'block', fontSize: '.45em', color: C.PINK, margin: '2px 0' }}>{ot.text('and')}</span>{second}</>}
                 </div>
               )}
               {ot.show('meta') && <div style={{ marginTop: 8, fontSize: 14.5, color: C.MUTED }}>{ot.text('meta')}</div>}
@@ -215,9 +200,9 @@ export default function BalloonPartyTemplate(props) {
   const disp = theme.fonts.heading
   const body = theme.fonts.body
   const script = SCRIPT
-  const T = TXT[lang] || TXT.az
+  const T = inv.copy(TXT)
   const age = inv.age
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const candles = Math.min(age || 3, 9)
 
   return (
@@ -244,12 +229,12 @@ export default function BalloonPartyTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: script, fontSize: 19, color: C.PINK_D }}>Digitoy</div>
+            <div style={{ fontFamily: script, fontSize: 19, color: C.PINK_D }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — şar girləndi və folqa hərflər */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: `linear-gradient(180deg, ${C.CREAM}, #FCEAF0)`, paddingBottom: 34 }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: `linear-gradient(180deg, ${C.CREAM}, #FCEAF0)`, paddingBottom: 34 }}>
             <Confetti opacity={0.4} />
             <Garland />
             <div style={{ position: 'relative', textAlign: 'center', padding: '4px 16px 0' }}>
@@ -282,7 +267,7 @@ export default function BalloonPartyTemplate(props) {
 
           {/* SAYĞAC — konfet bankaları */}
           {S.countdown && (
-            <Party disp={disp} tint="#FDF0F3" title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Party section="countdown" disp={disp} tint="#FDF0F3" title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 380, margin: '0 auto' }}>
                 {[
                   { v: cd.days, l: cd.labels.days, c: ['#EF8FA8', '#FFE495', '#F6C3CF'], lid: C.PINK_D },
@@ -305,7 +290,7 @@ export default function BalloonPartyTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Party disp={disp} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Party section="venue" disp={disp} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ position: 'relative', maxWidth: 420, margin: '0 auto', padding: 10, background: '#FFFFFF', borderRadius: 30, outline: `3px dashed ${alpha(C.PINK, 0.55)}`, outlineOffset: 6, boxShadow: '0 20px 34px -24px rgba(201,87,124,.6)' }}>
                 <div style={{ borderRadius: 22, overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
@@ -329,7 +314,7 @@ export default function BalloonPartyTemplate(props) {
 
           {/* PROQRAM — qatlı tort */}
           {S.program && (
-            <Party disp={disp} tint="#FDF0F3" title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Party section="program" disp={disp} tint="#FDF0F3" title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 400, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <div aria-hidden="true" style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginBottom: -2 }}>
                   {Array.from({ length: candles }, (_, k) => <Candle key={k} color={[C.MINT_D, C.PINK, '#C9913A', '#9D85D8'][k % 4]} h={26} />)}
@@ -351,7 +336,7 @@ export default function BalloonPartyTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Party disp={disp} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Party section="dresscode" disp={disp} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={disp} align="center" />
             </Party>
@@ -359,7 +344,7 @@ export default function BalloonPartyTemplate(props) {
 
           {/* MASA — saqqız avtomatı */}
           {S.seating && !seating.isEmpty && (
-            <Party disp={disp} tint="#FDF0F3" title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Party section="seating" disp={disp} tint="#FDF0F3" title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <input {...seatInputProps(inv, 'bp-seat-list')} style={field} />
               <SeatSuggest inv={inv} id="bp-seat-list" c={{ ...suggest, font: body }} />
               {seating.showNotFound && <div style={{ marginTop: 12, fontSize: 15, color: C.MUTED, textAlign: 'center' }}>{tr.inv_seat_fullname}</div>}
@@ -384,7 +369,7 @@ export default function BalloonPartyTemplate(props) {
 
           {/* FOTOLAR — ipdən asılan polaroidlər */}
           {S.gallery && (
-            <Party id="gallery-section" disp={disp} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Party section="gallery" id="gallery-section" disp={disp} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ position: 'relative', marginBottom: 30 }}>
                   <svg aria-hidden="true" viewBox="0 0 400 40" preserveAspectRatio="none" style={{ position: 'absolute', left: -10, right: -10, top: -6, width: 'calc(100% + 20px)', height: 40 }}>
@@ -412,7 +397,7 @@ export default function BalloonPartyTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Party disp={disp} tint="#FDF0F3" title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Party section="rsvp" disp={disp} tint="#FDF0F3" title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.PLUM, muted: C.MUTED, line: alpha(C.PINK_D, 0.45), hair: alpha(C.PINK, 0.25), accent: C.PINK_D,
                 font: body, display: disp, btnFont: disp,
@@ -425,7 +410,7 @@ export default function BalloonPartyTemplate(props) {
 
           {/* ARZU ŞARLARI */}
           {S.guestbook && (
-            <Party disp={disp} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Party section="guestbook" disp={disp} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 30 }}>
                 <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbookL.namePh} style={field} />
                 <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbookL.msgPh} rows={3} style={{ ...field, resize: 'none', lineHeight: 1.5 }} />

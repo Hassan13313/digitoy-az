@@ -10,6 +10,7 @@ import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { ageSentence, ageWord, kidsGalleryDesc, tableNum, tableSize } from '../_shared/kids'
 import { C } from './palette'
+import { LABELS, TXT } from './copy'
 import { HatchEgg, DinoBadge, NumberEgg, Fern, Volcano, Brachio, Footprint, Bone, Nest } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -31,22 +32,6 @@ import { HatchEgg, DinoBadge, NumberEgg, Fern, Volcano, Brachio, Footprint, Bone
 
 const BASE = getTemplateTheme('dino-adventure')
 const ID = 'dino-adventure'
-
-const LABELS = {
-  countdown: { title: { az: 'Ekspedisiyaya qədər', en: 'Until the expedition', ru: 'До экспедиции' } },
-  venue:     { title: { az: 'Ekspedisiya xəritəsi', en: 'Expedition map', ru: 'Карта экспедиции' } },
-  program:   { title: { az: 'İz cığırı', en: 'The footprint trail', ru: 'Тропа следов' } },
-  dresscode: { title: { az: 'Kəşfiyyatçı geyimi', en: 'Explorer outfit', ru: 'Наряд исследователя' } },
-  seating:   { title: { az: 'Qazıntı sahəsi', en: 'The dig site', ru: 'Место раскопок' } },
-  gallery:   { title: { az: 'Kəhrəba kolleksiyası', en: 'The amber collection', ru: 'Янтарная коллекция' } },
-  rsvp:      { title: { az: 'Ekspedisiyaya qoşulun', en: 'Join the expedition', ru: 'Присоединяйтесь к экспедиции' } },
-  guestbook: { title: { az: 'Qaya yazıları', en: 'Cave wall wishes', ru: 'Наскальные пожелания' } },
-}
-const TXT = {
-  az: { table: 'Masa', found: 'Tapıntı!', hello: 'Salam!' },
-  en: { table: 'Table', found: 'Found it!', hello: 'Hello!' },
-  ru: { table: 'Стол', found: 'Находка!', hello: 'Привет!' },
-}
 
 const KEYFRAMES = `
 @keyframes da-wobble { 0%,100% { transform: rotate(0) } 20% { transform: rotate(-6deg) } 40% { transform: rotate(5deg) } 60% { transform: rotate(-3deg) } 80% { transform: rotate(2deg) } }
@@ -77,7 +62,7 @@ function EggOpening({ inv, theme }) {
   const { titleOv, first, second } = openingNames(inv)
   const disp = theme.fonts.heading
   const go = gate.opening
-  const T = TXT[inv.lang] || TXT.az
+  const T = inv.copy(TXT)
   return (
     <motion.div {...gate.gateProps} data-da
       animate={go ? { opacity: 0 } : {}}
@@ -97,7 +82,7 @@ function EggOpening({ inv, theme }) {
           {ot.show('kicker') && <div style={{ display: 'inline-block', padding: '4px 14px', borderRadius: 999, background: alpha(C.JUNGLE, 0.85), color: C.SAND, fontFamily: disp, fontWeight: 600, fontSize: 14, animation: 'da-rise .8s ease-out .2s both' }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 12, fontFamily: disp, fontWeight: 800, fontSize: 'clamp(44px, 14vw, 66px)', lineHeight: 1, color: C.JUNGLE, textShadow: `3px 3px 0 ${C.SAND}, 5px 5px 0 ${alpha(C.JUNGLE, 0.2)}`, overflowWrap: 'anywhere', animation: 'da-pop .8s cubic-bezier(.2,.9,.3,1.3) .35s both' }}>
-              {first}{second && <><span style={{ display: 'block', fontSize: '.45em', color: C.LAVA, margin: '4px 0' }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'block', fontSize: '.45em', color: C.LAVA, margin: '4px 0' }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
           {ot.show('meta') && <div style={{ marginTop: 10, fontFamily: disp, fontWeight: 600, fontSize: 16, color: C.MUTED, animation: 'da-rise .8s ease-out .5s both' }}>{ot.text('meta')}</div>}
@@ -172,7 +157,7 @@ export default function DinoAdventureTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const disp = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
+  const T = inv.copy(TXT)
   const age = inv.age
 
   return (
@@ -198,12 +183,12 @@ export default function DinoAdventureTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.SAND, 0.85), fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: disp, fontWeight: 800, fontSize: 18, color: C.AMBER_L }}>Digitoy</div>
+            <div style={{ fontFamily: disp, fontWeight: 800, fontSize: 18, color: C.AMBER_L }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={{ ...theme, background: C.JUNGLE, surface: '#2F5A3C', text: C.SAND, muted: alpha(C.SAND, 0.75) }} />
           </header>
 
           {/* HERO — tarixdən əvvəlki vadi */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: C.SAND }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: C.SAND }}>
             <div style={{ position: 'relative', height: 'min(92vw, 400px)', background: `linear-gradient(180deg, ${C.SKY}, #E3EFD8 58%, ${C.SAND})`, overflow: 'hidden' }}>
               <Volcano width={210} style={{ position: 'absolute', right: '-6%', top: '14%' }} />
               <svg aria-hidden="true" viewBox="0 0 400 140" preserveAspectRatio="none" style={{ position: 'absolute', left: 0, right: 0, bottom: '18%', width: '100%', height: '34%' }}>
@@ -220,7 +205,7 @@ export default function DinoAdventureTemplate(props) {
             <div style={{ position: 'relative', margin: '-56px 18px 0', padding: '22px 18px 20px', textAlign: 'center', background: STONE_BG, borderRadius: '28px 34px 24px 30px', boxShadow: 'inset 0 2px 0 rgba(255,255,255,.35), inset 0 -4px 10px rgba(0,0,0,.15), 0 18px 30px -18px rgba(0,0,0,.45)' }}>
               <div style={{ fontFamily: disp, fontWeight: 600, fontSize: 15, color: C.STONE_D }}>{L('hero', 'kicker', inv.eventLabel)}</div>
               <h1 style={{ margin: '6px 0 0', fontFamily: disp, fontWeight: 800, fontSize: 'clamp(42px, 13vw, 64px)', lineHeight: 1.02, color: '#4E463A', textShadow: '0 1px 0 rgba(255,255,255,.55), 0 -1px 0 rgba(0,0,0,.25)', textWrap: 'balance', overflowWrap: 'anywhere' }}>
-                {inv.heroTitle ? inv.heroTitle : inv.isCouple ? <>{inv.groom} &amp; {inv.bride}</> : inv.single}
+                {inv.heroTitle ? inv.heroTitle : inv.isCouple ? <>{inv.groom} {inv.and} {inv.bride}</> : inv.single}
               </h1>
               {age && <div style={{ marginTop: 6, fontFamily: disp, fontWeight: 600, fontSize: 17, color: C.JUNGLE }}>{ageSentence(age, lang)}</div>}
               <Bone width={56} style={{ position: 'absolute', left: 14, bottom: 10, transform: 'rotate(-18deg)', opacity: 0.9 }} />
@@ -248,7 +233,7 @@ export default function DinoAdventureTemplate(props) {
 
           {/* SAYĞAC — dörd yumurta */}
           {S.countdown && (
-            <Camp disp={disp} tone="jungle" title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Camp section="countdown" disp={disp} tone="jungle" title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(10px, 3.4vw, 16px)', maxWidth: 380, margin: '0 auto', alignItems: 'end' }}>
                 {[
                   { v: cd.days, l: cd.labels.days, s: C.TEAL },
@@ -271,7 +256,7 @@ export default function DinoAdventureTemplate(props) {
 
           {/* MƏKAN — ekspedisiya xəritəsi */}
           {S.venue && (
-            <Camp disp={disp} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Camp section="venue" disp={disp} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ position: 'relative', maxWidth: 420, margin: '0 auto', padding: 10, background: '#FFFDF6', borderRadius: 18, border: `2px dashed ${alpha(C.LEAF, 0.45)}`, boxShadow: '0 20px 34px -24px rgba(0,0,0,.45)' }}>
                 <div style={{ borderRadius: 12, overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
@@ -295,7 +280,7 @@ export default function DinoAdventureTemplate(props) {
 
           {/* PROQRAM — iz cığırı */}
           {S.program && (
-            <Camp disp={disp} tone="egg" title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Camp section="program" disp={disp} tone="egg" title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <ol style={{ listStyle: 'none', margin: '0 auto', padding: 0, maxWidth: 400 }}>
                 {timeline.events.map((ev, i) => {
                   const right = i % 2 === 1
@@ -316,7 +301,7 @@ export default function DinoAdventureTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Camp disp={disp} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Camp section="dresscode" disp={disp} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={disp} align="center" />
             </Camp>
@@ -324,7 +309,7 @@ export default function DinoAdventureTemplate(props) {
 
           {/* MASA — qazıntı sahəsi */}
           {S.seating && !seating.isEmpty && (
-            <Camp disp={disp} tone="egg" title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Camp section="seating" disp={disp} tone="egg" title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <input {...seatInputProps(inv, 'da-seat-list')} style={field} />
               <SeatSuggest inv={inv} id="da-seat-list" c={{ ...suggest, font: body }} />
               {seating.showNotFound && <div style={{ marginTop: 12, fontSize: 15, color: C.MUTED, textAlign: 'center' }}>{tr.inv_seat_fullname}</div>}
@@ -354,7 +339,7 @@ export default function DinoAdventureTemplate(props) {
 
           {/* FOTOLAR — kəhrəba */}
           {S.gallery && (
-            <Camp id="gallery-section" disp={disp} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Camp section="gallery" id="gallery-section" disp={disp} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 10, marginBottom: 30 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -377,7 +362,7 @@ export default function DinoAdventureTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Camp disp={disp} tone="egg" title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Camp section="rsvp" disp={disp} tone="egg" title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.LEAF, 0.5), hair: alpha(C.LEAF, 0.18), accent: C.LEAF,
                 font: body, display: disp, btnFont: disp,
@@ -390,7 +375,7 @@ export default function DinoAdventureTemplate(props) {
 
           {/* QAYA YAZILARI */}
           {S.guestbook && (
-            <Camp disp={disp} tone="jungle" title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Camp section="guestbook" disp={disp} tone="jungle" title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 30 }}>
                 <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbookL.namePh} style={field} />
                 <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbookL.msgPh} rows={3} style={{ ...field, resize: 'none', lineHeight: 1.5 }} />

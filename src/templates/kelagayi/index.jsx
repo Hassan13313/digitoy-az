@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, BAND, SHEEN, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Buta, ButaTrio, KelagayiSquare, Diamond } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -30,22 +31,6 @@ import { Buta, ButaTrio, KelagayiSquare, Diamond } from './art'
 
 const BASE = getTemplateTheme('kelagayi')
 const ID = 'kelagayi'
-
-const LABELS = {
-  countdown: { title: { az: 'Gecəyə qalan vaxt', en: 'Time until the night', ru: 'До вечера осталось' } },
-  venue:     { title: { az: 'Ünvan', en: 'The address', ru: 'Адрес' } },
-  program:   { title: { az: 'Gecənin naxışı', en: 'The evening’s pattern', ru: 'Узор вечера' } },
-  dresscode: { title: { az: 'Libas', en: 'Attire', ru: 'Наряд' } },
-  seating:   { title: { az: 'Masanızı tapın', en: 'Find your table', ru: 'Найдите свой стол' } },
-  gallery:   { title: { az: 'İpək kimi anlar', en: 'Silken moments', ru: 'Шёлковые мгновения' } },
-  rsvp:      { title: { az: 'Cavabınızı gözləyirik', en: 'We await your reply', ru: 'Ждём вашего ответа' } },
-  guestbook: { title: { az: 'Kəlağayıya düyün — bir arzu', en: 'Tie a wish to the scarf', ru: 'Завяжите желание на платке' } },
-}
-const TXT = {
-  az: { table: 'Masa' },
-  en: { table: 'Table' },
-  ru: { table: 'Стол' },
-}
 
 const KEYFRAMES = `
 @keyframes kg-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -112,7 +97,7 @@ function ScarfOpening({ inv, theme }) {
           {ot.show('kicker') && <div style={{ fontFamily: head, fontSize: 15, letterSpacing: '.22em', color: C.CRIMSON }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 6, fontFamily: head, fontSize: 'clamp(40px, 12vw, 56px)', lineHeight: 1.05, color: C.INK, overflowWrap: 'anywhere' }}>
-              {first}{second && <><span style={{ display: 'block', fontSize: '.5em', color: C.CRIMSON }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'block', fontSize: '.5em', color: C.CRIMSON }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
           {ot.show('meta') && <div style={{ marginTop: 8, fontSize: 14.5, color: C.MUTED }}>{ot.text('meta')}</div>}
@@ -171,8 +156,8 @@ export default function KelagayiTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
     <div data-kg lang={lang} data-enter={enterDirection(ID)} style={{
@@ -197,13 +182,13 @@ export default function KelagayiTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 14, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontSize: 17, letterSpacing: '.08em', color: C.CRIMSON }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontSize: 17, letterSpacing: '.08em', color: C.CRIMSON }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
           <div aria-hidden="true" style={{ height: 5, background: BAND }} />
 
           {/* HERO — açıq kəlağayı */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: SILK_BG, padding: '46px 22px 58px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: SILK_BG, padding: '46px 22px 58px', textAlign: 'center' }}>
             <div style={{ fontFamily: head, fontSize: 15, letterSpacing: '.24em', color: C.CRIMSON, animation: 'kg-rise .8s ease-out .2s both' }}>{L('hero', 'kicker', inv.eventLabel)}</div>
             <h1 style={{ margin: '10px 0 0', fontFamily: head, fontWeight: 400, fontSize: nameSize(heroName), lineHeight: 1.05, color: C.INK, overflowWrap: 'anywhere', animation: 'kg-rise 1s ease-out .35s both' }}>{heroName}</h1>
             <ButaTrio style={{ marginTop: 16 }} />
@@ -223,7 +208,7 @@ export default function KelagayiTemplate(props) {
 
           {/* SAYĞAC — romb lövhələr */}
           {S.countdown && (
-            <Panel head={head} bg={INDIGO_BG} dark title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} bg={INDIGO_BG} dark title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(4px, 2vw, 10px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop]) => (
                   <div key={l} style={{ textAlign: 'center' }}>
@@ -241,7 +226,7 @@ export default function KelagayiTemplate(props) {
 
           {/* MƏKAN — üç rəngli haşiyə */}
           {S.venue && (
-            <Panel head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', padding: '10px 10px', background: '#FFFCF4', border: `3px solid ${C.CRIMSON}`, outline: `1px solid ${C.SAFFRON_D}`, outlineOffset: -9, boxShadow: '0 22px 34px -26px rgba(110,18,34,.6)' }}>
                 <div style={{ height: 5, background: BAND, marginBottom: 8 }} />
                 <div style={{ overflow: 'hidden', isolation: 'isolate' }}>
@@ -262,7 +247,7 @@ export default function KelagayiTemplate(props) {
 
           {/* PROQRAM */}
           {S.program && (
-            <Panel head={head} bg={SILK_ALT} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} bg={SILK_ALT} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 400, margin: '0 auto', borderTop: `1px solid ${alpha(C.CRIMSON, 0.35)}` }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '28px 76px minmax(0, 1fr)', gap: 12, alignItems: 'center', padding: '16px 4px', borderBottom: `1px solid ${alpha(C.CRIMSON, 0.35)}` }}>
@@ -276,7 +261,7 @@ export default function KelagayiTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -284,7 +269,7 @@ export default function KelagayiTemplate(props) {
 
           {/* MASA — böyük romb */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} bg={SILK_ALT} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} bg={SILK_ALT} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="kg-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.CRIMSON}
                 nameStyle={{ fontFamily: head, fontSize: 22 }}
                 card={(num) => (
@@ -298,7 +283,7 @@ export default function KelagayiTemplate(props) {
 
           {/* FOTOLAR — romb pəncərələr */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '28px 10px', padding: '16px 6px 26px' }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -315,7 +300,7 @@ export default function KelagayiTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} bg={SILK_ALT} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} bg={SILK_ALT} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.CRIMSON, 0.45), hair: alpha(C.CRIMSON, 0.22), accent: C.CRIMSON,
                 font: body, display: head, btnFont: body,
@@ -328,7 +313,7 @@ export default function KelagayiTemplate(props) {
 
           {/* ARZULAR */}
           {S.guestbook && (
-            <Panel head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.CRIMSON} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Mandala, Leaf, DotRule, HennaHand } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -31,22 +32,6 @@ import { Mandala, Leaf, DotRule, HennaHand } from './art'
 const BASE = getTemplateTheme('henna-buta')
 const ID = 'henna-buta'
 const SCRIPT = "'Bad Script', 'Cormorant Garamond', Georgia, cursive"
-
-const LABELS = {
-  countdown: { title: { az: 'Xına yaxılana qədər', en: 'Until the henna is applied', ru: 'До нанесения хны' } },
-  venue:     { title: { az: 'Gecənin məkanı', en: 'The venue', ru: 'Место вечера' } },
-  program:   { title: { az: 'Gecənin naxışı', en: 'The pattern of the night', ru: 'Узор вечера' } },
-  dresscode: { title: { az: 'Geyim', en: 'What to wear', ru: 'Что надеть' } },
-  seating:   { title: { az: 'Yerinizi tapın', en: 'Find your seat', ru: 'Найдите своё место' } },
-  gallery:   { title: { az: 'Naxışlı anlar', en: 'Patterned moments', ru: 'Узорные моменты' } },
-  rsvp:      { title: { az: 'Gələcəksinizmi?', en: 'Will you come?', ru: 'Вы придёте?' } },
-  guestbook: { title: { az: 'Gəlinin ovucuna bir arzu', en: 'A wish in the bride’s palm', ru: 'Пожелание на ладони невесты' } },
-}
-const TXT = {
-  az: { table: 'Masa' },
-  en: { table: 'Table' },
-  ru: { table: 'Стол' },
-}
 
 const KEYFRAMES = `
 @keyframes hb-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -86,7 +71,7 @@ function HennaOpening({ inv, theme }) {
           {ot.show('kicker') && <div style={{ fontFamily: SCRIPT, fontSize: 24, color: C.TERRA }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 2, fontFamily: head, fontWeight: 300, fontSize: 'clamp(42px, 12.6vw, 58px)', lineHeight: 1.05, color: C.HENNA_D, overflowWrap: 'anywhere' }}>
-              {first}{second && <><span style={{ display: 'block', fontFamily: SCRIPT, fontSize: '.5em', color: C.TERRA }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'block', fontFamily: SCRIPT, fontSize: '.5em', color: C.TERRA }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
           {ot.show('meta') && <div style={{ marginTop: 8, fontSize: 15, letterSpacing: '.04em', color: C.MUTED }}>{ot.text('meta')}</div>}
@@ -146,8 +131,8 @@ export default function HennaButaTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
     <div data-hb lang={lang} data-enter={enterDirection(ID)} style={{
@@ -172,12 +157,12 @@ export default function HennaButaTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: SCRIPT, fontSize: 21, color: C.HENNA }}>Digitoy</div>
+            <div style={{ fontFamily: SCRIPT, fontSize: 21, color: C.HENNA }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — xına gülü */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: PAPER, padding: '54px 22px 60px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: PAPER, padding: '54px 22px 60px', textAlign: 'center' }}>
             <Mandala size={460} color={alpha(C.HENNA, 0.09)} petals={16} style={{ position: 'absolute', left: '50%', top: 40, marginLeft: -230, animation: 'hb-spin 120s linear infinite' }} />
             <div style={{ position: 'relative' }}>
               <div style={{ fontFamily: SCRIPT, fontSize: 28, color: C.TERRA, animation: 'hb-rise .8s ease-out .2s both' }}>{L('hero', 'kicker', inv.eventLabel)}</div>
@@ -195,7 +180,7 @@ export default function HennaButaTemplate(props) {
 
           {/* SAYĞAC — mandalalar */}
           {S.countdown && (
-            <Panel head={head} sand title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} sand title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '18px 14px', maxWidth: 330, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop]) => (
                   <Mandala key={l} size={150} petals={12} disc="#FFFCF7" style={{ margin: '0 auto', maxWidth: '100%' }}>
@@ -211,7 +196,7 @@ export default function HennaButaTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', padding: 8, background: '#FFFCF7', borderRadius: 30, border: `1px solid ${alpha(C.HENNA, 0.35)}`, outline: `2px dotted ${alpha(C.HENNA, 0.55)}`, outlineOffset: 6, boxShadow: '0 20px 34px -26px rgba(90,35,12,.6)' }}>
                 <div style={{ borderRadius: 23, overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
@@ -230,7 +215,7 @@ export default function HennaButaTemplate(props) {
 
           {/* PROQRAM — xına sarmaşığı */}
           {S.program && (
-            <Panel head={head} sand title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} sand title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ position: 'relative', maxWidth: 380, margin: '0 auto' }}>
                 <svg aria-hidden="true" viewBox="0 0 24 100" preserveAspectRatio="none" style={{ position: 'absolute', left: 14, top: 10, bottom: 10, width: 24, height: 'calc(100% - 20px)' }}>
                   <path d="M12 0C4 12 20 25 12 37C4 50 20 62 12 75C4 87 20 95 12 100" fill="none" stroke={alpha(C.HENNA, 0.55)} strokeWidth="1.2" vectorEffect="non-scaling-stroke" />
@@ -253,7 +238,7 @@ export default function HennaButaTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -261,7 +246,7 @@ export default function HennaButaTemplate(props) {
 
           {/* MASA — mandala */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} sand title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} sand title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="hb-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.HENNA}
                 nameStyle={{ fontFamily: SCRIPT, fontSize: 26 }}
                 card={(num) => (
@@ -275,7 +260,7 @@ export default function HennaButaTemplate(props) {
 
           {/* FOTOLAR — günbəz çərçivələr */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 14, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -292,7 +277,7 @@ export default function HennaButaTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} sand title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} sand title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.HENNA, 0.4), hair: alpha(C.HENNA, 0.2), accent: C.HENNA,
                 font: body, display: head, btnFont: body,
@@ -305,7 +290,7 @@ export default function HennaButaTemplate(props) {
 
           {/* ARZULAR */}
           {S.guestbook && (
-            <Panel head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.HENNA} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

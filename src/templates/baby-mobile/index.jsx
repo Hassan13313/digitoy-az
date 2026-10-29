@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, FELT, NIGHT_BG, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Felt, Mobile, Sparks, Note } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -30,21 +31,6 @@ import { Felt, Mobile, Sparks, Note } from './art'
 const BASE = getTemplateTheme('baby-mobile')
 const ID = 'baby-mobile'
 
-const LABELS = {
-  countdown: { title: { az: 'Şirin gözləyiş', en: 'Sweet anticipation', ru: 'Сладкое ожидание' } },
-  venue:     { title: { az: 'Harada görüşürük?', en: 'Where we meet', ru: 'Где встречаемся?' } },
-  program:   { title: { az: 'Günün laylası', en: 'The day’s lullaby', ru: 'Колыбельная дня' } },
-  dresscode: { title: { az: 'Geyim', en: 'What to wear', ru: 'Что надеть' } },
-  seating:   { title: { az: 'Ulduzunuz', en: 'Your star', ru: 'Ваша звезда' } },
-  gallery:   { title: { az: 'Yumşaq anlar', en: 'Soft moments', ru: 'Нежные моменты' } },
-  rsvp:      { title: { az: 'Gələcəksiniz?', en: 'Will you come?', ru: 'Вы придёте?' } },
-  guestbook: { title: { az: 'Laylalar və arzular', en: 'Lullabies and wishes', ru: 'Колыбельные и пожелания' } },
-}
-const TXT = {
-  az: { table: 'Masa' },
-  en: { table: 'Table' },
-  ru: { table: 'Стол' },
-}
 const SHAPES = [['cloud', C.CREAM], ['cloud', '#FCE3DC'], ['cloud', '#E3EEDF'], ['cloud', '#FBEBC4']]
 const MARKERS = [['star', C.MUSTARD], ['moon', C.MUSTARD], ['heart', C.BLUSH], ['cloud', C.CREAM], ['star', C.SAGE]]
 
@@ -102,7 +88,7 @@ function MobileOpening({ inv, theme }) {
           {ot.show('kicker') && <div style={{ fontFamily: head, fontStyle: 'italic', fontSize: 19, color: C.MUSTARD }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 4, fontFamily: head, fontWeight: 700, fontSize: 'clamp(36px, 10.6vw, 50px)', lineHeight: 1.08, color: C.CREAM, overflowWrap: 'anywhere' }}>
-              {first}{second && <><span style={{ display: 'block', fontSize: '.5em', color: C.BLUSH }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'block', fontSize: '.5em', color: C.BLUSH }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
           {ot.show('meta') && <div style={{ marginTop: 8, fontSize: 15, color: alpha(C.CREAM, 0.75) }}>{ot.text('meta')}</div>}
@@ -166,8 +152,8 @@ export default function BabyMobileTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
     <div data-bm lang={lang} data-enter={enterDirection(ID)} style={{
@@ -192,12 +178,12 @@ export default function BabyMobileTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.CREAM, 0.8), fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 700, fontSize: 18, color: C.MUSTARD }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontWeight: 700, fontSize: 18, color: C.MUSTARD }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — gecə səmasında mobil */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: NIGHT_BG, padding: '0 20px 58px', textAlign: 'center', color: C.CREAM }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: NIGHT_BG, padding: '0 20px 58px', textAlign: 'center', color: C.CREAM }}>
             <Sparks />
             <div style={{ position: 'relative', perspective: 600 }}><Mobile width="min(86vw, 330px)" /></div>
             <div style={{ position: 'relative', marginTop: 10 }}>
@@ -214,7 +200,7 @@ export default function BabyMobileTemplate(props) {
 
           {/* SAYĞAC — keçə buludlar */}
           {S.countdown && (
-            <Panel head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(4px, 2vw, 10px)', maxWidth: 410, margin: '0 auto', justifyItems: 'center' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <div key={l} style={{ textAlign: 'center' }}>
@@ -232,7 +218,7 @@ export default function BabyMobileTemplate(props) {
 
           {/* MƏKAN — keçə çərçivə */}
           {S.venue && (
-            <Panel head={head} night title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} night title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', padding: 14, borderRadius: 26, background: FELT(C.MUSTARD), outline: '2px dashed rgba(255,255,255,.8)', outlineOffset: -7, boxShadow: '0 24px 40px -24px rgba(0,0,0,.7)' }}>
                 <div style={{ borderRadius: 16, overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
@@ -251,7 +237,7 @@ export default function BabyMobileTemplate(props) {
 
           {/* PROQRAM — sapdan asılan fiqurlar */}
           {S.program && (
-            <Panel head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ position: 'relative', maxWidth: 380, margin: '0 auto' }}>
                 <span aria-hidden="true" style={{ position: 'absolute', left: 30, top: 0, bottom: 30, width: 1.4, background: alpha(C.INK, 0.25) }} />
                 {timeline.events.map((ev, i) => {
@@ -271,7 +257,7 @@ export default function BabyMobileTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -279,7 +265,7 @@ export default function BabyMobileTemplate(props) {
 
           {/* MASA — keçə ulduz */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} night title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} night title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="bm-seat-list" field={field} suggest={suggest} font={body} muted={alpha(C.CREAM, 0.8)} accent={C.MUSTARD}
                 nameStyle={{ fontFamily: head, fontWeight: 700, fontSize: 22 }}
                 card={(num) => (
@@ -293,7 +279,7 @@ export default function BabyMobileTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => {
@@ -313,7 +299,7 @@ export default function BabyMobileTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.NIGHT, 0.35), hair: alpha(C.NIGHT, 0.12), accent: C.NIGHT,
                 font: body, display: head, btnFont: head,
@@ -326,7 +312,7 @@ export default function BabyMobileTemplate(props) {
 
           {/* LAYLALAR */}
           {S.guestbook && (
-            <Panel head={head} night title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} night title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={field} btn={(on) => ({ ...btn(on), background: on ? C.MUSTARD : 'transparent', color: on ? C.INK : C.CREAM, border: `2px solid ${on ? C.MUSTARD : alpha(C.CREAM, 0.45)}` })} errorColor={C.MUSTARD} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

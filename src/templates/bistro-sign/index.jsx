@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, GREEN_BG, CREAM_BG, BRASS_GRAD, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Awning, StringLights, HangingSign, Saucer } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -26,22 +27,6 @@ import { Awning, StringLights, HangingSign, Saucer } from './art'
 
 const BASE = getTemplateTheme('bistro-sign')
 const ID = 'bistro-sign'
-
-const LABELS = {
-  countdown: { title: { az: 'Qapılar açılana qədər', en: 'Until the doors open', ru: 'До открытия дверей' } },
-  venue:     { title: { az: 'Bizi burada tapın', en: 'Find us here', ru: 'Найдите нас здесь' } },
-  program:   { title: { az: 'Günün menyusu', en: 'Menu of the day', ru: 'Меню дня' } },
-  dresscode: { title: { az: 'Geyim', en: 'Dress code', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Sizin üçün rezerv', en: 'Reserved for you', ru: 'Зарезервировано для вас' } },
-  gallery:   { title: { az: 'İçəridən görüntülər', en: 'A look inside', ru: 'Взгляд изнутри' } },
-  rsvp:      { title: { az: 'Sizi gözləyək?', en: 'Shall we expect you?', ru: 'Вас ждать?' } },
-  guestbook: { title: { az: 'Qonaq dəftəri', en: 'Guest book', ru: 'Книга гостей' } },
-}
-const TXT = {
-  az: { table: 'Masa', closed: 'Bağlı', open: 'Açıq', welcome: 'Xoş gəlmisiniz!', reserved: 'Rezerv', since: 'Açılış' },
-  en: { table: 'Table', closed: 'Closed', open: 'Open', welcome: 'Welcome!', reserved: 'Reserved', since: 'Opening' },
-  ru: { table: 'Стол', closed: 'Закрыто', open: 'Открыто', welcome: 'Добро пожаловать!', reserved: 'Резерв', since: 'Открытие' },
-}
 
 const KEYFRAMES = `
 @keyframes bs-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -78,7 +63,7 @@ function SignOpening({ inv, theme, lang }) {
   const { titleOv, first, second } = openingNames(inv)
   const go = gate.opening
   const head = theme.fonts.heading
-  const T = TXT[lang] || TXT.az
+  const T = inv.copy(TXT)
   return (
     <motion.div {...gate.gateProps} data-bs
       animate={go ? { opacity: 0 } : {}}
@@ -97,7 +82,7 @@ function SignOpening({ inv, theme, lang }) {
           </EmblemSlot>
           {titleOv !== '' && (
             <div style={{ marginTop: 8, fontFamily: head, fontStyle: 'italic', fontSize: 'clamp(34px, 10vw, 48px)', lineHeight: 1.08, overflowWrap: 'anywhere', color: C.CREAM }}>
-              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .2em', color: C.BRASS }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .2em', color: C.BRASS }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
           {ot.show('meta') && <div style={{ marginTop: 8, fontSize: 15.5, color: alpha(C.CREAM, 0.7) }}>{ot.text('meta')}</div>}
@@ -159,8 +144,8 @@ export default function BistroSignTemplate(props) {
   const head = theme.fonts.heading
   const body = theme.fonts.body
   const mono = "'IBM Plex Mono', ui-monospace, monospace"
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
     <div data-bs lang={lang} data-enter={enterDirection(ID)} style={{
@@ -185,12 +170,12 @@ export default function BistroSignTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.CREAM, 0.75), fontSize: 15, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontStyle: 'italic', fontSize: 22, color: C.CREAM }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontStyle: 'italic', fontSize: 22, color: C.CREAM }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — tente, girlənd, «Açıq» */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: GREEN_BG, padding: '0 0 64px', textAlign: 'center', color: C.CREAM }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: GREEN_BG, padding: '0 0 64px', textAlign: 'center', color: C.CREAM }}>
             <Awning height={54} />
             <StringLights count={9} style={{ marginTop: 16 }} />
             <div style={{ padding: '0 22px' }}>
@@ -210,7 +195,7 @@ export default function BistroSignTemplate(props) {
 
           {/* SAYĞAC — nəlbəkilər */}
           {S.countdown && (
-            <Panel head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop]) => (
                   <div key={l} style={{ textAlign: 'center' }}>
@@ -228,7 +213,7 @@ export default function BistroSignTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', borderRadius: 18, overflow: 'hidden', isolation: 'isolate', boxShadow: `0 0 0 4px ${C.BRASS}, 0 24px 36px -22px rgba(0,0,0,.8)` }}>
                 <Awning height={22} />
                 <MapSection
@@ -246,7 +231,7 @@ export default function BistroSignTemplate(props) {
 
           {/* PROQRAM — menyu kartı */}
           {S.program && (
-            <Panel head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 400, margin: '0 auto', padding: '26px 22px 22px', background: C.CREAM_L, borderRadius: 6, boxShadow: `0 0 0 1px ${C.LINE}, 0 0 0 7px ${C.CREAM_L}, 0 0 0 8px ${C.GREEN}, 0 20px 30px -20px rgba(31,42,36,.5)` }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'baseline', gap: 8, padding: '9px 0' }}>
@@ -260,7 +245,7 @@ export default function BistroSignTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -268,7 +253,7 @@ export default function BistroSignTemplate(props) {
 
           {/* MASA — «Rezerv» lövhəciyi */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="bs-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.GREEN}
                 nameStyle={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
                 card={(num) => (
@@ -291,7 +276,7 @@ export default function BistroSignTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 14, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -308,7 +293,7 @@ export default function BistroSignTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: C.LINE, hair: alpha(C.LINE, 0.7), accent: C.GREEN,
                 font: body, display: head, displayItalic: true, btnFont: head,
@@ -321,7 +306,7 @@ export default function BistroSignTemplate(props) {
 
           {/* QONAQ DƏFTƏRİ — çek kağızı */}
           {S.guestbook && (
-            <Panel head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.BULB} />
               <div style={{ display: 'grid', gap: 18 }}>
                 {gbook.messages.map((raw, i) => {

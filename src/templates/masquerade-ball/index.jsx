@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, GOLD_GRAD, VELVET, BALL_BG, IVORY_BG, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Mask, Curtain, GoldDust, Chandelier } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -26,22 +27,6 @@ import { Mask, Curtain, GoldDust, Chandelier } from './art'
 
 const BASE = getTemplateTheme('masquerade-ball')
 const ID = 'masquerade-ball'
-
-const LABELS = {
-  countdown: { title: { az: 'Bal başlayana qədər', en: 'Until the ball begins', ru: 'До начала бала' } },
-  venue:     { title: { az: 'Bal salonu', en: 'The ballroom', ru: 'Бальный зал' } },
-  program:   { title: { az: 'Rəqs kartı', en: 'Dance card', ru: 'Бальная карточка' } },
-  dresscode: { title: { az: 'Geyim və maska', en: 'Attire & mask', ru: 'Наряд и маска' } },
-  seating:   { title: { az: 'Masanız', en: 'Your table', ru: 'Ваш стол' } },
-  gallery:   { title: { az: 'Maskalar arxasında', en: 'Behind the masks', ru: 'За масками' } },
-  rsvp:      { title: { az: 'Bala gələcəksiniz?', en: 'Will you attend the ball?', ru: 'Придёте на бал?' } },
-  guestbook: { title: { az: 'Gizli arzular', en: 'Secret wishes', ru: 'Тайные пожелания' } },
-}
-const TXT = {
-  az: { table: 'Masa', ball: 'Maskarad balı', guest: 'Hörmətli qonaq' },
-  en: { table: 'Table', ball: 'Masquerade ball', guest: 'Honoured guest' },
-  ru: { table: 'Стол', ball: 'Бал-маскарад', guest: 'Уважаемый гость' },
-}
 
 const KEYFRAMES = `
 @keyframes mb-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -83,7 +68,7 @@ function MaskOpening({ inv, theme, script }) {
           {ot.show('kicker') && <div style={{ fontFamily: script, fontStyle: 'italic', fontSize: 21, color: C.GOLD_L }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 4, fontFamily: head, fontWeight: 700, fontSize: 'clamp(30px, 9vw, 42px)', lineHeight: 1.08, overflowWrap: 'anywhere', ...goldText }}>
-              {first}{second && <> &amp; {second}</>}
+              {first}{second && <> {ot.text('and')} {second}</>}
             </div>
           )}
         </div>
@@ -153,8 +138,8 @@ export default function MasqueradeBallTemplate(props) {
   const head = theme.fonts.heading
   const body = theme.fonts.body
   const script = body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
     <div data-mb lang={lang} data-enter={enterDirection(ID)} style={{
@@ -179,12 +164,12 @@ export default function MasqueradeBallTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.IVORY, 0.72), fontSize: 17, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 700, fontSize: 19, letterSpacing: '.04em', ...goldText }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontWeight: 700, fontSize: 19, letterSpacing: '.04em', ...goldText }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — pərdə, çilçıraq, maska */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: BALL_BG, padding: '56px 22px 64px', textAlign: 'center', color: C.IVORY }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: BALL_BG, padding: '56px 22px 64px', textAlign: 'center', color: C.IVORY }}>
             <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 30, background: VELVET, borderRadius: '0 0 50% 50% / 0 0 100% 100%', boxShadow: '0 8px 14px rgba(0,0,0,.45)' }} />
             <span aria-hidden="true" style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '12%', background: VELVET, boxShadow: 'inset -10px 0 16px -6px rgba(0,0,0,.6)' }} />
             <span aria-hidden="true" style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '12%', background: VELVET, boxShadow: 'inset 10px 0 16px -6px rgba(0,0,0,.6)' }} />
@@ -203,7 +188,7 @@ export default function MasqueradeBallTemplate(props) {
 
           {/* SAYĞAC — kameo medalyonlar */}
           {S.countdown && (
-            <Panel head={head} script={script} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} script={script} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop]) => (
                   <div key={l} style={{ textAlign: 'center' }}>
@@ -223,7 +208,7 @@ export default function MasqueradeBallTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} script={script} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} script={script} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', padding: 5, borderRadius: '46% 46% 18px 18px / 22% 22% 18px 18px', background: GOLD_GRAD, boxShadow: '0 24px 36px -22px rgba(0,0,0,.85)' }}>
                 <div style={{ borderRadius: '45% 45% 14px 14px / 21% 21% 14px 14px', overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
@@ -242,7 +227,7 @@ export default function MasqueradeBallTemplate(props) {
 
           {/* PROQRAM — rəqs kartı */}
           {S.program && (
-            <Panel head={head} script={script} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} script={script} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ position: 'relative', maxWidth: 340, margin: '46px auto 0', padding: '30px 26px 26px', background: '#FFFDF8', boxShadow: `0 0 0 1px ${alpha(C.GOLD_D, 0.4)}, 0 0 0 6px #FFFDF8, 0 0 0 7px ${C.GOLD}, 0 22px 30px -20px rgba(58,16,48,.55)` }}>
                 <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: -26, width: 3, height: 26, marginLeft: -1.5, background: C.CRIMSON }} />
                 <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: -38, width: 16, height: 16, marginLeft: -8, borderRadius: '50%', background: C.CRIMSON, boxShadow: `0 0 0 2px ${C.GOLD}` }} />
@@ -258,7 +243,7 @@ export default function MasqueradeBallTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} script={script} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} script={script} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -266,7 +251,7 @@ export default function MasqueradeBallTemplate(props) {
 
           {/* MASA — dəvət kartı */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} script={script} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} script={script} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="mb-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.IVORY, 0.72)} accent={C.GOLD_L}
                 nameStyle={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
                 card={(num) => (
@@ -286,7 +271,7 @@ export default function MasqueradeBallTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} script={script} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} script={script} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 16, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -303,7 +288,7 @@ export default function MasqueradeBallTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} script={script} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} script={script} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.GOLD_D, 0.5), hair: alpha(C.GOLD_D, 0.25), accent: C.PLUM,
                 font: body, display: head, displayItalic: false, btnFont: head,
@@ -316,7 +301,7 @@ export default function MasqueradeBallTemplate(props) {
 
           {/* GİZLİ ARZULAR */}
           {S.guestbook && (
-            <Panel head={head} script={script} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} script={script} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.GOLD_L} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

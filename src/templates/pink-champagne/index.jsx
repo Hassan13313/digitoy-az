@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, GOLD_GRAD, ROSE_GRAD, BLUSH_BG, WINE_BG, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Bottle, Coupe, Bubbles, Sash } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -25,22 +26,6 @@ import { Bottle, Coupe, Bubbles, Sash } from './art'
 
 const BASE = getTemplateTheme('pink-champagne')
 const ID = 'pink-champagne'
-
-const LABELS = {
-  countdown: { title: { az: 'Qız gecəsinə qədər', en: 'Until the big night', ru: 'До девичника' } },
-  venue:     { title: { az: 'Harada görüşürük?', en: 'Where we meet', ru: 'Где встречаемся?' } },
-  program:   { title: { az: 'Gecənin planı', en: 'The plan', ru: 'План вечера' } },
-  dresscode: { title: { az: 'Geyim', en: 'Dress code', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Yerin hazırdır', en: 'Your seat is ready', ru: 'Твоё место готово' } },
-  gallery:   { title: { az: 'Qızlarla anlar', en: 'Girls’ moments', ru: 'Моменты с подругами' } },
-  rsvp:      { title: { az: 'Gəlirsən?', en: 'Are you in?', ru: 'Ты с нами?' } },
-  guestbook: { title: { az: 'Gəlinə arzular', en: 'Wishes for the bride', ru: 'Пожелания невесте' } },
-}
-const TXT = {
-  az: { table: 'Masa', bride: 'Gəlin olacaq', cheers: 'Sağlığına!' },
-  en: { table: 'Table', bride: 'Bride to be', cheers: 'Cheers!' },
-  ru: { table: 'Стол', bride: 'Скоро невеста', cheers: 'За невесту!' },
-}
 
 const KEYFRAMES = `
 @keyframes pc-rise { from { transform: translateY(0) } to { transform: translateY(-120vh) } }
@@ -66,7 +51,7 @@ function PopOpening({ inv, theme, lang }) {
   const { titleOv, first, second } = openingNames(inv)
   const go = gate.opening
   const head = theme.fonts.heading
-  const T = TXT[lang] || TXT.az
+  const T = inv.copy(TXT)
   return (
     <motion.div {...gate.gateProps} data-pc
       animate={go ? { opacity: 0 } : {}}
@@ -78,7 +63,7 @@ function PopOpening({ inv, theme, lang }) {
           {ot.show('kicker') && <div style={{ fontSize: 12.5, fontWeight: 600, letterSpacing: '.3em', textTransform: 'uppercase', color: C.ROSE_D }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 6, fontFamily: head, fontStyle: 'italic', fontWeight: 500, fontSize: 'clamp(48px, 15vw, 70px)', lineHeight: 1.04, overflowWrap: 'anywhere', color: C.WINE }}>
-              {first}{second && <> &amp; {second}</>}
+              {first}{second && <> {ot.text('and')} {second}</>}
             </div>
           )}
           <Sash text={T.bride} font={head} style={{ marginTop: 10 }} />
@@ -149,8 +134,8 @@ export default function PinkChampagneTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
     <div data-pc lang={lang} data-enter={enterDirection(ID)} style={{
@@ -175,12 +160,12 @@ export default function PinkChampagneTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontStyle: 'italic', fontWeight: 500, fontSize: 22, color: C.WINE }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontStyle: 'italic', fontWeight: 500, fontSize: 22, color: C.WINE }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — butulka, bokal, lent */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: BLUSH_BG, padding: '30px 22px 64px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: BLUSH_BG, padding: '30px 22px 64px', textAlign: 'center' }}>
             <Bubbles />
             <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: 6 }}>
               <Coupe size={74} tilt={-12} style={{ marginBottom: 4 }} />
@@ -198,7 +183,7 @@ export default function PinkChampagneTemplate(props) {
 
           {/* SAYĞAC — qabarcıqlar */}
           {S.countdown && (
-            <Panel head={head} dark title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} dark title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <div key={l} style={{ textAlign: 'center', transform: `translateY(${[0, -10, 4, -6][i]}px)` }}>
@@ -216,7 +201,7 @@ export default function PinkChampagneTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', padding: 4, borderRadius: 30, background: GOLD_GRAD, boxShadow: '0 24px 36px -22px rgba(92,26,43,.5)' }}>
                 <div style={{ borderRadius: 26, overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
@@ -235,7 +220,7 @@ export default function PinkChampagneTemplate(props) {
 
           {/* PROQRAM */}
           {S.program && (
-            <Panel head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 400, margin: '0 auto', display: 'grid', gap: 12 }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '40px 62px minmax(0, 1fr)', gap: 8, alignItems: 'center', padding: '12px 18px 12px 10px', borderRadius: 999, background: '#FFFFFF', boxShadow: '0 10px 20px -14px rgba(92,26,43,.4)' }}>
@@ -249,7 +234,7 @@ export default function PinkChampagneTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -257,7 +242,7 @@ export default function PinkChampagneTemplate(props) {
 
           {/* MASA — fiyonklu kart */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="pc-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.BLUSH, 0.75)} accent={C.GOLD_L}
                 nameStyle={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
                 card={(num) => (
@@ -280,7 +265,7 @@ export default function PinkChampagneTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 14, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -297,7 +282,7 @@ export default function PinkChampagneTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: C.LINE, hair: alpha(C.LINE, 0.7), accent: C.ROSE_D,
                 font: body, display: head, displayItalic: true, btnFont: body,
@@ -310,7 +295,7 @@ export default function PinkChampagneTemplate(props) {
 
           {/* ARZULAR */}
           {S.guestbook && (
-            <Panel head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.GOLD_L} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

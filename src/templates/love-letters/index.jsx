@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize, yearsSentence } from '../_shared/kids'
 import { C, ENVS, LINEN_BG, NAVY_BG, RULED, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Envelope, Stamp, HeartLine, LetterBundle } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -28,22 +29,6 @@ import { Envelope, Stamp, HeartLine, LetterBundle } from './art'
 
 const BASE = getTemplateTheme('love-letters')
 const ID = 'love-letters'
-
-const LABELS = {
-  countdown: { title: { az: 'Görüşə qədər', en: 'Until we meet', ru: 'До встречи' } },
-  venue:     { title: { az: 'Ünvan', en: 'The address', ru: 'Адрес' } },
-  program:   { title: { az: 'Axşamın sətirləri', en: 'Lines of the evening', ru: 'Строки вечера' } },
-  dresscode: { title: { az: 'Geyim', en: 'Attire', ru: 'Наряд' } },
-  seating:   { title: { az: 'Sizə ünvanlı', en: 'Addressed to you', ru: 'Адресовано вам' } },
-  gallery:   { title: { az: 'Məktublar arasında', en: 'Between the letters', ru: 'Между письмами' } },
-  rsvp:      { title: { az: 'Cavab məktubu', en: 'Your reply', ru: 'Ответное письмо' } },
-  guestbook: { title: { az: 'Bizə bir məktub', en: 'Write us a letter', ru: 'Напишите нам письмо' } },
-}
-const TXT = {
-  az: { table: 'Masa', to: 'Kimə:' },
-  en: { table: 'Table', to: 'To:' },
-  ru: { table: 'Стол', to: 'Кому:' },
-}
 
 const KEYFRAMES = `
 @keyframes ll-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -126,7 +111,7 @@ function BundleOpening({ inv, theme, lang, script }) {
         <div style={{ marginTop: 34, animation: 'll-rise 1s ease-out .3s both' }}>
           {titleOv !== '' && (
             <div style={{ fontFamily: script, fontSize: 'clamp(44px, 13vw, 62px)', lineHeight: 1.05, wordSpacing: '.14em', overflowWrap: 'anywhere', color: C.INK }}>
-              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .28em', color: C.ROSE }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .28em', color: C.ROSE }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
           {ot.show('meta') && <div style={{ marginTop: 4, fontSize: 16, fontStyle: 'italic', color: C.MUTED }}>{ot.text('meta')}</div>}
@@ -183,8 +168,8 @@ export default function LoveLettersTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const script = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
     <div data-ll lang={lang} data-enter={enterDirection(ID)} style={{
@@ -209,12 +194,12 @@ export default function LoveLettersTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 16, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: script, fontSize: 28, color: C.INK }}>Digitoy</div>
+            <div style={{ fontFamily: script, fontSize: 28, color: C.INK }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — açılmış bağlama */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: LINEN_BG, padding: '44px 22px 60px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: LINEN_BG, padding: '44px 22px 60px', textAlign: 'center' }}>
             <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 'calc(min(66vw, 270px) * .5)' }}>
               <LetterBundle width="min(66vw, 270px)" open instant
                 letter={<LetterSheet inv={inv} lang={lang} script={script} body={body} />}
@@ -231,7 +216,7 @@ export default function LoveLettersTemplate(props) {
 
           {/* SAYĞAC — zərflər */}
           {S.countdown && (
-            <Panel script={script} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" script={script} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 16, maxWidth: 380, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <Envelope key={l} width="100%" color={ENVS[i]} back={i % 2 === 0} style={{ transform: `rotate(${[-2, 1.5, 1.2, -1.8][i]}deg)` }}>
@@ -249,7 +234,7 @@ export default function LoveLettersTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel script={script} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" script={script} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', padding: 10, background: C.PAPER, borderRadius: 4, boxShadow: '0 24px 36px -20px rgba(0,0,0,.7)' }}>
                 <div style={{ overflow: 'hidden', isolation: 'isolate', borderRadius: 2 }}>
                   <MapSection
@@ -268,7 +253,7 @@ export default function LoveLettersTemplate(props) {
 
           {/* PROQRAM — xətli vərəq */}
           {S.program && (
-            <Panel script={script} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" script={script} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ position: 'relative', maxWidth: 400, margin: '0 auto', padding: '22px 22px 18px 52px', background: RULED, backgroundPositionY: 6, borderRadius: 3, boxShadow: '0 16px 26px -18px rgba(47,53,80,.5)', transform: 'rotate(-.6deg)' }}>
                 <span aria-hidden="true" style={{ position: 'absolute', left: 36, top: 0, bottom: 0, width: 1.5, background: alpha(C.ROSE, 0.5) }} />
                 {timeline.events.map((ev, i) => (
@@ -282,7 +267,7 @@ export default function LoveLettersTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel script={script} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" script={script} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={body} align="center" />
             </Panel>
@@ -290,7 +275,7 @@ export default function LoveLettersTemplate(props) {
 
           {/* MASA — ünvanlı zərf */}
           {S.seating && !seating.isEmpty && (
-            <Panel script={script} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" script={script} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="ll-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.ROSE}
                 nameStyle={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
                 card={(num) => (
@@ -316,7 +301,7 @@ export default function LoveLettersTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" script={script} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" script={script} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 18, marginBottom: 34 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -333,7 +318,7 @@ export default function LoveLettersTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel script={script} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" script={script} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.INK, 0.28), hair: alpha(C.INK, 0.14), accent: C.ROSE,
                 font: body, display: script, displayItalic: false, btnFont: body,
@@ -346,7 +331,7 @@ export default function LoveLettersTemplate(props) {
 
           {/* ARZULAR — P.S. */}
           {S.guestbook && (
-            <Panel script={script} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" script={script} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.ROSE_L} />
               <div style={{ display: 'grid', gap: 16 }}>
                 {gbook.messages.map((raw, i) => {

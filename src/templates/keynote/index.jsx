@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, GLOW, GRID_BG, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Screen, LiveDot, Beams, Badge } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -30,22 +31,6 @@ import { Screen, LiveDot, Beams, Badge } from './art'
 const BASE = getTemplateTheme('keynote')
 const ID = 'keynote'
 const MONO = "'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace"
-
-const LABELS = {
-  countdown: { title: { az: 'Başlanğıca qədər', en: 'Starting in', ru: 'До начала' } },
-  venue:     { title: { az: 'Məkan', en: 'Venue', ru: 'Место проведения' } },
-  program:   { title: { az: 'Gündəm', en: 'Agenda', ru: 'Повестка' } },
-  dresscode: { title: { az: 'Geyim qaydası', en: 'Dress code', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Bəyiniz və masanız', en: 'Your badge and table', ru: 'Ваш бейдж и стол' } },
-  gallery:   { title: { az: 'Kadrlar', en: 'Highlights', ru: 'Кадры' } },
-  rsvp:      { title: { az: 'Qeydiyyat', en: 'Registration', ru: 'Регистрация' } },
-  guestbook: { title: { az: 'Rəylər və təbriklər', en: 'Notes and congratulations', ru: 'Отзывы и поздравления' } },
-}
-const TXT = {
-  az: { table: 'Masa', guest: 'Qonaq', host: 'Təşkilatçı', live: 'CANLI' },
-  en: { table: 'Table', guest: 'Guest', host: 'Hosted by', live: 'LIVE' },
-  ru: { table: 'Стол', guest: 'Гость', host: 'Организатор', live: 'В ЭФИРЕ' },
-}
 
 const KEYFRAMES = `
 @keyframes kn-live { 0%,100% { opacity: 1 } 50% { opacity: .3 } }
@@ -87,7 +72,7 @@ function KeynoteOpening({ inv, theme, T }) {
             {ot.show('kicker') && <div style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '.24em', textTransform: 'uppercase', color: go ? alpha(C.WHITE, 0.8) : C.FAINT, transition: 'color .4s ease .6s' }}>{ot.text('kicker')}</div>}
             {titleOv !== '' && (
               <div style={{ marginTop: 8, fontFamily: head, fontWeight: 400, fontSize: 'clamp(26px, 8vw, 38px)', lineHeight: 1.08, letterSpacing: '-.01em', color: go ? C.WHITE : '#4A5571', transition: 'color .4s ease .55s', overflowWrap: 'anywhere' }}>
-                {first}{second && <><span style={{ display: 'block', fontSize: '.5em' }}>&amp;</span>{second}</>}
+                {first}{second && <><span style={{ display: 'block', fontSize: '.5em' }}>{ot.text('and')}</span>{second}</>}
               </div>
             )}
             {ot.show('meta') && <div style={{ marginTop: 10, fontFamily: MONO, fontSize: 12, letterSpacing: '.06em', color: go ? C.CYAN : C.FAINT, transition: 'color .4s ease .6s' }}>{ot.text('meta')}</div>}
@@ -146,8 +131,8 @@ export default function KeynoteTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const host = inv.isCorp ? weddingData.organizer?.trim() : ''
   let n = 0
   const idx = () => String(++n).padStart(2, '0')
@@ -175,12 +160,12 @@ export default function KeynoteTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 500, fontSize: 17, letterSpacing: '-.01em', ...gradText }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontWeight: 500, fontSize: 17, letterSpacing: '-.01em', ...gradText }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — ekran */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: GRID_BG, padding: '40px 18px 56px' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: GRID_BG, padding: '40px 18px 56px' }}>
             <Beams instant />
             <div style={{ position: 'relative', maxWidth: 460, margin: '0 auto' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
@@ -207,7 +192,7 @@ export default function KeynoteTemplate(props) {
 
           {/* SAYĞAC — səhnə taymeri */}
           {S.countdown && (
-            <Panel head={head} alt index={idx()} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} alt index={idx()} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8 }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <div key={l} style={{ padding: '16px 6px 12px', borderRadius: 14, background: C.PANEL, border: `1px solid ${i === 3 ? alpha(C.CYAN, 0.5) : C.LINE}`, textAlign: 'center' }}>
@@ -223,7 +208,7 @@ export default function KeynoteTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} index={idx()} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} index={idx()} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ padding: 3, borderRadius: 18, background: GLOW, boxShadow: '0 0 50px -16px rgba(61,123,255,.6)' }}>
                 <div style={{ borderRadius: 15, overflow: 'hidden', isolation: 'isolate', background: C.NAVY }}>
                   <MapSection
@@ -242,7 +227,7 @@ export default function KeynoteTemplate(props) {
 
           {/* PROQRAM — gündəm */}
           {S.program && (
-            <Panel head={head} alt index={idx()} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} alt index={idx()} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ display: 'grid', gap: 8 }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '34px 64px minmax(0, 1fr)', gap: 10, alignItems: 'center', padding: '14px 14px', borderRadius: 14, background: C.PANEL, border: `1px solid ${C.LINE}` }}>
@@ -256,7 +241,7 @@ export default function KeynoteTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} index={idx()} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} index={idx()} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -264,7 +249,7 @@ export default function KeynoteTemplate(props) {
 
           {/* MASA — konfrans bəyi */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} alt index={idx()} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} alt index={idx()} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="kn-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.CYAN}
                 nameStyle={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
                 card={(num) => (
@@ -280,7 +265,7 @@ export default function KeynoteTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} index={idx()} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} index={idx()} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8, marginBottom: 30 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -297,7 +282,7 @@ export default function KeynoteTemplate(props) {
 
           {/* RSVP — qeydiyyat */}
           {S.rsvp && (
-            <Panel head={head} alt index={idx()} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} alt index={idx()} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.WHITE, muted: C.MUTED, line: C.LINE, hair: C.LINE, accent: C.CYAN,
                 font: body, display: head, btnFont: body,
@@ -310,7 +295,7 @@ export default function KeynoteTemplate(props) {
 
           {/* RƏYLƏR */}
           {S.guestbook && (
-            <Panel head={head} index={idx()} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} index={idx()} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.CYAN} />
               <div style={{ display: 'grid', gap: 10 }}>
                 {gbook.messages.map((raw, i) => {

@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize, ageWord } from '../_shared/kids'
 import { C, GOLD_GRAD, NAVY_BG, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Crown, Cushion, SHIELD, Dust, CrownRule } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -28,22 +29,6 @@ import { Crown, Cushion, SHIELD, Dust, CrownRule } from './art'
 
 const BASE = getTemplateTheme('little-prince')
 const ID = 'little-prince'
-
-const LABELS = {
-  countdown: { title: { az: 'Böyük günə qədər', en: 'Until the big day', ru: 'До большого дня' } },
-  venue:     { title: { az: 'Saray harada?', en: 'Where is the palace?', ru: 'Где дворец?' } },
-  program:   { title: { az: 'Şahzadənin fərmanı', en: 'The royal decree', ru: 'Королевский указ' } },
-  dresscode: { title: { az: 'Saray geyimi', en: 'Palace attire', ru: 'Дворцовый наряд' } },
-  seating:   { title: { az: 'Sarayda yeriniz', en: 'Your place at court', ru: 'Ваше место при дворе' } },
-  gallery:   { title: { az: 'Saray albomu', en: 'The royal album', ru: 'Королевский альбом' } },
-  rsvp:      { title: { az: 'Saraya gələcəksiniz?', en: 'Will you join the court?', ru: 'Придёте ко двору?' } },
-  guestbook: { title: { az: 'Şahzadəyə arzular', en: 'Wishes for the prince', ru: 'Пожелания принцу' } },
-}
-const TXT = {
-  az: { table: 'Masa' },
-  en: { table: 'Table' },
-  ru: { table: 'Стол' },
-}
 
 const KEYFRAMES = `
 @keyframes lp-twinkle { 0%,100% { opacity: .2; transform: scale(.7) } 50% { opacity: 1; transform: scale(1.1) } }
@@ -92,7 +77,7 @@ function PrinceOpening({ inv, theme }) {
           {ot.show('kicker') && <div style={{ fontFamily: head, fontSize: 15, letterSpacing: '.24em', color: C.GOLD_L }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 6, fontFamily: head, fontSize: 'clamp(40px, 12vw, 56px)', lineHeight: 1.05, color: '#FFF6DE', overflowWrap: 'anywhere', textShadow: '0 2px 16px rgba(0,0,0,.35)' }}>
-              {first}{second && <><span style={{ display: 'block', fontSize: '.5em', color: C.GOLD_L }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'block', fontSize: '.5em', color: C.GOLD_L }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
           {ot.show('meta') && <div style={{ marginTop: 8, fontSize: 15, color: alpha(C.IVORY, 0.78) }}>{ot.text('meta')}</div>}
@@ -149,8 +134,8 @@ export default function LittlePrinceTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const age = inv.age
 
   return (
@@ -176,12 +161,12 @@ export default function LittlePrinceTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.IVORY, 0.8), fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontSize: 18, letterSpacing: '.1em', color: C.GOLD_L }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontSize: 18, letterSpacing: '.1em', color: C.GOLD_L }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — şüalar və tac */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: NAVY_BG, padding: '40px 22px 60px', textAlign: 'center', color: C.IVORY }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: NAVY_BG, padding: '40px 22px 60px', textAlign: 'center', color: C.IVORY }}>
             <Dust />
             <div aria-hidden="true" style={{ position: 'absolute', left: '50%', top: 110, width: 640, height: 640, margin: '-320px 0 0 -320px', borderRadius: '50%', background: RAYS, WebkitMaskImage: 'radial-gradient(circle, #000 14%, transparent 60%)', maskImage: 'radial-gradient(circle, #000 14%, transparent 60%)', animation: 'lp-rays 60s linear infinite' }} />
             <div style={{ position: 'relative' }}>
@@ -204,7 +189,7 @@ export default function LittlePrinceTemplate(props) {
 
           {/* SAYĞAC — qalxanlar */}
           {S.countdown && (
-            <Panel head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop]) => (
                   <div key={l} style={{ textAlign: 'center' }}>
@@ -224,7 +209,7 @@ export default function LittlePrinceTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ position: 'relative', maxWidth: 430, margin: '30px auto 0', padding: 6, background: GOLD_GRAD, borderRadius: '24px 24px 8px 8px', boxShadow: '0 28px 40px -24px rgba(0,0,0,.7)' }}>
                 <div style={{ position: 'absolute', left: '50%', top: -34, width: 70, marginLeft: -35, zIndex: 2 }}><Crown width="100%" uid="lp-map" /></div>
                 <div style={{ borderRadius: '19px 19px 4px 4px', overflow: 'hidden', isolation: 'isolate' }}>
@@ -244,7 +229,7 @@ export default function LittlePrinceTemplate(props) {
 
           {/* PROQRAM — fərman */}
           {S.program && (
-            <Panel head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ position: 'relative', maxWidth: 400, margin: '0 auto', padding: '34px 24px 30px', background: 'linear-gradient(180deg, #FFFCF2, #F5EBD2)', borderRadius: 6, boxShadow: `0 0 0 1px ${alpha(C.GOLD_D, 0.4)}, 0 0 0 6px #FFFCF2, 0 0 0 7px ${alpha(C.GOLD_D, 0.5)}, 0 24px 40px -26px rgba(15,28,63,.5)` }}>
                 <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: -9, height: 18, borderRadius: 9, background: 'linear-gradient(180deg, #E7D7B0, #C9B07A)', boxShadow: '0 4px 6px rgba(0,0,0,.15)' }} />
                 <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, bottom: -9, height: 18, borderRadius: 9, background: 'linear-gradient(180deg, #E7D7B0, #C9B07A)', boxShadow: '0 4px 6px rgba(0,0,0,.15)' }} />
@@ -262,7 +247,7 @@ export default function LittlePrinceTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -270,7 +255,7 @@ export default function LittlePrinceTemplate(props) {
 
           {/* MASA — yastıq üstündə */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="lp-seat-list" field={field} suggest={suggest} font={body} muted={alpha(C.IVORY, 0.75)} accent={C.GOLD_L}
                 nameStyle={{ fontFamily: head, fontSize: 24 }}
                 card={(num) => (
@@ -289,7 +274,7 @@ export default function LittlePrinceTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -306,7 +291,7 @@ export default function LittlePrinceTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.ROYAL, 0.4), hair: alpha(C.ROYAL, 0.18), accent: C.ROYAL,
                 font: body, display: head, btnFont: body,
@@ -319,7 +304,7 @@ export default function LittlePrinceTemplate(props) {
 
           {/* ARZULAR */}
           {S.guestbook && (
-            <Panel head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={field} btn={(on) => ({ ...btn(on), background: on ? GOLD_GRAD : 'transparent', color: on ? C.NAVY : C.GOLD_L, border: `1px solid ${C.GOLD}` })} errorColor={C.GOLD_L} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, ageWord } from '../_shared/kids'
 import { C, TILE, SASH_WORD, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Nazar, Bead, BeadRule, Sash } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -30,22 +31,6 @@ import { Nazar, Bead, BeadRule, Sash } from './art'
 
 const BASE = getTemplateTheme('mashallah')
 const ID = 'mashallah'
-
-const LABELS = {
-  countdown: { title: { az: 'Toya qədər', en: 'Until the celebration', ru: 'До праздника' } },
-  venue:     { title: { az: 'Toy harada?', en: 'Where is the party?', ru: 'Где праздник?' } },
-  program:   { title: { az: 'Toyun axarı', en: 'How the day flows', ru: 'Как пройдёт день' } },
-  dresscode: { title: { az: 'Geyim', en: 'What to wear', ru: 'Что надеть' } },
-  seating:   { title: { az: 'Yeriniz', en: 'Your seat', ru: 'Ваше место' } },
-  gallery:   { title: { az: 'Göz dəyməsin anlar', en: 'Moments to treasure', ru: 'Мгновения на память' } },
-  rsvp:      { title: { az: 'Toya gələcəksiniz?', en: 'Will you celebrate with us?', ru: 'Будете праздновать с нами?' } },
-  guestbook: { title: { az: 'Xeyir-dua və arzular', en: 'Blessings and wishes', ru: 'Благословения и пожелания' } },
-}
-const TXT = {
-  az: { table: 'Masa' },
-  en: { table: 'Table' },
-  ru: { table: 'Стол' },
-}
 
 const KEYFRAMES = `
 @keyframes mh-spin { to { transform: rotate(360deg) } }
@@ -106,7 +91,7 @@ function NazarOpening({ inv, theme, lang }) {
           {ot.show('kicker') && <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: '.2em', textTransform: 'uppercase', color: C.TURQ }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 6, fontFamily: head, fontWeight: 500, fontSize: 'clamp(40px, 12vw, 56px)', lineHeight: 1.05, color: C.COBALT, overflowWrap: 'anywhere' }}>
-              {first}{second && <><span style={{ display: 'block', fontStyle: 'italic', fontSize: '.5em', color: C.GOLD }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'block', fontStyle: 'italic', fontSize: '.5em', color: C.GOLD }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
           {ot.show('meta') && <div style={{ marginTop: 8, fontSize: 15, color: C.MUTED }}>{ot.text('meta')}</div>}
@@ -162,8 +147,8 @@ export default function MashallahTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const age = inv.age
 
   return (
@@ -189,12 +174,12 @@ export default function MashallahTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontStyle: 'italic', fontSize: 20, color: C.COBALT }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontStyle: 'italic', fontSize: 20, color: C.COBALT }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: CREAM_BG, padding: '46px 22px 60px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: CREAM_BG, padding: '46px 22px 60px', textAlign: 'center' }}>
             <div style={{ position: 'relative', width: 170, height: 170, margin: '0 auto' }}>
               <div aria-hidden="true" style={{ position: 'absolute', inset: -26, animation: 'mh-spin 50s linear infinite' }}>
                 {RING.map((i) => (
@@ -217,7 +202,7 @@ export default function MashallahTemplate(props) {
 
           {/* SAYĞAC — sapa düzülmüş muncuqlar */}
           {S.countdown && (
-            <Panel head={head} dark title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} dark title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 <span aria-hidden="true" style={{ position: 'absolute', left: -10, right: -10, top: 'calc(min(19vw, 84px) / 2 + 4px)', height: 1.5, background: C.GOLD }} />
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
@@ -236,7 +221,7 @@ export default function MashallahTemplate(props) {
 
           {/* MƏKAN — muncuq haşiyəsi */}
           {S.venue && (
-            <Panel head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', padding: 12, borderRadius: 28, background: `radial-gradient(circle, ${C.COBALT} 3.4px, transparent 3.9px) 0 0 / 14px 14px, radial-gradient(circle, ${C.TURQ} 2.6px, transparent 3px) 7px 7px / 14px 14px, ${C.WHITE}`, boxShadow: '0 22px 36px -26px rgba(8,38,88,.6)' }}>
                 <div style={{ borderRadius: 18, overflow: 'hidden', isolation: 'isolate', boxShadow: `0 0 0 3px ${C.WHITE}` }}>
                   <MapSection
@@ -255,7 +240,7 @@ export default function MashallahTemplate(props) {
 
           {/* PROQRAM — muncuq sapı */}
           {S.program && (
-            <Panel head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ position: 'relative', maxWidth: 380, margin: '0 auto' }}>
                 <span aria-hidden="true" style={{ position: 'absolute', left: 25, top: 18, bottom: 18, width: 1.5, background: C.GOLD }} />
                 {timeline.events.map((ev, i) => (
@@ -274,7 +259,7 @@ export default function MashallahTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -282,7 +267,7 @@ export default function MashallahTemplate(props) {
 
           {/* MASA — göz muncuğu və lent */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="mh-seat-list" field={field} suggest={suggest} font={body} muted={alpha(C.WHITE, 0.78)} accent={C.GOLD_L}
                 nameStyle={{ fontFamily: head, fontSize: 24 }}
                 card={(num, raw) => (
@@ -298,7 +283,7 @@ export default function MashallahTemplate(props) {
 
           {/* FOTOLAR — muncuq çərçivələr */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 14, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -315,7 +300,7 @@ export default function MashallahTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.COBALT, 0.4), hair: alpha(C.COBALT, 0.15), accent: C.COBALT,
                 font: body, display: head, btnFont: body,
@@ -328,7 +313,7 @@ export default function MashallahTemplate(props) {
 
           {/* ARZULAR */}
           {S.guestbook && (
-            <Panel head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={field} btn={(on) => ({ ...btn(on), background: on ? C.GOLD : C.WHITE, color: C.COBALT_D, border: `1.5px solid ${C.GOLD}` })} errorColor={C.GOLD_L} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

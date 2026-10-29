@@ -11,6 +11,8 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, SASH, GOLD_GRAD, GRID_BG, NAVY_BG, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
+import { fill } from '../_shared/copyText'
 import { Bell, SoundRings, Bow, Sash } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -26,22 +28,6 @@ import { Bell, SoundRings, Bow, Sash } from './art'
 
 const BASE = getTemplateTheme('last-bell')
 const ID = 'last-bell'
-
-const LABELS = {
-  countdown: { title: { az: 'Son zəngə qədər', en: 'Until the last bell', ru: 'До последнего звонка' } },
-  venue:     { title: { az: 'Harada qeyd edirik?', en: 'Where we celebrate', ru: 'Где празднуем?' } },
-  program:   { title: { az: 'Gecənin cədvəli', en: 'Timetable', ru: 'Расписание вечера' } },
-  dresscode: { title: { az: 'Geyim', en: 'Dress code', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Yeriniz', en: 'Your seat', ru: 'Ваше место' } },
-  gallery:   { title: { az: 'Məktəb xatirələri', en: 'School memories', ru: 'Школьные воспоминания' } },
-  rsvp:      { title: { az: 'Gələcəksiniz?', en: 'Will you come?', ru: 'Вы придёте?' } },
-  guestbook: { title: { az: 'Məzuna arzular', en: 'Wishes for the graduate', ru: 'Пожелания выпускнику' } },
-}
-const TXT = {
-  az: { table: 'Masa', classOf: (y) => `Məzun ${y}` },
-  en: { table: 'Table', classOf: (y) => `Class of ${y}` },
-  ru: { table: 'Стол', classOf: (y) => `Выпуск ${y}` },
-}
 
 const KEYFRAMES = `
 @keyframes lb-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -68,7 +54,7 @@ function BellOpening({ inv, theme, lang, year, script }) {
   const { titleOv, first, second } = openingNames(inv)
   const go = gate.opening
   const head = theme.fonts.heading
-  const T = TXT[lang] || TXT.az
+  const T = inv.copy(TXT)
   return (
     <motion.div {...gate.gateProps} data-lb
       animate={go ? { opacity: 0 } : {}}
@@ -92,7 +78,7 @@ function BellOpening({ inv, theme, lang, year, script }) {
         <div style={{ marginTop: 24, animation: 'lb-rise 1s ease-out .3s both' }}>
           {titleOv !== '' && (
             <div style={{ fontFamily: head, fontWeight: 700, fontSize: 'clamp(40px, 12vw, 58px)', lineHeight: 1.04, overflowWrap: 'anywhere', color: C.NAVY }}>
-              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .2em', color: C.RED }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .2em', color: C.RED }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
           {ot.show('meta') && <div style={{ marginTop: 8, fontSize: 15.5, color: C.MUTED }}>{ot.text('meta')}</div>}
@@ -109,7 +95,7 @@ function BellOpening({ inv, theme, lang, year, script }) {
       {/* lent ekranı kəsib keçir */}
       <div aria-hidden="true" style={{ position: 'absolute', left: '-15%', right: '-15%', top: '65%', transform: 'rotate(-11deg)', clipPath: go ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', transition: 'clip-path .65s cubic-bezier(.6,0,.3,1) .55s' }}>
         <Sash height={76}>
-          <span style={{ fontFamily: script, fontSize: 'clamp(50px, 15vw, 66px)', lineHeight: 1, paddingTop: 8, ...goldText }}>{year ? T.classOf(year) : ot.text('kicker')}</span>
+          <span style={{ fontFamily: script, fontSize: 'clamp(50px, 15vw, 66px)', lineHeight: 1, paddingTop: 8, ...goldText }}>{year ? fill(T.classOf, { y: year }) : ot.text('kicker')}</span>
         </Sash>
       </div>
     </motion.div>
@@ -171,8 +157,8 @@ export default function LastBellTemplate(props) {
   const head = theme.fonts.heading
   const body = theme.fonts.body
   const script = "'Comforter', 'Great Vibes', cursive"
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const year = inv.dp?.year || ''
 
   return (
@@ -198,12 +184,12 @@ export default function LastBellTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 15, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 700, fontSize: 20, color: C.NAVY }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontWeight: 700, fontSize: 20, color: C.NAVY }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — zəng, lent, bantlar */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: GRID_BG, padding: '36px 0 60px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: GRID_BG, padding: '36px 0 60px', textAlign: 'center' }}>
             <Bow size={86} style={{ position: 'absolute', left: -12, top: 10, transform: 'rotate(-18deg)' }} />
             <Bow size={86} style={{ position: 'absolute', right: -12, top: 10, transform: 'rotate(18deg) scaleX(-1)' }} />
             <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -211,7 +197,7 @@ export default function LastBellTemplate(props) {
             </div>
             <div style={{ margin: '18px -10% 0', transform: 'rotate(-5deg)' }}>
               <Sash height={68}>
-                <span style={{ fontFamily: script, fontSize: 'clamp(46px, 14vw, 60px)', lineHeight: 1, paddingTop: 8, ...goldText }}>{year ? T.classOf(year) : inv.eventLabel}</span>
+                <span style={{ fontFamily: script, fontSize: 'clamp(46px, 14vw, 60px)', lineHeight: 1, paddingTop: 8, ...goldText }}>{year ? fill(T.classOf, { y: year }) : inv.eventLabel}</span>
               </Sash>
             </div>
             <div style={{ padding: '0 22px' }}>
@@ -226,7 +212,7 @@ export default function LastBellTemplate(props) {
 
           {/* SAYĞAC — qopan təqvim vərəqləri */}
           {S.countdown && (
-            <Panel head={head} dark title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} dark title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop]) => (
                   <div key={l} style={{ textAlign: 'center', borderRadius: 8, overflow: 'hidden', background: C.WHITE, boxShadow: '0 12px 18px -10px rgba(0,0,0,.5)' }}>
@@ -246,7 +232,7 @@ export default function LastBellTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', borderRadius: 18, overflow: 'hidden', isolation: 'isolate', border: `3px solid ${C.NAVY}`, boxShadow: '0 20px 30px -20px rgba(28,42,74,.6)' }}>
                 <MapSection
                   weddingData={weddingData} theme={theme} accent={C.RED} height="clamp(240px, 66vw, 300px)"
@@ -263,7 +249,7 @@ export default function LastBellTemplate(props) {
 
           {/* PROQRAM — dərs cədvəli */}
           {S.program && (
-            <Panel head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 400, margin: '0 auto', borderRadius: 14, overflow: 'hidden', background: C.WHITE, border: `1.5px solid ${C.LINE}`, boxShadow: '0 16px 26px -20px rgba(28,42,74,.5)' }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '44px 66px minmax(0, 1fr)', alignItems: 'center', minHeight: 58, borderTop: i ? `1px solid ${C.LINE}` : 'none' }}>
@@ -277,7 +263,7 @@ export default function LastBellTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -285,7 +271,7 @@ export default function LastBellTemplate(props) {
 
           {/* MASA — rozet */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="lb-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.RED}
                 nameStyle={{ fontFamily: head, fontWeight: 700, fontSize: 24, color: C.NAVY }}
                 card={(num) => (
@@ -301,7 +287,7 @@ export default function LastBellTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 18, marginBottom: 32, paddingTop: 14 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -319,7 +305,7 @@ export default function LastBellTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: C.LINE, hair: alpha(C.LINE, 0.7), accent: C.RED,
                 font: body, display: head, displayItalic: false, btnFont: head,
@@ -332,7 +318,7 @@ export default function LastBellTemplate(props) {
 
           {/* ARZULAR — «5» qiyməti */}
           {S.guestbook && (
-            <Panel head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.GOLD_L} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

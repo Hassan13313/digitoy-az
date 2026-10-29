@@ -25,6 +25,57 @@ import * as gazette from './gazette/copy.js'
 import * as mediterranean from './mediterranean/copy.js'
 import * as nightSky from './night-sky/copy.js'
 import * as modernBlack from './modern-black/copy.js'
+/* 2026-10 — konsept şablonları (50) */
+import * as fairyTale from './fairy-tale/copy.js'
+import * as spaceMission from './space-mission/copy.js'
+import * as circusShow from './circus-show/copy.js'
+import * as dinoAdventure from './dino-adventure/copy.js'
+import * as balloonParty from './balloon-party/copy.js'
+import * as redVeil from './red-veil/copy.js'
+import * as xonca from './xonca/copy.js'
+import * as hennaButa from './henna-buta/copy.js'
+import * as mirrorCandle from './mirror-candle/copy.js'
+import * as kelagayi from './kelagayi/copy.js'
+import * as littlePrince from './little-prince/copy.js'
+import * as heroComic from './hero-comic/copy.js'
+import * as mashallah from './mashallah/copy.js'
+import * as littlePilot from './little-pilot/copy.js'
+import * as footballStar from './football-star/copy.js'
+import * as pastelBloom from './pastel-bloom/copy.js'
+import * as teddyBear from './teddy-bear/copy.js'
+import * as genderReveal from './gender-reveal/copy.js'
+import * as storkLetter from './stork-letter/copy.js'
+import * as babyMobile from './baby-mobile/copy.js'
+import * as galaNight from './gala-night/copy.js'
+import * as keynote from './keynote/copy.js'
+import * as awardNight from './award-night/copy.js'
+import * as businessCard from './business-card/copy.js'
+import * as neonParty from './neon-party/copy.js'
+import * as silverLocket from './silver-locket/copy.js'
+import * as goldenJubilee from './golden-jubilee/copy.js'
+import * as firstPaper from './first-paper/copy.js'
+import * as retroPolaroid from './retro-polaroid/copy.js'
+import * as loveLetters from './love-letters/copy.js'
+import * as capsToss from './caps-toss/copy.js'
+import * as yearbook from './yearbook/copy.js'
+import * as lastBell from './last-bell/copy.js'
+import * as chalkboard from './chalkboard/copy.js'
+import * as paperPlane from './paper-plane/copy.js'
+import * as ribbonCut from './ribbon-cut/copy.js'
+import * as bistroSign from './bistro-sign/copy.js'
+import * as rollerShutter from './roller-shutter/copy.js'
+import * as unboxing from './unboxing/copy.js'
+import * as galleryUnveil from './gallery-unveil/copy.js'
+import * as novruzBonfire from './novruz-bonfire/copy.js'
+import * as novruzSemeni from './novruz-semeni/copy.js'
+import * as midnightClock from './midnight-clock/copy.js'
+import * as snowGlobe from './snow-globe/copy.js'
+import * as masqueradeBall from './masquerade-ball/copy.js'
+import * as pinkChampagne from './pink-champagne/copy.js'
+import * as discoBall from './disco-ball/copy.js'
+import * as pajamaSpa from './pajama-spa/copy.js'
+import * as parisNight from './paris-night/copy.js'
+import * as bohoSunset from './boho-sunset/copy.js'
 
 const REGISTRY = {
   'oriental-luxe': orientalLuxe,
@@ -40,6 +91,56 @@ const REGISTRY = {
   'mediterranean': mediterranean,
   'night-sky': nightSky,
   'modern-black': modernBlack,
+  'fairy-tale': fairyTale,
+  'space-mission': spaceMission,
+  'circus-show': circusShow,
+  'dino-adventure': dinoAdventure,
+  'balloon-party': balloonParty,
+  'red-veil': redVeil,
+  'xonca': xonca,
+  'henna-buta': hennaButa,
+  'mirror-candle': mirrorCandle,
+  'kelagayi': kelagayi,
+  'little-prince': littlePrince,
+  'hero-comic': heroComic,
+  'mashallah': mashallah,
+  'little-pilot': littlePilot,
+  'football-star': footballStar,
+  'pastel-bloom': pastelBloom,
+  'teddy-bear': teddyBear,
+  'gender-reveal': genderReveal,
+  'stork-letter': storkLetter,
+  'baby-mobile': babyMobile,
+  'gala-night': galaNight,
+  'keynote': keynote,
+  'award-night': awardNight,
+  'business-card': businessCard,
+  'neon-party': neonParty,
+  'silver-locket': silverLocket,
+  'golden-jubilee': goldenJubilee,
+  'first-paper': firstPaper,
+  'retro-polaroid': retroPolaroid,
+  'love-letters': loveLetters,
+  'caps-toss': capsToss,
+  'yearbook': yearbook,
+  'last-bell': lastBell,
+  'chalkboard': chalkboard,
+  'paper-plane': paperPlane,
+  'ribbon-cut': ribbonCut,
+  'bistro-sign': bistroSign,
+  'roller-shutter': rollerShutter,
+  'unboxing': unboxing,
+  'gallery-unveil': galleryUnveil,
+  'novruz-bonfire': novruzBonfire,
+  'novruz-semeni': novruzSemeni,
+  'midnight-clock': midnightClock,
+  'snow-globe': snowGlobe,
+  'masquerade-ball': masqueradeBall,
+  'pink-champagne': pinkChampagne,
+  'disco-ball': discoBall,
+  'pajama-spa': pajamaSpa,
+  'paris-night': parisNight,
+  'boho-sunset': bohoSunset,
 }
 
 /** Şablonun öz bölmə başlıqları `{ countdown: { title: {az,en,ru} } … }` (yoxdursa null) */

@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize, ageWord } from '../_shared/kids'
 import { C, SKY_BG, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Cloud, Sky, Plane, PlaneIcon, TailFin } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -29,22 +30,6 @@ import { Cloud, Sky, Plane, PlaneIcon, TailFin } from './art'
 
 const BASE = getTemplateTheme('little-pilot')
 const ID = 'little-pilot'
-
-const LABELS = {
-  countdown: { title: { az: 'Uçuşa qədər', en: 'Until take-off', ru: 'До взлёта' } },
-  venue:     { title: { az: 'Eniş meydançası', en: 'Landing strip', ru: 'Посадочная площадка' } },
-  program:   { title: { az: 'Uçuş marşrutu', en: 'Flight route', ru: 'Маршрут полёта' } },
-  dresscode: { title: { az: 'Ekipaj forması', en: 'Crew uniform', ru: 'Форма экипажа' } },
-  seating:   { title: { az: 'Bortda yeriniz', en: 'Your seat on board', ru: 'Ваше место на борту' } },
-  gallery:   { title: { az: 'Pəncərədən görünənlər', en: 'Views from the window', ru: 'Вид из иллюминатора' } },
-  rsvp:      { title: { az: 'Bortda olacaqsınız?', en: 'Will you be on board?', ru: 'Будете на борту?' } },
-  guestbook: { title: { az: 'Pilota mesaj', en: 'Message to the pilot', ru: 'Послание пилоту' } },
-}
-const TXT = {
-  az: { table: 'Masa' },
-  en: { table: 'Table' },
-  ru: { table: 'Стол' },
-}
 
 const KEYFRAMES = `
 @keyframes lp2-drift { from { transform: translateX(-14px) } to { transform: translateX(14px) } }
@@ -107,7 +92,7 @@ function PilotOpening({ inv, theme }) {
             {titleOv !== '' && (
               <Towline>
                 <div style={{ fontFamily: head, fontWeight: 800, fontSize: nameSize(first), lineHeight: 1.05, color: C.RED, overflowWrap: 'break-word' }}>
-                  {first}{second && <><span style={{ display: 'block', fontSize: '.5em', color: C.NAVY }}>&amp;</span>{second}</>}
+                  {first}{second && <><span style={{ display: 'block', fontSize: '.5em', color: C.NAVY }}>{ot.text('and')}</span>{second}</>}
                 </div>
               </Towline>
             )}
@@ -197,8 +182,8 @@ export default function LittlePilotTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const age = inv.age
 
   return (
@@ -224,12 +209,12 @@ export default function LittlePilotTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontWeight: 600, fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 800, fontSize: 17, color: C.RED }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontWeight: 800, fontSize: 17, color: C.RED }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — göy üzü və bayraq */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: SKY_BG, padding: '46px 12px 56px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: SKY_BG, padding: '46px 12px 56px', textAlign: 'center' }}>
             <Sky />
             <div style={{ position: 'relative' }}>
               <div style={{ fontFamily: head, fontWeight: 700, fontSize: 15, letterSpacing: '.12em', textTransform: 'uppercase', color: C.CLOUD, textShadow: '0 1px 6px rgba(24,50,79,.35)' }}>{L('hero', 'kicker', inv.eventLabel)}</div>
@@ -253,7 +238,7 @@ export default function LittlePilotTemplate(props) {
 
           {/* SAYĞAC — cihazlar */}
           {S.countdown && (
-            <Panel head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 <Gauge head={head} value={cd.days} max={365} label={cd.labels.days} />
                 <Gauge head={head} value={cd.hours} max={24} label={cd.labels.hours} />
@@ -267,7 +252,7 @@ export default function LittlePilotTemplate(props) {
 
           {/* MƏKAN — təyyarə pəncərəsi */}
           {S.venue && (
-            <Panel head={head} sky title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} sky title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ width: 'min(80vw, 330px)', margin: '0 auto', padding: 16, borderRadius: '44% / 34%', background: 'linear-gradient(160deg, #FFFFFF, #DCE6EF)', boxShadow: '0 24px 40px -22px rgba(24,50,79,.6), inset 0 -4px 10px rgba(24,50,79,.15)' }}>
                 <div style={{ borderRadius: '42% / 32%', overflow: 'hidden', isolation: 'isolate', boxShadow: 'inset 0 0 0 3px rgba(24,50,79,.25)' }}>
                   <MapSection
@@ -286,7 +271,7 @@ export default function LittlePilotTemplate(props) {
 
           {/* PROQRAM — uçuş marşrutu */}
           {S.program && (
-            <Panel head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ position: 'relative', maxWidth: 380, margin: '0 auto' }}>
                 <svg aria-hidden="true" viewBox="0 0 40 100" preserveAspectRatio="none" style={{ position: 'absolute', left: 6, top: 14, width: 40, height: 'calc(100% - 28px)' }}>
                   <path d="M20 0C0 20 40 40 20 50C0 60 40 80 20 100" fill="none" stroke={C.SKY_D} strokeWidth="2" strokeDasharray="5 6" vectorEffect="non-scaling-stroke" />
@@ -307,7 +292,7 @@ export default function LittlePilotTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -315,7 +300,7 @@ export default function LittlePilotTemplate(props) {
 
           {/* MASA — quyruq */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} sky title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} sky title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="lp2-seat-list" field={field} suggest={suggest} font={body} muted={C.NAVY} accent={C.RED}
                 nameStyle={{ fontFamily: head, fontWeight: 800, fontSize: 20, color: C.NAVY }}
                 card={(num) => (
@@ -329,7 +314,7 @@ export default function LittlePilotTemplate(props) {
 
           {/* FOTOLAR — illüminatorlar */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -346,7 +331,7 @@ export default function LittlePilotTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.NAVY, muted: C.MUTED, line: alpha(C.SKY_D, 0.5), hair: alpha(C.SKY_D, 0.2), accent: C.RED,
                 font: body, display: head, btnFont: head,
@@ -359,7 +344,7 @@ export default function LittlePilotTemplate(props) {
 
           {/* MESAJLAR */}
           {S.guestbook && (
-            <Panel head={head} sky title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} sky title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.RED_D} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

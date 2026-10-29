@@ -11,6 +11,8 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, GOLD_GRAD, NAVY_BG, IVORY_BG, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
+import { fill } from '../_shared/copyText'
 import { Cap, ConfettiBurst, Seal, Scroll } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -28,22 +30,6 @@ import { Cap, ConfettiBurst, Seal, Scroll } from './art'
 
 const BASE = getTemplateTheme('caps-toss')
 const ID = 'caps-toss'
-
-const LABELS = {
-  countdown: { title: { az: 'Böyük günə qədər', en: 'Until the big day', ru: 'До большого дня' } },
-  venue:     { title: { az: 'Məzun gecəsi harada?', en: 'Where is the party?', ru: 'Где выпускной?' } },
-  program:   { title: { az: 'Gecənin proqramı', en: 'Programme', ru: 'Программа вечера' } },
-  dresscode: { title: { az: 'Geyim', en: 'Dress code', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Masanızı tapın', en: 'Find your table', ru: 'Найдите свой стол' } },
-  gallery:   { title: { az: 'Məzun anları', en: 'Graduation moments', ru: 'Моменты выпускного' } },
-  rsvp:      { title: { az: 'Gələcəksiniz?', en: 'Will you come?', ru: 'Вы придёте?' } },
-  guestbook: { title: { az: 'Məzuna arzular', en: 'Wishes for the graduate', ru: 'Пожелания выпускнику' } },
-}
-const TXT = {
-  az: { table: 'Masa', classOf: (y) => `Məzun ${y}` },
-  en: { table: 'Table', classOf: (y) => `Class of ${y}` },
-  ru: { table: 'Стол', classOf: (y) => `Выпуск ${y}` },
-}
 
 const KEYFRAMES = `
 @keyframes ct-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -74,7 +60,7 @@ function CapsOpening({ inv, theme, lang, year }) {
   const { titleOv, first, second } = openingNames(inv)
   const go = gate.opening
   const head = theme.fonts.heading
-  const T = TXT[lang] || TXT.az
+  const T = inv.copy(TXT)
   return (
     <motion.div {...gate.gateProps} data-ct
       animate={go ? { opacity: 0 } : {}}
@@ -85,7 +71,7 @@ function CapsOpening({ inv, theme, lang, year }) {
       <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 22px', textAlign: 'center' }}>
         <div style={{ animation: 'ct-rise 1s ease-out .2s both' }}>
           {ot.show('kicker') && <div style={{ fontFamily: head, fontSize: 15, letterSpacing: '.22em', color: C.GOLD_L }}>{ot.text('kicker')}</div>}
-          {year && <div style={{ marginTop: 6, fontFamily: head, fontWeight: 700, fontSize: 'clamp(26px, 8vw, 36px)', letterSpacing: '.04em', ...goldText }}>{T.classOf(year)}</div>}
+          {year && <div style={{ marginTop: 6, fontFamily: head, fontWeight: 700, fontSize: 'clamp(26px, 8vw, 36px)', letterSpacing: '.04em', ...goldText }}>{fill(T.classOf, { y: year })}</div>}
         </div>
         {/* papaqlar */}
         <div style={{ position: 'relative', width: 'min(86vw, 340px)', height: 'min(40vw, 160px)', marginTop: 26 }}>
@@ -109,7 +95,7 @@ function CapsOpening({ inv, theme, lang, year }) {
         <div style={{ marginTop: 40, animation: 'ct-rise 1s ease-out .35s both' }}>
           {titleOv !== '' && (
             <div style={{ fontFamily: head, fontWeight: 700, fontSize: 'clamp(40px, 12vw, 58px)', lineHeight: 1.04, overflowWrap: 'anywhere', color: C.IVORY }}>
-              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .2em', color: C.GOLD }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .2em', color: C.GOLD }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
           {ot.show('meta') && <div style={{ marginTop: 8, fontSize: 16, color: alpha(C.IVORY, 0.7) }}>{ot.text('meta')}</div>}
@@ -166,8 +152,8 @@ export default function CapsTossTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const year = inv.dp?.year || ''
 
   return (
@@ -193,12 +179,12 @@ export default function CapsTossTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.IVORY, 0.7), fontSize: 15.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 700, fontSize: 20, letterSpacing: '.06em', ...goldText }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontWeight: 700, fontSize: 20, letterSpacing: '.06em', ...goldText }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — havada papaqlar */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: NAVY_BG, padding: '40px 22px 64px', textAlign: 'center', color: C.IVORY }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: NAVY_BG, padding: '40px 22px 64px', textAlign: 'center', color: C.IVORY }}>
             <div aria-hidden="true" style={{ position: 'relative', height: 'min(44vw, 180px)', maxWidth: 360, margin: '0 auto' }}>
               {[[8, 30, -24, 92], [40, 0, 10, 120], [72, 34, 28, 86]].map(([x, y, r, s], i) => (
                 <div key={i} style={{ position: 'absolute', left: `${x}%`, top: `${y}%`, '--r': `${r}deg`, animation: `ct-bob ${3.4 + i * 0.5}s ease-in-out ${i * 0.4}s infinite` }}>
@@ -207,7 +193,7 @@ export default function CapsTossTemplate(props) {
               ))}
             </div>
             <div style={{ marginTop: 16, fontFamily: head, fontSize: 15, letterSpacing: '.22em', color: C.GOLD_L }}>{L('hero', 'kicker', inv.eventLabel)}</div>
-            {year && <div style={{ display: 'inline-block', marginTop: 10, padding: '6px 18px', border: `1px solid ${alpha(C.GOLD, 0.6)}`, borderRadius: 999, fontFamily: head, fontWeight: 700, fontSize: 19, letterSpacing: '.06em', ...goldText }}>{T.classOf(year)}</div>}
+            {year && <div style={{ display: 'inline-block', marginTop: 10, padding: '6px 18px', border: `1px solid ${alpha(C.GOLD, 0.6)}`, borderRadius: 999, fontFamily: head, fontWeight: 700, fontSize: 19, letterSpacing: '.06em', ...goldText }}>{fill(T.classOf, { y: year })}</div>}
             <h1 style={{ margin: '16px 0 0', fontFamily: head, fontWeight: 700, fontSize: nameSize(heroName), lineHeight: 1.04, overflowWrap: 'anywhere', color: C.IVORY, animation: 'ct-rise 1s ease-out .2s both' }}>{heroName}</h1>
             <div style={{ width: 70, height: 2, margin: '20px auto 0', background: GOLD_GRAD }} />
             <div style={{ marginTop: 18, fontFamily: head, fontWeight: 500, fontSize: 'clamp(20px, 5.6vw, 24px)', color: C.IVORY }}>{inv.fullDate}</div>
@@ -218,7 +204,7 @@ export default function CapsTossTemplate(props) {
 
           {/* SAYĞAC — romb kartlar */}
           {S.countdown && (
-            <Panel head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(10px, 3.6vw, 18px)', maxWidth: 380, margin: '0 auto', paddingTop: 10 }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop]) => (
                   <div key={l} style={{ textAlign: 'center' }}>
@@ -238,7 +224,7 @@ export default function CapsTossTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', padding: 4, borderRadius: 20, background: GOLD_GRAD, boxShadow: '0 24px 36px -22px rgba(0,0,0,.8)' }}>
                 <div style={{ borderRadius: 16, overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
@@ -257,7 +243,7 @@ export default function CapsTossTemplate(props) {
 
           {/* PROQRAM — diplom tumarı */}
           {S.program && (
-            <Panel head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <Scroll style={{ maxWidth: 400, marginInline: 'auto' }}>
                 <div style={{ padding: '30px 22px 26px' }}>
                   {timeline.events.map((ev, i) => (
@@ -273,7 +259,7 @@ export default function CapsTossTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -281,7 +267,7 @@ export default function CapsTossTemplate(props) {
 
           {/* MASA — sertifikat */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="ct-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.IVORY, 0.7)} accent={C.GOLD_L}
                 nameStyle={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
                 card={(num) => (
@@ -301,7 +287,7 @@ export default function CapsTossTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 14, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -318,7 +304,7 @@ export default function CapsTossTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.NAVY, 0.25), hair: alpha(C.NAVY, 0.12), accent: C.NAVY,
                 font: body, display: head, displayItalic: false, btnFont: head,
@@ -331,7 +317,7 @@ export default function CapsTossTemplate(props) {
 
           {/* ARZULAR */}
           {S.guestbook && (
-            <Panel head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.GOLD_L} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

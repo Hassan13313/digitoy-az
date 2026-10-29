@@ -25,6 +25,16 @@ import { OPENING_SPEC, OPENING_SLOT_LABELS } from '../src/templates/_shared/open
 const REDESIGNED = [
   'modern-black', 'white-elegance', 'night-sky', 'oriental-luxe', 'nature-touch', 'crystal-glass',
   'boarding-pass', 'cinema-premiere', 'vinyl-record', 'royal-palace', 'mediterranean', 'gazette', 'luxury-jewelry',
+  /* 2026-10 — konsept şablonları */
+  'fairy-tale', 'space-mission', 'circus-show', 'dino-adventure', 'balloon-party', 'red-veil',
+  'xonca', 'henna-buta', 'mirror-candle', 'kelagayi', 'little-prince', 'hero-comic',
+  'mashallah', 'little-pilot', 'football-star', 'pastel-bloom', 'teddy-bear', 'gender-reveal',
+  'stork-letter', 'baby-mobile', 'gala-night', 'keynote', 'award-night', 'business-card',
+  'neon-party', 'silver-locket', 'golden-jubilee', 'first-paper', 'retro-polaroid', 'love-letters',
+  'caps-toss', 'yearbook', 'last-bell', 'chalkboard', 'paper-plane', 'ribbon-cut',
+  'bistro-sign', 'roller-shutter', 'unboxing', 'gallery-unveil', 'novruz-bonfire', 'novruz-semeni',
+  'midnight-clock', 'snow-globe', 'masquerade-ball', 'pink-champagne', 'disco-ball', 'pajama-spa',
+  'paris-night', 'boho-sunset',
 ]
 const SERVER_KEY_RE = /^[a-z][a-z0-9_]*(\.[a-z][a-zA-Z0-9_]*)?$/i
 const SECTION_KEYS = new Set(CONTENT_SECTIONS.map((s) => s.key))

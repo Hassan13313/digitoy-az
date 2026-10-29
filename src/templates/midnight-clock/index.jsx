@@ -11,6 +11,8 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, GOLD_GRAD, NIGHT_BG, IVORY_BG, BURSTS, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
+import { fill } from '../_shared/copyText'
 import { ClockFace, Burst, MiniClock, PocketWatch } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -26,22 +28,6 @@ import { ClockFace, Burst, MiniClock, PocketWatch } from './art'
 
 const BASE = getTemplateTheme('midnight-clock')
 const ID = 'midnight-clock'
-
-const LABELS = {
-  countdown: { title: { az: 'Gecə yarısına qədər', en: 'Until midnight', ru: 'До полуночи' } },
-  venue:     { title: { az: 'Harada qarşılayırıq?', en: 'Where we ring it in', ru: 'Где встречаем?' } },
-  program:   { title: { az: 'Gecənin saatları', en: 'Hours of the night', ru: 'Часы этой ночи' } },
-  dresscode: { title: { az: 'Geyim', en: 'Dress code', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Masanız', en: 'Your table', ru: 'Ваш стол' } },
-  gallery:   { title: { az: 'Gecənin işıqları', en: 'Lights of the night', ru: 'Огни этой ночи' } },
-  rsvp:      { title: { az: 'Bizimlə qarşılayacaqsınız?', en: 'Will you ring it in with us?', ru: 'Встретите с нами?' } },
-  guestbook: { title: { az: 'Yeni il arzuları', en: 'New Year wishes', ru: 'Новогодние пожелания' } },
-}
-const TXT = {
-  az: { table: 'Masa', welcome: (y) => `Xoş gəldin, ${y}!`, ny: 'Yeni il' },
-  en: { table: 'Table', welcome: (y) => `Hello, ${y}!`, ny: 'New Year' },
-  ru: { table: 'Стол', welcome: (y) => `Здравствуй, ${y}!`, ny: 'Новый год' },
-}
 
 const KEYFRAMES = `
 @keyframes mc-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -75,7 +61,7 @@ function ClockOpening({ inv, theme, lang, nyYear }) {
   const { titleOv, first, second } = openingNames(inv)
   const go = gate.opening
   const head = theme.fonts.heading
-  const T = TXT[lang] || TXT.az
+  const T = inv.copy(TXT)
   return (
     <motion.div {...gate.gateProps} data-mc
       animate={go ? { opacity: 0 } : {}}
@@ -87,7 +73,7 @@ function ClockOpening({ inv, theme, lang, nyYear }) {
           {ot.show('kicker') && <div style={{ fontSize: 13, fontWeight: 600, letterSpacing: '.28em', textTransform: 'uppercase', color: C.GOLD_L }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 8, fontFamily: head, fontWeight: 600, fontSize: 'clamp(36px, 10.6vw, 50px)', lineHeight: 1.06, overflowWrap: 'anywhere', ...goldText }}>
-              {first}{second && <> &amp; {second}</>}
+              {first}{second && <> {ot.text('and')} {second}</>}
             </div>
           )}
         </div>
@@ -102,7 +88,7 @@ function ClockOpening({ inv, theme, lang, nyYear }) {
           )}
         </div>
         {nyYear && (
-          <div style={{ marginTop: 18, minHeight: 54, fontFamily: head, fontWeight: 700, fontSize: 'clamp(36px, 11vw, 50px)', lineHeight: 1, ...goldText, opacity: go ? 1 : 0, animation: go ? 'mc-pop .6s ease-out 1s both' : 'none' }}>{T.welcome(nyYear)}</div>
+          <div style={{ marginTop: 18, minHeight: 54, fontFamily: head, fontWeight: 700, fontSize: 'clamp(36px, 11vw, 50px)', lineHeight: 1, ...goldText, opacity: go ? 1 : 0, animation: go ? 'mc-pop .6s ease-out 1s both' : 'none' }}>{fill(T.welcome, { y: nyYear })}</div>
         )}
         <div style={{ marginTop: 8, animation: 'mc-rise 1s ease-out .35s both' }}>
           {ot.show('meta') && <div style={{ fontSize: 16, color: alpha(C.CHAMPAGNE, 0.72) }}>{ot.text('meta')}</div>}
@@ -163,8 +149,8 @@ export default function MidnightClockTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const nyYear = newYearOf(weddingData.date)
 
   return (
@@ -190,19 +176,19 @@ export default function MidnightClockTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.CHAMPAGNE, 0.72), fontSize: 15, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 700, fontSize: 22, ...goldText }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontWeight: 700, fontSize: 22, ...goldText }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — saat XII-də */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: NIGHT_BG, padding: '40px 22px 64px', textAlign: 'center', color: C.CHAMPAGNE }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: NIGHT_BG, padding: '40px 22px 64px', textAlign: 'center', color: C.CHAMPAGNE }}>
             {BURSTS.slice(0, 3).map((b, i) => <Burst key={i} x={b.x} y={b.y * 0.8} size={b.s * 0.8} color={b.c} delay={i * 0.9} loop />)}
             <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
               <ClockFace size={200} minDeg={0} hourDeg={0} font={head} instant glow />
             </div>
             <div style={{ position: 'relative', marginTop: 24, fontSize: 13, fontWeight: 600, letterSpacing: '.28em', textTransform: 'uppercase', color: C.GOLD_L }}>{L('hero', 'kicker', T.ny)}</div>
             <h1 style={{ position: 'relative', margin: '8px 0 0', fontFamily: head, fontWeight: 600, fontSize: nameSize(heroName), lineHeight: 1.05, overflowWrap: 'anywhere', ...goldText, animation: 'mc-rise 1s ease-out .2s both' }}>{heroName}</h1>
-            {nyYear && <div style={{ position: 'relative', marginTop: 8, fontFamily: head, fontStyle: 'italic', fontWeight: 500, fontSize: 24, color: C.CHAMPAGNE }}>{T.welcome(nyYear)}</div>}
+            {nyYear && <div style={{ position: 'relative', marginTop: 8, fontFamily: head, fontStyle: 'italic', fontWeight: 500, fontSize: 24, color: C.CHAMPAGNE }}>{fill(T.welcome, { y: nyYear })}</div>}
             {inv.isCorp && weddingData.organizer?.trim() && <div style={{ position: 'relative', marginTop: 8, fontSize: 15.5, color: alpha(C.CHAMPAGNE, 0.72) }}>{tr.organizer_display}: {weddingData.organizer}</div>}
             <div style={{ position: 'relative', width: 70, height: 1.5, margin: '18px auto 0', background: GOLD_GRAD }} />
             <div style={{ position: 'relative', marginTop: 16, fontFamily: head, fontWeight: 700, fontSize: 'clamp(21px, 5.8vw, 25px)', color: C.CHAMPAGNE }}>{inv.fullDate}</div>
@@ -212,7 +198,7 @@ export default function MidnightClockTemplate(props) {
 
           {/* SAYĞAC — saat halqaları */}
           {S.countdown && (
-            <Panel head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days, 1], [cd.hours, cd.labels.hours, 24], [cd.minutes, cd.labels.minutes, 60], [cd.seconds, cd.labels.seconds, 60, true]].map(([v, l, max, pop]) => (
                   <div key={l} style={{ textAlign: 'center' }}>
@@ -232,7 +218,7 @@ export default function MidnightClockTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', padding: 4, borderRadius: 22, background: GOLD_GRAD, boxShadow: '0 24px 36px -22px rgba(0,0,0,.8)' }}>
                 <div style={{ borderRadius: 18, overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
@@ -251,7 +237,7 @@ export default function MidnightClockTemplate(props) {
 
           {/* PROQRAM — hər tədbirin saatı */}
           {S.program && (
-            <Panel head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 400, margin: '0 auto', display: 'grid', gap: 10 }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '44px 64px minmax(0, 1fr)', gap: 10, alignItems: 'center', padding: '12px 14px', borderRadius: 14, background: '#FFFFFF', boxShadow: '0 10px 18px -14px rgba(21,27,56,.45)' }}>
@@ -265,7 +251,7 @@ export default function MidnightClockTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -273,7 +259,7 @@ export default function MidnightClockTemplate(props) {
 
           {/* MASA — cib saatı */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="mc-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.CHAMPAGNE, 0.72)} accent={C.GOLD_L}
                 nameStyle={{ fontFamily: head, fontWeight: 600, fontSize: 28, color: C.CHAMPAGNE }}
                 card={(num) => (
@@ -289,7 +275,7 @@ export default function MidnightClockTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 14, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -306,7 +292,7 @@ export default function MidnightClockTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: C.LINE, hair: alpha(C.LINE, 0.7), accent: C.MIDNIGHT,
                 font: body, display: head, displayItalic: false, btnFont: head,
@@ -319,7 +305,7 @@ export default function MidnightClockTemplate(props) {
 
           {/* ARZULAR */}
           {S.guestbook && (
-            <Panel head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.GOLD_L} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

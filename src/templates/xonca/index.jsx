@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Star8, Engraving, Xonca, CandleStick } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -30,22 +31,6 @@ import { Star8, Engraving, Xonca, CandleStick } from './art'
 
 const BASE = getTemplateTheme('xonca')
 const ID = 'xonca'
-
-const LABELS = {
-  countdown: { title: { az: 'Şamlar yanana qədər', en: 'Until the candles are lit', ru: 'Пока не зажгутся свечи' } },
-  venue:     { title: { az: 'Xonça harada açılacaq?', en: 'Where the tray awaits', ru: 'Где нас ждёт хонча' } },
-  program:   { title: { az: 'Gecənin şamları', en: 'Candles of the night', ru: 'Свечи вечера' } },
-  dresscode: { title: { az: 'Gecəyə yaraşan libas', en: 'Dressing for the night', ru: 'Наряд для вечера' } },
-  seating:   { title: { az: 'Sizin masanız', en: 'Your table', ru: 'Ваш стол' } },
-  gallery:   { title: { az: 'Xonça başında', en: 'Around the tray', ru: 'Вокруг хончи' } },
-  rsvp:      { title: { az: 'Sizi gözləyirik', en: 'We await you', ru: 'Мы вас ждём' } },
-  guestbook: { title: { az: 'Xonçaya bir arzu', en: 'A wish for the tray', ru: 'Пожелание к хонче' } },
-}
-const TXT = {
-  az: { table: 'Masa' },
-  en: { table: 'Table' },
-  ru: { table: 'Стол' },
-}
 
 const KEYFRAMES = `
 @keyframes xc-flame { from { transform: scaleY(.86) rotate(-2deg) } to { transform: scaleY(1.1) rotate(2deg) } }
@@ -87,7 +72,7 @@ function XoncaOpening({ inv, theme }) {
           {ot.show('kicker') && <div style={{ fontFamily: head, fontStyle: 'italic', fontSize: 22, color: C.COPPER_L }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 6, fontFamily: head, fontWeight: 500, fontSize: 'clamp(44px, 13vw, 62px)', lineHeight: 1.05, color: C.CREAM, overflowWrap: 'anywhere' }}>
-              {first}{second && <><span style={{ display: 'block', fontStyle: 'italic', fontSize: '.45em', color: C.COPPER_L }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'block', fontStyle: 'italic', fontSize: '.45em', color: C.COPPER_L }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
           {ot.show('meta') && <div style={{ marginTop: 10, fontSize: 15.5, letterSpacing: '.04em', color: alpha(C.CREAM, 0.75) }}>{ot.text('meta')}</div>}
@@ -165,8 +150,8 @@ export default function XoncaTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const MAP_H = 'min(78vw, 330px)'
 
   return (
@@ -192,12 +177,12 @@ export default function XoncaTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.CREAM, 0.78), fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontStyle: 'italic', fontSize: 20, color: C.COPPER_L }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontStyle: 'italic', fontSize: 20, color: C.COPPER_L }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — şamlı xonça */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: `radial-gradient(70% 40% at 50% 78%, rgba(255,180,100,.28), transparent 70%), ${DARK_BG}`, padding: '48px 22px 54px', textAlign: 'center', color: C.CREAM }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: `radial-gradient(70% 40% at 50% 78%, rgba(255,180,100,.28), transparent 70%), ${DARK_BG}`, padding: '48px 22px 54px', textAlign: 'center', color: C.CREAM }}>
             <div style={{ fontFamily: head, fontStyle: 'italic', fontSize: 24, color: C.COPPER_L, animation: 'xc-rise .8s ease-out .2s both' }}>{L('hero', 'kicker', inv.eventLabel)}</div>
             <h1 style={{ margin: '8px 0 0', fontFamily: head, fontWeight: 500, fontSize: nameSize(heroName), lineHeight: 1.04, color: C.CREAM, overflowWrap: 'anywhere', animation: 'xc-rise 1s ease-out .35s both' }}>{heroName}</h1>
             <Engraving width={220} style={{ marginTop: 18 }} />
@@ -212,7 +197,7 @@ export default function XoncaTemplate(props) {
 
           {/* SAYĞAC — mis nəlbəkilər */}
           {S.countdown && (
-            <Panel head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 <Bowl head={head} value={cd.days} label={cd.labels.days} />
                 <Bowl head={head} value={cd.hours} label={cd.labels.hours} />
@@ -226,7 +211,7 @@ export default function XoncaTemplate(props) {
 
           {/* MƏKAN — dəyirmi məcməyi */}
           {S.venue && (
-            <Panel head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ width: `calc(${MAP_H} + 28px)`, maxWidth: '100%', margin: '0 auto', padding: 14, borderRadius: '50%', background: 'conic-gradient(from 200deg, #7E3F1E, #E3A06C, #B8683A, #F2B987, #7E3F1E, #C97B48, #7E3F1E)', boxShadow: '0 26px 40px -22px rgba(0,0,0,.8)', outline: `2px dotted ${alpha(C.BRASS, 0.8)}`, outlineOffset: -7 }}>
                 <div style={{ borderRadius: '50%', overflow: 'hidden', isolation: 'isolate', aspectRatio: '1' }}>
                   <MapSection
@@ -245,7 +230,7 @@ export default function XoncaTemplate(props) {
 
           {/* PROQRAM — əriyən şamlar */}
           {S.program && (
-            <Panel head={head} dark title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} dark title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 380, margin: '0 auto', display: 'grid', gap: 4 }}>
                 {timeline.events.map((ev, i) => {
                   const n = timeline.events.length
@@ -265,7 +250,7 @@ export default function XoncaTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -273,7 +258,7 @@ export default function XoncaTemplate(props) {
 
           {/* MASA — lentli mis boşqab */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="xc-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.COPPER_D}
                 nameStyle={{ fontFamily: head, fontStyle: 'italic', fontSize: 24 }}
                 card={(num) => (
@@ -296,7 +281,7 @@ export default function XoncaTemplate(props) {
 
           {/* FOTOLAR — dəyirmi mis çərçivələr */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} dark title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} dark title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 14, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -313,7 +298,7 @@ export default function XoncaTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.COPPER, 0.5), hair: alpha(C.COPPER, 0.25), accent: C.COPPER_D,
                 font: body, display: head, btnFont: body,
@@ -326,7 +311,7 @@ export default function XoncaTemplate(props) {
 
           {/* ARZULAR */}
           {S.guestbook && (
-            <Panel head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.COPPER_L} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

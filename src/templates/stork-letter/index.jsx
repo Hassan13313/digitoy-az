@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, PAPER_BG, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Stork, Stamp, Postmark, WaxSeal } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -33,21 +34,6 @@ const BASE = getTemplateTheme('stork-letter')
 const ID = 'stork-letter'
 const SCRIPT = "'Great Vibes', 'Cormorant Garamond', Georgia, cursive"
 
-const LABELS = {
-  countdown: { title: { az: 'Leylək yoldadır', en: 'The stork is on its way', ru: 'Аист уже в пути' } },
-  venue:     { title: { az: 'Ünvan', en: 'The address', ru: 'Адрес' } },
-  program:   { title: { az: 'Məktubda yazılanlar', en: 'As the letter says', ru: 'Как сказано в письме' } },
-  dresscode: { title: { az: 'Geyim', en: 'Attire', ru: 'Наряд' } },
-  seating:   { title: { az: 'Masanız', en: 'Your table', ru: 'Ваш стол' } },
-  gallery:   { title: { az: 'Poçt kartları', en: 'Postcards', ru: 'Открытки' } },
-  rsvp:      { title: { az: 'Cavab məktubu', en: 'Your reply', ru: 'Ответное письмо' } },
-  guestbook: { title: { az: 'Körpəyə məktublar', en: 'Letters to the baby', ru: 'Письма малышу' } },
-}
-const TXT = {
-  az: { table: 'Masa', post: 'Bakı' },
-  en: { table: 'Table', post: 'Baku' },
-  ru: { table: 'Стол', post: 'Баку' },
-}
 const STAMP_COLORS = [C.DUSTY, C.TERRA, '#9DB08F', C.SEPIA]
 
 const KEYFRAMES = `
@@ -114,7 +100,7 @@ function LetterOpening({ inv, theme, T }) {
           {ot.show('kicker') && <div style={{ fontFamily: head, fontSize: 14, letterSpacing: '.24em', textTransform: 'uppercase', color: C.DUSTY_D }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 4, fontFamily: SCRIPT, fontSize: 'clamp(44px, 13vw, 62px)', lineHeight: 1.1, color: C.INK, overflowWrap: 'anywhere' }}>
-              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .2em', fontSize: '.7em', color: C.SEAL }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .2em', fontSize: '.7em', color: C.SEAL }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
         </motion.div>
@@ -180,8 +166,8 @@ export default function StorkLetterTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const dp = inv.dp
 
   return (
@@ -207,12 +193,12 @@ export default function StorkLetterTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 15, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: SCRIPT, fontSize: 24, color: C.SEAL }}>Digitoy</div>
+            <div style={{ fontFamily: SCRIPT, fontSize: 24, color: C.SEAL }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — məktub */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: PAPER_BG, padding: '34px 18px 58px' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: PAPER_BG, padding: '34px 18px 58px' }}>
             <div style={{ position: 'relative', maxWidth: 420, margin: '0 auto', padding: '34px 22px 30px', background: C.PAPER_L, borderRadius: 4, boxShadow: '0 1px 0 rgba(255,255,255,.6) inset, 0 24px 40px -26px rgba(62,58,54,.55)', textAlign: 'center' }}>
               <div style={{ position: 'absolute', right: 14, top: 14 }}>
                 <Stamp width={64} color={C.DUSTY} rotate={4}><Stork width="90%" flap={false} /></Stamp>
@@ -234,7 +220,7 @@ export default function StorkLetterTemplate(props) {
 
           {/* SAYĞAC — poçt markaları */}
           {S.countdown && (
-            <Panel head={head} dusty title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} dusty title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(6px, 2.4vw, 12px)', maxWidth: 400, margin: '0 auto', justifyItems: 'center' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <Stamp key={l} width="min(20vw, 84px)" color={STAMP_COLORS[i]} rotate={[-3, 2, -1.5, 3][i]}>
@@ -250,7 +236,7 @@ export default function StorkLetterTemplate(props) {
 
           {/* MƏKAN — poçt kartı */}
           {S.venue && (
-            <Panel head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ position: 'relative', maxWidth: 430, margin: '0 auto', padding: 10, background: C.PAPER_L, borderRadius: 4, boxShadow: '0 24px 40px -26px rgba(62,58,54,.55)', transform: 'rotate(-1deg)' }}>
                 <div style={{ overflow: 'hidden', isolation: 'isolate', borderRadius: 2 }}>
                   <MapSection
@@ -270,7 +256,7 @@ export default function StorkLetterTemplate(props) {
 
           {/* PROQRAM — xətli kağız */}
           {S.program && (
-            <Panel head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 420, margin: '0 auto', padding: '26px 18px 22px 0', background: `repeating-linear-gradient(180deg, transparent 0 39px, ${alpha(C.DUSTY, 0.35)} 39px 40px), ${C.PAPER_L}`, backgroundPosition: '0 14px', borderRadius: 4, boxShadow: '0 20px 34px -24px rgba(62,58,54,.5)' }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '78px minmax(0, 1fr)', alignItems: 'baseline', minHeight: 40, padding: '6px 0' }}>
@@ -283,7 +269,7 @@ export default function StorkLetterTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -291,7 +277,7 @@ export default function StorkLetterTemplate(props) {
 
           {/* MASA — marka */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} dusty title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} dusty title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="sl-seat-list" field={field} suggest={suggest} font={body} muted={alpha(C.PAPER_L, 0.85)} accent={C.PAPER_L}
                 nameStyle={{ fontFamily: SCRIPT, fontSize: 34, lineHeight: 1.1 }}
                 card={(num) => (
@@ -308,7 +294,7 @@ export default function StorkLetterTemplate(props) {
 
           {/* FOTOLAR — poçt kartları */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -325,7 +311,7 @@ export default function StorkLetterTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.SEPIA, 0.5), hair: alpha(C.SEPIA, 0.25), accent: C.SEAL,
                 font: body, display: head, btnFont: body,
@@ -338,7 +324,7 @@ export default function StorkLetterTemplate(props) {
 
           {/* MƏKTUBLAR */}
           {S.guestbook && (
-            <Panel head={head} dusty title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} dusty title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={field} btn={(on) => ({ ...btn(on), background: on ? C.PAPER_L : 'transparent', color: on ? C.SEAL : C.PAPER_L, border: `1px solid ${C.PAPER_L}` })} errorColor={C.PAPER_L} />
               <div style={{ display: 'grid', gap: 16 }}>
                 {gbook.messages.map((raw, i) => {

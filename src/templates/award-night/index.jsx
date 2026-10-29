@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, GOLD_GRAD, VELVET, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Trophy, Laurel, Medal, Plaque } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -29,22 +30,6 @@ import { Trophy, Laurel, Medal, Plaque } from './art'
 
 const BASE = getTemplateTheme('award-night')
 const ID = 'award-night'
-
-const LABELS = {
-  countdown: { title: { az: 'Mərasimə qədər', en: 'Until the ceremony', ru: 'До церемонии' } },
-  venue:     { title: { az: 'Mərasim zalı', en: 'Ceremony hall', ru: 'Зал церемонии' } },
-  program:   { title: { az: 'Mərasimin gedişi', en: 'Order of the ceremony', ru: 'Ход церемонии' } },
-  dresscode: { title: { az: 'Qırmızı xalça', en: 'Red carpet attire', ru: 'Красная дорожка' } },
-  seating:   { title: { az: 'Yeriniz', en: 'Your seat', ru: 'Ваше место' } },
-  gallery:   { title: { az: 'Qalib anlar', en: 'Winning moments', ru: 'Победные моменты' } },
-  rsvp:      { title: { az: 'İştirakınızı təsdiqləyin', en: 'Kindly confirm', ru: 'Подтвердите участие' } },
-  guestbook: { title: { az: 'Təbriklər', en: 'Congratulations', ru: 'Поздравления' } },
-}
-const TXT = {
-  az: { table: 'Masa', host: 'Təşkilatçı' },
-  en: { table: 'Table', host: 'Hosted by' },
-  ru: { table: 'Стол', host: 'Организатор' },
-}
 
 const KEYFRAMES = `
 @keyframes aw-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -88,7 +73,7 @@ function AwardOpening({ inv, theme }) {
           {ot.show('kicker') && <div style={{ fontSize: 12.5, fontWeight: 500, letterSpacing: '.4em', textTransform: 'uppercase', color: C.GOLD }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 8, fontFamily: head, fontWeight: 500, fontSize: 'clamp(34px, 10vw, 48px)', lineHeight: 1.06, overflowWrap: 'anywhere', ...goldText }}>
-              {first}{second && <><span style={{ display: 'block', fontSize: '.5em' }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'block', fontSize: '.5em' }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
           {ot.show('meta') && <div style={{ marginTop: 10, fontSize: 13.5, letterSpacing: '.12em', textTransform: 'uppercase', color: C.MUTED }}>{ot.text('meta')}</div>}
@@ -154,8 +139,8 @@ export default function AwardNightTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const host = inv.isCorp ? weddingData.organizer?.trim() : ''
 
   return (
@@ -181,12 +166,12 @@ export default function AwardNightTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 14, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 600, fontSize: 19, letterSpacing: '.08em', ...goldText }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontWeight: 600, fontSize: 19, letterSpacing: '.08em', ...goldText }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — çələng və kubok */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: VELVET, padding: '40px 22px 58px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: VELVET, padding: '40px 22px 58px', textAlign: 'center' }}>
             <div aria-hidden="true" style={{ position: 'absolute', left: '50%', top: -20, width: 520, height: 420, transform: 'translateX(-50%)', background: 'linear-gradient(180deg, rgba(255,240,200,.28), transparent 85%)', clipPath: 'polygon(42% 0, 58% 0, 92% 100%, 8% 100%)', filter: 'blur(3px)' }} />
             <div style={{ position: 'relative' }}>
               <Laurel width="min(80vw, 300px)">
@@ -205,7 +190,7 @@ export default function AwardNightTemplate(props) {
 
           {/* SAYĞAC — medallar */}
           {S.countdown && (
-            <Panel head={head} cream title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} cream title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(6px, 2.4vw, 12px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <div key={l} style={{ textAlign: 'center' }}>
@@ -223,7 +208,7 @@ export default function AwardNightTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', padding: 4, background: GOLD_GRAD, boxShadow: '0 26px 40px -24px rgba(0,0,0,.8)' }}>
                 <div style={{ padding: 10, background: C.WINE_D }}>
                   <div style={{ overflow: 'hidden', isolation: 'isolate', outline: `1px solid ${alpha(C.GOLD, 0.5)}` }}>
@@ -244,7 +229,7 @@ export default function AwardNightTemplate(props) {
 
           {/* PROQRAM — nominasiya kartları */}
           {S.program && (
-            <Panel head={head} cream title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} cream title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 400, margin: '0 auto', display: 'grid', gap: 12 }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ position: 'relative', display: 'grid', gridTemplateColumns: '78px minmax(0, 1fr)', alignItems: 'center', gap: 14, padding: '14px 16px', background: '#FFFCF5', border: `1px solid ${alpha(C.GOLD_D, 0.4)}`, boxShadow: '0 10px 20px -16px rgba(42,6,14,.5)' }}>
@@ -257,7 +242,7 @@ export default function AwardNightTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -265,7 +250,7 @@ export default function AwardNightTemplate(props) {
 
           {/* MASA — mis lövhə */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} cream title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} cream title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="aw-seat-list" field={field} suggest={suggest} font={body} muted="#7A5A52" accent={C.WINE}
                 nameStyle={{ fontFamily: head, fontWeight: 500, fontSize: 24 }}
                 card={(num) => (
@@ -280,7 +265,7 @@ export default function AwardNightTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -297,7 +282,7 @@ export default function AwardNightTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} cream title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} cream title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: '#7A5A52', line: alpha(C.WINE, 0.4), hair: alpha(C.WINE, 0.18), accent: C.WINE,
                 font: body, display: head, btnFont: body,
@@ -310,7 +295,7 @@ export default function AwardNightTemplate(props) {
 
           {/* TƏBRİKLƏR */}
           {S.guestbook && (
-            <Panel head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.GOLD_L} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, GOLD_GRAD, WALL_BG, CHAR_BG, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Artwork, GildedFrame, VelvetCloth, MuseumLabel } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -26,22 +27,6 @@ import { Artwork, GildedFrame, VelvetCloth, MuseumLabel } from './art'
 
 const BASE = getTemplateTheme('gallery-unveil')
 const ID = 'gallery-unveil'
-
-const LABELS = {
-  countdown: { title: { az: 'Sərgiyə qədər', en: 'Until the exhibition', ru: 'До выставки' } },
-  venue:     { title: { az: 'Qalereya', en: 'The gallery', ru: 'Галерея' } },
-  program:   { title: { az: 'Kataloq', en: 'Catalogue', ru: 'Каталог' } },
-  dresscode: { title: { az: 'Geyim', en: 'Dress code', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Yeriniz', en: 'Your seat', ru: 'Ваше место' } },
-  gallery:   { title: { az: 'Salon', en: 'The salon', ru: 'Салон' } },
-  rsvp:      { title: { az: 'Ziyarətinizi təsdiqləyin', en: 'Confirm your visit', ru: 'Подтвердите визит' } },
-  guestbook: { title: { az: 'Ziyarətçi dəftəri', en: 'Visitors’ book', ru: 'Книга посетителей' } },
-}
-const TXT = {
-  az: { table: 'Masa', opening: 'Sərginin açılışı', medium: 'Dəvətnamə, rəqəmsal', guest: 'Qonaq', no: 'No.' },
-  en: { table: 'Table', opening: 'Exhibition opening', medium: 'Invitation, digital', guest: 'Guest', no: 'No.' },
-  ru: { table: 'Стол', opening: 'Открытие выставки', medium: 'Приглашение, цифровое', guest: 'Гость', no: '№' },
-}
 
 const KEYFRAMES = `
 @keyframes gu-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -63,7 +48,7 @@ function UnveilOpening({ inv, theme, lang }) {
   const { titleOv, first, second } = openingNames(inv)
   const go = gate.opening
   const head = theme.fonts.heading
-  const T = TXT[lang] || TXT.az
+  const T = inv.copy(TXT)
   return (
     <motion.div {...gate.gateProps} data-gu
       animate={go ? { opacity: 0 } : {}}
@@ -84,7 +69,7 @@ function UnveilOpening({ inv, theme, lang }) {
         <MuseumLabel style={{ marginTop: 22, width: 'min(62vw, 250px)', animation: 'gu-rise 1s ease-out .35s both' }}>
           {titleOv !== '' && (
             <div style={{ fontFamily: head, fontStyle: 'italic', fontSize: 'clamp(19px, 5.6vw, 23px)', lineHeight: 1.2, color: C.INK, overflowWrap: 'anywhere' }}>
-              {first}{second && <> &amp; {second}</>}
+              {first}{second && <> {ot.text('and')} {second}</>}
             </div>
           )}
           {ot.show('meta') && <div style={{ marginTop: 6, fontSize: 12.5, color: C.MUTED }}>{ot.text('meta')}</div>}
@@ -141,8 +126,8 @@ export default function GalleryUnveilTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const year = inv.dp?.year || ''
 
   return (
@@ -168,12 +153,12 @@ export default function GalleryUnveilTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 15, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontStyle: 'italic', fontSize: 20, color: C.INK }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontStyle: 'italic', fontSize: 20, color: C.INK }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — açılmış əsər + etiket */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: WALL_BG, padding: '44px 22px 64px' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: WALL_BG, padding: '44px 22px 64px' }}>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <GildedFrame style={{ width: 'min(56vw, 230px)' }}><Artwork /></GildedFrame>
             </div>
@@ -191,7 +176,7 @@ export default function GalleryUnveilTemplate(props) {
 
           {/* SAYĞAC — kiçik kətanlar */}
           {S.countdown && (
-            <Panel head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <div key={l}>
@@ -213,7 +198,7 @@ export default function GalleryUnveilTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', padding: 8, background: GOLD_GRAD }}>
                 <div style={{ padding: 10, background: '#FBFAF7' }}>
                   <div style={{ overflow: 'hidden', isolation: 'isolate' }}>
@@ -234,7 +219,7 @@ export default function GalleryUnveilTemplate(props) {
 
           {/* PROQRAM — kataloq */}
           {S.program && (
-            <Panel head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 420, margin: '0 auto' }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '48px minmax(0, 1fr) auto', gap: 12, alignItems: 'baseline', padding: '16px 0', borderTop: `1px solid ${C.LINE}` }}>
@@ -248,7 +233,7 @@ export default function GalleryUnveilTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -256,7 +241,7 @@ export default function GalleryUnveilTemplate(props) {
 
           {/* MASA — muzey etiketi */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="gu-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.PLUM}
                 nameStyle={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
                 card={(num) => (
@@ -275,7 +260,7 @@ export default function GalleryUnveilTemplate(props) {
 
           {/* FOTOLAR — salon düzülüşü */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12, marginBottom: 34, alignItems: 'start' }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -292,7 +277,7 @@ export default function GalleryUnveilTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: C.LINE, hair: alpha(C.LINE, 0.7), accent: C.PLUM,
                 font: body, display: head, displayItalic: true, btnFont: body,
@@ -305,7 +290,7 @@ export default function GalleryUnveilTemplate(props) {
 
           {/* ZİYARƏTÇİ DƏFTƏRİ */}
           {S.guestbook && (
-            <Panel head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.GOLD_L} />
               <div style={{ display: 'grid', gap: 0 }}>
                 {gbook.messages.map((raw, i) => {

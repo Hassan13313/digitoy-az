@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize, yearsSentence } from '../_shared/kids'
 import { C, SILVER_GRAD, NIGHT_BG, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Locket, SmallHeart, ChainRule } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -28,22 +29,6 @@ import { Locket, SmallHeart, ChainRule } from './art'
 
 const BASE = getTemplateTheme('silver-locket')
 const ID = 'silver-locket'
-
-const LABELS = {
-  countdown: { title: { az: 'Bayrama qədər', en: 'Until we celebrate', ru: 'До праздника' } },
-  venue:     { title: { az: 'Görüş yeri', en: 'Where we meet', ru: 'Место встречи' } },
-  program:   { title: { az: 'Axşamın gedişi', en: 'The evening', ru: 'Ход вечера' } },
-  dresscode: { title: { az: 'Geyim', en: 'Attire', ru: 'Наряд' } },
-  seating:   { title: { az: 'Yeriniz', en: 'Your seat', ru: 'Ваше место' } },
-  gallery:   { title: { az: 'Xatirələr', en: 'Memories', ru: 'Воспоминания' } },
-  rsvp:      { title: { az: 'Bizimlə olacaqsınız?', en: 'Will you join us?', ru: 'Будете с нами?' } },
-  guestbook: { title: { az: 'Cütlüyə arzular', en: 'Wishes for the couple', ru: 'Пожелания паре' } },
-}
-const TXT = {
-  az: { table: 'Masa' },
-  en: { table: 'Table' },
-  ru: { table: 'Стол' },
-}
 
 const KEYFRAMES = `
 @keyframes sl2-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -102,7 +87,7 @@ function LocketOpening({ inv, theme, lang }) {
           {ot.show('kicker') && <div style={{ fontSize: 12.5, fontWeight: 600, letterSpacing: '.32em', textTransform: 'uppercase', color: C.SILVER_D }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 8, fontFamily: head, fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(38px, 11.4vw, 54px)', lineHeight: 1.06, overflowWrap: 'anywhere', ...silverText }}>
-              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .2em', color: C.ROSE, WebkitTextFillColor: C.ROSE }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .2em', color: C.ROSE, WebkitTextFillColor: C.ROSE }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
           {ot.show('meta') && <div style={{ marginTop: 10, fontSize: 14, letterSpacing: '.08em', color: C.MUTED }}>{ot.text('meta')}</div>}
@@ -160,8 +145,8 @@ export default function SilverLocketTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const yp = yearsParts(inv.age, lang)
 
   return (
@@ -187,12 +172,12 @@ export default function SilverLocketTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontStyle: 'italic', fontSize: 21, ...silverText }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontStyle: 'italic', fontSize: 21, ...silverText }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — açıq medalyon */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: NIGHT_BG, padding: '150px 22px 58px', textAlign: 'center', color: C.IVORY }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: NIGHT_BG, padding: '150px 22px 58px', textAlign: 'center', color: C.IVORY }}>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <Locket width="min(42vw, 168px)" open instant uid="sl2-hero"
                 inside={yp ? (
@@ -214,7 +199,7 @@ export default function SilverLocketTemplate(props) {
 
           {/* SAYĞAC — gümüş medalyonlar */}
           {S.countdown && (
-            <Panel head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop]) => (
                   <div key={l} style={{ textAlign: 'center' }}>
@@ -234,7 +219,7 @@ export default function SilverLocketTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', padding: 5, borderRadius: 26, background: SILVER_GRAD, boxShadow: '0 26px 40px -24px rgba(0,0,0,.8)' }}>
                 <div style={{ borderRadius: 21, overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
@@ -253,7 +238,7 @@ export default function SilverLocketTemplate(props) {
 
           {/* PROQRAM — zəncir */}
           {S.program && (
-            <Panel head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ position: 'relative', maxWidth: 380, margin: '0 auto' }}>
                 <span aria-hidden="true" style={{ position: 'absolute', left: 23, top: 16, bottom: 16, width: 4, backgroundImage: `radial-gradient(ellipse 2px 3px, transparent 1px, ${C.SILVER_D} 1.4px, ${C.SILVER_D} 2px, transparent 2.4px)`, backgroundSize: '4px 7px' }} />
                 {timeline.events.map((ev, i) => (
@@ -270,7 +255,7 @@ export default function SilverLocketTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -278,7 +263,7 @@ export default function SilverLocketTemplate(props) {
 
           {/* MASA — medalyonun içi */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="sl2-seat-list" field={darkField} suggest={suggest} font={body} muted={C.MUTED} accent={C.SILVER_L}
                 nameStyle={{ fontFamily: head, fontStyle: 'italic', fontSize: 26 }}
                 card={(num) => (
@@ -297,7 +282,7 @@ export default function SilverLocketTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -314,7 +299,7 @@ export default function SilverLocketTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.SILVER_D, 0.6), hair: alpha(C.SILVER_D, 0.3), accent: C.ROSE_D,
                 font: body, display: head, displayItalic: true, btnFont: body,
@@ -327,7 +312,7 @@ export default function SilverLocketTemplate(props) {
 
           {/* ARZULAR */}
           {S.guestbook && (
-            <Panel head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.ROSE} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

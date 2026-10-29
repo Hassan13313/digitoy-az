@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize, yearsSentence } from '../_shared/kids'
 import { C, RAINBOW, CREAM_BG, CHOC_BG, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Rainbow, SunsetScene, Polaroid, Camera } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -25,22 +26,6 @@ import { Rainbow, SunsetScene, Polaroid, Camera } from './art'
 
 const BASE = getTemplateTheme('retro-polaroid')
 const ID = 'retro-polaroid'
-
-const LABELS = {
-  countdown: { title: { az: 'Geri sayım', en: 'Countdown', ru: 'Обратный отсчёт' } },
-  venue:     { title: { az: 'Görüşək burada', en: 'Meet us here', ru: 'Встречаемся здесь' } },
-  program:   { title: { az: 'Axşamın ritmi', en: 'Rhythm of the night', ru: 'Ритм вечера' } },
-  dresscode: { title: { az: 'Geyim', en: 'Outfit', ru: 'Наряд' } },
-  seating:   { title: { az: 'Masanızı tapın', en: 'Find your table', ru: 'Найдите свой стол' } },
-  gallery:   { title: { az: 'Çəkdiyimiz anlar', en: 'Snapshots', ru: 'Снимки' } },
-  rsvp:      { title: { az: 'Gəlirsiniz?', en: 'Coming?', ru: 'Придёте?' } },
-  guestbook: { title: { az: 'Bir neçə xoş söz', en: 'A few kind words', ru: 'Пара тёплых слов' } },
-}
-const TXT = {
-  az: { table: 'Masa' },
-  en: { table: 'Table' },
-  ru: { table: 'Стол' },
-}
 
 const KEYFRAMES = `
 @keyframes rp-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -96,7 +81,7 @@ function CameraOpening({ inv, theme, lang, hand, date }) {
           {ot.show('kicker') && <div style={{ fontFamily: hand, fontSize: 18, color: C.ORANGE }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 4, fontFamily: head, fontSize: 'clamp(32px, 9.6vw, 46px)', lineHeight: 1.08, overflowWrap: 'anywhere', color: C.CHOC }}>
-              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .2em', color: C.ORANGE }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .2em', color: C.ORANGE }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
           {ot.show('meta') && <div style={{ marginTop: 6, fontSize: 15, color: C.MUTED }}>{ot.text('meta')}</div>}
@@ -173,8 +158,8 @@ export default function RetroPolaroidTemplate(props) {
   const head = theme.fonts.heading
   const body = theme.fonts.body
   const hand = "'Pangolin', 'Marmelad', cursive"
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
     <div data-rp lang={lang} data-enter={enterDirection(ID)} style={{
@@ -199,12 +184,12 @@ export default function RetroPolaroidTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 15, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontSize: 21, color: C.CHOC }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontSize: 21, color: C.CHOC }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — aşkarlanmış polaroid */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: CREAM_BG, padding: '44px 22px 60px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: CREAM_BG, padding: '44px 22px 60px', textAlign: 'center' }}>
             <Rainbow vertical thick={5} style={{ position: 'absolute', left: 18, top: 0, bottom: 0, opacity: 0.9 }} />
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <Polaroid width="min(62vw, 250px)" rot={-3}
@@ -221,7 +206,7 @@ export default function RetroPolaroidTemplate(props) {
 
           {/* SAYĞAC — kiçik polaroidlər */}
           {S.countdown && (
-            <Panel head={head} hand={hand} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} hand={hand} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <div key={l} style={{ padding: '7% 7% 0', background: C.WHITE, boxShadow: '0 10px 16px -10px rgba(59,36,24,.5)', transform: `rotate(${[-4, 3, -2, 4][i]}deg)` }}>
@@ -239,7 +224,7 @@ export default function RetroPolaroidTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} hand={hand} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} hand={hand} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', padding: '10px 10px 40px', background: C.WHITE, boxShadow: '0 24px 36px -20px rgba(0,0,0,.7)', transform: 'rotate(-1.5deg)' }}>
                 <div style={{ overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
@@ -258,7 +243,7 @@ export default function RetroPolaroidTemplate(props) {
 
           {/* PROQRAM — göy qurşağı xətti */}
           {S.program && (
-            <Panel head={head} hand={hand} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} hand={hand} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ position: 'relative', maxWidth: 380, margin: '0 auto' }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '72px minmax(0, 1fr)', gap: 14, alignItems: 'stretch' }}>
@@ -273,7 +258,7 @@ export default function RetroPolaroidTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} hand={hand} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} hand={hand} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -281,7 +266,7 @@ export default function RetroPolaroidTemplate(props) {
 
           {/* MASA — polaroid */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} hand={hand} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} hand={hand} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="rp-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.ORANGE}
                 nameStyle={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
                 card={(num) => (
@@ -303,7 +288,7 @@ export default function RetroPolaroidTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} hand={hand} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} hand={hand} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 18, marginBottom: 34 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -320,7 +305,7 @@ export default function RetroPolaroidTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} hand={hand} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} hand={hand} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.BROWN, 0.35), hair: alpha(C.BROWN, 0.18), accent: C.ORANGE,
                 font: body, display: head, displayItalic: false, btnFont: head,
@@ -333,7 +318,7 @@ export default function RetroPolaroidTemplate(props) {
 
           {/* ARZULAR */}
           {S.guestbook && (
-            <Panel head={head} hand={hand} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} hand={hand} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.MUSTARD} />
               <div style={{ display: 'grid', gap: 16 }}>
                 {gbook.messages.map((raw, i) => {

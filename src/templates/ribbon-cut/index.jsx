@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, GOLD_GRAD, RIBBON, EMERALD_BG, IVORY_BG, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Scissors, Bow, RibbonBand, DoorLeaf, GoldRain } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -26,22 +27,6 @@ import { Scissors, Bow, RibbonBand, DoorLeaf, GoldRain } from './art'
 
 const BASE = getTemplateTheme('ribbon-cut')
 const ID = 'ribbon-cut'
-
-const LABELS = {
-  countdown: { title: { az: 'Açılışa qədər', en: 'Until the opening', ru: 'До открытия' } },
-  venue:     { title: { az: 'Ünvanımız', en: 'Find us', ru: 'Наш адрес' } },
-  program:   { title: { az: 'Açılış proqramı', en: 'Opening programme', ru: 'Программа открытия' } },
-  dresscode: { title: { az: 'Geyim', en: 'Dress code', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Masanız', en: 'Your table', ru: 'Ваш стол' } },
-  gallery:   { title: { az: 'Açılış anları', en: 'Opening moments', ru: 'Моменты открытия' } },
-  rsvp:      { title: { az: 'İştirakınızı təsdiqləyin', en: 'Confirm your attendance', ru: 'Подтвердите участие' } },
-  guestbook: { title: { az: 'Təbrikləriniz', en: 'Your congratulations', ru: 'Ваши поздравления' } },
-}
-const TXT = {
-  az: { table: 'Masa', grand: 'Təntənəli açılış', vip: 'Dəvətli qonaq' },
-  en: { table: 'Table', grand: 'Grand opening', vip: 'Invited guest' },
-  ru: { table: 'Стол', grand: 'Торжественное открытие', vip: 'Приглашённый гость' },
-}
 
 const KEYFRAMES = `
 @keyframes rc-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -84,7 +69,7 @@ function RibbonOpening({ inv, theme }) {
           {ot.show('kicker') && <div style={{ fontFamily: head, fontSize: 15, letterSpacing: '.24em', color: C.GOLD_L }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 8, fontFamily: head, fontWeight: 700, fontSize: 'clamp(30px, 9vw, 42px)', lineHeight: 1.08, overflowWrap: 'anywhere', ...goldText }}>
-              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .2em' }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .2em' }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
         </div>
@@ -175,8 +160,8 @@ export default function RibbonCutTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
     <div data-rc lang={lang} data-enter={enterDirection(ID)} style={{
@@ -201,12 +186,12 @@ export default function RibbonCutTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.IVORY, 0.7), fontSize: 15.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 700, fontSize: 19, letterSpacing: '.06em', ...goldText }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontWeight: 700, fontSize: 19, letterSpacing: '.06em', ...goldText }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — kəsilmiş lent */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: EMERALD_BG, padding: '0 22px 64px', textAlign: 'center', color: C.IVORY }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: EMERALD_BG, padding: '0 22px 64px', textAlign: 'center', color: C.IVORY }}>
             <div aria-hidden="true" style={{ position: 'relative', height: 150, margin: '0 -22px' }}>
               <span style={{ position: 'absolute', left: -10, top: 40, width: '46%', transformOrigin: '0 50%', transform: 'rotate(14deg)' }}>
                 <RibbonBand height={24} style={{ clipPath: 'polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%)' }} />
@@ -227,7 +212,7 @@ export default function RibbonCutTemplate(props) {
 
           {/* SAYĞAC — zümrüd lövhələr */}
           {S.countdown && (
-            <Panel head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop]) => (
                   <div key={l} style={{ textAlign: 'center' }}>
@@ -247,7 +232,7 @@ export default function RibbonCutTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', padding: 5, borderRadius: 18, background: GOLD_GRAD, boxShadow: '0 24px 36px -22px rgba(0,0,0,.8)' }}>
                 <div style={{ borderRadius: 14, overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
@@ -266,7 +251,7 @@ export default function RibbonCutTemplate(props) {
 
           {/* PROQRAM — lent bayraqcıqları */}
           {S.program && (
-            <Panel head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 400, margin: '0 auto', display: 'grid', gap: 12 }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '74px minmax(0, 1fr)', alignItems: 'stretch', background: '#FFFFFF', borderRadius: 8, overflow: 'hidden', boxShadow: '0 10px 18px -14px rgba(9,40,31,.5)' }}>
@@ -279,7 +264,7 @@ export default function RibbonCutTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -287,7 +272,7 @@ export default function RibbonCutTemplate(props) {
 
           {/* MASA — VIP kart */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="rc-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.IVORY, 0.72)} accent={C.GOLD_L}
                 nameStyle={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
                 card={(num) => (
@@ -307,7 +292,7 @@ export default function RibbonCutTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 14, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -324,7 +309,7 @@ export default function RibbonCutTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.GOLD_D, 0.5), hair: alpha(C.GOLD_D, 0.25), accent: C.EMERALD,
                 font: body, display: head, displayItalic: false, btnFont: head,
@@ -337,7 +322,7 @@ export default function RibbonCutTemplate(props) {
 
           {/* TƏBRİKLƏR */}
           {S.guestbook && (
-            <Panel head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.GOLD_L} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, CREAM_BG, GREEN_BG, COPPER_GRAD, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Egg, Semeni, Tray, Sprout } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -25,22 +26,6 @@ import { Egg, Semeni, Tray, Sprout } from './art'
 
 const BASE = getTemplateTheme('novruz-semeni')
 const ID = 'novruz-semeni'
-
-const LABELS = {
-  countdown: { title: { az: 'Bahar bayramına qədər', en: 'Until spring arrives', ru: 'До весеннего праздника' } },
-  venue:     { title: { az: 'Süfrə harada açılır?', en: 'Where we gather', ru: 'Где собираемся?' } },
-  program:   { title: { az: 'Bayram proqramı', en: 'Holiday programme', ru: 'Праздничная программа' } },
-  dresscode: { title: { az: 'Geyim', en: 'Dress code', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Yeriniz', en: 'Your seat', ru: 'Ваше место' } },
-  gallery:   { title: { az: 'Bahar anları', en: 'Spring moments', ru: 'Весенние моменты' } },
-  rsvp:      { title: { az: 'Bayrama gələcəksiniz?', en: 'Will you come?', ru: 'Придёте на праздник?' } },
-  guestbook: { title: { az: 'Bayram təbrikləri', en: 'Holiday greetings', ru: 'Праздничные поздравления' } },
-}
-const TXT = {
-  az: { table: 'Masa', fest: 'Novruz bayramı' },
-  en: { table: 'Table', fest: 'Novruz holiday' },
-  ru: { table: 'Стол', fest: 'Праздник Новруз' },
-}
 
 const KEYFRAMES = `
 @keyframes ns-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -99,7 +84,7 @@ function SemeniOpening({ inv, theme }) {
           {ot.show('kicker') && <div style={{ fontWeight: 700, fontSize: 14, letterSpacing: '.2em', textTransform: 'uppercase', color: C.RED }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 8, fontFamily: head, fontWeight: 700, fontSize: 'clamp(36px, 10.6vw, 50px)', lineHeight: 1.06, overflowWrap: 'anywhere', color: C.GREEN_D }}>
-              {first}{second && <> &amp; {second}</>}
+              {first}{second && <> {ot.text('and')} {second}</>}
             </div>
           )}
         </div>
@@ -170,8 +155,8 @@ export default function NovruzSemeniTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
     <div data-ns lang={lang} data-enter={enterDirection(ID)} style={{
@@ -196,12 +181,12 @@ export default function NovruzSemeniTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 15.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 700, fontSize: 21, color: C.GREEN_D }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontWeight: 700, fontSize: 21, color: C.GREEN_D }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — xonça */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: CREAM_BG, padding: '30px 22px 64px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: CREAM_BG, padding: '30px 22px 64px', textAlign: 'center' }}>
             <div style={{ display: 'flex', justifyContent: 'center' }}><Xoncha grown instant width="min(78vw, 310px)" /></div>
             <div style={{ marginTop: 22, fontWeight: 700, fontSize: 14, letterSpacing: '.2em', textTransform: 'uppercase', color: C.RED }}>{L('hero', 'kicker', T.fest)}</div>
             <h1 style={{ margin: '8px 0 0', fontFamily: head, fontWeight: 700, fontSize: nameSize(heroName), lineHeight: 1.05, overflowWrap: 'anywhere', color: C.GREEN_D, animation: 'ns-rise 1s ease-out .2s both' }}>{heroName}</h1>
@@ -214,7 +199,7 @@ export default function NovruzSemeniTemplate(props) {
 
           {/* SAYĞAC — yumurtalar */}
           {S.countdown && (
-            <Panel head={head} dark title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} dark title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 380, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <div key={l} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -232,7 +217,7 @@ export default function NovruzSemeniTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', padding: 6, borderRadius: 26, background: COPPER_GRAD, boxShadow: '0 22px 34px -22px rgba(36,51,28,.6)' }}>
                 <div style={{ borderRadius: 20, overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
@@ -251,7 +236,7 @@ export default function NovruzSemeniTemplate(props) {
 
           {/* PROQRAM — cücərtilər */}
           {S.program && (
-            <Panel head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 400, margin: '0 auto', display: 'grid', gap: 12 }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '40px 64px minmax(0, 1fr)', gap: 8, alignItems: 'center', padding: '12px 16px 12px 10px', borderRadius: 18, background: '#FFFFFF', boxShadow: `inset 4px 0 0 ${i % 2 ? C.RED : C.GREEN}, 0 10px 18px -14px rgba(36,51,28,.45)` }}>
@@ -265,7 +250,7 @@ export default function NovruzSemeniTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -273,7 +258,7 @@ export default function NovruzSemeniTemplate(props) {
 
           {/* MASA — böyük yumurta */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="ns-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.CREAM, 0.78)} accent={C.CREAM}
                 nameStyle={{ fontFamily: head, fontWeight: 700, fontSize: 26, color: C.CREAM }}
                 card={(num) => (
@@ -291,7 +276,7 @@ export default function NovruzSemeniTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 14, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -308,7 +293,7 @@ export default function NovruzSemeniTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: C.LINE, hair: alpha(C.LINE, 0.7), accent: C.GREEN,
                 font: body, display: head, displayItalic: false, btnFont: head,
@@ -321,7 +306,7 @@ export default function NovruzSemeniTemplate(props) {
 
           {/* TƏBRİKLƏR */}
           {S.guestbook && (
-            <Panel head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.SPROUT_L} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, HAZARD, STEEL_GRAD, CONCRETE_BG, CHAR_BG, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Rivets, NeonOpen, Storefront, SteelPlate } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -26,22 +27,6 @@ import { Rivets, NeonOpen, Storefront, SteelPlate } from './art'
 
 const BASE = getTemplateTheme('roller-shutter')
 const ID = 'roller-shutter'
-
-const LABELS = {
-  countdown: { title: { az: 'Açılışa qalan vaxt', en: 'Time to opening', ru: 'До открытия' } },
-  venue:     { title: { az: 'Ünvan', en: 'Location', ru: 'Адрес' } },
-  program:   { title: { az: 'Açılış günü', en: 'Opening day', ru: 'День открытия' } },
-  dresscode: { title: { az: 'Geyim', en: 'Dress code', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Yeriniz', en: 'Your spot', ru: 'Ваше место' } },
-  gallery:   { title: { az: 'Kadrlar', en: 'Shots', ru: 'Кадры' } },
-  rsvp:      { title: { az: 'Gələcəksiniz?', en: 'Coming?', ru: 'Придёте?' } },
-  guestbook: { title: { az: 'Təbriklər', en: 'Congrats', ru: 'Поздравления' } },
-}
-const TXT = {
-  az: { table: 'Masa', open: 'Açıq', soon: 'Tezliklə', opening: 'Açılış' },
-  en: { table: 'Table', open: 'Open', soon: 'Coming soon', opening: 'Opening' },
-  ru: { table: 'Стол', open: 'Открыто', soon: 'Скоро', opening: 'Открытие' },
-}
 
 const KEYFRAMES = `
 @keyframes rs-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -74,7 +59,7 @@ function ShutterOpening({ inv, theme, lang, mono }) {
   const { titleOv, first, second } = openingNames(inv)
   const go = gate.opening
   const head = theme.fonts.heading
-  const T = TXT[lang] || TXT.az
+  const T = inv.copy(TXT)
   return (
     <motion.div {...gate.gateProps} data-rs
       animate={go ? { opacity: 0 } : {}}
@@ -84,7 +69,7 @@ function ShutterOpening({ inv, theme, lang, mono }) {
         {ot.show('kicker') && <div style={{ marginBottom: 10, fontFamily: mono, fontSize: 12, letterSpacing: '.22em', textTransform: 'uppercase', color: C.MUTED, animation: 'rs-rise .8s ease-out .2s both' }}>{ot.text('kicker')}</div>}
         {titleOv !== '' && (
           <SignBox head={head} style={{ maxWidth: 'min(86vw, 340px)', animation: 'rs-rise .9s ease-out .25s both' }}>
-            <span style={{ fontSize: 'clamp(30px, 9vw, 42px)', lineHeight: 1 }}>{first}{second && <> &amp; {second}</>}</span>
+            <span style={{ fontSize: 'clamp(30px, 9vw, 42px)', lineHeight: 1 }}>{first}{second && <> {ot.text('and')} {second}</>}</span>
           </SignBox>
         )}
         <div style={{ width: 'min(76vw, 300px)', marginTop: 18 }}>
@@ -154,8 +139,8 @@ export default function RollerShutterTemplate(props) {
   const head = theme.fonts.heading
   const body = theme.fonts.body
   const mono = "'IBM Plex Mono', ui-monospace, monospace"
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
     <div data-rs lang={lang} data-enter={enterDirection(ID)} style={{
@@ -180,12 +165,12 @@ export default function RollerShutterTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.WHITE, 0.75), fontSize: 15.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 800, fontSize: 26, letterSpacing: '.06em', textTransform: 'uppercase', color: C.WHITE }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontWeight: 800, fontSize: 26, letterSpacing: '.06em', textTransform: 'uppercase', color: C.WHITE }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — açıq vitrin */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: CONCRETE_BG, padding: '36px 22px 64px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: CONCRETE_BG, padding: '36px 22px 64px', textAlign: 'center' }}>
             <div style={{ maxWidth: 360, margin: '0 auto' }}>
               <SignBox head={head}>
                 <span style={{ fontSize: nameSize(heroName), lineHeight: 0.95, overflowWrap: 'anywhere' }}>{heroName}</span>
@@ -203,7 +188,7 @@ export default function RollerShutterTemplate(props) {
 
           {/* SAYĞAC — polad lövhələr */}
           {S.countdown && (
-            <Panel head={head} mono={mono} dark title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} mono={mono} dark title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop]) => (
                   <div key={l} style={{ textAlign: 'center' }}>
@@ -221,7 +206,7 @@ export default function RollerShutterTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} mono={mono} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} mono={mono} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <SteelPlate pad="8px" radius={10} style={{ maxWidth: 430, margin: '0 auto' }}>
                 <div style={{ borderRadius: 6, overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
@@ -240,7 +225,7 @@ export default function RollerShutterTemplate(props) {
 
           {/* PROQRAM — sarı etiketlər */}
           {S.program && (
-            <Panel head={head} mono={mono} dark title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} mono={mono} dark title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 400, margin: '0 auto', display: 'grid', gap: 10 }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '84px minmax(0, 1fr)', alignItems: 'stretch', borderRadius: 6, overflow: 'hidden', background: alpha('#FFFFFF', 0.06), border: `1px solid ${alpha('#FFFFFF', 0.1)}` }}>
@@ -253,7 +238,7 @@ export default function RollerShutterTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} mono={mono} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} mono={mono} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={body} align="center" />
             </Panel>
@@ -261,7 +246,7 @@ export default function RollerShutterTemplate(props) {
 
           {/* MASA — trafaret lövhə */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} mono={mono} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} mono={mono} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="rs-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.CHAR}
                 nameStyle={{ fontFamily: head, fontWeight: 800, fontSize: 32, textTransform: 'uppercase', color: C.CHAR }}
                 card={(num) => (
@@ -277,7 +262,7 @@ export default function RollerShutterTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} mono={mono} dark title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} mono={mono} dark title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 14, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -295,7 +280,7 @@ export default function RollerShutterTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} mono={mono} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} mono={mono} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: C.LINE, hair: alpha(C.LINE, 0.7), accent: C.CHAR,
                 font: body, display: head, displayItalic: false, btnFont: head,
@@ -308,7 +293,7 @@ export default function RollerShutterTemplate(props) {
 
           {/* TƏBRİKLƏR — etiketlər */}
           {S.guestbook && (
-            <Panel head={head} mono={mono} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} mono={mono} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.YELLOW} />
               <div style={{ display: 'grid', gap: 16 }}>
                 {gbook.messages.map((raw, i) => {

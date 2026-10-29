@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Card, CropMarks } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -30,22 +31,6 @@ import { Card, CropMarks } from './art'
 const BASE = getTemplateTheme('business-card')
 const ID = 'business-card'
 const MONO = "'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace"
-
-const LABELS = {
-  countdown: { title: { az: 'Qalan vaxt', en: 'Time remaining', ru: 'Осталось' } },
-  venue:     { title: { az: 'Ünvan', en: 'Address', ru: 'Адрес' } },
-  program:   { title: { az: 'Proqram', en: 'Schedule', ru: 'Программа' } },
-  dresscode: { title: { az: 'Geyim qaydası', en: 'Dress code', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Yeriniz', en: 'Your seat', ru: 'Ваше место' } },
-  gallery:   { title: { az: 'Fotolar', en: 'Photos', ru: 'Фото' } },
-  rsvp:      { title: { az: 'Cavab', en: 'Reply', ru: 'Ответ' } },
-  guestbook: { title: { az: 'Qeydlər', en: 'Notes', ru: 'Заметки' } },
-}
-const TXT = {
-  az: { table: 'Masa', date: 'Tarix', time: 'Saat', venue: 'Məkan', host: 'Təşkilatçı', guest: 'Qonaq' },
-  en: { table: 'Table', date: 'Date', time: 'Time', venue: 'Venue', host: 'Host', guest: 'Guest' },
-  ru: { table: 'Стол', date: 'Дата', time: 'Время', venue: 'Место', host: 'Организатор', guest: 'Гость' },
-}
 
 const KEYFRAMES = `
 @keyframes bc-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -88,7 +73,7 @@ function CardOpening({ inv, theme, T, weddingData }) {
                 </div>
                 {titleOv !== '' && (
                   <div style={{ fontFamily: head, fontWeight: 600, fontSize: 'clamp(22px, 6.6vw, 30px)', lineHeight: 1.02, letterSpacing: '-.03em', overflowWrap: 'anywhere' }}>
-                    {first}{second && <> &amp; {second}</>}
+                    {first}{second && <> {ot.text('and')} {second}</>}
                   </div>
                 )}
               </div>
@@ -155,8 +140,8 @@ export default function BusinessCardTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const host = inv.isCorp ? weddingData.organizer?.trim() : ''
   const rows = [[T.date, inv.fullDate], [T.time, inv.time], [T.venue, weddingData.venueName], [T.host, host]].filter(([, v]) => v)
 
@@ -183,12 +168,12 @@ export default function BusinessCardTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.GRAPHITE, fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: head, fontWeight: 600, fontSize: 16, letterSpacing: '-.02em' }}><span aria-hidden="true" style={{ width: 9, height: 9, background: C.KLEIN }} />Digitoy</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: head, fontWeight: 600, fontSize: 16, letterSpacing: '-.02em' }}><span aria-hidden="true" style={{ width: 9, height: 9, background: C.KLEIN }} />{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — iri ad və cədvəl */}
-          <section style={{ position: 'relative', background: C.PAPER, padding: '36px 20px 56px' }}>
+          <section data-section="hero" style={{ position: 'relative', background: C.PAPER, padding: '36px 20px 56px' }}>
             <div style={{ maxWidth: 520, margin: '0 auto' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', ...lbl }}>
                 <span>{L('hero', 'kicker', inv.eventLabel)}</span>
@@ -213,7 +198,7 @@ export default function BusinessCardTemplate(props) {
 
           {/* SAYĞAC */}
           {S.countdown && (
-            <Panel head={head} alt title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} alt title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', borderTop: `1px solid ${C.INK}`, borderBottom: `1px solid ${C.INK}` }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <div key={l} style={{ padding: '18px 6px 14px', borderLeft: i ? `1px solid ${C.HAIR}` : 'none' }}>
@@ -229,7 +214,7 @@ export default function BusinessCardTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ position: 'relative', margin: '0 8px' }}>
                 <CropMarks />
                 <div style={{ overflow: 'hidden', isolation: 'isolate', border: `1px solid ${C.INK}` }}>
@@ -254,7 +239,7 @@ export default function BusinessCardTemplate(props) {
 
           {/* PROQRAM — cədvəl */}
           {S.program && (
-            <Panel head={head} alt title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} alt title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ borderTop: `1px solid ${C.INK}` }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '108px minmax(0, 1fr)', gap: 12, alignItems: 'baseline', padding: '15px 0', borderBottom: `1px solid ${C.HAIR}` }}>
@@ -267,7 +252,7 @@ export default function BusinessCardTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -275,7 +260,7 @@ export default function BusinessCardTemplate(props) {
 
           {/* MASA — vizit kartı */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} alt title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} alt title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="bc-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.KLEIN}
                 nameStyle={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
                 card={(num) => (
@@ -298,7 +283,7 @@ export default function BusinessCardTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 4, marginBottom: 30 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -315,7 +300,7 @@ export default function BusinessCardTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} alt title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} alt title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: C.INK, hair: C.HAIR, accent: C.KLEIN,
                 font: body, display: head, btnFont: body,
@@ -328,7 +313,7 @@ export default function BusinessCardTemplate(props) {
 
           {/* QEYDLƏR */}
           {S.guestbook && (
-            <Panel head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.KLEIN} />
               <div style={{ borderTop: `1px solid ${C.INK}` }}>
                 {gbook.messages.map((raw, i) => {

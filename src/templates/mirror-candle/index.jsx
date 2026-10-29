@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, GILT, GILT_BAR, GLOW_BG, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Glint, GiltRule, Mirror, Candlestick } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -31,22 +32,6 @@ import { Glint, GiltRule, Mirror, Candlestick } from './art'
 const BASE = getTemplateTheme('mirror-candle')
 const ID = 'mirror-candle'
 const ON_MIRROR = '#3B2C14'
-
-const LABELS = {
-  countdown: { title: { az: 'Şamlar yanana qədər', en: 'Until the candles glow', ru: 'Пока не зажгутся свечи' } },
-  venue:     { title: { az: 'İşığın yeri', en: 'Where the light gathers', ru: 'Где собирается свет' } },
-  program:   { title: { az: 'Gecənin işıqları', en: 'Lights of the evening', ru: 'Огни вечера' } },
-  dresscode: { title: { az: 'Güzgüyə yaraşan', en: 'Worthy of the mirror', ru: 'Достойно зеркала' } },
-  seating:   { title: { az: 'Güzgüdə yeriniz', en: 'Your place in the mirror', ru: 'Ваше место в зеркале' } },
-  gallery:   { title: { az: 'Əks olunan anlar', en: 'Reflected moments', ru: 'Отражённые мгновения' } },
-  rsvp:      { title: { az: 'Gələcəksinizmi?', en: 'Will you be there?', ru: 'Вы будете?' } },
-  guestbook: { title: { az: 'İşıqlı arzular', en: 'Bright wishes', ru: 'Светлые пожелания' } },
-}
-const TXT = {
-  az: { table: 'Masa' },
-  en: { table: 'Table' },
-  ru: { table: 'Стол' },
-}
 
 const KEYFRAMES = `
 @keyframes mc-flame { from { transform: scaleY(.88) rotate(-2deg) } to { transform: scaleY(1.1) rotate(2deg) } }
@@ -86,7 +71,7 @@ function MirrorOpening({ inv, theme }) {
             {ot.show('kicker') && <div style={{ fontFamily: head, fontStyle: 'italic', fontWeight: 300, fontSize: 16, color: ink, transition: 'color .8s ease .4s' }}>{ot.text('kicker')}</div>}
             {titleOv !== '' && (
               <div style={{ marginTop: 6, fontFamily: head, fontWeight: 300, fontSize: 'clamp(30px, 9vw, 40px)', lineHeight: 1.08, color: ink, transition: 'color .8s ease .4s', overflowWrap: 'anywhere' }}>
-                {first}{second && <><span style={{ display: 'block', fontStyle: 'italic', fontSize: '.55em' }}>&amp;</span>{second}</>}
+                {first}{second && <><span style={{ display: 'block', fontStyle: 'italic', fontSize: '.55em' }}>{ot.text('and')}</span>{second}</>}
               </div>
             )}
           </Mirror>
@@ -143,8 +128,8 @@ export default function MirrorCandleTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
     <div data-mc lang={lang} data-enter={enterDirection(ID)} style={{
@@ -169,12 +154,12 @@ export default function MirrorCandleTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 15.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontStyle: 'italic', fontWeight: 300, fontSize: 20, color: C.GOLD_L }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontStyle: 'italic', fontWeight: 300, fontSize: 20, color: C.GOLD_L }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — güzgü və şamlar */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: `radial-gradient(55% 35% at 50% 42%, rgba(255,196,110,.20), transparent 72%), ${GLOW_BG}`, padding: '70px 14px 56px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: `radial-gradient(55% 35% at 50% 42%, rgba(255,196,110,.20), transparent 72%), ${GLOW_BG}`, padding: '70px 14px 56px', textAlign: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 'clamp(4px, 2vw, 14px)' }}>
               <Candlestick h={70} style={{ marginBottom: 8 }} />
               <Mirror width="min(60vw, 250px)" glintKey="hero">
@@ -192,7 +177,7 @@ export default function MirrorCandleTemplate(props) {
 
           {/* SAYĞAC — kiçik güzgülər */}
           {S.countdown && (
-            <Panel head={head} alt title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} alt title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop]) => (
                   <div key={l} style={{ textAlign: 'center' }}>
@@ -210,7 +195,7 @@ export default function MirrorCandleTemplate(props) {
 
           {/* MƏKAN — oval çərçivə */}
           {S.venue && (
-            <Panel head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ width: 'min(84vw, 340px)', margin: '0 auto', padding: 12, borderRadius: '50%', background: GILT, boxShadow: '0 30px 50px -24px rgba(0,0,0,.85)' }}>
                 <div style={{ borderRadius: '50%', overflow: 'hidden', isolation: 'isolate', boxShadow: 'inset 0 0 0 2px rgba(60,40,10,.6)' }}>
                   <MapSection
@@ -229,7 +214,7 @@ export default function MirrorCandleTemplate(props) {
 
           {/* PROQRAM — qızılı xətt */}
           {S.program && (
-            <Panel head={head} alt title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} alt title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ position: 'relative', maxWidth: 380, margin: '0 auto' }}>
                 <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: 6, bottom: 6, width: 1, background: `linear-gradient(180deg, transparent, ${C.GOLD} 12%, ${C.GOLD} 88%, transparent)` }} />
                 {timeline.events.map((ev, i) => (
@@ -244,7 +229,7 @@ export default function MirrorCandleTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -252,7 +237,7 @@ export default function MirrorCandleTemplate(props) {
 
           {/* MASA — güzgüdə rəqəm */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} alt title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} alt title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="mc-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.GOLD_L}
                 nameStyle={{ fontFamily: head, fontWeight: 300, fontSize: 26 }}
                 card={(num) => (
@@ -268,7 +253,7 @@ export default function MirrorCandleTemplate(props) {
 
           {/* FOTOLAR — oval çərçivələr */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -285,7 +270,7 @@ export default function MirrorCandleTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} alt title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} alt title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.IVORY, muted: C.MUTED, line: alpha(C.GOLD, 0.45), hair: alpha(C.GOLD, 0.2), accent: C.GOLD_L,
                 font: body, display: head, btnFont: body,
@@ -298,7 +283,7 @@ export default function MirrorCandleTemplate(props) {
 
           {/* ARZULAR */}
           {S.guestbook && (
-            <Panel head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.GOLD_L} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

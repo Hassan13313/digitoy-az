@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, CHROME, HOT, NIGHT_BG, LIGHT_BG, SUNBURST, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { MirrorBall, LightSpots, Beam } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -26,22 +27,6 @@ import { MirrorBall, LightSpots, Beam } from './art'
 
 const BASE = getTemplateTheme('disco-ball')
 const ID = 'disco-ball'
-
-const LABELS = {
-  countdown: { title: { az: 'Rəqsə qədər', en: 'Until we dance', ru: 'До танцев' } },
-  venue:     { title: { az: 'Rəqs meydançası', en: 'The dance floor', ru: 'Танцпол' } },
-  program:   { title: { az: 'Gecənin pleylisti', en: 'Tonight’s playlist', ru: 'Плейлист вечера' } },
-  dresscode: { title: { az: 'Geyim — parılda!', en: 'Dress code — shine!', ru: 'Дресс-код — сияй!' } },
-  seating:   { title: { az: 'Masan burada', en: 'Your table', ru: 'Твой стол' } },
-  gallery:   { title: { az: 'Disko anları', en: 'Disco moments', ru: 'Диско-моменты' } },
-  rsvp:      { title: { az: 'Rəqsə gəlirsən?', en: 'Ready to dance?', ru: 'Идёшь танцевать?' } },
-  guestbook: { title: { az: 'Gəlinə arzular', en: 'Wishes for the bride', ru: 'Пожелания невесте' } },
-}
-const TXT = {
-  az: { table: 'Masa', disco: 'Disko gecəsi' },
-  en: { table: 'Table', disco: 'Disco night' },
-  ru: { table: 'Стол', disco: 'Диско-вечер' },
-}
 
 const KEYFRAMES = `
 @keyframes db-in { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -88,7 +73,7 @@ function DiscoOpening({ inv, theme }) {
           {ot.show('kicker') && <div style={{ fontSize: 13, fontWeight: 500, letterSpacing: '.3em', textTransform: 'uppercase', ...hotText }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 6, fontFamily: head, fontStyle: 'italic', fontWeight: 800, fontSize: 'clamp(48px, 15vw, 70px)', lineHeight: 1, overflowWrap: 'anywhere', ...chromeText }}>
-              {first}{second && <> &amp; {second}</>}
+              {first}{second && <> {ot.text('and')} {second}</>}
             </div>
           )}
           <div aria-hidden="true" style={{ position: 'absolute', left: '50%', top: -18, transform: 'translateX(-50%)' }}>
@@ -151,8 +136,8 @@ export default function DiscoBallTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const TILES = [C.MAGENTA, C.GOLD, C.LILAC, '#4FD1C5']
 
   return (
@@ -178,12 +163,12 @@ export default function DiscoBallTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.SILVER, 0.75), fontSize: 15, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontStyle: 'italic', fontWeight: 800, fontSize: 22, ...hotText }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontStyle: 'italic', fontWeight: 800, fontSize: 22, ...hotText }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — fırlanan kürə */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: NIGHT_BG, padding: '70px 22px 70px', textAlign: 'center', color: C.SILVER }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: NIGHT_BG, padding: '70px 22px 70px', textAlign: 'center', color: C.SILVER }}>
             <LightSpots />
             <Beam side="left" />
             <Beam side="right" color="rgba(255,201,74,.28)" />
@@ -199,7 +184,7 @@ export default function DiscoBallTemplate(props) {
 
           {/* SAYĞAC — xrom rəqəmlər */}
           {S.countdown && (
-            <Panel head={head} dark title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} dark title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <div key={l} style={{ textAlign: 'center' }}>
@@ -219,7 +204,7 @@ export default function DiscoBallTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', padding: 3, borderRadius: 24, background: HOT, boxShadow: '0 20px 40px -24px rgba(194,31,122,.6)' }}>
                 <div style={{ borderRadius: 21, overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
@@ -238,7 +223,7 @@ export default function DiscoBallTemplate(props) {
 
           {/* PROQRAM — rəqs meydançası plitələri */}
           {S.program && (
-            <Panel head={head} dark title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} dark title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 400, margin: '0 auto', display: 'grid', gap: 10 }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '78px minmax(0, 1fr)', alignItems: 'stretch', borderRadius: 14, overflow: 'hidden', background: alpha('#FFFFFF', 0.05), border: `1px solid ${alpha(TILES[i % 4], 0.45)}` }}>
@@ -251,7 +236,7 @@ export default function DiscoBallTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -259,7 +244,7 @@ export default function DiscoBallTemplate(props) {
 
           {/* MASA — parlayan kart */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="db-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.SILVER, 0.75)} accent={C.GOLD}
                 nameStyle={{ fontFamily: head, fontStyle: 'italic', fontWeight: 800, fontSize: 28, color: '#FFFFFF' }}
                 card={(num) => (
@@ -278,7 +263,7 @@ export default function DiscoBallTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 14, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -295,7 +280,7 @@ export default function DiscoBallTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: C.LINE, hair: alpha(C.LINE, 0.7), accent: C.MAGENTA_D,
                 font: body, display: head, displayItalic: true, btnFont: head,
@@ -308,7 +293,7 @@ export default function DiscoBallTemplate(props) {
 
           {/* ARZULAR */}
           {S.guestbook && (
-            <Panel head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.GOLD} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

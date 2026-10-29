@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, BANDS, CREAM_BG, DUSK_BG, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { SunArch, Pampas, Rainbow, HalfSun } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -26,22 +27,6 @@ import { SunArch, Pampas, Rainbow, HalfSun } from './art'
 
 const BASE = getTemplateTheme('boho-sunset')
 const ID = 'boho-sunset'
-
-const LABELS = {
-  countdown: { title: { az: 'Gün batımına qədər', en: 'Until sunset', ru: 'До заката' } },
-  venue:     { title: { az: 'Harada görüşürük', en: 'Where we meet', ru: 'Где встречаемся' } },
-  program:   { title: { az: 'Gecənin axışı', en: 'How the night flows', ru: 'Ход вечера' } },
-  dresscode: { title: { az: 'Geyim', en: 'Dress code', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Yerin hazırdır', en: 'Your seat', ru: 'Твоё место' } },
-  gallery:   { title: { az: 'Gecədən kadrlar', en: 'Frames from the night', ru: 'Кадры вечера' } },
-  rsvp:      { title: { az: 'Bizimləsən?', en: 'Are you in?', ru: 'Ты с нами?' } },
-  guestbook: { title: { az: 'Gəlinə arzular', en: 'Wishes for the bride', ru: 'Пожелания невесте' } },
-}
-const TXT = {
-  az: { table: 'Masa', begins: 'gecə başlayır…' },
-  en: { table: 'Table', begins: 'the night begins…' },
-  ru: { table: 'Стол', begins: 'ночь начинается…' },
-}
 
 const KEYFRAMES = `
 @keyframes bs-in { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -64,7 +49,7 @@ function SunsetOpening({ inv, theme, lang }) {
   const { titleOv, first, second } = openingNames(inv)
   const go = gate.opening
   const head = theme.fonts.heading
-  const T = TXT[lang] || TXT.az
+  const T = inv.copy(TXT)
   return (
     <motion.div {...gate.gateProps} data-bs
       animate={go ? { opacity: 0 } : {}}
@@ -75,7 +60,7 @@ function SunsetOpening({ inv, theme, lang }) {
           {ot.show('kicker') && <div style={{ fontSize: 13, fontWeight: 500, letterSpacing: '.26em', textTransform: 'uppercase', color: C.CLAY_D }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 6, fontFamily: head, fontStyle: 'italic', fontWeight: 300, fontSize: 'clamp(48px, 14vw, 66px)', lineHeight: 1.08, overflowWrap: 'anywhere', color: C.INK }}>
-              {first}{second && <> &amp; {second}</>}
+              {first}{second && <> {ot.text('and')} {second}</>}
             </div>
           )}
         </div>
@@ -148,8 +133,8 @@ export default function BohoSunsetTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
     <div data-bs lang={lang} data-enter={enterDirection(ID)} style={{
@@ -174,12 +159,12 @@ export default function BohoSunsetTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 15.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontStyle: 'italic', fontWeight: 300, fontSize: 23, color: C.INK }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontStyle: 'italic', fontWeight: 300, fontSize: 23, color: C.INK }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — tağ və pampas */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: CREAM_BG, padding: '34px 22px 66px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: CREAM_BG, padding: '34px 22px 66px', textAlign: 'center' }}>
             <div style={{ position: 'relative', display: 'inline-block' }}>
               <Pampas height={200} delay={0.2} style={{ position: 'absolute', left: -50, bottom: 0, zIndex: 2 }} />
               <Pampas height={160} flip delay={1} color="#EBDCC2" style={{ position: 'absolute', left: -18, bottom: 0, zIndex: 2 }} />
@@ -201,7 +186,7 @@ export default function BohoSunsetTemplate(props) {
 
           {/* SAYĞAC — tağlar */}
           {S.countdown && (
-            <Panel head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <div key={l} style={{ textAlign: 'center' }}>
@@ -221,7 +206,7 @@ export default function BohoSunsetTemplate(props) {
 
           {/* MƏKAN — tağ çərçivə */}
           {S.venue && (
-            <Panel head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 400, margin: '0 auto', padding: 7, borderRadius: '999px 999px 14px 14px', background: `linear-gradient(180deg, ${C.CLAY}, ${C.ROSE})` }}>
                 <div style={{ borderRadius: '999px 999px 9px 9px', overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
@@ -240,7 +225,7 @@ export default function BohoSunsetTemplate(props) {
 
           {/* PROQRAM — makrame ipi və muncuqlar */}
           {S.program && (
-            <Panel head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ position: 'relative', maxWidth: 380, margin: '0 auto', paddingLeft: 52 }}>
                 <span aria-hidden="true" style={{ position: 'absolute', left: 22, top: -10, bottom: -10, width: 5, borderRadius: 3, background: `repeating-linear-gradient(160deg, #E3CBA6 0 4px, #CBAE84 4px 7px)` }} />
                 <div style={{ display: 'grid', gap: 22 }}>
@@ -258,7 +243,7 @@ export default function BohoSunsetTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={body} align="center" />
             </Panel>
@@ -266,7 +251,7 @@ export default function BohoSunsetTemplate(props) {
 
           {/* MASA — göy qurşağı */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="bs-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.PAMPAS, 0.8)} accent={C.MUSTARD}
                 nameStyle={{ fontFamily: head, fontStyle: 'italic', fontWeight: 300, fontSize: 32, color: C.CREAM }}
                 card={(num) => (
@@ -285,7 +270,7 @@ export default function BohoSunsetTemplate(props) {
 
           {/* FOTOLAR — tağ çərçivələr */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 16, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -303,7 +288,7 @@ export default function BohoSunsetTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: C.LINE, hair: alpha(C.LINE, 0.8), accent: C.CLAY,
                 font: body, display: head, displayItalic: true, btnFont: body,
@@ -316,7 +301,7 @@ export default function BohoSunsetTemplate(props) {
 
           {/* ARZULAR — kraft kağız etiketlər */}
           {S.guestbook && (
-            <Panel head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.MUSTARD} />
               <div style={{ display: 'grid', gap: 18 }}>
                 {gbook.messages.map((raw, i) => {

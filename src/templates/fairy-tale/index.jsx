@@ -11,6 +11,7 @@ import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { ageSentence, ageWord, kidsGalleryDesc, tableNum, tableSize } from '../_shared/kids'
 import { C, FOIL } from './palette'
+import { LABELS, TXT } from './copy'
 import {
   Sparkle, StarField, Moon, Castle, Hill, Crown, Wand, Flourish, CornerFiligree,
   MirrorFrame, Compass, Vignette, CastleMark, AgeSeal, Cloud, Topiary,
@@ -36,21 +37,6 @@ import {
 const BASE = getTemplateTheme('fairy-tale')
 const ID = 'fairy-tale'
 
-const LABELS = {
-  countdown: { title: { az: 'Nağıla qədər', en: 'Until the tale begins', ru: 'До начала сказки' } },
-  venue:     { title: { az: 'Sehrli xəritə', en: 'The magic map', ru: 'Волшебная карта' } },
-  program:   { title: { az: 'Nağılın fəsilləri', en: 'Chapters of the tale', ru: 'Главы сказки' } },
-  dresscode: { title: { az: 'Nağıl kostyumu', en: 'Storybook costume', ru: 'Сказочный костюм' } },
-  seating:   { title: { az: 'Sehrli güzgü', en: 'The magic mirror', ru: 'Волшебное зеркало' } },
-  gallery:   { title: { az: 'Portret zalı', en: 'The portrait hall', ru: 'Портретный зал' } },
-  rsvp:      { title: { az: 'Nağıla gələcəksiniz?', en: 'Will you join the tale?', ru: 'Придёте в сказку?' } },
-  guestbook: { title: { az: 'Sehrli arzular', en: 'Magic wishes', ru: 'Волшебные пожелания' } },
-}
-const TXT = {
-  az: { once: 'Biri var idi, biri yox idi…', chapter: 'Fəsil', table: 'Masa', mirror: 'Güzgü, güzgü, de görüm…', end: '…və nağıl başlayır' },
-  en: { once: 'Once upon a time…', chapter: 'Chapter', table: 'Table', mirror: 'Mirror, mirror, show me…', end: '…and the tale begins' },
-  ru: { once: 'Жили-были…', chapter: 'Глава', table: 'Стол', mirror: 'Свет мой, зеркальце, скажи…', end: '…и сказка начинается' },
-}
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
 
 const KEYFRAMES = `
@@ -145,7 +131,7 @@ function BookOpening({ inv, theme }) {
                 {ot.show('kicker') && <div style={{ marginTop: 16, fontStyle: 'italic', fontSize: 15.5, color: C.GOLD_L, lineHeight: 1.35 }}>{ot.text('kicker')}</div>}
                 {titleOv !== '' && (
                   <div style={{ ...foilText, marginTop: 10, fontFamily: serif, fontWeight: 600, fontSize: 'clamp(34px, 11vw, 46px)', lineHeight: 1.04, animation: 'ft-shine 6s linear infinite', overflowWrap: 'anywhere' }}>
-                    {first}{second && <><span style={{ display: 'block', fontSize: '.5em', margin: '2px 0' }}>&amp;</span>{second}</>}
+                    {first}{second && <><span style={{ display: 'block', fontSize: '.5em', margin: '2px 0' }}>{ot.text('and')}</span>{second}</>}
                   </div>
                 )}
                 {ot.show('meta') && <div style={{ marginTop: 14, fontSize: 13.5, letterSpacing: '.04em', color: alpha(C.CREAM, 0.82) }}>{ot.text('meta')}</div>}
@@ -226,7 +212,7 @@ export default function FairyTaleTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const serif = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
+  const T = inv.copy(TXT)
   const age = inv.age
 
   return (
@@ -253,18 +239,18 @@ export default function FairyTaleTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.CREAM, 0.8), fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ ...foilText, fontFamily: serif, fontWeight: 600, fontSize: 19 }}>Digitoy</div>
+            <div style={{ ...foilText, fontFamily: serif, fontWeight: 600, fontSize: 19 }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={{ ...theme, background: C.NIGHT, surface: '#2A3366', text: C.CREAM, muted: alpha(C.CREAM, 0.75) }} />
           </header>
 
           {/* HERO — «Biri var idi, biri yox idi…» */}
-          <section style={{ position: 'relative', overflow: 'hidden', paddingTop: 36, background: `linear-gradient(180deg, ${C.NIGHT} 0%, ${C.DUSK} 34%, #8E7CC6 58%, ${C.ROSE} 80%, ${C.CREAM} 97%)` }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', paddingTop: 36, background: `linear-gradient(180deg, ${C.NIGHT} 0%, ${C.DUSK} 34%, #8E7CC6 58%, ${C.ROSE} 80%, ${C.CREAM} 97%)` }}>
             <StarField count={30} opacity={0.95} />
             <Moon size={62} style={{ position: 'absolute', right: '9%', top: 26, animation: 'ft-float 7s ease-in-out infinite' }} />
             <div style={{ position: 'relative', textAlign: 'center', padding: '0 22px' }}>
               <div style={{ fontStyle: 'italic', fontSize: 17, color: C.GOLD_L, animation: 'ft-rise .9s ease-out .2s both' }}>{L('hero', 'kicker', T.once)}</div>
               <h1 style={{ ...foilText, margin: '10px 0 0', fontFamily: serif, fontWeight: 600, fontSize: 'clamp(48px, 15vw, 74px)', lineHeight: 1, textWrap: 'balance', overflowWrap: 'anywhere', filter: 'drop-shadow(0 3px 10px rgba(20,24,60,.45))', animation: 'ft-shine 7s linear infinite, ft-rise 1s ease-out .35s both' }}>
-                {inv.heroTitle ? inv.heroTitle : inv.isCouple ? <>{inv.groom} &amp; {inv.bride}</> : inv.single}
+                {inv.heroTitle ? inv.heroTitle : inv.isCouple ? <>{inv.groom} {inv.and} {inv.bride}</> : inv.single}
               </h1>
               {age && <div style={{ marginTop: 10, fontStyle: 'italic', fontSize: 18, color: C.CREAM, animation: 'ft-rise .9s ease-out .5s both' }}>{ageSentence(age, lang)}</div>}
             </div>
@@ -314,7 +300,7 @@ export default function FairyTaleTemplate(props) {
 
           {/* SAYĞAC — dörd nağıl qülləsi */}
           {S.countdown && (
-            <Page serif={serif} tone="night" title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Page section="countdown" serif={serif} tone="night" title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 380, margin: '0 auto', alignItems: 'end' }}>
                 {[
                   { v: cd.days, l: cd.labels.days, c: C.VIOLET },
@@ -339,7 +325,7 @@ export default function FairyTaleTemplate(props) {
 
           {/* MƏKAN — sehrli xəritə */}
           {S.venue && (
-            <Page serif={serif} tone="parch" title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Page section="venue" serif={serif} tone="parch" title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ position: 'relative', maxWidth: 420, margin: '0 auto', padding: 10, background: '#F8EED9', borderRadius: 6, boxShadow: `0 0 0 1px ${alpha(C.GOLD, 0.55)}, 0 0 0 6px #F8EED9, 0 0 0 7px ${alpha(C.GOLD, 0.4)}, 0 22px 38px -22px rgba(45,42,74,.55)` }}>
                 <div style={{ border: `1px dashed ${alpha(C.GOLD_D, 0.55)}`, borderRadius: 3, padding: 5 }}>
                   <MapSection
@@ -364,7 +350,7 @@ export default function FairyTaleTemplate(props) {
 
           {/* PROQRAM — nağılın fəsilləri */}
           {S.program && (
-            <Page serif={serif} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Page section="program" serif={serif} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <ol style={{ listStyle: 'none', margin: '0 auto', padding: 0, maxWidth: 400 }}>
                 {timeline.events.map((ev, i) => {
                   const [cap, rest] = splitFirst(ev.label)
@@ -389,7 +375,7 @@ export default function FairyTaleTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Page serif={serif} tone="parch" title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Page section="dresscode" serif={serif} tone="parch" title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={serif} align="center" italic />
             </Page>
@@ -397,7 +383,7 @@ export default function FairyTaleTemplate(props) {
 
           {/* MASA — sehrli güzgü */}
           {S.seating && !seating.isEmpty && (
-            <Page serif={serif} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Page section="seating" serif={serif} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <input {...seatInputProps(inv, 'ft-seat-list')} style={field} />
               <SeatSuggest inv={inv} id="ft-seat-list" c={{ ...suggest, font: body }} />
               {seating.showNotFound && <div style={{ marginTop: 12, fontSize: 15, color: C.MUTED, textAlign: 'center' }}>{tr.inv_seat_fullname}</div>}
@@ -423,7 +409,7 @@ export default function FairyTaleTemplate(props) {
 
           {/* FOTOLAR — portret zalı */}
           {S.gallery && (
-            <Page id="gallery-section" serif={serif} tone="parch" title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Page section="gallery" id="gallery-section" serif={serif} tone="parch" title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, marginBottom: 30, alignItems: 'end' }}>
                   {gallery.demoPhotos.map((url, i) => {
@@ -450,7 +436,7 @@ export default function FairyTaleTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Page serif={serif} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Page section="rsvp" serif={serif} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.VIOLET, 0.4), hair: alpha(C.GOLD, 0.35), accent: C.VIOLET,
                 font: body, display: serif, doneMark: <Crown size={36} style={{ margin: '0 auto 10px' }} />,
@@ -461,7 +447,7 @@ export default function FairyTaleTemplate(props) {
 
           {/* SEHRLİ ARZULAR */}
           {S.guestbook && (
-            <Page serif={serif} tone="parch" title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Page section="guestbook" serif={serif} tone="parch" title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 30 }}>
                 <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbookL.namePh} style={field} />
                 <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbookL.msgPh} rows={3} style={{ ...field, resize: 'none', lineHeight: 1.5 }} />

@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, NIGHT_BG, FROST_BG, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { SnowGlobe, SkySnow, Bauble, Flake, GiftTag } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -26,22 +27,6 @@ import { SnowGlobe, SkySnow, Bauble, Flake, GiftTag } from './art'
 
 const BASE = getTemplateTheme('snow-globe')
 const ID = 'snow-globe'
-
-const LABELS = {
-  countdown: { title: { az: 'Bayrama neçə gün qaldı?', en: 'How long till the holiday?', ru: 'Сколько до праздника?' } },
-  venue:     { title: { az: 'Harada görüşürük?', en: 'Where we meet', ru: 'Где встречаемся?' } },
-  program:   { title: { az: 'Bayram axşamı', en: 'Holiday evening', ru: 'Праздничный вечер' } },
-  dresscode: { title: { az: 'Geyim', en: 'Dress code', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Sizin üçün hədiyyə', en: 'A tag for you', ru: 'Ярлычок для вас' } },
-  gallery:   { title: { az: 'Qış anları', en: 'Winter moments', ru: 'Зимние моменты' } },
-  rsvp:      { title: { az: 'Bizimlə olacaqsınız?', en: 'Will you join us?', ru: 'Будете с нами?' } },
-  guestbook: { title: { az: 'Bayram açıqcaları', en: 'Holiday cards', ru: 'Праздничные открытки' } },
-}
-const TXT = {
-  az: { table: 'Masa', ny: 'Yeni il', to: 'Kimə:' },
-  en: { table: 'Table', ny: 'New Year', to: 'To:' },
-  ru: { table: 'Стол', ny: 'Новый год', to: 'Кому:' },
-}
 
 const KEYFRAMES = `
 @keyframes sg-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -77,7 +62,7 @@ function GlobeOpening({ inv, theme }) {
           {ot.show('kicker') && <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: '.24em', textTransform: 'uppercase', color: C.GOLD }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 6, fontFamily: head, fontSize: 'clamp(34px, 10vw, 48px)', lineHeight: 1.2, overflowWrap: 'anywhere', color: C.SNOW, textShadow: '0 4px 18px rgba(0,0,0,.25)' }}>
-              {first}{second && <> &amp; {second}</>}
+              {first}{second && <> {ot.text('and')} {second}</>}
             </div>
           )}
         </div>
@@ -145,8 +130,8 @@ export default function SnowGlobeTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
     <div data-sg lang={lang} data-enter={enterDirection(ID)} style={{
@@ -171,12 +156,12 @@ export default function SnowGlobeTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.ICE, 0.8), fontSize: 15.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontSize: 22, lineHeight: 1, color: C.SNOW }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontSize: 22, lineHeight: 1, color: C.SNOW }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — qar yağan kürə */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: NIGHT_BG, padding: '34px 22px 64px', textAlign: 'center', color: C.SNOW }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: NIGHT_BG, padding: '34px 22px 64px', textAlign: 'center', color: C.SNOW }}>
             <SkySnow />
             <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
               <SnowGlobe size={200} snowing plaque={<Flake size={16} color={C.NIGHT_D} />} />
@@ -191,7 +176,7 @@ export default function SnowGlobeTemplate(props) {
 
           {/* SAYĞAC — yolka oyuncaqları */}
           {S.countdown && (
-            <Panel head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ position: 'relative', maxWidth: 400, margin: '0 auto' }}>
                 <span aria-hidden="true" style={{ position: 'absolute', left: -6, right: -6, top: 0, height: 4, borderRadius: 2, background: `repeating-linear-gradient(90deg, ${C.PINE} 0 14px, ${C.PINE_L} 14px 28px)` }} />
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(10px, 3.6vw, 18px)' }}>
@@ -212,7 +197,7 @@ export default function SnowGlobeTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ position: 'relative', maxWidth: 430, margin: '0 auto', padding: 8, borderRadius: 28, background: alpha('#FFFFFF', 0.9), boxShadow: '0 24px 36px -22px rgba(0,0,0,.7)' }}>
                 <div style={{ borderRadius: 22, overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
@@ -231,7 +216,7 @@ export default function SnowGlobeTemplate(props) {
 
           {/* PROQRAM — qar dənələri */}
           {S.program && (
-            <Panel head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 400, margin: '0 auto', display: 'grid', gap: 12 }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '38px 66px minmax(0, 1fr)', gap: 8, alignItems: 'center', padding: '13px 16px 13px 12px', borderRadius: 18, background: '#FFFFFF', boxShadow: '0 10px 18px -14px rgba(27,43,64,.45)' }}>
@@ -245,7 +230,7 @@ export default function SnowGlobeTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={body} align="center" />
             </Panel>
@@ -253,7 +238,7 @@ export default function SnowGlobeTemplate(props) {
 
           {/* MASA — hədiyyə etiketi */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="sg-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.ICE, 0.8)} accent={C.SNOW}
                 nameStyle={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
                 card={(num) => (
@@ -272,7 +257,7 @@ export default function SnowGlobeTemplate(props) {
 
           {/* FOTOLAR — buzlu pəncərələr */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 14, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -289,7 +274,7 @@ export default function SnowGlobeTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: C.LINE, hair: alpha(C.LINE, 0.7), accent: C.RED,
                 font: body, display: head, displayItalic: false, btnFont: body,
@@ -302,7 +287,7 @@ export default function SnowGlobeTemplate(props) {
 
           {/* AÇIQCALAR */}
           {S.guestbook && (
-            <Panel head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.GOLD} />
               <div style={{ display: 'grid', gap: 16 }}>
                 {gbook.messages.map((raw, i) => {

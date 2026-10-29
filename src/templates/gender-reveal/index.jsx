@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, SPLIT, QUESTION, SIDES, RELEASE, CONFETTI, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Balloon, GiftBox, Question } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -30,21 +31,6 @@ import { Balloon, GiftBox, Question } from './art'
 const BASE = getTemplateTheme('gender-reveal')
 const ID = 'gender-reveal'
 
-const LABELS = {
-  countdown: { title: { az: 'Sirr açılana qədər', en: 'Until the big reveal', ru: 'До раскрытия секрета' } },
-  venue:     { title: { az: 'Sürpriz harada?', en: 'Where is the surprise?', ru: 'Где сюрприз?' } },
-  program:   { title: { az: 'Günün gedişi', en: 'How the day goes', ru: 'Как пройдёт день' } },
-  dresscode: { title: { az: 'Hansı komandadasınız?', en: 'Which team are you?', ru: 'Вы за какую команду?' } },
-  seating:   { title: { az: 'Masanız qutuda', en: 'Your table is in the box', ru: 'Ваш стол в коробке' } },
-  gallery:   { title: { az: 'Sürpriz anları', en: 'Surprise moments', ru: 'Моменты сюрприза' } },
-  rsvp:      { title: { az: 'Sirrin açılışında olacaqsınız?', en: 'Will you be at the reveal?', ru: 'Будете на раскрытии?' } },
-  guestbook: { title: { az: 'Təxminlər və arzular', en: 'Guesses and wishes', ru: 'Догадки и пожелания' } },
-}
-const TXT = {
-  az: { table: 'Masa' },
-  en: { table: 'Table' },
-  ru: { table: 'Стол' },
-}
 const TONES = [C.BLUE, C.PINK]
 const TONES_L = [C.BLUE_L, C.PINK_L]
 
@@ -85,7 +71,7 @@ function RevealOpening({ inv, theme, lang }) {
           {ot.show('kicker') && <div style={{ fontFamily: head, fontWeight: 700, fontSize: 16, color: C.MUTED }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 4, fontFamily: head, fontWeight: 800, fontSize: 'clamp(34px, 10vw, 48px)', lineHeight: 1.1, color: C.INK, overflowWrap: 'anywhere' }}>
-              {first}{second && <><span style={{ display: 'block', fontSize: '.5em', color: C.GOLD_D }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'block', fontSize: '.5em', color: C.GOLD_D }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
           <div style={{ marginTop: 10, fontFamily: head, fontWeight: 700, fontSize: 20 }}>
@@ -156,8 +142,8 @@ export default function GenderRevealTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const [boy, girl] = SIDES[lang] || SIDES.az
 
   return (
@@ -188,7 +174,7 @@ export default function GenderRevealTemplate(props) {
           </header>
 
           {/* HERO — iki tərəf */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: SPLIT(C.BLUE_L, C.PINK_L, 100), padding: '40px 20px 56px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: SPLIT(C.BLUE_L, C.PINK_L, 100), padding: '40px 20px 56px', textAlign: 'center' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', maxWidth: 360, margin: '0 auto' }}>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ animation: 'gr-bob 3s ease-in-out infinite' }}><Balloon size={60} tone="blue" string={44} /></div>
@@ -213,7 +199,7 @@ export default function GenderRevealTemplate(props) {
 
           {/* SAYĞAC */}
           {S.countdown && (
-            <Panel head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 2.6vw, 12px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <div key={l} style={{ position: 'relative', padding: '18px 4px 14px', textAlign: 'center', borderRadius: 22, background: TONES_L[i % 2], boxShadow: `inset 0 0 0 2px ${TONES[i % 2]}`, overflow: 'hidden' }}>
@@ -230,7 +216,7 @@ export default function GenderRevealTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} split title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} split title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', padding: 8, borderRadius: 28, background: `linear-gradient(115deg, ${C.BLUE} 50%, ${C.PINK} 50%)`, boxShadow: '0 22px 36px -24px rgba(51,54,92,.6)' }}>
                 <div style={{ borderRadius: 22, overflow: 'hidden', isolation: 'isolate', border: '4px solid #FFFFFF' }}>
                   <MapSection
@@ -249,7 +235,7 @@ export default function GenderRevealTemplate(props) {
 
           {/* PROQRAM */}
           {S.program && (
-            <Panel head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 380, margin: '0 auto', display: 'grid', gap: 12 }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '44px minmax(0, 1fr)', gap: 12, alignItems: 'center', padding: '12px 16px 12px 10px', borderRadius: 20, background: '#FFFFFF', boxShadow: `inset 4px 0 0 ${TONES[i % 2]}, 0 10px 18px -14px rgba(51,54,92,.45)` }}>
@@ -265,7 +251,7 @@ export default function GenderRevealTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} split title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} split title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -273,7 +259,7 @@ export default function GenderRevealTemplate(props) {
 
           {/* MASA — qutunun etiketi */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="gr-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.PINK_D}
                 nameStyle={{ fontFamily: head, fontWeight: 800, fontSize: 20, color: C.INK }}
                 card={(num) => (
@@ -289,7 +275,7 @@ export default function GenderRevealTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} split title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} split title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -306,7 +292,7 @@ export default function GenderRevealTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.INK, 0.3), hair: alpha(C.INK, 0.12), accent: C.PINK_D,
                 font: body, display: head, btnFont: head,
@@ -319,7 +305,7 @@ export default function GenderRevealTemplate(props) {
 
           {/* TƏXMİNLƏR */}
           {S.guestbook && (
-            <Panel head={head} split title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} split title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.PINK_D} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, NIGHT_BG, EMBER_BG, PAPER_BG, FIRE_GRAD, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Bonfire, Buta, ButaRule, Lamp } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -25,22 +26,6 @@ import { Bonfire, Buta, ButaRule, Lamp } from './art'
 
 const BASE = getTemplateTheme('novruz-bonfire')
 const ID = 'novruz-bonfire'
-
-const LABELS = {
-  countdown: { title: { az: 'Bayrama qədər', en: 'Until the holiday', ru: 'До праздника' } },
-  venue:     { title: { az: 'Tonqal harada yanacaq?', en: 'Where the fire burns', ru: 'Где зажжём костёр?' } },
-  program:   { title: { az: 'Bayram gecəsi', en: 'Holiday night', ru: 'Праздничная ночь' } },
-  dresscode: { title: { az: 'Geyim', en: 'Dress code', ru: 'Дресс-код' } },
-  seating:   { title: { az: 'Süfrədəki yeriniz', en: 'Your place at the table', ru: 'Ваше место за столом' } },
-  gallery:   { title: { az: 'Bayram anları', en: 'Holiday moments', ru: 'Праздничные моменты' } },
-  rsvp:      { title: { az: 'Bizimlə olacaqsınız?', en: 'Will you join us?', ru: 'Будете с нами?' } },
-  guestbook: { title: { az: 'Bayram arzuları', en: 'Holiday wishes', ru: 'Праздничные пожелания' } },
-}
-const TXT = {
-  az: { table: 'Masa', fest: 'Novruz bayramı' },
-  en: { table: 'Table', fest: 'Novruz holiday' },
-  ru: { table: 'Стол', fest: 'Праздник Новруз' },
-}
 
 const KEYFRAMES = `
 @keyframes nb-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -85,7 +70,7 @@ function FireOpening({ inv, theme }) {
           {ot.show('kicker') && <div style={{ fontSize: 13, fontWeight: 600, letterSpacing: '.26em', textTransform: 'uppercase', color: C.FLAME }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 10, fontFamily: head, fontWeight: 800, fontSize: 'clamp(36px, 10.6vw, 50px)', lineHeight: 1.04, overflowWrap: 'anywhere', ...fireText }}>
-              {first}{second && <> &amp; {second}</>}
+              {first}{second && <> {ot.text('and')} {second}</>}
             </div>
           )}
           <ButaRule color={C.EMBER} width={180} style={{ marginTop: 12 }} />
@@ -155,8 +140,8 @@ export default function NovruzBonfireTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
     <div data-nb lang={lang} data-enter={enterDirection(ID)} style={{
@@ -181,12 +166,12 @@ export default function NovruzBonfireTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.CREAM, 0.72), fontSize: 15, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 800, fontSize: 20, ...fireText }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontWeight: 800, fontSize: 20, ...fireText }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — yanan tonqal */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: NIGHT_BG, padding: '34px 22px 64px', textAlign: 'center', color: C.CREAM }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: NIGHT_BG, padding: '34px 22px 64px', textAlign: 'center', color: C.CREAM }}>
             <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 360, background: 'radial-gradient(50% 50% at 50% 70%, rgba(255,122,26,.3), transparent 70%)' }} />
             <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}><Bonfire size={170} instant /></div>
             <div style={{ position: 'relative', marginTop: 18, fontSize: 13, fontWeight: 600, letterSpacing: '.26em', textTransform: 'uppercase', color: C.FLAME }}>{L('hero', 'kicker', T.fest)}</div>
@@ -200,7 +185,7 @@ export default function NovruzBonfireTemplate(props) {
 
           {/* SAYĞAC — közlər */}
           {S.countdown && (
-            <Panel head={head} dark title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} dark title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop]) => (
                   <div key={l} style={{ textAlign: 'center' }}>
@@ -218,7 +203,7 @@ export default function NovruzBonfireTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', borderRadius: 22, overflow: 'hidden', isolation: 'isolate', boxShadow: `0 0 0 4px ${C.CREAM}, 0 0 0 5.5px ${alpha(C.RED, 0.5)}, 0 24px 36px -22px rgba(42,26,20,.55)` }}>
                 <MapSection
                   weddingData={weddingData} theme={theme} accent={C.RED} height="clamp(240px, 66vw, 300px)"
@@ -235,7 +220,7 @@ export default function NovruzBonfireTemplate(props) {
 
           {/* PROQRAM — alov nişanları */}
           {S.program && (
-            <Panel head={head} dark title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} dark title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ position: 'relative', maxWidth: 380, margin: '0 auto' }}>
                 <span aria-hidden="true" style={{ position: 'absolute', left: 21, top: 14, bottom: 14, width: 2, background: `linear-gradient(${C.FLAME}, ${alpha(C.EMBER, 0.15)})` }} />
                 {timeline.events.map((ev, i) => (
@@ -254,7 +239,7 @@ export default function NovruzBonfireTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -262,7 +247,7 @@ export default function NovruzBonfireTemplate(props) {
 
           {/* MASA — mis çıraq */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="nb-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.CREAM, 0.72)} accent={C.FLAME}
                 nameStyle={{ fontFamily: head, fontWeight: 800, fontSize: 24, color: C.CREAM }}
                 card={(num) => (
@@ -278,7 +263,7 @@ export default function NovruzBonfireTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 14, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -295,7 +280,7 @@ export default function NovruzBonfireTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.WOOD, 0.3), hair: alpha(C.WOOD, 0.15), accent: C.RED,
                 font: body, display: head, displayItalic: false, btnFont: head,
@@ -308,7 +293,7 @@ export default function NovruzBonfireTemplate(props) {
 
           {/* ARZULAR */}
           {S.guestbook && (
-            <Panel head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.FLAME} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

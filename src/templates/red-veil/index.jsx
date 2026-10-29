@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, VELVET_BG, VEIL_PATTERN, IVORY_PATTERN, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Buta, ButaRule, Tassel, EmbroideryBand, VeilDrape, Candle } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -31,22 +32,6 @@ import { Buta, ButaRule, Tassel, EmbroideryBand, VeilDrape, Candle } from './art
 const BASE = getTemplateTheme('red-veil')
 const ID = 'red-veil'
 const SCRIPT = "'Great Vibes', 'Cormorant Garamond', Georgia, cursive"
-
-const LABELS = {
-  countdown: { title: { az: 'Xına gecəsinə qədər', en: 'Until the henna night', ru: 'До вечера хны' } },
-  venue:     { title: { az: 'Gecənin ünvanı', en: 'Where we gather', ru: 'Где мы соберёмся' } },
-  program:   { title: { az: 'Gecənin ahəngi', en: 'The evening', ru: 'Ход вечера' } },
-  dresscode: { title: { az: 'Gecənin libası', en: 'Evening attire', ru: 'Наряд вечера' } },
-  seating:   { title: { az: 'Yeriniz hazırdır', en: 'Your seat awaits', ru: 'Ваше место готово' } },
-  gallery:   { title: { az: 'Gecənin xatirələri', en: 'Memories of the night', ru: 'Воспоминания вечера' } },
-  rsvp:      { title: { az: 'Gələcəksinizmi?', en: 'Will you join us?', ru: 'Вы придёте?' } },
-  guestbook: { title: { az: 'Gəlinə xoş sözlər', en: 'Kind words for the bride', ru: 'Тёплые слова невесте' } },
-}
-const TXT = {
-  az: { table: 'Masa' },
-  en: { table: 'Table' },
-  ru: { table: 'Стол' },
-}
 
 const KEYFRAMES = `
 @keyframes rv-swing { 0%,100% { transform: translateX(-50%) rotate(-4deg) } 50% { transform: translateX(-50%) rotate(4deg) } }
@@ -104,7 +89,7 @@ function VeilOpening({ inv, theme }) {
             {ot.show('kicker') && <div style={{ fontFamily: head, fontSize: 14, letterSpacing: '.32em', textTransform: 'uppercase', color: C.GOLD_L }}>{ot.text('kicker')}</div>}
             {titleOv !== '' && (
               <div style={{ marginTop: 10, fontFamily: SCRIPT, fontSize: 'clamp(46px, 14vw, 64px)', lineHeight: 1.05, color: '#FFF3E0', textShadow: '0 2px 18px rgba(0,0,0,.35)', overflowWrap: 'anywhere' }}>
-                {first}{second && <><span style={{ display: 'block', fontSize: '.5em', color: C.GOLD_L }}>&amp;</span>{second}</>}
+                {first}{second && <><span style={{ display: 'block', fontSize: '.5em', color: C.GOLD_L }}>{ot.text('and')}</span>{second}</>}
               </div>
             )}
             <ButaRule color={alpha(C.GOLD_L, 0.85)} width={180} style={{ marginTop: 14 }} />
@@ -174,8 +159,8 @@ export default function RedVeilTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
     <div data-rv lang={lang} data-enter={enterDirection(ID)} style={{
@@ -200,12 +185,12 @@ export default function RedVeilTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha('#FFF3E0', 0.8), fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: SCRIPT, fontSize: 24, color: C.GOLD_L }}>Digitoy</div>
+            <div style={{ fontFamily: SCRIPT, fontSize: 24, color: C.GOLD_L }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — asılan örpək */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: `${IVORY_PATTERN}, radial-gradient(90% 60% at 50% 40%, #FFF8EE, ${C.IVORY} 60%, ${C.IVORY_D})`, backgroundSize: '64px 80px, auto', padding: '150px 22px 56px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: `${IVORY_PATTERN}, radial-gradient(90% 60% at 50% 40%, #FFF8EE, ${C.IVORY} 60%, ${C.IVORY_D})`, backgroundSize: '64px 80px, auto', padding: '150px 22px 56px', textAlign: 'center' }}>
             <VeilDrape height={130} />
             <div style={{ position: 'relative' }}>
               <div style={{ fontFamily: head, fontSize: 14, letterSpacing: '.34em', textTransform: 'uppercase', color: C.GOLD_D, animation: 'rv-rise .8s ease-out .2s both' }}>{L('hero', 'kicker', inv.eventLabel)}</div>
@@ -223,7 +208,7 @@ export default function RedVeilTemplate(props) {
 
           {/* SAYĞAC — tikmə rozetlər */}
           {S.countdown && (
-            <Panel head={head} velvet title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} velvet title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop]) => (
                   <div key={l} style={{ textAlign: 'center' }}>
@@ -241,7 +226,7 @@ export default function RedVeilTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ maxWidth: 430, margin: '0 auto', padding: 8, background: '#FFFDF9', border: `1px solid ${alpha(C.GOLD, 0.8)}`, outline: `1px dashed ${alpha(C.GOLD_D, 0.5)}`, outlineOffset: -5, borderRadius: '180px 180px 6px 6px', boxShadow: '0 24px 40px -28px rgba(62,9,17,.6)' }}>
                 <div style={{ borderRadius: '172px 172px 2px 2px', overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
@@ -260,7 +245,7 @@ export default function RedVeilTemplate(props) {
 
           {/* PROQRAM — tikmə xətti */}
           {S.program && (
-            <Panel head={head} velvet title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} velvet title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ position: 'relative', maxWidth: 380, margin: '0 auto', padding: '4px 0' }}>
                 <span aria-hidden="true" style={{ position: 'absolute', left: 31, top: 0, bottom: 0, width: 1, borderLeft: `1px dashed ${alpha(C.GOLD_L, 0.6)}` }} />
                 {timeline.events.map((ev, i) => (
@@ -279,7 +264,7 @@ export default function RedVeilTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -287,7 +272,7 @@ export default function RedVeilTemplate(props) {
 
           {/* MASA — məxmər kisə */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="rv-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.CRIMSON}
                 nameStyle={{ fontFamily: SCRIPT, fontSize: 36, lineHeight: 1.1 }}
                 card={(num) => (
@@ -305,7 +290,7 @@ export default function RedVeilTemplate(props) {
 
           {/* FOTOLAR — mehrab tağları */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} velvet title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} velvet title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 10, marginBottom: 30 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -323,7 +308,7 @@ export default function RedVeilTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.CRIMSON, 0.45), hair: alpha(C.GOLD_D, 0.3), accent: C.CRIMSON,
                 font: body, display: head, btnFont: body,
@@ -336,7 +321,7 @@ export default function RedVeilTemplate(props) {
 
           {/* XOŞ SÖZLƏR */}
           {S.guestbook && (
-            <Panel head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.CRIMSON} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

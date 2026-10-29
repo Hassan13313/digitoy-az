@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { C, KNIT, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Teddy, Heart, Button, Bunting, Patch } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -30,21 +31,6 @@ import { Teddy, Heart, Button, Bunting, Patch } from './art'
 const BASE = getTemplateTheme('teddy-bear')
 const ID = 'teddy-bear'
 
-const LABELS = {
-  countdown: { title: { az: 'Görüşə qədər', en: 'Until we meet', ru: 'До встречи' } },
-  venue:     { title: { az: 'Harada?', en: 'Where?', ru: 'Где?' } },
-  program:   { title: { az: 'Günün planı', en: 'Plan for the day', ru: 'План дня' } },
-  dresscode: { title: { az: 'Geyim', en: 'What to wear', ru: 'Что надеть' } },
-  seating:   { title: { az: 'Ayıcıq yerinizi göstərir', en: 'Teddy shows your seat', ru: 'Мишка покажет ваше место' } },
-  gallery:   { title: { az: 'Şirin anlar', en: 'Sweet moments', ru: 'Милые моменты' } },
-  rsvp:      { title: { az: 'Gələcəksiniz?', en: 'Will you come?', ru: 'Вы придёте?' } },
-  guestbook: { title: { az: 'Körpəyə xoş sözlər', en: 'Kind words for the baby', ru: 'Тёплые слова малышу' } },
-}
-const TXT = {
-  az: { table: 'Masa' },
-  en: { table: 'Table' },
-  ru: { table: 'Стол' },
-}
 const PATCHES = [C.SKY, C.BLUSH, '#F2E2B8', C.SAGE]
 
 const KEYFRAMES = `
@@ -88,7 +74,7 @@ function TeddyOpening({ inv, theme }) {
         {ot.show('kicker') && <div style={{ fontFamily: head, fontWeight: 700, fontSize: 16, color: C.SKY_D }}>{ot.text('kicker')}</div>}
         {titleOv !== '' && (
           <div style={{ marginTop: 6, fontFamily: head, fontWeight: 700, fontSize: 'clamp(34px, 10vw, 48px)', lineHeight: 1.1, color: C.INK, overflowWrap: 'anywhere' }}>
-            {first}{second && <><span style={{ display: 'block', fontSize: '.5em', color: C.BLUSH_D }}>&amp;</span>{second}</>}
+            {first}{second && <><span style={{ display: 'block', fontSize: '.5em', color: C.BLUSH_D }}>{ot.text('and')}</span>{second}</>}
           </div>
         )}
         {ot.show('meta') && <div style={{ marginTop: 8, fontSize: 15, fontWeight: 600, color: C.MUTED }}>{ot.text('meta')}</div>}
@@ -155,8 +141,8 @@ export default function TeddyBearTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
     <div data-tb lang={lang} data-enter={enterDirection(ID)} style={{
@@ -181,12 +167,12 @@ export default function TeddyBearTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontWeight: 600, fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 700, fontSize: 17, color: C.HONEY_D }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontWeight: 700, fontSize: 17, color: C.HONEY_D }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — girlyanda və ayıcıq */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: `linear-gradient(180deg, #E4F0F8, ${C.CREAM} 70%)`, padding: '0 20px 58px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: `linear-gradient(180deg, #E4F0F8, ${C.CREAM} 70%)`, padding: '0 20px 58px', textAlign: 'center' }}>
             <Bunting count={8} style={{ marginLeft: -20, marginRight: -20 }} />
             <div style={{ marginTop: 18, fontFamily: head, fontWeight: 700, fontSize: 17, color: C.SKY_D }}>{L('hero', 'kicker', inv.eventLabel)}</div>
             <h1 style={{ margin: '8px 0 0', fontFamily: head, fontWeight: 700, fontSize: nameSize(heroName), lineHeight: 1.1, color: C.INK, overflowWrap: 'anywhere', animation: 'tb-rise 1s ease-out .2s both' }}>{heroName}</h1>
@@ -201,7 +187,7 @@ export default function TeddyBearTemplate(props) {
 
           {/* SAYĞAC — yamaqlar */}
           {S.countdown && (
-            <Panel head={head} oat title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} oat title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 2.6vw, 12px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <Patch key={l} color={PATCHES[i]} style={{ padding: '18px 4px 14px', textAlign: 'center', transform: `rotate(${[-2, 1.5, -1, 2][i]}deg)` }}>
@@ -217,7 +203,7 @@ export default function TeddyBearTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <Patch color={C.SAGE} style={{ maxWidth: 430, margin: '0 auto', padding: 14 }}>
                 <div style={{ borderRadius: 14, overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
@@ -236,7 +222,7 @@ export default function TeddyBearTemplate(props) {
 
           {/* PROQRAM — düymələr və sap */}
           {S.program && (
-            <Panel head={head} oat title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} oat title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ position: 'relative', maxWidth: 380, margin: '0 auto' }}>
                 <span aria-hidden="true" style={{ position: 'absolute', left: 27, top: 24, bottom: 24, borderLeft: `2px dashed ${alpha(C.HONEY_D, 0.45)}` }} />
                 {timeline.events.map((ev, i) => (
@@ -253,7 +239,7 @@ export default function TeddyBearTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -261,7 +247,7 @@ export default function TeddyBearTemplate(props) {
 
           {/* MASA — ayıcığın lövhəsi */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} oat title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} oat title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="tb-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.HONEY_D}
                 nameStyle={{ fontFamily: head, fontWeight: 700, fontSize: 19, color: C.INK }}
                 card={(num) => (
@@ -278,7 +264,7 @@ export default function TeddyBearTemplate(props) {
 
           {/* FOTOLAR — tikişli çərçivələr */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -295,7 +281,7 @@ export default function TeddyBearTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} oat title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} oat title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.HONEY_D, 0.45), hair: alpha(C.HONEY_D, 0.2), accent: C.HONEY_D,
                 font: body, display: head, btnFont: head,
@@ -308,7 +294,7 @@ export default function TeddyBearTemplate(props) {
 
           {/* XOŞ SÖZLƏR */}
           {S.guestbook && (
-            <Panel head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.BLUSH_D} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {

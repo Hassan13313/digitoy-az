@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize, yearsSentence } from '../_shared/kids'
 import { C, GOLD_GRAD, LEATHER_BG, LEATHER_FLAT, PAGE_BG, goldText, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { Album, GoldFrame, PhotoCorners, Flourish } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -27,22 +28,6 @@ import { Album, GoldFrame, PhotoCorners, Flourish } from './art'
 
 const BASE = getTemplateTheme('golden-jubilee')
 const ID = 'golden-jubilee'
-
-const LABELS = {
-  countdown: { title: { az: 'Bayrama qalan', en: 'Counting down', ru: 'До торжества' } },
-  venue:     { title: { az: 'Məclis yeri', en: 'The venue', ru: 'Место торжества' } },
-  program:   { title: { az: 'Axşamın səhifələri', en: 'Pages of the evening', ru: 'Страницы вечера' } },
-  dresscode: { title: { az: 'Geyim', en: 'Attire', ru: 'Наряд' } },
-  seating:   { title: { az: 'Sizin masanız', en: 'Your table', ru: 'Ваш стол' } },
-  gallery:   { title: { az: 'Ailə albomu', en: 'Family album', ru: 'Семейный альбом' } },
-  rsvp:      { title: { az: 'Bizimlə olun', en: 'Be with us', ru: 'Будьте с нами' } },
-  guestbook: { title: { az: 'Albom üçün arzular', en: 'Wishes for the album', ru: 'Пожелания в альбом' } },
-}
-const TXT = {
-  az: { table: 'Masa' },
-  en: { table: 'Table' },
-  ru: { table: 'Стол' },
-}
 
 const KEYFRAMES = `
 @keyframes gj-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -113,7 +98,7 @@ function AlbumOpening({ inv, theme, lang }) {
         <div style={{ marginTop: 26, animation: 'gj-rise 1s ease-out .3s both' }}>
           {titleOv !== '' && (
             <div style={{ fontFamily: head, fontWeight: 600, fontSize: 'clamp(28px, 8.4vw, 40px)', lineHeight: 1.08, overflowWrap: 'anywhere', ...goldText }}>
-              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .22em', fontStyle: 'italic' }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .22em', fontStyle: 'italic' }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
           {ot.show('meta') && <div style={{ marginTop: 8, fontSize: 14.5, fontStyle: 'italic', color: alpha(C.CREAM, 0.7) }}>{ot.text('meta')}</div>}
@@ -172,8 +157,8 @@ export default function GoldenJubileeTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const span = yearSpan(inv)
 
   return (
@@ -199,12 +184,12 @@ export default function GoldenJubileeTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.CREAM, 0.7), fontSize: 15, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 600, fontSize: 19, letterSpacing: '.06em', ...goldText }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontWeight: 600, fontSize: 19, letterSpacing: '.06em', ...goldText }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — dəri üz qabığı */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: LEATHER_BG, padding: '84px 22px 64px', textAlign: 'center', color: C.CREAM }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: LEATHER_BG, padding: '84px 22px 64px', textAlign: 'center', color: C.CREAM }}>
             <GoldFrame inset={14} radius={4} opacity={0.75} />
             <div style={{ position: 'relative' }}>
               <div style={{ fontFamily: head, fontSize: 13.5, letterSpacing: '.26em', ...goldText }}>{L('hero', 'kicker', inv.eventLabel)}</div>
@@ -226,7 +211,7 @@ export default function GoldenJubileeTemplate(props) {
 
           {/* SAYĞAC — foto künclərində */}
           {S.countdown && (
-            <Panel head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(10px, 3.4vw, 16px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <div key={l} style={{ textAlign: 'center' }}>
@@ -245,7 +230,7 @@ export default function GoldenJubileeTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ position: 'relative', maxWidth: 430, margin: '0 auto', padding: 10, background: '#FFFDF7', boxShadow: '0 24px 36px -22px rgba(0,0,0,.8)', transform: 'rotate(-1deg)' }}>
                 <PhotoCorners size={22} color="#1F0A09" />
                 <div style={{ overflow: 'hidden', isolation: 'isolate' }}>
@@ -265,7 +250,7 @@ export default function GoldenJubileeTemplate(props) {
 
           {/* PROQRAM */}
           {S.program && (
-            <Panel head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ position: 'relative', maxWidth: 380, margin: '0 auto' }}>
                 <span aria-hidden="true" style={{ position: 'absolute', left: 74, top: 10, bottom: 10, width: 1.5, background: `linear-gradient(${C.GOLD_D}, ${alpha(C.GOLD_D, 0.2)})` }} />
                 {timeline.events.map((ev, i) => (
@@ -280,7 +265,7 @@ export default function GoldenJubileeTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -288,7 +273,7 @@ export default function GoldenJubileeTemplate(props) {
 
           {/* MASA — dəri lövhə */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="gj-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.CREAM, 0.7)} accent={C.GOLD_L}
                 nameStyle={{ fontFamily: head, fontWeight: 600, fontSize: 24 }}
                 card={(num) => (
@@ -303,7 +288,7 @@ export default function GoldenJubileeTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 22, marginBottom: 34, padding: '0 6px' }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -321,7 +306,7 @@ export default function GoldenJubileeTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.GOLD_D, 0.55), hair: alpha(C.GOLD_D, 0.28), accent: C.LEATHER,
                 font: body, display: head, displayItalic: false, btnFont: body,
@@ -334,7 +319,7 @@ export default function GoldenJubileeTemplate(props) {
 
           {/* ARZULAR */}
           {S.guestbook && (
-            <Panel head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.GOLD_L} />
               <div style={{ display: 'grid', gap: 16 }}>
                 {gbook.messages.map((raw, i) => {

@@ -11,6 +11,7 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize, yearsSentence } from '../_shared/kids'
 import { C, WASHI, PAPER_BG, nameSize } from './palette'
+import { LABELS, TXT } from './copy'
 import { FoldedSheet, PaperHeart, TentCard, Tape } from './art'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -28,22 +29,6 @@ import { FoldedSheet, PaperHeart, TentCard, Tape } from './art'
 
 const BASE = getTemplateTheme('first-paper')
 const ID = 'first-paper'
-
-const LABELS = {
-  countdown: { title: { az: 'Bayrama qədər', en: 'Until the day', ru: 'До праздника' } },
-  venue:     { title: { az: 'Harada?', en: 'Where?', ru: 'Где?' } },
-  program:   { title: { az: 'Axşamın planı', en: 'Plan for the evening', ru: 'План вечера' } },
-  dresscode: { title: { az: 'Geyim', en: 'What to wear', ru: 'Что надеть' } },
-  seating:   { title: { az: 'Masa kartınız', en: 'Your place card', ru: 'Ваша карточка' } },
-  gallery:   { title: { az: 'Bir ilin şəkilləri', en: 'A year in photos', ru: 'Год в фотографиях' } },
-  rsvp:      { title: { az: 'Gələcəksiniz?', en: 'Will you come?', ru: 'Придёте?' } },
-  guestbook: { title: { az: 'Kağıza bir neçə söz', en: 'A few words on paper', ru: 'Пара слов на бумаге' } },
-}
-const TXT = {
-  az: { table: 'Masa' },
-  en: { table: 'Table' },
-  ru: { table: 'Стол' },
-}
 
 const KEYFRAMES = `
 @keyframes fp-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -102,7 +87,7 @@ function PaperOpening({ inv, theme, lang }) {
         <div style={{ marginTop: 26, animation: 'fp-rise 1s ease-out .3s both' }}>
           {titleOv !== '' && (
             <div style={{ fontFamily: head, fontStyle: 'italic', fontWeight: 500, fontSize: 'clamp(32px, 9.6vw, 46px)', lineHeight: 1.08, overflowWrap: 'anywhere', color: C.INK }}>
-              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .2em', color: C.BLUE }}>&amp;</span>{second}</>}
+              {first}{second && <><span style={{ display: 'inline-block', margin: '0 .2em', color: C.BLUE }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
           {ot.show('meta') && <div style={{ marginTop: 8, fontSize: 15, color: C.MUTED }}>{ot.text('meta')}</div>}
@@ -161,8 +146,8 @@ export default function FirstPaperTemplate(props) {
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = TXT[lang] || TXT.az
-  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
+  const T = inv.copy(TXT)
+  const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
     <div data-fp lang={lang} data-enter={enterDirection(ID)} style={{
@@ -187,12 +172,12 @@ export default function FirstPaperTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 15, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontStyle: 'italic', fontWeight: 600, fontSize: 20, color: C.INK }}>Digitoy</div>
+            <div style={{ fontFamily: head, fontStyle: 'italic', fontWeight: 600, fontSize: 20, color: C.INK }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — açılmış vərəq */}
-          <section style={{ position: 'relative', overflow: 'hidden', background: PAPER_BG, padding: '46px 22px 60px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: PAPER_BG, padding: '46px 22px 60px', textAlign: 'center' }}>
             <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
               <div style={{ transform: 'rotate(-4deg)', filter: 'drop-shadow(0 18px 20px rgba(35,43,74,.18))' }}>
                 <FoldedSheet width="min(62vw, 250px)" open instant>
@@ -216,7 +201,7 @@ export default function FirstPaperTemplate(props) {
 
           {/* SAYĞAC — qat izli kvadratlar */}
           {S.countdown && (
-            <Panel head={head} white title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} white title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <div key={l} style={{ textAlign: 'center' }}>
@@ -238,7 +223,7 @@ export default function FirstPaperTemplate(props) {
 
           {/* MƏKAN */}
           {S.venue && (
-            <Panel head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
+            <Panel section="venue" head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
               <div style={{ position: 'relative', maxWidth: 430, margin: '0 auto', padding: 8, background: '#FFFFFF', boxShadow: '0 24px 36px -22px rgba(0,0,0,.7)', transform: 'rotate(-1.2deg)' }}>
                 <Tape rot={-3} />
                 <div style={{ overflow: 'hidden', isolation: 'isolate' }}>
@@ -258,7 +243,7 @@ export default function FirstPaperTemplate(props) {
 
           {/* PROQRAM — origami ürəklər */}
           {S.program && (
-            <Panel head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ position: 'relative', maxWidth: 380, margin: '0 auto', padding: '6px 18px', background: C.WHITE, boxShadow: '0 16px 26px -20px rgba(35,43,74,.5)' }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '34px 64px minmax(0, 1fr)', gap: 8, alignItems: 'center', padding: '14px 0', borderTop: i ? `1px dashed ${C.CREASE}` : 'none' }}>
@@ -272,7 +257,7 @@ export default function FirstPaperTemplate(props) {
           )}
 
           {S.dresscode && (
-            <Panel head={head} white title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
+            <Panel section="dresscode" head={head} white title={L('dresscode', 'title', tr.inv_dresscode)} kicker={K('dresscode')}>
               <DressCodeSection theme={theme} paletteId={weddingData.dressCodePalette} customLabels={weddingData.dressCodeLabels}
                 customGenders={weddingData.dressCodeGenders} note={weddingData.dressCodeDescription} lang={lang} serif={head} align="center" />
             </Panel>
@@ -280,7 +265,7 @@ export default function FirstPaperTemplate(props) {
 
           {/* MASA — çadır kartı */}
           {S.seating && !seating.isEmpty && (
-            <Panel head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+            <Panel section="seating" head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
               <SeatFinder inv={inv} tr={tr} listId="fp-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.BLUE}
                 nameStyle={{ fontFamily: head, fontStyle: 'italic', fontWeight: 600, fontSize: 26, color: C.INK }}
                 card={(num) => (
@@ -297,7 +282,7 @@ export default function FirstPaperTemplate(props) {
 
           {/* FOTOLAR */}
           {S.gallery && (
-            <Panel id="gallery-section" head={head} white title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
+            <Panel section="gallery" id="gallery-section" head={head} white title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 24, marginBottom: 34, padding: '10px 4px 0' }}>
                   {gallery.demoPhotos.map((url, i) => (
@@ -315,7 +300,7 @@ export default function FirstPaperTemplate(props) {
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: C.CREASE, hair: alpha(C.CREASE, 0.6), accent: C.BLUE,
                 font: body, display: head, displayItalic: true, btnFont: head,
@@ -328,7 +313,7 @@ export default function FirstPaperTemplate(props) {
 
           {/* ARZULAR */}
           {S.guestbook && (
-            <Panel head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
+            <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.SKY} />
               <div style={{ display: 'grid', gap: 16 }}>
                 {gbook.messages.map((raw, i) => {
