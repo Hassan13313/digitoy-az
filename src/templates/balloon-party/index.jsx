@@ -221,7 +221,7 @@ export default function BalloonPartyTemplate(props) {
   const candles = Math.min(age || 3, 9)
 
   return (
-    <div data-bp data-enter={enterDirection(ID)} style={{
+    <div data-bp lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.CREAM,
       minHeight: '100vh', fontFamily: body, color: C.PLUM, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.PINK, 0.25),

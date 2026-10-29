@@ -170,7 +170,7 @@ export default function XoncaTemplate(props) {
   const MAP_H = 'min(78vw, 330px)'
 
   return (
-    <div data-xc data-enter={enterDirection(ID)} style={{
+    <div data-xc lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.WALNUT, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.COPPER_L, 0.3),
     }}>

@@ -83,6 +83,11 @@ const FAMILY = {
   badScript: 'Bad+Script',
   playfairSC: 'Playfair+Display+SC:wght@400;700',
   merriweather: 'Merriweather:ital,wght@0,300;0,400;1,300',
+  spectralSC: 'Spectral+SC:wght@400;500;600',
+  balsamiq: 'Balsamiq+Sans:ital,wght@0,400;0,700;1,400',
+  nunitoSans: 'Nunito+Sans:ital,wght@0,400;0,600;0,700;1,400',
+  montserratAlt: 'Montserrat+Alternates:wght@500;600;700;800',
+  nunito: 'Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400',
 }
 
 /* Hər şablonun öz ailələri */
@@ -113,6 +118,12 @@ const TEMPLATE_FONTS = {
   'henna-buta': ['spectral', 'commissioner', 'badScript'],
   'mirror-candle': ['notoDisplay', 'ebGaramond'],
   'kelagayi': ['playfairSC', 'merriweather'],
+  /* 2026-10 — «Sünnət toyu» konsepti */
+  'little-prince': ['spectralSC', 'mulish'],
+  'hero-comic': ['unbounded', 'balsamiq'],
+  'mashallah': ['literata', 'nunitoSans'],
+  'little-pilot': ['montserratAlt', 'nunito'],
+  'football-star': ['oswald', 'interTight', 'tektur'],
 }
 
 const ALL = Object.keys(FAMILY)

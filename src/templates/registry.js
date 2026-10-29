@@ -44,6 +44,12 @@ const COMPONENTS = {
   'henna-buta': lazy(() => import('./henna-buta')),
   'mirror-candle': lazy(() => import('./mirror-candle')),
   'kelagayi': lazy(() => import('./kelagayi')),
+  /* 2026-10 — «Sünnət toyu» konsepti */
+  'little-prince': lazy(() => import('./little-prince')),
+  'hero-comic': lazy(() => import('./hero-comic')),
+  'mashallah': lazy(() => import('./mashallah')),
+  'little-pilot': lazy(() => import('./little-pilot')),
+  'football-star': lazy(() => import('./football-star')),
 }
 
 /** Şablonun öz komponenti varmı (yoxsa scaffold göstəriləcək)? */

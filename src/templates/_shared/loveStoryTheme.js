@@ -83,6 +83,11 @@ const F = {
   badScript: FONT_STACKS.badScript,
   playfairSC: FONT_STACKS.playfairSC,
   merriweather: FONT_STACKS.merriweather,
+  spectralSC: FONT_STACKS.spectralSC,
+  balsamiq: FONT_STACKS.balsamiq,
+  nunitoSans: FONT_STACKS.nunitoSans,
+  montserratAlt: FONT_STACKS.montserratAlt,
+  nunito: FONT_STACKS.nunito,
 }
 export const STORY_FONTS = F
 
@@ -123,6 +128,12 @@ const T = {
   'henna-buta': { bg: 'linear-gradient(180deg,#FBF3E8,#F3E3CF)', surf: '#FFFCF7', ink: '#3A1E12', mute: '#7B5A48', hi: '#8A3A18', line: '#B5552B', paper: '#FFFFFF', paperInk: '#7B5A48', head: F.spectral, body: F.commissioner, cap: F.badScript, capItalic: false, titleFont: F.spectral, titleItalic: true, titleSize: 42, frame: 'polaroid', hero: 'oval', tilt: true },
   'mirror-candle': { bg: 'linear-gradient(180deg,#211A15,#14100D)', surf: '#1B1511', ink: '#F4ECDD', mute: '#B8AA94', hi: '#F6DFA0', line: '#E0B864', head: F.notoDisplay, body: F.ebGaramond, cap: F.notoDisplay, titleFont: F.notoDisplay, titleItalic: true, titleSize: 40, frame: 'glow', hero: 'oval' },
   'kelagayi': { bg: 'linear-gradient(180deg,#F7EED9,#F1E2C4)', surf: '#FFFCF4', ink: '#1E1A17', mute: '#6E5F4E', hi: '#9E1F32', line: '#24305E', paper: '#FFFCF4', paperInk: '#6E5F4E', head: F.playfairSC, body: F.merriweather, cap: F.merriweather, titleFont: F.playfairSC, titleSize: 34, frame: 'mat', hero: 'rect', labels: 'num2', textItalic: false },
+  /* 2026-10 — «Sünnət toyu» konsepti */
+  'little-prince': { bg: 'linear-gradient(180deg,#F8F2E4,#EFE5CF)', surf: '#FFFDF7', ink: '#16203D', mute: '#5D6684', hi: '#1C3474', line: '#D8B058', paper: '#FFFFFF', paperInk: '#5D6684', head: F.spectralSC, body: F.mulish, cap: F.spectralSC, capItalic: false, titleFont: F.spectralSC, titleSize: 36, frame: 'heraldic', hero: 'arch', textItalic: false },
+  'hero-comic': { bg: '#FFF8E6', surf: '#FFFFFF', ink: '#121212', mute: '#4A4A4A', hi: '#E63946', line: '#121212', paper: '#FFFFFF', paperInk: '#4A4A4A', head: F.unbounded, body: F.balsamiq, cap: F.balsamiq, capItalic: false, titleFont: F.unbounded, titleSize: 30, frame: 'clipping', hero: 'rect', labels: 'num2', kpre: true, textItalic: false, dash: '0' },
+  'mashallah': { bg: 'linear-gradient(180deg,#F6F2E8,#EDE6D6)', surf: '#FFFFFF', ink: '#0E1F3D', mute: '#56677F', hi: '#0D3B8E', line: '#27B0C8', paper: '#FFFFFF', paperInk: '#56677F', head: F.literata, body: F.nunitoSans, cap: F.literata, titleFont: F.literata, titleItalic: true, titleSize: 40, frame: 'polaroid', hero: 'circle', tilt: true, textItalic: false },
+  'little-pilot': { bg: 'linear-gradient(180deg,#CDEEFC,#FFF9EE)', surf: '#FFFFFF', ink: '#18324F', mute: '#5C6F85', hi: '#E5533D', line: '#3B95D6', paper: '#FFFFFF', paperInk: '#5C6F85', head: F.montserratAlt, body: F.nunito, cap: F.nunito, capItalic: false, titleFont: F.montserratAlt, titleSize: 32, frame: 'polaroid', hero: 'circle', tilt: true, labels: 'num', kpre: true, textItalic: false },
+  'football-star': { bg: 'linear-gradient(180deg,#EEF5EC,#DCEBD9)', surf: '#FFFFFF', ink: '#0C1B2C', mute: '#586878', hi: '#145A2B', line: '#0E2A47', paper: '#FFFFFF', paperInk: '#586878', head: F.oswald, body: F.interTight, cap: F.interTight, capItalic: false, titleFont: F.oswald, titleUpper: true, titleSize: 36, frame: 'polaroid', hero: 'circle', labels: 'num2', kpre: true, textItalic: false, dash: '0' },
 }
 
 /* ── Mətnlər (AZ/EN/RU) ── dizayndakı şablon adlandırmaları */
@@ -205,6 +216,45 @@ const COPY = {
     sub:    { az: 'Doğulduğum gündən bu günə qədər', en: 'From the day I was born until today', ru: 'С самого первого дня и до сегодня' },
     end:    { az: '…və bayram davam edir', en: '…and the party goes on', ru: '…и праздник продолжается' },
     endSub: { az: 'Bu səhifəni sizinlə doldurmaq istəyirik.', en: 'We want to fill this page with you.', ru: 'Эту страницу мы хотим заполнить вместе с вами.' },
+  },
+  /* 2026-10 — «Sünnət toyu» konsepti */
+  'little-prince': {
+    kicker: { az: 'Saray salnaməsi', en: 'Royal chronicle', ru: 'Королевская летопись' },
+    title:  { az: 'Mənim hekayəm', en: 'My story', ru: 'Моя история' },
+    sub:    { az: 'Doğulduğum gündən bu günə qədər', en: 'From the day I was born until today', ru: 'С самого первого дня и до сегодня' },
+    end:    { az: '…və hekayə davam edir', en: '…and the story goes on', ru: '…и история продолжается' },
+    endSub: { az: 'Bu günü sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this day with you.', ru: 'Мы хотим отпраздновать этот день вместе с вами.' },
+  },
+  'hero-comic': {
+    kicker: { az: 'Komiks', en: 'Comic', ru: 'Комикс' },
+    title:  { az: 'Qəhrəmanın hekayəsi', en: 'The hero’s story', ru: 'История героя' },
+    sub:    { az: 'Doğulduğum gündən bu günə qədər', en: 'From the day I was born until today', ru: 'С самого первого дня и до сегодня' },
+    end:    { az: 'Davamı növbəti sayda…', en: 'To be continued in the next issue…', ru: 'Продолжение в следующем выпуске…' },
+    endSub: { az: 'Bu səhifəni sizinlə birlikdə yazacağıq.', en: 'We will write this page together with you.', ru: 'Эту страницу мы напишем вместе с вами.' },
+    kpre:   { az: 'Səh.', en: 'P.', ru: 'Стр.' },
+  },
+  'mashallah': {
+    kicker: { az: 'Albom', en: 'Album', ru: 'Альбом' },
+    title:  { az: 'Mənim hekayəm', en: 'My story', ru: 'Моя история' },
+    sub:    { az: 'Doğulduğum gündən bu günə qədər', en: 'From the day I was born until today', ru: 'С самого первого дня и до сегодня' },
+    end:    { az: '…və hekayə davam edir', en: '…and the story goes on', ru: '…и история продолжается' },
+    endSub: { az: 'Bu günü sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this day with you.', ru: 'Мы хотим отпраздновать этот день вместе с вами.' },
+  },
+  'little-pilot': {
+    kicker: { az: 'Pilot gündəliyi', en: 'Pilot’s diary', ru: 'Дневник пилота' },
+    title:  { az: 'Mənim uçuşum', en: 'My flight', ru: 'Мой полёт' },
+    sub:    { az: 'Doğulduğum gündən bu günə qədər', en: 'From the day I was born until today', ru: 'С самого первого дня и до сегодня' },
+    end:    { az: 'Növbəti uçuş: bu bayram', en: 'Next flight: this celebration', ru: 'Следующий рейс: этот праздник' },
+    endSub: { az: 'Bortda sizi də görmək istəyirik.', en: 'We want you on board.', ru: 'Ждём вас на борту.' },
+    kpre:   { az: 'Uçuş', en: 'Flight', ru: 'Полёт' },
+  },
+  'football-star': {
+    kicker: { az: 'Karyera', en: 'Career', ru: 'Карьера' },
+    title:  { az: 'Ulduzun yolu', en: 'The star’s path', ru: 'Путь звезды' },
+    sub:    { az: 'Doğulduğum gündən bu günə qədər', en: 'From the day I was born until today', ru: 'С самого первого дня и до сегодня' },
+    end:    { az: 'Ən böyük qol hələ qabaqdadır', en: 'The best goal is yet to come', ru: 'Лучший гол ещё впереди' },
+    endSub: { az: 'Bu matçda sizi tribunada görmək istəyirik.', en: 'We want to see you in the stands.', ru: 'Ждём вас на трибунах.' },
+    kpre:   { az: 'Mövsüm', en: 'Season', ru: 'Сезон' },
   },
 }
 

@@ -176,7 +176,7 @@ export default function DinoAdventureTemplate(props) {
   const age = inv.age
 
   return (
-    <div data-da data-enter={enterDirection(ID)} style={{
+    <div data-da lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.SAND,
       minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.LEAF, 0.2),

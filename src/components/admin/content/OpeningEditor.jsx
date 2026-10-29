@@ -46,6 +46,11 @@ const EMBLEM_NAMES = {
   'henna-buta': 'xına gülü',
   'mirror-candle': 'parıltı',
   'kelagayi': 'buta',
+  'little-prince': 'tac',
+  'hero-comic': 'qəhrəman nişanı',
+  'mashallah': 'göz muncuğu',
+  'little-pilot': 'təyyarə',
+  'football-star': 'top',
 }
 
 export default function OpeningEditor({

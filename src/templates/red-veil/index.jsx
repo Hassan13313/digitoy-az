@@ -178,7 +178,7 @@ export default function RedVeilTemplate(props) {
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
 
   return (
-    <div data-rv data-enter={enterDirection(ID)} style={{
+    <div data-rv lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.IVORY, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.GOLD, 0.3),
     }}>

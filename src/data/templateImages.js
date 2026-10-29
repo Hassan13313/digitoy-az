@@ -21,6 +21,12 @@ const WITH_IMAGE = new Set([
   'henna-buta',
   'mirror-candle',
   'kelagayi',
+  /* 2026-10 — «Sünnət toyu» konsepti */
+  'little-prince',
+  'hero-comic',
+  'mashallah',
+  'little-pilot',
+  'football-star',
 ])
 
 export const TEMPLATE_IMAGE_SIZE = { width: 780, height: 1688 }

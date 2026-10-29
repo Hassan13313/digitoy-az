@@ -147,7 +147,7 @@ export default function MirrorCandleTemplate(props) {
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
 
   return (
-    <div data-mc data-enter={enterDirection(ID)} style={{
+    <div data-mc lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.NIGHT, minHeight: '100vh', fontFamily: body, color: C.IVORY, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.GOLD, 0.3),
     }}>

@@ -34,6 +34,12 @@ const REDESIGNED = [
   'henna-buta',
   'mirror-candle',
   'kelagayi',
+  /* 2026-10 — «Sünnət toyu» konsepti */
+  'little-prince',
+  'hero-comic',
+  'mashallah',
+  'little-pilot',
+  'football-star',
 ]
 const SECTIONS = ['countdown', 'venue', 'program', 'dresscode', 'seating', 'gallery', 'rsvp', 'guestbook', 'hero', 'story']
 

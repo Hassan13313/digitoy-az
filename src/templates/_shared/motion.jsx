@@ -36,6 +36,12 @@ const ENTER = {
   'henna-buta': 'left',
   'mirror-candle': 'down',
   'kelagayi': 'right',
+  /* 2026-10 — «Sünnət toyu» konsepti */
+  'little-prince': 'zoom',
+  'hero-comic': 'up',
+  'mashallah': 'left',
+  'little-pilot': 'right',
+  'football-star': 'up',
 }
 
 /** templateId → giriş istiqaməti (`data-enter` üçün). */

@@ -230,7 +230,7 @@ export default function FairyTaleTemplate(props) {
   const age = inv.age
 
   return (
-    <div data-ft data-enter={enterDirection(ID)} style={{
+    <div data-ft lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.CREAM,
       minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.VIOLET, 0.2),

@@ -150,7 +150,7 @@ export default function HennaButaTemplate(props) {
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
 
   return (
-    <div data-hb data-enter={enterDirection(ID)} style={{
+    <div data-hb lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.CREAM, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.TERRA, 0.25),
     }}>

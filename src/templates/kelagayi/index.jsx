@@ -175,7 +175,7 @@ export default function KelagayiTemplate(props) {
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} & ${inv.bride}` : inv.single)
 
   return (
-    <div data-kg data-enter={enterDirection(ID)} style={{
+    <div data-kg lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.SILK, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.SAFFRON, 0.3),
     }}>

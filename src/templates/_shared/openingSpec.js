@@ -60,6 +60,11 @@ export const OPENING_PHRASES = {
   applyHenna: { az: 'Xınanı yax', en: 'Apply the henna', ru: 'Нанести хну' },
   lightMirror: { az: 'Güzgünü işıqlandır', en: 'Light up the mirror', ru: 'Осветить зеркало' },
   unfoldScarf: { az: 'Kəlağayını aç', en: 'Unfold the scarf', ru: 'Развернуть платок' },
+  raiseCrown: { az: 'Tacı qaldır', en: 'Raise the crown', ru: 'Поднять корону' },
+  startAdventure: { az: 'Macəranı başlat', en: 'Start the adventure', ru: 'Начать приключение' },
+  touchCharm: { az: 'Muncuğa toxun', en: 'Touch the charm', ru: 'Коснуться оберега' },
+  takeOff: { az: 'Uçuşa başla', en: 'Take off', ru: 'На взлёт' },
+  takeShot: { az: 'Zərbəni vur', en: 'Take the shot', ru: 'Пробить' },
 }
 
 /* Gazette rubrikası — tədbir növünə görə (əvvəl hər tədbirdə «Toy elanı» idi) */
@@ -147,6 +152,12 @@ export const OPENING_SPEC = {
   'henna-buta': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
   'mirror-candle': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
   'kelagayi': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  /* 2026-10 — «Sünnət toyu» konsepti */
+  'little-prince': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'hero-comic': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'mashallah': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'little-pilot': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'football-star': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
 }
 
 /** Şablonun açılış təsviri (naməlum id → simple-luxury) */
@@ -276,6 +287,16 @@ export function openingDefaults(templateId, ctx) {
       return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('lightMirror') }
     case 'kelagayi':
       return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('unfoldScarf') }
+    case 'little-prince':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('raiseCrown') }
+    case 'hero-comic':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('startAdventure') }
+    case 'mashallah':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('touchCharm') }
+    case 'little-pilot':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('takeOff') }
+    case 'football-star':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('takeShot') }
     case 'simple-luxury':
     default:
       return { brand: 'Digitoy.az',

@@ -220,7 +220,7 @@ export default function SpaceMissionTemplate(props) {
   const year = String(weddingData.date || '').slice(0, 4)
 
   return (
-    <div data-sm data-enter={enterDirection(ID)} style={{
+    <div data-sm lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.SPACE,
       minHeight: '100vh', fontFamily: body, color: C.WHITE, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.SUN, 0.25),
