@@ -54,6 +54,12 @@ const ENTER = {
   'award-night': 'left',
   'business-card': 'right',
   'neon-party': 'down',
+  /* 2026-10 — «İldönümü» konsepti */
+  'silver-locket': 'down',
+  'golden-jubilee': 'up',
+  'first-paper': 'up',
+  'retro-polaroid': 'up',
+  'love-letters': 'up',
 }
 
 /** templateId → giriş istiqaməti (`data-enter` üçün). */

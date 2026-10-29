@@ -96,6 +96,13 @@ const FAMILY = {
   interTightBold: 'Inter+Tight:wght@400;500;600;700',
   lobster: 'Lobster',
   jura: 'Jura:wght@400;500;600;700',
+  vollkornSC: 'Vollkorn+SC:wght@400;600;700',
+  brygada: 'Brygada+1918:ital,wght@0,400;0,600;1,400',
+  piazzolla: 'Piazzolla:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600',
+  didact: 'Didact+Gothic',
+  marmelad: 'Marmelad',
+  pangolin: 'Pangolin',
+  bellotaText: 'Bellota+Text:wght@400;700',
 }
 
 /* Hər şablonun öz ailələri */
@@ -144,6 +151,12 @@ const TEMPLATE_FONTS = {
   'award-night': ['cormorantSC', 'raleway'],
   'business-card': ['interTightBold', 'jetbrains'],
   'neon-party': ['lobster', 'jura'],
+  /* 2026-10 — «İldönümü» konsepti */
+  'silver-locket': ['mulish'],
+  'golden-jubilee': ['vollkornSC', 'brygada'],
+  'first-paper': ['piazzolla', 'didact'],
+  'retro-polaroid': ['marmelad', 'pangolin', 'bellotaText'],
+  'love-letters': ['greatVibes', 'ebGaramond'],
 }
 
 const ALL = Object.keys(FAMILY)

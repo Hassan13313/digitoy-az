@@ -62,6 +62,12 @@ const COMPONENTS = {
   'award-night': lazy(() => import('./award-night')),
   'business-card': lazy(() => import('./business-card')),
   'neon-party': lazy(() => import('./neon-party')),
+  /* 2026-10 — «İldönümü» konsepti */
+  'silver-locket': lazy(() => import('./silver-locket')),
+  'golden-jubilee': lazy(() => import('./golden-jubilee')),
+  'first-paper': lazy(() => import('./first-paper')),
+  'retro-polaroid': lazy(() => import('./retro-polaroid')),
+  'love-letters': lazy(() => import('./love-letters')),
 }
 
 /** Şablonun öz komponenti varmı (yoxsa scaffold göstəriləcək)? */

@@ -75,6 +75,11 @@ export const OPENING_PHRASES = {
   unveilAward: { az: 'Mükafatı aç', en: 'Unveil the award', ru: 'Открыть награду' },
   flipCard: { az: 'Kartı çevir', en: 'Flip the card', ru: 'Перевернуть карточку' },
   switchOn: { az: 'İşıqları yandır', en: 'Switch on the lights', ru: 'Включить свет' },
+  openLocket: { az: 'Medalyonu aç', en: 'Open the locket', ru: 'Открыть медальон' },
+  openAlbum: { az: 'Albomu aç', en: 'Open the album', ru: 'Открыть альбом' },
+  unfoldPaper: { az: 'Vərəqi aç', en: 'Unfold the paper', ru: 'Развернуть лист' },
+  takePhoto: { az: 'Şəkil çək', en: 'Take a photo', ru: 'Сделать снимок' },
+  untieLetters: { az: 'Məktubları aç', en: 'Untie the letters', ru: 'Развязать письма' },
 }
 
 /* Gazette rubrikası — tədbir növünə görə (əvvəl hər tədbirdə «Toy elanı» idi) */
@@ -180,6 +185,12 @@ export const OPENING_SPEC = {
   'award-night': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
   'business-card': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
   'neon-party': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  /* 2026-10 — «İldönümü» konsepti */
+  'silver-locket': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'golden-jubilee': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'first-paper': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'retro-polaroid': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'love-letters': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
 }
 
 /** Şablonun açılış təsviri (naməlum id → simple-luxury) */
@@ -339,6 +350,16 @@ export function openingDefaults(templateId, ctx) {
       return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('flipCard') }
     case 'neon-party':
       return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('switchOn') }
+    case 'silver-locket':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('openLocket') }
+    case 'golden-jubilee':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('openAlbum') }
+    case 'first-paper':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('unfoldPaper') }
+    case 'retro-polaroid':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('takePhoto') }
+    case 'love-letters':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('untieLetters') }
     case 'simple-luxury':
     default:
       return { brand: 'Digitoy.az',

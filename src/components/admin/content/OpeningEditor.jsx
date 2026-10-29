@@ -61,6 +61,11 @@ const EMBLEM_NAMES = {
   'award-night': 'dəfnə çələngi',
   'business-card': 'kvadrat nişan',
   'neon-party': 'neon ulduz',
+  'silver-locket': 'gümüş medalyon',
+  'golden-jubilee': 'qızıl ornament',
+  'first-paper': 'origami ürək',
+  'retro-polaroid': 'kamera obyektivi',
+  'love-letters': 'poçt markası',
 }
 
 export default function OpeningEditor({

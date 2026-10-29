@@ -52,6 +52,12 @@ const REDESIGNED = [
   'award-night',
   'business-card',
   'neon-party',
+  /* 2026-10 — «İldönümü» konsepti */
+  'silver-locket',
+  'golden-jubilee',
+  'first-paper',
+  'retro-polaroid',
+  'love-letters',
 ]
 const SECTIONS = ['countdown', 'venue', 'program', 'dresscode', 'seating', 'gallery', 'rsvp', 'guestbook', 'hero', 'story']
 

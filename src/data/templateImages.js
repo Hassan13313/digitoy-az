@@ -39,6 +39,12 @@ const WITH_IMAGE = new Set([
   'award-night',
   'business-card',
   'neon-party',
+  /* 2026-10 — «İldönümü» konsepti */
+  'silver-locket',
+  'golden-jubilee',
+  'first-paper',
+  'retro-polaroid',
+  'love-letters',
 ])
 
 export const TEMPLATE_IMAGE_SIZE = { width: 780, height: 1688 }

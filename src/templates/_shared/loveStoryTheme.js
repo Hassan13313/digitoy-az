@@ -97,6 +97,14 @@ const F = {
   interTightBold: FONT_STACKS.interTightBold,
   jura: FONT_STACKS.jura,
   lobster: FONT_STACKS.lobster,
+  vollkornSC: FONT_STACKS.vollkornSC,
+  brygada: FONT_STACKS.brygada,
+  piazzolla: FONT_STACKS.piazzolla,
+  didact: FONT_STACKS.didact,
+  marmelad: FONT_STACKS.marmelad,
+  pangolin: FONT_STACKS.pangolin,
+  bellotaText: FONT_STACKS.bellotaText,
+  greatVibes: FONT_STACKS.greatVibes,
 }
 export const STORY_FONTS = F
 
@@ -155,6 +163,12 @@ const T = {
   'award-night': { bg: 'linear-gradient(180deg,#4E0D1A,#2A060E)', surf: '#3A0912', ink: '#F7EEDC', mute: '#CDB1A8', hi: '#F6DD95', line: '#E1B54E', head: F.cormorantSC, body: F.raleway, cap: F.cormorantSC, titleFont: F.cormorantSC, titleSize: 36, frame: 'heraldic', hero: 'arch', labels: 'roman' },
   'business-card': { bg: '#F4F3EF', surf: '#FFFFFF', ink: '#121212', mute: '#76756F', hi: '#2438E8', line: '#121212', paper: '#FFFFFF', paperInk: '#76756F', head: F.interTightBold, body: F.interTight, cap: F.mono, capItalic: false, titleFont: F.interTightBold, titleSize: 36, frame: 'minimal', hero: 'rect', labels: 'num2', dash: '0', textItalic: false },
   'neon-party': { bg: 'linear-gradient(180deg,#1B1428,#0D0A15)', surf: '#1B1428', ink: '#F6F0FF', mute: '#A99CC4', hi: '#FF4FD8', line: '#3CF2FF', head: F.jura, body: F.jura, cap: F.lobster, capItalic: false, titleFont: F.lobster, titleSize: 44, frame: 'glow', hero: 'circle', textItalic: false },
+  /* 2026-10 — «İldönümü» konsepti */
+  'silver-locket': { bg: 'linear-gradient(180deg,#1E2531,#141923)', surf: '#1E2531', ink: '#F4F1EC', mute: '#A9B0BA', hi: '#D9A3A6', line: '#C9CED6', head: F.cormorant, body: F.mulish, cap: F.cormorant, titleFont: F.cormorant, titleItalic: true, titleSize: 42, frame: 'glow', hero: 'oval', textItalic: false },
+  'golden-jubilee': { bg: 'linear-gradient(180deg,#5A1E1B,#33100E)', surf: '#4A1816', ink: '#F6EAD0', mute: '#CDB79A', hi: '#F3DE9C', line: '#D4AF5A', head: F.brygada, body: F.brygada, cap: F.brygada, titleFont: F.vollkornSC, titleSize: 34, frame: 'mat', hero: 'rect', labels: 'roman' },
+  'first-paper': { bg: '#F8F6F1', surf: '#FFFFFF', ink: '#232B4A', mute: '#737A8A', hi: '#3561C9', line: '#A9C0EE', paper: '#FFFFFF', paperInk: '#737A8A', head: F.piazzolla, body: F.didact, cap: F.piazzolla, titleFont: F.piazzolla, titleItalic: true, titleSize: 40, frame: 'clipping', hero: 'rect', labels: 'num', textItalic: false },
+  'retro-polaroid': { bg: '#F4EAD5', surf: '#FFFDF8', ink: '#3B2418', mute: '#8A6E58', hi: '#E07A2E', line: '#E2B33C', paper: '#FFFDF8', paperInk: '#8A6E58', head: F.marmelad, body: F.bellotaText, cap: F.pangolin, capItalic: false, titleFont: F.marmelad, titleSize: 40, frame: 'polaroid', hero: 'rect', labels: 'num', tilt: true, textItalic: false },
+  'love-letters': { bg: '#EFE6D8', surf: '#FBF6EC', ink: '#2F3550', mute: '#7D7468', hi: '#9C4A4A', line: '#C98B8B', paper: '#FBF6EC', paperInk: '#7D7468', head: F.ebGaramond, body: F.ebGaramond, cap: F.ebGaramond, titleFont: F.greatVibes, titleSize: 54, frame: 'mat', hero: 'oval', labels: 'roman' },
 }
 
 /* ── Mətnlər (AZ/EN/RU) ── dizayndakı şablon adlandırmaları */
@@ -337,6 +351,47 @@ const COPY = {
     sub:    { az: 'İlk gündən bu günə qədər', en: 'From day one to today', ru: 'С первого дня до сегодня' },
     end:    { az: '…və yeni zirvələr qabaqdadır', en: '…and new heights lie ahead', ru: '…и впереди новые вершины' },
     endSub: { az: 'Bu uğuru sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this success with you.', ru: 'Мы хотим отметить этот успех вместе с вами.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  /* 2026-10 — «İldönümü» konsepti */
+  'silver-locket': {
+    kicker: { az: 'Xatirələr', en: 'Memories', ru: 'Воспоминания' },
+    title:  { az: 'Bizim illərimiz', en: 'Our years', ru: 'Наши годы' },
+    sub:    { az: 'İlk görüşdən bu günə qədər', en: 'From our first meeting to today', ru: 'С первой встречи до сегодняшнего дня' },
+    end:    { az: '…və hekayəmiz davam edir', en: '…and our story goes on', ru: '…и наша история продолжается' },
+    endSub: { az: 'Bu ildönümünü sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this anniversary with you.', ru: 'Мы хотим отметить эту годовщину вместе с вами.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  'golden-jubilee': {
+    kicker: { az: 'Xatirələr', en: 'Memories', ru: 'Воспоминания' },
+    title:  { az: 'Bizim illərimiz', en: 'Our years', ru: 'Наши годы' },
+    sub:    { az: 'İlk görüşdən bu günə qədər', en: 'From our first meeting to today', ru: 'С первой встречи до сегодняшнего дня' },
+    end:    { az: '…və hekayəmiz davam edir', en: '…and our story goes on', ru: '…и наша история продолжается' },
+    endSub: { az: 'Bu ildönümünü sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this anniversary with you.', ru: 'Мы хотим отметить эту годовщину вместе с вами.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  'first-paper': {
+    kicker: { az: 'Xatirələr', en: 'Memories', ru: 'Воспоминания' },
+    title:  { az: 'Bizim illərimiz', en: 'Our years', ru: 'Наши годы' },
+    sub:    { az: 'İlk görüşdən bu günə qədər', en: 'From our first meeting to today', ru: 'С первой встречи до сегодняшнего дня' },
+    end:    { az: '…və hekayəmiz davam edir', en: '…and our story goes on', ru: '…и наша история продолжается' },
+    endSub: { az: 'Bu ildönümünü sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this anniversary with you.', ru: 'Мы хотим отметить эту годовщину вместе с вами.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  'retro-polaroid': {
+    kicker: { az: 'Xatirələr', en: 'Memories', ru: 'Воспоминания' },
+    title:  { az: 'Bizim illərimiz', en: 'Our years', ru: 'Наши годы' },
+    sub:    { az: 'İlk görüşdən bu günə qədər', en: 'From our first meeting to today', ru: 'С первой встречи до сегодняшнего дня' },
+    end:    { az: '…və hekayəmiz davam edir', en: '…and our story goes on', ru: '…и наша история продолжается' },
+    endSub: { az: 'Bu ildönümünü sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this anniversary with you.', ru: 'Мы хотим отметить эту годовщину вместе с вами.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  'love-letters': {
+    kicker: { az: 'Xatirələr', en: 'Memories', ru: 'Воспоминания' },
+    title:  { az: 'Bizim illərimiz', en: 'Our years', ru: 'Наши годы' },
+    sub:    { az: 'İlk görüşdən bu günə qədər', en: 'From our first meeting to today', ru: 'С первой встречи до сегодняшнего дня' },
+    end:    { az: '…və hekayəmiz davam edir', en: '…and our story goes on', ru: '…и наша история продолжается' },
+    endSub: { az: 'Bu ildönümünü sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this anniversary with you.', ru: 'Мы хотим отметить эту годовщину вместе с вами.' },
     kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
   },
 }
