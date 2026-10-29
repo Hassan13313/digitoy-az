@@ -6,7 +6,7 @@ export const C = {
 }
 
 /* Yarı çəhrayı, yarı mavi */
-export const SPLIT = (a = C.BLUE_L, b = C.PINK_L, deg = 115) => `linear-gradient(${deg}deg, ${a} 0 50%, ${b} 50% 100%)`
+export const SPLIT = (C) => ((a = C.BLUE_L, b = C.PINK_L, deg = 115) => `linear-gradient(${deg}deg, ${a} 0 50%, ${b} 50% 100%)`)
 
 /* Sual — dil üzrə */
 export const QUESTION = { az: 'Oğlan, yoxsa qız?', en: 'Boy or girl?', ru: 'Мальчик или девочка?' }
@@ -27,11 +27,11 @@ export function seeded(seed) {
   let s = seed >>> 0
   return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 }
 }
-export const CONFETTI = (() => {
+export const CONFETTI = (C) => ((() => {
   const r = seeded(31)
-  const cols = ['#F49AC1', '#7DB9F0', '#E9C46A', '#FFFFFF']
+  const cols = [C.PINK, '#7DB9F0', C.GOLD, '#FFFFFF']
   return Array.from({ length: 30 }, (_, i) => ({ x: (r() - 0.5) * 340, y: -80 - r() * 300, rot: Math.round(r() * 360), c: cols[i % 4], d: (r() * 0.3).toFixed(2), w: 6 + r() * 6 }))
-})()
+})())
 
 /* Ad uzunluğuna görə ölçü */
 export function nameSize(text) {

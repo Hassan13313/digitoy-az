@@ -1,15 +1,17 @@
-import { C, BANDS, SKY_DAY, SKY_NIGHT, WISPS } from './palette'
+import { C as PAL, BANDS, SKY_DAY, SKY_NIGHT, WISPS } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* BOHO SUNSET — göy qurşağı tağı, batan günəş, pampas otu */
 
 /** Göy qurşağı tağı içində gün batımı — `set` olanda günəş batır, gecə düşür */
 export function SunArch({ width = 260, set = false, style }) {
+  const C = usePalette(PAL)
   const W = width
   const b = W * 0.045
   const inner = W - 8 * b
   return (
     <div aria-hidden="true" style={{ position: 'relative', width: W, height: W * 1.18, ...style }}>
-      {BANDS.map((c, i) => (
+      {BANDS(C).map((c, i) => (
         <span key={i} style={{ position: 'absolute', left: i * b, right: i * b, top: i * b, bottom: 0, borderRadius: `${(W - 2 * i * b) / 2}px ${(W - 2 * i * b) / 2}px 0 0`, background: c }} />
       ))}
       <div style={{ position: 'absolute', left: 4 * b, right: 4 * b, top: 4 * b, bottom: 0, borderRadius: `${inner / 2}px ${inner / 2}px 0 0`, overflow: 'hidden', isolation: 'isolate', background: SKY_DAY }}>
@@ -34,7 +36,9 @@ function at(s) {
 }
 
 /** Pampas otu */
-export function Pampas({ height = 200, flip = false, color = C.PAMPAS, sway = true, delay = 0, style }) {
+export function Pampas($p) {
+  const C = usePalette(PAL)
+  const { height = 200, flip = false, color = C.PAMPAS, sway = true, delay = 0, style } = $p
   return (
     <span aria-hidden="true" style={{ display: 'block', width: height * 0.3, height, transformOrigin: '50% 100%', animation: sway ? `bs-sway 4.5s ease-in-out ${delay}s infinite` : 'none', ...style }}>
       <svg viewBox="0 0 60 200" width="100%" height="100%" style={{ display: 'block', overflow: 'visible', transform: flip ? 'scaleX(-1)' : 'none' }}>
@@ -55,16 +59,19 @@ export function Pampas({ height = 200, flip = false, color = C.PAMPAS, sway = tr
 
 /** Kiçik göy qurşağı nişanı */
 export function Rainbow({ size = 48, style }) {
+  const C = usePalette(PAL)
   const r = [22, 17, 12, 7]
   return (
     <svg aria-hidden="true" viewBox="0 0 48 26" width={size} height={size * 0.54} style={{ display: 'block', overflow: 'visible', ...style }}>
-      {r.map((R, i) => <path key={i} d={`M${24 - R} 25 A${R} ${R} 0 0 1 ${24 + R} 25`} fill="none" stroke={BANDS[i]} strokeWidth="4.2" strokeLinecap="round" />)}
+      {r.map((R, i) => <path key={i} d={`M${24 - R} 25 A${R} ${R} 0 0 1 ${24 + R} 25`} fill="none" stroke={BANDS(C)[i]} strokeWidth="4.2" strokeLinecap="round" />)}
     </svg>
   )
 }
 
 /** Şüalı yarım günəş */
-export function HalfSun({ size = 40, color = C.MUSTARD, style }) {
+export function HalfSun($p) {
+  const C = usePalette(PAL)
+  const { size = 40, color = C.MUSTARD, style } = $p
   return (
     <svg aria-hidden="true" viewBox="0 0 40 24" width={size} height={size * 0.6} style={{ display: 'block', overflow: 'visible', ...style }}>
       <path d="M8 22 A12 12 0 0 1 32 22 Z" fill={color} />

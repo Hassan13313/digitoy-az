@@ -10,10 +10,11 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C, SKY_BG, NIGHT_BG, LINED, AIRMAIL, nameSize } from './palette'
+import { C as PAL, SKY_BG, NIGHT_BG, LINED, AIRMAIL, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { fill } from '../_shared/copyText'
 import { Plane, Cloud, Trail, Airmail, Postmark } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    PAPER PLANE — «Gələcəyə məktub» (Məzuniyyət konsepti, 2026-10)
@@ -29,7 +30,11 @@ import { Plane, Cloud, Trail, Airmail, Postmark } from './art'
 const BASE = getTemplateTheme('paper-plane')
 const ID = 'paper-plane'
 
-const KEYFRAMES = `
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['BLUE'], secondary: ['SUN'], accent: ['RED'], background: ['WHITE'], text: ['INK'] }
+
+const KEYFRAMES = (C) => (`
 @keyframes pp-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes pp-fade { from { opacity: 0 } to { opacity: 1 } }
 @keyframes pp-hint { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
@@ -42,10 +47,11 @@ const KEYFRAMES = `
 [data-pp] input:focus-visible, [data-pp] textarea:focus-visible { border-color: ${C.BLUE} !important; outline: none; }
 [data-pp] button:focus-visible, [data-pp] a:focus-visible, [data-pp] [role="button"]:focus-visible { outline: 2px solid ${C.BLUE}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-pp] *, [data-pp] { animation: none !important; transition: none !important; } }
-`
+`)
 
 /* ═══ 01 — AÇILIŞ: məktub təyyarəyə çevrilib uçur ═══ */
 function PlaneOpening({ inv, theme, year, mono }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -67,7 +73,7 @@ function PlaneOpening({ inv, theme, year, mono }) {
         <div style={{ position: 'relative', width: 'min(74vw, 290px)', aspectRatio: '1.25' }}>
           {/* məktub */}
           <div style={{
-            position: 'absolute', inset: 0, padding: '18px 18px 14px 40px', background: LINED, borderRadius: 4, boxShadow: '0 18px 30px -16px rgba(27,45,79,.45)', textAlign: 'left',
+            position: 'absolute', inset: 0, padding: '18px 18px 14px 40px', background: LINED(C), borderRadius: 4, boxShadow: '0 18px 30px -16px rgba(27,45,79,.45)', textAlign: 'left',
             transform: go ? 'scale(.18) rotate(-30deg)' : 'rotate(-2deg)', opacity: go ? 0 : 1, transition: 'transform .45s cubic-bezier(.6,0,.4,1), opacity .25s ease .2s',
           }}>
             <div style={{ fontFamily: head, fontStyle: 'italic', fontWeight: 700, fontSize: 'clamp(22px, 6.6vw, 28px)', lineHeight: 1.1, color: C.BLUE }}>{T.letter}</div>
@@ -98,7 +104,7 @@ function PlaneOpening({ inv, theme, year, mono }) {
         </div>
         <motion.div animate={go ? { opacity: 0, y: 8 } : {}} transition={{ duration: 0.25 }} style={{ marginTop: 20 }}>
           {ot.show('cta') && (
-            <div style={{ minHeight: 50, padding: '12px 30px', display: 'inline-flex', alignItems: 'center', borderRadius: 999, background: C.BLUE, color: '#FFFFFF', fontFamily: head, fontWeight: 700, fontSize: 17, boxShadow: '0 12px 22px -12px rgba(47,111,219,.7)', animation: 'pp-rise .8s ease-out .8s both' }}>
+            <div style={{ minHeight: 50, padding: '12px 30px', display: 'inline-flex', alignItems: 'center', borderRadius: 999, background: C.BLUE, color: C.WHITE, fontFamily: head, fontWeight: 700, fontSize: 17, boxShadow: '0 12px 22px -12px rgba(47,111,219,.7)', animation: 'pp-rise .8s ease-out .8s both' }}>
               {ot.text('cta')}
             </div>
           )}
@@ -111,14 +117,15 @@ function PlaneOpening({ inv, theme, year, mono }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, mono, dark = false, sky = false }) {
+  const C = usePalette(PAL)
   return (
-    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? NIGHT_BG : sky ? `linear-gradient(180deg, ${C.SKY_L}, #FFFFFF)` : '#FFFFFF', color: dark ? C.WHITE : C.INK }}>
+    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? NIGHT_BG(C) : sky ? `linear-gradient(180deg, ${C.SKY_L}, ${C.WHITE})` : C.WHITE, color: dark ? C.WHITE : C.INK }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <Plane size={44} tone={dark ? 'white' : 'blue'} style={{ margin: '0 auto 10px', transform: 'rotate(-12deg)' }} />
             {kicker && <div style={{ marginBottom: 6, fontFamily: mono, fontSize: 12, letterSpacing: '.2em', textTransform: 'uppercase', color: dark ? C.SUN : C.BLUE }}>{kicker}</div>}
-            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 800, fontSize: 'clamp(30px, 8.8vw, 41px)', lineHeight: 1.1, textWrap: 'balance', color: dark ? C.WHITE : C.NAVY }}>{title}</h2>}
+            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 800, fontSize: scaleFont('clamp(30px, 8.8vw, 41px)', C.hs), lineHeight: 1.1, textWrap: 'balance', color: dark ? C.WHITE : C.NAVY }}>{title}</h2>}
             {sub && <p style={{ margin: '10px auto 0', maxWidth: 340, fontSize: 16.5, color: dark ? alpha(C.WHITE, 0.72) : C.MUTED, lineHeight: 1.55 }}>{sub}</p>}
           </div>
         )}
@@ -128,23 +135,24 @@ function Panel({ id, section, title, kicker, sub, children, head, mono, dark = f
   )
 }
 
-const field = {
-  width: '100%', background: '#FFFFFF', border: `1.5px solid ${C.LINE}`, borderRadius: 12,
+const field = (C) => ({
+  width: '100%', background: C.WHITE, border: `1.5px solid ${C.LINE}`, borderRadius: 12,
   padding: '14px 16px', fontSize: 16.5, color: C.INK, outline: 'none',
-}
-const darkField = { ...field, background: alpha('#FFFFFF', 0.08), border: `1.5px solid ${alpha('#FFFFFF', 0.22)}`, color: C.WHITE }
-const btn = (on) => ({
+})
+const darkField = (C) => ({ ...field(C), background: alpha(C.WHITE, 0.08), border: `1.5px solid ${alpha(C.WHITE, 0.22)}`, color: C.WHITE })
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 24px', borderRadius: 999,
   fontSize: 16, fontWeight: 600, textDecoration: 'none', cursor: 'pointer',
-  background: on ? C.BLUE : '#FFFFFF', color: on ? '#FFFFFF' : C.NAVY, border: `1.5px solid ${on ? C.BLUE : C.LINE}`,
-})
-const darkBtn = (on) => ({ ...btn(on), background: on ? C.SUN : 'transparent', color: on ? C.NAVY_D : C.WHITE, border: `1.5px solid ${on ? C.SUN : alpha('#FFFFFF', 0.45)}` })
-const suggest = { bg: '#FFFFFF', border: `1.5px solid ${C.LINE}`, active: alpha(C.SKY, 0.5), text: C.INK, table: C.BLUE, radius: 12 }
+  background: on ? C.BLUE : C.WHITE, color: on ? C.WHITE : C.NAVY, border: `1.5px solid ${on ? C.BLUE : C.LINE}`,
+}))
+const darkBtn = (C) => ((on) => ({ ...btn(C)(on), background: on ? C.SUN : 'transparent', color: on ? C.NAVY_D : C.WHITE, border: `1.5px solid ${on ? C.SUN : alpha(C.WHITE, 0.45)}` }))
+const suggest = (C) => ({ bg: C.WHITE, border: `1.5px solid ${C.LINE}`, active: alpha(C.SKY, 0.5), text: C.INK, table: C.BLUE, radius: 12 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function PaperPlaneTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -154,15 +162,15 @@ export default function PaperPlaneTemplate(props) {
   const year = inv.dp?.year || ''
 
   return (
-    <div data-pp lang={lang} data-enter={enterDirection(ID)} style={{
-      backgroundColor: '#FFFFFF', minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
+    <PaletteContext.Provider value={C}><div data-pp lang={lang} data-enter={enterDirection(ID)} style={{
+      backgroundColor: C.WHITE, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.BLUE, 0.3),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <PlaneOpening inv={inv} theme={theme} lang={lang} year={year} mono={mono} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.BLUE, boxShadow: '0 8px 20px rgba(31,79,168,.4)' }}>
-        {({ playing }) => <EqBars playing={playing} color="#FFFFFF" idle={alpha('#FFFFFF', 0.4)} />}
+        {({ playing }) => <EqBars playing={playing} color={C.WHITE} idle={alpha(C.WHITE, 0.4)} />}
       </MusicFab>
 
       {inv.opened && (
@@ -170,7 +178,7 @@ export default function PaperPlaneTemplate(props) {
           <header style={{
             position: 'sticky', top: 0, zIndex: 40, height: 52, padding: '0 16px',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            background: alpha('#FFFFFF', 0.9), backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
+            background: alpha(C.WHITE, 0.9), backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
             borderBottom: `1px solid ${C.LINE}`,
           }}>
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 15.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
@@ -190,7 +198,7 @@ export default function PaperPlaneTemplate(props) {
               <div style={{ fontFamily: mono, fontSize: 12.5, letterSpacing: '.22em', textTransform: 'uppercase', color: C.BLUE_D }}>{L('hero', 'kicker', inv.eventLabel)}</div>
               <div style={{ marginTop: 10, fontFamily: head, fontStyle: 'italic', fontWeight: 700, fontSize: 'clamp(22px, 6.4vw, 28px)', color: C.BLUE }}>{T.letter}</div>
               <h1 style={{ margin: '6px 0 0', fontFamily: head, fontWeight: 800, fontSize: nameSize(heroName), lineHeight: 1.02, overflowWrap: 'anywhere', color: C.NAVY, animation: 'pp-rise 1s ease-out .2s both' }}>{heroName}</h1>
-              {year && <div style={{ display: 'inline-block', marginTop: 14, padding: 4, borderRadius: 8, background: AIRMAIL }}><div style={{ padding: '6px 14px', borderRadius: 5, background: '#FFFFFF', fontFamily: mono, fontSize: 13, fontWeight: 600, letterSpacing: '.16em', textTransform: 'uppercase', color: C.NAVY }}>{fill(T.classOf, { y: year })}</div></div>}
+              {year && <div style={{ display: 'inline-block', marginTop: 14, padding: 4, borderRadius: 8, background: AIRMAIL(C) }}><div style={{ padding: '6px 14px', borderRadius: 5, background: C.WHITE, fontFamily: mono, fontSize: 13, fontWeight: 600, letterSpacing: '.16em', textTransform: 'uppercase', color: C.NAVY }}>{fill(T.classOf, { y: year })}</div></div>}
               <div style={{ marginTop: 18, fontFamily: head, fontWeight: 700, fontSize: 'clamp(20px, 5.6vw, 24px)', color: C.NAVY }}>{inv.fullDate}</div>
               <div style={{ marginTop: 6, fontSize: 16, color: C.MUTED }}>{[inv.time, weddingData.venueName].filter(Boolean).join(' · ')}</div>
               {inv.isCorp && weddingData.organizer?.trim() && <div style={{ marginTop: 6, fontSize: 15.5, color: C.MUTED }}>{tr.organizer_display}: {weddingData.organizer}</div>}
@@ -231,7 +239,7 @@ export default function PaperPlaneTemplate(props) {
               </Airmail>
               <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontWeight: 800, fontSize: 25, lineHeight: 1.2, color: C.NAVY }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 6, fontFamily: mono, fontSize: 12, letterSpacing: '.16em', textTransform: 'uppercase', color: C.MUTED }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn(C)} />
             </Panel>
           )}
 
@@ -245,7 +253,7 @@ export default function PaperPlaneTemplate(props) {
                   return (
                     <div key={i} style={{ position: 'relative', display: 'grid', gridTemplateColumns: '36px minmax(0, 1fr)', gap: 14, alignItems: 'center', padding: '12px 0' }}>
                       <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        {last ? <Plane size={34} tone="blue" style={{ transform: 'rotate(-20deg)' }} /> : <span aria-hidden="true" style={{ width: 14, height: 14, borderRadius: '50%', background: '#FFFFFF', border: `3px solid ${i === 0 ? C.RED : C.BLUE}` }} />}
+                        {last ? <Plane size={34} tone="blue" style={{ transform: 'rotate(-20deg)' }} /> : <span aria-hidden="true" style={{ width: 14, height: 14, borderRadius: '50%', background: C.WHITE, border: `3px solid ${i === 0 ? C.RED : C.BLUE}` }} />}
                       </div>
                       <div>
                         <div style={{ fontFamily: mono, fontSize: 13, fontWeight: 600, letterSpacing: '.06em', color: C.BLUE, fontVariantNumeric: 'tabular-nums' }}>{ev.time}</div>
@@ -268,7 +276,7 @@ export default function PaperPlaneTemplate(props) {
           {/* MASA — açıqca */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} mono={mono} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="pp-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.BLUE}
+              <SeatFinder inv={inv} tr={tr} listId="pp-seat-list" field={field(C)} suggest={suggest(C)} font={body} muted={C.MUTED} accent={C.BLUE}
                 nameStyle={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
                 card={(num) => (
                   <Airmail pad={7} radius={12} style={{ maxWidth: 340, margin: '22px auto 0' }}>
@@ -296,14 +304,14 @@ export default function PaperPlaneTemplate(props) {
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 16, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ aspectRatio: '4 / 5', padding: 6, borderRadius: 12, background: '#FFFFFF', boxShadow: '0 12px 20px -12px rgba(27,45,79,.45)', transform: `rotate(${i % 2 ? 1.5 : -1.5}deg)` }}>
+                    <div key={i} style={{ aspectRatio: '4 / 5', padding: 6, borderRadius: 12, background: C.WHITE, boxShadow: '0 12px 20px -12px rgba(27,45,79,.45)', transform: `rotate(${i % 2 ? 1.5 : -1.5}deg)` }}>
                       <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: 8 }} />
                     </div>
                   ))}
                 </div>
               )}
-              <PhotoQr inv={inv} tr={tr} fg={C.NAVY} bg="#FFFFFF" frame={{ borderRadius: 14, border: `1.5px solid ${C.LINE}` }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
+              <PhotoQr inv={inv} tr={tr} fg={C.NAVY} bg={C.WHITE} frame={{ borderRadius: 14, border: `1.5px solid ${C.LINE}` }}
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
             </Panel>
           )}
 
@@ -314,8 +322,8 @@ export default function PaperPlaneTemplate(props) {
                 ink: C.INK, muted: C.MUTED, line: C.LINE, hair: alpha(C.LINE, 0.7), accent: C.BLUE,
                 font: body, display: head, displayItalic: false, btnFont: head,
                 doneMark: <Plane size={70} tone="blue" style={{ margin: '0 auto 10px', transform: 'rotate(-12deg)' }} />,
-                marker: (a) => <span style={{ display: 'block', width: 15, height: 15, borderRadius: '50%', border: `2px solid ${a ? C.BLUE : C.LINE}`, background: a ? C.BLUE : 'transparent', boxShadow: a ? 'inset 0 0 0 2.5px #FFFFFF' : 'none' }} />,
-                suggest: { ...suggest, font: body },
+                marker: (a) => <span style={{ display: 'block', width: 15, height: 15, borderRadius: '50%', border: `2px solid ${a ? C.BLUE : C.LINE}`, background: a ? C.BLUE : 'transparent', boxShadow: a ? `inset 0 0 0 2.5px ${C.WHITE}` : 'none' }} />,
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -323,12 +331,12 @@ export default function PaperPlaneTemplate(props) {
           {/* ARZULAR — gecə səması */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} mono={mono} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.SUN} />
+              <GuestbookForm inv={inv} field={darkField(C)} btn={darkBtn(C)} errorColor={C.SUN} />
               <div style={{ display: 'grid', gap: 16 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
                   return (
-                    <figure key={msg.name + i} style={{ margin: 0, padding: '16px 18px 12px 44px', background: LINED, color: C.INK, borderRadius: 4, boxShadow: '0 14px 22px -14px rgba(0,0,0,.7)', transform: `rotate(${[-1, 0.8, -0.5][i % 3]}deg)` }}>
+                    <figure key={msg.name + i} style={{ margin: 0, padding: '16px 18px 12px 44px', background: LINED(C), color: C.INK, borderRadius: 4, boxShadow: '0 14px 22px -14px rgba(0,0,0,.7)', transform: `rotate(${[-1, 0.8, -0.5][i % 3]}deg)` }}>
                       <blockquote style={{ margin: 0, fontSize: 16.5, lineHeight: 1.7 }}>{msg.text}</blockquote>
                       <figcaption style={{ marginTop: 4, fontFamily: head, fontStyle: 'italic', fontWeight: 700, fontSize: 16, color: C.BLUE }}>
                         — {msg.name}{msg.date ? <span style={{ fontFamily: mono, fontStyle: 'normal', fontWeight: 400, fontSize: 11, color: C.MUTED }}> · {gbook.formatDate(msg.date)}</span> : null}
@@ -343,7 +351,7 @@ export default function PaperPlaneTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 

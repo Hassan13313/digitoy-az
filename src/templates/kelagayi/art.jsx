@@ -1,22 +1,26 @@
-import { C } from './palette'
+import { C as PAL } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* KƏLAĞAYI — dekor (hamısı aria-hidden) */
 
 const BUTA = 'M0 12C-6 12-9 7-9 2C-9-5-3-9 1-13C2-14 4-15 5-14C6-12 4-11 3-10C6-7 8-3 8 2C8 8 5 12 0 12Z'
 
 /** Kiçik buta (svg) */
-export function Buta({ size = 16, color = C.CRIMSON, style }) {
+export function Buta($p) {
+  const C = usePalette(PAL)
+  const { size = 16, color = C.CRIMSON, style } = $p
   return (
     <svg aria-hidden="true" viewBox="-10 -16 20 30" width={size} height={size * 1.5} style={{ display: 'block', ...style }}>
       <path d={BUTA} fill={color} />
-      <path d="M0 7C-3 7-4.5 4.5-4.5 2C-4.5-1-2-3 0-5" fill="none" stroke="#F7EED9" strokeWidth="1" />
-      <circle cx="0" cy="3" r="1.6" fill="#F7EED9" />
+      <path d="M0 7C-3 7-4.5 4.5-4.5 2C-4.5-1-2-3 0-5" fill="none" stroke={C.SILK} strokeWidth="1" />
+      <circle cx="0" cy="3" r="1.6" fill={C.SILK} />
     </svg>
   )
 }
 
 /** Üç buta — bölmə başlığı */
 export function ButaTrio({ style }) {
+  const C = usePalette(PAL)
   return (
     <div aria-hidden="true" style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: 10, ...style }}>
       <span style={{ width: 46, height: 3, background: `linear-gradient(90deg, transparent, ${C.CRIMSON})`, alignSelf: 'center' }} />
@@ -34,6 +38,7 @@ export function ButaTrio({ style }) {
  * ortada səkkizguşəli ulduzlu medalyon.
  */
 export function KelagayiSquare({ uid = 'kg', dim = false }) {
+  const C = usePalette(PAL)
   const S = 141.42 /* romb diaqonalı = 200 */
   const h = S / 2
   const borderButas = []
@@ -91,6 +96,7 @@ export function KelagayiSquare({ uid = 'kg', dim = false }) {
 
 /** Romb lövhə — sayğac və masa üçün */
 export function Diamond({ size = 80, children, style }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ position: 'relative', width: size, height: size, margin: '0 auto', ...style }}>
       <div aria-hidden="true" style={{ position: 'absolute', inset: '14.6%', transform: 'rotate(45deg)', background: C.SILK, border: `3px solid ${C.CRIMSON}`, outline: `1px solid ${C.SAFFRON_D}`, outlineOffset: -7, boxShadow: '0 12px 20px -12px rgba(110,18,34,.55)' }} />

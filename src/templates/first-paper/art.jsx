@@ -1,4 +1,5 @@
-import { C, WASHI } from './palette'
+import { C as PAL, WASHI } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* FIRST PAPER — origami dekor */
 
@@ -12,6 +13,7 @@ const FLAPS = [
 
 /** Qatlanmış vərəq — `open` olanda dörd künc açılır */
 export function FoldedSheet({ width = 300, open = false, children, instant = false, style }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ position: 'relative', width, aspectRatio: '1', perspective: 1100, ...style }}>
       {/* mərkəzi romb (həmişə yerində) */}
@@ -23,7 +25,7 @@ export function FoldedSheet({ width = 300, open = false, children, instant = fal
           transition: instant ? 'none' : `transform .75s cubic-bezier(.45,0,.2,1) ${0.05 + i * 0.16}s`,
         }}>
           <div style={{ position: 'absolute', inset: 0, clipPath: f.clip, background: C.WHITE, backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }} />
-          <div style={{ position: 'absolute', inset: 0, clipPath: f.clip, background: WASHI, backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transformOrigin: f.mo, transform: `rotate3d(${f.mirror}, 180deg)` }} />
+          <div style={{ position: 'absolute', inset: 0, clipPath: f.clip, background: WASHI(C), backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transformOrigin: f.mo, transform: `rotate3d(${f.mirror}, 180deg)` }} />
         </div>
       ))}
       {/* qat izləri */}
@@ -37,6 +39,7 @@ export function FoldedSheet({ width = 300, open = false, children, instant = fal
 
 /** Açılmış vərəqdə qat izləri (romb + diaqonallar) */
 export function Creases({ style }) {
+  const C = usePalette(PAL)
   return (
     <svg aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', ...style }}>
       <path d="M50 0L100 50L50 100L0 50Z" fill="none" stroke={C.CREASE} strokeWidth=".5" vectorEffect="non-scaling-stroke" />
@@ -47,10 +50,11 @@ export function Creases({ style }) {
 
 /** Origami ürək (üzlü) */
 export function PaperHeart({ size = 28, tone = 'blue', style }) {
+  const C = usePalette(PAL)
   const sh = tone === 'blue'
-    ? ['#5B86E5', '#3561C9', '#2B52B0', '#24449A']
+    ? ['#5B86E5', C.BLUE, '#2B52B0', C.BLUE_D]
     : tone === 'sky'
-      ? ['#D3E0FA', '#A9C0EE', '#93ADE3', '#7F9BD6']
+      ? ['#D3E0FA', C.SKY, '#93ADE3', '#7F9BD6']
       : ['#FFFFFF', '#F1EEE7', '#E4DFD4', '#D6D0C3']
   return (
     <svg aria-hidden="true" viewBox="0 0 100 92" width={size} height={size * 0.92} style={{ display: 'block', overflow: 'visible', ...style }}>
@@ -64,6 +68,7 @@ export function PaperHeart({ size = 28, tone = 'blue', style }) {
 
 /** Masa kartı (çadır qatı) */
 export function TentCard({ width = 220, children }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ position: 'relative', width, margin: '0 auto', perspective: 700 }}>
       <div aria-hidden="true" style={{ height: 26, background: `linear-gradient(180deg, ${C.SHADE}, #F3F0E9)`, transform: 'rotateX(52deg)', transformOrigin: '50% 100%', borderRadius: '6px 6px 0 0', boxShadow: 'inset 0 -1px 0 rgba(0,0,0,.08)' }} />

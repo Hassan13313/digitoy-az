@@ -5,12 +5,12 @@ export const C = {
   PLUM: '#5A1F3A', PLUM_L: '#7C2E52', PLUM_D: '#3E1227', GOLD: '#C8A55A', GOLD_L: '#EBD49A', OCHRE: '#D69A3C', TEAL: '#2F6B6A', CHAR: '#1C1B1A',
 }
 
-export const GOLD_GRAD = 'linear-gradient(160deg, #A6853B 0%, #EBD49A 35%, #C8A55A 60%, #F3E2B4 75%, #A6853B 100%)'
+export const GOLD_GRAD = (C) => (`linear-gradient(160deg, #A6853B 0%, #EBD49A 35%, ${C.GOLD} 60%, #F3E2B4 75%, #A6853B 100%)`)
 /* Divar + yuxarıdan işıq */
 export const WALL_BG = `radial-gradient(46% 38% at 50% 0%, rgba(255,250,235,.95), transparent 75%), linear-gradient(180deg, #F2F1EE, #E6E4DF)`
 export const CHAR_BG = `radial-gradient(60% 40% at 50% 0%, rgba(235,212,154,.12), transparent 70%), linear-gradient(180deg, #232120, #1C1B1A)`
 /* Məxmər örtük — qırışlar */
-export const VELVET = `repeating-linear-gradient(90deg, rgba(0,0,0,.28) 0 6%, rgba(255,255,255,.06) 9%, rgba(0,0,0,.18) 13%, rgba(0,0,0,.3) 16%), linear-gradient(180deg, #7C2E52, #5A1F3A 60%, #3E1227)`
+export const VELVET = (C) => (`repeating-linear-gradient(90deg, rgba(0,0,0,.28) 0 6%, rgba(255,255,255,.06) 9%, rgba(0,0,0,.18) 13%, rgba(0,0,0,.3) 16%), linear-gradient(180deg, #7C2E52, ${C.PLUM} 60%, #3E1227)`)
 
 /* Ad uzunluğuna görə ölçü */
 export function nameSize(text) {

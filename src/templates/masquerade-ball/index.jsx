@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C, GOLD_GRAD, VELVET, BALL_BG, IVORY_BG, nameSize } from './palette'
+import { C as PAL, GOLD_GRAD, VELVET, BALL_BG, IVORY_BG, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Mask, Curtain, GoldDust, Chandelier } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    MASQUERADE BALL — «Maskarad balı» (Bayram gecələri konsepti, 2026-10)
@@ -28,7 +29,11 @@ import { Mask, Curtain, GoldDust, Chandelier } from './art'
 const BASE = getTemplateTheme('masquerade-ball')
 const ID = 'masquerade-ball'
 
-const KEYFRAMES = `
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['PLUM'], secondary: ['CRIMSON'], accent: ['GOLD'], background: ['IVORY'], text: ['INK'] }
+
+const KEYFRAMES = (C) => (`
 @keyframes mb-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes mb-fade { from { opacity: 0 } to { opacity: 1 } }
 @keyframes mb-hint { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
@@ -41,12 +46,13 @@ const KEYFRAMES = `
 [data-mb] input:focus-visible, [data-mb] textarea:focus-visible { border-color: ${C.GOLD_D} !important; outline: none; }
 [data-mb] button:focus-visible, [data-mb] a:focus-visible, [data-mb] [role="button"]:focus-visible { outline: 2px solid ${C.GOLD}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-mb] *, [data-mb] { animation: none !important; transition: none !important; } }
-`
+`)
 
-const goldText = { backgroundImage: GOLD_GRAD, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' }
+const goldText = (C) => ({ backgroundImage: GOLD_GRAD(C), WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' })
 
 /* ═══ 01 — AÇILIŞ: pərdələr açılır, maska qalxır ═══ */
 function MaskOpening({ inv, theme, script }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -60,14 +66,14 @@ function MaskOpening({ inv, theme, script }) {
       style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: BALL_BG, color: C.IVORY, fontFamily: theme.fonts.body }}>
       <Curtain side="left" open={go} />
       <Curtain side="right" open={go} />
-      <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 34, zIndex: 4, background: VELVET, borderRadius: '0 0 50% 50% / 0 0 100% 100%', boxShadow: '0 8px 14px rgba(0,0,0,.45)' }} />
+      <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 34, zIndex: 4, background: VELVET(C), borderRadius: '0 0 50% 50% / 0 0 100% 100%', boxShadow: '0 8px 14px rgba(0,0,0,.45)' }} />
       <GoldDust on={go} />
       <div style={{ position: 'relative', zIndex: 2, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 22px', textAlign: 'center' }}>
         <Chandelier size={110} style={{ marginBottom: 10, filter: go ? 'drop-shadow(0 0 18px rgba(255,210,122,.8))' : 'drop-shadow(0 0 6px rgba(255,210,122,.4))', transition: 'filter .6s ease .3s' }} />
         <div style={{ animation: 'mb-rise 1s ease-out .2s both' }}>
           {ot.show('kicker') && <div style={{ fontFamily: script, fontStyle: 'italic', fontSize: 21, color: C.GOLD_L }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
-            <div style={{ marginTop: 4, fontFamily: head, fontWeight: 700, fontSize: 'clamp(30px, 9vw, 42px)', lineHeight: 1.08, overflowWrap: 'anywhere', ...goldText }}>
+            <div style={{ marginTop: 4, fontFamily: head, fontWeight: 700, fontSize: 'clamp(30px, 9vw, 42px)', lineHeight: 1.08, overflowWrap: 'anywhere', ...goldText(C) }}>
               {first}{second && <> {ot.text('and')} {second}</>}
             </div>
           )}
@@ -87,7 +93,7 @@ function MaskOpening({ inv, theme, script }) {
         </div>
         <motion.div animate={go ? { opacity: 0, y: 8 } : {}} transition={{ duration: 0.25 }} style={{ marginTop: 18 }}>
           {ot.show('cta') && (
-            <div style={{ minHeight: 50, padding: '12px 30px', display: 'inline-flex', alignItems: 'center', borderRadius: 999, background: GOLD_GRAD, color: C.PLUM_D, fontFamily: head, fontWeight: 700, fontSize: 16, letterSpacing: '.06em', boxShadow: '0 12px 26px -12px rgba(217,178,95,.7)', animation: 'mb-rise .8s ease-out .8s both' }}>
+            <div style={{ minHeight: 50, padding: '12px 30px', display: 'inline-flex', alignItems: 'center', borderRadius: 999, background: GOLD_GRAD(C), color: C.PLUM_D, fontFamily: head, fontWeight: 700, fontSize: 16, letterSpacing: '.06em', boxShadow: '0 12px 26px -12px rgba(217,178,95,.7)', animation: 'mb-rise .8s ease-out .8s both' }}>
               {ot.text('cta')}
             </div>
           )}
@@ -100,14 +106,15 @@ function MaskOpening({ inv, theme, script }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, script, dark = false }) {
+  const C = usePalette(PAL)
   return (
-    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? BALL_BG : IVORY_BG, color: dark ? C.IVORY : C.INK }}>
+    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? BALL_BG : IVORY_BG(C), color: dark ? C.IVORY : C.INK }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <Mask size={60} stick={false} style={{ margin: '0 auto 8px' }} />
             {kicker && <div style={{ marginBottom: 2, fontFamily: script, fontStyle: 'italic', fontSize: 20, color: dark ? C.GOLD_L : C.CRIMSON }}>{kicker}</div>}
-            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 700, fontSize: 'clamp(27px, 7.8vw, 36px)', lineHeight: 1.12, textWrap: 'balance', ...(dark ? goldText : { color: C.PLUM }) }}>{title}</h2>}
+            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 700, fontSize: scaleFont('clamp(27px, 7.8vw, 36px)', C.hs), lineHeight: 1.12, textWrap: 'balance', ...(dark ? goldText(C) : { color: C.PLUM }) }}>{title}</h2>}
             {sub && <p style={{ margin: '10px auto 0', maxWidth: 340, fontFamily: script, fontStyle: 'italic', fontSize: 19, color: dark ? alpha(C.IVORY, 0.72) : C.MUTED, lineHeight: 1.45 }}>{sub}</p>}
           </div>
         )}
@@ -117,23 +124,24 @@ function Panel({ id, section, title, kicker, sub, children, head, script, dark =
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: '#FFFDF8', border: `1px solid ${alpha(C.GOLD_D, 0.45)}`, borderRadius: 8,
   padding: '14px 16px', fontSize: 18, color: C.INK, outline: 'none',
-}
-const darkField = { ...field, background: alpha('#000000', 0.3), border: `1px solid ${alpha(C.GOLD, 0.4)}`, color: C.IVORY }
-const btn = (on) => ({
+})
+const darkField = (C) => ({ ...field(C), background: alpha('#000000', 0.3), border: `1px solid ${alpha(C.GOLD, 0.4)}`, color: C.IVORY })
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 24px', borderRadius: 999,
   fontSize: 17, fontWeight: 500, letterSpacing: '.04em', textDecoration: 'none', cursor: 'pointer',
   background: on ? C.PLUM : 'transparent', color: on ? C.GOLD_L : C.PLUM, border: `1px solid ${C.PLUM}`,
-})
-const darkBtn = (on) => ({ ...btn(on), background: on ? GOLD_GRAD : 'transparent', color: on ? C.PLUM_D : C.GOLD_L, border: `1px solid ${on ? C.GOLD : alpha(C.GOLD, 0.5)}` })
-const suggest = { bg: '#FFFDF8', border: `1px solid ${alpha(C.GOLD_D, 0.4)}`, active: alpha(C.GOLD, 0.22), text: C.INK, table: C.CRIMSON, radius: 8 }
+}))
+const darkBtn = (C) => ((on) => ({ ...btn(C)(on), background: on ? GOLD_GRAD(C) : 'transparent', color: on ? C.PLUM_D : C.GOLD_L, border: `1px solid ${on ? C.GOLD : alpha(C.GOLD, 0.5)}` }))
+const suggest = (C) => ({ bg: '#FFFDF8', border: `1px solid ${alpha(C.GOLD_D, 0.4)}`, active: alpha(C.GOLD, 0.22), text: C.INK, table: C.CRIMSON, radius: 8 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function MasqueradeBallTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -142,11 +150,11 @@ export default function MasqueradeBallTemplate(props) {
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
-    <div data-mb lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-mb lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.IVORY, minHeight: '100vh', fontFamily: body, fontSize: theme.bodyScale ? `${theme.bodyScale * 1.08}em` : '1.08em', color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       '--tpl-glow': alpha(C.GOLD, 0.4),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <MaskOpening inv={inv} theme={theme} script={script} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.PLUM, border: `1.5px solid ${C.GOLD}`, boxShadow: '0 8px 20px rgba(13,10,16,.5)' }}>
@@ -164,23 +172,23 @@ export default function MasqueradeBallTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.IVORY, 0.72), fontSize: 17, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 700, fontSize: 19, letterSpacing: '.04em', ...goldText }}>{T.brand}</div>
+            <div style={{ fontFamily: head, fontWeight: 700, fontSize: 19, letterSpacing: '.04em', ...goldText(C) }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — pərdə, çilçıraq, maska */}
           <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: BALL_BG, padding: '56px 22px 64px', textAlign: 'center', color: C.IVORY }}>
-            <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 30, background: VELVET, borderRadius: '0 0 50% 50% / 0 0 100% 100%', boxShadow: '0 8px 14px rgba(0,0,0,.45)' }} />
-            <span aria-hidden="true" style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '12%', background: VELVET, boxShadow: 'inset -10px 0 16px -6px rgba(0,0,0,.6)' }} />
-            <span aria-hidden="true" style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '12%', background: VELVET, boxShadow: 'inset 10px 0 16px -6px rgba(0,0,0,.6)' }} />
+            <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 30, background: VELVET(C), borderRadius: '0 0 50% 50% / 0 0 100% 100%', boxShadow: '0 8px 14px rgba(0,0,0,.45)' }} />
+            <span aria-hidden="true" style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '12%', background: VELVET(C), boxShadow: 'inset -10px 0 16px -6px rgba(0,0,0,.6)' }} />
+            <span aria-hidden="true" style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '12%', background: VELVET(C), boxShadow: 'inset 10px 0 16px -6px rgba(0,0,0,.6)' }} />
             <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <Chandelier size={96} style={{ filter: 'drop-shadow(0 0 14px rgba(255,210,122,.7))' }} />
               <div style={{ marginTop: 10, animation: 'mb-float 5s ease-in-out infinite' }}><Mask size={190} /></div>
             </div>
             <div style={{ position: 'relative', marginTop: 14, fontFamily: script, fontStyle: 'italic', fontSize: 22, color: C.GOLD_L }}>{L('hero', 'kicker', T.ball)}</div>
-            <h1 style={{ position: 'relative', margin: '6px 0 0', fontFamily: head, fontWeight: 700, fontSize: nameSize(heroName), lineHeight: 1.08, overflowWrap: 'anywhere', ...goldText, animation: 'mb-rise 1s ease-out .2s both' }}>{heroName}</h1>
+            <h1 style={{ position: 'relative', margin: '6px 0 0', fontFamily: head, fontWeight: 700, fontSize: nameSize(heroName), lineHeight: 1.08, overflowWrap: 'anywhere', ...goldText(C), animation: 'mb-rise 1s ease-out .2s both' }}>{heroName}</h1>
             {inv.isCorp && weddingData.organizer?.trim() && <div style={{ position: 'relative', marginTop: 8, fontSize: 18, fontStyle: 'italic', color: alpha(C.IVORY, 0.75) }}>{tr.organizer_display}: {weddingData.organizer}</div>}
-            <div style={{ position: 'relative', width: 70, height: 1.5, margin: '18px auto 0', background: GOLD_GRAD }} />
+            <div style={{ position: 'relative', width: 70, height: 1.5, margin: '18px auto 0', background: GOLD_GRAD(C) }} />
             <div style={{ position: 'relative', marginTop: 16, fontFamily: head, fontWeight: 700, fontSize: 'clamp(19px, 5.4vw, 23px)', color: C.IVORY }}>{inv.fullDate}</div>
             <div style={{ position: 'relative', marginTop: 4, fontSize: 19, fontStyle: 'italic', color: alpha(C.IVORY, 0.72) }}>{[inv.time, weddingData.venueName].filter(Boolean).join(' · ')}</div>
             <p style={{ position: 'relative', margin: '16px auto 0', maxWidth: 320, fontSize: 20, fontStyle: 'italic', lineHeight: 1.5, color: alpha(C.IVORY, 0.88) }}>{tr.inv_join}</p>
@@ -192,9 +200,9 @@ export default function MasqueradeBallTemplate(props) {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop]) => (
                   <div key={l} style={{ textAlign: 'center' }}>
-                    <div style={{ aspectRatio: '0.8', padding: 4, borderRadius: '50%', background: GOLD_GRAD, boxShadow: '0 12px 18px -10px rgba(58,16,48,.55)' }}>
+                    <div style={{ aspectRatio: '0.8', padding: 4, borderRadius: '50%', background: GOLD_GRAD(C), boxShadow: '0 12px 18px -10px rgba(58,16,48,.55)' }}>
                       <div style={{ height: '100%', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: `radial-gradient(circle at 50% 40%, ${C.PLUM_L}, ${C.PLUM_D})`, boxShadow: `inset 0 0 0 2px ${alpha(C.GOLD_L, 0.4)}` }}>
-                        <span style={{ fontFamily: head, fontWeight: 700, fontSize: 'clamp(20px, 6vw, 27px)', lineHeight: 1, fontVariantNumeric: 'lining-nums tabular-nums', ...goldText }}><PopDigit value={v} pop={pop} /></span>
+                        <span style={{ fontFamily: head, fontWeight: 700, fontSize: 'clamp(20px, 6vw, 27px)', lineHeight: 1, fontVariantNumeric: 'lining-nums tabular-nums', ...goldText(C) }}><PopDigit value={v} pop={pop} /></span>
                       </div>
                     </div>
                     <div style={{ marginTop: 10, fontSize: 16, fontStyle: 'italic', color: C.MUTED }}>{l}</div>
@@ -209,19 +217,19 @@ export default function MasqueradeBallTemplate(props) {
           {/* MƏKAN */}
           {S.venue && (
             <Panel section="venue" head={head} script={script} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
-              <div style={{ maxWidth: 430, margin: '0 auto', padding: 5, borderRadius: '46% 46% 18px 18px / 22% 22% 18px 18px', background: GOLD_GRAD, boxShadow: '0 24px 36px -22px rgba(0,0,0,.85)' }}>
+              <div style={{ maxWidth: 430, margin: '0 auto', padding: 5, borderRadius: '46% 46% 18px 18px / 22% 22% 18px 18px', background: GOLD_GRAD(C), boxShadow: '0 24px 36px -22px rgba(0,0,0,.85)' }}>
                 <div style={{ borderRadius: '45% 45% 14px 14px / 21% 21% 14px 14px', overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
                     weddingData={weddingData} theme={theme} accent={C.CRIMSON} height="clamp(250px, 70vw, 320px)"
                     map={{ opacity: 0.88, filter: 'grayscale(.5) sepia(.2)', tintOpacity: 0.16, tint: C.PLUM_L, blend: 'multiply' }}
                     frame={<MapPin />}
-                    fallback={<div style={{ height: 'clamp(250px, 70vw, 320px)', position: 'relative', background: IVORY_BG }}><MapPin /></div>}
+                    fallback={<div style={{ height: 'clamp(250px, 70vw, 320px)', position: 'relative', background: IVORY_BG(C) }}><MapPin /></div>}
                   />
                 </div>
               </div>
-              <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontWeight: 700, fontSize: 24, lineHeight: 1.2, ...goldText }}>{weddingData.venueName}</div>
+              <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontWeight: 700, fontSize: 24, lineHeight: 1.2, ...goldText(C) }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontSize: 19, fontStyle: 'italic', color: alpha(C.IVORY, 0.72) }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn(C)} />
             </Panel>
           )}
 
@@ -252,11 +260,11 @@ export default function MasqueradeBallTemplate(props) {
           {/* MASA — dəvət kartı */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} script={script} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="mb-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.IVORY, 0.72)} accent={C.GOLD_L}
+              <SeatFinder inv={inv} tr={tr} listId="mb-seat-list" field={darkField(C)} suggest={suggest(C)} font={body} muted={alpha(C.IVORY, 0.72)} accent={C.GOLD_L}
                 nameStyle={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
                 card={(num) => (
-                  <div style={{ maxWidth: 300, margin: '22px auto 0', padding: 4, background: GOLD_GRAD, boxShadow: '0 24px 34px -18px rgba(0,0,0,.85)' }}>
-                    <div style={{ padding: '22px 18px 24px', background: IVORY_BG, color: C.INK, textAlign: 'center', boxShadow: `inset 0 0 0 1px ${alpha(C.GOLD_D, 0.5)}` }}>
+                  <div style={{ maxWidth: 300, margin: '22px auto 0', padding: 4, background: GOLD_GRAD(C), boxShadow: '0 24px 34px -18px rgba(0,0,0,.85)' }}>
+                    <div style={{ padding: '22px 18px 24px', background: IVORY_BG(C), color: C.INK, textAlign: 'center', boxShadow: `inset 0 0 0 1px ${alpha(C.GOLD_D, 0.5)}` }}>
                       <Mask size={86} stick={false} style={{ margin: '0 auto' }} />
                       <div style={{ marginTop: 6, fontSize: 17, fontStyle: 'italic', color: C.MUTED }}>{T.guest}</div>
                       <div style={{ fontFamily: head, fontWeight: 700, fontSize: 'clamp(20px, 6vw, 25px)', lineHeight: 1.2, color: C.PLUM, overflowWrap: 'anywhere' }}>{seating.selected?.full_name}</div>
@@ -275,14 +283,14 @@ export default function MasqueradeBallTemplate(props) {
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 16, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ aspectRatio: '4 / 5', padding: 4, borderRadius: '50%', background: GOLD_GRAD, boxShadow: '0 12px 18px -12px rgba(58,16,48,.5)' }}>
+                    <div key={i} style={{ aspectRatio: '4 / 5', padding: 4, borderRadius: '50%', background: GOLD_GRAD(C), boxShadow: '0 12px 18px -12px rgba(58,16,48,.5)' }}>
                       <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: '50%' }} />
                     </div>
                   ))}
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.PLUM_D} bg="#FFFDF8" frame={{ borderRadius: 10, border: `1.5px solid ${C.GOLD}` }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
             </Panel>
           )}
 
@@ -294,7 +302,7 @@ export default function MasqueradeBallTemplate(props) {
                 font: body, display: head, displayItalic: false, btnFont: head,
                 doneMark: <Mask size={90} stick={false} style={{ margin: '0 auto 10px' }} />,
                 marker: (a) => <span style={{ display: 'block', width: 12, height: 12, transform: 'rotate(45deg)', border: `1.5px solid ${a ? C.CRIMSON : alpha(C.GOLD_D, 0.6)}`, background: a ? C.CRIMSON : 'transparent' }} />,
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -302,7 +310,7 @@ export default function MasqueradeBallTemplate(props) {
           {/* GİZLİ ARZULAR */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} script={script} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.GOLD_L} />
+              <GuestbookForm inv={inv} field={darkField(C)} btn={darkBtn(C)} errorColor={C.GOLD_L} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
@@ -322,7 +330,7 @@ export default function MasqueradeBallTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 

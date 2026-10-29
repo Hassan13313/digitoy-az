@@ -5,10 +5,10 @@ export const C = {
   CRIMSON: '#9E1B32', IVORY: '#F5EEE3', INK: '#1A1218', MUTED: '#7B6E76', LINE: '#E2D6C6',
 }
 
-export const GOLD_GRAD = 'linear-gradient(160deg, #A6822F 0%, #F4DC9C 35%, #D9B25F 58%, #FFF0C4 72%, #A6822F 100%)'
-export const VELVET = `repeating-linear-gradient(90deg, rgba(0,0,0,.35) 0 4%, rgba(255,255,255,.05) 7%, rgba(0,0,0,.2) 10%, rgba(0,0,0,.4) 13%), linear-gradient(180deg, #5A1C4A, #3A1030 60%, #22091C)`
+export const GOLD_GRAD = (C) => (`linear-gradient(160deg, #A6822F 0%, #F4DC9C 35%, ${C.GOLD} 58%, #FFF0C4 72%, #A6822F 100%)`)
+export const VELVET = (C) => (`repeating-linear-gradient(90deg, rgba(0,0,0,.35) 0 4%, rgba(255,255,255,.05) 7%, rgba(0,0,0,.2) 10%, rgba(0,0,0,.4) 13%), linear-gradient(180deg, #5A1C4A, ${C.PLUM} 60%, #22091C)`)
 export const BALL_BG = `radial-gradient(50% 36% at 50% 22%, rgba(244,220,156,.28), transparent 70%), radial-gradient(80% 60% at 50% 100%, rgba(90,28,74,.6), transparent 70%), linear-gradient(180deg, #1A0E18, #0D0A10)`
-export const IVORY_BG = `radial-gradient(90% 60% at 50% 0%, #FFFDF8, transparent 70%), #F5EEE3`
+export const IVORY_BG = (C) => (`radial-gradient(90% 60% at 50% 0%, #FFFDF8, transparent 70%), ${C.IVORY}`)
 
 /* Qızılı toz — sabit toxumlu LCG */
 let seed = 67

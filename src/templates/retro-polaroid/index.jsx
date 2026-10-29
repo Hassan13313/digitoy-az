@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize, yearsSentence } from '../_shared/kids'
-import { C, RAINBOW, CREAM_BG, CHOC_BG, nameSize } from './palette'
+import { C as PAL, RAINBOW, CREAM_BG, CHOC_BG, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Rainbow, SunsetScene, Polaroid, Camera } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    RETRO POLAROID — «Ani foto» (İldönümü konsepti, 2026-10)
@@ -27,7 +28,11 @@ import { Rainbow, SunsetScene, Polaroid, Camera } from './art'
 const BASE = getTemplateTheme('retro-polaroid')
 const ID = 'retro-polaroid'
 
-const KEYFRAMES = `
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['ORANGE'], secondary: ['TEAL'], accent: ['MUSTARD'], background: ['CREAM'], text: ['INK'] }
+
+const KEYFRAMES = (C) => (`
 @keyframes rp-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes rp-fade { from { opacity: 0 } to { opacity: 1 } }
 @keyframes rp-hint { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
@@ -39,7 +44,7 @@ const KEYFRAMES = `
 [data-rp] input:focus-visible, [data-rp] textarea:focus-visible { border-color: ${C.ORANGE} !important; outline: none; }
 [data-rp] button:focus-visible, [data-rp] a:focus-visible, [data-rp] [role="button"]:focus-visible { outline: 2px solid ${C.ORANGE}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-rp] *, [data-rp] { animation: none !important; transition: none !important; } }
-`
+`)
 
 function shortDate(inv, raw) {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(raw || ''))
@@ -64,6 +69,7 @@ function ScenePhoto({ inv, lang, head, big = 'clamp(54px, 17vw, 76px)' }) {
 
 /* ═══ 01 — AÇILIŞ: kamera şəkil çəkir ═══ */
 function CameraOpening({ inv, theme, lang, hand, date }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -74,7 +80,7 @@ function CameraOpening({ inv, theme, lang, hand, date }) {
     <motion.div {...gate.gateProps} data-rp
       animate={go ? { opacity: 0 } : {}}
       transition={{ duration: 0.4, delay: 1.7 }}
-      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: CREAM_BG, color: C.INK, fontFamily: theme.fonts.body }}>
+      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: CREAM_BG(C), color: C.INK, fontFamily: theme.fonts.body }}>
       <Rainbow style={{ position: 'absolute', left: 0, right: 0, top: 0 }} thick={4} />
       <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px 22px 0', textAlign: 'center' }}>
         <div style={{ animation: 'rp-rise 1s ease-out .2s both' }}>
@@ -120,13 +126,14 @@ function CameraOpening({ inv, theme, lang, hand, date }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, hand, dark = false }) {
+  const C = usePalette(PAL)
   return (
-    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? CHOC_BG : CREAM_BG, color: dark ? C.CREAM : C.INK }}>
+    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? CHOC_BG(C) : CREAM_BG(C), color: dark ? C.CREAM : C.INK }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             {kicker && <div style={{ marginBottom: 4, fontFamily: hand, fontSize: 18, color: dark ? C.MUSTARD : C.ORANGE }}>{kicker}</div>}
-            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 400, fontSize: 'clamp(31px, 9vw, 42px)', lineHeight: 1.1, textWrap: 'balance', color: dark ? C.CREAM : C.CHOC }}>{title}</h2>}
+            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 400, fontSize: scaleFont('clamp(31px, 9vw, 42px)', C.hs), lineHeight: 1.1, textWrap: 'balance', color: dark ? C.CREAM : C.CHOC }}>{title}</h2>}
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: 14 }}><Rainbow thick={2.5} style={{ width: 72, borderRadius: 3 }} /></div>
             {sub && <p style={{ margin: '12px auto 0', maxWidth: 340, fontSize: 16, color: dark ? alpha(C.CREAM, 0.72) : C.MUTED, lineHeight: 1.6 }}>{sub}</p>}
           </div>
@@ -137,23 +144,24 @@ function Panel({ id, section, title, kicker, sub, children, head, hand, dark = f
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: C.WHITE, border: `1.5px solid ${alpha(C.BROWN, 0.3)}`, borderRadius: 14,
   padding: '14px 16px', fontSize: 16, color: C.INK, outline: 'none',
-}
-const darkField = { ...field, background: alpha('#FFFFFF', 0.07), border: `1.5px solid ${alpha(C.CREAM, 0.25)}`, color: C.CREAM }
-const btn = (on) => ({
+})
+const darkField = (C) => ({ ...field(C), background: alpha('#FFFFFF', 0.07), border: `1.5px solid ${alpha(C.CREAM, 0.25)}`, color: C.CREAM })
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 24px', borderRadius: 999,
   fontSize: 15.5, fontWeight: 700, textDecoration: 'none', cursor: 'pointer',
   background: on ? C.CHOC : 'transparent', color: on ? C.CREAM : C.CHOC, border: `1.5px solid ${C.CHOC}`, boxShadow: on ? `0 4px 0 ${C.ORANGE}` : 'none',
-})
-const darkBtn = (on) => ({ ...btn(on), background: on ? C.MUSTARD : 'transparent', color: on ? C.CHOC : C.CREAM, border: `1.5px solid ${on ? C.MUSTARD : alpha(C.CREAM, 0.45)}`, boxShadow: on ? `0 4px 0 ${C.RED}` : 'none' })
-const suggest = { bg: C.WHITE, border: `1.5px solid ${alpha(C.BROWN, 0.3)}`, active: alpha(C.MUSTARD, 0.3), text: C.INK, table: C.ORANGE, radius: 14 }
+}))
+const darkBtn = (C) => ((on) => ({ ...btn(C)(on), background: on ? C.MUSTARD : 'transparent', color: on ? C.CHOC : C.CREAM, border: `1.5px solid ${on ? C.MUSTARD : alpha(C.CREAM, 0.45)}`, boxShadow: on ? `0 4px 0 ${C.RED}` : 'none' }))
+const suggest = (C) => ({ bg: C.WHITE, border: `1.5px solid ${alpha(C.BROWN, 0.3)}`, active: alpha(C.MUSTARD, 0.3), text: C.INK, table: C.ORANGE, radius: 14 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function RetroPolaroidTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -162,11 +170,11 @@ export default function RetroPolaroidTemplate(props) {
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
-    <div data-rp lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-rp lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.CREAM, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.ORANGE, 0.35),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <CameraOpening inv={inv} theme={theme} lang={lang} hand={hand} date={weddingData.date} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.CHOC, boxShadow: `0 4px 0 ${C.ORANGE}, 0 10px 20px rgba(59,36,24,.35)` }}>
@@ -189,7 +197,7 @@ export default function RetroPolaroidTemplate(props) {
           </header>
 
           {/* HERO — aşkarlanmış polaroid */}
-          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: CREAM_BG, padding: '44px 22px 60px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: CREAM_BG(C), padding: '44px 22px 60px', textAlign: 'center' }}>
             <Rainbow vertical thick={5} style={{ position: 'absolute', left: 18, top: 0, bottom: 0, opacity: 0.9 }} />
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <Polaroid width="min(62vw, 250px)" rot={-3}
@@ -210,7 +218,7 @@ export default function RetroPolaroidTemplate(props) {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <div key={l} style={{ padding: '7% 7% 0', background: C.WHITE, boxShadow: '0 10px 16px -10px rgba(59,36,24,.5)', transform: `rotate(${[-4, 3, -2, 4][i]}deg)` }}>
-                    <div style={{ aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', background: RAINBOW[i] }}>
+                    <div style={{ aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', background: RAINBOW(C)[i] }}>
                       <span style={{ fontFamily: head, fontSize: 'clamp(22px, 6.6vw, 30px)', lineHeight: 1, color: C.WHITE, fontVariantNumeric: 'tabular-nums', textShadow: '0 2px 0 rgba(0,0,0,.18)' }}><PopDigit value={v} pop={pop} /></span>
                     </div>
                     <div style={{ padding: '6px 0 8px', textAlign: 'center', fontFamily: hand, fontSize: 13.5, color: C.CHOC_L }}>{l}</div>
@@ -231,13 +239,13 @@ export default function RetroPolaroidTemplate(props) {
                     weddingData={weddingData} theme={theme} accent={C.ORANGE} height="clamp(230px, 62vw, 290px)"
                     map={{ opacity: 0.88, filter: 'sepia(.35) saturate(1.1)', tintOpacity: 0.14, tint: C.MUSTARD, blend: 'multiply' }}
                     frame={<MapPin />}
-                    fallback={<div style={{ height: 'clamp(230px, 62vw, 290px)', position: 'relative', background: CREAM_BG }}><MapPin /></div>}
+                    fallback={<div style={{ height: 'clamp(230px, 62vw, 290px)', position: 'relative', background: CREAM_BG(C) }}><MapPin /></div>}
                   />
                 </div>
                 <div style={{ marginTop: 10, textAlign: 'center', fontFamily: hand, fontSize: 19, color: C.CHOC }}>{weddingData.venueName}</div>
               </div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 20, fontFamily: hand, fontSize: 17, color: C.MUSTARD }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn(C)} />
             </Panel>
           )}
 
@@ -247,7 +255,7 @@ export default function RetroPolaroidTemplate(props) {
               <div style={{ position: 'relative', maxWidth: 380, margin: '0 auto' }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '72px minmax(0, 1fr)', gap: 14, alignItems: 'stretch' }}>
-                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '14px 0', background: RAINBOW[i % 4], color: C.WHITE, borderRadius: i === 0 ? '14px 14px 0 0' : i === timeline.events.length - 1 ? '0 0 14px 14px' : 0 }}>
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '14px 0', background: RAINBOW(C)[i % 4], color: C.WHITE, borderRadius: i === 0 ? '14px 14px 0 0' : i === timeline.events.length - 1 ? '0 0 14px 14px' : 0 }}>
                       <span style={{ fontFamily: head, fontSize: 18, fontVariantNumeric: 'tabular-nums' }}>{ev.time}</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', padding: '14px 0', borderBottom: i < timeline.events.length - 1 ? `1px dashed ${alpha(C.BROWN, 0.25)}` : 'none', fontSize: 16.5, lineHeight: 1.35, color: C.INK }}>{ev.label}</div>
@@ -267,7 +275,7 @@ export default function RetroPolaroidTemplate(props) {
           {/* MASA — polaroid */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} hand={hand} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="rp-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.ORANGE}
+              <SeatFinder inv={inv} tr={tr} listId="rp-seat-list" field={field(C)} suggest={suggest(C)} font={body} muted={C.MUTED} accent={C.ORANGE}
                 nameStyle={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
                 card={(num) => (
                   <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 22 }}>
@@ -299,7 +307,7 @@ export default function RetroPolaroidTemplate(props) {
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.CHOC} bg={C.WHITE} frame={{ borderRadius: 4, padding: 10, boxShadow: '0 12px 18px -12px rgba(59,36,24,.5)' }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
             </Panel>
           )}
 
@@ -311,7 +319,7 @@ export default function RetroPolaroidTemplate(props) {
                 font: body, display: head, displayItalic: false, btnFont: head,
                 doneMark: <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}><Rainbow thick={4} style={{ width: 80, borderRadius: 4 }} /></div>,
                 marker: (a) => <span style={{ display: 'block', width: 15, height: 15, borderRadius: '50%', border: `2px solid ${a ? C.ORANGE : alpha(C.BROWN, 0.4)}`, background: a ? C.MUSTARD : 'transparent' }} />,
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -319,13 +327,13 @@ export default function RetroPolaroidTemplate(props) {
           {/* ARZULAR */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} hand={hand} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.MUSTARD} />
+              <GuestbookForm inv={inv} field={darkField(C)} btn={darkBtn(C)} errorColor={C.MUSTARD} />
               <div style={{ display: 'grid', gap: 16 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
                   return (
                     <figure key={msg.name + i} style={{ margin: 0, display: 'grid', gridTemplateColumns: '8px minmax(0, 1fr)', background: C.CREAM_L, color: C.INK, borderRadius: 4, overflow: 'hidden', transform: `rotate(${i % 2 ? 0.8 : -0.8}deg)` }}>
-                      <span aria-hidden="true" style={{ background: RAINBOW[i % 4] }} />
+                      <span aria-hidden="true" style={{ background: RAINBOW(C)[i % 4] }} />
                       <div style={{ padding: '18px 18px 14px' }}>
                         <blockquote style={{ margin: 0, fontFamily: hand, fontSize: 18.5, lineHeight: 1.45 }}>{msg.text}</blockquote>
                         <figcaption style={{ marginTop: 8, fontFamily: head, fontSize: 15, color: C.ORANGE }}>
@@ -342,11 +350,12 @@ export default function RetroPolaroidTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 
 function MapPin() {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
       <span style={{ position: 'absolute', left: -16, top: -16, width: 32, height: 32, borderRadius: '50%', background: `conic-gradient(${C.RED} 0 25%, ${C.ORANGE} 0 50%, ${C.MUSTARD} 0 75%, ${C.TEAL} 0)`, boxShadow: '0 0 0 4px #FFFFFF, 0 6px 12px rgba(0,0,0,.35)' }} />

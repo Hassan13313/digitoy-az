@@ -5,7 +5,7 @@ export const C = {
   ROSE: '#D9A3A6', ROSE_D: '#B87B80', IVORY: '#F4F1EC', INK: '#232831', MUTED: '#7C8592', FAINT: '#5A6372',
 }
 
-export const SILVER_GRAD = 'linear-gradient(150deg, #8D949E 0%, #F1F3F6 35%, #C9CED6 55%, #FFFFFF 70%, #9AA1AB 100%)'
+export const SILVER_GRAD = (C) => (`linear-gradient(150deg, #8D949E 0%, #F1F3F6 35%, ${C.SILVER} 55%, #FFFFFF 70%, #9AA1AB 100%)`)
 export const NIGHT_BG = `radial-gradient(70% 45% at 50% 0%, rgba(201,206,214,.12), transparent 70%), linear-gradient(180deg, ${'#1E2531'}, ${'#141923'})`
 
 /* Ürək forması (viewBox 0 0 200 184) */

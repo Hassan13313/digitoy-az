@@ -1,9 +1,11 @@
-import { C, TOWER } from './palette'
+import { C as PAL, TOWER } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* GALA NIGHT — art-deco dekor */
 
 /** Şampan qülləsi — `pour` olanda qədəhlər yuxarıdan aşağı dolur */
 export function ChampagneTower({ width = 260, pour = true, instant = false, style }) {
+  const C = usePalette(PAL)
   return (
     <svg aria-hidden="true" viewBox="0 0 220 176" width={width} style={{ display: 'block', maxWidth: '100%', overflow: 'visible', ...style }}>
       <defs>
@@ -37,6 +39,7 @@ export function ChampagneTower({ width = 260, pour = true, instant = false, styl
 
 /** Art-deco günəş şüaları */
 export function Sunburst({ size = 360, opacity = 0.35, style }) {
+  const C = usePalette(PAL)
   return (
     <svg aria-hidden="true" viewBox="-100 -100 200 100" width={size} style={{ display: 'block', overflow: 'visible', opacity, ...style }}>
       {Array.from({ length: 19 }, (_, i) => {
@@ -49,7 +52,9 @@ export function Sunburst({ size = 360, opacity = 0.35, style }) {
 }
 
 /** Yelpik ornamenti — başlıq */
-export function Fan({ width = 220, color = C.GOLD, style }) {
+export function Fan($p) {
+  const C = usePalette(PAL)
+  const { width = 220, color = C.GOLD, style } = $p
   return (
     <div aria-hidden="true" style={{ display: 'flex', alignItems: 'center', gap: 10, width, maxWidth: '100%', margin: '0 auto', ...style }}>
       <span style={{ flex: 1, height: 5, borderTop: `1px solid ${color}`, borderBottom: `1px solid ${color}` }} />
@@ -67,7 +72,9 @@ export function Fan({ width = 220, color = C.GOLD, style }) {
 }
 
 /** Künc yelpikləri — deco çərçivəsi üçün */
-export function CornerFans({ color = C.GOLD, size = 34 }) {
+export function CornerFans($p) {
+  const C = usePalette(PAL)
+  const { color = C.GOLD, size = 34 } = $p
   const fan = (rot, pos) => (
     <svg key={rot} aria-hidden="true" viewBox="0 0 40 40" width={size} height={size} style={{ position: 'absolute', ...pos, transform: `rotate(${rot}deg)` }}>
       {[10, 18, 26].map((r) => <path key={r} d={`M0 ${r}A${r} ${r} 0 0 0 ${r} 0`} fill="none" stroke={color} strokeWidth="1" />)}

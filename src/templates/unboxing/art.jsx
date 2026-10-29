@@ -1,4 +1,5 @@
-import { C, BOX_FRONT, ORB } from './palette'
+import { C as PAL, BOX_FRONT, ORB } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* UNBOXING — premium qutu, işıq şüaları, parlayan məhsul */
 
@@ -50,6 +51,7 @@ export function GiftBox({ width = 220, open = false, instant = false, label, sty
 
 /** «Yeni» nişanı */
 export function NewChip({ text, font }) {
+  const C = usePalette(PAL)
   return (
     <span style={{ display: 'inline-block', padding: '5px 12px', borderRadius: 999, background: '#1E1C48', border: `1px solid ${C.VIOLET_L}`, fontFamily: font, fontWeight: 600, fontSize: 12, letterSpacing: '.22em', textTransform: 'uppercase', color: C.VIOLET_L }}>{text}</span>
   )

@@ -5,10 +5,13 @@
    hesablanır (render təmiz qalır).
    ───────────────────────────────────────────────────────────────────────── */
 
-import { C, seeded } from './palette'
+import { C as PAL, seeded } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* Dörd şüalı sehrli ulduz */
-export function Sparkle({ size = 14, color = C.GOLD_L, style, className }) {
+export function Sparkle($p) {
+  const C = usePalette(PAL)
+  const { size = 14, color = C.GOLD_L, style, className } = $p
   return (
     <svg viewBox="-10 -10 20 20" width={size} height={size} aria-hidden="true" className={className} style={{ display: 'block', overflow: 'visible', ...style }}>
       <path d="M0 -10C1 -3 3 -1 10 0C3 1 1 3 0 10C-1 3 -3 1 -10 0C-3 -1 -1 -3 0 -10Z" fill={color} />
@@ -21,7 +24,9 @@ const SKY = (() => {
   const r = seeded(7)
   return Array.from({ length: 34 }, () => ({ x: r() * 100, y: r() * 100, s: 3 + r() * 9, d: (r() * 4).toFixed(2), sp: r() > 0.72 }))
 })()
-export function StarField({ opacity = 1, color = C.GOLD_L, count = 34 }) {
+export function StarField($p) {
+  const C = usePalette(PAL)
+  const { opacity = 1, color = C.GOLD_L, count = 34 } = $p
   return (
     <div aria-hidden="true" style={{ position: 'absolute', inset: 0, opacity }}>
       {SKY.slice(0, count).map((p, i) => (
@@ -61,6 +66,7 @@ export function Cloud({ width = 120, style, opacity = 0.9 }) {
 
 /* Dəyirmi bağ ağacı (topiar) */
 export function Topiary({ size = 44, style, tone = '#6F8F6C' }) {
+  const C = usePalette(PAL)
   return (
     <svg viewBox="0 0 40 56" width={size} height={size * 1.4} aria-hidden="true" style={{ display: 'block', overflow: 'visible', ...style }}>
       <rect x="18" y="34" width="4" height="16" fill="#8A6A4A" />
@@ -73,7 +79,9 @@ export function Topiary({ size = 44, style, tone = '#6F8F6C' }) {
 }
 
 /* ── Nağıl qəsri ──────────────────────────────────────────────────────────── */
-function Tower({ x, w, top, base = 250, roofH, roof = C.VIOLET, wall = 'url(#ft-wall)', flag = C.ROSE, win = 2, flagDelay = 0, lit }) {
+function Tower($p) {
+  const C = usePalette(PAL)
+  const { x, w, top, base = 250, roofH, roof = C.VIOLET, wall = 'url(#ft-wall)', flag = C.ROSE, win = 2, flagDelay = 0, lit } = $p
   const cx = x + w / 2
   const apex = top - roofH
   const winW = Math.max(5, w * 0.22)
@@ -103,6 +111,7 @@ function Tower({ x, w, top, base = 250, roofH, roof = C.VIOLET, wall = 'url(#ft-
 
 /** Qəsr: viewBox 0 0 320 260, alt xətt y=250 */
 export function Castle({ width = 300, lit = true, style }) {
+  const C = usePalette(PAL)
   return (
     <svg viewBox="0 0 320 262" width={width} height={width * 0.82} aria-hidden="true" style={{ display: 'block', overflow: 'visible', ...style }}>
       <defs>
@@ -141,6 +150,7 @@ export function Castle({ width = 300, lit = true, style }) {
 
 /* Təpə + cığır (qəsrin altında) */
 export function Hill({ style }) {
+  const C = usePalette(PAL)
   return (
     <svg viewBox="0 0 400 120" preserveAspectRatio="none" width="100%" height="100%" aria-hidden="true" style={{ display: 'block', ...style }}>
       <defs>
@@ -161,7 +171,9 @@ export function Hill({ style }) {
 }
 
 /* Kiçik tac */
-export function Crown({ size = 34, color = C.GOLD, style }) {
+export function Crown($p) {
+  const C = usePalette(PAL)
+  const { size = 34, color = C.GOLD, style } = $p
   return (
     <svg viewBox="0 0 40 30" width={size} height={size * 0.75} aria-hidden="true" style={{ display: 'block', overflow: 'visible', ...style }}>
       <path d="M4 24L2 8L12 16L20 3L28 16L38 8L36 24Z" fill={color} />
@@ -175,6 +187,7 @@ export function Crown({ size = 34, color = C.GOLD, style }) {
 
 /* Sehrli çubuq — RSVP seçim nişanı */
 export function Wand({ size = 18, active }) {
+  const C = usePalette(PAL)
   return (
     <svg viewBox="-10 -10 20 20" width={size} height={size} aria-hidden="true" style={{ display: 'block', overflow: 'visible' }}>
       {active ? (
@@ -190,7 +203,9 @@ export function Wand({ size = 18, active }) {
 }
 
 /* Qızıl naxışlı ayırıcı */
-export function Flourish({ width = 150, color = C.GOLD, style }) {
+export function Flourish($p) {
+  const C = usePalette(PAL)
+  const { width = 150, color = C.GOLD, style } = $p
   return (
     <svg viewBox="0 0 150 20" width={width} height={width * 0.133} aria-hidden="true" style={{ display: 'block', margin: '0 auto', overflow: 'visible', ...style }}>
       <path d="M75 10C64 2 52 2 46 8C42 12 46 17 50 14C53 12 51 8 47 9M75 10C86 2 98 2 104 8C108 12 104 17 100 14C97 12 99 8 103 9" fill="none" stroke={color} strokeWidth="1.2" strokeLinecap="round" />
@@ -202,6 +217,7 @@ export function Flourish({ width = 150, color = C.GOLD, style }) {
 
 /* Kitab üz qabığının künc naxışı (sol yuxarı; digərləri çevrilərək) */
 export function CornerFiligree({ size = 54, style }) {
+  const C = usePalette(PAL)
   return (
     <svg viewBox="0 0 54 54" width={size} height={size} aria-hidden="true" style={{ position: 'absolute', overflow: 'visible', ...style }}>
       <path d="M4 50V12C4 7 7 4 12 4H50" fill="none" stroke={C.GOLD} strokeWidth="1.4" />
@@ -214,12 +230,13 @@ export function CornerFiligree({ size = 54, style }) {
 
 /* Güzgü çərçivəsi (oval, qıvrımlı) — 240×300 */
 export function MirrorFrame({ width = 230, children }) {
+  const C = usePalette(PAL)
   const h = width * 1.26
   return (
     <div style={{ position: 'relative', width, height: h, margin: '0 auto' }}>
       <svg viewBox="0 0 240 302" width={width} height={h} aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'visible' }}>
         <defs>
-          <linearGradient id="ft-mframe" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#F1DA9C" /><stop offset=".45" stopColor="#C8A15A" /><stop offset=".7" stopColor="#F6E3B0" /><stop offset="1" stopColor="#9C7A3A" /></linearGradient>
+          <linearGradient id="ft-mframe" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#F1DA9C" /><stop offset=".45" stopColor={C.GOLD} /><stop offset=".7" stopColor="#F6E3B0" /><stop offset="1" stopColor="#9C7A3A" /></linearGradient>
           <radialGradient id="ft-glass" cx="42%" cy="36%" r="70%"><stop offset="0" stopColor="#FFFFFF" /><stop offset=".45" stopColor="#ECE5F7" /><stop offset="1" stopColor="#B7A3D9" /></radialGradient>
         </defs>
         <ellipse cx="120" cy="150" rx="104" ry="132" fill="url(#ft-mframe)" />
@@ -244,6 +261,7 @@ export function MirrorFrame({ width = 230, children }) {
 
 /* Kompas gülü — xəritənin küncü */
 export function Compass({ size = 64, style }) {
+  const C = usePalette(PAL)
   return (
     <svg viewBox="-32 -32 64 64" width={size} height={size} aria-hidden="true" style={{ display: 'block', overflow: 'visible', ...style }}>
       <circle r="27" fill={C.CREAM} stroke={C.GOLD_D} strokeWidth="1" />
@@ -258,6 +276,7 @@ export function Compass({ size = 64, style }) {
 
 /* Fəsil vinyetləri — proqram sətirlərinin solunda (sıra ilə dəyişir) */
 export function Vignette({ kind = 0, size = 38 }) {
+  const C = usePalette(PAL)
   const k = kind % 6
   return (
     <svg viewBox="-20 -20 40 40" width={size} height={size} aria-hidden="true" style={{ display: 'block', overflow: 'visible' }}>
@@ -274,7 +293,9 @@ export function Vignette({ kind = 0, size = 38 }) {
 }
 
 /* Üz qabığındakı qızıl qəsr nişanı (tək rəng, «folqa basması») */
-export function CastleMark({ size = 74, color = C.GOLD_L }) {
+export function CastleMark($p) {
+  const C = usePalette(PAL)
+  const { size = 74, color = C.GOLD_L } = $p
   return (
     <svg viewBox="0 0 80 70" width={size} height={size * 0.875} aria-hidden="true" style={{ display: 'block', margin: '0 auto', overflow: 'visible' }}>
       <g fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round">
@@ -302,11 +323,12 @@ const SCALLOP = (() => {
   return d + 'Z'
 })()
 export function AgeSeal({ size = 96, children, style }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ position: 'relative', width: size, height: size, ...style }}>
       <svg viewBox="-50 -50 100 100" width={size} height={size} aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'visible' }}>
         <defs>
-          <linearGradient id="ft-seal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#F6E3B0" /><stop offset=".5" stopColor="#C8A15A" /><stop offset="1" stopColor="#9C7A3A" /></linearGradient>
+          <linearGradient id="ft-seal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#F6E3B0" /><stop offset=".5" stopColor={C.GOLD} /><stop offset="1" stopColor="#9C7A3A" /></linearGradient>
         </defs>
         <path d={SCALLOP} fill="url(#ft-seal)" stroke="#8A6A30" strokeWidth=".8" />
         <circle r="35" fill="none" stroke="#FFF3C9" strokeWidth="1" opacity=".8" />

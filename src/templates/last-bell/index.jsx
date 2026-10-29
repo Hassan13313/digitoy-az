@@ -10,10 +10,11 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C, SASH, GOLD_GRAD, GRID_BG, NAVY_BG, nameSize } from './palette'
+import { C as PAL, SASH, GOLD_GRAD, GRID_BG, NAVY_BG, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { fill } from '../_shared/copyText'
 import { Bell, SoundRings, Bow, Sash } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    LAST BELL — «Son zəng» (Məzuniyyət konsepti, 2026-10)
@@ -29,7 +30,11 @@ import { Bell, SoundRings, Bow, Sash } from './art'
 const BASE = getTemplateTheme('last-bell')
 const ID = 'last-bell'
 
-const KEYFRAMES = `
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['RED'], secondary: ['NAVY'], accent: ['GOLD'], background: ['WHITE'], text: ['INK'] }
+
+const KEYFRAMES = (C) => (`
 @keyframes lb-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes lb-fade { from { opacity: 0 } to { opacity: 1 } }
 @keyframes lb-hint { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
@@ -42,12 +47,13 @@ const KEYFRAMES = `
 [data-lb] input:focus-visible, [data-lb] textarea:focus-visible { border-color: ${C.RED} !important; outline: none; }
 [data-lb] button:focus-visible, [data-lb] a:focus-visible, [data-lb] [role="button"]:focus-visible { outline: 2px solid ${C.RED}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-lb] *, [data-lb] { animation: none !important; transition: none !important; } }
-`
+`)
 
-const goldText = { backgroundImage: GOLD_GRAD, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' }
+const goldText = (C) => ({ backgroundImage: GOLD_GRAD(C), WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' })
 
 /* ═══ 01 — AÇILIŞ: son zəng çalınır ═══ */
 function BellOpening({ inv, theme, year, script }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -59,7 +65,7 @@ function BellOpening({ inv, theme, year, script }) {
     <motion.div {...gate.gateProps} data-lb
       animate={go ? { opacity: 0 } : {}}
       transition={{ duration: 0.4, delay: 1.75 }}
-      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: GRID_BG, color: C.INK, fontFamily: theme.fonts.body }}>
+      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: GRID_BG(C), color: C.INK, fontFamily: theme.fonts.body }}>
       <Bow size={96} style={{ position: 'absolute', left: -10, top: 18, transform: 'rotate(-18deg)' }} />
       <Bow size={96} style={{ position: 'absolute', right: -10, top: 18, transform: 'rotate(18deg) scaleX(-1)' }} />
       <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 22px', textAlign: 'center' }}>
@@ -69,7 +75,7 @@ function BellOpening({ inv, theme, year, script }) {
           <Bell size="min(38vw, 150px)" ringing={go} />
           {!go && (
             <div aria-hidden="true" style={{ position: 'absolute', left: '50%', bottom: '18%', transform: 'translateX(-50%)' }}>
-              <EmblemSlot mono={ot.mono} size={44} border={`2px solid ${C.GOLD_L}`} background={C.RED} color="#FFFFFF" font={head} style={{ animation: 'none', margin: 0 }}>
+              <EmblemSlot mono={ot.mono} size={44} border={`2px solid ${C.GOLD_L}`} background={C.RED} color={C.WHITE} font={head} style={{ animation: 'none', margin: 0 }}>
                 <span />
               </EmblemSlot>
             </div>
@@ -85,7 +91,7 @@ function BellOpening({ inv, theme, year, script }) {
         </div>
         <motion.div animate={go ? { opacity: 0, y: 8 } : {}} transition={{ duration: 0.25 }} style={{ marginTop: 22 }}>
           {ot.show('cta') && (
-            <div style={{ minHeight: 50, padding: '12px 30px', display: 'inline-flex', alignItems: 'center', borderRadius: 999, background: SASH, color: '#FFFFFF', fontFamily: head, fontWeight: 600, fontSize: 16.5, boxShadow: '0 12px 22px -12px rgba(147,11,33,.7)', animation: 'lb-rise .8s ease-out .8s both' }}>
+            <div style={{ minHeight: 50, padding: '12px 30px', display: 'inline-flex', alignItems: 'center', borderRadius: 999, background: SASH(C), color: C.WHITE, fontFamily: head, fontWeight: 600, fontSize: 16.5, boxShadow: '0 12px 22px -12px rgba(147,11,33,.7)', animation: 'lb-rise .8s ease-out .8s both' }}>
               {ot.text('cta')}
             </div>
           )}
@@ -95,7 +101,7 @@ function BellOpening({ inv, theme, year, script }) {
       {/* lent ekranı kəsib keçir */}
       <div aria-hidden="true" style={{ position: 'absolute', left: '-15%', right: '-15%', top: '65%', transform: 'rotate(-11deg)', clipPath: go ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', transition: 'clip-path .65s cubic-bezier(.6,0,.3,1) .55s' }}>
         <Sash height={76}>
-          <span style={{ fontFamily: script, fontSize: 'clamp(50px, 15vw, 66px)', lineHeight: 1, paddingTop: 8, ...goldText }}>{year ? fill(T.classOf, { y: year }) : ot.text('kicker')}</span>
+          <span style={{ fontFamily: script, fontSize: 'clamp(50px, 15vw, 66px)', lineHeight: 1, paddingTop: 8, ...goldText(C) }}>{year ? fill(T.classOf, { y: year }) : ot.text('kicker')}</span>
         </Sash>
       </div>
     </motion.div>
@@ -104,14 +110,15 @@ function BellOpening({ inv, theme, year, script }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, dark = false }) {
+  const C = usePalette(PAL)
   return (
-    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? NAVY_BG : GRID_BG, color: dark ? C.WHITE : C.INK }}>
+    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? NAVY_BG(C) : GRID_BG(C), color: dark ? C.WHITE : C.INK }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             {kicker && <div style={{ marginBottom: 6, fontFamily: head, fontWeight: 600, fontSize: 13.5, letterSpacing: '.22em', textTransform: 'uppercase', color: dark ? C.GOLD : C.RED }}>{kicker}</div>}
-            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 700, fontSize: 'clamp(29px, 8.4vw, 39px)', lineHeight: 1.1, textWrap: 'balance', color: dark ? C.WHITE : C.NAVY }}>{title}</h2>}
-            <div aria-hidden="true" style={{ width: 54, height: 5, margin: '14px auto 0', background: SASH, borderRadius: 1, boxShadow: `inset 0 1px 0 ${C.GOLD}, inset 0 -1px 0 ${C.GOLD}` }} />
+            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 700, fontSize: scaleFont('clamp(29px, 8.4vw, 39px)', C.hs), lineHeight: 1.1, textWrap: 'balance', color: dark ? C.WHITE : C.NAVY }}>{title}</h2>}
+            <div aria-hidden="true" style={{ width: 54, height: 5, margin: '14px auto 0', background: SASH(C), borderRadius: 1, boxShadow: `inset 0 1px 0 ${C.GOLD}, inset 0 -1px 0 ${C.GOLD}` }} />
             {sub && <p style={{ margin: '12px auto 0', maxWidth: 340, fontSize: 16, color: dark ? alpha(C.WHITE, 0.72) : C.MUTED, lineHeight: 1.6 }}>{sub}</p>}
           </div>
         )}
@@ -121,25 +128,26 @@ function Panel({ id, section, title, kicker, sub, children, head, dark = false }
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: C.WHITE, border: `1.5px solid ${C.LINE}`, borderRadius: 10,
   padding: '14px 16px', fontSize: 16, color: C.INK, outline: 'none',
-}
-const darkField = { ...field, background: alpha('#FFFFFF', 0.07), border: `1.5px solid ${alpha('#FFFFFF', 0.22)}`, color: C.WHITE }
-const btn = (on) => ({
+})
+const darkField = (C) => ({ ...field(C), background: alpha(C.WHITE, 0.07), border: `1.5px solid ${alpha(C.WHITE, 0.22)}`, color: C.WHITE })
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 24px', borderRadius: 999,
   fontSize: 15.5, fontWeight: 600, textDecoration: 'none', cursor: 'pointer',
-  background: on ? C.RED : C.WHITE, color: on ? '#FFFFFF' : C.NAVY, border: `1.5px solid ${on ? C.RED : C.LINE}`,
-})
-const darkBtn = (on) => ({ ...btn(on), background: on ? C.WHITE : 'transparent', color: on ? C.NAVY : C.WHITE, border: `1.5px solid ${on ? C.WHITE : alpha('#FFFFFF', 0.45)}` })
-const suggest = { bg: C.WHITE, border: `1.5px solid ${C.LINE}`, active: alpha(C.RED, 0.1), text: C.INK, table: C.RED, radius: 10 }
+  background: on ? C.RED : C.WHITE, color: on ? C.WHITE : C.NAVY, border: `1.5px solid ${on ? C.RED : C.LINE}`,
+}))
+const darkBtn = (C) => ((on) => ({ ...btn(C)(on), background: on ? C.WHITE : 'transparent', color: on ? C.NAVY : C.WHITE, border: `1.5px solid ${on ? C.WHITE : alpha(C.WHITE, 0.45)}` }))
+const suggest = (C) => ({ bg: C.WHITE, border: `1.5px solid ${C.LINE}`, active: alpha(C.RED, 0.1), text: C.INK, table: C.RED, radius: 10 })
 
 /* Qırmızı rozet (büzməli lent) */
 function Rosette({ size = 190, children }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ position: 'relative', width: size, height: size * 1.32, margin: '0 auto' }}>
-      <span aria-hidden="true" style={{ position: 'absolute', left: '26%', top: '60%', width: '20%', height: '40%', background: SASH, clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 86%, 0 100%)', transform: 'rotate(12deg)' }} />
-      <span aria-hidden="true" style={{ position: 'absolute', right: '26%', top: '60%', width: '20%', height: '40%', background: SASH, clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 86%, 0 100%)', transform: 'rotate(-12deg)' }} />
+      <span aria-hidden="true" style={{ position: 'absolute', left: '26%', top: '60%', width: '20%', height: '40%', background: SASH(C), clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 86%, 0 100%)', transform: 'rotate(12deg)' }} />
+      <span aria-hidden="true" style={{ position: 'absolute', right: '26%', top: '60%', width: '20%', height: '40%', background: SASH(C), clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 86%, 0 100%)', transform: 'rotate(-12deg)' }} />
       <div style={{ position: 'absolute', left: 0, top: 0, width: size, height: size, borderRadius: '50%', background: `repeating-conic-gradient(from 0deg, #E0213F 0 7.5deg, #A50D26 7.5deg 15deg)`, boxShadow: '0 16px 26px -14px rgba(147,11,33,.7)' }}>
         <div style={{ position: 'absolute', inset: '17%', borderRadius: '50%', background: C.WHITE, boxShadow: `0 0 0 3px ${C.GOLD}, inset 0 2px 6px rgba(0,0,0,.12)`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
           {children}
@@ -153,6 +161,7 @@ function Rosette({ size = 190, children }) {
 export default function LastBellTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -162,14 +171,14 @@ export default function LastBellTemplate(props) {
   const year = inv.dp?.year || ''
 
   return (
-    <div data-lb lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-lb lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.WHITE, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.RED, 0.3),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <BellOpening inv={inv} theme={theme} lang={lang} year={year} script={script} />}
 
-      <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: SASH, boxShadow: '0 8px 20px rgba(147,11,33,.4)' }}>
+      <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: SASH(C), boxShadow: '0 8px 20px rgba(147,11,33,.4)' }}>
         {({ playing }) => <EqBars playing={playing} color={C.GOLD_L} idle={alpha(C.GOLD_L, 0.4)} />}
       </MusicFab>
 
@@ -189,7 +198,7 @@ export default function LastBellTemplate(props) {
           </header>
 
           {/* HERO — zəng, lent, bantlar */}
-          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: GRID_BG, padding: '36px 0 60px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: GRID_BG(C), padding: '36px 0 60px', textAlign: 'center' }}>
             <Bow size={86} style={{ position: 'absolute', left: -12, top: 10, transform: 'rotate(-18deg)' }} />
             <Bow size={86} style={{ position: 'absolute', right: -12, top: 10, transform: 'rotate(18deg) scaleX(-1)' }} />
             <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -197,7 +206,7 @@ export default function LastBellTemplate(props) {
             </div>
             <div style={{ margin: '18px -10% 0', transform: 'rotate(-5deg)' }}>
               <Sash height={68}>
-                <span style={{ fontFamily: script, fontSize: 'clamp(46px, 14vw, 60px)', lineHeight: 1, paddingTop: 8, ...goldText }}>{year ? fill(T.classOf, { y: year }) : inv.eventLabel}</span>
+                <span style={{ fontFamily: script, fontSize: 'clamp(46px, 14vw, 60px)', lineHeight: 1, paddingTop: 8, ...goldText(C) }}>{year ? fill(T.classOf, { y: year }) : inv.eventLabel}</span>
               </Sash>
             </div>
             <div style={{ padding: '0 22px' }}>
@@ -216,7 +225,7 @@ export default function LastBellTemplate(props) {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop]) => (
                   <div key={l} style={{ textAlign: 'center', borderRadius: 8, overflow: 'hidden', background: C.WHITE, boxShadow: '0 12px 18px -10px rgba(0,0,0,.5)' }}>
-                    <div style={{ position: 'relative', height: 18, background: SASH }}>
+                    <div style={{ position: 'relative', height: 18, background: SASH(C) }}>
                       <span aria-hidden="true" style={{ position: 'absolute', left: '28%', top: 6, width: 6, height: 6, borderRadius: '50%', background: C.NAVY_D }} />
                       <span aria-hidden="true" style={{ position: 'absolute', right: '28%', top: 6, width: 6, height: 6, borderRadius: '50%', background: C.NAVY_D }} />
                     </div>
@@ -238,12 +247,12 @@ export default function LastBellTemplate(props) {
                   weddingData={weddingData} theme={theme} accent={C.RED} height="clamp(240px, 66vw, 300px)"
                   map={{ opacity: 0.92, filter: 'grayscale(.3)', tintOpacity: 0.08, tint: C.RED, blend: 'multiply' }}
                   frame={<MapPin />}
-                  fallback={<div style={{ height: 'clamp(240px, 66vw, 300px)', position: 'relative', background: GRID_BG }}><MapPin /></div>}
+                  fallback={<div style={{ height: 'clamp(240px, 66vw, 300px)', position: 'relative', background: GRID_BG(C) }}><MapPin /></div>}
                 />
               </div>
               <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontWeight: 700, fontSize: 25, lineHeight: 1.2, color: C.NAVY }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 6, fontSize: 15, color: C.MUTED }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn(C)} />
             </Panel>
           )}
 
@@ -272,7 +281,7 @@ export default function LastBellTemplate(props) {
           {/* MASA — rozet */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="lb-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.RED}
+              <SeatFinder inv={inv} tr={tr} listId="lb-seat-list" field={field(C)} suggest={suggest(C)} font={body} muted={C.MUTED} accent={C.RED}
                 nameStyle={{ fontFamily: head, fontWeight: 700, fontSize: 24, color: C.NAVY }}
                 card={(num) => (
                   <div style={{ paddingTop: 20 }}>
@@ -299,7 +308,7 @@ export default function LastBellTemplate(props) {
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.NAVY} bg={C.WHITE} frame={{ borderRadius: 14, border: `1.5px solid ${C.LINE}` }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
             </Panel>
           )}
 
@@ -311,7 +320,7 @@ export default function LastBellTemplate(props) {
                 font: body, display: head, displayItalic: false, btnFont: head,
                 doneMark: <Bow size={70} style={{ margin: '0 auto 10px' }} />,
                 marker: (a) => <span style={{ display: 'block', width: 15, height: 15, borderRadius: '50%', border: `2px solid ${a ? C.RED : C.LINE}`, background: a ? C.RED : 'transparent', boxShadow: a ? `inset 0 0 0 2px ${C.WHITE}` : 'none' }} />,
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -319,12 +328,12 @@ export default function LastBellTemplate(props) {
           {/* ARZULAR — «5» qiyməti */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.GOLD_L} />
+              <GuestbookForm inv={inv} field={darkField(C)} btn={darkBtn(C)} errorColor={C.GOLD_L} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
                   return (
-                    <figure key={msg.name + i} style={{ position: 'relative', margin: 0, padding: '18px 54px 14px 18px', background: GRID_BG, color: C.INK, borderRadius: 8, boxShadow: '0 12px 20px -14px rgba(0,0,0,.6)' }}>
+                    <figure key={msg.name + i} style={{ position: 'relative', margin: 0, padding: '18px 54px 14px 18px', background: GRID_BG(C), color: C.INK, borderRadius: 8, boxShadow: '0 12px 20px -14px rgba(0,0,0,.6)' }}>
                       <span aria-hidden="true" style={{ position: 'absolute', right: 12, top: 10, width: 34, height: 34, borderRadius: '50%', border: `2px solid ${C.RED}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: head, fontStyle: 'italic', fontWeight: 700, fontSize: 20, color: C.RED, transform: 'rotate(-10deg)' }}>5</span>
                       <blockquote style={{ margin: 0, fontSize: 16.5, lineHeight: 1.55 }}>{msg.text}</blockquote>
                       <figcaption style={{ marginTop: 8, fontFamily: head, fontWeight: 600, fontSize: 14.5, color: C.RED }}>
@@ -340,7 +349,7 @@ export default function LastBellTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 

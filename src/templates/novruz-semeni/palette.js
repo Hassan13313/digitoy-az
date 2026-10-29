@@ -9,9 +9,9 @@ export const EGGS = [
   { base: '#E94F37', pat: 'dots' }, { base: '#F6C445', pat: 'zigzag' }, { base: '#4FB3D9', pat: 'stripes' }, { base: '#9B5DE5', pat: 'dots' },
 ]
 
-export const CREAM_BG = `radial-gradient(60% 40% at 15% 10%, rgba(201,234,142,.35), transparent 70%), radial-gradient(50% 35% at 90% 90%, rgba(233,79,55,.10), transparent 70%), #FFF8EA`
-export const GREEN_BG = `radial-gradient(70% 50% at 50% 0%, rgba(201,234,142,.25), transparent 70%), linear-gradient(180deg, #3F8F2F, #2B6A1F)`
-export const COPPER_GRAD = 'linear-gradient(160deg, #8A5226 0%, #E7B57A 38%, #B8743A 62%, #F1C994 76%, #8A5226 100%)'
+export const CREAM_BG = (C) => (`radial-gradient(60% 40% at 15% 10%, rgba(201,234,142,.35), transparent 70%), radial-gradient(50% 35% at 90% 90%, rgba(233,79,55,.10), transparent 70%), ${C.CREAM}`)
+export const GREEN_BG = (C) => (`radial-gradient(70% 50% at 50% 0%, rgba(201,234,142,.25), transparent 70%), linear-gradient(180deg, ${C.GREEN}, #2B6A1F)`)
+export const COPPER_GRAD = (C) => (`linear-gradient(160deg, #8A5226 0%, #E7B57A 38%, ${C.COPPER} 62%, #F1C994 76%, #8A5226 100%)`)
 
 /* Səməni yarpaqları — sabit toxumlu LCG */
 let seed = 41

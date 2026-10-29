@@ -1,9 +1,11 @@
-import { C, SASH } from './palette'
+import { C as PAL, SASH } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* LAST BELL — məktəb zəngi, ağ bant, qırmızı lent */
 
 /** Mis məktəb zəngi (taxta dəstəkli, qırmızı lentli) */
 export function Bell({ size = 140, ringing = false, style }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ width: size, transformOrigin: '50% 12%', animation: ringing ? 'lb-ring .16s ease-in-out 6 alternate' : 'none', ...style }}>
       <svg aria-hidden="true" viewBox="0 0 120 150" width="100%" style={{ display: 'block', overflow: 'visible' }}>
@@ -33,7 +35,9 @@ export function Bell({ size = 140, ringing = false, style }) {
 }
 
 /** Zəng səsi — genişlənən dalğalar */
-export function SoundRings({ on = false, color = C.GOLD }) {
+export function SoundRings($p) {
+  const C = usePalette(PAL)
+  const { on = false, color = C.GOLD } = $p
   if (!on) return null
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
@@ -46,9 +50,10 @@ export function SoundRings({ on = false, color = C.GOLD }) {
 
 /** Ağ bant (məktəbli fiyonku) */
 export function Bow({ size = 90, style }) {
+  const C = usePalette(PAL)
   return (
     <svg aria-hidden="true" viewBox="0 0 120 90" width={size} height={size * 0.75} style={{ display: 'block', overflow: 'visible', filter: 'drop-shadow(0 6px 8px rgba(28,42,74,.18))', ...style }}>
-      <g fill="#FFFFFF" stroke="#D9DEE8" strokeWidth="1.2">
+      <g fill={C.WHITE} stroke="#D9DEE8" strokeWidth="1.2">
         <path d="M60 40C40 8 6 4 6 30C6 50 30 60 60 46Z" />
         <path d="M60 40C80 8 114 4 114 30C114 50 90 60 60 46Z" />
         <path d="M54 46L34 88L46 80L52 90L60 50Z" />
@@ -58,16 +63,17 @@ export function Bow({ size = 90, style }) {
         <path d="M58 40C44 20 22 14 14 26M58 42C40 34 24 34 14 38" />
         <path d="M62 40C76 20 98 14 106 26M62 42C80 34 96 34 106 38" />
       </g>
-      <ellipse cx="60" cy="43" rx="10" ry="9" fill="#FFFFFF" stroke="#D9DEE8" strokeWidth="1.2" />
+      <ellipse cx="60" cy="43" rx="10" ry="9" fill={C.WHITE} stroke="#D9DEE8" strokeWidth="1.2" />
     </svg>
   )
 }
 
 /** Qırmızı məzun lenti (qızılı kənar zolaqlı) */
 export function Sash({ children, style, height = 64 }) {
+  const C = usePalette(PAL)
   return (
     <div style={{
-      position: 'relative', height, display: 'flex', alignItems: 'center', justifyContent: 'center', background: SASH,
+      position: 'relative', height, display: 'flex', alignItems: 'center', justifyContent: 'center', background: SASH(C),
       boxShadow: '0 10px 20px -10px rgba(147,11,33,.6)', ...style,
     }}>
       <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 5, height: 2, background: C.GOLD, opacity: 0.85 }} />

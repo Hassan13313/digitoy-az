@@ -7,17 +7,17 @@ export const C = {
 }
 
 /* Qızılı çərçivə — konik parıltı */
-export const GILT = 'conic-gradient(from 210deg, #8C6A2A, #F6DFA0, #B8913F, #FFF1C4, #9C7A34, #E0B864, #8C6A2A)'
+export const GILT = (C) => (`conic-gradient(from 210deg, #8C6A2A, ${C.GOLD_L}, #B8913F, #FFF1C4, #9C7A34, ${C.GOLD}, #8C6A2A)`)
 
 /* Düymələr üçün — konik parıltı enli düymədə «konus» kimi görünür */
-export const GILT_BAR = 'linear-gradient(160deg, #B8913F 0%, #F6DFA0 42%, #D9B565 62%, #9C7A34 100%)'
+export const GILT_BAR = (C) => (`linear-gradient(160deg, #B8913F 0%, ${C.GOLD_L} 42%, #D9B565 62%, #9C7A34 100%)`)
 
 /* Güzgü səthi: sönük (açılışdan əvvəl) və işıqlı */
 export const MIRROR_DIM = 'radial-gradient(80% 70% at 40% 30%, #4A4846 0%, #2A2826 45%, #171513 100%)'
 export const MIRROR_LIT = 'radial-gradient(80% 70% at 40% 30%, #FFF6E2 0%, #D9C7A6 32%, #8F826E 70%, #4A4034 100%)'
 
 /* Şam işığı ləkələri (fon) */
-export const GLOW_BG = `radial-gradient(45% 30% at 12% 20%, rgba(255,190,100,.10), transparent 70%), radial-gradient(45% 30% at 88% 60%, rgba(255,190,100,.08), transparent 70%), linear-gradient(180deg, ${C.NIGHT_L}, ${C.NIGHT})`
+export const GLOW_BG = (C) => (`radial-gradient(45% 30% at 12% 20%, rgba(255,190,100,.10), transparent 70%), radial-gradient(45% 30% at 88% 60%, rgba(255,190,100,.08), transparent 70%), linear-gradient(180deg, ${C.NIGHT_L}, ${C.NIGHT})`)
 
 /* Ad uzunluğuna görə ölçü */
 export function nameSize(text) {

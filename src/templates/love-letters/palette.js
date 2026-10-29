@@ -6,9 +6,9 @@ export const C = {
   MUTED: '#7D7468', NAVY: '#262B42',
 }
 
-export const ENVS = [C.ENV1, C.ENV2, C.ENV3, C.ENV4]
+export const ENVS = (C) => ([C.ENV1, C.ENV2, C.ENV3, C.ENV4])
 
-export const LINEN_BG = `repeating-linear-gradient(0deg, rgba(120,100,70,.035) 0 1px, transparent 1px 3px), repeating-linear-gradient(90deg, rgba(120,100,70,.035) 0 1px, transparent 1px 3px), #EFE6D8`
+export const LINEN_BG = (C) => (`repeating-linear-gradient(0deg, rgba(120,100,70,.035) 0 1px, transparent 1px 3px), repeating-linear-gradient(90deg, rgba(120,100,70,.035) 0 1px, transparent 1px 3px), ${C.LINEN}`)
 export const NAVY_BG = `radial-gradient(80% 50% at 50% 0%, rgba(201,139,139,.18), transparent 70%), #262B42`
 /* Xətli məktub kağızı */
 export const RULED = `repeating-linear-gradient(180deg, transparent 0 31px, rgba(47,53,80,.12) 31px 32px), #FBF6EC`

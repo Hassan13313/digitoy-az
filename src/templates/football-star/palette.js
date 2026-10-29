@@ -6,8 +6,8 @@ export const C = {
 }
 
 /* Ot zolaqları */
-export const PITCH_BG = `repeating-linear-gradient(180deg, ${C.PITCH} 0 54px, ${C.PITCH_L} 54px 108px)`
-export const NIGHT_BG = `radial-gradient(60% 30% at 18% 0%, rgba(255,255,255,.22), transparent 70%), radial-gradient(60% 30% at 82% 0%, rgba(255,255,255,.22), transparent 70%), linear-gradient(180deg, ${C.NAVY_D}, ${C.NAVY} 40%, ${C.PITCH_D} 40.2%, ${C.PITCH} 100%)`
+export const PITCH_BG = (C) => (`repeating-linear-gradient(180deg, ${C.PITCH} 0 54px, ${C.PITCH_L} 54px 108px)`)
+export const NIGHT_BG = (C) => (`radial-gradient(60% 30% at 18% 0%, rgba(255,255,255,.22), transparent 70%), radial-gradient(60% 30% at 82% 0%, rgba(255,255,255,.22), transparent 70%), linear-gradient(180deg, ${C.NAVY_D}, ${C.NAVY} 40%, ${C.PITCH_D} 40.2%, ${C.PITCH} 100%)`)
 
 /* «Qol!» */
 export const GOAL_WORD = { az: 'QOL!', en: 'GOAL!', ru: 'ГОЛ!' }

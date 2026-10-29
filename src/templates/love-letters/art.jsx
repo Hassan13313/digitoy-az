@@ -1,9 +1,12 @@
-import { C, ENVS } from './palette'
+import { C as PAL, ENVS } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* LOVE LETTERS — məktublar, ip, marka */
 
 /** Zərf (arxa tərəfi: qapaq xətləri) */
-export function Envelope({ width = 240, color = C.ENV1, children, back = true, style }) {
+export function Envelope($p) {
+  const C = usePalette(PAL)
+  const { width = 240, color = C.ENV1, children, back = true, style } = $p
   return (
     <div style={{ position: 'relative', width, aspectRatio: '1.55', borderRadius: 4, background: color, boxShadow: '0 10px 18px -12px rgba(47,53,80,.5), inset 0 0 0 1px rgba(0,0,0,.05)', overflow: 'hidden', ...style }}>
       {back && (
@@ -30,7 +33,9 @@ const PERF = {
 }
 
 /** Poçt markası (dişli kənar) */
-export function Stamp({ size = 46, color = C.ROSE_L, children, rot = 6, style }) {
+export function Stamp($p) {
+  const C = usePalette(PAL)
+  const { size = 46, color = C.ROSE_L, children, rot = 6, style } = $p
   return (
     <div aria-hidden="true" style={{
       position: 'relative', width: size, height: size * 1.18, padding: 4, transform: `rotate(${rot}deg)`,
@@ -45,7 +50,9 @@ export function Stamp({ size = 46, color = C.ROSE_L, children, rot = 6, style })
 }
 
 /** Xətli ürək */
-export function HeartLine({ size = 22, color = C.ROSE, fill = 'none', style }) {
+export function HeartLine($p) {
+  const C = usePalette(PAL)
+  const { size = 22, color = C.ROSE, fill = 'none', style } = $p
   return (
     <svg aria-hidden="true" viewBox="0 0 24 22" width={size} height={size * 0.92} style={{ display: 'block', overflow: 'visible', ...style }}>
       <path d="M12 20.5S2 14.4 2 7.6C2 4.4 4.5 2 7.5 2c2 0 3.6 1.1 4.5 2.7C12.9 3.1 14.5 2 16.5 2 19.5 2 22 4.4 22 7.6c0 6.8-10 12.9-10 12.9z" fill={fill} stroke={color} strokeWidth="1.5" strokeLinejoin="round" />
@@ -55,6 +62,7 @@ export function HeartLine({ size = 22, color = C.ROSE, fill = 'none', style }) {
 
 /** İp (çarpaz) və fiyonk — açılanda sürüşüb düşür */
 export function Twine({ off = false, instant = false }) {
+  const C = usePalette(PAL)
   const tr = instant ? 'none' : 'transform .55s cubic-bezier(.5,0,.8,.4), opacity .45s ease .1s'
   const rope = (extra) => ({
     position: 'absolute', background: `repeating-linear-gradient(45deg, ${C.TWINE} 0 3px, ${C.TWINE_D} 3px 4.5px)`, boxShadow: '0 1px 2px rgba(0,0,0,.25)', ...extra,
@@ -74,6 +82,7 @@ export function Twine({ off = false, instant = false }) {
 
 /** Bağlama: zərflər yelpik kimi açılır, üstdəki məktub qalxır */
 export function LetterBundle({ width = 260, open = false, letter, instant = false, front }) {
+  const C = usePalette(PAL)
   const fan = [
     { r: -18, x: -26, y: 12 },
     { r: -8, x: -12, y: 4 },
@@ -83,9 +92,9 @@ export function LetterBundle({ width = 260, open = false, letter, instant = fals
   const closed = [{ r: -3 }, { r: 2.5 }, { r: -1.5 }, { r: 0.5 }]
   return (
     <div style={{ position: 'relative', width, aspectRatio: '1.55' }}>
-      {ENVS.map((col, i) => {
+      {ENVS(C).map((col, i) => {
         const f = open ? fan[i] : { x: 0, y: 0, ...closed[i] }
-        const top = i === ENVS.length - 1
+        const top = i === ENVS(C).length - 1
         return (
           <div key={i} style={{ position: 'absolute', inset: 0, transform: `translate(${f.x}%, ${f.y}%) rotate(${f.r}deg)`, transition: instant ? 'none' : `transform .7s cubic-bezier(.3,.8,.3,1) ${0.3 + i * 0.05}s`, zIndex: i }}>
             {top && (

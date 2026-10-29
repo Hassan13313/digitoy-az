@@ -10,9 +10,10 @@ import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { ageSentence, kidsGalleryDesc, tableNum, tableSize } from '../_shared/kids'
-import { C, FOIL, ROSE_FOIL, BUNCH, letterSize } from './palette'
+import { C as PAL, FOIL, ROSE_FOIL, BUNCH, letterSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Balloon, Confetti, Garland, CandyJar, GumballMachine, Candle } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    BALLOON PARTY — «Şar və şirniyyat bayramı» (Uşaq ad günü konsepti, 2026-10)
@@ -32,9 +33,13 @@ import { Balloon, Confetti, Garland, CandyJar, GumballMachine, Candle } from './
 
 const BASE = getTemplateTheme('balloon-party')
 const ID = 'balloon-party'
+
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['PINK_D'], secondary: ['MINT_D'], accent: ['GOLD'], background: ['CREAM'], text: ['PLUM'] }
 const SCRIPT = "'Pacifico', 'Great Vibes', cursive"
 
-const KEYFRAMES = `
+const KEYFRAMES = (C) => (`
 @keyframes bp-bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-6px) } }
 @keyframes bp-sway { 0%,100% { transform: rotate(-2deg) } 50% { transform: rotate(2deg) } }
 @keyframes bp-flame { from { transform: scaleY(.85) } to { transform: scaleY(1.12) } }
@@ -49,7 +54,7 @@ const KEYFRAMES = `
 [data-bp] input:focus-visible, [data-bp] textarea:focus-visible { border-color: ${C.PINK} !important; outline: none; }
 [data-bp] button:focus-visible, [data-bp] a:focus-visible, [data-bp] [role="button"]:focus-visible { outline: 2px solid ${C.PINK_D}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-bp] *, [data-bp] { animation: none !important; transition: none !important; } }
-`
+`)
 
 const foilText = (grad) => ({
   backgroundImage: grad, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent',
@@ -57,6 +62,7 @@ const foilText = (grad) => ({
 
 /* Folqa şar hərfləri */
 function FoilLetters({ text, disp, size }) {
+  const C = usePalette(PAL)
   const chars = Array.from(String(text || ''))
   return (
     <h1 aria-label={text} style={{ margin: '6px 0 0', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-end', gap: '0 .03em', fontFamily: disp, fontWeight: 900, fontSize: size, lineHeight: 1.08 }}>
@@ -64,7 +70,7 @@ function FoilLetters({ text, disp, size }) {
         ? <span key={i} aria-hidden="true" style={{ width: '.28em' }} />
         : (
           <span key={i} aria-hidden="true" style={{ position: 'relative', display: 'inline-block', paddingBottom: '.06em', animation: `bp-bob ${2.4 + (i % 3) * 0.4}s ease-in-out ${(i * 0.17).toFixed(2)}s infinite` }}>
-            <span style={{ ...foilText(i % 2 ? ROSE_FOIL : FOIL), display: 'inline-block', transform: `rotate(${i % 2 ? 4 : -4}deg)`, WebkitTextStroke: '1px rgba(150,100,40,.22)', filter: 'drop-shadow(0 6px 6px rgba(150,90,40,.22))' }}>{ch}</span>
+            <span style={{ ...foilText(i % 2 ? ROSE_FOIL : FOIL(C)), display: 'inline-block', transform: `rotate(${i % 2 ? 4 : -4}deg)`, WebkitTextStroke: '1px rgba(150,100,40,.22)', filter: 'drop-shadow(0 6px 6px rgba(150,90,40,.22))' }}>{ch}</span>
           </span>
         )))}
     </h1>
@@ -73,6 +79,7 @@ function FoilLetters({ text, disp, size }) {
 
 /* ═══ 01 — AÇILIŞ: şar dəstəsi ═══ */
 function BalloonOpening({ inv, theme }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -152,6 +159,7 @@ function BalloonOpening({ inv, theme }) {
 
 /* Bölmə */
 function Party({ id, section, title, kicker, sub, children, disp, tint }) {
+  const C = usePalette(PAL)
   return (
     <section id={id} data-section={section} style={{ position: 'relative', padding: '60px 20px 66px', background: tint || C.CREAM, overflow: 'hidden' }}>
       <Confetti opacity={0.22} count={14} />
@@ -163,7 +171,7 @@ function Party({ id, section, title, kicker, sub, children, disp, tint }) {
               <Balloon size={24} color="gold" string={14} />
               <Balloon size={18} color={C.MINT_D} string={12} />
             </div>
-            {title && <h2 style={{ margin: 0, fontFamily: disp, fontWeight: 800, fontSize: 'clamp(28px, 8vw, 36px)', lineHeight: 1.12, color: C.PLUM, textWrap: 'balance' }}>{title}</h2>}
+            {title && <h2 style={{ margin: 0, fontFamily: disp, fontWeight: 800, fontSize: scaleFont('clamp(28px, 8vw, 36px)', C.hs), lineHeight: 1.12, color: C.PLUM, textWrap: 'balance' }}>{title}</h2>}
             {kicker && <div style={{ marginTop: 8, fontSize: 15.5, color: C.MUTED }}>{kicker}</div>}
             {sub && <p style={{ margin: '8px auto 0', maxWidth: 330, fontSize: 15.5, color: C.MUTED, lineHeight: 1.55 }}>{sub}</p>}
           </div>
@@ -174,28 +182,29 @@ function Party({ id, section, title, kicker, sub, children, disp, tint }) {
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: '#FFFFFF', border: `2px solid ${alpha(C.PINK, 0.3)}`, borderRadius: 18,
   padding: '13px 16px', fontSize: 16, color: C.PLUM, outline: 'none',
-}
-const btn = (on) => ({
+})
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 22px', borderRadius: 999,
   fontSize: 15.5, fontWeight: 700, textDecoration: 'none', cursor: 'pointer',
   background: on ? C.PINK_D : '#FFFFFF', color: on ? '#FFFFFF' : C.PINK_D, border: `2px solid ${on ? C.PINK_D : alpha(C.PINK_D, 0.45)}`,
-})
-const suggest = { bg: '#FFFFFF', border: `2px solid ${alpha(C.PINK, 0.25)}`, active: alpha(C.BLUSH, 0.35), text: C.PLUM, table: C.PINK_D, radius: 18 }
+}))
+const suggest = (C) => ({ bg: '#FFFFFF', border: `2px solid ${alpha(C.PINK, 0.25)}`, active: alpha(C.BLUSH, 0.35), text: C.PLUM, table: C.PINK_D, radius: 18 })
 
-const TIERS = [
+const TIERS = (C) => ([
   { bg: C.BLUSH, frost: C.CREAM, ink: C.PINK_D },
   { bg: C.MINT, frost: '#FFFFFF', ink: '#3F8E78' },
   { bg: C.LEMON, frost: '#FFFFFF', ink: '#A87410' },
   { bg: C.LILAC, frost: '#FFFFFF', ink: '#6C55A8' },
-]
+])
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function BalloonPartyTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const disp = theme.fonts.heading
   const body = theme.fonts.body
@@ -206,12 +215,12 @@ export default function BalloonPartyTemplate(props) {
   const candles = Math.min(age || 3, 9)
 
   return (
-    <div data-bp lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-bp lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.CREAM,
       minHeight: '100vh', fontFamily: body, color: C.PLUM, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.PINK, 0.25),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <BalloonOpening inv={inv} theme={theme} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.PINK_D, border: '3px solid #FFFFFF', boxShadow: '0 8px 18px rgba(201,87,124,.35)' }}>
@@ -248,7 +257,7 @@ export default function BalloonPartyTemplate(props) {
               <Balloon size={62} color={C.PINK} string={70} style={{ transform: 'rotate(-12deg)', animation: 'bp-bob 3s ease-in-out infinite' }} />
               {age ? (
                 <div aria-hidden="true" style={{ position: 'relative', animation: 'bp-bob 3.4s ease-in-out .4s infinite' }}>
-                  <span style={{ ...foilText(FOIL), display: 'block', fontFamily: disp, fontWeight: 900, fontSize: age > 9 ? 128 : 170, lineHeight: 0.9, WebkitTextStroke: '1.5px rgba(150,100,40,.25)', filter: 'drop-shadow(0 10px 10px rgba(150,90,40,.25))' }}>{age}</span>
+                  <span style={{ ...foilText(FOIL(C)), display: 'block', fontFamily: disp, fontWeight: 900, fontSize: age > 9 ? 128 : 170, lineHeight: 0.9, WebkitTextStroke: '1.5px rgba(150,100,40,.25)', filter: 'drop-shadow(0 10px 10px rgba(150,90,40,.25))' }}>{age}</span>
                   <span style={{ position: 'absolute', left: '50%', top: '96%', width: 1.2, height: 34, background: alpha(C.GOLD_D, 0.6) }} />
                 </div>
               ) : (
@@ -271,9 +280,9 @@ export default function BalloonPartyTemplate(props) {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 380, margin: '0 auto' }}>
                 {[
                   { v: cd.days, l: cd.labels.days, c: ['#EF8FA8', '#FFE495', '#F6C3CF'], lid: C.PINK_D },
-                  { v: cd.hours, l: cd.labels.hours, c: ['#7FC8B0', '#BDE8D7', '#FFFFFF'], lid: '#3F8E78' },
+                  { v: cd.hours, l: cd.labels.hours, c: [C.MINT_D, '#BDE8D7', '#FFFFFF'], lid: '#3F8E78' },
                   { v: cd.minutes, l: cd.labels.minutes, c: ['#D6C5F3', '#BFDCF6', '#EF8FA8'], lid: '#6C55A8' },
-                  { v: cd.seconds, l: cd.labels.seconds, c: ['#FFE495', '#EF8FA8', '#7FC8B0'], lid: '#C9913A', pop: true },
+                  { v: cd.seconds, l: cd.labels.seconds, c: ['#FFE495', '#EF8FA8', C.MINT_D], lid: '#C9913A', pop: true },
                 ].map(({ v, l, c, lid, pop }) => (
                   <div key={l} style={{ textAlign: 'center' }}>
                     <CandyJar candies={c} lid={lid}>
@@ -304,10 +313,10 @@ export default function BalloonPartyTemplate(props) {
               <div style={{ textAlign: 'center', marginTop: 24, fontFamily: disp, fontWeight: 800, fontSize: 24, lineHeight: 1.2, color: C.PLUM }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontSize: 15.5, color: C.MUTED }}>{weddingData.venueNote}</div>}
               <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
-                {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(true)}>{tr.inv_directions_btn}</a>}
-                {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(!inv.dirUrl)}>Maps</a>}
-                {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Waze</a>}
-                {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Apple</a>}
+                {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(true)}>{tr.inv_directions_btn}</a>}
+                {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(!inv.dirUrl)}>Maps</a>}
+                {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>Waze</a>}
+                {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>Apple</a>}
               </div>
             </Party>
           )}
@@ -320,7 +329,7 @@ export default function BalloonPartyTemplate(props) {
                   {Array.from({ length: candles }, (_, k) => <Candle key={k} color={[C.MINT_D, C.PINK, '#C9913A', '#9D85D8'][k % 4]} h={26} />)}
                 </div>
                 {timeline.events.map((ev, i) => {
-                  const t = TIERS[i % TIERS.length]
+                  const t = TIERS(C)[i % TIERS(C).length]
                   const w = Math.min(100, 62 + i * 8)
                   return (
                     <div key={i} style={{ position: 'relative', width: `${w}%`, padding: '22px 14px 14px', marginTop: i ? -1 : 0, textAlign: 'center', background: t.bg, borderRadius: i === 0 ? '20px 20px 8px 8px' : 8, boxShadow: 'inset 0 -6px 0 rgba(0,0,0,.05)' }}>
@@ -345,8 +354,8 @@ export default function BalloonPartyTemplate(props) {
           {/* MASA — saqqız avtomatı */}
           {S.seating && !seating.isEmpty && (
             <Party section="seating" disp={disp} tint="#FDF0F3" title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <input {...seatInputProps(inv, 'bp-seat-list')} style={field} />
-              <SeatSuggest inv={inv} id="bp-seat-list" c={{ ...suggest, font: body }} />
+              <input {...seatInputProps(inv, 'bp-seat-list')} style={field(C)} />
+              <SeatSuggest inv={inv} id="bp-seat-list" c={{ ...suggest(C), font: body }} />
               {seating.showNotFound && <div style={{ marginTop: 12, fontSize: 15, color: C.MUTED, textAlign: 'center' }}>{tr.inv_seat_fullname}</div>}
               {seating.selected && (
                 <div key={seating.selected.full_name} style={{ marginTop: 24, textAlign: 'center' }}>
@@ -389,7 +398,7 @@ export default function BalloonPartyTemplate(props) {
                   <QRCodeSVG value={gallery.photoShareUrl} size={126} bgColor="#FFFFFF" fgColor={C.PLUM} level="M" />
                 </div>
                 <div style={{ marginTop: 16, fontSize: 15, color: C.MUTED }}>{tr.inv_scan_upload}</div>
-                <a data-press href={gallery.photoShareUrl} style={{ ...btn(true), marginTop: 16 }}>{tr.inv_gallery_btn}</a>
+                <a data-press href={gallery.photoShareUrl} style={{ ...btn(C)(true), marginTop: 16 }}>{tr.inv_gallery_btn}</a>
                 <p style={{ margin: '16px auto 0', maxWidth: 340, fontSize: 15.5, color: C.MUTED, lineHeight: 1.65 }}>{kidsGalleryDesc(props.adminOverrides, tr, lang)}</p>
               </div>
             </Party>
@@ -403,7 +412,7 @@ export default function BalloonPartyTemplate(props) {
                 font: body, display: disp, btnFont: disp,
                 doneMark: <div style={{ display: 'flex', justifyContent: 'center', gap: 2, marginBottom: 8 }}><Balloon size={26} color={C.PINK} string={18} /><Balloon size={32} color="gold" string={20} /></div>,
                 marker: (a) => (a ? <Balloon size={14} color={C.PINK} string={0} /> : <span style={{ display: 'block', width: 12, height: 12, borderRadius: '50%', border: `2px solid ${alpha(C.PINK_D, 0.45)}` }} />),
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Party>
           )}
@@ -412,9 +421,9 @@ export default function BalloonPartyTemplate(props) {
           {S.guestbook && (
             <Party section="guestbook" disp={disp} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 30 }}>
-                <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbookL.namePh} style={field} />
-                <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbookL.msgPh} rows={3} style={{ ...field, resize: 'none', lineHeight: 1.5 }} />
-                <button type="submit" disabled={!gbook.canSubmit} data-press style={{ ...btn(gbook.canSubmit), width: '100%', opacity: gbook.canSubmit ? 1 : 0.55, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed' }}>
+                <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbookL.namePh} style={field(C)} />
+                <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbookL.msgPh} rows={3} style={{ ...field(C), resize: 'none', lineHeight: 1.5 }} />
+                <button type="submit" disabled={!gbook.canSubmit} data-press style={{ ...btn(C)(gbook.canSubmit), width: '100%', opacity: gbook.canSubmit ? 1 : 0.55, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed' }}>
                   {gbook.sending ? gbookL.sending : gbookL.btn}
                 </button>
                 {gbook.error && <p role="alert" style={{ margin: 0, fontSize: 14, color: C.PINK_D }}>⚠ {gbookL.error}</p>}
@@ -441,11 +450,12 @@ export default function BalloonPartyTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={disp} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 
 function BalloonPin() {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
       <span style={{ position: 'absolute', left: -21, top: -96, animation: 'bp-bob 3s ease-in-out infinite' }}>

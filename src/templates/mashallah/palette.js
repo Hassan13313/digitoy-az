@@ -6,11 +6,11 @@ export const C = {
 }
 
 /* Göz muncuğu — konsentrik halqalar (+ şüşə parıltısı ayrıca) */
-export const NAZAR = `radial-gradient(circle at 50% 50%, #0B0B12 0 15%, #8FD6EA 15.5% 29%, #FFFFFF 29.5% 45%, ${C.COBALT} 45.5% 100%)`
+export const NAZAR = (C) => (`radial-gradient(circle at 50% 50%, #0B0B12 0 15%, #8FD6EA 15.5% 29%, #FFFFFF 29.5% 45%, ${C.COBALT} 45.5% 100%)`)
 export const GLASS = 'radial-gradient(60% 45% at 34% 26%, rgba(255,255,255,.75), rgba(255,255,255,0) 60%), radial-gradient(80% 80% at 70% 80%, rgba(0,0,40,.35), transparent 60%)'
 
 /* Atlas lent — «Maşallah» */
-export const SASH = `linear-gradient(180deg, #1A55B8 0%, ${C.COBALT} 45%, ${C.COBALT_D} 100%)`
+export const SASH = (C) => (`linear-gradient(180deg, #1A55B8 0%, ${C.COBALT} 45%, ${C.COBALT_D} 100%)`)
 export const SASH_WORD = { az: 'Maşallah', en: 'Mashallah', ru: 'Машаллах' }
 
 /* Krem fonda incə mavi kaşı naxışı */

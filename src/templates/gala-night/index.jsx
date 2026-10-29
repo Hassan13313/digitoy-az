@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C, GOLD_GRAD, DECO, nameSize } from './palette'
+import { C as PAL, GOLD_GRAD, DECO, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { ChampagneTower, Sunburst, Fan, CornerFans } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    GALA NIGHT — «Gala gecəsi» (Korporativ konsepti, 2026-10)
@@ -30,7 +31,11 @@ import { ChampagneTower, Sunburst, Fan, CornerFans } from './art'
 const BASE = getTemplateTheme('gala-night')
 const ID = 'gala-night'
 
-const KEYFRAMES = `
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['GOLD'], secondary: ['GOLD_D'], accent: ['GOLD_L'], background: ['BLACK'], text: ['IVORY'] }
+
+const KEYFRAMES = (C) => (`
 @keyframes gn-stream { to { stroke-dashoffset: -7 } }
 @keyframes gn-bubble { 0% { transform: translateY(0); opacity: 0 } 20% { opacity: 1 } 100% { transform: translateY(-14px); opacity: 0 } }
 @keyframes gn-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -43,13 +48,14 @@ const KEYFRAMES = `
 [data-gn] input:focus-visible, [data-gn] textarea:focus-visible { border-color: ${C.GOLD} !important; outline: none; }
 [data-gn] button:focus-visible, [data-gn] a:focus-visible, [data-gn] [role="button"]:focus-visible { outline: 2px solid ${C.GOLD_L}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-gn] *, [data-gn] { animation: none !important; transition: none !important; } }
-`
+`)
 
-const ONYX_BG = `radial-gradient(70% 40% at 50% 0%, rgba(212,175,97,.12), transparent 70%), linear-gradient(180deg, ${C.ONYX}, ${C.BLACK})`
-const goldText = { backgroundImage: GOLD_GRAD, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' }
+const ONYX_BG = (C) => (`radial-gradient(70% 40% at 50% 0%, rgba(212,175,97,.12), transparent 70%), linear-gradient(180deg, ${C.ONYX}, ${C.BLACK})`)
+const goldText = (C) => ({ backgroundImage: GOLD_GRAD(C), WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' })
 
 /* ═══ 01 — AÇILIŞ: şampan qülləsi dolur ═══ */
 function GalaOpening({ inv, theme }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -69,7 +75,7 @@ function GalaOpening({ inv, theme }) {
           </EmblemSlot>
           {ot.show('kicker') && <div style={{ fontSize: 12.5, fontWeight: 500, letterSpacing: '.42em', textTransform: 'uppercase', color: C.GOLD }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
-            <div style={{ marginTop: 10, fontFamily: head, fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(36px, 10.6vw, 52px)', lineHeight: 1.08, overflowWrap: 'anywhere', ...goldText }}>
+            <div style={{ marginTop: 10, fontFamily: head, fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(36px, 10.6vw, 52px)', lineHeight: 1.08, overflowWrap: 'anywhere', ...goldText(C) }}>
               {first}{second && <><span style={{ display: 'block', fontSize: '.5em' }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
@@ -80,7 +86,7 @@ function GalaOpening({ inv, theme }) {
         </div>
         <motion.div animate={go ? { opacity: 0, y: 8 } : {}} transition={{ duration: 0.3 }} style={{ marginTop: 24 }}>
           {ot.show('cta') && (
-            <div style={{ minHeight: 50, padding: '12px 30px', display: 'inline-flex', alignItems: 'center', clipPath: DECO, background: GOLD_GRAD, color: C.BLACK, fontWeight: 600, fontSize: 14, letterSpacing: '.22em', textTransform: 'uppercase', animation: 'gn-rise .8s ease-out .8s both' }}>
+            <div style={{ minHeight: 50, padding: '12px 30px', display: 'inline-flex', alignItems: 'center', clipPath: DECO, background: GOLD_GRAD(C), color: C.BLACK, fontWeight: 600, fontSize: 14, letterSpacing: '.22em', textTransform: 'uppercase', animation: 'gn-rise .8s ease-out .8s both' }}>
               {ot.text('cta')}
             </div>
           )}
@@ -93,13 +99,14 @@ function GalaOpening({ inv, theme }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, alt = false }) {
+  const C = usePalette(PAL)
   return (
-    <section id={id} data-section={section} style={{ position: 'relative', padding: '66px 20px 72px', overflow: 'hidden', background: alt ? C.ONYX : ONYX_BG, color: C.IVORY, borderTop: `1px solid ${alpha(C.GOLD, 0.18)}` }}>
+    <section id={id} data-section={section} style={{ position: 'relative', padding: '66px 20px 72px', overflow: 'hidden', background: alt ? C.ONYX : ONYX_BG(C), color: C.IVORY, borderTop: `1px solid ${alpha(C.GOLD, 0.18)}` }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 34 }}>
             <Fan width={200} />
-            {title && <h2 style={{ margin: '16px 0 0', fontFamily: head, fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(30px, 8.8vw, 40px)', lineHeight: 1.12, textWrap: 'balance', ...goldText }}>{title}</h2>}
+            {title && <h2 style={{ margin: '16px 0 0', fontFamily: head, fontStyle: 'italic', fontWeight: 400, fontSize: scaleFont('clamp(30px, 8.8vw, 40px)', C.hs), lineHeight: 1.12, textWrap: 'balance', ...goldText(C) }}>{title}</h2>}
             {kicker && <div style={{ marginTop: 10, fontSize: 12.5, fontWeight: 500, letterSpacing: '.3em', textTransform: 'uppercase', color: C.MUTED }}>{kicker}</div>}
             {sub && <p style={{ margin: '10px auto 0', maxWidth: 340, fontSize: 15, color: C.MUTED, lineHeight: 1.65 }}>{sub}</p>}
           </div>
@@ -110,21 +117,22 @@ function Panel({ id, section, title, kicker, sub, children, head, alt = false })
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: alpha('#000000', 0.35), border: `1px solid ${alpha(C.GOLD, 0.35)}`, borderRadius: 0,
   padding: '14px 16px', fontSize: 16, color: C.IVORY, outline: 'none',
-}
-const btn = (on) => ({
+})
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 22px',
   fontSize: 13, fontWeight: 600, letterSpacing: '.18em', textTransform: 'uppercase', textDecoration: 'none', cursor: 'pointer',
-  background: on ? GOLD_GRAD : 'transparent', color: on ? C.BLACK : C.GOLD_L, border: `1px solid ${on ? C.GOLD : alpha(C.GOLD, 0.45)}`,
-})
-const suggest = { bg: C.ONYX_L, border: `1px solid ${alpha(C.GOLD, 0.3)}`, active: alpha(C.GOLD, 0.15), text: C.IVORY, table: C.GOLD_L, radius: 0 }
+  background: on ? GOLD_GRAD(C) : 'transparent', color: on ? C.BLACK : C.GOLD_L, border: `1px solid ${on ? C.GOLD : alpha(C.GOLD, 0.45)}`,
+}))
+const suggest = (C) => ({ bg: C.ONYX_L, border: `1px solid ${alpha(C.GOLD, 0.3)}`, active: alpha(C.GOLD, 0.15), text: C.IVORY, table: C.GOLD_L, radius: 0 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function GalaNightTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -133,14 +141,14 @@ export default function GalaNightTemplate(props) {
   const host = inv.isCorp ? weddingData.organizer?.trim() : ''
 
   return (
-    <div data-gn lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-gn lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.BLACK, minHeight: '100vh', fontFamily: body, color: C.IVORY, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.GOLD, 0.3),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <GalaOpening inv={inv} theme={theme} />}
 
-      <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: 0, clipPath: DECO, background: GOLD_GRAD, boxShadow: '0 8px 20px rgba(0,0,0,.6)' }}>
+      <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: 0, clipPath: DECO, background: GOLD_GRAD(C), boxShadow: '0 8px 20px rgba(0,0,0,.6)' }}>
         {({ playing }) => <EqBars playing={playing} color={C.BLACK} idle={alpha(C.BLACK, 0.4)} />}
       </MusicFab>
 
@@ -155,17 +163,17 @@ export default function GalaNightTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 14, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontStyle: 'italic', fontSize: 20, ...goldText }}>{T.brand}</div>
+            <div style={{ fontFamily: head, fontStyle: 'italic', fontSize: 20, ...goldText(C) }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — deco çərçivə */}
-          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: ONYX_BG, padding: '30px 16px 56px' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: ONYX_BG(C), padding: '30px 16px 56px' }}>
             <Sunburst size={520} opacity={0.18} style={{ position: 'absolute', left: '50%', top: 0, marginLeft: -260, transform: 'scaleY(-1)' }} />
             <div style={{ position: 'relative', maxWidth: 440, margin: '0 auto', padding: '54px 26px 44px', textAlign: 'center', border: `1px solid ${alpha(C.GOLD, 0.7)}`, outline: `1px solid ${alpha(C.GOLD, 0.35)}`, outlineOffset: -9 }}>
               <CornerFans />
               <div style={{ fontSize: 12.5, fontWeight: 500, letterSpacing: '.42em', textTransform: 'uppercase', color: C.GOLD }}>{L('hero', 'kicker', inv.eventLabel)}</div>
-              <h1 style={{ margin: '14px 0 0', fontFamily: head, fontStyle: 'italic', fontWeight: 400, fontSize: nameSize(heroName), lineHeight: 1.06, overflowWrap: 'anywhere', ...goldText, animation: 'gn-rise 1s ease-out .2s both' }}>{heroName}</h1>
+              <h1 style={{ margin: '14px 0 0', fontFamily: head, fontStyle: 'italic', fontWeight: 400, fontSize: nameSize(heroName), lineHeight: 1.06, overflowWrap: 'anywhere', ...goldText(C), animation: 'gn-rise 1s ease-out .2s both' }}>{heroName}</h1>
               {host && (
                 <div style={{ marginTop: 14 }}>
                   <div style={{ fontSize: 11.5, letterSpacing: '.3em', textTransform: 'uppercase', color: C.FAINT }}>{T.host}</div>
@@ -185,9 +193,9 @@ export default function GalaNightTemplate(props) {
             <Panel section="countdown" head={head} alt title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(6px, 2.4vw, 12px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop]) => (
-                  <div key={l} style={{ padding: 1, background: GOLD_GRAD, clipPath: DECO }}>
+                  <div key={l} style={{ padding: 1, background: GOLD_GRAD(C), clipPath: DECO }}>
                     <div style={{ clipPath: DECO, background: `linear-gradient(180deg, ${C.ONYX_L}, ${C.BLACK})`, padding: '20px 4px 14px', textAlign: 'center' }}>
-                      <div style={{ fontFamily: head, fontWeight: 400, fontSize: 'clamp(26px, 7.6vw, 36px)', lineHeight: 1, fontVariantNumeric: 'tabular-nums', ...goldText }}><PopDigit value={v} pop={pop} /></div>
+                      <div style={{ fontFamily: head, fontWeight: 400, fontSize: 'clamp(26px, 7.6vw, 36px)', lineHeight: 1, fontVariantNumeric: 'tabular-nums', ...goldText(C) }}><PopDigit value={v} pop={pop} /></div>
                       <div style={{ marginTop: 8, fontSize: 10.5, fontWeight: 500, letterSpacing: '.18em', textTransform: 'uppercase', color: C.MUTED }}>{l}</div>
                     </div>
                   </div>
@@ -201,7 +209,7 @@ export default function GalaNightTemplate(props) {
           {/* MƏKAN */}
           {S.venue && (
             <Panel section="venue" head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
-              <div style={{ maxWidth: 430, margin: '0 auto', padding: 1, background: GOLD_GRAD, clipPath: DECO }}>
+              <div style={{ maxWidth: 430, margin: '0 auto', padding: 1, background: GOLD_GRAD(C), clipPath: DECO }}>
                 <div style={{ clipPath: DECO, padding: 10, background: C.BLACK }}>
                   <div style={{ overflow: 'hidden', isolation: 'isolate' }}>
                     <MapSection
@@ -215,7 +223,7 @@ export default function GalaNightTemplate(props) {
               </div>
               <div style={{ textAlign: 'center', marginTop: 26, fontFamily: head, fontStyle: 'italic', fontSize: 27, lineHeight: 1.2, color: C.IVORY }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 6, fontSize: 12.5, letterSpacing: '.24em', textTransform: 'uppercase', color: C.MUTED }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn(C)} />
             </Panel>
           )}
 
@@ -225,7 +233,7 @@ export default function GalaNightTemplate(props) {
               <div style={{ maxWidth: 400, margin: '0 auto', display: 'grid', gap: 10 }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '86px minmax(0, 1fr)', alignItems: 'stretch', border: `1px solid ${alpha(C.GOLD, 0.35)}` }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: GOLD_GRAD, color: C.BLACK, fontWeight: 600, fontSize: 15, letterSpacing: '.06em', fontVariantNumeric: 'tabular-nums' }}>{ev.time}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: GOLD_GRAD(C), color: C.BLACK, fontWeight: 600, fontSize: 15, letterSpacing: '.06em', fontVariantNumeric: 'tabular-nums' }}>{ev.time}</div>
                     <div style={{ padding: '15px 16px', fontFamily: head, fontSize: 18.5, lineHeight: 1.3, color: C.IVORY }}>{ev.label}</div>
                   </div>
                 ))}
@@ -243,7 +251,7 @@ export default function GalaNightTemplate(props) {
           {/* MASA — yer kartı */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} alt title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="gn-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.GOLD_L}
+              <SeatFinder inv={inv} tr={tr} listId="gn-seat-list" field={field(C)} suggest={suggest(C)} font={body} muted={C.MUTED} accent={C.GOLD_L}
                 nameStyle={{ fontFamily: head, fontStyle: 'italic', fontSize: 25 }}
                 card={(num) => (
                   <div style={{ perspective: 600 }}>
@@ -270,7 +278,7 @@ export default function GalaNightTemplate(props) {
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.BLACK} bg={C.IVORY} frame={{ clipPath: DECO, outline: `1px solid ${C.GOLD_D}`, outlineOffset: -5 }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'event')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'event')} />
             </Panel>
           )}
 
@@ -281,8 +289,8 @@ export default function GalaNightTemplate(props) {
                 ink: C.IVORY, muted: C.MUTED, line: alpha(C.GOLD, 0.45), hair: alpha(C.GOLD, 0.2), accent: C.GOLD_L,
                 font: body, display: head, displayItalic: true, btnFont: body,
                 doneMark: <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><Fan width={80} /></div>,
-                marker: (a) => (a ? <span style={{ display: 'block', width: 12, height: 12, transform: 'rotate(45deg)', background: GOLD_GRAD }} /> : <span style={{ display: 'block', width: 12, height: 12, transform: 'rotate(45deg)', border: `1px solid ${alpha(C.GOLD, 0.5)}` }} />),
-                suggest: { ...suggest, font: body },
+                marker: (a) => (a ? <span style={{ display: 'block', width: 12, height: 12, transform: 'rotate(45deg)', background: GOLD_GRAD(C) }} /> : <span style={{ display: 'block', width: 12, height: 12, transform: 'rotate(45deg)', border: `1px solid ${alpha(C.GOLD, 0.5)}` }} />),
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -290,7 +298,7 @@ export default function GalaNightTemplate(props) {
           {/* TƏBRİKLƏR */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.GOLD_L} />
+              <GuestbookForm inv={inv} field={field(C)} btn={btn(C)} errorColor={C.GOLD_L} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
@@ -308,14 +316,15 @@ export default function GalaNightTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 
 function MapPin() {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
-      <span style={{ position: 'absolute', left: -14, top: -40, width: 28, height: 28, transform: 'rotate(45deg)', background: GOLD_GRAD, boxShadow: '0 8px 14px rgba(0,0,0,.5)' }} />
+      <span style={{ position: 'absolute', left: -14, top: -40, width: 28, height: 28, transform: 'rotate(45deg)', background: GOLD_GRAD(C), boxShadow: '0 8px 14px rgba(0,0,0,.5)' }} />
       <span style={{ position: 'absolute', left: -5, top: -31, width: 10, height: 10, transform: 'rotate(45deg)', background: C.BLACK }} />
     </span>
   )

@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C, nameSize } from './palette'
+import { C as PAL, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Mandala, Leaf, DotRule, HennaHand } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    HENNA BUTA — «Xına naxışı» (Xına gecəsi konsepti, 2026-10)
@@ -31,9 +32,13 @@ import { Mandala, Leaf, DotRule, HennaHand } from './art'
 
 const BASE = getTemplateTheme('henna-buta')
 const ID = 'henna-buta'
+
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['HENNA'], secondary: ['LEAF'], accent: ['TERRA'], background: ['CREAM'], text: ['INK'] }
 const SCRIPT = "'Bad Script', 'Cormorant Garamond', Georgia, cursive"
 
-const KEYFRAMES = `
+const KEYFRAMES = (C) => (`
 @keyframes hb-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes hb-fade { from { opacity: 0 } to { opacity: 1 } }
 @keyframes hb-hint { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
@@ -44,13 +49,14 @@ const KEYFRAMES = `
 [data-hb] input:focus-visible, [data-hb] textarea:focus-visible { border-color: ${C.HENNA} !important; outline: none; }
 [data-hb] button:focus-visible, [data-hb] a:focus-visible, [data-hb] [role="button"]:focus-visible { outline: 2px solid ${C.TERRA}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-hb] *, [data-hb] { animation: none !important; transition: none !important; } }
-`
+`)
 
-const PAPER = `radial-gradient(120% 70% at 50% 0%, #FFFAF2, transparent 70%), ${C.CREAM}`
-const SAND = `radial-gradient(120% 70% at 50% 0%, #F8EBDB, transparent 70%), ${C.SAND}`
+const PAPER = (C) => (`radial-gradient(120% 70% at 50% 0%, #FFFAF2, transparent 70%), ${C.CREAM}`)
+const SAND = (C) => (`radial-gradient(120% 70% at 50% 0%, #F8EBDB, transparent 70%), ${C.SAND}`)
 
 /* ═══ 01 — AÇILIŞ: xına özü çəkilir ═══ */
 function HennaOpening({ inv, theme }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -96,13 +102,14 @@ function HennaOpening({ inv, theme }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, sand = false }) {
+  const C = usePalette(PAL)
   return (
-    <section id={id} data-section={section} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: sand ? SAND : PAPER }}>
+    <section id={id} data-section={section} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: sand ? SAND(C) : PAPER(C) }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <DotRule width={210} />
-            {title && <h2 style={{ margin: '14px 0 0', fontFamily: head, fontWeight: 300, fontSize: 'clamp(30px, 8.6vw, 40px)', lineHeight: 1.15, color: C.HENNA_D, textWrap: 'balance' }}>{title}</h2>}
+            {title && <h2 style={{ margin: '14px 0 0', fontFamily: head, fontWeight: 300, fontSize: scaleFont('clamp(30px, 8.6vw, 40px)', C.hs), lineHeight: 1.15, color: C.HENNA_D, textWrap: 'balance' }}>{title}</h2>}
             {kicker && <div style={{ marginTop: 6, fontFamily: SCRIPT, fontSize: 20, color: C.TERRA }}>{kicker}</div>}
             {sub && <p style={{ margin: '8px auto 0', maxWidth: 340, fontSize: 15.5, color: C.MUTED, lineHeight: 1.6 }}>{sub}</p>}
           </div>
@@ -113,21 +120,22 @@ function Panel({ id, section, title, kicker, sub, children, head, sand = false }
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: '#FFFCF7', border: `1px solid ${alpha(C.HENNA, 0.28)}`, borderRadius: 14,
   padding: '14px 16px', fontSize: 16, color: C.INK, outline: 'none',
-}
-const btn = (on) => ({
+})
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 24px', borderRadius: 999,
   fontSize: 15.5, fontWeight: 500, textDecoration: 'none', cursor: 'pointer',
   background: on ? C.HENNA : 'transparent', color: on ? C.CREAM : C.HENNA, border: `1px solid ${on ? C.HENNA : alpha(C.HENNA, 0.45)}`,
-})
-const suggest = { bg: '#FFFCF7', border: `1px solid ${alpha(C.HENNA, 0.25)}`, active: alpha(C.SKIN, 0.6), text: C.INK, table: C.HENNA, radius: 14 }
+}))
+const suggest = (C) => ({ bg: '#FFFCF7', border: `1px solid ${alpha(C.HENNA, 0.25)}`, active: alpha(C.SKIN, 0.6), text: C.INK, table: C.HENNA, radius: 14 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function HennaButaTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -135,11 +143,11 @@ export default function HennaButaTemplate(props) {
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
-    <div data-hb lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-hb lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.CREAM, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.TERRA, 0.25),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <HennaOpening inv={inv} theme={theme} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.HENNA, border: `2px solid ${C.CREAM}`, boxShadow: '0 8px 20px rgba(90,35,12,.35)' }}>
@@ -162,7 +170,7 @@ export default function HennaButaTemplate(props) {
           </header>
 
           {/* HERO — xına gülü */}
-          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: PAPER, padding: '54px 22px 60px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: PAPER(C), padding: '54px 22px 60px', textAlign: 'center' }}>
             <Mandala size={460} color={alpha(C.HENNA, 0.09)} petals={16} style={{ position: 'absolute', left: '50%', top: 40, marginLeft: -230, animation: 'hb-spin 120s linear infinite' }} />
             <div style={{ position: 'relative' }}>
               <div style={{ fontFamily: SCRIPT, fontSize: 28, color: C.TERRA, animation: 'hb-rise .8s ease-out .2s both' }}>{L('hero', 'kicker', inv.eventLabel)}</div>
@@ -203,13 +211,13 @@ export default function HennaButaTemplate(props) {
                     weddingData={weddingData} theme={theme} accent={C.HENNA} height="clamp(250px, 70vw, 320px)"
                     map={{ opacity: 0.88, filter: 'sepia(.3) saturate(.8)', tintOpacity: 0.12, tint: C.TERRA, blend: 'multiply' }}
                     frame={<MapPin />}
-                    fallback={<div style={{ height: 'clamp(250px, 70vw, 320px)', position: 'relative', background: SAND }}><MapPin /></div>}
+                    fallback={<div style={{ height: 'clamp(250px, 70vw, 320px)', position: 'relative', background: SAND(C) }}><MapPin /></div>}
                   />
                 </div>
               </div>
               <div style={{ textAlign: 'center', marginTop: 26, fontFamily: head, fontSize: 26, lineHeight: 1.2, color: C.INK }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontSize: 15.5, color: C.MUTED }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn(C)} />
             </Panel>
           )}
 
@@ -247,7 +255,7 @@ export default function HennaButaTemplate(props) {
           {/* MASA — mandala */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} sand title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="hb-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.HENNA}
+              <SeatFinder inv={inv} tr={tr} listId="hb-seat-list" field={field(C)} suggest={suggest(C)} font={body} muted={C.MUTED} accent={C.HENNA}
                 nameStyle={{ fontFamily: SCRIPT, fontSize: 26 }}
                 card={(num) => (
                   <Mandala size={210} petals={14} disc="#FFFCF7" style={{ margin: '0 auto', animation: 'hb-bloom .9s cubic-bezier(.3,.8,.4,1) both' }}>
@@ -271,7 +279,7 @@ export default function HennaButaTemplate(props) {
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.HENNA_D} bg="#FFFCF7" frame={{ borderRadius: 22, border: `1px solid ${alpha(C.HENNA, 0.35)}`, outline: `2px dotted ${alpha(C.HENNA, 0.5)}`, outlineOffset: 5 }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
             </Panel>
           )}
 
@@ -283,7 +291,7 @@ export default function HennaButaTemplate(props) {
                 font: body, display: head, btnFont: body,
                 doneMark: <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><Mandala size={46} petals={10} /></div>,
                 marker: (a) => (a ? <Mandala size={16} petals={8} color={C.HENNA} /> : <span style={{ display: 'block', width: 12, height: 12, borderRadius: '50%', border: `1px solid ${alpha(C.HENNA, 0.45)}` }} />),
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -291,7 +299,7 @@ export default function HennaButaTemplate(props) {
           {/* ARZULAR */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.HENNA} />
+              <GuestbookForm inv={inv} field={field(C)} btn={btn(C)} errorColor={C.HENNA} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
@@ -310,11 +318,12 @@ export default function HennaButaTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 
 function MapPin() {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
       <span style={{ position: 'absolute', left: -22, top: -22 }}><Mandala size={44} petals={10} /></span>

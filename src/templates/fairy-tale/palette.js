@@ -7,7 +7,7 @@ export const C = {
 }
 
 /* Folqa qızılı (mətn və konturlar üçün) */
-export const FOIL = 'linear-gradient(100deg, #9C7A3A 0%, #F1DA9C 34%, #C8A15A 52%, #F6E3B0 72%, #A8843F 100%)'
+export const FOIL = (C) => (`linear-gradient(100deg, #9C7A3A 0%, #F1DA9C 34%, ${C.GOLD} 52%, #F6E3B0 72%, #A8843F 100%)`)
 
 /* Toxumlu təsadüf — hər render eyni nəticə */
 export function seeded(seed) {

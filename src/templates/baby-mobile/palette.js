@@ -8,7 +8,7 @@ export const C = {
 /* Keçə (felt) dənəsi */
 export const FELT = (color) => `radial-gradient(circle, rgba(255,255,255,.18) .8px, transparent 1.2px) 0 0 / 4px 4px, radial-gradient(circle, rgba(0,0,0,.06) .8px, transparent 1.2px) 2px 2px / 4px 4px, ${color}`
 
-export const NIGHT_BG = `radial-gradient(70% 45% at 50% 0%, #4B5B96, transparent 70%), linear-gradient(180deg, ${C.NIGHT}, ${C.NIGHT_D})`
+export const NIGHT_BG = (C) => (`radial-gradient(70% 45% at 50% 0%, #4B5B96, transparent 70%), linear-gradient(180deg, ${C.NIGHT}, ${C.NIGHT_D})`)
 
 /* Seeded təsadüf — ulduzlar */
 export function seeded(seed) {
@@ -21,13 +21,13 @@ export const SPARKS = (() => {
 })()
 
 /* Mobilin asma parçaları: x (%), sapın uzunluğu (px), forma, rəng */
-export const HANG = [
-  { x: 10, len: 70, shape: 'star', color: '#E9B949' },
+export const HANG = (C) => ([
+  { x: 10, len: 70, shape: 'star', color: C.MUSTARD },
   { x: 30, len: 120, shape: 'cloud', color: '#FFF4DE' },
-  { x: 50, len: 86, shape: 'moon', color: '#E9B949' },
-  { x: 70, len: 128, shape: 'heart', color: '#F2B5A7' },
+  { x: 50, len: 86, shape: 'moon', color: C.MUSTARD },
+  { x: 70, len: 128, shape: 'heart', color: C.BLUSH },
   { x: 90, len: 74, shape: 'star', color: '#A8C3A0' },
-]
+])
 
 /* Ad uzunluğuna görə ölçü */
 export function nameSize(text) {

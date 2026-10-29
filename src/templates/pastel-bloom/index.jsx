@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C, PAPER_BG, OPEN_BLOOMS, WREATH, nameSize } from './palette'
+import { C as PAL, PAPER_BG, OPEN_BLOOMS, WREATH, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { WatercolorDefs, Bloom, Dab, Sprig } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    PASTEL BLOOM — «Akvarel çiçəklər» (Baby shower konsepti, 2026-10)
@@ -30,11 +31,15 @@ import { WatercolorDefs, Bloom, Dab, Sprig } from './art'
 
 const BASE = getTemplateTheme('pastel-bloom')
 const ID = 'pastel-bloom'
+
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['BLUSH_D'], secondary: ['LAVENDER'], accent: ['SAGE'], background: ['PAPER'], text: ['INK'] }
 const HAND = "'Caveat', 'Cormorant Garamond', cursive"
 
 const TONE_ROW = ['blush', 'sage', 'butter', 'lavender']
 
-const KEYFRAMES = `
+const KEYFRAMES = (C) => (`
 @keyframes pb-paint { 0% { opacity: 0; transform: scale(.35); filter: blur(10px) } 60% { opacity: .95; filter: blur(2px) } 100% { opacity: .92; transform: scale(1); filter: blur(0) } }
 @keyframes pb-sway { 0%,100% { transform: rotate(-3deg) } 50% { transform: rotate(3deg) } }
 @keyframes pb-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -45,10 +50,11 @@ const KEYFRAMES = `
 [data-pb] input:focus-visible, [data-pb] textarea:focus-visible { border-color: ${C.BLUSH_D} !important; outline: none; }
 [data-pb] button:focus-visible, [data-pb] a:focus-visible, [data-pb] [role="button"]:focus-visible { outline: 2px solid ${C.SAGE_D}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-pb] *, [data-pb] { animation: none !important; transition: none !important; } }
-`
+`)
 
 /* ═══ 01 — AÇILIŞ: çiçəklər kağıza yayılır ═══ */
 function BloomOpening({ inv, theme }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -59,7 +65,7 @@ function BloomOpening({ inv, theme }) {
     <motion.div {...gate.gateProps} data-pb
       animate={go ? { opacity: 0 } : {}}
       transition={{ duration: 0.4, delay: 1.7 }}
-      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: PAPER_BG, color: C.INK, fontFamily: theme.fonts.body }}>
+      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: PAPER_BG(C), color: C.INK, fontFamily: theme.fonts.body }}>
       {go && OPEN_BLOOMS.map(([x, y, s, tone, d, r], i) => (
         <div key={i} aria-hidden="true" style={{ position: 'absolute', left: `${x}%`, top: `${y}%`, animation: `pb-paint 1.1s cubic-bezier(.3,.7,.3,1) ${d}s both` }}>
           <Bloom size={s} tone={tone} rotate={r} />
@@ -93,13 +99,14 @@ function BloomOpening({ inv, theme }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, tint }) {
+  const C = usePalette(PAL)
   return (
-    <section id={id} data-section={section} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: tint || PAPER_BG }}>
+    <section id={id} data-section={section} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: tint || PAPER_BG(C) }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 30 }}>
             <Sprig />
-            {title && <h2 style={{ margin: '10px 0 0', fontFamily: head, fontWeight: 500, fontSize: 'clamp(31px, 9vw, 42px)', lineHeight: 1.1, color: C.INK, textWrap: 'balance' }}>{title}</h2>}
+            {title && <h2 style={{ margin: '10px 0 0', fontFamily: head, fontWeight: 500, fontSize: scaleFont('clamp(31px, 9vw, 42px)', C.hs), lineHeight: 1.1, color: C.INK, textWrap: 'balance' }}>{title}</h2>}
             {kicker && <div style={{ marginTop: 6, fontFamily: HAND, fontSize: 22, color: C.BLUSH_D }}>{kicker}</div>}
             {sub && <p style={{ margin: '8px auto 0', maxWidth: 340, fontSize: 15.5, color: C.MUTED, lineHeight: 1.6 }}>{sub}</p>}
           </div>
@@ -110,22 +117,23 @@ function Panel({ id, section, title, kicker, sub, children, head, tint }) {
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: alpha('#FFFFFF', 0.8), border: `1px solid ${alpha(C.BLUSH_D, 0.35)}`, borderRadius: 18,
   padding: '14px 16px', fontSize: 16, color: C.INK, outline: 'none',
-}
-const btn = (on) => ({
+})
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 24px', borderRadius: 999,
   fontSize: 15.5, fontWeight: 600, textDecoration: 'none', cursor: 'pointer',
   background: on ? C.BLUSH_D : alpha('#FFFFFF', 0.7), color: on ? '#FFFFFF' : C.BLUSH_D, border: `1px solid ${on ? C.BLUSH_D : alpha(C.BLUSH_D, 0.45)}`,
-})
-const suggest = { bg: '#FFFFFF', border: `1px solid ${alpha(C.BLUSH_D, 0.3)}`, active: alpha(C.BLUSH, 0.3), text: C.INK, table: C.BLUSH_D, radius: 18 }
-const ALT = `radial-gradient(circle at 80% 20%, rgba(205,191,230,.18), transparent 45%), radial-gradient(circle, rgba(78,63,69,.03) 1px, transparent 1.4px) 0 0 / 6px 6px, ${C.PAPER_D}`
+}))
+const suggest = (C) => ({ bg: '#FFFFFF', border: `1px solid ${alpha(C.BLUSH_D, 0.3)}`, active: alpha(C.BLUSH, 0.3), text: C.INK, table: C.BLUSH_D, radius: 18 })
+const ALT = (C) => (`radial-gradient(circle at 80% 20%, rgba(205,191,230,.18), transparent 45%), radial-gradient(circle, rgba(78,63,69,.03) 1px, transparent 1.4px) 0 0 / 6px 6px, ${C.PAPER_D}`)
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function PastelBloomTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -133,11 +141,11 @@ export default function PastelBloomTemplate(props) {
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
-    <div data-pb lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-pb lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.PAPER, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.BLUSH, 0.35),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       <WatercolorDefs />
       {!inv.opened && <BloomOpening inv={inv} theme={theme} />}
 
@@ -161,7 +169,7 @@ export default function PastelBloomTemplate(props) {
           </header>
 
           {/* HERO — çiçək çələngi */}
-          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: PAPER_BG, padding: '40px 18px 58px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: PAPER_BG(C), padding: '40px 18px 58px', textAlign: 'center' }}>
             <div style={{ position: 'relative', width: 'min(92vw, 380px)', aspectRatio: '1', margin: '0 auto' }}>
               {WREATH.map((w, i) => (
                 <div key={i} aria-hidden="true" style={{ position: 'absolute', left: `${w.x}%`, top: `${w.y}%`, transform: 'translate(-50%, -50%)', animation: `pb-paint 1s cubic-bezier(.3,.7,.3,1) ${(0.1 + i * 0.08).toFixed(2)}s both` }}>
@@ -181,7 +189,7 @@ export default function PastelBloomTemplate(props) {
 
           {/* SAYĞAC — akvarel ləkələri */}
           {S.countdown && (
-            <Panel section="countdown" head={head} tint={ALT} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
+            <Panel section="countdown" head={head} tint={ALT(C)} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(6px, 2.4vw, 12px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <Dab key={l} size="min(22vw, 92px)" tone={TONE_ROW[i]}>
@@ -207,20 +215,20 @@ export default function PastelBloomTemplate(props) {
                       weddingData={weddingData} theme={theme} accent={C.BLUSH_D} height="clamp(250px, 70vw, 320px)"
                       map={{ opacity: 0.85, filter: 'saturate(.6) brightness(1.06)', tintOpacity: 0.14, tint: C.BLUSH, blend: 'multiply' }}
                       frame={<MapPin />}
-                      fallback={<div style={{ height: 'clamp(250px, 70vw, 320px)', position: 'relative', background: ALT }}><MapPin /></div>}
+                      fallback={<div style={{ height: 'clamp(250px, 70vw, 320px)', position: 'relative', background: ALT(C) }}><MapPin /></div>}
                     />
                   </div>
                 </div>
               </div>
               <div style={{ textAlign: 'center', marginTop: 30, fontFamily: head, fontWeight: 600, fontSize: 27, lineHeight: 1.2, color: C.INK }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 2, fontFamily: HAND, fontSize: 21, color: C.MUTED }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn(C)} />
             </Panel>
           )}
 
           {/* PROQRAM */}
           {S.program && (
-            <Panel section="program" head={head} tint={ALT} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
+            <Panel section="program" head={head} tint={ALT(C)} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 380, margin: '0 auto', display: 'grid', gap: 12 }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '62px minmax(0, 1fr)', gap: 12, alignItems: 'center', padding: '8px 14px 8px 6px', borderRadius: 999, background: alpha('#FFFFFF', 0.7) }}>
@@ -243,8 +251,8 @@ export default function PastelBloomTemplate(props) {
 
           {/* MASA — çiçəyin ortasında */}
           {S.seating && !seating.isEmpty && (
-            <Panel section="seating" head={head} tint={ALT} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="pb-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.BLUSH_D}
+            <Panel section="seating" head={head} tint={ALT(C)} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
+              <SeatFinder inv={inv} tr={tr} listId="pb-seat-list" field={field(C)} suggest={suggest(C)} font={body} muted={C.MUTED} accent={C.BLUSH_D}
                 nameStyle={{ fontFamily: HAND, fontSize: 28 }}
                 card={(num) => (
                   <div style={{ position: 'relative', width: 230, height: 230, margin: '0 auto', animation: 'pb-paint 1s cubic-bezier(.3,.7,.3,1) both' }}>
@@ -271,19 +279,19 @@ export default function PastelBloomTemplate(props) {
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.INK} bg="#FFFFFF" frame={{ borderRadius: 22, boxShadow: `0 0 0 6px ${alpha(C.BLUSH, 0.4)}` }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
             </Panel>
           )}
 
           {/* RSVP */}
           {S.rsvp && (
-            <Panel section="rsvp" head={head} tint={ALT} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
+            <Panel section="rsvp" head={head} tint={ALT(C)} title={L('rsvp', 'title', rsvpL.title)} kicker={L('rsvp', 'kicker', tr.inv_rsvp)} sub={rsvpL.subtitle}>
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.BLUSH_D, 0.4), hair: alpha(C.BLUSH_D, 0.2), accent: C.BLUSH_D,
                 font: body, display: head, btnFont: body,
                 doneMark: <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6 }}><Bloom size={56} tone="blush" /></div>,
                 marker: (a) => (a ? <Bloom size={18} tone="blush" /> : <span style={{ display: 'block', width: 14, height: 14, borderRadius: '50%', border: `1.5px solid ${alpha(C.BLUSH_D, 0.45)}` }} />),
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -291,7 +299,7 @@ export default function PastelBloomTemplate(props) {
           {/* ARZULAR */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.BLUSH_D} />
+              <GuestbookForm inv={inv} field={field(C)} btn={btn(C)} errorColor={C.BLUSH_D} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
@@ -310,11 +318,12 @@ export default function PastelBloomTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 
 function MapPin() {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
       <span style={{ position: 'absolute', left: -26, top: -60, animation: 'pb-sway 4s ease-in-out infinite', transformOrigin: '50% 100%' }}><Bloom size={52} tone="blush" /></span>

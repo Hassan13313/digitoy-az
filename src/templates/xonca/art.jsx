@@ -1,9 +1,12 @@
-import { C, CANDLES, SWEETS } from './palette'
+import { C as PAL, CANDLES, SWEETS } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* XONÇA — dekor (hamısı aria-hidden) */
 
 /** Səkkizguşəli ulduz — mis üzərində döymə naxış */
-export function Star8({ size = 14, color = C.BRASS, fill = 'none', style }) {
+export function Star8($p) {
+  const C = usePalette(PAL)
+  const { size = 14, color = C.BRASS, fill = 'none', style } = $p
   return (
     <svg aria-hidden="true" viewBox="-10 -10 20 20" width={size} height={size} style={{ display: 'block', overflow: 'visible', ...style }}>
       <rect x="-6.2" y="-6.2" width="12.4" height="12.4" fill={fill} stroke={color} strokeWidth="1.2" />
@@ -14,7 +17,9 @@ export function Star8({ size = 14, color = C.BRASS, fill = 'none', style }) {
 }
 
 /** Döymə xətti — bölmə başlığı */
-export function Engraving({ color = C.BRASS, width = 220, style }) {
+export function Engraving($p) {
+  const C = usePalette(PAL)
+  const { color = C.BRASS, width = 220, style } = $p
   return (
     <div aria-hidden="true" style={{ display: 'flex', alignItems: 'center', gap: 8, width, maxWidth: '100%', margin: '0 auto', ...style }}>
       <span style={{ flex: 1, height: 3, borderTop: `1px solid ${color}`, borderBottom: `1px dotted ${color}`, opacity: 0.8 }} />
@@ -31,6 +36,7 @@ export function Engraving({ color = C.BRASS, width = 220, style }) {
  * lit=false → şamlar sönük; true olanda hər şam öz gecikməsi ilə alışır.
  */
 export function Xonca({ uid = 'xc', lit = true, width = 300, style }) {
+  const C = usePalette(PAL)
   const sorted = [...CANDLES].sort((a, b) => a.y - b.y)
   const back = sorted.filter((c) => c.y < 172)
   const front = sorted.filter((c) => c.y >= 172)

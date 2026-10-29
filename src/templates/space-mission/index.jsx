@@ -11,9 +11,10 @@ import { getTemplateTheme, FONT_STACKS } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { ageSentence, ageWord, kidsGalleryDesc, tableNum, tableSize } from '../_shared/kids'
-import { C } from './palette'
+import { C as PAL } from './palette'
 import { LABELS, TXT } from './copy'
 import { Stars, Rocket, Planet, Gantry, Smoke, RadarGrid, MissionPatch, Helmet, StarMark, OrbitIcon, Comet } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    SPACE MISSION — «Kosmik səyahət» (Uşaq ad günü konsepti, 2026-10)
@@ -34,11 +35,15 @@ import { Stars, Rocket, Planet, Gantry, Smoke, RadarGrid, MissionPatch, Helmet, 
 
 const BASE = getTemplateTheme('space-mission')
 const ID = 'space-mission'
+
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['TANGERINE'], secondary: ['MINT'], accent: ['SUN'], background: ['SPACE'], text: ['WHITE'] }
 /* Tektur — yalnız rəqəmlər üçün (LED ekranlar). Hərflərdə «Y» «V»-yə bənzəyir,
    ona görə adlar və başlıqlar Unbounded, kiçik etiketlər Exo 2 ilə yazılır. */
 const LED = FONT_STACKS.tektur
 
-const KEYFRAMES = `
+const KEYFRAMES = (C) => (`
 @keyframes sm-twinkle { 0%,100% { opacity: .3 } 50% { opacity: 1 } }
 @keyframes sm-flame { from { transform: scaleY(.88) scaleX(1.04) } to { transform: scaleY(1.12) scaleX(.94) } }
 @keyframes sm-blink { 0%,100% { opacity: 1 } 50% { opacity: .2 } }
@@ -57,12 +62,14 @@ const KEYFRAMES = `
 [data-sm] input:focus-visible, [data-sm] textarea:focus-visible { border-color: ${C.MINT} !important; outline: none; }
 [data-sm] button:focus-visible, [data-sm] a:focus-visible, [data-sm] [role="button"]:focus-visible { outline: 2px solid ${C.SUN}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-sm] *, [data-sm] { animation: none !important; transition: none !important; } }
-`
+`)
 
 const upAz = (s, lang) => String(s || '').toLocaleUpperCase(lang === 'az' ? 'az' : lang === 'ru' ? 'ru' : 'en')
 
 /* Künc mötərizələri — HUD çərçivəsi */
-function Hud({ children, color = C.MINT, style }) {
+function Hud($p) {
+  const C = usePalette(PAL)
+  const { children, color = C.MINT, style } = $p
   const c = (pos) => ({ position: 'absolute', width: 16, height: 16, borderColor: color, borderStyle: 'solid', borderWidth: 0, ...pos })
   return (
     <div style={{ position: 'relative', padding: '18px 18px', ...style }}>
@@ -77,6 +84,7 @@ function Hud({ children, color = C.MINT, style }) {
 
 /* ═══ 01 — AÇILIŞ: buraxılış meydançası ═══ */
 function LaunchOpening({ inv, theme }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -158,6 +166,7 @@ function LaunchOpening({ inv, theme }) {
 
 /* Bölmə — kosmik göyərtə */
 function Deck({ id, section, title, kicker, sub, children, disp, deep }) {
+  const C = usePalette(PAL)
   return (
     <section id={id} data-section={section} style={{ position: 'relative', padding: '60px 20px 66px', background: deep ? C.DEEP : C.SPACE, overflow: 'hidden' }}>
       <Stars count={26} opacity={0.5} />
@@ -165,7 +174,7 @@ function Deck({ id, section, title, kicker, sub, children, disp, deep }) {
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 30 }}>
             <OrbitIcon />
-            {title && <h2 style={{ margin: '12px 0 0', fontFamily: disp, fontWeight: 700, fontSize: 'clamp(22px, 6.4vw, 29px)', lineHeight: 1.18, letterSpacing: 0, color: C.WHITE, textWrap: 'balance' }}>{title}</h2>}
+            {title && <h2 style={{ margin: '12px 0 0', fontFamily: disp, fontWeight: 700, fontSize: scaleFont('clamp(22px, 6.4vw, 29px)', C.hs), lineHeight: 1.18, letterSpacing: 0, color: C.WHITE, textWrap: 'balance' }}>{title}</h2>}
             {kicker && <div style={{ marginTop: 8, fontSize: 15, color: C.MUTED }}>{kicker}</div>}
             {sub && <p style={{ margin: '8px auto 0', maxWidth: 330, fontSize: 15.5, color: C.MUTED, lineHeight: 1.55 }}>{sub}</p>}
           </div>
@@ -176,25 +185,26 @@ function Deck({ id, section, title, kicker, sub, children, disp, deep }) {
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: alpha(C.WHITE, 0.06), border: `1px solid ${alpha(C.WHITE, 0.18)}`, borderRadius: 14,
   padding: '14px 16px', fontSize: 16, color: C.WHITE, outline: 'none',
-}
-const btn = (on) => ({
+})
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 22px', borderRadius: 999,
   fontSize: 15, fontWeight: 600, textDecoration: 'none', cursor: 'pointer', letterSpacing: '.02em',
   background: on ? C.TANGERINE : 'transparent', color: on ? C.DEEP : C.WHITE, border: `1.5px solid ${on ? C.TANGERINE : alpha(C.WHITE, 0.4)}`,
-})
-const suggest = { bg: C.PANEL, border: `1px solid ${alpha(C.WHITE, 0.16)}`, active: alpha(C.MINT, 0.14), text: C.WHITE, table: C.SUN, radius: 14 }
+}))
+const suggest = (C) => ({ bg: C.PANEL, border: `1px solid ${alpha(C.WHITE, 0.16)}`, active: alpha(C.MINT, 0.14), text: C.WHITE, table: C.SUN, radius: 14 })
 
-const PLANETS = [
+const PLANETS = (C) => ([
   [C.MINT, '#2BAE8A'], [C.PINK, '#C2477A'], [C.SUN, C.TANGERINE], [C.SKY, '#3B5FBF'], ['#C9B8FF', C.PURPLE], [C.TANGERINE, '#B8482A'],
-]
+])
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function SpaceMissionTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const disp = theme.fonts.heading
   const body = theme.fonts.body
@@ -205,12 +215,12 @@ export default function SpaceMissionTemplate(props) {
   const year = String(weddingData.date || '').slice(0, 4)
 
   return (
-    <div data-sm lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-sm lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.SPACE,
       minHeight: '100vh', fontFamily: body, color: C.WHITE, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.SUN, 0.25),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <LaunchOpening inv={inv} theme={theme} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.TANGERINE, border: 'none', boxShadow: `0 0 0 4px ${alpha(C.TANGERINE, 0.25)}, 0 8px 18px rgba(0,0,0,.4)` }}>
@@ -340,10 +350,10 @@ export default function SpaceMissionTemplate(props) {
               <div style={{ textAlign: 'center', marginTop: 10, fontFamily: disp, fontWeight: 700, fontSize: 21, lineHeight: 1.2, color: C.WHITE }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontSize: 15, color: C.MUTED }}>{weddingData.venueNote}</div>}
               <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
-                {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(true)}>{tr.inv_directions_btn}</a>}
-                {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(!inv.dirUrl)}>Maps</a>}
-                {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Waze</a>}
-                {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Apple</a>}
+                {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(true)}>{tr.inv_directions_btn}</a>}
+                {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(!inv.dirUrl)}>Maps</a>}
+                {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>Waze</a>}
+                {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>Apple</a>}
               </div>
             </Deck>
           )}
@@ -354,7 +364,7 @@ export default function SpaceMissionTemplate(props) {
               <ol style={{ position: 'relative', listStyle: 'none', margin: '0 auto', padding: 0, maxWidth: 400 }}>
                 <span aria-hidden="true" style={{ position: 'absolute', left: 31, top: 30, bottom: 30, borderLeft: `2px dashed ${alpha(C.WHITE, 0.22)}` }} />
                 {timeline.events.map((ev, i) => {
-                  const [c1, c2] = PLANETS[i % PLANETS.length]
+                  const [c1, c2] = PLANETS(C)[i % PLANETS(C).length]
                   const sz = [40, 52, 36, 48, 44, 56][i % 6]
                   return (
                     <li key={i} style={{ position: 'relative', display: 'grid', gridTemplateColumns: '64px minmax(0, 1fr)', gap: 12, alignItems: 'center', padding: '9px 0' }}>
@@ -382,8 +392,8 @@ export default function SpaceMissionTemplate(props) {
           {/* MASA — missiya nişanı */}
           {S.seating && !seating.isEmpty && (
             <Deck section="seating" disp={disp} deep title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <input {...seatInputProps(inv, 'sm-seat-list')} style={field} />
-              <SeatSuggest inv={inv} id="sm-seat-list" c={{ ...suggest, font: body }} />
+              <input {...seatInputProps(inv, 'sm-seat-list')} style={field(C)} />
+              <SeatSuggest inv={inv} id="sm-seat-list" c={{ ...suggest(C), font: body }} />
               {seating.showNotFound && <div style={{ marginTop: 12, fontSize: 15, color: C.MUTED, textAlign: 'center' }}>{tr.inv_seat_fullname}</div>}
               {seating.selected && (
                 <div style={{ marginTop: 26, textAlign: 'center', animation: 'sm-rise .6s ease-out both' }}>
@@ -420,7 +430,7 @@ export default function SpaceMissionTemplate(props) {
                   </div>
                 </Hud>
                 <div style={{ marginTop: 12, fontSize: 14.5, color: C.MUTED }}>{tr.inv_scan_upload}</div>
-                <a data-press href={gallery.photoShareUrl} style={{ ...btn(true), marginTop: 16 }}>{tr.inv_gallery_btn}</a>
+                <a data-press href={gallery.photoShareUrl} style={{ ...btn(C)(true), marginTop: 16 }}>{tr.inv_gallery_btn}</a>
                 <p style={{ margin: '16px auto 0', maxWidth: 340, fontSize: 15, color: C.MUTED, lineHeight: 1.65 }}>{kidsGalleryDesc(props.adminOverrides, tr, lang)}</p>
               </div>
             </Deck>
@@ -433,7 +443,7 @@ export default function SpaceMissionTemplate(props) {
                 ink: C.WHITE, muted: C.MUTED, line: alpha(C.WHITE, 0.35), hair: alpha(C.WHITE, 0.12), accent: C.SUN,
                 font: body, display: disp, btnFont: body, btnUpper: true, btnTracking: '.12em',
                 doneMark: <Helmet size={44} style={{ margin: '0 auto 10px' }} />,
-                marker: (a) => <StarMark active={a} />, suggest: { ...suggest, font: body },
+                marker: (a) => <StarMark active={a} />, suggest: { ...suggest(C), font: body },
               }} />
             </Deck>
           )}
@@ -442,9 +452,9 @@ export default function SpaceMissionTemplate(props) {
           {S.guestbook && (
             <Deck section="guestbook" disp={disp} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 30 }}>
-                <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbookL.namePh} style={field} />
-                <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbookL.msgPh} rows={3} style={{ ...field, resize: 'none', lineHeight: 1.5 }} />
-                <button type="submit" disabled={!gbook.canSubmit} data-press style={{ ...btn(gbook.canSubmit), width: '100%', opacity: gbook.canSubmit ? 1 : 0.5, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed' }}>
+                <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbookL.namePh} style={field(C)} />
+                <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbookL.msgPh} rows={3} style={{ ...field(C), resize: 'none', lineHeight: 1.5 }} />
+                <button type="submit" disabled={!gbook.canSubmit} data-press style={{ ...btn(C)(gbook.canSubmit), width: '100%', opacity: gbook.canSubmit ? 1 : 0.5, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed' }}>
                   {gbook.sending ? gbookL.sending : gbookL.btn}
                 </button>
                 {gbook.error && <p role="alert" style={{ margin: 0, fontSize: 14, color: C.PINK }}>⚠ {gbookL.error}</p>}
@@ -473,11 +483,12 @@ export default function SpaceMissionTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={disp} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 
 function LandingPin() {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
       <span style={{ position: 'absolute', left: -22, top: -22, width: 44, height: 44, borderRadius: '50%', background: alpha(C.SUN, 0.18), animation: 'sm-blink 1.6s ease-in-out infinite' }} />

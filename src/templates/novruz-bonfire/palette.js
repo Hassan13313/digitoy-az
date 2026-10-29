@@ -7,8 +7,8 @@ export const C = {
 
 export const NIGHT_BG = `radial-gradient(1.4px 1.4px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 32% 8%, #fff 50%, transparent 51%), radial-gradient(1.6px 1.6px at 58% 14%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 76% 26%, #fff 50%, transparent 51%), radial-gradient(1.3px 1.3px at 88% 10%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 46% 30%, #fff 50%, transparent 51%), linear-gradient(180deg, #100A20, #1A1230 55%, #2A1E4A)`
 export const EMBER_BG = `radial-gradient(70% 45% at 50% 100%, rgba(255,122,26,.30), transparent 70%), linear-gradient(180deg, #1A1230, #241838)`
-export const PAPER_BG = `radial-gradient(90% 60% at 50% 0%, #FFFAF0, transparent 70%), #F6ECDA`
-export const FIRE_GRAD = 'linear-gradient(180deg, #FFE08A, #FFC23D 35%, #FF7A1A 70%, #D93B2B)'
+export const PAPER_BG = (C) => (`radial-gradient(90% 60% at 50% 0%, #FFFAF0, transparent 70%), ${C.PAPER}`)
+export const FIRE_GRAD = (C) => (`linear-gradient(180deg, #FFE08A, ${C.FLAME} 35%, ${C.EMBER} 70%, ${C.RED})`)
 
 /* Qığılcımlar — sabit toxumlu LCG */
 let seed = 23

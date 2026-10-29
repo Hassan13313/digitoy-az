@@ -5,13 +5,13 @@ export const C = {
   RED: '#C8452D', ORANGE: '#E07A2E', MUSTARD: '#E2B33C', TEAL: '#3E7C74', INK: '#3B2418', MUTED: '#8A6E58', WHITE: '#FFFDF8',
 }
 
-export const RAINBOW = [C.RED, C.ORANGE, C.MUSTARD, C.TEAL]
+export const RAINBOW = (C) => ([C.RED, C.ORANGE, C.MUSTARD, C.TEAL])
 
 /* 70-ci illər gün batımı — zolaqlı səma */
-export const SUNSET = `linear-gradient(180deg, #F2C15A 0%, #EFA243 30%, #E07A2E 52%, #C8452D 70%, #7A3B2A 100%)`
+export const SUNSET = (C) => (`linear-gradient(180deg, #F2C15A 0%, #EFA243 30%, ${C.ORANGE} 52%, #C8452D 70%, #7A3B2A 100%)`)
 
-export const CREAM_BG = `radial-gradient(90% 60% at 50% 0%, #FFF8EA, transparent 70%), #F4EAD5`
-export const CHOC_BG = `radial-gradient(80% 50% at 50% 0%, rgba(224,122,46,.22), transparent 70%), #3B2418`
+export const CREAM_BG = (C) => (`radial-gradient(90% 60% at 50% 0%, #FFF8EA, transparent 70%), ${C.CREAM}`)
+export const CHOC_BG = (C) => (`radial-gradient(80% 50% at 50% 0%, rgba(224,122,46,.22), transparent 70%), ${C.CHOC}`)
 
 /* Ad uzunluğuna görə ölçü */
 export function nameSize(text) {

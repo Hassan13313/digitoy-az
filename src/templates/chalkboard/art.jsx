@@ -1,14 +1,16 @@
-import { C } from './palette'
+import { C as PAL } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* CHALKBOARD — taxta çərçivə, təbaşir, cizgilər */
 
 /** Taxta çərçivə (bölmənin içinə) */
 export function WoodFrame({ inset = 0, thick = 12 }) {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{
       position: 'absolute', inset, pointerEvents: 'none',
       border: `${thick}px solid ${C.WOOD}`,
-      borderImage: `linear-gradient(135deg, #B07C50, #7A4E2C 30%, #A87448 55%, #6E4628 80%, #9A6A42) 1`,
+      borderImage: `linear-gradient(135deg, #B07C50, #7A4E2C 30%, #A87448 55%, #6E4628 80%, ${C.WOOD}) 1`,
       boxShadow: 'inset 0 0 0 1px rgba(0,0,0,.35), inset 0 6px 14px rgba(0,0,0,.35)',
     }} />
   )
@@ -16,6 +18,7 @@ export function WoodFrame({ inset = 0, thick = 12 }) {
 
 /** Təbaşir rəfi: təbaşir parçaları + pozan */
 export function ChalkTray({ style }) {
+  const C = usePalette(PAL)
   return (
     <div aria-hidden="true" style={{ position: 'relative', height: 22, background: `linear-gradient(180deg, #A87448, ${C.WOOD_D})`, boxShadow: '0 6px 10px -4px rgba(0,0,0,.5)', ...style }}>
       <span style={{ position: 'absolute', left: '18%', top: -6, width: 34, height: 8, borderRadius: 3, background: C.CHALK, transform: 'rotate(-4deg)' }} />
@@ -27,7 +30,9 @@ export function ChalkTray({ style }) {
 }
 
 /** Təbaşir cizgisi: ulduz, papaq, ox, ürək, alt xətt */
-export function ChalkDoodle({ kind = 'star', size = 40, color = C.CHALK, style }) {
+export function ChalkDoodle($p) {
+  const C = usePalette(PAL)
+  const { kind = 'star', size = 40, color = C.CHALK, style } = $p
   const paths = {
     star: 'M20 3l4.6 10.4 11.4 1.1-8.6 7.6 2.6 11.2L20 27.4 10 33.3l2.6-11.2L4 14.5l11.4-1.1z',
     cap: 'M2 15L20 7l18 8-18 8zM9 18v8c0 3 5 5 11 5s11-2 11-5v-8M34 16v10',
@@ -44,7 +49,9 @@ export function ChalkDoodle({ kind = 'star', size = 40, color = C.CHALK, style }
 }
 
 /** Təbaşir alt xətti (əl ilə çəkilmiş) */
-export function ChalkLine({ width = 160, color = C.CHALK, draw = true, delay = 0, style }) {
+export function ChalkLine($p) {
+  const C = usePalette(PAL)
+  const { width = 160, color = C.CHALK, draw = true, delay = 0, style } = $p
   return (
     <svg aria-hidden="true" viewBox="0 0 200 14" width={width} height={width * 0.07} style={{ display: 'block', margin: '0 auto', overflow: 'visible', ...style }}>
       <path d="M4 9C40 4 80 11 120 6S180 5 196 8" fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" strokeDasharray="220" strokeDashoffset={draw ? 0 : 220} style={{ transition: `stroke-dashoffset .6s ease ${delay}s`, opacity: 0.85 }} />

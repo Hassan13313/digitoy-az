@@ -1,9 +1,12 @@
-import { C } from './palette'
+import { C as PAL } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* YEARBOOK — marker cizgiləri, varsity yamaq */
 
 /** Marker cizgisi: ulduz / ürək / gülüş / ox */
-export function Doodle({ kind = 'star', size = 34, color = C.BLUE, style }) {
+export function Doodle($p) {
+  const C = usePalette(PAL)
+  const { kind = 'star', size = 34, color = C.BLUE, style } = $p
   const p = {
     star: 'M17 3l4 9 10 1-7.5 6.5L26 30l-9-5.5L8 30l2.5-10.5L3 13l10-1z',
     heart: 'M17 30S4 22 4 12c0-4.5 3.4-8 7.5-8 2.7 0 4.5 1.6 5.5 3.6C18 5.6 19.8 4 22.5 4 26.6 4 30 7.5 30 12c0 10-13 18-13 18z',
@@ -19,7 +22,9 @@ export function Doodle({ kind = 'star', size = 34, color = C.BLUE, style }) {
 }
 
 /** Yuvarlaq varsity yamağı (tikişli kənar) */
-export function Patch({ size = 120, children, bg = C.BLUE, style }) {
+export function Patch($p) {
+  const C = usePalette(PAL)
+  const { size = 120, children, bg = C.BLUE, style } = $p
   return (
     <div style={{
       position: 'relative', width: size, height: size, borderRadius: '50%', background: bg,
@@ -33,7 +38,9 @@ export function Patch({ size = 120, children, bg = C.BLUE, style }) {
 }
 
 /** Bir-bir görünən imza */
-export function Signature({ text, color = C.BLUE, rot = -6, font, size = 26, delay = 0, show = true, style }) {
+export function Signature($p) {
+  const C = usePalette(PAL)
+  const { text, color = C.BLUE, rot = -6, font, size = 26, delay = 0, show = true, style } = $p
   return (
     <span aria-hidden="true" style={{
       position: 'absolute', display: 'block', whiteSpace: 'nowrap', fontFamily: font, fontSize: size, lineHeight: 1, color,

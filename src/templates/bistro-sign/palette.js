@@ -6,10 +6,10 @@ export const C = {
 }
 
 /* Zolaqlı tente */
-export const AWNING = `repeating-linear-gradient(90deg, #1F4D3A 0 28px, #F4ECDC 28px 56px)`
-export const GREEN_BG = `radial-gradient(70% 50% at 50% 0%, rgba(255,217,138,.16), transparent 70%), linear-gradient(180deg, #24563F, #1F4D3A 60%, #143628)`
-export const CREAM_BG = `radial-gradient(90% 60% at 50% 0%, #FFFDF7, transparent 70%), #F4ECDC`
-export const BRASS_GRAD = 'linear-gradient(160deg, #9C7A2E 0%, #EED493 40%, #C9A04A 62%, #9C7A2E 100%)'
+export const AWNING = (C) => (`repeating-linear-gradient(90deg, ${C.GREEN} 0 28px, ${C.CREAM} 28px 56px)`)
+export const GREEN_BG = (C) => (`radial-gradient(70% 50% at 50% 0%, rgba(255,217,138,.16), transparent 70%), linear-gradient(180deg, #24563F, ${C.GREEN} 60%, #143628)`)
+export const CREAM_BG = (C) => (`radial-gradient(90% 60% at 50% 0%, #FFFDF7, transparent 70%), ${C.CREAM}`)
+export const BRASS_GRAD = (C) => (`linear-gradient(160deg, #9C7A2E 0%, #EED493 40%, ${C.BRASS} 62%, #9C7A2E 100%)`)
 
 /* Ad uzunluğuna görə ölçü */
 export function nameSize(text) {

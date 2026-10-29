@@ -1,4 +1,5 @@
-import { C, PILLOW, FEATHERS } from './palette'
+import { C as PAL, PILLOW, FEATHERS } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* PAJAMA SPA — yastıq, lələklər, yuxu maskası, xiyar dilimi */
 
@@ -29,6 +30,7 @@ export function Feather({ size = 20, color = '#FFFFFF', style }) {
 
 /** Lələk partlayışı */
 export function FeatherBurst({ on = false }) {
+  const C = usePalette(PAL)
   if (!on) return null
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none', zIndex: 3 }}>
@@ -43,6 +45,7 @@ export function FeatherBurst({ on = false }) {
 
 /** Yuxu maskası */
 export function SleepMask({ width = 220, children, style }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ position: 'relative', width, ...style }}>
       <span aria-hidden="true" style={{ position: 'absolute', left: '-8%', right: '-8%', top: '34%', height: 10, borderRadius: 5, background: C.LILAC_D, opacity: 0.7 }} />

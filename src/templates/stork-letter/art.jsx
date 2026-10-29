@@ -1,9 +1,11 @@
-import { C, PERF } from './palette'
+import { C as PAL, PERF } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* STORK LETTER — dekor */
 
 /** Uçan leylək, dimdiyində bağlama */
 export function Stork({ width = 200, flap = true, style }) {
+  const C = usePalette(PAL)
   return (
     <svg aria-hidden="true" viewBox="0 0 200 120" width={width} style={{ display: 'block', overflow: 'visible', ...style }}>
       {/* ayaqlar */}
@@ -39,7 +41,9 @@ export function Stork({ width = 200, flap = true, style }) {
 }
 
 /** Poçt markası (perforasiyalı) */
-export function Stamp({ width = 90, color = C.DUSTY, children, style, rotate = 0 }) {
+export function Stamp($p) {
+  const C = usePalette(PAL)
+  const { width = 90, color = C.DUSTY, children, style, rotate = 0 } = $p
   return (
     <div style={{ display: 'inline-block', filter: 'drop-shadow(0 6px 8px rgba(62,58,54,.22))', transform: `rotate(${rotate}deg)`, ...style }}>
       <div style={{ width, padding: 7, background: '#FFFDF8', ...PERF }}>
@@ -52,7 +56,9 @@ export function Stamp({ width = 90, color = C.DUSTY, children, style, rotate = 0
 }
 
 /** Poçt ştampı (dairəvi) */
-export function Postmark({ size = 96, top = '', bottom = '', mid = '', color = C.SEAL, font, waves = false, style }) {
+export function Postmark($p) {
+  const C = usePalette(PAL)
+  const { size = 96, top = '', bottom = '', mid = '', color = C.SEAL, font, waves = false, style } = $p
   return (
     <div aria-hidden="true" style={{ position: 'relative', width: size, height: size, borderRadius: '50%', border: `2px solid ${color}`, color, opacity: 0.75, ...style }}>
       <div style={{ position: 'absolute', inset: 6, borderRadius: '50%', border: `1px solid ${color}` }} />
@@ -70,6 +76,7 @@ export function Postmark({ size = 96, top = '', bottom = '', mid = '', color = C
 
 /** Mum möhür */
 export function WaxSeal({ size = 64, cracked = false, initial = '', font, style }) {
+  const C = usePalette(PAL)
   return (
     <div aria-hidden="true" style={{ position: 'relative', width: size, height: size, ...style }}>
       <div style={{ position: 'absolute', inset: 0, borderRadius: '46% 54% 50% 50% / 52% 48% 52% 48%', background: `radial-gradient(circle at 38% 32%, #D2715F, ${C.SEAL} 55%, ${C.SEAL_D})`, boxShadow: '0 4px 8px rgba(62,58,54,.35), inset 0 -3px 6px rgba(0,0,0,.25)', transform: cracked ? 'scale(1.15) rotate(-14deg)' : 'none', opacity: cracked ? 0 : 1, transition: 'transform .45s ease, opacity .35s ease .15s' }}>

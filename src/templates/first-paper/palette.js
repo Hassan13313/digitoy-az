@@ -6,10 +6,10 @@ export const C = {
 }
 
 /* Origami kağızının rəngli üzü — dalğa (seigaiha) naxışı */
-export const WASHI = `radial-gradient(circle at 50% 100%, transparent 5px, rgba(255,255,255,.55) 5.5px 6.5px, transparent 7px, transparent 9px, rgba(255,255,255,.35) 9.5px 10.5px, transparent 11px) 0 0 / 22px 11px, radial-gradient(circle at 50% 100%, transparent 5px, rgba(255,255,255,.55) 5.5px 6.5px, transparent 7px, transparent 9px, rgba(255,255,255,.35) 9.5px 10.5px, transparent 11px) 11px 5.5px / 22px 11px, linear-gradient(135deg, #3B6AD6, #24449A)`
+export const WASHI = (C) => (`radial-gradient(circle at 50% 100%, transparent 5px, rgba(255,255,255,.55) 5.5px 6.5px, transparent 7px, transparent 9px, rgba(255,255,255,.35) 9.5px 10.5px, transparent 11px) 0 0 / 22px 11px, radial-gradient(circle at 50% 100%, transparent 5px, rgba(255,255,255,.55) 5.5px 6.5px, transparent 7px, transparent 9px, rgba(255,255,255,.35) 9.5px 10.5px, transparent 11px) 11px 5.5px / 22px 11px, linear-gradient(135deg, #3B6AD6, ${C.BLUE_D})`)
 
 /* Kağız fakturası — çox incə damalı vərəq */
-export const PAPER_BG = `linear-gradient(rgba(53,97,201,.05) 1px, transparent 1px) 0 0 / 100% 26px, linear-gradient(90deg, rgba(53,97,201,.05) 1px, transparent 1px) 0 0 / 26px 100%, #F8F6F1`
+export const PAPER_BG = (C) => (`linear-gradient(rgba(53,97,201,.05) 1px, transparent 1px) 0 0 / 100% 26px, linear-gradient(90deg, rgba(53,97,201,.05) 1px, transparent 1px) 0 0 / 26px 100%, ${C.PAPER}`)
 
 /* Ad uzunluğuna görə ölçü */
 export function nameSize(text) {

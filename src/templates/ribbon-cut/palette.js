@@ -5,18 +5,20 @@ export const C = {
   RED: '#C21F32', RED_D: '#8E1424', IVORY: '#F7F2E6', INK: '#13281F', MUTED: '#6E7C74',
 }
 
-export const GOLD_GRAD = 'linear-gradient(160deg, #A8822E 0%, #F5DE9C 35%, #D8B25A 58%, #FFF0C0 74%, #A8822E 100%)'
-export const RIBBON = 'linear-gradient(180deg, #E23A4D 0%, #C21F32 40%, #9A1527 75%, #C21F32 100%)'
-export const EMERALD_BG = `radial-gradient(70% 50% at 50% 0%, rgba(216,178,90,.16), transparent 70%), linear-gradient(180deg, #175443, #0F3D30 60%, #09281F)`
-export const IVORY_BG = `radial-gradient(90% 60% at 50% 0%, #FFFFFF, transparent 70%), #F7F2E6`
+export const GOLD_GRAD = (C) => (`linear-gradient(160deg, #A8822E 0%, #F5DE9C 35%, ${C.GOLD} 58%, #FFF0C0 74%, #A8822E 100%)`)
+export const RIBBON = (C) => (`linear-gradient(180deg, #E23A4D 0%, ${C.RED} 40%, #9A1527 75%, ${C.RED} 100%)`)
+export const EMERALD_BG = (C) => (`radial-gradient(70% 50% at 50% 0%, rgba(216,178,90,.16), transparent 70%), linear-gradient(180deg, #175443, ${C.EMERALD} 60%, #09281F)`)
+export const IVORY_BG = (C) => (`radial-gradient(90% 60% at 50% 0%, #FFFFFF, transparent 70%), ${C.IVORY}`)
 
 /* Qızılı konfetti — sabit toxumlu LCG */
 let seed = 11
 const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646 }
-export const CONFETTI = Array.from({ length: 30 }, () => ({
+/* Mövqelər modul yüklənəndə BİR dəfə (rnd vəziyyətlidir); fabrik yalnız rəngi admin palitrasından götürür */
+const CONFETTI_BASE = Array.from({ length: 30 }, () => ({
   x: rnd() * 100, d: 0.35 + rnd() * 0.5, s: 5 + rnd() * 6, r: rnd() * 360, dx: (rnd() - 0.5) * 70, dur: 1.3 + rnd() * 1,
-  c: ['#D8B25A', '#F5DE9C', '#FFFFFF', '#C21F32'][Math.floor(rnd() * 4)],
+  ci: Math.floor(rnd() * 4),
 }))
+export const CONFETTI = (C) => CONFETTI_BASE.map(({ ci, ...p }) => ({ ...p, c: [C.GOLD, '#F5DE9C', '#FFFFFF', C.RED][ci] }))
 
 /* Ad uzunluğuna görə ölçü */
 export function nameSize(text) {

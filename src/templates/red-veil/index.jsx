@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C, VELVET_BG, VEIL_PATTERN, IVORY_PATTERN, nameSize } from './palette'
+import { C as PAL, VELVET_BG, VEIL_PATTERN, IVORY_PATTERN, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Buta, ButaRule, Tassel, EmbroideryBand, VeilDrape, Candle } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    RED VEIL — «Qırmızı örpək» (Xına gecəsi konsepti, 2026-10)
@@ -31,9 +32,13 @@ import { Buta, ButaRule, Tassel, EmbroideryBand, VeilDrape, Candle } from './art
 
 const BASE = getTemplateTheme('red-veil')
 const ID = 'red-veil'
+
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['CRIMSON'], secondary: ['WINE'], accent: ['GOLD'], background: ['IVORY'], text: ['INK'] }
 const SCRIPT = "'Great Vibes', 'Cormorant Garamond', Georgia, cursive"
 
-const KEYFRAMES = `
+const KEYFRAMES = (C) => (`
 @keyframes rv-swing { 0%,100% { transform: translateX(-50%) rotate(-4deg) } 50% { transform: translateX(-50%) rotate(4deg) } }
 @keyframes rv-flame { from { transform: scaleY(.88) rotate(-2deg) } to { transform: scaleY(1.1) rotate(2deg) } }
 @keyframes rv-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -46,10 +51,11 @@ const KEYFRAMES = `
 [data-rv] input:focus-visible, [data-rv] textarea:focus-visible { border-color: ${C.CRIMSON} !important; outline: none; }
 [data-rv] button:focus-visible, [data-rv] a:focus-visible, [data-rv] [role="button"]:focus-visible { outline: 2px solid ${C.GOLD}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-rv] *, [data-rv] { animation: none !important; transition: none !important; } }
-`
+`)
 
 /* ═══ 01 — AÇILIŞ: örpək qalxır ═══ */
 function VeilOpening({ inv, theme }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -81,7 +87,7 @@ function VeilOpening({ inv, theme }) {
         transition: 'transform 1.35s cubic-bezier(.6,.02,.3,1) .1s, border-radius 1.1s ease .1s',
         boxShadow: '0 30px 60px rgba(40,4,10,.55)',
       }}>
-        <div style={{ position: 'relative', flex: 1, background: `${VEIL_PATTERN}, ${VELVET_BG}`, backgroundSize: '64px 80px, auto, auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 24px 8vh', textAlign: 'center' }}>
+        <div style={{ position: 'relative', flex: 1, background: `${VEIL_PATTERN}, ${VELVET_BG(C)}`, backgroundSize: '64px 80px, auto, auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 24px 8vh', textAlign: 'center' }}>
           <div style={{ position: 'relative', padding: '34px 22px 28px', width: 'min(84vw, 330px)', border: `1px solid ${alpha(C.GOLD, 0.7)}`, outline: `1px dashed ${alpha(C.GOLD_L, 0.55)}`, outlineOffset: -9, borderRadius: '160px 160px 14px 14px', background: 'radial-gradient(120% 80% at 50% 0%, rgba(255,255,255,.07), rgba(0,0,0,.18))', animation: 'rv-rise 1s ease-out .2s both' }}>
             <EmblemSlot mono={ot.mono} size={58} border={`1px solid ${alpha(C.GOLD, 0.8)}`} background="rgba(62,9,17,.5)" color={C.GOLD_L} font={head} style={{ animation: 'none', margin: '0 auto 12px' }}>
               <Buta size={22} color={C.GOLD_L} style={{ margin: '0 auto' }} />
@@ -118,19 +124,20 @@ function VeilOpening({ inv, theme }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, velvet = false }) {
+  const C = usePalette(PAL)
   const ink = velvet ? '#FFF3E0' : C.INK
   const mute = velvet ? alpha('#FFF3E0', 0.75) : C.MUTED
   return (
     <section id={id} data-section={section} style={{
       position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', color: ink,
-      background: velvet ? `${VEIL_PATTERN}, ${VELVET_BG}` : `${IVORY_PATTERN}, ${C.IVORY}`,
+      background: velvet ? `${VEIL_PATTERN}, ${VELVET_BG(C)}` : `${IVORY_PATTERN}, ${C.IVORY}`,
       backgroundSize: velvet ? '64px 80px, auto, auto' : '64px 80px, auto',
     }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <ButaRule color={velvet ? C.GOLD_L : C.GOLD} width={200} />
-            {title && <h2 style={{ margin: '14px 0 0', fontFamily: head, fontWeight: 500, fontSize: 'clamp(30px, 8.6vw, 40px)', lineHeight: 1.12, color: velvet ? '#FFF3E0' : C.CRIMSON, textWrap: 'balance' }}>{title}</h2>}
+            {title && <h2 style={{ margin: '14px 0 0', fontFamily: head, fontWeight: 500, fontSize: scaleFont('clamp(30px, 8.6vw, 40px)', C.hs), lineHeight: 1.12, color: velvet ? '#FFF3E0' : C.CRIMSON, textWrap: 'balance' }}>{title}</h2>}
             {kicker && <div style={{ marginTop: 8, fontSize: 15.5, color: mute }}>{kicker}</div>}
             {sub && <p style={{ margin: '8px auto 0', maxWidth: 340, fontSize: 15.5, color: mute, lineHeight: 1.6 }}>{sub}</p>}
           </div>
@@ -141,21 +148,22 @@ function Panel({ id, section, title, kicker, sub, children, head, velvet = false
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: '#FFFDF9', border: `1px solid ${alpha(C.GOLD_D, 0.4)}`, borderRadius: 4,
   padding: '14px 16px', fontSize: 16, color: C.INK, outline: 'none',
-}
-const btn = (on) => ({
+})
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 24px', borderRadius: 999,
   fontSize: 15.5, fontWeight: 500, letterSpacing: '.02em', textDecoration: 'none', cursor: 'pointer',
   background: on ? C.CRIMSON : 'transparent', color: on ? '#FFF3E0' : C.CRIMSON, border: `1px solid ${on ? C.CRIMSON : alpha(C.CRIMSON, 0.5)}`,
-})
-const suggest = { bg: '#FFFDF9', border: `1px solid ${alpha(C.GOLD_D, 0.35)}`, active: alpha(C.GOLD_L, 0.3), text: C.INK, table: C.CRIMSON, radius: 4 }
+}))
+const suggest = (C) => ({ bg: '#FFFDF9', border: `1px solid ${alpha(C.GOLD_D, 0.35)}`, active: alpha(C.GOLD_L, 0.3), text: C.INK, table: C.CRIMSON, radius: 4 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function RedVeilTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -163,11 +171,11 @@ export default function RedVeilTemplate(props) {
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
-    <div data-rv lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-rv lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.IVORY, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.GOLD, 0.3),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <VeilOpening inv={inv} theme={theme} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.CRIMSON, border: `1px solid ${C.GOLD}`, boxShadow: '0 8px 20px rgba(62,9,17,.4)' }}>
@@ -239,7 +247,7 @@ export default function RedVeilTemplate(props) {
               </div>
               <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontWeight: 500, fontSize: 27, lineHeight: 1.2, color: C.INK }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontSize: 15.5, color: C.MUTED }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn(C)} />
             </Panel>
           )}
 
@@ -273,11 +281,11 @@ export default function RedVeilTemplate(props) {
           {/* MASA — məxmər kisə */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="rv-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.CRIMSON}
+              <SeatFinder inv={inv} tr={tr} listId="rv-seat-list" field={field(C)} suggest={suggest(C)} font={body} muted={C.MUTED} accent={C.CRIMSON}
                 nameStyle={{ fontFamily: SCRIPT, fontSize: 36, lineHeight: 1.1 }}
                 card={(num) => (
                   <div style={{ position: 'relative', display: 'inline-block', marginBottom: 46, animation: 'rv-seal .7s cubic-bezier(.3,.8,.4,1) both' }}>
-                    <div style={{ minWidth: 170, padding: '26px 30px 24px', borderRadius: '90px 90px 10px 10px', background: `${VEIL_PATTERN}, ${VELVET_BG}`, backgroundSize: '64px 80px, auto, auto', border: `1px solid ${C.GOLD}`, outline: `1px dashed ${alpha(C.GOLD_L, 0.6)}`, outlineOffset: -8, boxShadow: '0 22px 34px -18px rgba(62,9,17,.7)' }}>
+                    <div style={{ minWidth: 170, padding: '26px 30px 24px', borderRadius: '90px 90px 10px 10px', background: `${VEIL_PATTERN}, ${VELVET_BG(C)}`, backgroundSize: '64px 80px, auto, auto', border: `1px solid ${C.GOLD}`, outline: `1px dashed ${alpha(C.GOLD_L, 0.6)}`, outlineOffset: -8, boxShadow: '0 22px 34px -18px rgba(62,9,17,.7)' }}>
                       <div style={{ fontFamily: head, fontSize: 13, letterSpacing: '.3em', textTransform: 'uppercase', color: C.GOLD_L }}>{T.table}</div>
                       <div style={{ fontFamily: head, fontWeight: 500, fontSize: tableSize(num, 68), lineHeight: 1.05, color: '#FFF3E0' }}>{num}</div>
                     </div>
@@ -301,7 +309,7 @@ export default function RedVeilTemplate(props) {
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.WINE} bg="#FFF8EE" frame={{ borderRadius: 6, border: `1px solid ${C.GOLD}`, boxShadow: `0 0 0 6px ${alpha(C.WINE, 0.5)}, 0 0 0 7px ${alpha(C.GOLD_L, 0.5)}` }}
-                btn={(on) => ({ ...btn(on), background: on ? C.GOLD : 'transparent', color: on ? C.WINE : C.GOLD_L, border: `1px solid ${C.GOLD}` })}
+                btn={(on) => ({ ...btn(C)(on), background: on ? C.GOLD : 'transparent', color: on ? C.WINE : C.GOLD_L, border: `1px solid ${C.GOLD}` })}
                 muted={alpha('#FFF3E0', 0.78)} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
             </Panel>
           )}
@@ -314,7 +322,7 @@ export default function RedVeilTemplate(props) {
                 font: body, display: head, btnFont: body,
                 doneMark: <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><Buta size={30} color={C.CRIMSON} fill={alpha(C.GOLD_L, 0.4)} /></div>,
                 marker: (a) => (a ? <Buta size={10} color={C.CRIMSON} fill={C.CRIMSON} /> : <span style={{ display: 'block', width: 12, height: 12, borderRadius: '50%', border: `1px solid ${alpha(C.CRIMSON, 0.5)}` }} />),
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -322,7 +330,7 @@ export default function RedVeilTemplate(props) {
           {/* XOŞ SÖZLƏR */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.CRIMSON} />
+              <GuestbookForm inv={inv} field={field(C)} btn={btn(C)} errorColor={C.CRIMSON} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
@@ -342,11 +350,12 @@ export default function RedVeilTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 
 function MapPin() {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
       <span style={{ position: 'absolute', left: -16, top: -50, display: 'flex', padding: '8px 10px', borderRadius: '50% 50% 50% 0', transform: 'rotate(-45deg)', background: C.CRIMSON, boxShadow: `0 0 0 2px ${C.GOLD}, 0 10px 16px rgba(62,9,17,.45)` }}>

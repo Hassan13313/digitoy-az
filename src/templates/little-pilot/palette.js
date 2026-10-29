@@ -5,7 +5,7 @@ export const C = {
   RED: '#E5533D', RED_D: '#B83A28', YELLOW: '#FFC845', CREAM: '#FFF9EE', MUTED: '#5C6F85',
 }
 
-export const SKY_BG = `linear-gradient(180deg, ${C.SKY_D} 0%, ${C.SKY} 55%, ${C.SKY_L} 100%)`
+export const SKY_BG = (C) => (`linear-gradient(180deg, ${C.SKY_D} 0%, ${C.SKY} 55%, ${C.SKY_L} 100%)`)
 
 /* Buludlar: x, y (%), ölçü, sürüşmə müddəti */
 export const CLOUDS = [

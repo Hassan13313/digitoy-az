@@ -6,8 +6,8 @@ export const C = {
   IVORY: '#F8F2E4', IVORY_D: '#EFE5CF', INK: '#16203D', MUTED: '#5D6684',
 }
 
-export const GOLD_GRAD = 'linear-gradient(160deg, #9E7A2E 0%, #F3DC98 40%, #D8B058 62%, #8C6A24 100%)'
-export const NAVY_BG = `radial-gradient(90% 55% at 50% 0%, #22397A 0%, transparent 70%), linear-gradient(180deg, ${C.ROYAL}, ${C.NAVY})`
+export const GOLD_GRAD = (C) => (`linear-gradient(160deg, #9E7A2E 0%, #F3DC98 40%, ${C.GOLD} 62%, #8C6A24 100%)`)
+export const NAVY_BG = (C) => (`radial-gradient(90% 55% at 50% 0%, #22397A 0%, transparent 70%), linear-gradient(180deg, ${C.ROYAL}, ${C.NAVY})`)
 
 /* Seeded təsadüf */
 export function seeded(seed) {

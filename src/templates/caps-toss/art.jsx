@@ -1,9 +1,12 @@
-import { C, CONFETTI } from './palette'
+import { C as PAL, CONFETTI } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* CAPS TOSS — məzun papağı, diplom, möhür */
 
 /** Məzun papağı (kvadrat taxta + qotaz) */
-export function Cap({ size = 120, tassel = C.GOLD, board = '#27396A', style }) {
+export function Cap($p) {
+  const C = usePalette(PAL)
+  const { size = 120, tassel = C.GOLD, board = '#27396A', style } = $p
   return (
     <svg aria-hidden="true" viewBox="0 0 120 92" width={size} height={typeof size === 'number' ? size * 0.77 : undefined} style={{ display: 'block', overflow: 'visible', ...(typeof size === 'number' ? null : { height: 'auto' }), ...style }}>
       {/* baş hissəsi */}
@@ -24,10 +27,11 @@ export function Cap({ size = 120, tassel = C.GOLD, board = '#27396A', style }) {
 
 /** Konfetti partlayışı (açılışda) */
 export function ConfettiBurst({ on = false }) {
+  const C = usePalette(PAL)
   if (!on) return null
   return (
     <div aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-      {CONFETTI.map((p, i) => (
+      {CONFETTI(C).map((p, i) => (
         <span key={i} style={{
           position: 'absolute', left: `${p.x}%`, top: '-4%', width: p.s, height: p.s * 0.45, background: p.c, borderRadius: 1,
           '--dx': `${p.dx}px`, '--r': `${p.r}deg`,
@@ -40,6 +44,7 @@ export function ConfettiBurst({ on = false }) {
 
 /** Qızıl möhür (ulduzlu kənar) */
 export function Seal({ size = 64, children, style }) {
+  const C = usePalette(PAL)
   const pts = Array.from({ length: 24 }, (_, i) => {
     const a = (i / 24) * Math.PI * 2
     const r = i % 2 ? 44 : 50
@@ -50,7 +55,7 @@ export function Seal({ size = 64, children, style }) {
       <svg aria-hidden="true" viewBox="0 0 100 100" width={size} height={size} style={{ position: 'absolute', inset: 0, display: 'block' }}>
         <defs>
           <radialGradient id="ct-seal" cx="40%" cy="35%" r="70%">
-            <stop offset="0" stopColor="#FFF0BF" /><stop offset=".55" stopColor="#E5B94E" /><stop offset="1" stopColor="#9C7522" />
+            <stop offset="0" stopColor="#FFF0BF" /><stop offset=".55" stopColor={C.GOLD} /><stop offset="1" stopColor="#9C7522" />
           </radialGradient>
         </defs>
         <polygon points={pts} fill="url(#ct-seal)" />
@@ -64,6 +69,7 @@ export function Seal({ size = 64, children, style }) {
 
 /** Diplom tumarı (iki ucu bükülü) */
 export function Scroll({ children, style }) {
+  const C = usePalette(PAL)
   const roll = (side) => ({
     position: 'absolute', left: -8, right: -8, height: 18, [side]: -9, borderRadius: 9,
     background: 'linear-gradient(180deg, #E6D9B8, #F7EFDA 45%, #D3C29A)', boxShadow: '0 4px 8px -4px rgba(0,0,0,.35)',

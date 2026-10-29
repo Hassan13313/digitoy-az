@@ -1,4 +1,5 @@
-import { C, GOLD_GRAD } from './palette'
+import { C as PAL, GOLD_GRAD } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* MIDNIGHT CLOCK — saat, atəşfəşanlıq, cib saatı */
 
@@ -6,10 +7,11 @@ const ROMAN = ['XII', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X
 
 /** Böyük saat siferblatı. min/hour — dəqiqə və saat əqrəbinin dərəcəsi */
 export function ClockFace({ size = 260, minDeg = 0, hourDeg = 0, font, instant = false, glow = false, style }) {
+  const C = usePalette(PAL)
   const tr = instant ? 'none' : 'transform .9s ease-in-out .1s'
   const trMin = instant ? 'none' : 'transform .9s steps(3, end) .1s'
   return (
-    <div style={{ position: 'relative', width: size, height: size, borderRadius: '50%', padding: size * 0.04, background: GOLD_GRAD, boxShadow: glow ? `0 0 0 1px ${C.GOLD_D}, 0 0 60px 10px rgba(232,196,106,.45), 0 30px 40px -24px rgba(0,0,0,.8)` : `0 0 0 1px ${C.GOLD_D}, 0 30px 40px -24px rgba(0,0,0,.8)`, transition: 'box-shadow .5s ease', ...style }}>
+    <div style={{ position: 'relative', width: size, height: size, borderRadius: '50%', padding: size * 0.04, background: GOLD_GRAD(C), boxShadow: glow ? `0 0 0 1px ${C.GOLD_D}, 0 0 60px 10px rgba(232,196,106,.45), 0 30px 40px -24px rgba(0,0,0,.8)` : `0 0 0 1px ${C.GOLD_D}, 0 30px 40px -24px rgba(0,0,0,.8)`, transition: 'box-shadow .5s ease', ...style }}>
       <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: '50%', background: 'radial-gradient(circle at 50% 40%, #FFFDF6, #F3EAD2 70%, #E2D3AE)', boxShadow: 'inset 0 4px 14px rgba(0,0,0,.25)' }}>
         {ROMAN.map((r, i) => {
           const a = (i / 12) * Math.PI * 2
@@ -25,14 +27,16 @@ export function ClockFace({ size = 260, minDeg = 0, hourDeg = 0, font, instant =
         <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: size * 0.035, height: size * 0.24, marginLeft: -size * 0.0175, borderRadius: size * 0.02, background: C.INK, transformOrigin: '50% 100%', transform: `translateY(-100%) rotate(${hourDeg}deg)`, transition: tr }} />
         {/* dəqiqə əqrəbi */}
         <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: size * 0.02, height: size * 0.34, marginLeft: -size * 0.01, borderRadius: size * 0.01, background: C.INK, transformOrigin: '50% 100%', transform: `translateY(-100%) rotate(${minDeg}deg)`, transition: trMin }} />
-        <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: size * 0.07, height: size * 0.07, transform: 'translate(-50%, -50%)', borderRadius: '50%', background: GOLD_GRAD, boxShadow: '0 1px 3px rgba(0,0,0,.4)' }} />
+        <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: size * 0.07, height: size * 0.07, transform: 'translate(-50%, -50%)', borderRadius: '50%', background: GOLD_GRAD(C), boxShadow: '0 1px 3px rgba(0,0,0,.4)' }} />
       </div>
     </div>
   )
 }
 
 /** Atəşfəşanlıq partlayışı */
-export function Burst({ x, y, size = 120, color = C.GOLD, delay = 0, loop = false }) {
+export function Burst($p) {
+  const C = usePalette(PAL)
+  const { x, y, size = 120, color = C.GOLD, delay = 0, loop = false } = $p
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: `${x}%`, top: `${y}%`, width: 0, height: 0, pointerEvents: 'none' }}>
       {Array.from({ length: 20 }, (_, i) => (
@@ -45,7 +49,9 @@ export function Burst({ x, y, size = 120, color = C.GOLD, delay = 0, loop = fals
 }
 
 /** Mini saat — tədbir vaxtını göstərir */
-export function MiniClock({ time = '00:00', size = 34, color = C.GOLD }) {
+export function MiniClock($p) {
+  const C = usePalette(PAL)
+  const { time = '00:00', size = 34, color = C.GOLD } = $p
   const [h, m] = String(time).split(':').map((n) => parseInt(n, 10) || 0)
   const md = m * 6
   const hd = (h % 12) * 30 + m * 0.5
@@ -62,11 +68,12 @@ export function MiniClock({ time = '00:00', size = 34, color = C.GOLD }) {
 
 /** Cib saatı (masa üçün) */
 export function PocketWatch({ size = 190, children }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ position: 'relative', width: size, margin: '0 auto', paddingTop: size * 0.16 }}>
       <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: 0, width: size * 0.16, height: size * 0.16, marginLeft: -size * 0.08, borderRadius: '50%', border: `${size * 0.03}px solid ${C.GOLD}` }} />
-      <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: size * 0.12, width: size * 0.12, height: size * 0.08, marginLeft: -size * 0.06, borderRadius: 4, background: GOLD_GRAD }} />
-      <div style={{ width: size, height: size, borderRadius: '50%', padding: size * 0.05, background: GOLD_GRAD, boxShadow: '0 22px 30px -16px rgba(0,0,0,.8)' }}>
+      <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: size * 0.12, width: size * 0.12, height: size * 0.08, marginLeft: -size * 0.06, borderRadius: 4, background: GOLD_GRAD(C) }} />
+      <div style={{ width: size, height: size, borderRadius: '50%', padding: size * 0.05, background: GOLD_GRAD(C), boxShadow: '0 22px 30px -16px rgba(0,0,0,.8)' }}>
         <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'radial-gradient(circle at 50% 40%, #FFFDF6, #F0E4C4)', boxShadow: 'inset 0 3px 10px rgba(0,0,0,.25)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
           {children}
         </div>

@@ -7,11 +7,11 @@ export const C = {
 
 /* Büzməli metal jalüz */
 export const SHUTTER = `repeating-linear-gradient(180deg, #C9CFD5 0 4px, #E6E9EC 4px 9px, #AEB5BC 9px 11px, #8F979F 11px 13px)`
-export const HAZARD = `repeating-linear-gradient(135deg, #FFD23F 0 12px, #1D2023 12px 24px)`
+export const HAZARD = (C) => (`repeating-linear-gradient(135deg, ${C.YELLOW} 0 12px, ${C.CHAR} 12px 24px)`)
 export const STEEL_GRAD = 'linear-gradient(160deg, #8F979F 0%, #E6E9EC 35%, #B9C0C7 60%, #F2F4F6 75%, #8F979F 100%)'
 const NOISE = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .12 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E\")"
 export const CONCRETE_BG = `${NOISE}, linear-gradient(180deg, #F1F2F3, #E4E6E8)`
-export const CHAR_BG = `${NOISE}, radial-gradient(70% 50% at 50% 0%, rgba(255,181,71,.12), transparent 70%), linear-gradient(180deg, #2A2E33, #1D2023)`
+export const CHAR_BG = (C) => (`${NOISE}, radial-gradient(70% 50% at 50% 0%, rgba(255,181,71,.12), transparent 70%), linear-gradient(180deg, #2A2E33, ${C.CHAR})`)
 /* Mağazanın içi — isti işıq */
 export const INTERIOR = `radial-gradient(60% 45% at 50% 40%, rgba(255,214,150,.95), rgba(255,181,71,.55) 45%, rgba(60,40,20,.9) 100%), #3A2A1A`
 

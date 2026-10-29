@@ -12,7 +12,7 @@ export function seeded(seed) {
 }
 
 /* Konfetti parçaları — açılış partlayışı (sabit, toxumlu) */
-export const CONFETTI = (() => {
+export const CONFETTI = (C) => ((() => {
   const r = seeded(31)
   const cols = [C.RED, C.MUSTARD, C.TEAL, C.CREAM, '#E86A8F', '#5B7BD5']
   return Array.from({ length: 46 }, (_, i) => {
@@ -24,7 +24,7 @@ export const CONFETTI = (() => {
       c: cols[i % cols.length], delay: (r() * 0.25).toFixed(2), round: r() > 0.7,
     }
   })
-})()
+})())
 
 /* Uzun adlarda Oi şriftinin ölçüsü (çox enli şriftdir) */
 export function nameSize(text) {

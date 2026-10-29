@@ -1,4 +1,5 @@
-import { C } from './palette'
+import { C as PAL } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* FOOTBALL STAR — dekor */
 
@@ -28,6 +29,7 @@ export function Ball({ size = 60, style }) {
 
 /** Qapı (tor) — `bulge` toru dartır */
 export function Goal({ width = 300, bulge = false, delay = 0, style }) {
+  const C = usePalette(PAL)
   return (
     <svg aria-hidden="true" viewBox="0 0 300 130" width={width} style={{ display: 'block', maxWidth: '100%', overflow: 'visible', ...style }}>
       <defs>
@@ -46,7 +48,9 @@ export function Goal({ width = 300, bulge = false, delay = 0, style }) {
 }
 
 /** Forma (arxadan) — ad və nömrə */
-export function Jersey({ width = 240, name, number, head, digits, color = C.NAVY, trim = C.GOLD, children, style }) {
+export function Jersey($p) {
+  const C = usePalette(PAL)
+  const { width = 240, name, number, head, digits, color = C.NAVY, trim = C.GOLD, children, style } = $p
   return (
     <div style={{ position: 'relative', width, maxWidth: '100%', margin: '0 auto', ...style }}>
       <svg aria-hidden="true" viewBox="0 0 240 250" width="100%" style={{ display: 'block', filter: 'drop-shadow(0 18px 22px rgba(0,0,0,.35))' }}>
@@ -76,7 +80,9 @@ export function Jersey({ width = 240, name, number, head, digits, color = C.NAVY
 }
 
 /** Fit (hakim fiti) ikonu */
-export function Whistle({ size = 20, color = C.GOLD, style }) {
+export function Whistle($p) {
+  const C = usePalette(PAL)
+  const { size = 20, color = C.GOLD, style } = $p
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" width={size} height={size} style={{ display: 'block', ...style }}>
       <path d="M3 13a6 6 0 0 0 11.6 2.2L21 13V9h-9.2A6 6 0 0 0 3 13z" fill={color} />

@@ -1,9 +1,11 @@
-import { C, FLAKES, SKY_FLAKES, BAUBLES } from './palette'
+import { C as PAL, FLAKES, SKY_FLAKES, BAUBLES } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* SNOW GLOBE — qar kürəsi, oyuncaqlar, hədiyyə etiketi */
 
 /** Küknar */
 function Pine({ x, h, style }) {
+  const C = usePalette(PAL)
   return (
     <svg aria-hidden="true" viewBox="0 0 40 60" style={{ position: 'absolute', left: `${x}%`, bottom: '18%', height: `${h}%`, overflow: 'visible', ...style }}>
       <path d="M20 2L34 24H27L38 40H28L40 54H0L12 40H2L13 24H6Z" fill={C.PINE} />
@@ -16,6 +18,7 @@ function Pine({ x, h, style }) {
 
 /** Qar kürəsi — `shaking` olanda silkələnir, qar yağır */
 export function SnowGlobe({ size = 260, snowing = true, shaking = false, plaque, style }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ position: 'relative', width: size, ...style }}>
       <div style={{ position: 'relative', width: size, height: size, animation: shaking ? 'sg-shake .5s ease-in-out 2' : 'none', transformOrigin: '50% 90%' }}>
@@ -70,7 +73,8 @@ export function SkySnow({ on = true }) {
 
 /** Yolka oyuncağı (sayğac üçün) */
 export function Bauble({ i = 0, children, drop = 18 }) {
-  const c = BAUBLES[i % BAUBLES.length]
+  const C = usePalette(PAL)
+  const c = BAUBLES(C)[i % BAUBLES(C).length]
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <span aria-hidden="true" style={{ width: 1.5, height: drop, background: C.GOLD }} />
@@ -84,7 +88,9 @@ export function Bauble({ i = 0, children, drop = 18 }) {
 }
 
 /** Qar dənəsi */
-export function Flake({ size = 22, color = C.NIGHT, style }) {
+export function Flake($p) {
+  const C = usePalette(PAL)
+  const { size = 22, color = C.NIGHT, style } = $p
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" width={size} height={size} style={{ display: 'block', ...style }}>
       <g stroke={color} strokeWidth="1.8" strokeLinecap="round" fill="none">
@@ -100,6 +106,7 @@ export function Flake({ size = 22, color = C.NIGHT, style }) {
 
 /** Hədiyyə etiketi (masa üçün) */
 export function GiftTag({ width = 210, children }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ position: 'relative', width, margin: '0 auto', paddingTop: 34 }}>
       <svg aria-hidden="true" viewBox="0 0 100 40" width="56%" style={{ position: 'absolute', left: '22%', top: 0, overflow: 'visible' }}>

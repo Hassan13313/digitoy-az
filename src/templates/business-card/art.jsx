@@ -1,9 +1,11 @@
-import { C } from './palette'
+import { C as PAL } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* BUSINESS CARD — dekor */
 
 /** Vizit kartı — iki üzlü, `flipped` arxa üzü göstərir */
 export function Card({ front, back, flipped = false, width = 320, style }) {
+  const C = usePalette(PAL)
   const face = { position: 'absolute', inset: 0, borderRadius: 6, backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', overflow: 'hidden' }
   return (
     <div style={{ position: 'relative', width, aspectRatio: '85 / 55', perspective: 1200, ...style }}>
@@ -16,7 +18,9 @@ export function Card({ front, back, flipped = false, width = 320, style }) {
 }
 
 /** Künc işarələri (kəsmə nişanları) */
-export function CropMarks({ color = C.KLEIN, size = 14, inset = -8 }) {
+export function CropMarks($p) {
+  const C = usePalette(PAL)
+  const { color = C.KLEIN, size = 14, inset = -8 } = $p
   const m = (pos, rot) => (
     <span key={rot} aria-hidden="true" style={{ position: 'absolute', ...pos, width: size, height: size, borderTop: `1.5px solid ${color}`, borderLeft: `1.5px solid ${color}`, transform: `rotate(${rot}deg)` }} />
   )

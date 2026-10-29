@@ -1,4 +1,5 @@
-import { C, HANG, SPARKS } from './palette'
+import { C as PAL, HANG, SPARKS } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* BABY MOBILE — keçə dekor */
 
@@ -10,7 +11,9 @@ const PATHS = {
 }
 
 /** Keçə fiqur — tikiş xətti ilə */
-export function Felt({ shape = 'star', size = 60, color = C.MUSTARD, children, style }) {
+export function Felt($p) {
+  const C = usePalette(PAL)
+  const { shape = 'star', size = 60, color = C.MUSTARD, children, style } = $p
   const d = PATHS[shape] || PATHS.star
   return (
     <div style={{ position: 'relative', width: size, height: size, ...style }}>
@@ -32,6 +35,7 @@ export function Felt({ shape = 'star', size = 60, color = C.MUSTARD, children, s
 
 /** Beşik mobili — taxta halqa, saplar, keçə fiqurlar */
 export function Mobile({ width = 300, spin = false, style }) {
+  const C = usePalette(PAL)
   return (
     <div aria-hidden="true" style={{ position: 'relative', width, height: 250, margin: '0 auto', transformOrigin: '50% 0', animation: spin ? 'bm-swing 1.6s ease-in-out' : 'bm-sway 6s ease-in-out infinite', ...style }}>
       {/* qarmaq və mərkəz sapı */}
@@ -40,7 +44,7 @@ export function Mobile({ width = 300, spin = false, style }) {
       {/* taxta halqa */}
       <span style={{ position: 'absolute', left: '4%', right: '4%', top: 30, height: 22, borderRadius: '50%', border: '5px solid #C9955A', boxShadow: 'inset 0 2px 0 rgba(255,255,255,.25), 0 3px 6px rgba(0,0,0,.25)' }} />
       {[18, 50, 82].map((x) => <span key={x} style={{ position: 'absolute', left: `${x}%`, top: 6, width: 1.4, height: 30, background: 'rgba(255,244,222,.45)', transform: `rotate(${(50 - x) * 0.5}deg)`, transformOrigin: '50% 100%' }} />)}
-      {HANG.map((h, i) => (
+      {HANG(C).map((h, i) => (
         <span key={i} style={{ position: 'absolute', left: `${h.x}%`, top: 44, transform: 'translateX(-50%)' }}>
           <span style={{ display: 'block', width: 1.2, height: h.len, margin: '0 auto', background: 'rgba(255,244,222,.5)' }} />
           <span style={{ display: 'block', marginTop: -2, transformOrigin: '50% 0', animation: spin ? `bm-turn .9s ease-in-out ${(i * 0.08).toFixed(2)}s 2` : `bm-dangle ${3 + i * 0.4}s ease-in-out ${(i * 0.3).toFixed(2)}s infinite` }}>
@@ -54,6 +58,7 @@ export function Mobile({ width = 300, spin = false, style }) {
 
 /** Ulduz tozu (fon) */
 export function Sparks({ opacity = 1 }) {
+  const C = usePalette(PAL)
   return (
     <div aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'hidden', opacity }}>
       {SPARKS.map((s, i) => (
@@ -64,7 +69,9 @@ export function Sparks({ opacity = 1 }) {
 }
 
 /** Musiqi notu */
-export function Note({ size = 22, color = C.CREAM, style }) {
+export function Note($p) {
+  const C = usePalette(PAL)
+  const { size = 22, color = C.CREAM, style } = $p
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" width={size} height={size} style={{ display: 'block', ...style }}>
       <path d="M9 18a3 3 0 1 1-2-2.8V5l11-2v11.2A3 3 0 1 1 16 11.4V6.4L9 7.6z" fill={color} />

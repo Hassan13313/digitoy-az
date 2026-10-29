@@ -7,7 +7,7 @@ export const C = {
 
 /* Lövhə — təbaşir ləkələri ilə */
 export const BOARD_BG = `radial-gradient(40% 30% at 22% 28%, rgba(255,255,255,.07), transparent 70%), radial-gradient(35% 25% at 78% 70%, rgba(255,255,255,.06), transparent 70%), radial-gradient(60% 40% at 50% 110%, rgba(255,255,255,.05), transparent 70%), linear-gradient(180deg, #2A4B42, #22403A)`
-export const PAPER_BG = `radial-gradient(90% 60% at 50% 0%, #FFFDF6, transparent 70%), #F6F2E8`
+export const PAPER_BG = (C) => (`radial-gradient(90% 60% at 50% 0%, #FFFDF6, transparent 70%), ${C.PAPER}`)
 
 /* Təbaşir fakturası — səs-küy maskası */
 const NOISE = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  3 0 0 0 -.55'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E\")"

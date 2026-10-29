@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize, ageWord } from '../_shared/kids'
-import { C, DOTS, SPEED, OUTLINE, SFX, BURST_SHARP, nameSize } from './palette'
+import { C as PAL, DOTS, SPEED, OUTLINE, SFX, BURST_SHARP, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Emblem, Burst, Bubble, Caption } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    HERO COMIC — «Qəhrəman» (Sünnət toyu konsepti, 2026-10)
@@ -31,9 +32,13 @@ import { Emblem, Burst, Bubble, Caption } from './art'
 const BASE = getTemplateTheme('hero-comic')
 const ID = 'hero-comic'
 
-const PANEL_COLORS = [C.RED, C.BLUE, C.YELLOW, C.SKY]
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['RED'], secondary: ['BLUE'], accent: ['YELLOW'], background: ['PAPER'], text: ['INK'] }
 
-const KEYFRAMES = `
+const PANEL_COLORS = (C) => ([C.RED, C.BLUE, C.YELLOW, C.SKY])
+
+const KEYFRAMES = (C) => (`
 @keyframes hc-pop { 0% { transform: scale(0) rotate(-20deg) } 60% { transform: scale(1.15) rotate(6deg) } 100% { transform: scale(1) rotate(-4deg) } }
 @keyframes hc-shake { 0%,100% { transform: none } 20% { transform: translate(-6px, 3px) } 40% { transform: translate(5px, -4px) } 60% { transform: translate(-4px, -2px) } 80% { transform: translate(3px, 4px) } }
 @keyframes hc-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
@@ -45,14 +50,15 @@ const KEYFRAMES = `
 [data-hc] input:focus-visible, [data-hc] textarea:focus-visible { border-color: ${C.BLUE} !important; outline: none; }
 [data-hc] button:focus-visible, [data-hc] a:focus-visible, [data-hc] [role="button"]:focus-visible { outline: 3px solid ${C.BLUE}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-hc] *, [data-hc] { animation: none !important; transition: none !important; } }
-`
+`)
 
 /* Üz qabığının məzmunu (bölünmə üçün iki dəfə çəkilir) */
 function Cover({ inv, head, hidden }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const { titleOv, first, second } = openingNames(inv)
   return (
-    <div aria-hidden={hidden ? 'true' : undefined} style={{ position: 'absolute', inset: 0, background: `${DOTS('rgba(255,255,255,.14)', 9)}, ${SPEED()}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 22px', textAlign: 'center', borderLeft: `6px solid ${C.INK}`, borderRight: `6px solid ${C.INK}` }}>
+    <div aria-hidden={hidden ? 'true' : undefined} style={{ position: 'absolute', inset: 0, background: `${DOTS('rgba(255,255,255,.14)', 9)}, ${SPEED(C)()}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 22px', textAlign: 'center', borderLeft: `6px solid ${C.INK}`, borderRight: `6px solid ${C.INK}` }}>
       <div style={{ position: 'absolute', left: 14, right: 14, top: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ padding: '4px 10px', background: C.RED, border: `3px solid ${C.INK}`, fontFamily: head, fontWeight: 800, fontSize: 13, color: C.WHITE }}>№1</span>
         {inv.dp?.year && <span style={{ padding: '4px 10px', background: C.WHITE, border: `3px solid ${C.INK}`, fontFamily: head, fontWeight: 800, fontSize: 11, color: C.INK }}>{inv.dp.year}</span>}
@@ -62,7 +68,7 @@ function Cover({ inv, head, hidden }) {
       </EmblemSlot>
       {ot.show('kicker') && <Caption head={head} rotate={-3}>{ot.text('kicker')}</Caption>}
       {titleOv !== '' && (
-        <div style={{ marginTop: 16, fontFamily: head, fontWeight: 800, fontSize: 'clamp(46px, 14vw, 66px)', lineHeight: 1, color: C.YELLOW, transform: 'rotate(-4deg) skewX(-6deg)', overflowWrap: 'anywhere', ...OUTLINE(4, 6) }}>
+        <div style={{ marginTop: 16, fontFamily: head, fontWeight: 800, fontSize: 'clamp(46px, 14vw, 66px)', lineHeight: 1, color: C.YELLOW, transform: 'rotate(-4deg) skewX(-6deg)', overflowWrap: 'anywhere', ...OUTLINE(C)(4, 6) }}>
           {first}{second && <><span style={{ display: 'block', fontSize: '.45em', color: C.WHITE }}>{ot.text('and')}</span>{second}</>}
         </div>
       )}
@@ -75,6 +81,7 @@ function Cover({ inv, head, hidden }) {
 
 /* ═══ 01 — AÇILIŞ: BAM! və səhifə bölünür ═══ */
 function ComicOpening({ inv, theme, lang }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -97,7 +104,7 @@ function ComicOpening({ inv, theme, lang }) {
       {go && (
         <div aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', marginLeft: -120, marginTop: -120, animation: 'hc-pop .45s cubic-bezier(.3,1.5,.5,1) both' }}>
           <Burst size={240} shape={BURST_SHARP}>
-            <span style={{ fontFamily: head, fontWeight: 800, fontSize: 54, color: C.RED, ...OUTLINE(3, 4) }}>{SFX[lang] || SFX.az}</span>
+            <span style={{ fontFamily: head, fontWeight: 800, fontSize: 54, color: C.RED, ...OUTLINE(C)(3, 4) }}>{SFX[lang] || SFX.az}</span>
           </Burst>
         </div>
       )}
@@ -114,14 +121,16 @@ function ComicOpening({ inv, theme, lang }) {
 }
 
 /* Bölmə: komiks səhifəsi + panel */
-function Page({ id, section, title, kicker, sub, children, head, tint = C.PAPER, panel = true }) {
+function Page($p) {
+  const C = usePalette(PAL)
+  const { id, section, title, kicker, sub, children, head, tint = C.PAPER, panel = true } = $p
   return (
     <section id={id} data-section={section} style={{ position: 'relative', padding: '56px 16px 62px', background: `${DOTS()}, ${tint}` }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 26 }}>
             {title && (
-              <h2 style={{ display: 'inline-block', margin: 0, padding: '10px 18px 9px', background: C.WHITE, border: `3px solid ${C.INK}`, boxShadow: `5px 5px 0 ${C.INK}`, transform: 'rotate(-1.5deg)', fontFamily: head, fontWeight: 800, fontSize: 'clamp(21px, 6.2vw, 28px)', lineHeight: 1.15, color: C.INK, textWrap: 'balance' }}>{title}</h2>
+              <h2 style={{ display: 'inline-block', margin: 0, padding: '10px 18px 9px', background: C.WHITE, border: `3px solid ${C.INK}`, boxShadow: `5px 5px 0 ${C.INK}`, transform: 'rotate(-1.5deg)', fontFamily: head, fontWeight: 800, fontSize: scaleFont('clamp(21px, 6.2vw, 28px)', C.hs), lineHeight: 1.15, color: C.INK, textWrap: 'balance' }}>{title}</h2>
             )}
             {kicker && <div style={{ marginTop: 14, fontWeight: 700, fontSize: 15.5, color: C.MUTED }}>{kicker}</div>}
             {sub && <p style={{ margin: '10px auto 0', maxWidth: 340, fontSize: 15.5, color: C.MUTED, lineHeight: 1.55 }}>{sub}</p>}
@@ -135,21 +144,22 @@ function Page({ id, section, title, kicker, sub, children, head, tint = C.PAPER,
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: C.WHITE, border: `3px solid ${C.INK}`, borderRadius: 0,
   padding: '12px 14px', fontSize: 16, color: C.INK, outline: 'none',
-}
-const btn = (on) => ({
+})
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '11px 20px',
   fontSize: 15.5, fontWeight: 700, textDecoration: 'none', cursor: 'pointer',
   background: on ? C.RED : C.WHITE, color: on ? C.WHITE : C.INK, border: `3px solid ${C.INK}`, boxShadow: `4px 4px 0 ${C.INK}`,
-})
-const suggest = { bg: C.WHITE, border: `3px solid ${C.INK}`, active: alpha(C.YELLOW, 0.6), text: C.INK, table: C.RED, radius: 0 }
+}))
+const suggest = (C) => ({ bg: C.WHITE, border: `3px solid ${C.INK}`, active: alpha(C.YELLOW, 0.6), text: C.INK, table: C.RED, radius: 0 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function HeroComicTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -158,11 +168,11 @@ export default function HeroComicTemplate(props) {
   const age = inv.age
 
   return (
-    <div data-hc lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-hc lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.PAPER, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.YELLOW, 0.4),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <ComicOpening inv={inv} theme={theme} lang={lang} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.YELLOW, border: `3px solid ${C.INK}`, boxShadow: `3px 3px 0 ${C.INK}` }}>
@@ -179,18 +189,18 @@ export default function HeroComicTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.INK, fontWeight: 700, fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 800, fontSize: 16, color: C.RED, ...OUTLINE(1, 2) }}>{T.brand}</div>
+            <div style={{ fontFamily: head, fontWeight: 800, fontSize: 16, color: C.RED, ...OUTLINE(C)(1, 2) }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — üz qabığı */}
-          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: `${DOTS('rgba(255,255,255,.14)', 9)}, ${SPEED()}`, padding: '40px 18px 56px', textAlign: 'center', borderBottom: `4px solid ${C.INK}` }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: `${DOTS('rgba(255,255,255,.14)', 9)}, ${SPEED(C)()}`, padding: '40px 18px 56px', textAlign: 'center', borderBottom: `4px solid ${C.INK}` }}>
             <Emblem size={84} style={{ margin: '0 auto', animation: 'hc-wobble 3s ease-in-out infinite' }} />
             <div style={{ marginTop: 16 }}><Caption head={head} rotate={-3}>{L('hero', 'kicker', inv.eventLabel)}</Caption></div>
-            <h1 style={{ margin: '20px 0 0', fontFamily: head, fontWeight: 800, fontSize: nameSize(heroName), lineHeight: 1, color: C.YELLOW, transform: 'rotate(-4deg) skewX(-6deg)', overflowWrap: 'anywhere', ...OUTLINE(4, 6) }}>{heroName}</h1>
+            <h1 style={{ margin: '20px 0 0', fontFamily: head, fontWeight: 800, fontSize: nameSize(heroName), lineHeight: 1, color: C.YELLOW, transform: 'rotate(-4deg) skewX(-6deg)', overflowWrap: 'anywhere', ...OUTLINE(C)(4, 6) }}>{heroName}</h1>
             {age && (
               <Burst size={112} style={{ margin: '18px auto 0', transform: 'rotate(8deg)' }}>
-                <span style={{ fontFamily: head, fontWeight: 800, fontSize: 36, lineHeight: 0.9, color: C.RED, ...OUTLINE(2, 2) }}>{age}</span>
+                <span style={{ fontFamily: head, fontWeight: 800, fontSize: 36, lineHeight: 0.9, color: C.RED, ...OUTLINE(C)(2, 2) }}>{age}</span>
                 <span style={{ fontFamily: head, fontWeight: 800, fontSize: 12, color: C.INK, textTransform: 'uppercase' }}>{ageWord(age, lang)}</span>
               </Burst>
             )}
@@ -209,8 +219,8 @@ export default function HeroComicTemplate(props) {
             <Page section="countdown" head={head} panel={false} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12, maxWidth: 360, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
-                  <div key={l} style={{ position: 'relative', padding: '18px 10px 14px', textAlign: 'center', background: `${DOTS('rgba(255,255,255,.22)', 7)}, ${PANEL_COLORS[i]}`, border: `3px solid ${C.INK}`, boxShadow: `5px 5px 0 ${C.INK}`, transform: `rotate(${[-1.5, 1, 1.5, -1][i]}deg)` }}>
-                    <div style={{ fontFamily: head, fontWeight: 800, fontSize: 'clamp(38px, 11vw, 52px)', lineHeight: 1, color: C.WHITE, fontVariantNumeric: 'tabular-nums', ...OUTLINE(3, 4) }}><PopDigit value={v} pop={pop} /></div>
+                  <div key={l} style={{ position: 'relative', padding: '18px 10px 14px', textAlign: 'center', background: `${DOTS('rgba(255,255,255,.22)', 7)}, ${PANEL_COLORS(C)[i]}`, border: `3px solid ${C.INK}`, boxShadow: `5px 5px 0 ${C.INK}`, transform: `rotate(${[-1.5, 1, 1.5, -1][i]}deg)` }}>
+                    <div style={{ fontFamily: head, fontWeight: 800, fontSize: 'clamp(38px, 11vw, 52px)', lineHeight: 1, color: C.WHITE, fontVariantNumeric: 'tabular-nums', ...OUTLINE(C)(3, 4) }}><PopDigit value={v} pop={pop} /></div>
                     <div style={{ display: 'inline-block', marginTop: 10, padding: '2px 10px', background: C.WHITE, border: `2px solid ${C.INK}`, fontWeight: 700, fontSize: 13.5, color: C.INK }}>{l}</div>
                   </div>
                 ))}
@@ -233,7 +243,7 @@ export default function HeroComicTemplate(props) {
               </div>
               <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontWeight: 800, fontSize: 21, lineHeight: 1.25, color: C.INK }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontWeight: 700, fontSize: 15, color: C.MUTED }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn(C)} />
             </Page>
           )}
 
@@ -267,12 +277,12 @@ export default function HeroComicTemplate(props) {
           {/* MASA — missiya partlayışı */}
           {S.seating && !seating.isEmpty && (
             <Page section="seating" head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="hc-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.RED}
+              <SeatFinder inv={inv} tr={tr} listId="hc-seat-list" field={field(C)} suggest={suggest(C)} font={body} muted={C.MUTED} accent={C.RED}
                 nameStyle={{ fontFamily: head, fontWeight: 800, fontSize: 19, color: C.INK }}
                 card={(num) => (
                   <Burst size={210} style={{ margin: '0 auto', animation: 'hc-pop .5s cubic-bezier(.3,1.5,.5,1) both' }}>
                     <span style={{ fontFamily: head, fontWeight: 800, fontSize: 13, letterSpacing: '.08em', textTransform: 'uppercase', color: C.INK }}>{T.table}</span>
-                    <span style={{ fontFamily: head, fontWeight: 800, fontSize: tableSize(num, 64), lineHeight: 1, color: C.RED, ...OUTLINE(3, 4) }}>{num}</span>
+                    <span style={{ fontFamily: head, fontWeight: 800, fontSize: tableSize(num, 64), lineHeight: 1, color: C.RED, ...OUTLINE(C)(3, 4) }}>{num}</span>
                   </Burst>
                 )} />
             </Page>
@@ -291,7 +301,7 @@ export default function HeroComicTemplate(props) {
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.INK} bg={C.WHITE} frame={{ border: `3px solid ${C.INK}`, boxShadow: `5px 5px 0 ${C.INK}` }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
             </Page>
           )}
 
@@ -303,7 +313,7 @@ export default function HeroComicTemplate(props) {
                 font: body, display: head, btnFont: head,
                 doneMark: <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><Emblem size={54} /></div>,
                 marker: (a) => (a ? <span style={{ display: 'block', width: 14, height: 14, background: C.RED, border: `2px solid ${C.INK}` }} /> : <span style={{ display: 'block', width: 14, height: 14, border: `2px solid ${C.INK}` }} />),
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Page>
           )}
@@ -312,7 +322,7 @@ export default function HeroComicTemplate(props) {
           {S.guestbook && (
             <Page section="guestbook" head={head} panel={false} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <div style={{ background: C.WHITE, border: `3px solid ${C.INK}`, boxShadow: `7px 7px 0 ${C.INK}`, padding: '20px 16px 0', marginBottom: 30 }}>
-                <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.RED} />
+                <GuestbookForm inv={inv} field={field(C)} btn={btn(C)} errorColor={C.RED} />
               </div>
               <div style={{ display: 'grid', gap: 34 }}>
                 {gbook.messages.map((raw, i) => {
@@ -334,11 +344,12 @@ export default function HeroComicTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 
 function MapPin({ label, head }) {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
       <span style={{ position: 'absolute', left: -46, top: -70, width: 92, padding: '6px 0 5px', textAlign: 'center', background: C.YELLOW, border: `3px solid ${C.INK}`, boxShadow: `3px 3px 0 ${C.INK}`, fontFamily: head, fontWeight: 800, fontSize: 12, textTransform: 'uppercase', color: C.INK }}>{label}</span>

@@ -1,4 +1,5 @@
-import { SPOTS } from './palette'
+import { C as PAL, SPOTS } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* DISCO BALL — güzgü kürə, işıq ləkələri */
 
@@ -33,9 +34,10 @@ export function MirrorBall({ size = 180, spin = true, lit = true, chain = 80, st
 
 /** Divarlarda fırlanan işıq ləkələri */
 export function LightSpots({ on = true, style }) {
+  const C = usePalette(PAL)
   return (
     <div aria-hidden="true" style={{ position: 'absolute', inset: '-30%', pointerEvents: 'none', opacity: on ? 1 : 0, transition: 'opacity .6s ease .3s', animation: on ? 'db-rotate 16s linear infinite' : 'none', ...style }}>
-      {SPOTS.map((p, i) => (
+      {SPOTS(C).map((p, i) => (
         <span key={i} style={{ position: 'absolute', left: `${p.x}%`, top: `${p.y}%`, width: p.s, height: p.s, borderRadius: '50%', background: p.c, boxShadow: `0 0 10px 2px ${p.c}`, opacity: 0.75 }} />
       ))}
     </div>

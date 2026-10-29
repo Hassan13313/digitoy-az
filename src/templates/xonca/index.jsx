@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C, nameSize } from './palette'
+import { C as PAL, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Star8, Engraving, Xonca, CandleStick } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    XONÇA — «Şamlı xonça» (Xına gecəsi konsepti, 2026-10)
@@ -32,7 +33,11 @@ import { Star8, Engraving, Xonca, CandleStick } from './art'
 const BASE = getTemplateTheme('xonca')
 const ID = 'xonca'
 
-const KEYFRAMES = `
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['COPPER'], secondary: ['WALNUT'], accent: ['BRASS'], background: ['IVORY'], text: ['INK'] }
+
+const KEYFRAMES = (C) => (`
 @keyframes xc-flame { from { transform: scaleY(.86) rotate(-2deg) } to { transform: scaleY(1.1) rotate(2deg) } }
 @keyframes xc-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes xc-fade { from { opacity: 0 } to { opacity: 1 } }
@@ -44,13 +49,14 @@ const KEYFRAMES = `
 [data-xc] input:focus-visible, [data-xc] textarea:focus-visible { border-color: ${C.COPPER} !important; outline: none; }
 [data-xc] button:focus-visible, [data-xc] a:focus-visible, [data-xc] [role="button"]:focus-visible { outline: 2px solid ${C.BRASS}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-xc] *, [data-xc] { animation: none !important; transition: none !important; } }
-`
+`)
 
-const DARK_BG = `radial-gradient(90% 60% at 50% 30%, rgba(227,160,108,.16), transparent 70%), linear-gradient(180deg, ${C.WALNUT_L}, ${C.WALNUT})`
-const LIGHT_BG = `radial-gradient(80% 50% at 50% 0%, #FFF8EC, transparent 70%), ${C.IVORY}`
+const DARK_BG = (C) => (`radial-gradient(90% 60% at 50% 30%, rgba(227,160,108,.16), transparent 70%), linear-gradient(180deg, ${C.WALNUT_L}, ${C.WALNUT})`)
+const LIGHT_BG = (C) => (`radial-gradient(80% 50% at 50% 0%, #FFF8EC, transparent 70%), ${C.IVORY}`)
 
 /* ═══ 01 — AÇILIŞ: şamlar alışır ═══ */
 function XoncaOpening({ inv, theme }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -97,14 +103,15 @@ function XoncaOpening({ inv, theme }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, dark = false }) {
+  const C = usePalette(PAL)
   const mute = dark ? alpha(C.CREAM, 0.72) : C.MUTED
   return (
-    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? DARK_BG : LIGHT_BG, color: dark ? C.CREAM : C.INK }}>
+    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? DARK_BG(C) : LIGHT_BG(C), color: dark ? C.CREAM : C.INK }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <Engraving color={dark ? C.BRASS : C.COPPER} width={210} />
-            {title && <h2 style={{ margin: '14px 0 0', fontFamily: head, fontWeight: 500, fontSize: 'clamp(29px, 8.4vw, 38px)', lineHeight: 1.15, color: dark ? C.CREAM : C.COPPER_D, textWrap: 'balance' }}>{title}</h2>}
+            {title && <h2 style={{ margin: '14px 0 0', fontFamily: head, fontWeight: 500, fontSize: scaleFont('clamp(29px, 8.4vw, 38px)', C.hs), lineHeight: 1.15, color: dark ? C.CREAM : C.COPPER_D, textWrap: 'balance' }}>{title}</h2>}
             {kicker && <div style={{ marginTop: 8, fontSize: 15.5, color: mute }}>{kicker}</div>}
             {sub && <p style={{ margin: '8px auto 0', maxWidth: 340, fontSize: 15.5, color: mute, lineHeight: 1.6 }}>{sub}</p>}
           </div>
@@ -115,25 +122,26 @@ function Panel({ id, section, title, kicker, sub, children, head, dark = false }
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: '#FFFBF4', border: `1px solid ${alpha(C.COPPER, 0.4)}`, borderRadius: 12,
   padding: '14px 16px', fontSize: 16, color: C.INK, outline: 'none',
-}
-const darkField = { ...field, background: alpha('#000000', 0.25), border: `1px solid ${alpha(C.COPPER_L, 0.4)}`, color: C.CREAM }
-const btn = (on) => ({
+})
+const darkField = (C) => ({ ...field(C), background: alpha('#000000', 0.25), border: `1px solid ${alpha(C.COPPER_L, 0.4)}`, color: C.CREAM })
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 24px', borderRadius: 999,
   fontSize: 15.5, fontWeight: 500, textDecoration: 'none', cursor: 'pointer',
   background: on ? `linear-gradient(180deg, ${C.COPPER_L}, ${C.COPPER})` : 'transparent', color: on ? C.WALNUT : C.COPPER_D,
   border: `1px solid ${on ? C.COPPER : alpha(C.COPPER_D, 0.45)}`,
-})
-const darkBtn = (on) => ({ ...btn(on), color: on ? C.WALNUT : C.COPPER_L, border: `1px solid ${on ? C.COPPER : alpha(C.COPPER_L, 0.5)}` })
-const suggest = { bg: '#FFFBF4', border: `1px solid ${alpha(C.COPPER, 0.35)}`, active: alpha(C.COPPER_L, 0.25), text: C.INK, table: C.COPPER_D, radius: 12 }
+}))
+const darkBtn = (C) => ((on) => ({ ...btn(C)(on), color: on ? C.WALNUT : C.COPPER_L, border: `1px solid ${on ? C.COPPER : alpha(C.COPPER_L, 0.5)}` }))
+const suggest = (C) => ({ bg: '#FFFBF4', border: `1px solid ${alpha(C.COPPER, 0.35)}`, active: alpha(C.COPPER_L, 0.25), text: C.INK, table: C.COPPER_D, radius: 12 })
 
 /* Mis nəlbəki — sayğac */
 function Bowl({ value, label, pop, head }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ textAlign: 'center' }}>
-      <div style={{ position: 'relative', aspectRatio: '1', borderRadius: '50%', padding: '11%', background: 'conic-gradient(from 210deg, #7E3F1E, #E3A06C, #B8683A, #F2B987, #7E3F1E, #C97B48, #7E3F1E)', boxShadow: '0 14px 22px -12px rgba(60,25,10,.6)' }}>
+      <div style={{ position: 'relative', aspectRatio: '1', borderRadius: '50%', padding: '11%', background: `conic-gradient(from 210deg, #7E3F1E, #E3A06C, ${C.COPPER}, #F2B987, #7E3F1E, #C97B48, #7E3F1E)`, boxShadow: '0 14px 22px -12px rgba(60,25,10,.6)' }}>
         <div style={{ height: '100%', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(circle at 40% 35%, #D88E58, #9C552B 70%, #7E3F1E)', boxShadow: 'inset 0 3px 8px rgba(40,15,5,.55)', outline: `1px dashed ${alpha('#FFE1BC', 0.45)}`, outlineOffset: -5 }}>
           <span style={{ fontFamily: head, fontWeight: 500, fontSize: 'clamp(22px, 6.8vw, 30px)', lineHeight: 1, color: C.CREAM, textShadow: '0 1px 2px rgba(60,20,5,.6)', fontVariantNumeric: 'tabular-nums' }}><PopDigit value={value} pop={pop} /></span>
         </div>
@@ -147,6 +155,7 @@ function Bowl({ value, label, pop, head }) {
 export default function XoncaTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -155,11 +164,11 @@ export default function XoncaTemplate(props) {
   const MAP_H = 'min(78vw, 330px)'
 
   return (
-    <div data-xc lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-xc lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.WALNUT, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.COPPER_L, 0.3),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <XoncaOpening inv={inv} theme={theme} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: `linear-gradient(180deg, ${C.COPPER_L}, ${C.COPPER})`, border: `1px solid ${C.BRASS}`, boxShadow: '0 8px 20px rgba(34,18,11,.45)' }}>
@@ -182,7 +191,7 @@ export default function XoncaTemplate(props) {
           </header>
 
           {/* HERO — şamlı xonça */}
-          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: `radial-gradient(70% 40% at 50% 78%, rgba(255,180,100,.28), transparent 70%), ${DARK_BG}`, padding: '48px 22px 54px', textAlign: 'center', color: C.CREAM }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: `radial-gradient(70% 40% at 50% 78%, rgba(255,180,100,.28), transparent 70%), ${DARK_BG(C)}`, padding: '48px 22px 54px', textAlign: 'center', color: C.CREAM }}>
             <div style={{ fontFamily: head, fontStyle: 'italic', fontSize: 24, color: C.COPPER_L, animation: 'xc-rise .8s ease-out .2s both' }}>{L('hero', 'kicker', inv.eventLabel)}</div>
             <h1 style={{ margin: '8px 0 0', fontFamily: head, fontWeight: 500, fontSize: nameSize(heroName), lineHeight: 1.04, color: C.CREAM, overflowWrap: 'anywhere', animation: 'xc-rise 1s ease-out .35s both' }}>{heroName}</h1>
             <Engraving width={220} style={{ marginTop: 18 }} />
@@ -212,7 +221,7 @@ export default function XoncaTemplate(props) {
           {/* MƏKAN — dəyirmi məcməyi */}
           {S.venue && (
             <Panel section="venue" head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
-              <div style={{ width: `calc(${MAP_H} + 28px)`, maxWidth: '100%', margin: '0 auto', padding: 14, borderRadius: '50%', background: 'conic-gradient(from 200deg, #7E3F1E, #E3A06C, #B8683A, #F2B987, #7E3F1E, #C97B48, #7E3F1E)', boxShadow: '0 26px 40px -22px rgba(0,0,0,.8)', outline: `2px dotted ${alpha(C.BRASS, 0.8)}`, outlineOffset: -7 }}>
+              <div style={{ width: `calc(${MAP_H} + 28px)`, maxWidth: '100%', margin: '0 auto', padding: 14, borderRadius: '50%', background: `conic-gradient(from 200deg, #7E3F1E, #E3A06C, ${C.COPPER}, #F2B987, #7E3F1E, #C97B48, #7E3F1E)`, boxShadow: '0 26px 40px -22px rgba(0,0,0,.8)', outline: `2px dotted ${alpha(C.BRASS, 0.8)}`, outlineOffset: -7 }}>
                 <div style={{ borderRadius: '50%', overflow: 'hidden', isolation: 'isolate', aspectRatio: '1' }}>
                   <MapSection
                     weddingData={weddingData} theme={theme} accent={C.COPPER_D} height={MAP_H}
@@ -224,7 +233,7 @@ export default function XoncaTemplate(props) {
               </div>
               <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontWeight: 500, fontSize: 26, lineHeight: 1.2, color: C.CREAM }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontSize: 15.5, color: alpha(C.CREAM, 0.7) }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn(C)} />
             </Panel>
           )}
 
@@ -259,11 +268,11 @@ export default function XoncaTemplate(props) {
           {/* MASA — lentli mis boşqab */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="xc-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.COPPER_D}
+              <SeatFinder inv={inv} tr={tr} listId="xc-seat-list" field={field(C)} suggest={suggest(C)} font={body} muted={C.MUTED} accent={C.COPPER_D}
                 nameStyle={{ fontFamily: head, fontStyle: 'italic', fontSize: 24 }}
                 card={(num) => (
                   <div style={{ position: 'relative', width: 190, height: 190, margin: '8px auto 0', animation: 'xc-plate .8s cubic-bezier(.3,.8,.4,1) both' }}>
-                    <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'conic-gradient(from 200deg, #7E3F1E, #E3A06C, #B8683A, #F2B987, #7E3F1E, #C97B48, #7E3F1E)', boxShadow: '0 20px 30px -14px rgba(60,25,10,.65)', outline: `2px dotted ${alpha(C.BRASS, 0.9)}`, outlineOffset: -8 }} />
+                    <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: `conic-gradient(from 200deg, #7E3F1E, #E3A06C, ${C.COPPER}, #F2B987, #7E3F1E, #C97B48, #7E3F1E)`, boxShadow: '0 20px 30px -14px rgba(60,25,10,.65)', outline: `2px dotted ${alpha(C.BRASS, 0.9)}`, outlineOffset: -8 }} />
                     <div style={{ position: 'absolute', inset: 22, borderRadius: '50%', background: 'radial-gradient(circle at 40% 35%, #E9A570, #A75C30 70%, #7E3F1E)', boxShadow: 'inset 0 4px 10px rgba(40,15,5,.5)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                       <span style={{ fontSize: 13, letterSpacing: '.24em', textTransform: 'uppercase', color: alpha(C.CREAM, 0.85) }}>{T.table}</span>
                       <span style={{ fontFamily: head, fontWeight: 500, fontSize: tableSize(num, 64), lineHeight: 1, color: C.CREAM, textShadow: '0 2px 2px rgba(60,20,5,.55)' }}>{num}</span>
@@ -292,7 +301,7 @@ export default function XoncaTemplate(props) {
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.WALNUT} bg="#FFF6E8" frame={{ borderRadius: 18, boxShadow: `0 0 0 4px ${C.COPPER}, 0 0 0 6px ${alpha(C.BRASS, 0.6)}` }}
-                btn={darkBtn} muted={alpha(C.CREAM, 0.72)} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
+                btn={darkBtn(C)} muted={alpha(C.CREAM, 0.72)} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
             </Panel>
           )}
 
@@ -304,7 +313,7 @@ export default function XoncaTemplate(props) {
                 font: body, display: head, btnFont: body,
                 doneMark: <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><CandleStick h={30} /></div>,
                 marker: (a) => (a ? <Star8 size={13} color={C.COPPER_D} fill={alpha(C.COPPER_L, 0.6)} /> : <span style={{ display: 'block', width: 12, height: 12, borderRadius: '50%', border: `1px solid ${alpha(C.COPPER_D, 0.5)}` }} />),
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -312,7 +321,7 @@ export default function XoncaTemplate(props) {
           {/* ARZULAR */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.COPPER_L} />
+              <GuestbookForm inv={inv} field={darkField(C)} btn={darkBtn(C)} errorColor={C.COPPER_L} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
@@ -333,11 +342,12 @@ export default function XoncaTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 
 function MapPin() {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
       <span style={{ position: 'absolute', left: -15, top: -82 }}><CandleStick h={34} /></span>

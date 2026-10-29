@@ -7,8 +7,8 @@ export const C = {
 }
 
 export const NIGHT_BG = `radial-gradient(70% 45% at 50% 0%, rgba(220,235,247,.18), transparent 70%), linear-gradient(180deg, #2C4F7C, #1E3A5F 55%, #142842)`
-export const FROST_BG = `radial-gradient(60% 40% at 50% 0%, #FFFFFF, transparent 70%), #F2F7FB`
-export const BAUBLES = ['#C8303C', '#E2B65C', '#3F8A66', '#4C7CC4']
+export const FROST_BG = (C) => (`radial-gradient(60% 40% at 50% 0%, #FFFFFF, transparent 70%), ${C.FROST}`)
+export const BAUBLES = (C) => ([C.RED, C.GOLD, '#3F8A66', '#4C7CC4'])
 
 /* Qar dənələri — sabit toxumlu LCG */
 let seed = 53

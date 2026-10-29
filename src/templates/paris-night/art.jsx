@@ -1,4 +1,5 @@
-import { C, STRIPES, SPARKS, halfWidth } from './palette'
+import { C as PAL, STRIPES, SPARKS, halfWidth } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* PARIS NIGHT — Eyfel qülləsi, şlyapa qutusu, makaronlar, kafe tenti */
 
@@ -21,7 +22,9 @@ function zigzag(y0, y1, steps, side = 0) {
 const LATTICE = [zigzag(15, 65, 9), zigzag(73, 115, 6), zigzag(125, 196, 6, -1), zigzag(125, 196, 6, 1)]
 
 /** Eyfel qülləsi — `sparkle` olanda qızılı işıqlar yanıb-sönür */
-export function EiffelTower({ height = 300, sparkle = false, color = C.GOLD, glow = true, style }) {
+export function EiffelTower($p) {
+  const C = usePalette(PAL)
+  const { height = 300, sparkle = false, color = C.GOLD, glow = true, style } = $p
   return (
     <svg aria-hidden="true" viewBox="-2 -2 104 204" {...(typeof height === 'number' ? { width: height / 2, height } : {})} style={{ display: 'block', overflow: 'visible', ...(typeof height === 'number' ? {} : { height, width: 'auto', aspectRatio: '104 / 204' }), filter: glow ? `drop-shadow(0 0 ${typeof height === 'number' ? Math.max(2, height / 40) : 8}px rgba(225,188,120,.55))` : 'none', ...style }}>
       <path d={TOWER} fill="rgba(225,188,120,.12)" stroke={color} strokeWidth="1.6" strokeLinejoin="round" />
@@ -35,7 +38,9 @@ export function EiffelTower({ height = 300, sparkle = false, color = C.GOLD, glo
 }
 
 /** Makaron (3/4 görünüş) — üst qabıqda uşaqlar (rəqəm və s.) */
-export function Macaron({ size = 80, color = C.ROSE, children, style }) {
+export function Macaron($p) {
+  const C = usePalette(PAL)
+  const { size = 80, color = C.ROSE, children, style } = $p
   return (
     <div style={{ position: 'relative', width: size, maxWidth: '100%', aspectRatio: '1 / .86', ...style }}>
       <span aria-hidden="true" style={{ position: 'absolute', left: '4%', right: '4%', bottom: 0, height: '36%', borderRadius: '24% 24% 50% 50% / 30% 30% 70% 70%', background: `linear-gradient(180deg, ${color}, color-mix(in srgb, ${color} 78%, #000))`, boxShadow: '0 10px 14px -10px rgba(0,0,0,.45)' }} />
@@ -50,12 +55,13 @@ export function Macaron({ size = 80, color = C.ROSE, children, style }) {
 
 /** Şlyapa qutusu — `open` olanda qapaq uçur, makaronlar çıxır */
 export function HatBox({ width = 230, open = false, children }) {
+  const C = usePalette(PAL)
   const W = width
   const macs = [[-17, 0.2, C.LEMON], [17, 0.25, C.RASPBERRY], [-34, 0.05, C.ROSE], [0, 0, C.PISTACHIO], [34, 0.1, C.LAVENDER]]
   return (
     <div style={{ position: 'relative', width: W, height: W }}>
       {/* gövdə */}
-      <div aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: W * 0.26, height: W * 0.6, borderRadius: `0 0 50% 50% / 0 0 ${W * 0.12}px ${W * 0.12}px`, background: `${STRIPES}`, boxShadow: `inset ${-W * 0.12}px 0 ${W * 0.1}px rgba(0,0,0,.28), inset ${W * 0.08}px 0 ${W * 0.08}px rgba(255,255,255,.25), 0 ${W * 0.08}px ${W * 0.1}px -${W * 0.05}px rgba(0,0,0,.5)` }}>
+      <div aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: W * 0.26, height: W * 0.6, borderRadius: `0 0 50% 50% / 0 0 ${W * 0.12}px ${W * 0.12}px`, background: `${STRIPES(C)}`, boxShadow: `inset ${-W * 0.12}px 0 ${W * 0.1}px rgba(0,0,0,.28), inset ${W * 0.08}px 0 ${W * 0.08}px rgba(255,255,255,.25), 0 ${W * 0.08}px ${W * 0.1}px -${W * 0.05}px rgba(0,0,0,.5)` }}>
         <span style={{ position: 'absolute', left: 0, right: 0, bottom: W * 0.06, height: W * 0.07, background: C.ROSE, borderRadius: `0 0 50% 50% / 0 0 ${W * 0.05}px ${W * 0.05}px`, opacity: 0.95 }} />
       </div>
       {/* ağız */}
@@ -81,7 +87,9 @@ export function HatBox({ width = 230, open = false, children }) {
 }
 
 /** Fiyonk */
-export function Bow({ size = 60, color = C.INK, style }) {
+export function Bow($p) {
+  const C = usePalette(PAL)
+  const { size = 60, color = C.INK, style } = $p
   return (
     <svg aria-hidden="true" viewBox="0 0 60 30" width={size} height={size / 2} style={{ display: 'block', overflow: 'visible', ...style }}>
       <path d="M30 15 C18 0 4 2 6 12 C8 22 20 22 30 15 Z" fill={color} />
@@ -93,13 +101,17 @@ export function Bow({ size = 60, color = C.INK, style }) {
 }
 
 /** Kafe tenti — dişli zolaq */
-export function Awning({ height = 34, tooth = 24, color = C.ROSE }) {
+export function Awning($p) {
+  const C = usePalette(PAL)
+  const { height = 34, tooth = 24, color = C.ROSE } = $p
   const mask = `radial-gradient(${tooth / 2}px at ${tooth / 2}px ${height - tooth / 2}px, #000 98%, transparent) 0 0 / ${tooth}px ${height}px repeat-x, linear-gradient(#000, #000) top / 100% ${height - tooth / 2}px no-repeat`
   return <div aria-hidden="true" style={{ height, background: `repeating-linear-gradient(90deg, ${color} 0 ${tooth}px, #FFFFFF ${tooth}px ${tooth * 2}px)`, WebkitMask: mask, mask }} />
 }
 
 /** Poçt möhürü */
-export function Postmark({ size = 54, color = C.ROSE_D, style }) {
+export function Postmark($p) {
+  const C = usePalette(PAL)
+  const { size = 54, color = C.ROSE_D, style } = $p
   return (
     <svg aria-hidden="true" viewBox="0 0 80 50" width={size * 1.6} height={size} style={{ display: 'block', overflow: 'visible', ...style }}>
       <circle cx="25" cy="25" r="21" fill="none" stroke={color} strokeWidth="1.6" />

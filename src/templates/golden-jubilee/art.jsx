@@ -1,9 +1,12 @@
-import { C, LEATHER_BG, PAGE_BG } from './palette'
+import { C as PAL, LEATHER_BG, PAGE_BG } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* GOLDEN JUBILEE — dəri albom, qızıl naxış */
 
 /** Qızıl basma çərçivə (iki xətt) */
-export function GoldFrame({ inset = 14, radius = 6, color = C.GOLD, opacity = 0.9 }) {
+export function GoldFrame($p) {
+  const C = usePalette(PAL)
+  const { inset = 14, radius = 6, color = C.GOLD, opacity = 0.9 } = $p
   return (
     <span aria-hidden="true" style={{ position: 'absolute', inset, borderRadius: radius, border: `1.5px solid ${color}`, opacity, pointerEvents: 'none' }}>
       <span style={{ position: 'absolute', inset: 5, borderRadius: Math.max(0, radius - 3), border: `1px solid ${color}`, opacity: 0.7 }} />
@@ -34,7 +37,9 @@ export function MetalCorners({ size = 34 }) {
 }
 
 /** Foto küncləri (kağız) — elementin dörd küncündə */
-export function PhotoCorners({ size = 18, color = C.LEATHER_D }) {
+export function PhotoCorners($p) {
+  const C = usePalette(PAL)
+  const { size = 18, color = C.LEATHER_D } = $p
   const pos = [
     { left: -4, top: -4, transform: 'none' },
     { right: -4, top: -4, transform: 'scaleX(-1)' },
@@ -50,7 +55,9 @@ export function PhotoCorners({ size = 18, color = C.LEATHER_D }) {
 }
 
 /** Qızıl ornament xətti */
-export function Flourish({ width = 200, color = C.GOLD, style }) {
+export function Flourish($p) {
+  const C = usePalette(PAL)
+  const { width = 200, color = C.GOLD, style } = $p
   return (
     <svg aria-hidden="true" viewBox="0 0 200 20" width={width} height={width * 0.1} style={{ display: 'block', margin: '0 auto', maxWidth: '100%', overflow: 'visible', ...style }}>
       <path d="M4 10H76M124 10H196" stroke={color} strokeWidth="1" />
@@ -66,11 +73,12 @@ export function Flourish({ width = 200, color = C.GOLD, style }) {
  * cover: üz qabığındakı məzmun · page: ilk səhifə
  */
 export function Album({ width = 320, open = false, cover, page, instant = false, style }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ position: 'relative', width, aspectRatio: '3 / 4', perspective: 1400, ...style }}>
       {/* səhifələr (kənardan görünən qalınlıq) */}
       <span aria-hidden="true" style={{ position: 'absolute', inset: '4px -6px -6px 4px', borderRadius: '4px 10px 10px 4px', background: 'repeating-linear-gradient(90deg, #EADFC6 0 1px, #FBF5E7 1px 3px)', boxShadow: '0 30px 40px -24px rgba(0,0,0,.7)' }} />
-      <div style={{ position: 'absolute', inset: 0, borderRadius: '3px 8px 8px 3px', overflow: 'hidden', background: PAGE_BG, boxShadow: 'inset 14px 0 18px -14px rgba(60,40,20,.45)' }}>
+      <div style={{ position: 'absolute', inset: 0, borderRadius: '3px 8px 8px 3px', overflow: 'hidden', background: PAGE_BG(C), boxShadow: 'inset 14px 0 18px -14px rgba(60,40,20,.45)' }}>
         {page}
       </div>
       <div style={{
@@ -78,7 +86,7 @@ export function Album({ width = 320, open = false, cover, page, instant = false,
         transform: open ? 'rotateY(-118deg)' : 'none',
         transition: instant ? 'none' : 'transform 1.3s cubic-bezier(.55,0,.2,1) .05s',
       }}>
-        <div style={{ position: 'absolute', inset: 0, borderRadius: '3px 8px 8px 3px', overflow: 'hidden', backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', background: LEATHER_BG, boxShadow: 'inset 10px 0 14px -8px rgba(0,0,0,.6), inset 0 0 0 1px rgba(0,0,0,.4)' }}>
+        <div style={{ position: 'absolute', inset: 0, borderRadius: '3px 8px 8px 3px', overflow: 'hidden', backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', background: LEATHER_BG(C), boxShadow: 'inset 10px 0 14px -8px rgba(0,0,0,.6), inset 0 0 0 1px rgba(0,0,0,.4)' }}>
           {/* tikiş xətti */}
           <span aria-hidden="true" style={{ position: 'absolute', inset: 8, borderRadius: 6, border: '1.5px dashed rgba(243,222,156,.32)' }} />
           <MetalCorners size={Math.round(typeof width === 'number' ? width * 0.11 : 34)} />

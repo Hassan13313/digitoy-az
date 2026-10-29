@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C, SPLIT, QUESTION, SIDES, RELEASE, CONFETTI, nameSize } from './palette'
+import { C as PAL, SPLIT, QUESTION, SIDES, RELEASE, CONFETTI, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Balloon, GiftBox, Question } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    GENDER REVEAL — «Oğlan, yoxsa qız?» (Baby shower konsepti, 2026-10)
@@ -31,10 +32,14 @@ import { Balloon, GiftBox, Question } from './art'
 const BASE = getTemplateTheme('gender-reveal')
 const ID = 'gender-reveal'
 
-const TONES = [C.BLUE, C.PINK]
-const TONES_L = [C.BLUE_L, C.PINK_L]
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['INK'], secondary: ['PINK'], accent: ['GOLD'], background: ['CREAM'], text: ['INK'] }
 
-const KEYFRAMES = `
+const TONES = (C) => ([C.BLUE, C.PINK])
+const TONES_L = (C) => ([C.BLUE_L, C.PINK_L])
+
+const KEYFRAMES = (C) => (`
 @keyframes gr-fly { 0% { transform: translateY(0) scale(.5); opacity: 0 } 15% { opacity: 1 } 100% { transform: translateY(-115vh) scale(1); opacity: 1 } }
 @keyframes gr-conf { 0% { transform: translate(0, 0) rotate(0); opacity: 1 } 100% { transform: translate(var(--x), var(--y)) rotate(var(--r)); opacity: 0 } }
 @keyframes gr-wiggle { 0%,100% { transform: rotate(-3deg) } 50% { transform: rotate(3deg) } }
@@ -48,10 +53,11 @@ const KEYFRAMES = `
 [data-gr] input:focus-visible, [data-gr] textarea:focus-visible { border-color: ${C.BLUE_D} !important; outline: none; }
 [data-gr] button:focus-visible, [data-gr] a:focus-visible, [data-gr] [role="button"]:focus-visible { outline: 3px solid ${C.GOLD_D}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-gr] *, [data-gr] { animation: none !important; transition: none !important; } }
-`
+`)
 
 /* ═══ 01 — AÇILIŞ: qutu açılır, şarlar uçur ═══ */
 function RevealOpening({ inv, theme, lang }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -62,7 +68,7 @@ function RevealOpening({ inv, theme, lang }) {
     <motion.div {...gate.gateProps} data-gr
       animate={go ? { opacity: 0 } : {}}
       transition={{ duration: 0.4, delay: 1.7 }}
-      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: SPLIT(), color: C.INK, fontFamily: theme.fonts.body }}>
+      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: SPLIT(C)(), color: C.INK, fontFamily: theme.fonts.body }}>
       <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 22px', textAlign: 'center' }}>
         <div style={{ animation: 'gr-rise 1s ease-out .2s both' }}>
           <EmblemSlot mono={ot.mono} size={50} border={`2px solid ${C.GOLD}`} background="#FFFFFF" color={C.GOLD_D} font={head} style={{ animation: 'none', margin: '0 auto 8px' }}>
@@ -85,7 +91,7 @@ function RevealOpening({ inv, theme, lang }) {
           {go && RELEASE.map(([x, tone, d, s], i) => (
             <span key={i} aria-hidden="true" style={{ position: 'absolute', left: `calc(50% + ${x}px - ${s / 2}px)`, top: '20%', animation: `gr-fly 1.6s cubic-bezier(.4,0,.6,1) ${d + 0.15}s both` }}><Balloon size={s} tone={tone} string={30} /></span>
           ))}
-          {go && CONFETTI.map((c, i) => (
+          {go && CONFETTI(C).map((c, i) => (
             <span key={`c${i}`} aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '30%', width: c.w, height: c.w * 0.5, background: c.c, borderRadius: 2, '--x': `${c.x}px`, '--y': `${c.y}px`, '--r': `${c.rot}deg`, animation: `gr-conf 1.2s ease-out ${c.d}s both` }} />
           ))}
         </div>
@@ -105,15 +111,16 @@ function RevealOpening({ inv, theme, lang }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, split = false }) {
+  const C = usePalette(PAL)
   return (
-    <section id={id} data-section={section} style={{ position: 'relative', padding: '62px 20px 68px', overflow: 'hidden', background: split ? SPLIT(C.BLUE_L, C.PINK_L, 100) : `radial-gradient(90% 60% at 50% 0%, #FFFFFF, transparent 70%), ${C.CREAM}` }}>
+    <section id={id} data-section={section} style={{ position: 'relative', padding: '62px 20px 68px', overflow: 'hidden', background: split ? SPLIT(C)(C.BLUE_L, C.PINK_L, 100) : `radial-gradient(90% 60% at 50% 0%, #FFFFFF, transparent 70%), ${C.CREAM}` }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 30 }}>
             <div aria-hidden="true" style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: 2 }}>
               <Balloon size={18} tone="blue" string={10} /><Balloon size={24} tone="gold" string={12} /><Balloon size={18} tone="pink" string={10} />
             </div>
-            {title && <h2 style={{ margin: '8px 0 0', fontFamily: head, fontWeight: 800, fontSize: 'clamp(26px, 7.6vw, 34px)', lineHeight: 1.18, color: C.INK, textWrap: 'balance' }}>{title}</h2>}
+            {title && <h2 style={{ margin: '8px 0 0', fontFamily: head, fontWeight: 800, fontSize: scaleFont('clamp(26px, 7.6vw, 34px)', C.hs), lineHeight: 1.18, color: C.INK, textWrap: 'balance' }}>{title}</h2>}
             {kicker && <div style={{ marginTop: 8, fontWeight: 500, fontSize: 15.5, color: C.MUTED }}>{kicker}</div>}
             {sub && <p style={{ margin: '8px auto 0', maxWidth: 340, fontSize: 15.5, color: C.MUTED, lineHeight: 1.6 }}>{sub}</p>}
           </div>
@@ -124,21 +131,22 @@ function Panel({ id, section, title, kicker, sub, children, head, split = false 
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: '#FFFFFF', border: `2px solid ${alpha(C.INK, 0.12)}`, borderRadius: 16,
   padding: '13px 16px', fontSize: 16, color: C.INK, outline: 'none',
-}
-const btn = (on) => ({
+})
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 22px', borderRadius: 999,
   fontSize: 15.5, fontWeight: 600, textDecoration: 'none', cursor: 'pointer',
   background: on ? C.INK : '#FFFFFF', color: on ? '#FFFFFF' : C.INK, border: `2px solid ${on ? C.INK : alpha(C.INK, 0.2)}`,
-})
-const suggest = { bg: '#FFFFFF', border: `2px solid ${alpha(C.INK, 0.12)}`, active: alpha(C.GOLD, 0.25), text: C.INK, table: C.PINK_D, radius: 16 }
+}))
+const suggest = (C) => ({ bg: '#FFFFFF', border: `2px solid ${alpha(C.INK, 0.12)}`, active: alpha(C.GOLD, 0.25), text: C.INK, table: C.PINK_D, radius: 16 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function GenderRevealTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -147,11 +155,11 @@ export default function GenderRevealTemplate(props) {
   const [boy, girl] = SIDES[lang] || SIDES.az
 
   return (
-    <div data-gr lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-gr lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.CREAM, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.GOLD, 0.35),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <RevealOpening inv={inv} theme={theme} lang={lang} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: `linear-gradient(115deg, ${C.BLUE} 50%, ${C.PINK} 50%)`, border: '3px solid #FFFFFF', boxShadow: '0 8px 18px rgba(51,54,92,.3)' }}>
@@ -174,7 +182,7 @@ export default function GenderRevealTemplate(props) {
           </header>
 
           {/* HERO — iki tərəf */}
-          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: SPLIT(C.BLUE_L, C.PINK_L, 100), padding: '40px 20px 56px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: SPLIT(C)(C.BLUE_L, C.PINK_L, 100), padding: '40px 20px 56px', textAlign: 'center' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', maxWidth: 360, margin: '0 auto' }}>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ animation: 'gr-bob 3s ease-in-out infinite' }}><Balloon size={60} tone="blue" string={44} /></div>
@@ -202,8 +210,8 @@ export default function GenderRevealTemplate(props) {
             <Panel section="countdown" head={head} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 2.6vw, 12px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
-                  <div key={l} style={{ position: 'relative', padding: '18px 4px 14px', textAlign: 'center', borderRadius: 22, background: TONES_L[i % 2], boxShadow: `inset 0 0 0 2px ${TONES[i % 2]}`, overflow: 'hidden' }}>
-                    <span aria-hidden="true" style={{ position: 'absolute', right: -4, bottom: -18, fontFamily: head, fontWeight: 800, fontSize: 70, lineHeight: 1, color: alpha(TONES[i % 2], 0.25) }}>?</span>
+                  <div key={l} style={{ position: 'relative', padding: '18px 4px 14px', textAlign: 'center', borderRadius: 22, background: TONES_L(C)[i % 2], boxShadow: `inset 0 0 0 2px ${TONES(C)[i % 2]}`, overflow: 'hidden' }}>
+                    <span aria-hidden="true" style={{ position: 'absolute', right: -4, bottom: -18, fontFamily: head, fontWeight: 800, fontSize: 70, lineHeight: 1, color: alpha(TONES(C)[i % 2], 0.25) }}>?</span>
                     <div style={{ position: 'relative', fontFamily: head, fontWeight: 800, fontSize: 'clamp(22px, 6.6vw, 30px)', lineHeight: 1, color: C.INK, fontVariantNumeric: 'tabular-nums' }}><PopDigit value={v} pop={pop} /></div>
                     <div style={{ position: 'relative', marginTop: 6, fontWeight: 600, fontSize: 12.5, color: C.MUTED }}>{l}</div>
                   </div>
@@ -229,7 +237,7 @@ export default function GenderRevealTemplate(props) {
               </div>
               <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontWeight: 800, fontSize: 22, lineHeight: 1.25, color: C.INK }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontSize: 15, color: C.MUTED }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn(C)} />
             </Panel>
           )}
 
@@ -238,7 +246,7 @@ export default function GenderRevealTemplate(props) {
             <Panel section="program" head={head} title={L('program', 'title', timeline.sectionLabel)} kicker={K('program')}>
               <div style={{ maxWidth: 380, margin: '0 auto', display: 'grid', gap: 12 }}>
                 {timeline.events.map((ev, i) => (
-                  <div key={i} style={{ display: 'grid', gridTemplateColumns: '44px minmax(0, 1fr)', gap: 12, alignItems: 'center', padding: '12px 16px 12px 10px', borderRadius: 20, background: '#FFFFFF', boxShadow: `inset 4px 0 0 ${TONES[i % 2]}, 0 10px 18px -14px rgba(51,54,92,.45)` }}>
+                  <div key={i} style={{ display: 'grid', gridTemplateColumns: '44px minmax(0, 1fr)', gap: 12, alignItems: 'center', padding: '12px 16px 12px 10px', borderRadius: 20, background: '#FFFFFF', boxShadow: `inset 4px 0 0 ${TONES(C)[i % 2]}, 0 10px 18px -14px rgba(51,54,92,.45)` }}>
                     <div style={{ display: 'flex', justifyContent: 'center', height: 50, overflow: 'hidden' }}><Balloon size={30} tone={i % 2 ? 'pink' : 'blue'} string={14} /></div>
                     <div>
                       <div style={{ fontFamily: head, fontWeight: 800, fontSize: 15.5, color: i % 2 ? C.PINK_D : C.BLUE_D, fontVariantNumeric: 'tabular-nums' }}>{ev.time}</div>
@@ -260,7 +268,7 @@ export default function GenderRevealTemplate(props) {
           {/* MASA — qutunun etiketi */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="gr-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.PINK_D}
+              <SeatFinder inv={inv} tr={tr} listId="gr-seat-list" field={field(C)} suggest={suggest(C)} font={body} muted={C.MUTED} accent={C.PINK_D}
                 nameStyle={{ fontFamily: head, fontWeight: 800, fontSize: 20, color: C.INK }}
                 card={(num) => (
                   <GiftBox width={210} style={{ margin: '0 auto', animation: 'gr-pop .6s cubic-bezier(.3,1.3,.5,1) both' }} tag={(
@@ -279,14 +287,14 @@ export default function GenderRevealTemplate(props) {
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ aspectRatio: '1', overflow: 'hidden', borderRadius: 22, background: TONES_L[i % 2], border: `5px solid ${TONES[i % 2]}`, boxShadow: '0 12px 20px -12px rgba(51,54,92,.5)' }}>
+                    <div key={i} style={{ aspectRatio: '1', overflow: 'hidden', borderRadius: 22, background: TONES_L(C)[i % 2], border: `5px solid ${TONES(C)[i % 2]}`, boxShadow: '0 12px 20px -12px rgba(51,54,92,.5)' }}>
                       <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                     </div>
                   ))}
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.INK} bg="#FFFFFF" frame={{ borderRadius: 22, boxShadow: `0 0 0 4px ${C.GOLD}` }}
-                btn={btn} muted={C.INK} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
+                btn={btn(C)} muted={C.INK} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
             </Panel>
           )}
 
@@ -298,7 +306,7 @@ export default function GenderRevealTemplate(props) {
                 font: body, display: head, btnFont: head,
                 doneMark: <div style={{ display: 'flex', justifyContent: 'center', gap: 2, marginBottom: 8 }}><Balloon size={28} tone="blue" string={14} /><Balloon size={28} tone="pink" string={14} /></div>,
                 marker: (a) => (a ? <span style={{ display: 'block', width: 14, height: 14, borderRadius: '50%', background: `linear-gradient(115deg, ${C.BLUE} 50%, ${C.PINK} 50%)` }} /> : <span style={{ display: 'block', width: 14, height: 14, borderRadius: '50%', border: `2px solid ${alpha(C.INK, 0.3)}` }} />),
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -306,12 +314,12 @@ export default function GenderRevealTemplate(props) {
           {/* TƏXMİNLƏR */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} split title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.PINK_D} />
+              <GuestbookForm inv={inv} field={field(C)} btn={btn(C)} errorColor={C.PINK_D} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
                   return (
-                    <figure key={msg.name + i} style={{ margin: 0, padding: '18px 20px 16px', borderRadius: 22, background: '#FFFFFF', boxShadow: `inset 0 4px 0 ${TONES[i % 2]}, 0 14px 24px -18px rgba(51,54,92,.5)` }}>
+                    <figure key={msg.name + i} style={{ margin: 0, padding: '18px 20px 16px', borderRadius: 22, background: '#FFFFFF', boxShadow: `inset 0 4px 0 ${TONES(C)[i % 2]}, 0 14px 24px -18px rgba(51,54,92,.5)` }}>
                       <blockquote style={{ margin: 0, fontSize: 16.5, lineHeight: 1.55, color: C.INK }}>{msg.text}</blockquote>
                       <figcaption style={{ marginTop: 8, fontFamily: head, fontWeight: 700, fontSize: 14.5, color: i % 2 ? C.PINK_D : C.BLUE_D }}>{msg.name}{msg.date ? <span style={{ fontFamily: body, fontWeight: 400, color: C.MUTED }}> · {gbook.formatDate(msg.date)}</span> : null}</figcaption>
                     </figure>
@@ -324,11 +332,12 @@ export default function GenderRevealTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 
 function MapPin() {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
       <span style={{ position: 'absolute', left: -38, top: -84, display: 'flex', gap: 2, animation: 'gr-bob 3s ease-in-out infinite' }}>

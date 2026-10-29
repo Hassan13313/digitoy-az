@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C, NIGHT_BG, EMBER_BG, PAPER_BG, FIRE_GRAD, nameSize } from './palette'
+import { C as PAL, NIGHT_BG, EMBER_BG, PAPER_BG, FIRE_GRAD, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Bonfire, Buta, ButaRule, Lamp } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    NOVRUZ BONFIRE — «Tonqal gecəsi» (Bayram gecələri konsepti, 2026-10)
@@ -27,7 +28,11 @@ import { Bonfire, Buta, ButaRule, Lamp } from './art'
 const BASE = getTemplateTheme('novruz-bonfire')
 const ID = 'novruz-bonfire'
 
-const KEYFRAMES = `
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['RED'], secondary: ['EMBER'], accent: ['FLAME'], background: ['PAPER'], text: ['INK'] }
+
+const KEYFRAMES = (C) => (`
 @keyframes nb-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes nb-fade { from { opacity: 0 } to { opacity: 1 } }
 @keyframes nb-hint { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
@@ -40,9 +45,9 @@ const KEYFRAMES = `
 [data-nb] input:focus-visible, [data-nb] textarea:focus-visible { border-color: ${C.EMBER} !important; outline: none; }
 [data-nb] button:focus-visible, [data-nb] a:focus-visible, [data-nb] [role="button"]:focus-visible { outline: 2px solid ${C.FLAME}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-nb] *, [data-nb] { animation: none !important; transition: none !important; } }
-`
+`)
 
-const fireText = { backgroundImage: FIRE_GRAD, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' }
+const fireText = (C) => ({ backgroundImage: FIRE_GRAD(C), WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' })
 const Hills = () => (
   <svg aria-hidden="true" viewBox="0 0 400 80" preserveAspectRatio="none" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, width: '100%', height: '22%' }}>
     <path d="M0 50C60 20 120 30 180 46S300 24 400 40V80H0Z" fill="#140C26" />
@@ -52,6 +57,7 @@ const Hills = () => (
 
 /* ═══ 01 — AÇILIŞ: tonqal alovlanır ═══ */
 function FireOpening({ inv, theme }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -69,7 +75,7 @@ function FireOpening({ inv, theme }) {
         <div style={{ animation: 'nb-rise 1s ease-out .2s both' }}>
           {ot.show('kicker') && <div style={{ fontSize: 13, fontWeight: 600, letterSpacing: '.26em', textTransform: 'uppercase', color: C.FLAME }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
-            <div style={{ marginTop: 10, fontFamily: head, fontWeight: 800, fontSize: 'clamp(36px, 10.6vw, 50px)', lineHeight: 1.04, overflowWrap: 'anywhere', ...fireText }}>
+            <div style={{ marginTop: 10, fontFamily: head, fontWeight: 800, fontSize: 'clamp(36px, 10.6vw, 50px)', lineHeight: 1.04, overflowWrap: 'anywhere', ...fireText(C) }}>
               {first}{second && <> {ot.text('and')} {second}</>}
             </div>
           )}
@@ -90,7 +96,7 @@ function FireOpening({ inv, theme }) {
         </div>
         <motion.div animate={go ? { opacity: 0, y: 8 } : {}} transition={{ duration: 0.25 }} style={{ marginTop: 18 }}>
           {ot.show('cta') && (
-            <div style={{ minHeight: 50, padding: '12px 30px', display: 'inline-flex', alignItems: 'center', borderRadius: 999, background: FIRE_GRAD, color: C.NIGHT_D, fontFamily: head, fontWeight: 700, fontSize: 17, boxShadow: '0 12px 28px -10px rgba(255,122,26,.75)', animation: 'nb-rise .8s ease-out .8s both' }}>
+            <div style={{ minHeight: 50, padding: '12px 30px', display: 'inline-flex', alignItems: 'center', borderRadius: 999, background: FIRE_GRAD(C), color: C.NIGHT_D, fontFamily: head, fontWeight: 700, fontSize: 17, boxShadow: '0 12px 28px -10px rgba(255,122,26,.75)', animation: 'nb-rise .8s ease-out .8s both' }}>
               {ot.text('cta')}
             </div>
           )}
@@ -103,14 +109,15 @@ function FireOpening({ inv, theme }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, dark = false }) {
+  const C = usePalette(PAL)
   return (
-    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? EMBER_BG : PAPER_BG, color: dark ? C.CREAM : C.INK }}>
+    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? EMBER_BG : PAPER_BG(C), color: dark ? C.CREAM : C.INK }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <Buta size={26} color={dark ? C.FLAME : C.RED} style={{ margin: '0 auto 10px' }} />
             {kicker && <div style={{ marginBottom: 6, fontSize: 12.5, fontWeight: 600, letterSpacing: '.24em', textTransform: 'uppercase', color: dark ? C.FLAME : C.RED }}>{kicker}</div>}
-            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 800, fontSize: 'clamp(28px, 8.2vw, 38px)', lineHeight: 1.12, textWrap: 'balance', ...(dark ? fireText : { color: C.INK }) }}>{title}</h2>}
+            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 800, fontSize: scaleFont('clamp(28px, 8.2vw, 38px)', C.hs), lineHeight: 1.12, textWrap: 'balance', ...(dark ? fireText(C) : { color: C.INK }) }}>{title}</h2>}
             {sub && <p style={{ margin: '12px auto 0', maxWidth: 340, fontSize: 16, color: dark ? alpha(C.CREAM, 0.72) : C.MUTED, lineHeight: 1.55 }}>{sub}</p>}
           </div>
         )}
@@ -120,23 +127,24 @@ function Panel({ id, section, title, kicker, sub, children, head, dark = false }
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: '#FFFCF5', border: `1.5px solid ${alpha(C.WOOD, 0.25)}`, borderRadius: 12,
   padding: '14px 16px', fontSize: 16, color: C.INK, outline: 'none',
-}
-const darkField = { ...field, background: alpha('#000000', 0.22), border: `1.5px solid ${alpha(C.EMBER, 0.35)}`, color: C.CREAM }
-const btn = (on) => ({
+})
+const darkField = (C) => ({ ...field(C), background: alpha('#000000', 0.22), border: `1.5px solid ${alpha(C.EMBER, 0.35)}`, color: C.CREAM })
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 24px', borderRadius: 999,
   fontSize: 15.5, fontWeight: 600, textDecoration: 'none', cursor: 'pointer',
   background: on ? C.RED : 'transparent', color: on ? '#FFFFFF' : C.INK, border: `1.5px solid ${on ? C.RED : alpha(C.INK, 0.3)}`,
-})
-const darkBtn = (on) => ({ ...btn(on), background: on ? FIRE_GRAD : 'transparent', color: on ? C.NIGHT_D : C.CREAM, border: `1.5px solid ${on ? C.FLAME : alpha(C.CREAM, 0.4)}` })
-const suggest = { bg: '#FFFCF5', border: `1.5px solid ${alpha(C.WOOD, 0.25)}`, active: alpha(C.FLAME, 0.25), text: C.INK, table: C.RED, radius: 12 }
+}))
+const darkBtn = (C) => ((on) => ({ ...btn(C)(on), background: on ? FIRE_GRAD(C) : 'transparent', color: on ? C.NIGHT_D : C.CREAM, border: `1.5px solid ${on ? C.FLAME : alpha(C.CREAM, 0.4)}` }))
+const suggest = (C) => ({ bg: '#FFFCF5', border: `1.5px solid ${alpha(C.WOOD, 0.25)}`, active: alpha(C.FLAME, 0.25), text: C.INK, table: C.RED, radius: 12 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function NovruzBonfireTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -144,11 +152,11 @@ export default function NovruzBonfireTemplate(props) {
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
-    <div data-nb lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-nb lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.PAPER, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.EMBER, 0.4),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <FireOpening inv={inv} theme={theme} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.NIGHT, border: `1.5px solid ${C.EMBER}`, boxShadow: '0 8px 22px rgba(255,122,26,.35)' }}>
@@ -166,7 +174,7 @@ export default function NovruzBonfireTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.CREAM, 0.72), fontSize: 15, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 800, fontSize: 20, ...fireText }}>{T.brand}</div>
+            <div style={{ fontFamily: head, fontWeight: 800, fontSize: 20, ...fireText(C) }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
@@ -175,7 +183,7 @@ export default function NovruzBonfireTemplate(props) {
             <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 360, background: 'radial-gradient(50% 50% at 50% 70%, rgba(255,122,26,.3), transparent 70%)' }} />
             <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}><Bonfire size={170} instant /></div>
             <div style={{ position: 'relative', marginTop: 18, fontSize: 13, fontWeight: 600, letterSpacing: '.26em', textTransform: 'uppercase', color: C.FLAME }}>{L('hero', 'kicker', T.fest)}</div>
-            <h1 style={{ position: 'relative', margin: '10px 0 0', fontFamily: head, fontWeight: 800, fontSize: nameSize(heroName), lineHeight: 1.04, overflowWrap: 'anywhere', ...fireText, animation: 'nb-rise 1s ease-out .2s both' }}>{heroName}</h1>
+            <h1 style={{ position: 'relative', margin: '10px 0 0', fontFamily: head, fontWeight: 800, fontSize: nameSize(heroName), lineHeight: 1.04, overflowWrap: 'anywhere', ...fireText(C), animation: 'nb-rise 1s ease-out .2s both' }}>{heroName}</h1>
             {inv.isCorp && weddingData.organizer?.trim() && <div style={{ position: 'relative', marginTop: 10, fontSize: 16, color: alpha(C.CREAM, 0.75) }}>{tr.organizer_display}: {weddingData.organizer}</div>}
             <ButaRule color={C.EMBER} width={200} style={{ marginTop: 18 }} />
             <div style={{ position: 'relative', marginTop: 16, fontFamily: head, fontWeight: 700, fontSize: 'clamp(20px, 5.6vw, 24px)', color: C.CREAM }}>{inv.fullDate}</div>
@@ -190,7 +198,7 @@ export default function NovruzBonfireTemplate(props) {
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop]) => (
                   <div key={l} style={{ textAlign: 'center' }}>
                     <div style={{ aspectRatio: '1', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(circle at 50% 60%, #3A2440, #1A1230 70%)', boxShadow: `inset 0 -8px 16px rgba(255,122,26,.35), 0 0 0 1.5px ${alpha(C.EMBER, 0.6)}, 0 10px 20px -8px rgba(255,122,26,.4)` }}>
-                      <span style={{ fontFamily: head, fontWeight: 800, fontSize: 'clamp(22px, 6.6vw, 30px)', lineHeight: 1, fontVariantNumeric: 'tabular-nums', ...fireText }}><PopDigit value={v} pop={pop} /></span>
+                      <span style={{ fontFamily: head, fontWeight: 800, fontSize: 'clamp(22px, 6.6vw, 30px)', lineHeight: 1, fontVariantNumeric: 'tabular-nums', ...fireText(C) }}><PopDigit value={v} pop={pop} /></span>
                     </div>
                     <div style={{ marginTop: 10, fontSize: 11.5, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: C.FLAME }}>{l}</div>
                   </div>
@@ -209,12 +217,12 @@ export default function NovruzBonfireTemplate(props) {
                   weddingData={weddingData} theme={theme} accent={C.RED} height="clamp(240px, 66vw, 300px)"
                   map={{ opacity: 0.92, filter: 'sepia(.25)', tintOpacity: 0.1, tint: C.EMBER, blend: 'multiply' }}
                   frame={<MapPin />}
-                  fallback={<div style={{ height: 'clamp(240px, 66vw, 300px)', position: 'relative', background: PAPER_BG }}><MapPin /></div>}
+                  fallback={<div style={{ height: 'clamp(240px, 66vw, 300px)', position: 'relative', background: PAPER_BG(C) }}><MapPin /></div>}
                 />
               </div>
               <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontWeight: 800, fontSize: 25, lineHeight: 1.2, color: C.INK }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 6, fontSize: 15.5, color: C.MUTED }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn(C)} />
             </Panel>
           )}
 
@@ -248,7 +256,7 @@ export default function NovruzBonfireTemplate(props) {
           {/* MASA — mis çıraq */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="nb-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.CREAM, 0.72)} accent={C.FLAME}
+              <SeatFinder inv={inv} tr={tr} listId="nb-seat-list" field={darkField(C)} suggest={suggest(C)} font={body} muted={alpha(C.CREAM, 0.72)} accent={C.FLAME}
                 nameStyle={{ fontFamily: head, fontWeight: 800, fontSize: 24, color: C.CREAM }}
                 card={(num) => (
                   <div style={{ paddingTop: 26 }}>
@@ -267,14 +275,14 @@ export default function NovruzBonfireTemplate(props) {
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 14, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ aspectRatio: '4 / 5', padding: 4, borderRadius: '48% 48% 12px 12px / 30% 30% 12px 12px', background: FIRE_GRAD, boxShadow: '0 12px 20px -12px rgba(217,59,43,.5)' }}>
+                    <div key={i} style={{ aspectRatio: '4 / 5', padding: 4, borderRadius: '48% 48% 12px 12px / 30% 30% 12px 12px', background: FIRE_GRAD(C), boxShadow: '0 12px 20px -12px rgba(217,59,43,.5)' }}>
                       <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: '47% 47% 9px 9px / 29% 29% 9px 9px' }} />
                     </div>
                   ))}
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.NIGHT} bg="#FFFCF5" frame={{ borderRadius: 14, border: `1.5px solid ${alpha(C.RED, 0.4)}` }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
             </Panel>
           )}
 
@@ -285,8 +293,8 @@ export default function NovruzBonfireTemplate(props) {
                 ink: C.INK, muted: C.MUTED, line: alpha(C.WOOD, 0.3), hair: alpha(C.WOOD, 0.15), accent: C.RED,
                 font: body, display: head, displayItalic: false, btnFont: head,
                 doneMark: <Buta size={40} color={C.RED} style={{ margin: '0 auto 10px' }} />,
-                marker: (a) => <span style={{ display: 'block', width: 15, height: 15, borderRadius: '50%', border: `2px solid ${a ? C.RED : alpha(C.WOOD, 0.35)}`, background: a ? FIRE_GRAD : 'transparent' }} />,
-                suggest: { ...suggest, font: body },
+                marker: (a) => <span style={{ display: 'block', width: 15, height: 15, borderRadius: '50%', border: `2px solid ${a ? C.RED : alpha(C.WOOD, 0.35)}`, background: a ? FIRE_GRAD(C) : 'transparent' }} />,
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -294,7 +302,7 @@ export default function NovruzBonfireTemplate(props) {
           {/* ARZULAR */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.FLAME} />
+              <GuestbookForm inv={inv} field={darkField(C)} btn={darkBtn(C)} errorColor={C.FLAME} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
@@ -315,11 +323,12 @@ export default function NovruzBonfireTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 
 function MapPin() {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
       <svg viewBox="0 0 30 40" width="34" height="46" style={{ position: 'absolute', left: -17, top: -42, overflow: 'visible', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,.35))' }}>

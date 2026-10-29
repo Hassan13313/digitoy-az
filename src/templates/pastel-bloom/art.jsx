@@ -1,9 +1,11 @@
-import { TONES } from './palette'
+import { C as PAL, TONES } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* PASTEL BLOOM — akvarel dekor (hamısı aria-hidden) */
 
 /** Akvarel filtri və tonlar — kökdə bir dəfə çəkilir */
 export function WatercolorDefs() {
+  const C = usePalette(PAL)
   return (
     <svg aria-hidden="true" width="0" height="0" style={{ position: 'absolute', width: 0, height: 0 }}>
       <defs>
@@ -17,7 +19,7 @@ export function WatercolorDefs() {
           <feDisplacementMap in="SourceGraphic" in2="n" scale="16" xChannelSelector="R" yChannelSelector="G" result="d" />
           <feGaussianBlur in="d" stdDeviation="1.4" />
         </filter>
-        {Object.entries(TONES).map(([k, [a, b, c]]) => (
+        {Object.entries(TONES(C)).map(([k, [a, b, c]]) => (
           <radialGradient key={k} id={`pb-${k}`} cx="50%" cy="85%" r="85%">
             <stop offset="0" stopColor={c} stopOpacity=".85" /><stop offset=".45" stopColor={b} stopOpacity=".8" /><stop offset="1" stopColor={a} stopOpacity=".55" />
           </radialGradient>
@@ -29,7 +31,8 @@ export function WatercolorDefs() {
 
 /** Akvarel çiçəyi */
 export function Bloom({ size = 120, tone = 'blush', rotate = 0, petals = 6, style }) {
-  const [, , dark] = TONES[tone] || TONES.blush
+  const C = usePalette(PAL)
+  const [, , dark] = TONES(C)[tone] || TONES(C).blush
   const step = 360 / petals
   return (
     <svg aria-hidden="true" viewBox="-60 -60 120 120" width={size} height={size} style={{ display: 'block', overflow: 'visible', transform: `rotate(${rotate}deg)`, ...style }}>

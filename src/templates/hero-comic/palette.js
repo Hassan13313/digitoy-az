@@ -9,13 +9,13 @@ export const C = {
 export const DOTS = (color = 'rgba(18,18,18,.16)', size = 8) => `radial-gradient(circle, ${color} 1.15px, transparent 1.6px) 0 0 / ${size}px ${size}px`
 
 /* Sürət xətləri — mərkəzdən */
-export const SPEED = (a = '#1F5FD1', b = '#2C74F0') => `repeating-conic-gradient(from 0deg at 50% 50%, ${a} 0deg 7deg, ${b} 7deg 14deg)`
+export const SPEED = (C) => ((a = C.BLUE, b = '#2C74F0') => `repeating-conic-gradient(from 0deg at 50% 50%, ${a} 0deg 7deg, ${b} 7deg 14deg)`)
 
 /* Komiks hərfi: qalın qara kontur + kölgə */
-export const OUTLINE = (w = 3, shadow = 5) => ({
+export const OUTLINE = (C) => ((w = 3, shadow = 5) => ({
   WebkitTextStroke: `${w}px ${C.INK}`, paintOrder: 'stroke fill',
   textShadow: `${shadow}px ${shadow}px 0 ${C.INK}`,
-})
+}))
 
 /* Səs effekti sözü dil üzrə */
 export const SFX = { az: 'BAM!', en: 'POW!', ru: 'БАМ!' }

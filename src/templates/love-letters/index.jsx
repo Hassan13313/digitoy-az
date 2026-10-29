@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize, yearsSentence } from '../_shared/kids'
-import { C, ENVS, LINEN_BG, NAVY_BG, RULED, nameSize } from './palette'
+import { C as PAL, ENVS, LINEN_BG, NAVY_BG, RULED, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Envelope, Stamp, HeartLine, LetterBundle } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    LOVE LETTERS — «Sevgi məktubları» (İldönümü konsepti, 2026-10)
@@ -30,7 +31,11 @@ import { Envelope, Stamp, HeartLine, LetterBundle } from './art'
 const BASE = getTemplateTheme('love-letters')
 const ID = 'love-letters'
 
-const KEYFRAMES = `
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['INK'], secondary: ['ROSE'], accent: ['ROSE_L'], background: ['LINEN'], text: ['INK'] }
+
+const KEYFRAMES = (C) => (`
 @keyframes ll-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes ll-fade { from { opacity: 0 } to { opacity: 1 } }
 @keyframes ll-hint { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
@@ -41,10 +46,11 @@ const KEYFRAMES = `
 [data-ll] input:focus-visible, [data-ll] textarea:focus-visible { border-color: ${C.ROSE} !important; outline: none; }
 [data-ll] button:focus-visible, [data-ll] a:focus-visible, [data-ll] [role="button"]:focus-visible { outline: 2px solid ${C.ROSE}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-ll] *, [data-ll] { animation: none !important; transition: none !important; } }
-`
+`)
 
 /* Məktubun üst hissəsi */
 function LetterSheet({ inv, lang, script, body }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ height: '100%', padding: '9% 8% 0', background: RULED, borderRadius: 3, boxShadow: '0 6px 14px -8px rgba(47,53,80,.45)', textAlign: 'center' }}>
       {inv.age ? (
@@ -59,6 +65,7 @@ function LetterSheet({ inv, lang, script, body }) {
 
 /* Üstdəki zərfin üzü: ünvan sətirləri + marka */
 function EnvelopeFront({ inv, script, children, stamp }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ position: 'absolute', inset: 0, padding: '10% 8%' }}>
       <div style={{ position: 'absolute', right: '7%', top: '10%' }}>{stamp || <Stamp size={40} />}</div>
@@ -82,6 +89,7 @@ function EnvelopeFront({ inv, script, children, stamp }) {
 
 /* ═══ 01 — AÇILIŞ: bağlama açılır ═══ */
 function BundleOpening({ inv, theme, lang, script }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -92,7 +100,7 @@ function BundleOpening({ inv, theme, lang, script }) {
     <motion.div {...gate.gateProps} data-ll
       animate={go ? { opacity: 0 } : {}}
       transition={{ duration: 0.4, delay: 1.75 }}
-      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: LINEN_BG, color: C.INK, fontFamily: body }}>
+      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: LINEN_BG(C), color: C.INK, fontFamily: body }}>
       <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 22px', textAlign: 'center' }}>
         {ot.show('kicker') && <div style={{ fontSize: 13.5, letterSpacing: '.28em', textTransform: 'uppercase', color: C.MUTED, animation: 'll-rise .8s ease-out .2s both' }}>{ot.text('kicker')}</div>}
         <div style={{ marginTop: 'calc(min(74vw, 300px) * .46)', animation: go ? 'none' : 'll-bob 4s ease-in-out infinite' }}>
@@ -131,13 +139,14 @@ function BundleOpening({ inv, theme, lang, script }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, script, dark = false }) {
+  const C = usePalette(PAL)
   return (
-    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? NAVY_BG : LINEN_BG, color: dark ? C.LINEN : C.INK }}>
+    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? NAVY_BG : LINEN_BG(C), color: dark ? C.LINEN : C.INK }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 30 }}>
             {kicker && <div style={{ marginBottom: 2, fontSize: 13, letterSpacing: '.26em', textTransform: 'uppercase', color: dark ? C.ROSE_L : C.MUTED }}>{kicker}</div>}
-            {title && <h2 style={{ margin: 0, fontFamily: script, fontWeight: 400, fontSize: 'clamp(42px, 12.4vw, 58px)', lineHeight: 1.12, wordSpacing: '.14em', textWrap: 'balance', color: dark ? C.PAPER : C.INK }}>{title}</h2>}
+            {title && <h2 style={{ margin: 0, fontFamily: script, fontWeight: 400, fontSize: scaleFont('clamp(42px, 12.4vw, 58px)', C.hs), lineHeight: 1.12, wordSpacing: '.14em', textWrap: 'balance', color: dark ? C.PAPER : C.INK }}>{title}</h2>}
             <HeartLine size={20} color={dark ? C.ROSE_L : C.ROSE} style={{ margin: '6px auto 0' }} />
             {sub && <p style={{ margin: '10px auto 0', maxWidth: 340, fontSize: 17, fontStyle: 'italic', color: dark ? alpha(C.LINEN, 0.72) : C.MUTED, lineHeight: 1.55 }}>{sub}</p>}
           </div>
@@ -148,23 +157,24 @@ function Panel({ id, section, title, kicker, sub, children, script, dark = false
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: C.PAPER, border: `1px solid ${alpha(C.INK, 0.2)}`, borderRadius: 4,
   padding: '14px 16px', fontSize: 17, color: C.INK, outline: 'none',
-}
-const darkField = { ...field, background: alpha('#FFFFFF', 0.06), border: `1px solid ${alpha(C.LINEN, 0.25)}`, color: C.PAPER }
-const btn = (on) => ({
+})
+const darkField = (C) => ({ ...field(C), background: alpha('#FFFFFF', 0.06), border: `1px solid ${alpha(C.LINEN, 0.25)}`, color: C.PAPER })
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 24px', borderRadius: 999,
   fontSize: 16, letterSpacing: '.04em', textDecoration: 'none', cursor: 'pointer',
   background: on ? C.INK : 'transparent', color: on ? C.PAPER : C.INK, border: `1px solid ${on ? C.INK : alpha(C.INK, 0.35)}`,
-})
-const darkBtn = (on) => ({ ...btn(on), background: on ? C.ROSE_L : 'transparent', color: on ? C.NAVY : C.LINEN, border: `1px solid ${on ? C.ROSE_L : alpha(C.LINEN, 0.4)}` })
-const suggest = { bg: C.PAPER, border: `1px solid ${alpha(C.INK, 0.2)}`, active: alpha(C.ROSE_L, 0.25), text: C.INK, table: C.ROSE, radius: 4 }
+}))
+const darkBtn = (C) => ((on) => ({ ...btn(C)(on), background: on ? C.ROSE_L : 'transparent', color: on ? C.NAVY : C.LINEN, border: `1px solid ${on ? C.ROSE_L : alpha(C.LINEN, 0.4)}` }))
+const suggest = (C) => ({ bg: C.PAPER, border: `1px solid ${alpha(C.INK, 0.2)}`, active: alpha(C.ROSE_L, 0.25), text: C.INK, table: C.ROSE, radius: 4 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function LoveLettersTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const script = theme.fonts.heading
   const body = theme.fonts.body
@@ -172,11 +182,11 @@ export default function LoveLettersTemplate(props) {
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
-    <div data-ll lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-ll lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.LINEN, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.ROSE_L, 0.4),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <BundleOpening inv={inv} theme={theme} lang={lang} script={script} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.INK, boxShadow: '0 8px 20px rgba(38,43,66,.4)' }}>
@@ -199,7 +209,7 @@ export default function LoveLettersTemplate(props) {
           </header>
 
           {/* HERO — açılmış bağlama */}
-          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: LINEN_BG, padding: '44px 22px 60px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: LINEN_BG(C), padding: '44px 22px 60px', textAlign: 'center' }}>
             <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 'calc(min(66vw, 270px) * .5)' }}>
               <LetterBundle width="min(66vw, 270px)" open instant
                 letter={<LetterSheet inv={inv} lang={lang} script={script} body={body} />}
@@ -219,7 +229,7 @@ export default function LoveLettersTemplate(props) {
             <Panel section="countdown" script={script} title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 16, maxWidth: 380, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
-                  <Envelope key={l} width="100%" color={ENVS[i]} back={i % 2 === 0} style={{ transform: `rotate(${[-2, 1.5, 1.2, -1.8][i]}deg)` }}>
+                  <Envelope key={l} width="100%" color={ENVS(C)[i]} back={i % 2 === 0} style={{ transform: `rotate(${[-2, 1.5, 1.2, -1.8][i]}deg)` }}>
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                       <span style={{ fontSize: 'clamp(30px, 9vw, 40px)', fontWeight: 500, lineHeight: 1, color: C.INK, fontVariantNumeric: 'tabular-nums' }}><PopDigit value={v} pop={pop} /></span>
                       <span style={{ marginTop: 2, fontFamily: script, fontSize: 20, color: C.ROSE }}>{l}</span>
@@ -247,7 +257,7 @@ export default function LoveLettersTemplate(props) {
               </div>
               <div style={{ textAlign: 'center', marginTop: 24, fontFamily: script, fontSize: 38, lineHeight: 1.15, color: C.PAPER }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontSize: 16, fontStyle: 'italic', color: C.ROSE_L }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn(C)} />
             </Panel>
           )}
 
@@ -276,7 +286,7 @@ export default function LoveLettersTemplate(props) {
           {/* MASA — ünvanlı zərf */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" script={script} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="ll-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.ROSE}
+              <SeatFinder inv={inv} tr={tr} listId="ll-seat-list" field={field(C)} suggest={suggest(C)} font={body} muted={C.MUTED} accent={C.ROSE}
                 nameStyle={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
                 card={(num) => (
                   <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 20 }}>
@@ -312,7 +322,7 @@ export default function LoveLettersTemplate(props) {
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.INK} bg={C.PAPER} frame={{ borderRadius: 4, boxShadow: '0 12px 18px -12px rgba(47,53,80,.45)' }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
             </Panel>
           )}
 
@@ -324,7 +334,7 @@ export default function LoveLettersTemplate(props) {
                 font: body, display: script, displayItalic: false, btnFont: body,
                 doneMark: <HeartLine size={40} style={{ margin: '0 auto 10px' }} />,
                 marker: (a) => <HeartLine size={16} color={a ? C.ROSE : alpha(C.INK, 0.35)} fill={a ? C.ROSE : 'none'} />,
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -332,7 +342,7 @@ export default function LoveLettersTemplate(props) {
           {/* ARZULAR — P.S. */}
           {S.guestbook && (
             <Panel section="guestbook" script={script} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.ROSE_L} />
+              <GuestbookForm inv={inv} field={darkField(C)} btn={darkBtn(C)} errorColor={C.ROSE_L} />
               <div style={{ display: 'grid', gap: 16 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
@@ -352,7 +362,7 @@ export default function LoveLettersTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={body} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 

@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize, yearsSentence } from '../_shared/kids'
-import { C, WASHI, PAPER_BG, nameSize } from './palette'
+import { C as PAL, WASHI, PAPER_BG, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { FoldedSheet, PaperHeart, TentCard, Tape } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    FIRST PAPER — «Kağız toy» (İldönümü konsepti, 2026-10)
@@ -30,7 +31,11 @@ import { FoldedSheet, PaperHeart, TentCard, Tape } from './art'
 const BASE = getTemplateTheme('first-paper')
 const ID = 'first-paper'
 
-const KEYFRAMES = `
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['BLUE'], secondary: ['BLUE_D'], accent: ['SKY'], background: ['PAPER'], text: ['INK'] }
+
+const KEYFRAMES = (C) => (`
 @keyframes fp-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes fp-fade { from { opacity: 0 } to { opacity: 1 } }
 @keyframes fp-hint { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
@@ -42,11 +47,12 @@ const KEYFRAMES = `
 [data-fp] input:focus-visible, [data-fp] textarea:focus-visible { border-color: ${C.BLUE} !important; outline: none; }
 [data-fp] button:focus-visible, [data-fp] a:focus-visible, [data-fp] [role="button"]:focus-visible { outline: 2px solid ${C.BLUE}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-fp] *, [data-fp] { animation: none !important; transition: none !important; } }
-`
+`)
 
-const INK_BG = `radial-gradient(70% 50% at 50% 0%, rgba(53,97,201,.35), transparent 70%), ${C.INK}`
+const INK_BG = (C) => (`radial-gradient(70% 50% at 50% 0%, rgba(53,97,201,.35), transparent 70%), ${C.INK}`)
 
 function SheetInside({ inv, lang, head, big = 'clamp(64px, 20vw, 92px)' }) {
+  const C = usePalette(PAL)
   if (!inv.age) return <PaperHeart size={64} />
   return (
     <>
@@ -58,6 +64,7 @@ function SheetInside({ inv, lang, head, big = 'clamp(64px, 20vw, 92px)' }) {
 
 /* ═══ 01 — AÇILIŞ: origami vərəq açılır ═══ */
 function PaperOpening({ inv, theme, lang }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -68,7 +75,7 @@ function PaperOpening({ inv, theme, lang }) {
     <motion.div {...gate.gateProps} data-fp
       animate={go ? { opacity: 0 } : {}}
       transition={{ duration: 0.4, delay: 1.75 }}
-      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: PAPER_BG, color: C.INK, fontFamily: theme.fonts.body }}>
+      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: PAPER_BG(C), color: C.INK, fontFamily: theme.fonts.body }}>
       <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 22px', textAlign: 'center' }}>
         {ot.show('kicker') && <div style={{ marginBottom: 18, fontFamily: head, fontStyle: 'italic', fontSize: 17, color: C.BLUE, animation: 'fp-rise .8s ease-out .2s both' }}>{ot.text('kicker')}</div>}
         <div style={{ position: 'relative', filter: 'drop-shadow(0 18px 18px rgba(35,43,74,.22))', animation: go ? 'none' : 'fp-breathe 3.4s ease-in-out infinite' }}>
@@ -107,8 +114,9 @@ function PaperOpening({ inv, theme, lang }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, dark = false, white = false }) {
+  const C = usePalette(PAL)
   return (
-    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? INK_BG : white ? C.WHITE : PAPER_BG, color: dark ? '#FFFFFF' : C.INK }}>
+    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? INK_BG(C) : white ? C.WHITE : PAPER_BG(C), color: dark ? '#FFFFFF' : C.INK }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
@@ -116,7 +124,7 @@ function Panel({ id, section, title, kicker, sub, children, head, dark = false, 
               <PaperHeart size={20} tone={dark ? 'sky' : 'blue'} style={{ transform: 'rotate(-10deg)' }} />
             </div>
             {kicker && <div style={{ marginBottom: 6, fontFamily: head, fontStyle: 'italic', fontSize: 16, color: dark ? C.SKY : C.BLUE }}>{kicker}</div>}
-            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 600, fontSize: 'clamp(30px, 8.6vw, 40px)', lineHeight: 1.12, textWrap: 'balance', color: dark ? '#FFFFFF' : C.INK }}>{title}</h2>}
+            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 600, fontSize: scaleFont('clamp(30px, 8.6vw, 40px)', C.hs), lineHeight: 1.12, textWrap: 'balance', color: dark ? '#FFFFFF' : C.INK }}>{title}</h2>}
             {sub && <p style={{ margin: '10px auto 0', maxWidth: 340, fontSize: 16, color: dark ? alpha('#FFFFFF', 0.7) : C.MUTED, lineHeight: 1.6 }}>{sub}</p>}
           </div>
         )}
@@ -126,23 +134,24 @@ function Panel({ id, section, title, kicker, sub, children, head, dark = false, 
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: C.WHITE, border: `1px solid ${C.CREASE}`, borderRadius: 10,
   padding: '14px 16px', fontSize: 16, color: C.INK, outline: 'none',
-}
-const darkField = { ...field, background: alpha('#FFFFFF', 0.08), border: `1px solid ${alpha(C.SKY, 0.35)}`, color: '#FFFFFF' }
-const btn = (on) => ({
+})
+const darkField = (C) => ({ ...field(C), background: alpha('#FFFFFF', 0.08), border: `1px solid ${alpha(C.SKY, 0.35)}`, color: '#FFFFFF' })
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 24px', borderRadius: 999,
   fontSize: 15.5, fontWeight: 600, textDecoration: 'none', cursor: 'pointer',
   background: on ? C.BLUE : C.WHITE, color: on ? '#FFFFFF' : C.INK, border: `1px solid ${on ? C.BLUE : C.CREASE}`,
-})
-const darkBtn = (on) => ({ ...btn(on), background: on ? '#FFFFFF' : 'transparent', color: on ? C.INK : '#FFFFFF', border: `1px solid ${on ? '#FFFFFF' : alpha(C.SKY, 0.45)}` })
-const suggest = { bg: C.WHITE, border: `1px solid ${C.CREASE}`, active: alpha(C.SKY, 0.3), text: C.INK, table: C.BLUE, radius: 10 }
+}))
+const darkBtn = (C) => ((on) => ({ ...btn(C)(on), background: on ? '#FFFFFF' : 'transparent', color: on ? C.INK : '#FFFFFF', border: `1px solid ${on ? '#FFFFFF' : alpha(C.SKY, 0.45)}` }))
+const suggest = (C) => ({ bg: C.WHITE, border: `1px solid ${C.CREASE}`, active: alpha(C.SKY, 0.3), text: C.INK, table: C.BLUE, radius: 10 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function FirstPaperTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -150,14 +159,14 @@ export default function FirstPaperTemplate(props) {
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
-    <div data-fp lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-fp lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.PAPER, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.BLUE, 0.3),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <PaperOpening inv={inv} theme={theme} lang={lang} />}
 
-      <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: WASHI, boxShadow: '0 8px 20px rgba(35,43,74,.35)' }}>
+      <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: WASHI(C), boxShadow: '0 8px 20px rgba(35,43,74,.35)' }}>
         {({ playing }) => <EqBars playing={playing} color="#FFFFFF" idle={alpha('#FFFFFF', 0.4)} />}
       </MusicFab>
 
@@ -177,7 +186,7 @@ export default function FirstPaperTemplate(props) {
           </header>
 
           {/* HERO — açılmış vərəq */}
-          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: PAPER_BG, padding: '46px 22px 60px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: PAPER_BG(C), padding: '46px 22px 60px', textAlign: 'center' }}>
             <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
               <div style={{ transform: 'rotate(-4deg)', filter: 'drop-shadow(0 18px 20px rgba(35,43,74,.18))' }}>
                 <FoldedSheet width="min(62vw, 250px)" open instant>
@@ -231,13 +240,13 @@ export default function FirstPaperTemplate(props) {
                     weddingData={weddingData} theme={theme} accent={C.BLUE} height="clamp(240px, 66vw, 300px)"
                     map={{ opacity: 0.9, filter: 'grayscale(.5)', tintOpacity: 0.12, tint: C.SKY, blend: 'multiply' }}
                     frame={<MapPin />}
-                    fallback={<div style={{ height: 'clamp(240px, 66vw, 300px)', position: 'relative', background: PAPER_BG }}><MapPin /></div>}
+                    fallback={<div style={{ height: 'clamp(240px, 66vw, 300px)', position: 'relative', background: PAPER_BG(C) }}><MapPin /></div>}
                   />
                 </div>
               </div>
               <div style={{ textAlign: 'center', marginTop: 26, fontFamily: head, fontWeight: 600, fontSize: 25, lineHeight: 1.2, color: '#FFFFFF' }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 6, fontFamily: head, fontStyle: 'italic', fontSize: 16, color: C.SKY }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn(C)} />
             </Panel>
           )}
 
@@ -266,7 +275,7 @@ export default function FirstPaperTemplate(props) {
           {/* MASA — çadır kartı */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="fp-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.BLUE}
+              <SeatFinder inv={inv} tr={tr} listId="fp-seat-list" field={field(C)} suggest={suggest(C)} font={body} muted={C.MUTED} accent={C.BLUE}
                 nameStyle={{ fontFamily: head, fontStyle: 'italic', fontWeight: 600, fontSize: 26, color: C.INK }}
                 card={(num) => (
                   <div style={{ paddingTop: 18 }}>
@@ -294,7 +303,7 @@ export default function FirstPaperTemplate(props) {
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.INK} bg={C.WHITE} frame={{ borderRadius: 10, border: `1px solid ${C.CREASE}`, boxShadow: '0 10px 18px -12px rgba(35,43,74,.4)' }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
             </Panel>
           )}
 
@@ -306,7 +315,7 @@ export default function FirstPaperTemplate(props) {
                 font: body, display: head, displayItalic: true, btnFont: head,
                 doneMark: <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><PaperHeart size={40} /></div>,
                 marker: (a) => (a ? <PaperHeart size={16} /> : <span style={{ display: 'block', width: 14, height: 14, transform: 'rotate(45deg)', border: `1.5px solid ${C.CREASE}` }} />),
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -314,7 +323,7 @@ export default function FirstPaperTemplate(props) {
           {/* ARZULAR */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.SKY} />
+              <GuestbookForm inv={inv} field={darkField(C)} btn={darkBtn(C)} errorColor={C.SKY} />
               <div style={{ display: 'grid', gap: 16 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
@@ -335,7 +344,7 @@ export default function FirstPaperTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 

@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C, GOLD_GRAD, RIBBON, EMERALD_BG, IVORY_BG, nameSize } from './palette'
+import { C as PAL, GOLD_GRAD, RIBBON, EMERALD_BG, IVORY_BG, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Scissors, Bow, RibbonBand, DoorLeaf, GoldRain } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    RIBBON CUT — «Lentin kəsilməsi» (Açılış konsepti, 2026-10)
@@ -28,7 +29,11 @@ import { Scissors, Bow, RibbonBand, DoorLeaf, GoldRain } from './art'
 const BASE = getTemplateTheme('ribbon-cut')
 const ID = 'ribbon-cut'
 
-const KEYFRAMES = `
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['EMERALD'], secondary: ['RED'], accent: ['GOLD'], background: ['IVORY'], text: ['INK'] }
+
+const KEYFRAMES = (C) => (`
 @keyframes rc-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes rc-fade { from { opacity: 0 } to { opacity: 1 } }
 @keyframes rc-hint { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
@@ -40,13 +45,14 @@ const KEYFRAMES = `
 [data-rc] input:focus-visible, [data-rc] textarea:focus-visible { border-color: ${C.GOLD_D} !important; outline: none; }
 [data-rc] button:focus-visible, [data-rc] a:focus-visible, [data-rc] [role="button"]:focus-visible { outline: 2px solid ${C.GOLD}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-rc] *, [data-rc] { animation: none !important; transition: none !important; } }
-`
+`)
 
-const goldText = { backgroundImage: GOLD_GRAD, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' }
+const goldText = (C) => ({ backgroundImage: GOLD_GRAD(C), WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' })
 const TAIL = 'polygon(0 0, 100% 0, 100% 100%, 50% 72%, 0 100%)'
 
 /* ═══ 01 — AÇILIŞ: lent kəsilir ═══ */
 function RibbonOpening({ inv, theme }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -62,20 +68,20 @@ function RibbonOpening({ inv, theme }) {
     <motion.div {...gate.gateProps} data-rc
       animate={go ? { opacity: 0 } : {}}
       transition={{ duration: 0.4, delay: 1.75 }}
-      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: EMERALD_BG, color: C.IVORY, fontFamily: theme.fonts.body }}>
+      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: EMERALD_BG(C), color: C.IVORY, fontFamily: theme.fonts.body }}>
       <GoldRain on={go} />
       <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 22px', textAlign: 'center' }}>
         <div style={{ animation: 'rc-rise 1s ease-out .2s both' }}>
           {ot.show('kicker') && <div style={{ fontFamily: head, fontSize: 15, letterSpacing: '.24em', color: C.GOLD_L }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
-            <div style={{ marginTop: 8, fontFamily: head, fontWeight: 700, fontSize: 'clamp(30px, 9vw, 42px)', lineHeight: 1.08, overflowWrap: 'anywhere', ...goldText }}>
+            <div style={{ marginTop: 8, fontFamily: head, fontWeight: 700, fontSize: 'clamp(30px, 9vw, 42px)', lineHeight: 1.08, overflowWrap: 'anywhere', ...goldText(C) }}>
               {first}{second && <><span style={{ display: 'inline-block', margin: '0 .2em' }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
         </div>
         {/* giriş */}
         <div style={{ position: 'relative', width: 'min(68vw, 270px)', marginTop: 110 }}>
-          <div style={{ position: 'relative', aspectRatio: '0.8', padding: 8, background: GOLD_GRAD, borderRadius: '50% 50% 6px 6px / 18% 18% 6px 6px', boxShadow: '0 30px 40px -24px rgba(0,0,0,.8)' }}>
+          <div style={{ position: 'relative', aspectRatio: '0.8', padding: 8, background: GOLD_GRAD(C), borderRadius: '50% 50% 6px 6px / 18% 18% 6px 6px', boxShadow: '0 30px 40px -24px rgba(0,0,0,.8)' }}>
             <div style={{ position: 'relative', height: '100%', overflow: 'hidden', borderRadius: '50% 50% 3px 3px / 17% 17% 3px 3px', background: 'radial-gradient(60% 50% at 50% 55%, #FFF6DA, #F0C868 60%, #C9963A)' }}>
               <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <EmblemSlot mono={ot.mono} size={84} border={`2px solid ${C.GOLD_D}`} background="rgba(255,255,255,.4)" color={C.EMERALD} font={head} style={{ animation: 'none' }}>
@@ -106,7 +112,7 @@ function RibbonOpening({ inv, theme }) {
         </div>
         <motion.div animate={go ? { opacity: 0, y: 8 } : {}} transition={{ duration: 0.25 }} style={{ marginTop: 18 }}>
           {ot.show('cta') && (
-            <div style={{ minHeight: 50, padding: '12px 30px', display: 'inline-flex', alignItems: 'center', borderRadius: 999, background: RIBBON, color: '#FFFFFF', fontFamily: head, fontWeight: 700, fontSize: 17, letterSpacing: '.06em', boxShadow: `0 0 0 1.5px ${C.GOLD}, 0 12px 24px -12px rgba(194,31,50,.7)`, animation: 'rc-rise .8s ease-out .8s both' }}>
+            <div style={{ minHeight: 50, padding: '12px 30px', display: 'inline-flex', alignItems: 'center', borderRadius: 999, background: RIBBON(C), color: '#FFFFFF', fontFamily: head, fontWeight: 700, fontSize: 17, letterSpacing: '.06em', boxShadow: `0 0 0 1.5px ${C.GOLD}, 0 12px 24px -12px rgba(194,31,50,.7)`, animation: 'rc-rise .8s ease-out .8s both' }}>
               {ot.text('cta')}
             </div>
           )}
@@ -119,17 +125,18 @@ function RibbonOpening({ inv, theme }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, dark = false }) {
+  const C = usePalette(PAL)
   return (
-    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? EMERALD_BG : IVORY_BG, color: dark ? C.IVORY : C.INK }}>
+    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? EMERALD_BG(C) : IVORY_BG(C), color: dark ? C.IVORY : C.INK }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             {kicker && <div style={{ marginBottom: 6, fontFamily: head, fontSize: 14.5, letterSpacing: '.22em', color: dark ? C.GOLD : C.GOLD_D }}>{kicker}</div>}
-            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 700, fontSize: 'clamp(28px, 8.2vw, 38px)', lineHeight: 1.1, textWrap: 'balance', ...(dark ? goldText : { color: C.EMERALD }) }}>{title}</h2>}
+            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 700, fontSize: scaleFont('clamp(28px, 8.2vw, 38px)', C.hs), lineHeight: 1.1, textWrap: 'balance', ...(dark ? goldText(C) : { color: C.EMERALD }) }}>{title}</h2>}
             <div aria-hidden="true" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, marginTop: 14 }}>
-              <span style={{ width: 46, height: 8, background: RIBBON, clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 18% 50%)' }} />
+              <span style={{ width: 46, height: 8, background: RIBBON(C), clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 18% 50%)' }} />
               <span style={{ width: 6, height: 6, transform: 'rotate(45deg)', background: C.GOLD }} />
-              <span style={{ width: 46, height: 8, background: RIBBON, clipPath: 'polygon(0 0, 100% 0, 82% 50%, 100% 100%, 0 100%)' }} />
+              <span style={{ width: 46, height: 8, background: RIBBON(C), clipPath: 'polygon(0 0, 100% 0, 82% 50%, 100% 100%, 0 100%)' }} />
             </div>
             {sub && <p style={{ margin: '12px auto 0', maxWidth: 340, fontSize: 16.5, color: dark ? alpha(C.IVORY, 0.72) : C.MUTED, lineHeight: 1.55 }}>{sub}</p>}
           </div>
@@ -140,23 +147,24 @@ function Panel({ id, section, title, kicker, sub, children, head, dark = false }
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: '#FFFFFF', border: `1px solid ${alpha(C.GOLD_D, 0.4)}`, borderRadius: 8,
   padding: '14px 16px', fontSize: 16.5, color: C.INK, outline: 'none',
-}
-const darkField = { ...field, background: alpha('#000000', 0.2), border: `1px solid ${alpha(C.GOLD, 0.4)}`, color: C.IVORY }
-const btn = (on) => ({
+})
+const darkField = (C) => ({ ...field(C), background: alpha('#000000', 0.2), border: `1px solid ${alpha(C.GOLD, 0.4)}`, color: C.IVORY })
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 24px', borderRadius: 999,
   fontSize: 16, fontWeight: 600, letterSpacing: '.04em', textDecoration: 'none', cursor: 'pointer',
   background: on ? C.EMERALD : 'transparent', color: on ? C.GOLD_L : C.EMERALD, border: `1.5px solid ${C.EMERALD}`,
-})
-const darkBtn = (on) => ({ ...btn(on), background: on ? GOLD_GRAD : 'transparent', color: on ? C.EMERALD_D : C.GOLD_L, border: `1.5px solid ${on ? C.GOLD : alpha(C.GOLD, 0.5)}` })
-const suggest = { bg: '#FFFFFF', border: `1px solid ${alpha(C.GOLD_D, 0.4)}`, active: alpha(C.GOLD, 0.22), text: C.INK, table: C.RED, radius: 8 }
+}))
+const darkBtn = (C) => ((on) => ({ ...btn(C)(on), background: on ? GOLD_GRAD(C) : 'transparent', color: on ? C.EMERALD_D : C.GOLD_L, border: `1.5px solid ${on ? C.GOLD : alpha(C.GOLD, 0.5)}` }))
+const suggest = (C) => ({ bg: '#FFFFFF', border: `1px solid ${alpha(C.GOLD_D, 0.4)}`, active: alpha(C.GOLD, 0.22), text: C.INK, table: C.RED, radius: 8 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function RibbonCutTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -164,11 +172,11 @@ export default function RibbonCutTemplate(props) {
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
-    <div data-rc lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-rc lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.IVORY, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.GOLD, 0.4),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <RibbonOpening inv={inv} theme={theme} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.EMERALD, border: `1.5px solid ${C.GOLD}`, boxShadow: '0 8px 20px rgba(9,40,31,.45)' }}>
@@ -186,12 +194,12 @@ export default function RibbonCutTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.IVORY, 0.7), fontSize: 15.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 700, fontSize: 19, letterSpacing: '.06em', ...goldText }}>{T.brand}</div>
+            <div style={{ fontFamily: head, fontWeight: 700, fontSize: 19, letterSpacing: '.06em', ...goldText(C) }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — kəsilmiş lent */}
-          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: EMERALD_BG, padding: '0 22px 64px', textAlign: 'center', color: C.IVORY }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: EMERALD_BG(C), padding: '0 22px 64px', textAlign: 'center', color: C.IVORY }}>
             <div aria-hidden="true" style={{ position: 'relative', height: 150, margin: '0 -22px' }}>
               <span style={{ position: 'absolute', left: -10, top: 40, width: '46%', transformOrigin: '0 50%', transform: 'rotate(14deg)' }}>
                 <RibbonBand height={24} style={{ clipPath: 'polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%)' }} />
@@ -202,9 +210,9 @@ export default function RibbonCutTemplate(props) {
               <span style={{ position: 'absolute', left: '50%', top: 54, transform: 'translateX(-50%) rotate(8deg)' }}><Scissors size={58} closed /></span>
             </div>
             <div style={{ fontFamily: head, fontSize: 15, letterSpacing: '.24em', color: C.GOLD_L }}>{L('hero', 'kicker', T.grand)}</div>
-            <h1 style={{ margin: '12px 0 0', fontFamily: head, fontWeight: 700, fontSize: nameSize(heroName), lineHeight: 1.06, overflowWrap: 'anywhere', ...goldText, animation: 'rc-rise 1s ease-out .2s both' }}>{heroName}</h1>
+            <h1 style={{ margin: '12px 0 0', fontFamily: head, fontWeight: 700, fontSize: nameSize(heroName), lineHeight: 1.06, overflowWrap: 'anywhere', ...goldText(C), animation: 'rc-rise 1s ease-out .2s both' }}>{heroName}</h1>
             {inv.isCorp && weddingData.organizer?.trim() && <div style={{ marginTop: 10, fontSize: 16, letterSpacing: '.06em', color: alpha(C.IVORY, 0.75) }}>{tr.organizer_display}: {weddingData.organizer}</div>}
-            <div style={{ width: 70, height: 1.5, margin: '20px auto 0', background: GOLD_GRAD }} />
+            <div style={{ width: 70, height: 1.5, margin: '20px auto 0', background: GOLD_GRAD(C) }} />
             <div style={{ marginTop: 18, fontFamily: head, fontWeight: 700, fontSize: 'clamp(20px, 5.6vw, 24px)', color: C.IVORY }}>{inv.fullDate}</div>
             <div style={{ marginTop: 6, fontSize: 16.5, color: alpha(C.IVORY, 0.72) }}>{[inv.time, weddingData.venueName].filter(Boolean).join(' · ')}</div>
             <p style={{ margin: '18px auto 0', maxWidth: 330, fontSize: 17, lineHeight: 1.6, color: alpha(C.IVORY, 0.85) }}>{tr.inv_join}</p>
@@ -216,9 +224,9 @@ export default function RibbonCutTemplate(props) {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop]) => (
                   <div key={l} style={{ textAlign: 'center' }}>
-                    <div style={{ aspectRatio: '0.86', padding: 3, borderRadius: '40% 40% 6px 6px / 22% 22% 6px 6px', background: GOLD_GRAD, boxShadow: '0 12px 18px -10px rgba(9,40,31,.5)' }}>
-                      <div style={{ height: '100%', borderRadius: '40% 40% 4px 4px / 21% 21% 4px 4px', background: EMERALD_BG, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <span style={{ fontFamily: head, fontWeight: 700, fontSize: 'clamp(22px, 6.6vw, 30px)', lineHeight: 1, fontVariantNumeric: 'tabular-nums', ...goldText }}><PopDigit value={v} pop={pop} /></span>
+                    <div style={{ aspectRatio: '0.86', padding: 3, borderRadius: '40% 40% 6px 6px / 22% 22% 6px 6px', background: GOLD_GRAD(C), boxShadow: '0 12px 18px -10px rgba(9,40,31,.5)' }}>
+                      <div style={{ height: '100%', borderRadius: '40% 40% 4px 4px / 21% 21% 4px 4px', background: EMERALD_BG(C), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontFamily: head, fontWeight: 700, fontSize: 'clamp(22px, 6.6vw, 30px)', lineHeight: 1, fontVariantNumeric: 'tabular-nums', ...goldText(C) }}><PopDigit value={v} pop={pop} /></span>
                       </div>
                     </div>
                     <div style={{ marginTop: 10, fontFamily: head, fontSize: 13, letterSpacing: '.12em', color: C.MUTED }}>{l}</div>
@@ -233,19 +241,19 @@ export default function RibbonCutTemplate(props) {
           {/* MƏKAN */}
           {S.venue && (
             <Panel section="venue" head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
-              <div style={{ maxWidth: 430, margin: '0 auto', padding: 5, borderRadius: 18, background: GOLD_GRAD, boxShadow: '0 24px 36px -22px rgba(0,0,0,.8)' }}>
+              <div style={{ maxWidth: 430, margin: '0 auto', padding: 5, borderRadius: 18, background: GOLD_GRAD(C), boxShadow: '0 24px 36px -22px rgba(0,0,0,.8)' }}>
                 <div style={{ borderRadius: 14, overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
                     weddingData={weddingData} theme={theme} accent={C.RED} height="clamp(240px, 66vw, 300px)"
                     map={{ opacity: 0.9, filter: 'grayscale(.35)', tintOpacity: 0.12, tint: C.EMERALD_L, blend: 'multiply' }}
                     frame={<MapPin />}
-                    fallback={<div style={{ height: 'clamp(240px, 66vw, 300px)', position: 'relative', background: IVORY_BG }}><MapPin /></div>}
+                    fallback={<div style={{ height: 'clamp(240px, 66vw, 300px)', position: 'relative', background: IVORY_BG(C) }}><MapPin /></div>}
                   />
                 </div>
               </div>
-              <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontWeight: 700, fontSize: 24, lineHeight: 1.2, ...goldText }}>{weddingData.venueName}</div>
+              <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontWeight: 700, fontSize: 24, lineHeight: 1.2, ...goldText(C) }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 6, fontSize: 16, color: alpha(C.IVORY, 0.72) }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn(C)} />
             </Panel>
           )}
 
@@ -255,7 +263,7 @@ export default function RibbonCutTemplate(props) {
               <div style={{ maxWidth: 400, margin: '0 auto', display: 'grid', gap: 12 }}>
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '74px minmax(0, 1fr)', alignItems: 'stretch', background: '#FFFFFF', borderRadius: 8, overflow: 'hidden', boxShadow: '0 10px 18px -14px rgba(9,40,31,.5)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '14px 0 18px', background: RIBBON, clipPath: TAIL, color: '#FFFFFF', fontFamily: head, fontWeight: 700, fontSize: 17, fontVariantNumeric: 'tabular-nums' }}>{ev.time}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '14px 0 18px', background: RIBBON(C), clipPath: TAIL, color: '#FFFFFF', fontFamily: head, fontWeight: 700, fontSize: 17, fontVariantNumeric: 'tabular-nums' }}>{ev.time}</div>
                     <div style={{ display: 'flex', alignItems: 'center', padding: '12px 16px', fontSize: 17, lineHeight: 1.3, color: C.INK }}>{ev.label}</div>
                   </div>
                 ))}
@@ -273,15 +281,15 @@ export default function RibbonCutTemplate(props) {
           {/* MASA — VIP kart */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="rc-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.IVORY, 0.72)} accent={C.GOLD_L}
+              <SeatFinder inv={inv} tr={tr} listId="rc-seat-list" field={darkField(C)} suggest={suggest(C)} font={body} muted={alpha(C.IVORY, 0.72)} accent={C.GOLD_L}
                 nameStyle={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
                 card={(num) => (
-                  <div style={{ position: 'relative', maxWidth: 320, margin: '22px auto 0', padding: 4, borderRadius: 14, background: GOLD_GRAD, boxShadow: '0 24px 34px -18px rgba(0,0,0,.85)' }}>
-                    <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 11, padding: '26px 20px 24px', background: IVORY_BG, color: C.INK, textAlign: 'center' }}>
+                  <div style={{ position: 'relative', maxWidth: 320, margin: '22px auto 0', padding: 4, borderRadius: 14, background: GOLD_GRAD(C), boxShadow: '0 24px 34px -18px rgba(0,0,0,.85)' }}>
+                    <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 11, padding: '26px 20px 24px', background: IVORY_BG(C), color: C.INK, textAlign: 'center' }}>
                       <span aria-hidden="true" style={{ position: 'absolute', right: -42, top: 22, width: 170, transform: 'rotate(40deg)' }}><RibbonBand height={22} /></span>
                       <div style={{ position: 'relative', fontFamily: head, fontSize: 12.5, letterSpacing: '.24em', color: C.GOLD_D }}>{T.vip}</div>
                       <div style={{ position: 'relative', marginTop: 8, fontFamily: head, fontWeight: 700, fontSize: 'clamp(22px, 6.4vw, 27px)', lineHeight: 1.15, color: C.EMERALD, overflowWrap: 'anywhere', paddingInline: 14 }}>{seating.selected?.full_name}</div>
-                      <div style={{ width: 50, height: 1.5, margin: '14px auto', background: GOLD_GRAD }} />
+                      <div style={{ width: 50, height: 1.5, margin: '14px auto', background: GOLD_GRAD(C) }} />
                       <div style={{ fontFamily: head, fontSize: 15, letterSpacing: '.2em', color: C.MUTED }}>{T.table}{' '}</div>
                       <div style={{ fontFamily: head, fontWeight: 700, fontSize: tableSize(num, 64), lineHeight: 1, color: C.RED }}>{num}</div>
                     </div>
@@ -296,14 +304,14 @@ export default function RibbonCutTemplate(props) {
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 14, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ aspectRatio: '4 / 5', padding: 4, borderRadius: 10, background: GOLD_GRAD, boxShadow: '0 12px 18px -12px rgba(9,40,31,.5)' }}>
+                    <div key={i} style={{ aspectRatio: '4 / 5', padding: 4, borderRadius: 10, background: GOLD_GRAD(C), boxShadow: '0 12px 18px -12px rgba(9,40,31,.5)' }}>
                       <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: 7 }} />
                     </div>
                   ))}
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.EMERALD_D} bg="#FFFFFF" frame={{ borderRadius: 12, border: `1.5px solid ${C.GOLD}` }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'event')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'event')} />
             </Panel>
           )}
 
@@ -315,7 +323,7 @@ export default function RibbonCutTemplate(props) {
                 font: body, display: head, displayItalic: false, btnFont: head,
                 doneMark: <Bow size={70} style={{ margin: '0 auto 10px' }} />,
                 marker: (a) => <span style={{ display: 'block', width: 12, height: 12, transform: 'rotate(45deg)', border: `1.5px solid ${a ? C.RED : alpha(C.GOLD_D, 0.6)}`, background: a ? C.RED : 'transparent' }} />,
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -323,7 +331,7 @@ export default function RibbonCutTemplate(props) {
           {/* TƏBRİKLƏR */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.GOLD_L} />
+              <GuestbookForm inv={inv} field={darkField(C)} btn={darkBtn(C)} errorColor={C.GOLD_L} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
@@ -343,7 +351,7 @@ export default function RibbonCutTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 

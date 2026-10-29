@@ -1,9 +1,11 @@
-import { C, CLOUDS } from './palette'
+import { C as PAL, CLOUDS } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* LITTLE PILOT — dekor */
 
 /** Bulud (CSS) */
 export function Cloud({ w = 120, opacity = 1, style }) {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', display: 'block', width: w, height: w * 0.42, opacity, ...style }}>
       <span style={{ position: 'absolute', left: '8%', right: '8%', bottom: 0, height: '52%', borderRadius: 999, background: C.CLOUD }} />
@@ -30,6 +32,7 @@ export function Sky({ part = false, opacity = 1 }) {
 
 /** Təyyarə (yandan, sağa baxır) */
 export function Plane({ width = 130, badge, style }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ position: 'relative', width, ...style }}>
       <svg aria-hidden="true" viewBox="0 0 140 72" width="100%" style={{ display: 'block', overflow: 'visible' }}>
@@ -68,7 +71,9 @@ export function Plane({ width = 130, badge, style }) {
 }
 
 /** Kiçik təyyarə ikonu (proqram üçün) */
-export function PlaneIcon({ size = 22, color = C.RED, style }) {
+export function PlaneIcon($p) {
+  const C = usePalette(PAL)
+  const { size = 22, color = C.RED, style } = $p
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" width={size} height={size} style={{ display: 'block', ...style }}>
       <path d="M2 13l8-1 4-8h2l-2 8 6-.5 2-2.5h1.5l-1 4 1 4H22l-2-2.5-6-.5 2 8h-2l-4-8-8-1z" fill={color} />
@@ -78,6 +83,7 @@ export function PlaneIcon({ size = 22, color = C.RED, style }) {
 
 /** Quyruq — masa nömrəsi quyruqda yazılır */
 export function TailFin({ children, width = 200, style }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ position: 'relative', width, aspectRatio: '1 / 1.05', margin: '0 auto', ...style }}>
       <div aria-hidden="true" style={{ position: 'absolute', inset: 0, clipPath: 'polygon(30% 0, 64% 0, 100% 100%, 0 100%)', background: `linear-gradient(160deg, #FF7A63, ${C.RED} 50%, ${C.RED_D})` }} />

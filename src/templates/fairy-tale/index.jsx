@@ -10,12 +10,13 @@ import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { ageSentence, ageWord, kidsGalleryDesc, tableNum, tableSize } from '../_shared/kids'
-import { C, FOIL } from './palette'
+import { C as PAL, FOIL } from './palette'
 import { LABELS, TXT } from './copy'
 import {
   Sparkle, StarField, Moon, Castle, Hill, Crown, Wand, Flourish, CornerFiligree,
   MirrorFrame, Compass, Vignette, CastleMark, AgeSeal, Cloud, Topiary,
 } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    FAIRY TALE — «Nağıl kitabı» (Uşaq ad günü konsepti, 2026-10)
@@ -37,9 +38,13 @@ import {
 const BASE = getTemplateTheme('fairy-tale')
 const ID = 'fairy-tale'
 
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['VIOLET'], secondary: ['NIGHT'], accent: ['GOLD'], background: ['CREAM'], text: ['INK'] }
+
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
 
-const KEYFRAMES = `
+const KEYFRAMES = (C) => (`
 @keyframes ft-twinkle { 0%,100% { opacity: .25 } 50% { opacity: 1 } }
 @keyframes ft-glow { 0%,100% { opacity: .78 } 50% { opacity: 1 } }
 @keyframes ft-flag { 0%,100% { transform: skewY(0) scaleX(1) } 50% { transform: skewY(-9deg) scaleX(.86) } }
@@ -54,12 +59,12 @@ const KEYFRAMES = `
 [data-ft] input:focus-visible, [data-ft] textarea:focus-visible { border-color: ${C.VIOLET} !important; outline: none; }
 [data-ft] button:focus-visible, [data-ft] a:focus-visible, [data-ft] [role="button"]:focus-visible { outline: 2px solid ${C.GOLD}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-ft] *, [data-ft] { animation: none !important; transition: none !important; } }
-`
+`)
 
-const foilText = {
-  backgroundImage: FOIL, backgroundSize: '200% 100%', WebkitBackgroundClip: 'text', backgroundClip: 'text',
+const foilText = (C) => ({
+  backgroundImage: FOIL(C), backgroundSize: '200% 100%', WebkitBackgroundClip: 'text', backgroundClip: 'text',
   color: 'transparent', WebkitTextFillColor: 'transparent',
-}
+})
 
 /* İlk hərf + qalan (Unicode-təhlükəsiz) — proqramın iri baş hərfi */
 function splitFirst(s) {
@@ -69,6 +74,7 @@ function splitFirst(s) {
 
 /* ═══ 01 — AÇILIŞ: nağıl kitabı + pop-up qəsr ═══ */
 function BookOpening({ inv, theme }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -114,7 +120,7 @@ function BookOpening({ inv, theme }) {
             }}>
               {/* cildin beli */}
               <div aria-hidden="true" style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 22, background: 'linear-gradient(90deg, #141A38, #2A3070 60%, #1B2250)', boxShadow: '2px 0 4px rgba(0,0,0,.3)' }}>
-                {[14, 50, 86].map((p) => <span key={p} style={{ position: 'absolute', left: 0, right: 0, top: `${p}%`, height: 3, background: FOIL }} />)}
+                {[14, 50, 86].map((p) => <span key={p} style={{ position: 'absolute', left: 0, right: 0, top: `${p}%`, height: 3, background: FOIL(C) }} />)}
               </div>
               {/* qızıl çərçivə + künclər */}
               <div aria-hidden="true" style={{ position: 'absolute', left: 34, right: 12, top: 12, bottom: 12, border: `1.5px solid ${C.GOLD}`, borderRadius: 3 }} />
@@ -130,7 +136,7 @@ function BookOpening({ inv, theme }) {
                 </EmblemSlot>
                 {ot.show('kicker') && <div style={{ marginTop: 16, fontStyle: 'italic', fontSize: 15.5, color: C.GOLD_L, lineHeight: 1.35 }}>{ot.text('kicker')}</div>}
                 {titleOv !== '' && (
-                  <div style={{ ...foilText, marginTop: 10, fontFamily: serif, fontWeight: 600, fontSize: 'clamp(34px, 11vw, 46px)', lineHeight: 1.04, animation: 'ft-shine 6s linear infinite', overflowWrap: 'anywhere' }}>
+                  <div style={{ ...foilText(C), marginTop: 10, fontFamily: serif, fontWeight: 600, fontSize: 'clamp(34px, 11vw, 46px)', lineHeight: 1.04, animation: 'ft-shine 6s linear infinite', overflowWrap: 'anywhere' }}>
                     {first}{second && <><span style={{ display: 'block', fontSize: '.5em', margin: '2px 0' }}>{ot.text('and')}</span>{second}</>}
                   </div>
                 )}
@@ -144,7 +150,7 @@ function BookOpening({ inv, theme }) {
 
         <motion.div animate={open ? { opacity: 0, y: 8 } : {}} transition={{ duration: 0.3 }} style={{ textAlign: 'center' }}>
           {ot.show('cta') && (
-            <div style={{ marginTop: 36, minHeight: 50, padding: '13px 30px', display: 'inline-flex', alignItems: 'center', gap: 10, borderRadius: 999, backgroundImage: FOIL, color: C.NIGHT, fontSize: 16.5, fontStyle: 'italic', fontWeight: 700, boxShadow: '0 0 0 4px rgba(235,212,154,.18), 0 14px 30px rgba(0,0,0,.4)', animation: 'ft-rise .8s ease-out 1s both' }}>
+            <div style={{ marginTop: 36, minHeight: 50, padding: '13px 30px', display: 'inline-flex', alignItems: 'center', gap: 10, borderRadius: 999, backgroundImage: FOIL(C), color: C.NIGHT, fontSize: 16.5, fontStyle: 'italic', fontWeight: 700, boxShadow: '0 0 0 4px rgba(235,212,154,.18), 0 14px 30px rgba(0,0,0,.4)', animation: 'ft-rise .8s ease-out 1s both' }}>
               <Sparkle size={12} color={C.NIGHT} />{ot.text('cta')}<Sparkle size={12} color={C.NIGHT} />
             </div>
           )}
@@ -157,6 +163,7 @@ function BookOpening({ inv, theme }) {
 
 /* Bölmə — kitab səhifəsi */
 function Page({ id, section, title, kicker, sub, children, serif, tone = 'cream' }) {
+  const C = usePalette(PAL)
   const night = tone === 'night'
   const bg = night ? `radial-gradient(130% 90% at 50% 0%, ${C.DUSK}, ${C.NIGHT} 70%)` : tone === 'parch' ? C.PARCH : C.CREAM
   return (
@@ -170,7 +177,7 @@ function Page({ id, section, title, kicker, sub, children, serif, tone = 'cream'
               <Sparkle size={16} color={night ? C.GOLD_L : C.GOLD} />
               <Sparkle size={9} color={night ? C.GOLD_L : C.GOLD} style={{ marginTop: 6 }} />
             </div>
-            {title && <h2 style={{ margin: 0, fontFamily: serif, fontWeight: 600, fontSize: 'clamp(31px, 8.8vw, 40px)', lineHeight: 1.08, color: night ? C.GOLD_L : C.VIOLET, textWrap: 'balance' }}>{title}</h2>}
+            {title && <h2 style={{ margin: 0, fontFamily: serif, fontWeight: 600, fontSize: scaleFont('clamp(31px, 8.8vw, 40px)', C.hs), lineHeight: 1.08, color: night ? C.GOLD_L : C.VIOLET, textWrap: 'balance' }}>{title}</h2>}
             {kicker && <div style={{ marginTop: 8, fontStyle: 'italic', fontSize: 16, color: night ? alpha(C.CREAM, 0.8) : C.MUTED }}>{kicker}</div>}
             {sub && <p style={{ margin: '8px auto 0', maxWidth: 330, fontSize: 16, color: night ? alpha(C.CREAM, 0.8) : C.MUTED, lineHeight: 1.55 }}>{sub}</p>}
           </div>
@@ -181,19 +188,20 @@ function Page({ id, section, title, kicker, sub, children, serif, tone = 'cream'
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: '#FFFFFF', border: `1px solid ${alpha(C.VIOLET, 0.25)}`, borderRadius: 14,
   padding: '14px 16px', fontSize: 16, color: C.INK, outline: 'none',
-}
-const btn = (on) => ({
+})
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 22px', borderRadius: 999,
   fontSize: 15.5, textDecoration: 'none', cursor: 'pointer',
   background: on ? C.VIOLET : 'transparent', color: on ? C.CREAM : C.VIOLET, border: `1.5px solid ${C.VIOLET}`,
-})
-const suggest = { bg: '#FFFFFF', border: `1px solid ${alpha(C.VIOLET, 0.22)}`, active: alpha(C.LILAC, 0.25), text: C.INK, table: C.VIOLET, radius: 14 }
+}))
+const suggest = (C) => ({ bg: '#FFFFFF', border: `1px solid ${alpha(C.VIOLET, 0.22)}`, active: alpha(C.LILAC, 0.25), text: C.INK, table: C.VIOLET, radius: 14 })
 
 /* Qüllə damı — sayğac */
 function TowerRoof({ color, delay = 0 }) {
+  const C = usePalette(PAL)
   return (
     <svg viewBox="0 0 80 58" width="100%" aria-hidden="true" style={{ display: 'block', overflow: 'visible' }}>
       <path d="M40 14v-12" stroke={C.GOLD} strokeWidth="1.4" />
@@ -209,6 +217,7 @@ function TowerRoof({ color, delay = 0 }) {
 export default function FairyTaleTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const serif = theme.fonts.heading
   const body = theme.fonts.body
@@ -216,12 +225,12 @@ export default function FairyTaleTemplate(props) {
   const age = inv.age
 
   return (
-    <div data-ft lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-ft lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.CREAM,
       minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.VIOLET, 0.2),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <BookOpening inv={inv} theme={theme} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.NIGHT, border: `1.5px solid ${C.GOLD}`, boxShadow: '0 8px 18px rgba(31,42,82,.35)' }}>
@@ -239,7 +248,7 @@ export default function FairyTaleTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.CREAM, 0.8), fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ ...foilText, fontFamily: serif, fontWeight: 600, fontSize: 19 }}>{T.brand}</div>
+            <div style={{ ...foilText(C), fontFamily: serif, fontWeight: 600, fontSize: 19 }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={{ ...theme, background: C.NIGHT, surface: '#2A3366', text: C.CREAM, muted: alpha(C.CREAM, 0.75) }} />
           </header>
 
@@ -249,7 +258,7 @@ export default function FairyTaleTemplate(props) {
             <Moon size={62} style={{ position: 'absolute', right: '9%', top: 26, animation: 'ft-float 7s ease-in-out infinite' }} />
             <div style={{ position: 'relative', textAlign: 'center', padding: '0 22px' }}>
               <div style={{ fontStyle: 'italic', fontSize: 17, color: C.GOLD_L, animation: 'ft-rise .9s ease-out .2s both' }}>{L('hero', 'kicker', T.once)}</div>
-              <h1 style={{ ...foilText, margin: '10px 0 0', fontFamily: serif, fontWeight: 600, fontSize: 'clamp(48px, 15vw, 74px)', lineHeight: 1, textWrap: 'balance', overflowWrap: 'anywhere', filter: 'drop-shadow(0 3px 10px rgba(20,24,60,.45))', animation: 'ft-shine 7s linear infinite, ft-rise 1s ease-out .35s both' }}>
+              <h1 style={{ ...foilText(C), margin: '10px 0 0', fontFamily: serif, fontWeight: 600, fontSize: 'clamp(48px, 15vw, 74px)', lineHeight: 1, textWrap: 'balance', overflowWrap: 'anywhere', filter: 'drop-shadow(0 3px 10px rgba(20,24,60,.45))', animation: 'ft-shine 7s linear infinite, ft-rise 1s ease-out .35s both' }}>
                 {inv.heroTitle ? inv.heroTitle : inv.isCouple ? <>{inv.groom} {inv.and} {inv.bride}</> : inv.single}
               </h1>
               {age && <div style={{ marginTop: 10, fontStyle: 'italic', fontSize: 18, color: C.CREAM, animation: 'ft-rise .9s ease-out .5s both' }}>{ageSentence(age, lang)}</div>}
@@ -340,10 +349,10 @@ export default function FairyTaleTemplate(props) {
               <div style={{ textAlign: 'center', marginTop: 24, fontFamily: serif, fontWeight: 600, fontSize: 26, lineHeight: 1.2, color: C.VIOLET }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontSize: 15.5, color: C.MUTED }}>{weddingData.venueNote}</div>}
               <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
-                {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(true)}>{tr.inv_directions_btn}</a>}
-                {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(!inv.dirUrl)}>Maps</a>}
-                {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Waze</a>}
-                {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Apple</a>}
+                {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(true)}>{tr.inv_directions_btn}</a>}
+                {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(!inv.dirUrl)}>Maps</a>}
+                {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>Waze</a>}
+                {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>Apple</a>}
               </div>
             </Page>
           )}
@@ -384,8 +393,8 @@ export default function FairyTaleTemplate(props) {
           {/* MASA — sehrli güzgü */}
           {S.seating && !seating.isEmpty && (
             <Page section="seating" serif={serif} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <input {...seatInputProps(inv, 'ft-seat-list')} style={field} />
-              <SeatSuggest inv={inv} id="ft-seat-list" c={{ ...suggest, font: body }} />
+              <input {...seatInputProps(inv, 'ft-seat-list')} style={field(C)} />
+              <SeatSuggest inv={inv} id="ft-seat-list" c={{ ...suggest(C), font: body }} />
               {seating.showNotFound && <div style={{ marginTop: 12, fontSize: 15, color: C.MUTED, textAlign: 'center' }}>{tr.inv_seat_fullname}</div>}
               {seating.selected && (
                 <div style={{ marginTop: 26, textAlign: 'center', animation: 'ft-rise .6s ease-out both' }}>
@@ -428,7 +437,7 @@ export default function FairyTaleTemplate(props) {
                   <QRCodeSVG value={gallery.photoShareUrl} size={128} bgColor="#FFFFFF" fgColor={C.NIGHT} level="M" />
                 </div>
                 <div style={{ marginTop: 16, fontSize: 15, color: C.MUTED }}>{tr.inv_scan_upload}</div>
-                <a data-press href={gallery.photoShareUrl} style={{ ...btn(true), marginTop: 16 }}>{tr.inv_gallery_btn}</a>
+                <a data-press href={gallery.photoShareUrl} style={{ ...btn(C)(true), marginTop: 16 }}>{tr.inv_gallery_btn}</a>
                 <p style={{ margin: '16px auto 0', maxWidth: 340, fontSize: 15.5, color: C.MUTED, lineHeight: 1.65 }}>{kidsGalleryDesc(props.adminOverrides, tr, lang)}</p>
               </div>
             </Page>
@@ -440,7 +449,7 @@ export default function FairyTaleTemplate(props) {
               <ReplyForm inv={inv} t={{
                 ink: C.INK, muted: C.MUTED, line: alpha(C.VIOLET, 0.4), hair: alpha(C.GOLD, 0.35), accent: C.VIOLET,
                 font: body, display: serif, doneMark: <Crown size={36} style={{ margin: '0 auto 10px' }} />,
-                marker: (a) => <Wand active={a} />, suggest: { ...suggest, font: body },
+                marker: (a) => <Wand active={a} />, suggest: { ...suggest(C), font: body },
               }} />
             </Page>
           )}
@@ -449,9 +458,9 @@ export default function FairyTaleTemplate(props) {
           {S.guestbook && (
             <Page section="guestbook" serif={serif} tone="parch" title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 30 }}>
-                <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbookL.namePh} style={field} />
-                <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbookL.msgPh} rows={3} style={{ ...field, resize: 'none', lineHeight: 1.5 }} />
-                <button type="submit" disabled={!gbook.canSubmit} data-press style={{ ...btn(gbook.canSubmit), width: '100%', opacity: gbook.canSubmit ? 1 : 0.5, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed' }}>
+                <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbookL.namePh} style={field(C)} />
+                <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbookL.msgPh} rows={3} style={{ ...field(C), resize: 'none', lineHeight: 1.5 }} />
+                <button type="submit" disabled={!gbook.canSubmit} data-press style={{ ...btn(C)(gbook.canSubmit), width: '100%', opacity: gbook.canSubmit ? 1 : 0.5, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed' }}>
                   {gbook.sending ? gbookL.sending : gbookL.btn}
                 </button>
                 {gbook.error && <p role="alert" style={{ margin: 0, fontSize: 14, color: C.ROSE_D }}>⚠ {gbookL.error}</p>}
@@ -476,11 +485,12 @@ export default function FairyTaleTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={serif} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 
 function CastlePin() {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
       <span style={{ position: 'absolute', left: -24, top: -48, width: 48, height: 48, borderRadius: '50% 50% 50% 0', transform: 'rotate(-45deg)', background: C.NIGHT, boxShadow: `0 0 0 2px ${C.GOLD}, 0 10px 18px rgba(31,42,82,.4)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

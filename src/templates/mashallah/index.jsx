@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, ageWord } from '../_shared/kids'
-import { C, TILE, SASH_WORD, nameSize } from './palette'
+import { C as PAL, TILE, SASH_WORD, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Nazar, Bead, BeadRule, Sash } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    MAŞALLAH — «Göz muncuğu və atlas lent» (Sünnət toyu konsepti, 2026-10)
@@ -32,7 +33,11 @@ import { Nazar, Bead, BeadRule, Sash } from './art'
 const BASE = getTemplateTheme('mashallah')
 const ID = 'mashallah'
 
-const KEYFRAMES = `
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['COBALT'], secondary: ['GOLD'], accent: ['TURQ'], background: ['CREAM'], text: ['INK'] }
+
+const KEYFRAMES = (C) => (`
 @keyframes mh-spin { to { transform: rotate(360deg) } }
 @keyframes mh-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes mh-fade { from { opacity: 0 } to { opacity: 1 } }
@@ -45,14 +50,15 @@ const KEYFRAMES = `
 [data-mh] input:focus-visible, [data-mh] textarea:focus-visible { border-color: ${C.TURQ} !important; outline: none; }
 [data-mh] button:focus-visible, [data-mh] a:focus-visible, [data-mh] [role="button"]:focus-visible { outline: 2px solid ${C.COBALT}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-mh] *, [data-mh] { animation: none !important; transition: none !important; } }
-`
+`)
 
-const CREAM_BG = `${TILE}, radial-gradient(90% 60% at 50% 0%, #FFFDF7, transparent 70%), ${C.CREAM}`
-const COBALT_BG = `radial-gradient(90% 60% at 50% 0%, #1A55B8, transparent 70%), linear-gradient(180deg, ${C.COBALT}, ${C.COBALT_D})`
+const CREAM_BG = (C) => (`${TILE}, radial-gradient(90% 60% at 50% 0%, #FFFDF7, transparent 70%), ${C.CREAM}`)
+const COBALT_BG = (C) => (`radial-gradient(90% 60% at 50% 0%, #1A55B8, transparent 70%), linear-gradient(180deg, ${C.COBALT}, ${C.COBALT_D})`)
 const RING = Array.from({ length: 18 }, (_, i) => i)
 
 /* ═══ 01 — AÇILIŞ: göz muncuğu və lent ═══ */
 function NazarOpening({ inv, theme, lang }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -63,7 +69,7 @@ function NazarOpening({ inv, theme, lang }) {
     <motion.div {...gate.gateProps} data-mh
       animate={go ? { opacity: 0 } : {}}
       transition={{ duration: 0.4, delay: 1.7 }}
-      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: CREAM_BG, color: C.INK, fontFamily: theme.fonts.body }}>
+      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: CREAM_BG(C), color: C.INK, fontFamily: theme.fonts.body }}>
       <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 22px', textAlign: 'center' }}>
         <div style={{ position: 'relative', width: 'min(64vw, 250px)', aspectRatio: '1' }}>
           {/* muncuq sapı */}
@@ -111,14 +117,15 @@ function NazarOpening({ inv, theme, lang }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, dark = false }) {
+  const C = usePalette(PAL)
   const mute = dark ? alpha(C.WHITE, 0.78) : C.MUTED
   return (
-    <section id={id} data-section={section} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? COBALT_BG : CREAM_BG, color: dark ? C.WHITE : C.INK }}>
+    <section id={id} data-section={section} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? COBALT_BG(C) : CREAM_BG(C), color: dark ? C.WHITE : C.INK }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <BeadRule width={210} />
-            {title && <h2 style={{ margin: '14px 0 0', fontFamily: head, fontWeight: 500, fontSize: 'clamp(29px, 8.4vw, 38px)', lineHeight: 1.15, color: dark ? C.WHITE : C.COBALT, textWrap: 'balance' }}>{title}</h2>}
+            {title && <h2 style={{ margin: '14px 0 0', fontFamily: head, fontWeight: 500, fontSize: scaleFont('clamp(29px, 8.4vw, 38px)', C.hs), lineHeight: 1.15, color: dark ? C.WHITE : C.COBALT, textWrap: 'balance' }}>{title}</h2>}
             {kicker && <div style={{ marginTop: 8, fontSize: 15.5, color: mute }}>{kicker}</div>}
             {sub && <p style={{ margin: '8px auto 0', maxWidth: 340, fontSize: 15.5, color: mute, lineHeight: 1.6 }}>{sub}</p>}
           </div>
@@ -129,21 +136,22 @@ function Panel({ id, section, title, kicker, sub, children, head, dark = false }
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: C.WHITE, border: `1.5px solid ${alpha(C.COBALT, 0.25)}`, borderRadius: 16,
   padding: '14px 16px', fontSize: 16, color: C.INK, outline: 'none',
-}
-const btn = (on) => ({
+})
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 24px', borderRadius: 999,
   fontSize: 15.5, fontWeight: 700, textDecoration: 'none', cursor: 'pointer',
   background: on ? C.COBALT : C.WHITE, color: on ? C.WHITE : C.COBALT, border: `1.5px solid ${on ? C.COBALT : alpha(C.COBALT, 0.35)}`,
-})
-const suggest = { bg: C.WHITE, border: `1.5px solid ${alpha(C.COBALT, 0.22)}`, active: alpha(C.SKY, 0.6), text: C.INK, table: C.COBALT, radius: 16 }
+}))
+const suggest = (C) => ({ bg: C.WHITE, border: `1.5px solid ${alpha(C.COBALT, 0.22)}`, active: alpha(C.SKY, 0.6), text: C.INK, table: C.COBALT, radius: 16 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function MashallahTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -152,11 +160,11 @@ export default function MashallahTemplate(props) {
   const age = inv.age
 
   return (
-    <div data-mh lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-mh lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.CREAM, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.TURQ, 0.3),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <NazarOpening inv={inv} theme={theme} lang={lang} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.COBALT, border: `2px solid ${C.WHITE}`, boxShadow: `0 0 0 2px ${C.TURQ}, 0 8px 18px rgba(8,38,88,.4)` }}>
@@ -179,7 +187,7 @@ export default function MashallahTemplate(props) {
           </header>
 
           {/* HERO */}
-          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: CREAM_BG, padding: '46px 22px 60px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: CREAM_BG(C), padding: '46px 22px 60px', textAlign: 'center' }}>
             <div style={{ position: 'relative', width: 170, height: 170, margin: '0 auto' }}>
               <div aria-hidden="true" style={{ position: 'absolute', inset: -26, animation: 'mh-spin 50s linear infinite' }}>
                 {RING.map((i) => (
@@ -228,13 +236,13 @@ export default function MashallahTemplate(props) {
                     weddingData={weddingData} theme={theme} accent={C.COBALT} height="clamp(250px, 70vw, 320px)"
                     map={{ opacity: 0.92, filter: 'saturate(.85)', tintOpacity: 0.12, tint: C.TURQ, blend: 'multiply' }}
                     frame={<MapPin />}
-                    fallback={<div style={{ height: 'clamp(250px, 70vw, 320px)', position: 'relative', background: CREAM_BG }}><MapPin /></div>}
+                    fallback={<div style={{ height: 'clamp(250px, 70vw, 320px)', position: 'relative', background: CREAM_BG(C) }}><MapPin /></div>}
                   />
                 </div>
               </div>
               <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontWeight: 500, fontSize: 25, lineHeight: 1.2, color: C.COBALT }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontSize: 15.5, color: C.MUTED }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn(C)} />
             </Panel>
           )}
 
@@ -268,7 +276,7 @@ export default function MashallahTemplate(props) {
           {/* MASA — göz muncuğu və lent */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="mh-seat-list" field={field} suggest={suggest} font={body} muted={alpha(C.WHITE, 0.78)} accent={C.GOLD_L}
+              <SeatFinder inv={inv} tr={tr} listId="mh-seat-list" field={field(C)} suggest={suggest(C)} font={body} muted={alpha(C.WHITE, 0.78)} accent={C.GOLD_L}
                 nameStyle={{ fontFamily: head, fontSize: 24 }}
                 card={(num, raw) => (
                   <div style={{ position: 'relative', width: 200, margin: '0 auto 10px', animation: 'mh-drop .8s cubic-bezier(.3,.8,.4,1) both' }}>
@@ -294,7 +302,7 @@ export default function MashallahTemplate(props) {
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.COBALT_D} bg={C.WHITE} frame={{ borderRadius: 22, boxShadow: `0 0 0 4px ${C.COBALT}, 0 0 0 6px ${C.TURQ}` }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
             </Panel>
           )}
 
@@ -306,7 +314,7 @@ export default function MashallahTemplate(props) {
                 font: body, display: head, btnFont: body,
                 doneMark: <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><Nazar size={48} /></div>,
                 marker: (a) => (a ? <Nazar size={16} /> : <span style={{ display: 'block', width: 14, height: 14, borderRadius: '50%', border: `1.5px solid ${alpha(C.COBALT, 0.4)}` }} />),
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -314,7 +322,7 @@ export default function MashallahTemplate(props) {
           {/* ARZULAR */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={field} btn={(on) => ({ ...btn(on), background: on ? C.GOLD : C.WHITE, color: C.COBALT_D, border: `1.5px solid ${C.GOLD}` })} errorColor={C.GOLD_L} />
+              <GuestbookForm inv={inv} field={field(C)} btn={(on) => ({ ...btn(C)(on), background: on ? C.GOLD : C.WHITE, color: C.COBALT_D, border: `1.5px solid ${C.GOLD}` })} errorColor={C.GOLD_L} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
@@ -335,11 +343,12 @@ export default function MashallahTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 
 function MapPin() {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
       <span style={{ position: 'absolute', left: -20, top: -48, animation: 'mh-float 3s ease-in-out infinite' }}><Nazar size={40} /></span>

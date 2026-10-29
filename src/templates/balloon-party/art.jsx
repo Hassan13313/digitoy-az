@@ -3,7 +3,8 @@
    Parlaq şarlar (adi və folqa), şar girləndi, konfetti fonu, konfet
    bankası, saqqız avtomatı, şam. Hamısı aria-hidden.
    ───────────────────────────────────────────────────────────────────────── */
-import { C, DOTS } from './palette'
+import { C as PAL, DOTS } from './palette'
+import { usePalette } from '../_shared/palette'
 
 const BALLOON = 'M0 -36C18 -36 28 -20 28 -4C28 16 12 30 2 33L4.5 38H-4.5L-2 33C-12 30 -28 16 -28 -4C-28 -20 -18 -36 0 -36Z'
 
@@ -15,7 +16,9 @@ function shade(hex, k) {
 }
 
 /** Bir şar: `color` — hex, 'gold' və ya 'rose' (folqa) */
-export function Balloon({ size = 60, color = C.PINK, string = 60, stringBend = 6, style, id }) {
+export function Balloon($p) {
+  const C = usePalette(PAL)
+  const { size = 60, color = C.PINK, string = 60, stringBend = 6, style, id } = $p
   const key = id || `bp-b-${String(color).replace('#', '')}`
   const foil = color === 'gold' || color === 'rose'
   const stops = color === 'gold'
@@ -43,9 +46,10 @@ export function Balloon({ size = 60, color = C.PINK, string = 60, stringBend = 6
 
 /** Fon konfettisi */
 export function Confetti({ opacity = 0.6, count = 26 }) {
+  const C = usePalette(PAL)
   return (
     <div aria-hidden="true" style={{ position: 'absolute', inset: 0, opacity, overflow: 'hidden' }}>
-      {DOTS.slice(0, count).map((d, i) => (
+      {DOTS(C).slice(0, count).map((d, i) => (
         <span key={i} style={{ position: 'absolute', left: `${d.x}%`, top: `${d.y}%`, width: d.s, height: d.sq ? d.s * 0.5 : d.s, borderRadius: d.sq ? 2 : '50%', background: d.c, transform: `rotate(${d.rot}deg)` }} />
       ))}
     </div>
@@ -88,7 +92,9 @@ export function Garland({ style }) {
 }
 
 /** Konfet bankası — sayğac (ortada etiket) */
-export function CandyJar({ candies = ['#EF8FA8', '#7FC8B0', '#FFE495'], lid = C.PINK_D, children }) {
+export function CandyJar($p) {
+  const C = usePalette(PAL)
+  const { candies = ['#EF8FA8', C.MINT_D, '#FFE495'], lid = C.PINK_D, children } = $p
   const dots = []
   for (let i = 0; i < 26; i++) {
     const row = Math.floor(i / 6)
@@ -100,7 +106,7 @@ export function CandyJar({ candies = ['#EF8FA8', '#7FC8B0', '#FFE495'], lid = C.
       <svg viewBox="0 0 80 104" width="100%" aria-hidden="true" style={{ display: 'block', overflow: 'visible' }}>
         <ellipse cx="40" cy="101" rx="34" ry="4" fill="#000" opacity=".08" />
         <rect x="18" y="4" width="44" height="12" rx="4" fill={lid} />
-        <rect x="14" y="13" width="52" height="7" rx="3" fill={shade(lid.startsWith('#') ? lid : '#C9577C', 0.85)} />
+        <rect x="14" y="13" width="52" height="7" rx="3" fill={shade(lid.startsWith('#') ? lid : C.PINK_D, 0.85)} />
         <path d="M14 22C6 30 6 44 6 56V90C6 98 12 100 18 100H62C68 100 74 98 74 90V56C74 44 74 30 66 22Z" fill="rgba(255,255,255,.55)" stroke="rgba(74,48,70,.18)" strokeWidth="1.2" />
         {dots.map((d, i) => <circle key={i} cx={d.x} cy={d.y} r="4.6" fill={d.c} />)}
         <path d="M14 30C10 40 10 56 10 70" stroke="#FFFFFF" strokeWidth="4" strokeLinecap="round" opacity=".7" fill="none" />
@@ -112,7 +118,8 @@ export function CandyJar({ candies = ['#EF8FA8', '#7FC8B0', '#FFE495'], lid = C.
 
 /** Saqqız avtomatı — masa nömrəsi saqqız topunda düşür */
 export function GumballMachine({ width = 200, children }) {
-  const balls = [[-26, -10, '#EF8FA8'], [-8, -22, '#FFE495'], [12, -14, '#7FC8B0'], [28, -2, '#D6C5F3'], [-18, 10, '#BFDCF6'], [4, 4, '#F6C3CF'], [22, 18, '#EF8FA8'], [-30, 18, '#FFE495'], [-4, 22, '#D6C5F3'], [10, -32, '#BFDCF6'], [-24, -30, '#7FC8B0']]
+  const C = usePalette(PAL)
+  const balls = [[-26, -10, '#EF8FA8'], [-8, -22, '#FFE495'], [12, -14, C.MINT_D], [28, -2, '#D6C5F3'], [-18, 10, '#BFDCF6'], [4, 4, '#F6C3CF'], [22, 18, '#EF8FA8'], [-30, 18, '#FFE495'], [-4, 22, '#D6C5F3'], [10, -32, '#BFDCF6'], [-24, -30, C.MINT_D]]
   return (
     <div style={{ position: 'relative', width, margin: '0 auto' }}>
       <svg viewBox="-60 -70 120 170" width={width} height={width * 1.42} aria-hidden="true" style={{ display: 'block', overflow: 'visible' }}>
@@ -138,7 +145,9 @@ export function GumballMachine({ width = 200, children }) {
 }
 
 /** Şam (proqram tortunun üstündə) */
-export function Candle({ color = C.MINT_D, h = 30 }) {
+export function Candle($p) {
+  const C = usePalette(PAL)
+  const { color = C.MINT_D, h = 30 } = $p
   return (
     <svg viewBox={`-8 -22 16 ${h + 24}`} width="14" height={(h + 24) * 0.875} aria-hidden="true" style={{ display: 'block', overflow: 'visible' }}>
       <path d="M0 -20C4 -14 5 -8 0 -4C-5 -8 -4 -14 0 -20Z" fill="#FFB347" style={{ transformOrigin: '0px -4px', animation: 'bp-flame .4s ease-in-out infinite alternate' }} />

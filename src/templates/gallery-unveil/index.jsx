@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C, GOLD_GRAD, WALL_BG, CHAR_BG, nameSize } from './palette'
+import { C as PAL, GOLD_GRAD, WALL_BG, CHAR_BG, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Artwork, GildedFrame, VelvetCloth, MuseumLabel } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    GALLERY UNVEIL — «Pərdə açılır» (Açılış konsepti, 2026-10)
@@ -28,7 +29,11 @@ import { Artwork, GildedFrame, VelvetCloth, MuseumLabel } from './art'
 const BASE = getTemplateTheme('gallery-unveil')
 const ID = 'gallery-unveil'
 
-const KEYFRAMES = `
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['PLUM'], secondary: ['INK'], accent: ['GOLD'], background: ['WALL'], text: ['INK'] }
+
+const KEYFRAMES = (C) => (`
 @keyframes gu-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes gu-fade { from { opacity: 0 } to { opacity: 1 } }
 @keyframes gu-hint { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
@@ -38,10 +43,11 @@ const KEYFRAMES = `
 [data-gu] input:focus-visible, [data-gu] textarea:focus-visible { border-color: ${C.PLUM} !important; outline: none; }
 [data-gu] button:focus-visible, [data-gu] a:focus-visible, [data-gu] [role="button"]:focus-visible { outline: 2px solid ${C.PLUM}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-gu] *, [data-gu] { animation: none !important; transition: none !important; } }
-`
+`)
 
 /* ═══ 01 — AÇILIŞ: örtük düşür ═══ */
 function UnveilOpening({ inv, theme }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -90,13 +96,14 @@ function UnveilOpening({ inv, theme }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, dark = false }) {
+  const C = usePalette(PAL)
   return (
     <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '68px 20px 74px', overflow: 'hidden', background: dark ? CHAR_BG : WALL_BG, color: dark ? C.WALL_L : C.INK }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ marginBottom: 32, textAlign: 'left', borderLeft: `2px solid ${dark ? C.GOLD : C.PLUM}`, paddingLeft: 16 }}>
             {kicker && <div style={{ marginBottom: 6, fontSize: 11.5, fontWeight: 500, letterSpacing: '.3em', textTransform: 'uppercase', color: dark ? C.GOLD_L : C.MUTED }}>{kicker}</div>}
-            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 300, fontSize: 'clamp(32px, 9.4vw, 44px)', lineHeight: 1.08, textWrap: 'balance', color: dark ? C.WALL_L : C.INK }}>{title}</h2>}
+            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 300, fontSize: scaleFont('clamp(32px, 9.4vw, 44px)', C.hs), lineHeight: 1.08, textWrap: 'balance', color: dark ? C.WALL_L : C.INK }}>{title}</h2>}
             {sub && <p style={{ margin: '10px 0 0', maxWidth: 360, fontSize: 15.5, color: dark ? alpha(C.WALL_L, 0.68) : C.MUTED, lineHeight: 1.6 }}>{sub}</p>}
           </div>
         )}
@@ -106,23 +113,24 @@ function Panel({ id, section, title, kicker, sub, children, head, dark = false }
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: '#FFFFFF', border: `1px solid ${C.LINE}`, borderRadius: 0,
   padding: '14px 16px', fontSize: 16, color: C.INK, outline: 'none',
-}
-const darkField = { ...field, background: alpha('#FFFFFF', 0.05), border: `1px solid ${alpha(C.WALL_L, 0.2)}`, color: C.WALL_L }
-const btn = (on) => ({
+})
+const darkField = (C) => ({ ...field(C), background: alpha('#FFFFFF', 0.05), border: `1px solid ${alpha(C.WALL_L, 0.2)}`, color: C.WALL_L })
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 24px', borderRadius: 0,
   fontSize: 13.5, fontWeight: 500, letterSpacing: '.16em', textTransform: 'uppercase', textDecoration: 'none', cursor: 'pointer',
   background: on ? C.INK : 'transparent', color: on ? C.WALL_L : C.INK, border: `1px solid ${C.INK}`,
-})
-const darkBtn = (on) => ({ ...btn(on), background: on ? C.WALL_L : 'transparent', color: on ? C.INK : C.WALL_L, border: `1px solid ${on ? C.WALL_L : alpha(C.WALL_L, 0.45)}` })
-const suggest = { bg: '#FFFFFF', border: `1px solid ${C.LINE}`, active: alpha(C.PLUM, 0.08), text: C.INK, table: C.PLUM, radius: 0 }
+}))
+const darkBtn = (C) => ((on) => ({ ...btn(C)(on), background: on ? C.WALL_L : 'transparent', color: on ? C.INK : C.WALL_L, border: `1px solid ${on ? C.WALL_L : alpha(C.WALL_L, 0.45)}` }))
+const suggest = (C) => ({ bg: '#FFFFFF', border: `1px solid ${C.LINE}`, active: alpha(C.PLUM, 0.08), text: C.INK, table: C.PLUM, radius: 0 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function GalleryUnveilTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -131,11 +139,11 @@ export default function GalleryUnveilTemplate(props) {
   const year = inv.dp?.year || ''
 
   return (
-    <div data-gu lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-gu lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.WALL, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.GOLD, 0.35),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <UnveilOpening inv={inv} theme={theme} lang={lang} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: 0, background: C.INK, boxShadow: '0 8px 20px rgba(0,0,0,.3)' }}>
@@ -199,7 +207,7 @@ export default function GalleryUnveilTemplate(props) {
           {/* MƏKAN */}
           {S.venue && (
             <Panel section="venue" head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
-              <div style={{ maxWidth: 430, margin: '0 auto', padding: 8, background: GOLD_GRAD }}>
+              <div style={{ maxWidth: 430, margin: '0 auto', padding: 8, background: GOLD_GRAD(C) }}>
                 <div style={{ padding: 10, background: '#FBFAF7' }}>
                   <div style={{ overflow: 'hidden', isolation: 'isolate' }}>
                     <MapSection
@@ -213,7 +221,7 @@ export default function GalleryUnveilTemplate(props) {
               </div>
               <div style={{ marginTop: 24, fontFamily: head, fontWeight: 300, fontSize: 26, lineHeight: 1.2, color: C.WALL_L }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ marginTop: 4, fontFamily: head, fontStyle: 'italic', fontSize: 17, color: C.GOLD_L }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn(C)} />
             </Panel>
           )}
 
@@ -242,7 +250,7 @@ export default function GalleryUnveilTemplate(props) {
           {/* MASA — muzey etiketi */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="gu-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.PLUM}
+              <SeatFinder inv={inv} tr={tr} listId="gu-seat-list" field={field(C)} suggest={suggest(C)} font={body} muted={C.MUTED} accent={C.PLUM}
                 nameStyle={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
                 card={(num) => (
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.2fr)', gap: 16, alignItems: 'end', maxWidth: 380, margin: '22px auto 0' }}>
@@ -264,14 +272,14 @@ export default function GalleryUnveilTemplate(props) {
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12, marginBottom: 34, alignItems: 'start' }}>
                   {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ gridColumn: ['1 / 5', '5 / 7', '1 / 3', '3 / 7', '1 / 4', '4 / 7'][i % 6], aspectRatio: ['4 / 3', '3 / 4', '3 / 4', '4 / 3', '1', '1'][i % 6], padding: i % 2 ? 4 : 6, background: i % 2 ? C.INK : GOLD_GRAD, boxShadow: '0 12px 18px -12px rgba(0,0,0,.45)' }}>
+                    <div key={i} style={{ gridColumn: ['1 / 5', '5 / 7', '1 / 3', '3 / 7', '1 / 4', '4 / 7'][i % 6], aspectRatio: ['4 / 3', '3 / 4', '3 / 4', '4 / 3', '1', '1'][i % 6], padding: i % 2 ? 4 : 6, background: i % 2 ? C.INK : GOLD_GRAD(C), boxShadow: '0 12px 18px -12px rgba(0,0,0,.45)' }}>
                       <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                     </div>
                   ))}
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.INK} bg="#FFFFFF" frame={{ borderRadius: 0, padding: 10, boxShadow: '0 12px 18px -12px rgba(0,0,0,.4)' }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'event')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'event')} />
             </Panel>
           )}
 
@@ -283,7 +291,7 @@ export default function GalleryUnveilTemplate(props) {
                 font: body, display: head, displayItalic: true, btnFont: body,
                 doneMark: <div style={{ width: 70, margin: '0 auto 12px' }}><GildedFrame aspect="1" mat="8%"><Artwork /></GildedFrame></div>,
                 marker: (a) => <span style={{ display: 'block', width: 14, height: 14, border: `1.5px solid ${a ? C.PLUM : C.LINE}`, background: a ? C.PLUM : 'transparent', boxShadow: a ? 'inset 0 0 0 2.5px #FFFFFF' : 'none' }} />,
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -291,7 +299,7 @@ export default function GalleryUnveilTemplate(props) {
           {/* ZİYARƏTÇİ DƏFTƏRİ */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.GOLD_L} />
+              <GuestbookForm inv={inv} field={darkField(C)} btn={darkBtn(C)} errorColor={C.GOLD_L} />
               <div style={{ display: 'grid', gap: 0 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
@@ -311,11 +319,12 @@ export default function GalleryUnveilTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 
 function MapPin() {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
       <span style={{ position: 'absolute', left: -14, top: -14, width: 28, height: 28, borderRadius: '50%', background: C.PLUM, boxShadow: '0 0 0 4px #FFFFFF, 0 6px 10px rgba(0,0,0,.35)' }} />

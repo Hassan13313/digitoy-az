@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C, CREAM_BG, GREEN_BG, COPPER_GRAD, nameSize } from './palette'
+import { C as PAL, CREAM_BG, GREEN_BG, COPPER_GRAD, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Egg, Semeni, Tray, Sprout } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    NOVRUZ SƏMƏNİ — «Bahar xonçası» (Bayram gecələri konsepti, 2026-10)
@@ -27,7 +28,11 @@ import { Egg, Semeni, Tray, Sprout } from './art'
 const BASE = getTemplateTheme('novruz-semeni')
 const ID = 'novruz-semeni'
 
-const KEYFRAMES = `
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['GREEN'], secondary: ['COPPER'], accent: ['RED'], background: ['CREAM'], text: ['INK'] }
+
+const KEYFRAMES = (C) => (`
 @keyframes ns-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes ns-fade { from { opacity: 0 } to { opacity: 1 } }
 @keyframes ns-hint { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
@@ -39,7 +44,7 @@ const KEYFRAMES = `
 [data-ns] input:focus-visible, [data-ns] textarea:focus-visible { border-color: ${C.GREEN} !important; outline: none; }
 [data-ns] button:focus-visible, [data-ns] a:focus-visible, [data-ns] [role="button"]:focus-visible { outline: 2px solid ${C.RED}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-ns] *, [data-ns] { animation: none !important; transition: none !important; } }
-`
+`)
 
 const EGG_POS = [
   { left: '2%', bottom: '6%', r: -14, s: 46, d: 0.45 },
@@ -65,6 +70,7 @@ function Xoncha({ grown, instant, width = 'min(80vw, 320px)', eggsIn = true }) {
 
 /* ═══ 01 — AÇILIŞ: səməni boy atır ═══ */
 function SemeniOpening({ inv, theme }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -75,7 +81,7 @@ function SemeniOpening({ inv, theme }) {
     <motion.div {...gate.gateProps} data-ns
       animate={go ? { opacity: 0 } : {}}
       transition={{ duration: 0.4, delay: 1.75 }}
-      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: CREAM_BG, color: C.INK, fontFamily: theme.fonts.body }}>
+      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: CREAM_BG(C), color: C.INK, fontFamily: theme.fonts.body }}>
       {go && [[18, -30], [40, 20], [62, -10], [80, 30], [30, 40]].map(([x, dx], i) => (
         <span key={i} aria-hidden="true" style={{ position: 'absolute', left: `${x}%`, top: '62%', width: 12, height: 8, borderRadius: '50% 0', background: i % 2 ? C.SPROUT : '#F6A5B6', '--dx': `${dx}px`, animation: `ns-petal 1.8s ease-out ${0.5 + i * 0.12}s both` }} />
       ))}
@@ -116,8 +122,9 @@ function SemeniOpening({ inv, theme }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, dark = false }) {
+  const C = usePalette(PAL)
   return (
-    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? GREEN_BG : CREAM_BG, color: dark ? C.CREAM : C.INK }}>
+    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? GREEN_BG(C) : CREAM_BG(C), color: dark ? C.CREAM : C.INK }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
@@ -125,7 +132,7 @@ function Panel({ id, section, title, kicker, sub, children, head, dark = false }
               <Sprout size={22} /><Sprout size={28} /><Sprout size={22} />
             </div>
             {kicker && <div style={{ marginBottom: 4, fontWeight: 700, fontSize: 13, letterSpacing: '.2em', textTransform: 'uppercase', color: dark ? C.SPROUT_L : C.RED }}>{kicker}</div>}
-            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 700, fontSize: 'clamp(30px, 8.8vw, 41px)', lineHeight: 1.1, textWrap: 'balance', color: dark ? C.CREAM : C.GREEN_D }}>{title}</h2>}
+            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 700, fontSize: scaleFont('clamp(30px, 8.8vw, 41px)', C.hs), lineHeight: 1.1, textWrap: 'balance', color: dark ? C.CREAM : C.GREEN_D }}>{title}</h2>}
             {sub && <p style={{ margin: '10px auto 0', maxWidth: 340, fontSize: 16.5, color: dark ? alpha(C.CREAM, 0.78) : C.MUTED, lineHeight: 1.55 }}>{sub}</p>}
           </div>
         )}
@@ -135,23 +142,24 @@ function Panel({ id, section, title, kicker, sub, children, head, dark = false }
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: '#FFFFFF', border: `1.5px solid ${C.LINE}`, borderRadius: 14,
   padding: '14px 16px', fontSize: 16.5, color: C.INK, outline: 'none',
-}
-const darkField = { ...field, background: alpha('#FFFFFF', 0.12), border: `1.5px solid ${alpha(C.CREAM, 0.35)}`, color: C.CREAM }
-const btn = (on) => ({
+})
+const darkField = (C) => ({ ...field(C), background: alpha('#FFFFFF', 0.12), border: `1.5px solid ${alpha(C.CREAM, 0.35)}`, color: C.CREAM })
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 24px', borderRadius: 999,
   fontSize: 16, fontWeight: 700, textDecoration: 'none', cursor: 'pointer',
   background: on ? C.GREEN : '#FFFFFF', color: on ? C.CREAM : C.GREEN_D, border: `1.5px solid ${on ? C.GREEN : C.LINE}`,
-})
-const darkBtn = (on) => ({ ...btn(on), background: on ? C.CREAM : 'transparent', color: on ? C.GREEN_D : C.CREAM, border: `1.5px solid ${on ? C.CREAM : alpha(C.CREAM, 0.5)}` })
-const suggest = { bg: '#FFFFFF', border: `1.5px solid ${C.LINE}`, active: alpha(C.SPROUT, 0.25), text: C.INK, table: C.RED, radius: 14 }
+}))
+const darkBtn = (C) => ((on) => ({ ...btn(C)(on), background: on ? C.CREAM : 'transparent', color: on ? C.GREEN_D : C.CREAM, border: `1.5px solid ${on ? C.CREAM : alpha(C.CREAM, 0.5)}` }))
+const suggest = (C) => ({ bg: '#FFFFFF', border: `1.5px solid ${C.LINE}`, active: alpha(C.SPROUT, 0.25), text: C.INK, table: C.RED, radius: 14 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function NovruzSemeniTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -159,11 +167,11 @@ export default function NovruzSemeniTemplate(props) {
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
-    <div data-ns lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-ns lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.CREAM, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.SPROUT, 0.45),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <SemeniOpening inv={inv} theme={theme} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.GREEN, border: `2px solid ${C.CREAM}`, boxShadow: `0 0 0 2px ${C.RED}, 0 8px 18px rgba(43,106,31,.4)` }}>
@@ -186,7 +194,7 @@ export default function NovruzSemeniTemplate(props) {
           </header>
 
           {/* HERO — xonça */}
-          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: CREAM_BG, padding: '30px 22px 64px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: CREAM_BG(C), padding: '30px 22px 64px', textAlign: 'center' }}>
             <div style={{ display: 'flex', justifyContent: 'center' }}><Xoncha grown instant width="min(78vw, 310px)" /></div>
             <div style={{ marginTop: 22, fontWeight: 700, fontSize: 14, letterSpacing: '.2em', textTransform: 'uppercase', color: C.RED }}>{L('hero', 'kicker', T.fest)}</div>
             <h1 style={{ margin: '8px 0 0', fontFamily: head, fontWeight: 700, fontSize: nameSize(heroName), lineHeight: 1.05, overflowWrap: 'anywhere', color: C.GREEN_D, animation: 'ns-rise 1s ease-out .2s both' }}>{heroName}</h1>
@@ -218,19 +226,19 @@ export default function NovruzSemeniTemplate(props) {
           {/* MƏKAN */}
           {S.venue && (
             <Panel section="venue" head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
-              <div style={{ maxWidth: 430, margin: '0 auto', padding: 6, borderRadius: 26, background: COPPER_GRAD, boxShadow: '0 22px 34px -22px rgba(36,51,28,.6)' }}>
+              <div style={{ maxWidth: 430, margin: '0 auto', padding: 6, borderRadius: 26, background: COPPER_GRAD(C), boxShadow: '0 22px 34px -22px rgba(36,51,28,.6)' }}>
                 <div style={{ borderRadius: 20, overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
                     weddingData={weddingData} theme={theme} accent={C.RED} height="clamp(240px, 66vw, 300px)"
                     map={{ opacity: 0.92, filter: 'saturate(.9)', tintOpacity: 0.1, tint: C.SPROUT, blend: 'multiply' }}
                     frame={<MapPin />}
-                    fallback={<div style={{ height: 'clamp(240px, 66vw, 300px)', position: 'relative', background: CREAM_BG }}><MapPin /></div>}
+                    fallback={<div style={{ height: 'clamp(240px, 66vw, 300px)', position: 'relative', background: CREAM_BG(C) }}><MapPin /></div>}
                   />
                 </div>
               </div>
               <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontWeight: 700, fontSize: 26, lineHeight: 1.2, color: C.GREEN_D }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 6, fontSize: 16, color: C.MUTED }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn(C)} />
             </Panel>
           )}
 
@@ -259,7 +267,7 @@ export default function NovruzSemeniTemplate(props) {
           {/* MASA — böyük yumurta */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="ns-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.CREAM, 0.78)} accent={C.CREAM}
+              <SeatFinder inv={inv} tr={tr} listId="ns-seat-list" field={darkField(C)} suggest={suggest(C)} font={body} muted={alpha(C.CREAM, 0.78)} accent={C.CREAM}
                 nameStyle={{ fontFamily: head, fontWeight: 700, fontSize: 26, color: C.CREAM }}
                 card={(num) => (
                   <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 20 }}>
@@ -287,7 +295,7 @@ export default function NovruzSemeniTemplate(props) {
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.GREEN_D} bg="#FFFFFF" frame={{ borderRadius: 18, border: `2px solid ${C.SPROUT}` }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
             </Panel>
           )}
 
@@ -299,7 +307,7 @@ export default function NovruzSemeniTemplate(props) {
                 font: body, display: head, displayItalic: false, btnFont: head,
                 doneMark: <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><Egg size={46} i={1} /></div>,
                 marker: (a) => (a ? <Sprout size={18} /> : <span style={{ display: 'block', width: 15, height: 15, borderRadius: '50%', border: `2px solid ${C.LINE}` }} />),
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -307,7 +315,7 @@ export default function NovruzSemeniTemplate(props) {
           {/* TƏBRİKLƏR */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.SPROUT_L} />
+              <GuestbookForm inv={inv} field={darkField(C)} btn={darkBtn(C)} errorColor={C.SPROUT_L} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
@@ -328,7 +336,7 @@ export default function NovruzSemeniTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 

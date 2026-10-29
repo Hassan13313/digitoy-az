@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C, GLOW, GRID_BG, nameSize } from './palette'
+import { C as PAL, GLOW, GRID_BG, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Screen, LiveDot, Beams, Badge } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    KEYNOTE — «Konfrans səhnəsi» (Korporativ konsepti, 2026-10)
@@ -30,9 +31,13 @@ import { Screen, LiveDot, Beams, Badge } from './art'
 
 const BASE = getTemplateTheme('keynote')
 const ID = 'keynote'
+
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['BLUE'], secondary: ['VIOLET'], accent: ['CYAN'], background: ['VOID'], text: ['WHITE'] }
 const MONO = "'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace"
 
-const KEYFRAMES = `
+const KEYFRAMES = (C) => (`
 @keyframes kn-live { 0%,100% { opacity: 1 } 50% { opacity: .3 } }
 @keyframes kn-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes kn-fade { from { opacity: 0 } to { opacity: 1 } }
@@ -44,12 +49,13 @@ const KEYFRAMES = `
 [data-kn] input:focus-visible, [data-kn] textarea:focus-visible { border-color: ${C.CYAN} !important; outline: none; }
 [data-kn] button:focus-visible, [data-kn] a:focus-visible, [data-kn] [role="button"]:focus-visible { outline: 2px solid ${C.CYAN}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-kn] *, [data-kn] { animation: none !important; transition: none !important; } }
-`
+`)
 
-const gradText = { backgroundImage: GLOW, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' }
+const gradText = (C) => ({ backgroundImage: GLOW(C), WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' })
 
 /* ═══ 01 — AÇILIŞ: ekran yanır ═══ */
 function KeynoteOpening({ inv, theme, T }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -60,14 +66,14 @@ function KeynoteOpening({ inv, theme, T }) {
     <motion.div {...gate.gateProps} data-kn
       animate={go ? { opacity: 0 } : {}}
       transition={{ duration: 0.4, delay: 1.7 }}
-      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: GRID_BG, color: C.WHITE, fontFamily: theme.fonts.body }}>
+      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: GRID_BG(C), color: C.WHITE, fontFamily: theme.fonts.body }}>
       <Beams on={go} />
       <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 18px', textAlign: 'center' }}>
         <div style={{ marginBottom: 18, animation: 'kn-rise .9s ease-out .2s both' }}><LiveDot label={T.live} font={MONO} /></div>
         <div style={{ width: 'min(92vw, 420px)' }}>
           <Screen on={go}>
             <EmblemSlot mono={ot.mono} size={44} border={`1px solid ${alpha(C.WHITE, 0.3)}`} background="transparent" color={C.WHITE} font={head} style={{ animation: 'none', margin: '0 auto 10px' }}>
-              <span style={{ display: 'block', width: 26, height: 26, margin: '0 auto', borderRadius: 8, background: GLOW, opacity: go ? 1 : 0.4, transition: 'opacity .4s ease .6s' }} />
+              <span style={{ display: 'block', width: 26, height: 26, margin: '0 auto', borderRadius: 8, background: GLOW(C), opacity: go ? 1 : 0.4, transition: 'opacity .4s ease .6s' }} />
             </EmblemSlot>
             {ot.show('kicker') && <div style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '.24em', textTransform: 'uppercase', color: go ? alpha(C.WHITE, 0.8) : C.FAINT, transition: 'color .4s ease .6s' }}>{ot.text('kicker')}</div>}
             {titleOv !== '' && (
@@ -95,14 +101,15 @@ function KeynoteOpening({ inv, theme, T }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, index, alt = false }) {
+  const C = usePalette(PAL)
   return (
-    <section id={id} data-section={section} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: alt ? C.NAVY : GRID_BG, color: C.WHITE, borderTop: `1px solid ${C.LINE}` }}>
+    <section id={id} data-section={section} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: alt ? C.NAVY : GRID_BG(C), color: C.WHITE, borderTop: `1px solid ${C.LINE}` }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ marginBottom: 30 }}>
             {index && <div style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '.2em', color: C.CYAN }}>{index}</div>}
-            {title && <h2 style={{ margin: '8px 0 0', fontFamily: head, fontWeight: 300, fontSize: 'clamp(32px, 9.4vw, 44px)', lineHeight: 1.05, letterSpacing: '-.02em', color: C.WHITE, textWrap: 'balance' }}>{title}</h2>}
-            <div aria-hidden="true" style={{ width: 56, height: 3, marginTop: 14, borderRadius: 3, background: GLOW }} />
+            {title && <h2 style={{ margin: '8px 0 0', fontFamily: head, fontWeight: 300, fontSize: scaleFont('clamp(32px, 9.4vw, 44px)', C.hs), lineHeight: 1.05, letterSpacing: '-.02em', color: C.WHITE, textWrap: 'balance' }}>{title}</h2>}
+            <div aria-hidden="true" style={{ width: 56, height: 3, marginTop: 14, borderRadius: 3, background: GLOW(C) }} />
             {kicker && <div style={{ marginTop: 12, fontSize: 15.5, color: C.MUTED }}>{kicker}</div>}
             {sub && <p style={{ margin: '8px 0 0', maxWidth: 360, fontSize: 15.5, color: C.MUTED, lineHeight: 1.6 }}>{sub}</p>}
           </div>
@@ -113,21 +120,22 @@ function Panel({ id, section, title, kicker, sub, children, head, index, alt = f
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: C.PANEL, border: `1px solid ${C.LINE}`, borderRadius: 12,
   padding: '14px 16px', fontSize: 16, color: C.WHITE, outline: 'none',
-}
-const btn = (on) => ({
+})
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 22px', borderRadius: 999,
   fontSize: 15, fontWeight: 500, textDecoration: 'none', cursor: 'pointer',
   background: on ? C.WHITE : 'transparent', color: on ? C.VOID : C.WHITE, border: `1px solid ${on ? C.WHITE : C.LINE}`,
-})
-const suggest = { bg: C.PANEL_L, border: `1px solid ${C.LINE}`, active: alpha(C.BLUE, 0.25), text: C.WHITE, table: C.CYAN, radius: 12 }
+}))
+const suggest = (C) => ({ bg: C.PANEL_L, border: `1px solid ${C.LINE}`, active: alpha(C.BLUE, 0.25), text: C.WHITE, table: C.CYAN, radius: 12 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function KeynoteTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -138,14 +146,14 @@ export default function KeynoteTemplate(props) {
   const idx = () => String(++n).padStart(2, '0')
 
   return (
-    <div data-kn lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-kn lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.VOID, minHeight: '100vh', fontFamily: body, color: C.WHITE, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.BLUE, 0.35),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <KeynoteOpening inv={inv} theme={theme} T={T} />}
 
-      <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: 14, background: GLOW, boxShadow: '0 8px 24px rgba(61,123,255,.45)' }}>
+      <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: 14, background: GLOW(C), boxShadow: '0 8px 24px rgba(61,123,255,.45)' }}>
         {({ playing }) => <EqBars playing={playing} color={C.WHITE} idle={alpha(C.WHITE, 0.45)} />}
       </MusicFab>
 
@@ -160,12 +168,12 @@ export default function KeynoteTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 500, fontSize: 17, letterSpacing: '-.01em', ...gradText }}>{T.brand}</div>
+            <div style={{ fontFamily: head, fontWeight: 500, fontSize: 17, letterSpacing: '-.01em', ...gradText(C) }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — ekran */}
-          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: GRID_BG, padding: '40px 18px 56px' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: GRID_BG(C), padding: '40px 18px 56px' }}>
             <Beams instant />
             <div style={{ position: 'relative', maxWidth: 460, margin: '0 auto' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
@@ -209,19 +217,19 @@ export default function KeynoteTemplate(props) {
           {/* MƏKAN */}
           {S.venue && (
             <Panel section="venue" head={head} index={idx()} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
-              <div style={{ padding: 3, borderRadius: 18, background: GLOW, boxShadow: '0 0 50px -16px rgba(61,123,255,.6)' }}>
+              <div style={{ padding: 3, borderRadius: 18, background: GLOW(C), boxShadow: '0 0 50px -16px rgba(61,123,255,.6)' }}>
                 <div style={{ borderRadius: 15, overflow: 'hidden', isolation: 'isolate', background: C.NAVY }}>
                   <MapSection
                     weddingData={weddingData} theme={theme} accent={C.BLUE} height="clamp(250px, 70vw, 320px)"
                     map={{ opacity: 0.75, filter: 'invert(.92) hue-rotate(185deg) saturate(.7) brightness(.9)', tintOpacity: 0.18, tint: C.BLUE, blend: 'multiply' }}
                     frame={<MapPin />}
-                    fallback={<div style={{ height: 'clamp(250px, 70vw, 320px)', position: 'relative', background: GRID_BG }}><MapPin /></div>}
+                    fallback={<div style={{ height: 'clamp(250px, 70vw, 320px)', position: 'relative', background: GRID_BG(C) }}><MapPin /></div>}
                   />
                 </div>
               </div>
               <div style={{ marginTop: 22, fontFamily: head, fontWeight: 400, fontSize: 25, lineHeight: 1.2 }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ marginTop: 4, fontFamily: MONO, fontSize: 12, letterSpacing: '.14em', textTransform: 'uppercase', color: C.FAINT }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn} style={{ justifyContent: 'flex-start' }} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn(C)} style={{ justifyContent: 'flex-start' }} />
             </Panel>
           )}
 
@@ -250,13 +258,13 @@ export default function KeynoteTemplate(props) {
           {/* MASA — konfrans bəyi */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} alt index={idx()} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="kn-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.CYAN}
+              <SeatFinder inv={inv} tr={tr} listId="kn-seat-list" field={field(C)} suggest={suggest(C)} font={body} muted={C.MUTED} accent={C.CYAN}
                 nameStyle={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
                 card={(num) => (
                   <Badge name={seating.selected?.full_name} role={T.guest} head={head} mono={MONO} style={{ transformOrigin: '50% 0', animation: 'kn-swing .9s cubic-bezier(.3,.8,.4,1) both' }}>
                     <div style={{ marginTop: 14, padding: '10px 0 2px', borderTop: `1px dashed ${alpha(C.VOID, 0.2)}` }}>
                       <div style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '.2em', textTransform: 'uppercase', color: C.FAINT }}>{T.table}</div>
-                      <div style={{ fontFamily: head, fontWeight: 500, fontSize: tableSize(num, 58), lineHeight: 1.05, ...gradText }}>{num}</div>
+                      <div style={{ fontFamily: head, fontWeight: 500, fontSize: tableSize(num, 58), lineHeight: 1.05, ...gradText(C) }}>{num}</div>
                     </div>
                   </Badge>
                 )} />
@@ -276,7 +284,7 @@ export default function KeynoteTemplate(props) {
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.VOID} bg={C.WHITE} frame={{ borderRadius: 16, boxShadow: '0 0 0 3px rgba(61,123,255,.6), 0 0 40px -10px rgba(34,211,238,.6)' }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'event')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'event')} />
             </Panel>
           )}
 
@@ -286,9 +294,9 @@ export default function KeynoteTemplate(props) {
               <ReplyForm inv={inv} t={{
                 ink: C.WHITE, muted: C.MUTED, line: C.LINE, hair: C.LINE, accent: C.CYAN,
                 font: body, display: head, btnFont: body,
-                doneMark: <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><span style={{ width: 40, height: 40, borderRadius: 12, background: GLOW }} /></div>,
-                marker: (a) => (a ? <span style={{ display: 'block', width: 14, height: 14, borderRadius: 4, background: GLOW }} /> : <span style={{ display: 'block', width: 14, height: 14, borderRadius: 4, border: `1px solid ${C.MUTED}` }} />),
-                suggest: { ...suggest, font: body },
+                doneMark: <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><span style={{ width: 40, height: 40, borderRadius: 12, background: GLOW(C) }} /></div>,
+                marker: (a) => (a ? <span style={{ display: 'block', width: 14, height: 14, borderRadius: 4, background: GLOW(C) }} /> : <span style={{ display: 'block', width: 14, height: 14, borderRadius: 4, border: `1px solid ${C.MUTED}` }} />),
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -296,14 +304,14 @@ export default function KeynoteTemplate(props) {
           {/* RƏYLƏR */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} index={idx()} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.CYAN} />
+              <GuestbookForm inv={inv} field={field(C)} btn={btn(C)} errorColor={C.CYAN} />
               <div style={{ display: 'grid', gap: 10 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
                   const ini = Array.from(String(msg.name || '?'))[0]
                   return (
                     <figure key={msg.name + i} style={{ margin: 0, display: 'grid', gridTemplateColumns: '38px minmax(0, 1fr)', gap: 12, padding: '16px 16px 14px', borderRadius: 16, background: C.PANEL, border: `1px solid ${C.LINE}` }}>
-                      <span aria-hidden="true" style={{ width: 38, height: 38, borderRadius: '50%', background: GLOW, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: head, fontWeight: 500, fontSize: 16, color: C.WHITE }}>{ini}</span>
+                      <span aria-hidden="true" style={{ width: 38, height: 38, borderRadius: '50%', background: GLOW(C), display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: head, fontWeight: 500, fontSize: 16, color: C.WHITE }}>{ini}</span>
                       <div>
                         <figcaption style={{ fontWeight: 500, fontSize: 15, color: C.WHITE }}>{msg.name}{msg.date ? <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: 11.5, color: C.FAINT }}> · {gbook.formatDate(msg.date)}</span> : null}</figcaption>
                         <blockquote style={{ margin: '4px 0 0', fontSize: 16, lineHeight: 1.55, color: C.MUTED }}>{msg.text}</blockquote>
@@ -318,15 +326,16 @@ export default function KeynoteTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 
 function MapPin() {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
       <span style={{ position: 'absolute', left: -22, top: -22, width: 44, height: 44, borderRadius: '50%', border: `2px solid ${C.CYAN}`, opacity: 0.6, animation: 'kn-live 1.6s ease-in-out infinite' }} />
-      <span style={{ position: 'absolute', left: -8, top: -8, width: 16, height: 16, borderRadius: '50%', background: GLOW, boxShadow: '0 0 16px rgba(34,211,238,.8)' }} />
+      <span style={{ position: 'absolute', left: -8, top: -8, width: 16, height: 16, borderRadius: '50%', background: GLOW(C), boxShadow: '0 0 16px rgba(34,211,238,.8)' }} />
     </span>
   )
 }

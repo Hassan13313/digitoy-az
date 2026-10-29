@@ -1,12 +1,14 @@
-import { C } from './palette'
+import { C as PAL } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* GENDER REVEAL — dekor */
 
-const TONE = { pink: [C.PINK_L, C.PINK, C.PINK_D], blue: [C.BLUE_L, C.BLUE, C.BLUE_D], gold: ['#FFF2C9', C.GOLD, C.GOLD_D] }
+const TONE = (C) => ({ pink: [C.PINK_L, C.PINK, C.PINK_D], blue: [C.BLUE_L, C.BLUE, C.BLUE_D], gold: ['#FFF2C9', C.GOLD, C.GOLD_D] })
 
 /** Şar */
 export function Balloon({ size = 50, tone = 'pink', string = 40, style }) {
-  const [l, m, d] = TONE[tone] || TONE.pink
+  const C = usePalette(PAL)
+  const [l, m, d] = TONE(C)[tone] || TONE(C).pink
   return (
     <span aria-hidden="true" style={{ position: 'relative', display: 'inline-block', width: size, height: size * 1.22 + string, ...style }}>
       <span style={{ position: 'absolute', left: 0, top: 0, width: size, height: size * 1.18, borderRadius: '50% 50% 48% 48% / 56% 56% 44% 44%', background: `radial-gradient(circle at 34% 28%, #FFFFFF 0 6%, ${l} 18%, ${m} 55%, ${d})` }} />
@@ -18,6 +20,7 @@ export function Balloon({ size = 50, tone = 'pink', string = 40, style }) {
 
 /** Hədiyyə qutusu — `open` qapağı atır */
 export function GiftBox({ width = 200, open = false, tag, style }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ position: 'relative', width, aspectRatio: '1 / 1', ...style }}>
       {/* gövdə */}
@@ -44,6 +47,7 @@ export function GiftBox({ width = 200, open = false, tag, style }) {
 
 /** Sual işarəsi (qızılı) */
 export function Question({ size = 60, style }) {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ display: 'inline-block', fontFamily: 'inherit', fontWeight: 800, fontSize: size, lineHeight: 1, color: C.GOLD, WebkitTextStroke: `${Math.max(1, size / 30)}px ${C.GOLD_D}`, textShadow: `0 ${size / 20}px 0 rgba(51,54,92,.15)`, ...style }}>?</span>
   )

@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C, NIGHT_BG, PAPER_BG, MACARONS, nameSize } from './palette'
+import { C as PAL, NIGHT_BG, PAPER_BG, MACARONS, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { EiffelTower, Macaron, HatBox, Bow, Awning, Postmark, Rooftops } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    PARIS NIGHT — «Paris gecəsi» (Qız gecəsi konsepti, 2026-10)
@@ -28,9 +29,13 @@ import { EiffelTower, Macaron, HatBox, Bow, Awning, Postmark, Rooftops } from '.
 
 const BASE = getTemplateTheme('paris-night')
 const ID = 'paris-night'
+
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['INK'], secondary: ['GOLD'], accent: ['ROSE'], background: ['PAPER'], text: ['INK'] }
 const SCRIPT = "'Comforter Brush', 'Caveat', cursive"
 
-const KEYFRAMES = `
+const KEYFRAMES = (C) => (`
 @keyframes pn-in { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes pn-fade { from { opacity: 0 } to { opacity: 1 } }
 @keyframes pn-hint { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
@@ -43,10 +48,11 @@ const KEYFRAMES = `
 [data-pn] input:focus-visible, [data-pn] textarea:focus-visible { border-color: ${C.ROSE} !important; outline: none; }
 [data-pn] button:focus-visible, [data-pn] a:focus-visible, [data-pn] [role="button"]:focus-visible { outline: 2px solid ${C.GOLD}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-pn] *, [data-pn] { animation: none !important; transition: none !important; } }
-`
+`)
 
 /* ═══ 01 — AÇILIŞ: şlyapa qutusu ═══ */
 function HatboxOpening({ inv, theme }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -57,7 +63,7 @@ function HatboxOpening({ inv, theme }) {
     <motion.div {...gate.gateProps} data-pn
       animate={go ? { opacity: 0 } : {}}
       transition={{ duration: 0.4, delay: 1.75 }}
-      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: NIGHT_BG, color: '#FFFFFF', fontFamily: theme.fonts.body }}>
+      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: NIGHT_BG(C), color: '#FFFFFF', fontFamily: theme.fonts.body }}>
       <div aria-hidden="true" style={{ position: 'absolute', right: '-9vw', bottom: 24, opacity: 0.7 }}>
         {go && <span style={{ position: 'absolute', left: '50%', top: 4, width: 0, height: 0, transformOrigin: '0 0', animation: 'pn-beam 3s ease-in-out infinite' }}><span style={{ position: 'absolute', left: -60, top: -520, width: 120, height: 520, background: 'linear-gradient(0deg, rgba(255,243,214,.28), transparent)', clipPath: 'polygon(48% 100%, 52% 100%, 100% 0, 0 0)' }} /></span>}
         <EiffelTower height="min(50vh, 400px)" sparkle={go} />
@@ -100,14 +106,15 @@ function HatboxOpening({ inv, theme }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, dark = false }) {
+  const C = usePalette(PAL)
   return (
-    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '62px 20px 70px', overflow: 'hidden', background: dark ? NIGHT_BG : PAPER_BG, color: dark ? C.BLUSH : C.INK }}>
+    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '62px 20px 70px', overflow: 'hidden', background: dark ? NIGHT_BG(C) : PAPER_BG(C), color: dark ? C.BLUSH : C.INK }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <EiffelTower height={46} glow={dark} color={dark ? C.GOLD : C.GOLD_D} style={{ margin: '0 auto 10px' }} />
             {kicker && <div style={{ fontFamily: SCRIPT, fontSize: 32, lineHeight: 1, color: dark ? C.ROSE : C.ROSE_D }}>{kicker}</div>}
-            {title && <h2 style={{ margin: '4px 0 0', fontFamily: head, fontWeight: 400, fontSize: 'clamp(42px, 12.6vw, 58px)', lineHeight: 1, letterSpacing: '.04em', textTransform: 'uppercase', textWrap: 'balance', color: dark ? C.GOLD : C.INK }}>{title}</h2>}
+            {title && <h2 style={{ margin: '4px 0 0', fontFamily: head, fontWeight: 400, fontSize: scaleFont('clamp(42px, 12.6vw, 58px)', C.hs), lineHeight: 1, letterSpacing: '.04em', textTransform: 'uppercase', textWrap: 'balance', color: dark ? C.GOLD : C.INK }}>{title}</h2>}
             {sub && <p style={{ margin: '12px auto 0', maxWidth: 340, fontSize: 16.5, color: dark ? alpha(C.BLUSH, 0.8) : C.MUTED, lineHeight: 1.55 }}>{sub}</p>}
           </div>
         )}
@@ -117,23 +124,24 @@ function Panel({ id, section, title, kicker, sub, children, head, dark = false }
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: '#FFFFFF', border: `1.5px solid ${C.LINE}`, borderRadius: 14,
   padding: '14px 16px', fontSize: 16.5, color: C.INK, outline: 'none',
-}
-const darkField = { ...field, background: alpha('#FFFFFF', 0.08), border: `1.5px solid ${alpha(C.GOLD, 0.4)}`, color: '#FFFFFF' }
-const btn = (on) => ({
+})
+const darkField = (C) => ({ ...field(C), background: alpha('#FFFFFF', 0.08), border: `1.5px solid ${alpha(C.GOLD, 0.4)}`, color: '#FFFFFF' })
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 24px', borderRadius: 999,
   fontSize: 14.5, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', textDecoration: 'none', cursor: 'pointer',
   background: on ? C.INK : '#FFFFFF', color: on ? C.BLUSH : C.INK, border: `1.5px solid ${on ? C.INK : C.LINE}`,
-})
-const darkBtn = (on) => ({ ...btn(on), background: on ? C.BLUSH : 'transparent', color: on ? C.INK : C.BLUSH, border: `1.5px solid ${on ? C.BLUSH : alpha(C.GOLD, 0.5)}` })
-const suggest = { bg: '#FFFFFF', border: `1.5px solid ${C.LINE}`, active: alpha(C.BLUSH, 0.6), text: C.INK, table: C.ROSE_D, radius: 14 }
+}))
+const darkBtn = (C) => ((on) => ({ ...btn(C)(on), background: on ? C.BLUSH : 'transparent', color: on ? C.INK : C.BLUSH, border: `1.5px solid ${on ? C.BLUSH : alpha(C.GOLD, 0.5)}` }))
+const suggest = (C) => ({ bg: '#FFFFFF', border: `1.5px solid ${C.LINE}`, active: alpha(C.BLUSH, 0.6), text: C.INK, table: C.ROSE_D, radius: 14 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function ParisNightTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -141,11 +149,11 @@ export default function ParisNightTemplate(props) {
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
-    <div data-pn lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-pn lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.PAPER, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.GOLD, 0.5),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <HatboxOpening inv={inv} theme={theme} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.INK, border: `1.5px solid ${C.GOLD}`, boxShadow: '0 10px 22px rgba(21,25,53,.4)' }}>
@@ -168,13 +176,13 @@ export default function ParisNightTemplate(props) {
           </header>
 
           {/* HERO — gecə Parisi */}
-          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: NIGHT_BG, padding: '26px 22px 0', textAlign: 'center', color: C.BLUSH }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: NIGHT_BG(C), padding: '26px 22px 0', textAlign: 'center', color: C.BLUSH }}>
             <span aria-hidden="true" style={{ position: 'absolute', left: '14%', top: 40, width: 40, height: 40, borderRadius: '50%', boxShadow: `-9px 4px 0 0 ${C.MOON}`, transform: 'rotate(-20deg)' }} />
             <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
               <EiffelTower height="min(74vw, 300px)" sparkle />
             </div>
             <Rooftops style={{ position: 'relative', marginTop: -30, marginLeft: -22, width: 'calc(100% + 44px)' }} />
-            <div style={{ position: 'relative', margin: '0 -22px', padding: '26px 22px 60px', background: 'linear-gradient(180deg, #0B0E22, #1C2140)' }}>
+            <div style={{ position: 'relative', margin: '0 -22px', padding: '26px 22px 60px', background: `linear-gradient(180deg, #0B0E22, ${C.INK})` }}>
               <div style={{ fontFamily: SCRIPT, fontSize: 38, lineHeight: 1, color: C.ROSE }}>{L('hero', 'kicker', inv.eventLabel)}</div>
               <h1 style={{ margin: '6px 0 0', fontFamily: head, fontWeight: 400, fontSize: nameSize(heroName), lineHeight: 1, letterSpacing: '.04em', textTransform: 'uppercase', overflowWrap: 'anywhere', color: C.GOLD, textShadow: '0 0 20px rgba(225,188,120,.35)', animation: 'pn-in 1s ease-out .2s both' }}>{heroName}</h1>
               <div style={{ marginTop: 6, fontFamily: SCRIPT, fontSize: 34, lineHeight: 1, color: C.BLUSH }}>{T.ooh}</div>
@@ -195,7 +203,7 @@ export default function ParisNightTemplate(props) {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <div key={l} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <Macaron size="100%" color={MACARONS[i]}>
+                    <Macaron size="100%" color={MACARONS(C)[i]}>
                       <span style={{ fontSize: 'clamp(22px, 6.6vw, 30px)', fontWeight: 600, lineHeight: 1, color: C.INK, fontVariantNumeric: 'tabular-nums lining-nums' }}><PopDigit value={v} pop={pop} /></span>
                     </Macaron>
                     <div style={{ marginTop: 10, fontSize: 12, fontWeight: 600, letterSpacing: '.16em', textTransform: 'uppercase', color: C.MUTED }}>{l}</div>
@@ -224,7 +232,7 @@ export default function ParisNightTemplate(props) {
               </div>
               <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontSize: 40, lineHeight: 1.05, letterSpacing: '.04em', textTransform: 'uppercase', color: '#FFFFFF' }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontFamily: SCRIPT, fontSize: 30, lineHeight: 1.1, color: C.ROSE }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn(C)} />
             </Panel>
           )}
 
@@ -260,7 +268,7 @@ export default function ParisNightTemplate(props) {
           {/* MASA — şirniyyat qutusu */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="pn-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.BLUSH, 0.8)} accent={C.ROSE}
+              <SeatFinder inv={inv} tr={tr} listId="pn-seat-list" field={darkField(C)} suggest={suggest(C)} font={body} muted={alpha(C.BLUSH, 0.8)} accent={C.ROSE}
                 nameStyle={{ fontFamily: head, fontSize: 38, letterSpacing: '.04em', textTransform: 'uppercase', color: C.GOLD }}
                 card={(num) => (
                   <div style={{ position: 'relative', maxWidth: 280, margin: '22px auto 0', aspectRatio: '1', borderRadius: 10, background: `linear-gradient(135deg, #F9C6D2, ${C.ROSE})`, boxShadow: 'inset 0 0 0 6px rgba(255,255,255,.35), 0 26px 40px -20px rgba(0,0,0,.7)' }}>
@@ -289,7 +297,7 @@ export default function ParisNightTemplate(props) {
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.INK} bg="#FFFFFF" frame={{ borderRadius: 12, border: `1.5px solid ${C.ROSE}` }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
             </Panel>
           )}
 
@@ -301,7 +309,7 @@ export default function ParisNightTemplate(props) {
                 font: body, display: head, displayItalic: false, btnFont: body,
                 doneMark: <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><Macaron size={70} color={C.ROSE} /></div>,
                 marker: (a) => (a ? <Macaron size={20} color={C.ROSE} /> : <span style={{ display: 'block', width: 16, height: 16, borderRadius: '50%', border: `1.5px solid ${C.ROSE}` }} />),
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -309,13 +317,13 @@ export default function ParisNightTemplate(props) {
           {/* MƏKTUBLAR */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.ROSE} />
+              <GuestbookForm inv={inv} field={darkField(C)} btn={darkBtn(C)} errorColor={C.ROSE} />
               <div style={{ display: 'grid', gap: 18 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
                   return (
                     <figure key={msg.name + i} style={{ position: 'relative', margin: 0, padding: '22px 20px 14px', background: C.PAPER, color: C.INK, borderRadius: 4, transform: `rotate(${i % 2 ? 0.8 : -0.8}deg)`, boxShadow: '0 16px 24px -16px rgba(0,0,0,.6)' }}>
-                      <Bow size={36} color={MACARONS[i % 4]} style={{ position: 'absolute', left: '50%', top: -10, marginLeft: -18 }} />
+                      <Bow size={36} color={MACARONS(C)[i % 4]} style={{ position: 'absolute', left: '50%', top: -10, marginLeft: -18 }} />
                       <blockquote style={{ margin: 0, fontSize: 16.5, lineHeight: 1.55 }}>{msg.text}</blockquote>
                       <figcaption style={{ marginTop: 8, display: 'flex', alignItems: 'baseline', justifyContent: 'flex-end', gap: 8, flexWrap: 'wrap' }}>
                         <span style={{ fontFamily: SCRIPT, fontSize: 30, lineHeight: 1, color: C.ROSE_D }}>{msg.name}</span>
@@ -331,11 +339,12 @@ export default function ParisNightTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={body} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 
 function MapPin() {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
       <span style={{ position: 'absolute', left: -20, top: -30, filter: 'drop-shadow(0 4px 6px rgba(0,0,0,.35))' }}><Macaron size={40} color={C.ROSE} /></span>

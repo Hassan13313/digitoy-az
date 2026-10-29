@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C, BANDS, CREAM_BG, DUSK_BG, nameSize } from './palette'
+import { C as PAL, BANDS, CREAM_BG, DUSK_BG, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { SunArch, Pampas, Rainbow, HalfSun } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    BOHO SUNSET — «Gün batımı» (Qız gecəsi konsepti, 2026-10)
@@ -28,7 +29,11 @@ import { SunArch, Pampas, Rainbow, HalfSun } from './art'
 const BASE = getTemplateTheme('boho-sunset')
 const ID = 'boho-sunset'
 
-const KEYFRAMES = `
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['CLAY'], secondary: ['SAGE'], accent: ['MUSTARD'], background: ['CREAM'], text: ['INK'] }
+
+const KEYFRAMES = (C) => (`
 @keyframes bs-in { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes bs-fade { from { opacity: 0 } to { opacity: 1 } }
 @keyframes bs-hint { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
@@ -39,10 +44,11 @@ const KEYFRAMES = `
 [data-bs] input:focus-visible, [data-bs] textarea:focus-visible { border-color: ${C.CLAY} !important; outline: none; }
 [data-bs] button:focus-visible, [data-bs] a:focus-visible, [data-bs] [role="button"]:focus-visible { outline: 2px solid ${C.MUSTARD}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-bs] *, [data-bs] { animation: none !important; transition: none !important; } }
-`
+`)
 
 /* ═══ 01 — AÇILIŞ: gün batımı ═══ */
 function SunsetOpening({ inv, theme }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -54,7 +60,7 @@ function SunsetOpening({ inv, theme }) {
     <motion.div {...gate.gateProps} data-bs
       animate={go ? { opacity: 0 } : {}}
       transition={{ duration: 0.4, delay: 1.75 }}
-      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: CREAM_BG, color: C.INK, fontFamily: theme.fonts.body }}>
+      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: CREAM_BG(C), color: C.INK, fontFamily: theme.fonts.body }}>
       <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 22px', textAlign: 'center' }}>
         <div style={{ animation: 'bs-in 1s ease-out .2s both' }}>
           {ot.show('kicker') && <div style={{ fontSize: 13, fontWeight: 500, letterSpacing: '.26em', textTransform: 'uppercase', color: C.CLAY_D }}>{ot.text('kicker')}</div>}
@@ -96,14 +102,15 @@ function SunsetOpening({ inv, theme }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, dark = false }) {
+  const C = usePalette(PAL)
   return (
-    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 72px', overflow: 'hidden', background: dark ? DUSK_BG : CREAM_BG, color: dark ? C.PAMPAS : C.INK }}>
+    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 72px', overflow: 'hidden', background: dark ? DUSK_BG : CREAM_BG(C), color: dark ? C.PAMPAS : C.INK }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <Rainbow size={46} style={{ margin: '0 auto 12px' }} />
             {kicker && <div style={{ marginBottom: 6, fontSize: 12.5, fontWeight: 500, letterSpacing: '.26em', textTransform: 'uppercase', color: dark ? C.MUSTARD : C.CLAY_D }}>{kicker}</div>}
-            {title && <h2 style={{ margin: 0, fontFamily: head, fontStyle: 'italic', fontWeight: 300, fontSize: 'clamp(34px, 10vw, 46px)', lineHeight: 1.12, textWrap: 'balance', color: dark ? C.CREAM : C.INK }}>{title}</h2>}
+            {title && <h2 style={{ margin: 0, fontFamily: head, fontStyle: 'italic', fontWeight: 300, fontSize: scaleFont('clamp(34px, 10vw, 46px)', C.hs), lineHeight: 1.12, textWrap: 'balance', color: dark ? C.CREAM : C.INK }}>{title}</h2>}
             {sub && <p style={{ margin: '12px auto 0', maxWidth: 340, fontSize: 17, color: dark ? alpha(C.PAMPAS, 0.8) : C.MUTED, lineHeight: 1.55 }}>{sub}</p>}
           </div>
         )}
@@ -113,23 +120,24 @@ function Panel({ id, section, title, kicker, sub, children, head, dark = false }
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: '#FFFDF9', border: `1.5px solid ${C.LINE}`, borderRadius: 12,
   padding: '14px 16px', fontSize: 17, color: C.INK, outline: 'none',
-}
-const darkField = { ...field, background: alpha('#FFFFFF', 0.08), border: `1.5px solid ${alpha(C.PAMPAS, 0.35)}`, color: C.CREAM }
-const btn = (on) => ({
+})
+const darkField = (C) => ({ ...field(C), background: alpha('#FFFFFF', 0.08), border: `1.5px solid ${alpha(C.PAMPAS, 0.35)}`, color: C.CREAM })
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 24px', borderRadius: 999,
   fontSize: 14.5, fontWeight: 500, letterSpacing: '.14em', textTransform: 'uppercase', textDecoration: 'none', cursor: 'pointer',
   background: on ? C.CLAY : 'transparent', color: on ? C.CREAM : C.INK, border: `1.5px solid ${on ? C.CLAY : C.LINE}`,
-})
-const darkBtn = (on) => ({ ...btn(on), background: on ? C.MUSTARD : 'transparent', color: on ? C.DUSK : C.PAMPAS, border: `1.5px solid ${on ? C.MUSTARD : alpha(C.PAMPAS, 0.4)}` })
-const suggest = { bg: '#FFFDF9', border: `1.5px solid ${C.LINE}`, active: alpha(C.ROSE, 0.25), text: C.INK, table: C.CLAY_D, radius: 12 }
+}))
+const darkBtn = (C) => ((on) => ({ ...btn(C)(on), background: on ? C.MUSTARD : 'transparent', color: on ? C.DUSK : C.PAMPAS, border: `1.5px solid ${on ? C.MUSTARD : alpha(C.PAMPAS, 0.4)}` }))
+const suggest = (C) => ({ bg: '#FFFDF9', border: `1.5px solid ${C.LINE}`, active: alpha(C.ROSE, 0.25), text: C.INK, table: C.CLAY_D, radius: 12 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function BohoSunsetTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -137,11 +145,11 @@ export default function BohoSunsetTemplate(props) {
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
-    <div data-bs lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-bs lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.CREAM, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.CLAY, 0.45),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <SunsetOpening inv={inv} theme={theme} lang={lang} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '999px 999px 10px 10px', background: C.CLAY, boxShadow: '0 10px 22px rgba(156,79,49,.4)' }}>
@@ -164,7 +172,7 @@ export default function BohoSunsetTemplate(props) {
           </header>
 
           {/* HERO — tağ və pampas */}
-          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: CREAM_BG, padding: '34px 22px 66px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: CREAM_BG(C), padding: '34px 22px 66px', textAlign: 'center' }}>
             <div style={{ position: 'relative', display: 'inline-block' }}>
               <Pampas height={200} delay={0.2} style={{ position: 'absolute', left: -50, bottom: 0, zIndex: 2 }} />
               <Pampas height={160} flip delay={1} color="#EBDCC2" style={{ position: 'absolute', left: -18, bottom: 0, zIndex: 2 }} />
@@ -190,7 +198,7 @@ export default function BohoSunsetTemplate(props) {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <div key={l} style={{ textAlign: 'center' }}>
-                    <div style={{ aspectRatio: '3 / 4', borderRadius: '999px 999px 8px 8px', padding: 5, background: BANDS[i] }}>
+                    <div style={{ aspectRatio: '3 / 4', borderRadius: '999px 999px 8px 8px', padding: 5, background: BANDS(C)[i] }}>
                       <div style={{ height: '100%', borderRadius: '999px 999px 5px 5px', border: `1.5px solid ${alpha('#FFFFFF', 0.55)}`, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: '18%' }}>
                         <span style={{ fontFamily: head, fontStyle: 'italic', fontWeight: 300, fontSize: 'clamp(26px, 7.8vw, 36px)', lineHeight: 1, color: '#FFFFFF', fontVariantNumeric: 'tabular-nums lining-nums' }}><PopDigit value={v} pop={pop} /></span>
                       </div>
@@ -219,7 +227,7 @@ export default function BohoSunsetTemplate(props) {
               </div>
               <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontStyle: 'italic', fontWeight: 300, fontSize: 32, lineHeight: 1.15, color: C.CREAM }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 6, fontSize: 13, fontWeight: 500, letterSpacing: '.22em', textTransform: 'uppercase', color: C.MUSTARD }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn(C)} />
             </Panel>
           )}
 
@@ -231,7 +239,7 @@ export default function BohoSunsetTemplate(props) {
                 <div style={{ display: 'grid', gap: 22 }}>
                   {timeline.events.map((ev, i) => (
                     <div key={i} style={{ position: 'relative' }}>
-                      <span aria-hidden="true" style={{ position: 'absolute', left: -40, top: 2, width: 22, height: 22, borderRadius: '50%', background: `radial-gradient(circle at 35% 30%, ${alpha('#FFFFFF', 0.7)}, ${BANDS[i % 4]} 60%)`, boxShadow: '0 3px 6px rgba(74,47,36,.25)' }} />
+                      <span aria-hidden="true" style={{ position: 'absolute', left: -40, top: 2, width: 22, height: 22, borderRadius: '50%', background: `radial-gradient(circle at 35% 30%, ${alpha('#FFFFFF', 0.7)}, ${BANDS(C)[i % 4]} 60%)`, boxShadow: '0 3px 6px rgba(74,47,36,.25)' }} />
                       <div style={{ fontFamily: head, fontStyle: 'italic', fontWeight: 300, fontSize: 24, lineHeight: 1.1, color: C.CLAY_D, fontVariantNumeric: 'lining-nums' }}>{ev.time}</div>
                       <div style={{ marginTop: 2, fontSize: 17.5, lineHeight: 1.35, color: C.INK }}>{ev.label}</div>
                     </div>
@@ -252,11 +260,11 @@ export default function BohoSunsetTemplate(props) {
           {/* MASA — göy qurşağı */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="bs-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.PAMPAS, 0.8)} accent={C.MUSTARD}
+              <SeatFinder inv={inv} tr={tr} listId="bs-seat-list" field={darkField(C)} suggest={suggest(C)} font={body} muted={alpha(C.PAMPAS, 0.8)} accent={C.MUSTARD}
                 nameStyle={{ fontFamily: head, fontStyle: 'italic', fontWeight: 300, fontSize: 32, color: C.CREAM }}
                 card={(num) => (
                   <div style={{ position: 'relative', width: 'min(100%, 260px)', margin: '24px auto 0', aspectRatio: '1 / .62' }}>
-                    {BANDS.map((c, i) => (
+                    {BANDS(C).map((c, i) => (
                       <span key={i} aria-hidden="true" style={{ position: 'absolute', left: `${i * 6}%`, right: `${i * 6}%`, top: `${i * 9.6}%`, bottom: 0, borderRadius: '999px 999px 0 0', background: c }} />
                     ))}
                     <div style={{ position: 'absolute', left: '24%', right: '24%', top: '38.4%', bottom: 0, borderRadius: '999px 999px 0 0', background: C.CREAM, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 6 }}>
@@ -275,14 +283,14 @@ export default function BohoSunsetTemplate(props) {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 16, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
                     <div key={i} style={{ position: 'relative', aspectRatio: '3 / 4', marginTop: i % 2 ? 24 : 0 }}>
-                      <span aria-hidden="true" style={{ position: 'absolute', inset: 0, transform: 'translate(7px, 7px)', borderRadius: '999px 999px 10px 10px', border: `1.5px solid ${BANDS[i % 4]}` }} />
+                      <span aria-hidden="true" style={{ position: 'absolute', inset: 0, transform: 'translate(7px, 7px)', borderRadius: '999px 999px 10px 10px', border: `1.5px solid ${BANDS(C)[i % 4]}` }} />
                       <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ position: 'relative', width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: '999px 999px 10px 10px' }} />
                     </div>
                   ))}
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.INK} bg="#FFFDF9" frame={{ borderRadius: '90px 90px 12px 12px', border: `1.5px solid ${C.CLAY}` }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
             </Panel>
           )}
 
@@ -294,7 +302,7 @@ export default function BohoSunsetTemplate(props) {
                 font: body, display: head, displayItalic: true, btnFont: body,
                 doneMark: <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}><Rainbow size={64} /></div>,
                 marker: (a) => (a ? <HalfSun size={22} color={C.CLAY} /> : <span style={{ display: 'block', width: 16, height: 16, borderRadius: '50%', border: `1.5px solid ${C.LINE}` }} />),
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -302,7 +310,7 @@ export default function BohoSunsetTemplate(props) {
           {/* ARZULAR — kraft kağız etiketlər */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.MUSTARD} />
+              <GuestbookForm inv={inv} field={darkField(C)} btn={darkBtn(C)} errorColor={C.MUSTARD} />
               <div style={{ display: 'grid', gap: 18 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
@@ -323,11 +331,12 @@ export default function BohoSunsetTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 
 function MapPin() {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
       <span style={{ position: 'absolute', left: -22, top: -26, filter: 'drop-shadow(0 3px 5px rgba(0,0,0,.35))' }}><HalfSun size={44} color={C.CLAY} /></span>

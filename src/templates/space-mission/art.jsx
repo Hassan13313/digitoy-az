@@ -3,10 +3,12 @@
    Retro raket, planetlər, buraxılış qülləsi, tüstü, radar, missiya nişanı,
    illuminator, kosmonavt dəbilqəsi. Hamısı aria-hidden.
    ───────────────────────────────────────────────────────────────────────── */
-import { C, STARS } from './palette'
+import { C as PAL, STARS } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* Ulduzlu səma */
 export function Stars({ count = 60, opacity = 1 }) {
+  const C = usePalette(PAL)
   return (
     <div aria-hidden="true" style={{ position: 'absolute', inset: 0, opacity, overflow: 'hidden' }}>
       {STARS.slice(0, count).map((p, i) => (
@@ -22,6 +24,7 @@ export function Stars({ count = 60, opacity = 1 }) {
 
 /* Retro raket — viewBox mərkəzi x=0, burun y=-92, ucluq y=50 */
 export function Rocket({ size = 120, flame = true, big = false, style }) {
+  const C = usePalette(PAL)
   return (
     <svg viewBox="-44 -100 88 210" width={size} height={size * 2.39} aria-hidden="true" style={{ display: 'block', overflow: 'visible', ...style }}>
       <defs>
@@ -62,7 +65,9 @@ export function Rocket({ size = 120, flame = true, big = false, style }) {
 }
 
 /* Planet — istəyə görə halqa, zolaq, krater */
-export function Planet({ size = 80, c1 = C.PINK, c2 = C.TANGERINE, ring = false, ringColor = C.SUN, bands = false, craters = false, tilt = -16, style, childStyle, children }) {
+export function Planet($p) {
+  const C = usePalette(PAL)
+  const { size = 80, c1 = C.PINK, c2 = C.TANGERINE, ring = false, ringColor = C.SUN, bands = false, craters = false, tilt = -16, style, childStyle, children } = $p
   const id = `sm-p-${c1.slice(1)}-${c2.slice(1)}-${String(tilt).replace('-', 'm')}`
   return (
     <div style={{ position: 'relative', width: size, height: size, ...style }}>
@@ -102,6 +107,7 @@ export function Planet({ size = 80, c1 = C.PINK, c2 = C.TANGERINE, ring = false,
 
 /* Buraxılış qülləsi (qəfəs konstruksiya) */
 export function Gantry({ height = 260, style }) {
+  const C = usePalette(PAL)
   const rows = 9
   return (
     <svg viewBox={`0 0 60 ${height}`} width="60" height={height} aria-hidden="true" style={{ display: 'block', overflow: 'visible', ...style }}>
@@ -130,6 +136,7 @@ export function Smoke({ width = 240, style }) {
 
 /* Radar şəbəkəsi (xəritənin üstündə) */
 export function RadarGrid() {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
       <svg viewBox="-50 -50 100 100" width="100%" height="100%" style={{ position: 'absolute', inset: 0 }}>
@@ -148,6 +155,7 @@ export function RadarGrid() {
 
 /* Missiya nişanı — tikişli dairəvi emblem (masa nömrəsi üçün) */
 export function MissionPatch({ size = 230, top = '', bottom = '', children }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ position: 'relative', width: size, height: size, margin: '0 auto' }}>
       <svg viewBox="-100 -100 200 200" width={size} height={size} aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'visible' }}>
@@ -172,9 +180,10 @@ export function MissionPatch({ size = 230, top = '', bottom = '', children }) {
 
 /* Kosmonavt dəbilqəsi — «cavab göndərildi» nişanı */
 export function Helmet({ size = 40, style }) {
+  const C = usePalette(PAL)
   return (
     <svg viewBox="-24 -24 48 48" width={size} height={size} aria-hidden="true" style={{ display: 'block', overflow: 'visible', ...style }}>
-      <circle r="20" fill="#F5F3FF" />
+      <circle r="20" fill={C.WHITE} />
       <rect x="-15" y="-11" width="30" height="20" rx="10" fill="#2A3166" />
       <path d="M-9 -6A10 10 0 0 1 2 -9" stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" opacity=".7" />
       <rect x="-12" y="15" width="24" height="7" rx="3" fill={C.TANGERINE} />
@@ -185,6 +194,7 @@ export function Helmet({ size = 40, style }) {
 
 /* Ulduz nişanı — RSVP seçimi */
 export function StarMark({ active, size = 18 }) {
+  const C = usePalette(PAL)
   return (
     <svg viewBox="-10 -10 20 20" width={size} height={size} aria-hidden="true" style={{ display: 'block', overflow: 'visible' }}>
       {active
@@ -195,7 +205,9 @@ export function StarMark({ active, size = 18 }) {
 }
 
 /* Orbit nişanı — bölmə başlığının üstündə */
-export function OrbitIcon({ size = 44, color = C.SUN }) {
+export function OrbitIcon($p) {
+  const C = usePalette(PAL)
+  const { size = 44, color = C.SUN } = $p
   return (
     <svg viewBox="-24 -14 48 28" width={size} height={size * 0.58} aria-hidden="true" style={{ display: 'block', margin: '0 auto', overflow: 'visible' }}>
       <ellipse rx="22" ry="7" fill="none" stroke={color} strokeWidth="1.2" opacity=".7" transform="rotate(-12)" />

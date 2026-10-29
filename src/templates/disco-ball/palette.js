@@ -6,16 +6,18 @@ export const C = {
 }
 
 export const CHROME = 'linear-gradient(180deg, #FFFFFF 0%, #E6E9F2 38%, #8C93A8 50%, #F4F6FB 56%, #B8BED0 80%, #FFFFFF 100%)'
-export const HOT = 'linear-gradient(90deg, #FF3EA5, #FFC94A)'
+export const HOT = (C) => (`linear-gradient(90deg, ${C.MAGENTA}, ${C.GOLD})`)
 export const NIGHT_BG = `radial-gradient(60% 40% at 50% 0%, rgba(182,156,255,.28), transparent 70%), radial-gradient(70% 40% at 50% 100%, rgba(255,62,165,.22), transparent 70%), linear-gradient(180deg, #24154D, #140B2E 55%, #0B0619)`
-export const LIGHT_BG = `radial-gradient(60% 40% at 80% 0%, rgba(255,201,74,.18), transparent 70%), radial-gradient(60% 40% at 10% 100%, rgba(255,62,165,.12), transparent 70%), #FBF1FF`
+export const LIGHT_BG = (C) => (`radial-gradient(60% 40% at 80% 0%, rgba(255,201,74,.18), transparent 70%), radial-gradient(60% 40% at 10% 100%, rgba(255,62,165,.12), transparent 70%), ${C.LIGHT}`)
 /* 70-ci illər gün şüası (pol) */
 export const SUNBURST = 'repeating-conic-gradient(from 0deg at 50% 0%, rgba(255,62,165,.28) 0 6deg, rgba(255,201,74,.18) 6deg 12deg, transparent 12deg 18deg)'
 
 /* İşıq ləkələri — sabit toxumlu LCG */
 let seed = 83
 const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646 }
-export const SPOTS = Array.from({ length: 42 }, () => ({ x: rnd() * 100, y: rnd() * 100, s: 4 + rnd() * 8, c: ['#FFFFFF', '#FF3EA5', '#FFC94A', '#B69CFF'][Math.floor(rnd() * 4)] }))
+/* Mövqelər modul yüklənəndə BİR dəfə (rnd vəziyyətlidir); rəng admin palitrasından */
+const SPOTS_BASE = Array.from({ length: 42 }, () => ({ x: rnd() * 100, y: rnd() * 100, s: 4 + rnd() * 8, ci: Math.floor(rnd() * 4) }))
+export const SPOTS = (C) => (SPOTS_BASE.map(({ ci, ...p }) => ({ ...p, c: ['#FFFFFF', C.MAGENTA, C.GOLD, C.LILAC][ci] })))
 
 /* Ad uzunluğuna görə ölçü */
 export function nameSize(text) {

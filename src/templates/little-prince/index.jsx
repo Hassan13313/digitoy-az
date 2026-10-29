@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize, ageWord } from '../_shared/kids'
-import { C, GOLD_GRAD, NAVY_BG, nameSize } from './palette'
+import { C as PAL, GOLD_GRAD, NAVY_BG, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Crown, Cushion, SHIELD, Dust, CrownRule } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    LITTLE PRINCE — «Kiçik şahzadə» (Sünnət toyu konsepti, 2026-10)
@@ -30,7 +31,11 @@ import { Crown, Cushion, SHIELD, Dust, CrownRule } from './art'
 const BASE = getTemplateTheme('little-prince')
 const ID = 'little-prince'
 
-const KEYFRAMES = `
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['ROYAL'], secondary: ['NAVY'], accent: ['GOLD'], background: ['IVORY'], text: ['INK'] }
+
+const KEYFRAMES = (C) => (`
 @keyframes lp-twinkle { 0%,100% { opacity: .2; transform: scale(.7) } 50% { opacity: 1; transform: scale(1.1) } }
 @keyframes lp-rays { to { transform: rotate(360deg) } }
 @keyframes lp-float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-6px) } }
@@ -43,13 +48,14 @@ const KEYFRAMES = `
 [data-lp] input:focus-visible, [data-lp] textarea:focus-visible { border-color: ${C.ROYAL} !important; outline: none; }
 [data-lp] button:focus-visible, [data-lp] a:focus-visible, [data-lp] [role="button"]:focus-visible { outline: 2px solid ${C.GOLD}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-lp] *, [data-lp] { animation: none !important; transition: none !important; } }
-`
+`)
 
 const RAYS = `repeating-conic-gradient(from 0deg, rgba(243,220,152,.16) 0deg 6deg, transparent 6deg 18deg)`
-const IVORY_BG = `radial-gradient(90% 60% at 50% 0%, #FFFBF1, transparent 70%), ${C.IVORY}`
+const IVORY_BG = (C) => (`radial-gradient(90% 60% at 50% 0%, #FFFBF1, transparent 70%), ${C.IVORY}`)
 
 /* ═══ 01 — AÇILIŞ: tac qalxır ═══ */
 function PrinceOpening({ inv, theme }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -60,7 +66,7 @@ function PrinceOpening({ inv, theme }) {
     <motion.div {...gate.gateProps} data-lp
       animate={go ? { opacity: 0 } : {}}
       transition={{ duration: 0.4, delay: 1.7 }}
-      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: NAVY_BG, color: C.IVORY, fontFamily: theme.fonts.body }}>
+      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: NAVY_BG(C), color: C.IVORY, fontFamily: theme.fonts.body }}>
       <Dust />
       <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 22px', textAlign: 'center' }}>
         <div style={{ position: 'relative', width: 'min(72vw, 280px)', height: 230, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
@@ -84,7 +90,7 @@ function PrinceOpening({ inv, theme }) {
         </div>
         <motion.div animate={go ? { opacity: 0, y: 8 } : {}} transition={{ duration: 0.3 }} style={{ marginTop: 22 }}>
           {ot.show('cta') && (
-            <div style={{ minHeight: 50, padding: '12px 30px', display: 'inline-flex', alignItems: 'center', borderRadius: 999, background: GOLD_GRAD, color: C.NAVY, fontFamily: head, fontSize: 17, letterSpacing: '.06em', boxShadow: '0 12px 26px -10px rgba(243,220,152,.6)', animation: 'lp-rise .8s ease-out .8s both' }}>
+            <div style={{ minHeight: 50, padding: '12px 30px', display: 'inline-flex', alignItems: 'center', borderRadius: 999, background: GOLD_GRAD(C), color: C.NAVY, fontFamily: head, fontSize: 17, letterSpacing: '.06em', boxShadow: '0 12px 26px -10px rgba(243,220,152,.6)', animation: 'lp-rise .8s ease-out .8s both' }}>
               {ot.text('cta')}
             </div>
           )}
@@ -97,15 +103,16 @@ function PrinceOpening({ inv, theme }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, dark = false }) {
+  const C = usePalette(PAL)
   const mute = dark ? alpha(C.IVORY, 0.75) : C.MUTED
   return (
-    <section id={id} data-section={section} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? NAVY_BG : IVORY_BG, color: dark ? C.IVORY : C.INK }}>
+    <section id={id} data-section={section} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? NAVY_BG(C) : IVORY_BG(C), color: dark ? C.IVORY : C.INK }}>
       {dark && <Dust opacity={0.5} />}
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <CrownRule color={dark ? C.GOLD_L : C.GOLD_D} width={210} />
-            {title && <h2 style={{ margin: '12px 0 0', fontFamily: head, fontWeight: 500, fontSize: 'clamp(28px, 8vw, 37px)', lineHeight: 1.15, color: dark ? C.GOLD_L : C.ROYAL, textWrap: 'balance' }}>{title}</h2>}
+            {title && <h2 style={{ margin: '12px 0 0', fontFamily: head, fontWeight: 500, fontSize: scaleFont('clamp(28px, 8vw, 37px)', C.hs), lineHeight: 1.15, color: dark ? C.GOLD_L : C.ROYAL, textWrap: 'balance' }}>{title}</h2>}
             {kicker && <div style={{ marginTop: 8, fontSize: 15.5, color: mute }}>{kicker}</div>}
             {sub && <p style={{ margin: '8px auto 0', maxWidth: 340, fontSize: 15.5, color: mute, lineHeight: 1.6 }}>{sub}</p>}
           </div>
@@ -116,21 +123,22 @@ function Panel({ id, section, title, kicker, sub, children, head, dark = false }
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: '#FFFDF7', border: `1px solid ${alpha(C.ROYAL, 0.3)}`, borderRadius: 10,
   padding: '14px 16px', fontSize: 16, color: C.INK, outline: 'none',
-}
-const btn = (on) => ({
+})
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 24px', borderRadius: 999,
   fontSize: 15.5, fontWeight: 600, textDecoration: 'none', cursor: 'pointer',
   background: on ? C.ROYAL : 'transparent', color: on ? C.GOLD_L : C.ROYAL, border: `1px solid ${on ? C.ROYAL : alpha(C.ROYAL, 0.45)}`,
-})
-const suggest = { bg: '#FFFDF7', border: `1px solid ${alpha(C.ROYAL, 0.25)}`, active: alpha(C.GOLD_L, 0.4), text: C.INK, table: C.ROYAL, radius: 10 }
+}))
+const suggest = (C) => ({ bg: '#FFFDF7', border: `1px solid ${alpha(C.ROYAL, 0.25)}`, active: alpha(C.GOLD_L, 0.4), text: C.INK, table: C.ROYAL, radius: 10 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function LittlePrinceTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -139,11 +147,11 @@ export default function LittlePrinceTemplate(props) {
   const age = inv.age
 
   return (
-    <div data-lp lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-lp lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.IVORY, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.GOLD, 0.3),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <PrinceOpening inv={inv} theme={theme} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.ROYAL, border: `2px solid ${C.GOLD}`, boxShadow: '0 8px 20px rgba(15,28,63,.45)' }}>
@@ -166,13 +174,13 @@ export default function LittlePrinceTemplate(props) {
           </header>
 
           {/* HERO — şüalar və tac */}
-          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: NAVY_BG, padding: '40px 22px 60px', textAlign: 'center', color: C.IVORY }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: NAVY_BG(C), padding: '40px 22px 60px', textAlign: 'center', color: C.IVORY }}>
             <Dust />
             <div aria-hidden="true" style={{ position: 'absolute', left: '50%', top: 110, width: 640, height: 640, margin: '-320px 0 0 -320px', borderRadius: '50%', background: RAYS, WebkitMaskImage: 'radial-gradient(circle, #000 14%, transparent 60%)', maskImage: 'radial-gradient(circle, #000 14%, transparent 60%)', animation: 'lp-rays 60s linear infinite' }} />
             <div style={{ position: 'relative' }}>
               <div style={{ width: 150, margin: '0 auto', animation: 'lp-float 4s ease-in-out infinite', filter: 'drop-shadow(0 0 18px rgba(243,220,152,.5))' }}><Crown width="100%" uid="lp-hero" /></div>
               <div style={{ marginTop: 20, fontFamily: head, fontSize: 15, letterSpacing: '.26em', color: C.GOLD_L }}>{L('hero', 'kicker', inv.eventLabel)}</div>
-              <h1 style={{ margin: '8px 0 0', fontFamily: head, fontWeight: 500, fontSize: nameSize(heroName), lineHeight: 1.04, overflowWrap: 'anywhere', backgroundImage: GOLD_GRAD, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent', animation: 'lp-rise 1s ease-out .3s both' }}>{heroName}</h1>
+              <h1 style={{ margin: '8px 0 0', fontFamily: head, fontWeight: 500, fontSize: nameSize(heroName), lineHeight: 1.04, overflowWrap: 'anywhere', backgroundImage: GOLD_GRAD(C), WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent', animation: 'lp-rise 1s ease-out .3s both' }}>{heroName}</h1>
               {age && (
                 <div style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6, marginTop: 14, padding: '6px 18px', borderRadius: 999, border: `1px solid ${alpha(C.GOLD, 0.6)}`, color: C.GOLD_L }}>
                   <span style={{ fontFamily: head, fontSize: 24, lineHeight: 1 }}>{age}</span>
@@ -193,7 +201,7 @@ export default function LittlePrinceTemplate(props) {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop]) => (
                   <div key={l} style={{ textAlign: 'center' }}>
-                    <div style={{ padding: 3, background: GOLD_GRAD, clipPath: SHIELD, filter: 'drop-shadow(0 10px 12px rgba(15,28,63,.3))' }}>
+                    <div style={{ padding: 3, background: GOLD_GRAD(C), clipPath: SHIELD, filter: 'drop-shadow(0 10px 12px rgba(15,28,63,.3))' }}>
                       <div style={{ aspectRatio: '1 / 1.18', clipPath: SHIELD, background: `linear-gradient(180deg, ${C.ROYAL_L}, ${C.ROYAL} 60%, ${C.NAVY})`, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingBottom: '18%' }}>
                         <span style={{ fontFamily: head, fontWeight: 500, fontSize: 'clamp(22px, 7vw, 32px)', lineHeight: 1, color: C.GOLD_L, fontVariantNumeric: 'tabular-nums' }}><PopDigit value={v} pop={pop} /></span>
                       </div>
@@ -210,7 +218,7 @@ export default function LittlePrinceTemplate(props) {
           {/* MƏKAN */}
           {S.venue && (
             <Panel section="venue" head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
-              <div style={{ position: 'relative', maxWidth: 430, margin: '30px auto 0', padding: 6, background: GOLD_GRAD, borderRadius: '24px 24px 8px 8px', boxShadow: '0 28px 40px -24px rgba(0,0,0,.7)' }}>
+              <div style={{ position: 'relative', maxWidth: 430, margin: '30px auto 0', padding: 6, background: GOLD_GRAD(C), borderRadius: '24px 24px 8px 8px', boxShadow: '0 28px 40px -24px rgba(0,0,0,.7)' }}>
                 <div style={{ position: 'absolute', left: '50%', top: -34, width: 70, marginLeft: -35, zIndex: 2 }}><Crown width="100%" uid="lp-map" /></div>
                 <div style={{ borderRadius: '19px 19px 4px 4px', overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
@@ -223,7 +231,7 @@ export default function LittlePrinceTemplate(props) {
               </div>
               <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontSize: 25, lineHeight: 1.2, color: C.GOLD_L }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontSize: 15.5, color: alpha(C.IVORY, 0.72) }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={(on) => ({ ...btn(on), background: on ? GOLD_GRAD : 'transparent', color: on ? C.NAVY : C.GOLD_L, border: `1px solid ${on ? C.GOLD : alpha(C.GOLD, 0.5)}` })} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={(on) => ({ ...btn(C)(on), background: on ? GOLD_GRAD(C) : 'transparent', color: on ? C.NAVY : C.GOLD_L, border: `1px solid ${on ? C.GOLD : alpha(C.GOLD, 0.5)}` })} />
             </Panel>
           )}
 
@@ -256,7 +264,7 @@ export default function LittlePrinceTemplate(props) {
           {/* MASA — yastıq üstündə */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="lp-seat-list" field={field} suggest={suggest} font={body} muted={alpha(C.IVORY, 0.75)} accent={C.GOLD_L}
+              <SeatFinder inv={inv} tr={tr} listId="lp-seat-list" field={field(C)} suggest={suggest(C)} font={body} muted={alpha(C.IVORY, 0.75)} accent={C.GOLD_L}
                 nameStyle={{ fontFamily: head, fontSize: 24 }}
                 card={(num) => (
                   <div style={{ position: 'relative', width: 240, margin: '0 auto', paddingTop: 56, animation: 'lp-crown .8s cubic-bezier(.3,.8,.4,1) both' }}>
@@ -285,7 +293,7 @@ export default function LittlePrinceTemplate(props) {
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.NAVY} bg="#FFFDF7" frame={{ borderRadius: 14, border: `3px solid ${C.GOLD}`, boxShadow: `0 0 0 4px ${C.IVORY}, 0 0 0 5px ${C.ROYAL}` }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
             </Panel>
           )}
 
@@ -296,8 +304,8 @@ export default function LittlePrinceTemplate(props) {
                 ink: C.INK, muted: C.MUTED, line: alpha(C.ROYAL, 0.4), hair: alpha(C.ROYAL, 0.18), accent: C.ROYAL,
                 font: body, display: head, btnFont: body,
                 doneMark: <div style={{ width: 70, margin: '0 auto 10px' }}><Crown width="100%" uid="lp-done" /></div>,
-                marker: (a) => (a ? <span style={{ display: 'block', width: 12, height: 12, borderRadius: '50%', background: GOLD_GRAD, boxShadow: `0 0 0 2px ${C.ROYAL}` }} /> : <span style={{ display: 'block', width: 12, height: 12, borderRadius: '50%', border: `1px solid ${alpha(C.ROYAL, 0.45)}` }} />),
-                suggest: { ...suggest, font: body },
+                marker: (a) => (a ? <span style={{ display: 'block', width: 12, height: 12, borderRadius: '50%', background: GOLD_GRAD(C), boxShadow: `0 0 0 2px ${C.ROYAL}` }} /> : <span style={{ display: 'block', width: 12, height: 12, borderRadius: '50%', border: `1px solid ${alpha(C.ROYAL, 0.45)}` }} />),
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -305,7 +313,7 @@ export default function LittlePrinceTemplate(props) {
           {/* ARZULAR */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={field} btn={(on) => ({ ...btn(on), background: on ? GOLD_GRAD : 'transparent', color: on ? C.NAVY : C.GOLD_L, border: `1px solid ${C.GOLD}` })} errorColor={C.GOLD_L} />
+              <GuestbookForm inv={inv} field={field(C)} btn={(on) => ({ ...btn(C)(on), background: on ? GOLD_GRAD(C) : 'transparent', color: on ? C.NAVY : C.GOLD_L, border: `1px solid ${C.GOLD}` })} errorColor={C.GOLD_L} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
@@ -323,11 +331,12 @@ export default function LittlePrinceTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 
 function MapPin() {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
       <span style={{ position: 'absolute', left: -22, top: -40, width: 44 }}><Crown width="100%" uid="lp-pin" /></span>

@@ -1,15 +1,17 @@
-import { C, HEART } from './palette'
+import { C as PAL, HEART } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* SILVER LOCKET — dekor */
 
 function HeartFace({ uid, variant = 'front', children }) {
+  const C = usePalette(PAL)
   const fill = variant === 'inside' ? `url(#${uid}-in)` : `url(#${uid}-sv)`
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
       <svg aria-hidden="true" viewBox="0 0 200 184" width="100%" height="100%" style={{ display: 'block', overflow: 'visible' }}>
         <defs>
           <linearGradient id={`${uid}-sv`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#9AA1AB" /><stop offset=".3" stopColor="#F4F6F9" /><stop offset=".55" stopColor="#C9CED6" /><stop offset=".72" stopColor="#FFFFFF" /><stop offset="1" stopColor="#8D949E" />
+            <stop offset="0" stopColor="#9AA1AB" /><stop offset=".3" stopColor="#F4F6F9" /><stop offset=".55" stopColor={C.SILVER} /><stop offset=".72" stopColor="#FFFFFF" /><stop offset="1" stopColor="#8D949E" />
           </linearGradient>
           <radialGradient id={`${uid}-in`} cx="50%" cy="40%" r="70%">
             <stop offset="0" stopColor="#FBFCFD" /><stop offset=".7" stopColor="#D9DDE3" /><stop offset="1" stopColor="#A9B0BA" />
@@ -37,12 +39,13 @@ function HeartFace({ uid, variant = 'front', children }) {
  * front: qapağın üstündə (məs. monoqram); inside: içəridə (il sayı).
  */
 export function Locket({ width = 220, open = false, front, inside, lid, uid = 'sl', instant = false, chain = true, style }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ position: 'relative', width, ...style }}>
       {chain && (
-        <div aria-hidden="true" style={{ position: 'absolute', left: '50%', bottom: '100%', width: 2, height: 140, marginLeft: -1, backgroundImage: 'radial-gradient(circle, #C9CED6 1.6px, transparent 2px)', backgroundSize: '2px 7px' }} />
+        <div aria-hidden="true" style={{ position: 'absolute', left: '50%', bottom: '100%', width: 2, height: 140, marginLeft: -1, backgroundImage: `radial-gradient(circle, ${C.SILVER} 1.6px, transparent 2px)`, backgroundSize: '2px 7px' }} />
       )}
-      <div aria-hidden="true" style={{ position: 'absolute', left: '50%', top: -12, width: 18, height: 18, marginLeft: -9, borderRadius: '50%', border: '3px solid #C9CED6' }} />
+      <div aria-hidden="true" style={{ position: 'absolute', left: '50%', top: -12, width: 18, height: 18, marginLeft: -9, borderRadius: '50%', border: `3px solid ${C.SILVER}` }} />
       <div style={{ position: 'relative', width: '100%', aspectRatio: '200 / 184', perspective: 900 }}>
         <HeartFace uid={`${uid}-b`} variant="inside">{inside}</HeartFace>
         <div style={{ position: 'absolute', inset: 0, transformStyle: 'preserve-3d', transformOrigin: '2% 40%', transform: open ? 'rotateY(-158deg)' : 'none', transition: instant ? 'none' : 'transform 1.2s cubic-bezier(.5,0,.2,1) .1s' }}>
@@ -59,7 +62,9 @@ export function Locket({ width = 220, open = false, front, inside, lid, uid = 's
 }
 
 /** Kiçik ürək (gümüş) */
-export function SmallHeart({ size = 16, color = C.SILVER, style }) {
+export function SmallHeart($p) {
+  const C = usePalette(PAL)
+  const { size = 16, color = C.SILVER, style } = $p
   return (
     <svg aria-hidden="true" viewBox="0 0 200 184" width={size} height={size * 0.92} style={{ display: 'block', ...style }}>
       <path d={HEART} fill={color} />
@@ -68,7 +73,9 @@ export function SmallHeart({ size = 16, color = C.SILVER, style }) {
 }
 
 /** Zəncir ornamenti */
-export function ChainRule({ width = 220, color = C.SILVER, style }) {
+export function ChainRule($p) {
+  const C = usePalette(PAL)
+  const { width = 220, color = C.SILVER, style } = $p
   return (
     <div aria-hidden="true" style={{ display: 'flex', alignItems: 'center', gap: 8, width, maxWidth: '100%', margin: '0 auto', ...style }}>
       <span style={{ flex: 1, height: 4, backgroundImage: `radial-gradient(ellipse 3px 2px, transparent 1px, ${color} 1.4px, ${color} 2px, transparent 2.4px)`, backgroundSize: '7px 4px', opacity: 0.85 }} />

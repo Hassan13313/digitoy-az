@@ -7,10 +7,10 @@ export const C = {
 
 /* Toxuma (trikotaj) — kiçik «V» ilmələr */
 const knit = (color, op) => `<svg xmlns='http://www.w3.org/2000/svg' width='14' height='12' viewBox='0 0 14 12'><path d='M1 1l6 9 6-9' fill='none' stroke='${color}' stroke-opacity='${op}' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/></svg>`
-export const KNIT = (color = '#8E6440', op = 0.1) => `url("data:image/svg+xml,${encodeURIComponent(knit(color, op))}")`
+export const KNIT = (C) => ((color = C.HONEY_D, op = 0.1) => `url("data:image/svg+xml,${encodeURIComponent(knit(color, op))}")`)
 
 /* Bayraqcıqlar (girlyanda) */
-export const BUNTING = ['#BFD9EA', '#F2CFCF', '#F2E2B8', '#CFE0CB', '#E6C49E', '#BFD9EA', '#F2CFCF', '#CFE0CB']
+export const BUNTING = (C) => ([C.SKY, C.BLUSH, '#F2E2B8', '#CFE0CB', '#E6C49E', C.SKY, C.BLUSH, '#CFE0CB'])
 
 /* Ad uzunluğuna görə ölçü (Comfortaa) */
 export function nameSize(text) {

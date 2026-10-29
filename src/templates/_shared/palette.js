@@ -51,7 +51,9 @@ export function scaleFont(size, scale) {
 
 export const PaletteContext = createContext(null)
 
-/** Şablonun cari (override tətbiq olunmuş) palitrası */
-export function usePalette() {
-  return useContext(PaletteContext)
+/** Şablonun cari (override tətbiq olunmuş) palitrası.
+    `fallback` — Provider-dən kənarda render olunanda (konsept şablonlarının
+    art.jsx komponentləri) şablonun öz baza palitrası */
+export function usePalette(fallback = null) {
+  return useContext(PaletteContext) || fallback
 }

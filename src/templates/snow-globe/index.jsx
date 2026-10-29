@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C, NIGHT_BG, FROST_BG, nameSize } from './palette'
+import { C as PAL, NIGHT_BG, FROST_BG, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { SnowGlobe, SkySnow, Bauble, Flake, GiftTag } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    SNOW GLOBE — «Qar kürəsi» (Bayram gecələri konsepti, 2026-10)
@@ -28,7 +29,11 @@ import { SnowGlobe, SkySnow, Bauble, Flake, GiftTag } from './art'
 const BASE = getTemplateTheme('snow-globe')
 const ID = 'snow-globe'
 
-const KEYFRAMES = `
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['RED'], secondary: ['PINE'], accent: ['GOLD'], background: ['FROST'], text: ['INK'] }
+
+const KEYFRAMES = (C) => (`
 @keyframes sg-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes sg-fade { from { opacity: 0 } to { opacity: 1 } }
 @keyframes sg-hint { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
@@ -41,10 +46,11 @@ const KEYFRAMES = `
 [data-sg] input:focus-visible, [data-sg] textarea:focus-visible { border-color: ${C.RED} !important; outline: none; }
 [data-sg] button:focus-visible, [data-sg] a:focus-visible, [data-sg] [role="button"]:focus-visible { outline: 2px solid ${C.GOLD}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-sg] *, [data-sg] { animation: none !important; transition: none !important; } }
-`
+`)
 
 /* ═══ 01 — AÇILIŞ: kürə silkələnir ═══ */
 function GlobeOpening({ inv, theme }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -92,15 +98,16 @@ function GlobeOpening({ inv, theme }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, dark = false }) {
+  const C = usePalette(PAL)
   return (
-    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? NIGHT_BG : FROST_BG, color: dark ? C.SNOW : C.INK }}>
+    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? NIGHT_BG : FROST_BG(C), color: dark ? C.SNOW : C.INK }}>
       {dark && <SkySnow />}
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <Flake size={26} color={dark ? C.ICE : C.RED} style={{ margin: '0 auto 10px' }} />
             {kicker && <div style={{ marginBottom: 4, fontSize: 12.5, fontWeight: 700, letterSpacing: '.22em', textTransform: 'uppercase', color: dark ? C.GOLD : C.RED }}>{kicker}</div>}
-            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 400, fontSize: 'clamp(28px, 8.4vw, 38px)', lineHeight: 1.25, textWrap: 'balance', color: dark ? C.SNOW : C.NIGHT }}>{title}</h2>}
+            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 400, fontSize: scaleFont('clamp(28px, 8.4vw, 38px)', C.hs), lineHeight: 1.25, textWrap: 'balance', color: dark ? C.SNOW : C.NIGHT }}>{title}</h2>}
             {sub && <p style={{ margin: '10px auto 0', maxWidth: 340, fontSize: 16.5, color: dark ? alpha(C.ICE, 0.8) : C.MUTED, lineHeight: 1.55 }}>{sub}</p>}
           </div>
         )}
@@ -110,23 +117,24 @@ function Panel({ id, section, title, kicker, sub, children, head, dark = false }
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: '#FFFFFF', border: `1.5px solid ${C.LINE}`, borderRadius: 14,
   padding: '14px 16px', fontSize: 16.5, color: C.INK, outline: 'none',
-}
-const darkField = { ...field, background: alpha('#FFFFFF', 0.1), border: `1.5px solid ${alpha(C.ICE, 0.35)}`, color: C.SNOW }
-const btn = (on) => ({
+})
+const darkField = (C) => ({ ...field(C), background: alpha('#FFFFFF', 0.1), border: `1.5px solid ${alpha(C.ICE, 0.35)}`, color: C.SNOW })
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 24px', borderRadius: 999,
   fontSize: 16, fontWeight: 800, textDecoration: 'none', cursor: 'pointer',
   background: on ? C.RED : '#FFFFFF', color: on ? C.SNOW : C.NIGHT, border: `1.5px solid ${on ? C.RED : C.LINE}`,
-})
-const darkBtn = (on) => ({ ...btn(on), background: on ? C.SNOW : 'transparent', color: on ? C.NIGHT : C.SNOW, border: `1.5px solid ${on ? C.SNOW : alpha(C.ICE, 0.5)}` })
-const suggest = { bg: '#FFFFFF', border: `1.5px solid ${C.LINE}`, active: alpha(C.ICE, 0.8), text: C.INK, table: C.RED, radius: 14 }
+}))
+const darkBtn = (C) => ((on) => ({ ...btn(C)(on), background: on ? C.SNOW : 'transparent', color: on ? C.NIGHT : C.SNOW, border: `1.5px solid ${on ? C.SNOW : alpha(C.ICE, 0.5)}` }))
+const suggest = (C) => ({ bg: '#FFFFFF', border: `1.5px solid ${C.LINE}`, active: alpha(C.ICE, 0.8), text: C.INK, table: C.RED, radius: 14 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function SnowGlobeTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -134,11 +142,11 @@ export default function SnowGlobeTemplate(props) {
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
-    <div data-sg lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-sg lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.FROST, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.ICE, 0.6),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <GlobeOpening inv={inv} theme={theme} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.RED, border: `2px solid ${C.SNOW}`, boxShadow: '0 8px 20px rgba(20,40,66,.4)' }}>
@@ -204,13 +212,13 @@ export default function SnowGlobeTemplate(props) {
                     weddingData={weddingData} theme={theme} accent={C.RED} height="clamp(240px, 66vw, 300px)"
                     map={{ opacity: 0.9, filter: 'saturate(.6) brightness(1.05)', tintOpacity: 0.14, tint: C.ICE, blend: 'multiply' }}
                     frame={<MapPin />}
-                    fallback={<div style={{ height: 'clamp(240px, 66vw, 300px)', position: 'relative', background: FROST_BG }}><MapPin /></div>}
+                    fallback={<div style={{ height: 'clamp(240px, 66vw, 300px)', position: 'relative', background: FROST_BG(C) }}><MapPin /></div>}
                   />
                 </div>
               </div>
               <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontSize: 28, lineHeight: 1.25, color: C.SNOW }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontSize: 16, color: alpha(C.ICE, 0.8) }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn(C)} />
             </Panel>
           )}
 
@@ -239,7 +247,7 @@ export default function SnowGlobeTemplate(props) {
           {/* MASA — hədiyyə etiketi */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="sg-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.ICE, 0.8)} accent={C.SNOW}
+              <SeatFinder inv={inv} tr={tr} listId="sg-seat-list" field={darkField(C)} suggest={suggest(C)} font={body} muted={alpha(C.ICE, 0.8)} accent={C.SNOW}
                 nameStyle={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
                 card={(num) => (
                   <div style={{ paddingTop: 10, filter: 'drop-shadow(0 16px 18px rgba(0,0,0,.45))' }}>
@@ -268,7 +276,7 @@ export default function SnowGlobeTemplate(props) {
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.NIGHT_D} bg="#FFFFFF" frame={{ borderRadius: 18, border: `2px solid ${C.ICE}` }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
             </Panel>
           )}
 
@@ -280,7 +288,7 @@ export default function SnowGlobeTemplate(props) {
                 font: body, display: head, displayItalic: false, btnFont: body,
                 doneMark: <Flake size={44} color={C.RED} style={{ margin: '0 auto 10px' }} />,
                 marker: (a) => (a ? <Flake size={18} color={C.RED} /> : <span style={{ display: 'block', width: 15, height: 15, borderRadius: '50%', border: `2px solid ${C.LINE}` }} />),
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -288,7 +296,7 @@ export default function SnowGlobeTemplate(props) {
           {/* AÇIQCALAR */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.GOLD} />
+              <GuestbookForm inv={inv} field={darkField(C)} btn={darkBtn(C)} errorColor={C.GOLD} />
               <div style={{ display: 'grid', gap: 16 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
@@ -309,11 +317,12 @@ export default function SnowGlobeTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 
 function MapPin() {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
       <span style={{ position: 'absolute', left: -18, top: -18, width: 36, height: 36, borderRadius: '50%', background: C.RED, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 0 3px #FFFFFF, 0 6px 10px rgba(0,0,0,.35)' }}><Flake size={20} color="#FFFFFF" /></span>

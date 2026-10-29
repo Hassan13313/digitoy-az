@@ -1,9 +1,12 @@
-import { C, HAND, TIPS, BANDS } from './palette'
+import { C as PAL, HAND, TIPS, BANDS } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* HENNA BUTA — dekor (hamısı aria-hidden) */
 
 /** Mandala — xına naxışının mərkəzi gülü */
-export function Mandala({ size = 120, color = C.HENNA, petals = 12, disc = null, style, children }) {
+export function Mandala($p) {
+  const C = usePalette(PAL)
+  const { size = 120, color = C.HENNA, petals = 12, disc = null, style, children } = $p
   const step = 360 / petals
   return (
     <div aria-hidden={children ? undefined : 'true'} style={{ position: 'relative', width: size, height: size, ...style }}>
@@ -29,7 +32,9 @@ export function Mandala({ size = 120, color = C.HENNA, petals = 12, disc = null,
 }
 
 /** Yarpaq — sarmaşığın üstündə */
-export function Leaf({ size = 18, color = C.HENNA, rotate = 0, style }) {
+export function Leaf($p) {
+  const C = usePalette(PAL)
+  const { size = 18, color = C.HENNA, rotate = 0, style } = $p
   return (
     <svg aria-hidden="true" viewBox="0 0 20 20" width={size} height={size} style={{ display: 'block', transform: `rotate(${rotate}deg)`, ...style }}>
       <path d="M2 18C2 9 8 3 18 2C17 12 11 18 2 18Z" fill="none" stroke={color} strokeWidth="1.2" />
@@ -39,7 +44,9 @@ export function Leaf({ size = 18, color = C.HENNA, rotate = 0, style }) {
 }
 
 /** Nöqtəli xətt — başlıq ornamenti */
-export function DotRule({ color = C.HENNA, width = 220, style }) {
+export function DotRule($p) {
+  const C = usePalette(PAL)
+  const { color = C.HENNA, width = 220, style } = $p
   return (
     <div aria-hidden="true" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width, maxWidth: '100%', margin: '0 auto', ...style }}>
       <span style={{ flex: 1, height: 2, backgroundImage: `radial-gradient(circle, ${color} 1px, transparent 1.3px)`, backgroundSize: '7px 2px', backgroundRepeat: 'repeat-x' }} />
@@ -56,6 +63,7 @@ export function DotRule({ color = C.HENNA, width = 220, style }) {
  * çəkilir (stroke-dashoffset), barmaq ucları sonra dolur.
  */
 export function HennaHand({ drawn = true, width = 220, instant = false, style }) {
+  const C = usePalette(PAL)
   /* ⚠ yuvarlaq uclu xəttin sıfır uzunluqlu tirəsi nöqtə kimi görünür — çəkilənə qədər opacity 0 */
   const t = (delay, dur = 0.9) => (instant ? {} : { transition: `stroke-dashoffset ${dur}s ease ${delay}s, opacity 0s linear ${delay}s` })
   const line = (delay, dur) => ({ pathLength: 1, style: { strokeDasharray: 1, strokeDashoffset: drawn ? 0 : 1, opacity: drawn ? 1 : 0, ...t(delay, dur) } })

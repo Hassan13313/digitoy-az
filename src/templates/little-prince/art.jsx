@@ -1,4 +1,5 @@
-import { C, DUST } from './palette'
+import { C as PAL, DUST } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* LITTLE PRINCE — dekor (hamısı aria-hidden) */
 
@@ -38,12 +39,13 @@ export function Crown({ width = 120, uid = 'lp', style }) {
 
 /** Qotazlı məxmər yastıq */
 export function Cushion({ width = 220, children, style }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ position: 'relative', width, maxWidth: '100%', ...style }}>
       <svg aria-hidden="true" viewBox="0 0 220 80" width="100%" style={{ display: 'block', overflow: 'visible' }}>
         <defs>
           <radialGradient id="lp-cush" cx="50%" cy="30%" r="80%">
-            <stop offset="0" stopColor="#3B5DB3" /><stop offset=".6" stopColor="#1C3474" /><stop offset="1" stopColor="#0F1C3F" />
+            <stop offset="0" stopColor="#3B5DB3" /><stop offset=".6" stopColor={C.ROYAL} /><stop offset="1" stopColor={C.NAVY} />
           </radialGradient>
         </defs>
         <ellipse cx="110" cy="74" rx="104" ry="7" fill="rgba(0,0,0,.35)" />
@@ -68,6 +70,7 @@ export const SHIELD = 'polygon(0 0, 100% 0, 100% 62%, 50% 100%, 0 62%)'
 
 /** Qızılı toz (fon) */
 export function Dust({ opacity = 1 }) {
+  const C = usePalette(PAL)
   return (
     <div aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'hidden', opacity }}>
       {DUST.map((d, i) => (
@@ -78,7 +81,9 @@ export function Dust({ opacity = 1 }) {
 }
 
 /** Kiçik tac — başlıq ornamenti */
-export function CrownRule({ color = C.GOLD, width = 220, style }) {
+export function CrownRule($p) {
+  const C = usePalette(PAL)
+  const { color = C.GOLD, width = 220, style } = $p
   return (
     <div aria-hidden="true" style={{ display: 'flex', alignItems: 'center', gap: 10, width, maxWidth: '100%', margin: '0 auto', ...style }}>
       <span style={{ flex: 1, height: 1, background: `linear-gradient(90deg, transparent, ${color})` }} />

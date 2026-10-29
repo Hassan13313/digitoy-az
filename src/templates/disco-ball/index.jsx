@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C, CHROME, HOT, NIGHT_BG, LIGHT_BG, SUNBURST, nameSize } from './palette'
+import { C as PAL, CHROME, HOT, NIGHT_BG, LIGHT_BG, SUNBURST, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { MirrorBall, LightSpots, Beam } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    DISCO BALL — «Disko gecəsi» (Qız gecəsi konsepti, 2026-10)
@@ -28,7 +29,11 @@ import { MirrorBall, LightSpots, Beam } from './art'
 const BASE = getTemplateTheme('disco-ball')
 const ID = 'disco-ball'
 
-const KEYFRAMES = `
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['MAGENTA'], secondary: ['LILAC'], accent: ['GOLD'], background: ['LIGHT'], text: ['INK'] }
+
+const KEYFRAMES = (C) => (`
 @keyframes db-in { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes db-fade { from { opacity: 0 } to { opacity: 1 } }
 @keyframes db-hint { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
@@ -43,13 +48,14 @@ const KEYFRAMES = `
 [data-db] input:focus-visible, [data-db] textarea:focus-visible { border-color: ${C.MAGENTA} !important; outline: none; }
 [data-db] button:focus-visible, [data-db] a:focus-visible, [data-db] [role="button"]:focus-visible { outline: 2px solid ${C.GOLD}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-db] *, [data-db] { animation: none !important; transition: none !important; } }
-`
+`)
 
 const chromeText = { backgroundImage: CHROME, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent', filter: 'drop-shadow(0 3px 0 rgba(255,62,165,.55))' }
-const hotText = { backgroundImage: HOT, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' }
+const hotText = (C) => ({ backgroundImage: HOT(C), WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' })
 
 /* ═══ 01 — AÇILIŞ: işıqlar yanır, kürə fırlanır ═══ */
 function DiscoOpening({ inv, theme }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -70,7 +76,7 @@ function DiscoOpening({ inv, theme }) {
           <MirrorBall size={150} spin={go} lit={go} chain={60} />
         </div>
         <div style={{ position: 'relative', marginTop: 26, animation: 'db-in 1s ease-out .2s both' }}>
-          {ot.show('kicker') && <div style={{ fontSize: 13, fontWeight: 500, letterSpacing: '.3em', textTransform: 'uppercase', ...hotText }}>{ot.text('kicker')}</div>}
+          {ot.show('kicker') && <div style={{ fontSize: 13, fontWeight: 500, letterSpacing: '.3em', textTransform: 'uppercase', ...hotText(C) }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
             <div style={{ marginTop: 6, fontFamily: head, fontStyle: 'italic', fontWeight: 800, fontSize: 'clamp(48px, 15vw, 70px)', lineHeight: 1, overflowWrap: 'anywhere', ...chromeText }}>
               {first}{second && <> {ot.text('and')} {second}</>}
@@ -85,7 +91,7 @@ function DiscoOpening({ inv, theme }) {
         </div>
         <motion.div animate={go ? { opacity: 0, y: 8 } : {}} transition={{ duration: 0.25 }} style={{ marginTop: 22 }}>
           {ot.show('cta') && (
-            <div style={{ minHeight: 50, padding: '12px 30px', display: 'inline-flex', alignItems: 'center', borderRadius: 999, background: HOT, color: C.NIGHT_D, fontFamily: head, fontStyle: 'italic', fontWeight: 800, fontSize: 18, letterSpacing: '.04em', boxShadow: '0 0 24px rgba(255,62,165,.55)', animation: 'db-in .8s ease-out .8s both' }}>
+            <div style={{ minHeight: 50, padding: '12px 30px', display: 'inline-flex', alignItems: 'center', borderRadius: 999, background: HOT(C), color: C.NIGHT_D, fontFamily: head, fontStyle: 'italic', fontWeight: 800, fontSize: 18, letterSpacing: '.04em', boxShadow: '0 0 24px rgba(255,62,165,.55)', animation: 'db-in .8s ease-out .8s both' }}>
               {ot.text('cta')}
             </div>
           )}
@@ -98,15 +104,16 @@ function DiscoOpening({ inv, theme }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, dark = false }) {
+  const C = usePalette(PAL)
   return (
-    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? NIGHT_BG : LIGHT_BG, color: dark ? C.SILVER : C.INK }}>
+    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? NIGHT_BG : LIGHT_BG(C), color: dark ? C.SILVER : C.INK }}>
       {dark && <LightSpots style={{ opacity: 0.45 }} />}
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            {kicker && <div style={{ marginBottom: 6, fontSize: 12.5, fontWeight: 500, letterSpacing: '.28em', textTransform: 'uppercase', ...hotText }}>{kicker}</div>}
-            {title && <h2 style={{ margin: 0, fontFamily: head, fontStyle: 'italic', fontWeight: 800, fontSize: 'clamp(32px, 9.4vw, 44px)', lineHeight: 1.05, textWrap: 'balance', ...(dark ? chromeText : { color: C.INK }) }}>{title}</h2>}
-            <span aria-hidden="true" style={{ display: 'block', width: 90, height: 4, margin: '14px auto 0', borderRadius: 2, background: HOT }} />
+            {kicker && <div style={{ marginBottom: 6, fontSize: 12.5, fontWeight: 500, letterSpacing: '.28em', textTransform: 'uppercase', ...hotText(C) }}>{kicker}</div>}
+            {title && <h2 style={{ margin: 0, fontFamily: head, fontStyle: 'italic', fontWeight: 800, fontSize: scaleFont('clamp(32px, 9.4vw, 44px)', C.hs), lineHeight: 1.05, textWrap: 'balance', ...(dark ? chromeText : { color: C.INK }) }}>{title}</h2>}
+            <span aria-hidden="true" style={{ display: 'block', width: 90, height: 4, margin: '14px auto 0', borderRadius: 2, background: HOT(C) }} />
             {sub && <p style={{ margin: '12px auto 0', maxWidth: 340, fontSize: 16, color: dark ? alpha(C.SILVER, 0.75) : C.MUTED, lineHeight: 1.55 }}>{sub}</p>}
           </div>
         )}
@@ -116,23 +123,24 @@ function Panel({ id, section, title, kicker, sub, children, head, dark = false }
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: '#FFFFFF', border: `1.5px solid ${C.LINE}`, borderRadius: 14,
   padding: '14px 16px', fontSize: 16, color: C.INK, outline: 'none',
-}
-const darkField = { ...field, background: alpha('#FFFFFF', 0.07), border: `1.5px solid ${alpha(C.LILAC, 0.4)}`, color: C.SILVER }
-const btn = (on) => ({
+})
+const darkField = (C) => ({ ...field(C), background: alpha('#FFFFFF', 0.07), border: `1.5px solid ${alpha(C.LILAC, 0.4)}`, color: C.SILVER })
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 24px', borderRadius: 999,
   fontSize: 15.5, fontWeight: 500, textDecoration: 'none', cursor: 'pointer',
   background: on ? C.INK : '#FFFFFF', color: on ? C.GOLD : C.INK, border: `1.5px solid ${on ? C.INK : C.LINE}`,
-})
-const darkBtn = (on) => ({ ...btn(on), background: on ? HOT : 'transparent', color: on ? C.NIGHT_D : C.SILVER, border: `1.5px solid ${on ? C.MAGENTA : alpha(C.LILAC, 0.5)}` })
-const suggest = { bg: '#FFFFFF', border: `1.5px solid ${C.LINE}`, active: alpha(C.MAGENTA, 0.12), text: C.INK, table: C.MAGENTA_D, radius: 14 }
+}))
+const darkBtn = (C) => ((on) => ({ ...btn(C)(on), background: on ? HOT(C) : 'transparent', color: on ? C.NIGHT_D : C.SILVER, border: `1.5px solid ${on ? C.MAGENTA : alpha(C.LILAC, 0.5)}` }))
+const suggest = (C) => ({ bg: '#FFFFFF', border: `1.5px solid ${C.LINE}`, active: alpha(C.MAGENTA, 0.12), text: C.INK, table: C.MAGENTA_D, radius: 14 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function DiscoBallTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -141,14 +149,14 @@ export default function DiscoBallTemplate(props) {
   const TILES = [C.MAGENTA, C.GOLD, C.LILAC, '#4FD1C5']
 
   return (
-    <div data-db lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-db lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.NIGHT, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.MAGENTA, 0.4),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <DiscoOpening inv={inv} theme={theme} />}
 
-      <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: HOT, boxShadow: '0 0 22px rgba(255,62,165,.55)' }}>
+      <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: HOT(C), boxShadow: '0 0 22px rgba(255,62,165,.55)' }}>
         {({ playing }) => <EqBars playing={playing} color={C.NIGHT_D} idle={alpha(C.NIGHT_D, 0.4)} />}
       </MusicFab>
 
@@ -158,12 +166,12 @@ export default function DiscoBallTemplate(props) {
             position: 'sticky', top: 0, zIndex: 40, height: 52, padding: '0 16px',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             background: alpha(C.NIGHT_D, 0.9), backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-            borderBottom: '2px solid transparent', borderImage: `${HOT} 1`,
+            borderBottom: '2px solid transparent', borderImage: `${HOT(C)} 1`,
           }}>
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: alpha(C.SILVER, 0.75), fontSize: 15, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontStyle: 'italic', fontWeight: 800, fontSize: 22, ...hotText }}>{T.brand}</div>
+            <div style={{ fontFamily: head, fontStyle: 'italic', fontWeight: 800, fontSize: 22, ...hotText(C) }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
@@ -174,7 +182,7 @@ export default function DiscoBallTemplate(props) {
             <Beam side="right" color="rgba(255,201,74,.28)" />
             <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '30%', background: SUNBURST, animation: 'db-floor 1.2s ease-in-out infinite' }} />
             <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}><MirrorBall size={130} chain={70} /></div>
-            <div style={{ position: 'relative', marginTop: 24, fontSize: 13, fontWeight: 500, letterSpacing: '.3em', textTransform: 'uppercase', ...hotText }}>{L('hero', 'kicker', T.disco)}</div>
+            <div style={{ position: 'relative', marginTop: 24, fontSize: 13, fontWeight: 500, letterSpacing: '.3em', textTransform: 'uppercase', ...hotText(C) }}>{L('hero', 'kicker', T.disco)}</div>
             <h1 style={{ position: 'relative', margin: '6px 0 0', fontFamily: head, fontStyle: 'italic', fontWeight: 800, fontSize: nameSize(heroName), lineHeight: 1, overflowWrap: 'anywhere', ...chromeText, animation: 'db-in 1s ease-out .2s both' }}>{heroName}</h1>
             {inv.isCorp && weddingData.organizer?.trim() && <div style={{ position: 'relative', marginTop: 8, fontSize: 15.5, color: alpha(C.SILVER, 0.8) }}>{tr.organizer_display}: {weddingData.organizer}</div>}
             <div style={{ position: 'relative', marginTop: 20, fontFamily: head, fontStyle: 'italic', fontWeight: 700, fontSize: 'clamp(20px, 5.6vw, 24px)', color: '#FFFFFF' }}>{inv.fullDate}</div>
@@ -205,19 +213,19 @@ export default function DiscoBallTemplate(props) {
           {/* MƏKAN */}
           {S.venue && (
             <Panel section="venue" head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
-              <div style={{ maxWidth: 430, margin: '0 auto', padding: 3, borderRadius: 24, background: HOT, boxShadow: '0 20px 40px -24px rgba(194,31,122,.6)' }}>
+              <div style={{ maxWidth: 430, margin: '0 auto', padding: 3, borderRadius: 24, background: HOT(C), boxShadow: '0 20px 40px -24px rgba(194,31,122,.6)' }}>
                 <div style={{ borderRadius: 21, overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
                     weddingData={weddingData} theme={theme} accent={C.MAGENTA_D} height="clamp(240px, 66vw, 300px)"
                     map={{ opacity: 0.92, filter: 'saturate(.8)', tintOpacity: 0.12, tint: C.LILAC, blend: 'multiply' }}
                     frame={<MapPin />}
-                    fallback={<div style={{ height: 'clamp(240px, 66vw, 300px)', position: 'relative', background: LIGHT_BG }}><MapPin /></div>}
+                    fallback={<div style={{ height: 'clamp(240px, 66vw, 300px)', position: 'relative', background: LIGHT_BG(C) }}><MapPin /></div>}
                   />
                 </div>
               </div>
               <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontStyle: 'italic', fontWeight: 800, fontSize: 26, lineHeight: 1.15, color: C.INK }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 6, fontSize: 12.5, fontWeight: 500, letterSpacing: '.22em', textTransform: 'uppercase', color: C.MAGENTA_D }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn(C)} />
             </Panel>
           )}
 
@@ -245,14 +253,14 @@ export default function DiscoBallTemplate(props) {
           {/* MASA — parlayan kart */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="db-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.SILVER, 0.75)} accent={C.GOLD}
+              <SeatFinder inv={inv} tr={tr} listId="db-seat-list" field={darkField(C)} suggest={suggest(C)} font={body} muted={alpha(C.SILVER, 0.75)} accent={C.GOLD}
                 nameStyle={{ fontFamily: head, fontStyle: 'italic', fontWeight: 800, fontSize: 28, color: '#FFFFFF' }}
                 card={(num) => (
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 16 }}>
                     <MirrorBall size={70} chain={0} />
-                    <div style={{ marginTop: 14, padding: 2.5, borderRadius: 22, background: HOT, boxShadow: '0 0 30px rgba(255,62,165,.5)' }}>
+                    <div style={{ marginTop: 14, padding: 2.5, borderRadius: 22, background: HOT(C), boxShadow: '0 0 30px rgba(255,62,165,.5)' }}>
                       <div style={{ width: 210, padding: '18px 14px 20px', borderRadius: 19.5, background: C.NIGHT_D, textAlign: 'center' }}>
-                        <div style={{ fontSize: 12.5, fontWeight: 500, letterSpacing: '.3em', textTransform: 'uppercase', ...hotText }}>{T.table}{' '}</div>
+                        <div style={{ fontSize: 12.5, fontWeight: 500, letterSpacing: '.3em', textTransform: 'uppercase', ...hotText(C) }}>{T.table}{' '}</div>
                         <div style={{ fontFamily: head, fontStyle: 'italic', fontWeight: 800, fontSize: tableSize(num, 80), lineHeight: 1, ...chromeText }}>{num}</div>
                       </div>
                     </div>
@@ -274,7 +282,7 @@ export default function DiscoBallTemplate(props) {
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.NIGHT} bg="#FFFFFF" frame={{ borderRadius: 18, border: `2.5px solid ${C.MAGENTA}` }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
             </Panel>
           )}
 
@@ -285,8 +293,8 @@ export default function DiscoBallTemplate(props) {
                 ink: C.INK, muted: C.MUTED, line: C.LINE, hair: alpha(C.LINE, 0.7), accent: C.MAGENTA_D,
                 font: body, display: head, displayItalic: true, btnFont: head,
                 doneMark: <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}><MirrorBall size={56} chain={0} /></div>,
-                marker: (a) => <span style={{ display: 'block', width: 15, height: 15, borderRadius: '50%', border: `2px solid ${a ? C.MAGENTA : C.LINE}`, background: a ? HOT : 'transparent' }} />,
-                suggest: { ...suggest, font: body },
+                marker: (a) => <span style={{ display: 'block', width: 15, height: 15, borderRadius: '50%', border: `2px solid ${a ? C.MAGENTA : C.LINE}`, background: a ? HOT(C) : 'transparent' }} />,
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -294,7 +302,7 @@ export default function DiscoBallTemplate(props) {
           {/* ARZULAR */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.GOLD} />
+              <GuestbookForm inv={inv} field={darkField(C)} btn={darkBtn(C)} errorColor={C.GOLD} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
@@ -314,7 +322,7 @@ export default function DiscoBallTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 

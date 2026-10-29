@@ -3,12 +3,15 @@
    Xallı dinozavr yumurtası (çatlayan), balaca dino, qıjı, vulkan,
    uzunboyun dinozavr, iz, sümük, yuva. Hamısı aria-hidden.
    ───────────────────────────────────────────────────────────────────────── */
-import { C, SPOTS } from './palette'
+import { C as PAL, SPOTS } from './palette'
+import { usePalette } from '../_shared/palette'
 
 const EGG_PATH = 'M0 -70C38 -70 56 -10 56 18C56 52 30 72 0 72C-30 72 -56 52 -56 18C-56 -10 -38 -70 0 -70Z'
 const CRACK = 'M-58 -4L-44 -14L-30 -2L-16 -16L0 -4L14 -18L28 -4L42 -16L58 -6'
 
-function EggBody({ id, spot = C.TEAL }) {
+function EggBody($p) {
+  const C = usePalette(PAL)
+  const { id, spot = C.TEAL } = $p
   return (
     <>
       <path d={EGG_PATH} fill={`url(#${id}-g)`} />
@@ -21,6 +24,7 @@ function EggBody({ id, spot = C.TEAL }) {
 }
 
 function EggDefs({ id }) {
+  const C = usePalette(PAL)
   return (
     <defs>
       <radialGradient id={`${id}-g`} cx="36%" cy="30%" r="80%"><stop offset="0" stopColor="#FFFDF5" /><stop offset=".65" stopColor={C.EGG} /><stop offset="1" stopColor="#E3D3AE" /></radialGradient>
@@ -32,6 +36,7 @@ function EggDefs({ id }) {
 
 /** Böyük açılış yumurtası: `open` → çatlar, qapaq uçur, balaca dino çıxır */
 export function HatchEgg({ size = 200, open = false, style }) {
+  const C = usePalette(PAL)
   const id = 'da-hatch'
   return (
     <svg viewBox="-80 -110 160 200" width={size} height={size * 1.25} aria-hidden="true" style={{ display: 'block', overflow: 'visible', ...style }}>
@@ -63,6 +68,7 @@ export function HatchEgg({ size = 200, open = false, style }) {
 
 /** Balaca dino başı (yumurtadan çıxan və «göndərildi» nişanı) */
 export function BabyDinoHead({ scale = 1 }) {
+  const C = usePalette(PAL)
   return (
     <g transform={`scale(${scale})`}>
       <path d="M-22 40V-6C-22 -34 22 -34 22 -6V40Z" fill={C.FERN} />
@@ -101,7 +107,9 @@ export function NumberEgg({ id, spot, children, wobble }) {
 }
 
 /** Qıjı yarpağı */
-export function Fern({ width = 120, color = C.LEAF, flip, style }) {
+export function Fern($p) {
+  const C = usePalette(PAL)
+  const { width = 120, color = C.LEAF, flip, style } = $p
   const leaflets = 9
   return (
     <svg viewBox="0 0 120 160" width={width} height={width * 1.33} aria-hidden="true" style={{ display: 'block', overflow: 'visible', transform: flip ? 'scaleX(-1)' : undefined, ...style }}>
@@ -124,6 +132,7 @@ export function Fern({ width = 120, color = C.LEAF, flip, style }) {
 
 /** Vulkan + tüstü */
 export function Volcano({ width = 200, style }) {
+  const C = usePalette(PAL)
   return (
     <svg viewBox="0 0 200 140" width={width} height={width * 0.7} aria-hidden="true" style={{ display: 'block', overflow: 'visible', ...style }}>
       <defs>
@@ -143,6 +152,7 @@ export function Volcano({ width = 200, style }) {
 
 /** Uzunboyun dinozavr */
 export function Brachio({ width = 220, style }) {
+  const C = usePalette(PAL)
   return (
     <svg viewBox="0 0 220 180" width={width} height={width * 0.82} aria-hidden="true" style={{ display: 'block', overflow: 'visible', ...style }}>
       <path d="M150 120C170 124 196 132 218 150C196 146 176 142 152 140Z" fill={C.LEAF} />
@@ -159,7 +169,9 @@ export function Brachio({ width = 220, style }) {
 }
 
 /** Üç barmaqlı dinozavr izi */
-export function Footprint({ size = 30, color = C.LEAF, style, children }) {
+export function Footprint($p) {
+  const C = usePalette(PAL)
+  const { size = 30, color = C.LEAF, style, children } = $p
   return (
     <div style={{ position: 'relative', width: size, height: size * 1.1, ...style }}>
       <svg viewBox="-30 -34 60 66" width={size} height={size * 1.1} aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'visible' }}>
@@ -176,6 +188,7 @@ export function Footprint({ size = 30, color = C.LEAF, style, children }) {
 
 /** Sümük (fosil) */
 export function Bone({ width = 70, style }) {
+  const C = usePalette(PAL)
   return (
     <svg viewBox="0 0 70 20" width={width} height={width * 0.29} aria-hidden="true" style={{ display: 'block', overflow: 'visible', ...style }}>
       <path d="M10 6C4 0 -2 6 4 10C-2 14 4 20 10 14H60C66 20 72 14 66 10C72 6 66 0 60 6Z" fill={C.BONE} stroke="#C9BC9C" strokeWidth="1.2" />
@@ -185,6 +198,7 @@ export function Bone({ width = 70, style }) {
 
 /** Yuva — xəritə sancağı */
 export function Nest({ size = 56 }) {
+  const C = usePalette(PAL)
   return (
     <svg viewBox="-30 -24 60 40" width={size} height={size * 0.67} aria-hidden="true" style={{ display: 'block', overflow: 'visible' }}>
       <ellipse cx="-8" cy="-4" rx="9" ry="12" fill={C.EGG} stroke="#C9BC9C" />

@@ -5,7 +5,7 @@ export const C = {
   CHAMPAGNE: '#F3E2B3', IVORY: '#F5EFE3', MUTED: '#A99F8E', FAINT: '#6E665A',
 }
 
-export const GOLD_GRAD = 'linear-gradient(160deg, #9C7C34 0%, #F1DCA4 42%, #D4AF61 60%, #8A6A28 100%)'
+export const GOLD_GRAD = (C) => (`linear-gradient(160deg, ${C.GOLD_D} 0%, ${C.GOLD_L} 42%, ${C.GOLD} 60%, #8A6A28 100%)`)
 
 /* Art-deco pilləli künclər */
 export const DECO = 'polygon(14px 0, calc(100% - 14px) 0, calc(100% - 14px) 6px, calc(100% - 6px) 6px, calc(100% - 6px) 14px, 100% 14px, 100% calc(100% - 14px), calc(100% - 6px) calc(100% - 14px), calc(100% - 6px) calc(100% - 6px), calc(100% - 14px) calc(100% - 6px), calc(100% - 14px) 100%, 14px 100%, 14px calc(100% - 6px), 6px calc(100% - 6px), 6px calc(100% - 14px), 0 calc(100% - 14px), 0 14px, 6px 14px, 6px 6px, 14px 6px)'

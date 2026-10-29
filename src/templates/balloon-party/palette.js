@@ -6,7 +6,7 @@ export const C = {
 }
 
 /* Folqa qızılı — şar hərfləri və rəqəm */
-export const FOIL = 'linear-gradient(165deg, #FFF4D6 0%, #F2CF7E 22%, #C9913A 46%, #F7E3A3 62%, #D8A64A 80%, #B9822F 100%)'
+export const FOIL = (C) => (`linear-gradient(165deg, #FFF4D6 0%, #F2CF7E 22%, #C9913A 46%, #F7E3A3 62%, ${C.GOLD} 80%, #B9822F 100%)`)
 export const ROSE_FOIL = 'linear-gradient(165deg, #FFE9E3 0%, #F3B9AA 25%, #C9786A 48%, #F8D3C8 64%, #D99A8A 82%, #B5685C 100%)'
 
 export function seeded(seed) {
@@ -27,11 +27,11 @@ export const BUNCH = [
 ]
 
 /* Konfetti nöqtələri (fon) */
-export const DOTS = (() => {
+export const DOTS = (C) => ((() => {
   const r = seeded(11)
-  const cols = ['#EF8FA8', '#7FC8B0', '#FFE495', '#D6C5F3', '#BFDCF6', '#D8A64A']
+  const cols = ['#EF8FA8', C.MINT_D, '#FFE495', '#D6C5F3', '#BFDCF6', C.GOLD]
   return Array.from({ length: 26 }, (_, i) => ({ x: r() * 100, y: r() * 100, s: 4 + r() * 6, c: cols[i % cols.length], rot: Math.round(r() * 90), sq: r() > 0.6 }))
-})()
+})())
 
 /* Ad uzunluğuna görə şar hərflərinin ölçüsü */
 export function letterSize(text) {

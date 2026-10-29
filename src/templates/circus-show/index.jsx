@@ -9,9 +9,10 @@ import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { ageSentence, ageWord, kidsGalleryDesc, tableNum, tableSize } from '../_shared/kids'
-import { C, CONFETTI, nameSize } from './palette'
+import { C as PAL, CONFETTI, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Star, Bunting, StringLights, Tent, Drum, Starburst, TopHat, Hoop, Pedestal } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    CIRCUS SHOW — «Böyük sirk şousu» (Uşaq ad günü konsepti, 2026-10)
@@ -34,7 +35,11 @@ import { Star, Bunting, StringLights, Tent, Drum, Starburst, TopHat, Hoop, Pedes
 const BASE = getTemplateTheme('circus-show')
 const ID = 'circus-show'
 
-const KEYFRAMES = `
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['RED'], secondary: ['NAVY'], accent: ['MUSTARD'], background: ['PAPER'], text: ['INK'] }
+
+const KEYFRAMES = (C) => (`
 @keyframes cs-bulb { 0%,100% { opacity: .15 } 50% { opacity: .55 } }
 @keyframes cs-flag { 0%,100% { transform: skewY(0) scaleX(1) } 50% { transform: skewY(-8deg) scaleX(.86) } }
 @keyframes cs-spin { to { transform: rotate(360deg) } }
@@ -50,13 +55,14 @@ const KEYFRAMES = `
 [data-cs] input:focus-visible, [data-cs] textarea:focus-visible { border-color: ${C.RED} !important; outline: none; }
 [data-cs] button:focus-visible, [data-cs] a:focus-visible, [data-cs] [role="button"]:focus-visible { outline: 2px solid ${C.NAVY}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-cs] *, [data-cs] { animation: none !important; transition: none !important; } }
-`
+`)
 
-const PAPER_TEX = `radial-gradient(rgba(120,80,40,.07) 1px, transparent 1.3px) 0 0 / 7px 7px, radial-gradient(rgba(120,80,40,.05) 1px, transparent 1.3px) 3px 4px / 11px 11px, ${C.PAPER}`
+const PAPER_TEX = (C) => (`radial-gradient(rgba(120,80,40,.07) 1px, transparent 1.3px) 0 0 / 7px 7px, radial-gradient(rgba(120,80,40,.05) 1px, transparent 1.3px) 3px 4px / 11px 11px, ${C.PAPER}`)
 const up = (s, lang) => String(s || '').toLocaleUpperCase(lang === 'az' ? 'az' : lang === 'ru' ? 'ru' : 'en')
 
 /* ═══ 01 — AÇILIŞ: çadır, nağara, projektorlar ═══ */
 function BigTopOpening({ inv, theme }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -98,7 +104,7 @@ function BigTopOpening({ inv, theme }) {
 
         <div style={{ position: 'relative', width: 'min(78vw, 34vh, 330px)', marginTop: 10 }}>
           <Tent width={330} open={go} glow={go} style={{ width: '100%', height: 'auto', filter: 'drop-shadow(0 18px 24px rgba(0,0,0,.45))' }} />
-          {go && CONFETTI.map((p, i) => (
+          {go && CONFETTI(C).map((p, i) => (
             <span key={i} aria-hidden="true" style={{
               position: 'absolute', left: '50%', top: '62%', width: p.w, height: p.round ? p.w : p.h, borderRadius: p.round ? '50%' : 2, background: p.c,
               '--dx': `${p.dx}px`, '--dy': `${p.dy}px`, '--r': `${p.rot}deg`,
@@ -127,7 +133,8 @@ function BigTopOpening({ inv, theme }) {
 
 /* Bölmə — afişa vərəqi */
 function Act({ id, section, title, kicker, sub, children, body, tone = 'paper' }) {
-  const bg = tone === 'cream' ? C.CREAM : tone === 'navy' ? `radial-gradient(120% 80% at 50% 0%, #2A3A78, ${C.NAVY} 60%)` : PAPER_TEX
+  const C = usePalette(PAL)
+  const bg = tone === 'cream' ? C.CREAM : tone === 'navy' ? `radial-gradient(120% 80% at 50% 0%, #2A3A78, ${C.NAVY} 60%)` : PAPER_TEX(C)
   const navy = tone === 'navy'
   return (
     <section id={id} data-section={section} style={{ position: 'relative', padding: '58px 20px 64px', background: bg }}>
@@ -139,7 +146,7 @@ function Act({ id, section, title, kicker, sub, children, body, tone = 'paper' }
               <Star size={12} color={navy ? C.MUSTARD : C.RED} /><Star size={18} color={C.MUSTARD} /><Star size={12} color={navy ? C.MUSTARD : C.RED} />
               <span style={{ width: 34, height: 2, background: navy ? C.MUSTARD : C.RED }} />
             </div>
-            {title && <h2 style={{ margin: 0, fontFamily: body, fontWeight: 800, fontSize: 'clamp(26px, 7.6vw, 34px)', lineHeight: 1.12, letterSpacing: '.03em', textTransform: 'uppercase', color: navy ? C.CREAM : C.RED, textShadow: `2px 2px 0 ${navy ? C.RED : C.NAVY}`, textWrap: 'balance' }}>{title}</h2>}
+            {title && <h2 style={{ margin: 0, fontFamily: body, fontWeight: 800, fontSize: scaleFont('clamp(26px, 7.6vw, 34px)', C.hs), lineHeight: 1.12, letterSpacing: '.03em', textTransform: 'uppercase', color: navy ? C.CREAM : C.RED, textShadow: `2px 2px 0 ${navy ? C.RED : C.NAVY}`, textWrap: 'balance' }}>{title}</h2>}
             {kicker && <div style={{ marginTop: 10, fontSize: 15.5, color: navy ? alpha(C.CREAM, 0.8) : C.MUTED }}>{kicker}</div>}
             {sub && <p style={{ margin: '8px auto 0', maxWidth: 330, fontSize: 15.5, color: navy ? alpha(C.CREAM, 0.8) : C.MUTED, lineHeight: 1.55 }}>{sub}</p>}
           </div>
@@ -150,21 +157,22 @@ function Act({ id, section, title, kicker, sub, children, body, tone = 'paper' }
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: C.CREAM, border: `2px solid ${alpha(C.NAVY, 0.25)}`, borderRadius: 12,
   padding: '13px 16px', fontSize: 16, color: C.INK, outline: 'none',
-}
-const btn = (on) => ({
+})
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 22px', borderRadius: 999,
   fontSize: 15, fontWeight: 700, letterSpacing: '.03em', textDecoration: 'none', cursor: 'pointer',
   background: on ? C.RED : 'transparent', color: on ? C.CREAM : C.RED, border: `2px solid ${C.RED}`,
-})
-const suggest = { bg: C.CREAM, border: `2px solid ${alpha(C.NAVY, 0.2)}`, active: alpha(C.MUSTARD, 0.22), text: C.INK, table: C.RED, radius: 12 }
+}))
+const suggest = (C) => ({ bg: C.CREAM, border: `2px solid ${alpha(C.NAVY, 0.2)}`, active: alpha(C.MUSTARD, 0.22), text: C.INK, table: C.RED, radius: 12 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function CircusShowTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const disp = theme.fonts.heading
   const body = theme.fonts.body
@@ -173,12 +181,12 @@ export default function CircusShowTemplate(props) {
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
-    <div data-cs lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-cs lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.PAPER,
       minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.RED, 0.2),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <BigTopOpening inv={inv} theme={theme} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.RED, border: `3px solid ${C.CREAM}`, boxShadow: `0 0 0 2px ${C.RED}, 0 8px 18px rgba(0,0,0,.3)` }}>
@@ -201,7 +209,7 @@ export default function CircusShowTemplate(props) {
           </header>
 
           {/* HERO — sirk afişası */}
-          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: PAPER_TEX, paddingBottom: 34 }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: PAPER_TEX(C), paddingBottom: 34 }}>
             <Bunting count={11} height={48} />
             <div style={{ position: 'relative', textAlign: 'center', padding: '6px 18px 0' }}>
               {/* qövs lent */}
@@ -283,10 +291,10 @@ export default function CircusShowTemplate(props) {
               <div style={{ textAlign: 'center', marginTop: 22, fontWeight: 800, fontSize: 22, lineHeight: 1.25, letterSpacing: '.02em', textTransform: 'uppercase', color: C.NAVY }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontSize: 15.5, color: C.MUTED }}>{weddingData.venueNote}</div>}
               <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
-                {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(true)}>{tr.inv_directions_btn}</a>}
-                {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(!inv.dirUrl)}>Maps</a>}
-                {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Waze</a>}
-                {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Apple</a>}
+                {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(true)}>{tr.inv_directions_btn}</a>}
+                {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(!inv.dirUrl)}>Maps</a>}
+                {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>Waze</a>}
+                {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>Apple</a>}
               </div>
             </Act>
           )}
@@ -326,8 +334,8 @@ export default function CircusShowTemplate(props) {
           {/* MASA — zolaqlı halqa */}
           {S.seating && !seating.isEmpty && (
             <Act section="seating" body={body} tone="cream" title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <input {...seatInputProps(inv, 'cs-seat-list')} style={field} />
-              <SeatSuggest inv={inv} id="cs-seat-list" c={{ ...suggest, font: body }} />
+              <input {...seatInputProps(inv, 'cs-seat-list')} style={field(C)} />
+              <SeatSuggest inv={inv} id="cs-seat-list" c={{ ...suggest(C), font: body }} />
               {seating.showNotFound && <div style={{ marginTop: 12, fontSize: 15, color: C.MUTED, textAlign: 'center' }}>{tr.inv_seat_fullname}</div>}
               {seating.selected && (
                 <div style={{ marginTop: 26, textAlign: 'center', animation: 'cs-rise .6s ease-out both' }}>
@@ -362,7 +370,7 @@ export default function CircusShowTemplate(props) {
                   <QRCodeSVG value={gallery.photoShareUrl} size={126} bgColor="#FFFDF6" fgColor={C.NAVY} level="M" />
                 </div>
                 <div style={{ marginTop: 16, fontSize: 15, color: C.MUTED }}>{tr.inv_scan_upload}</div>
-                <a data-press href={gallery.photoShareUrl} style={{ ...btn(true), marginTop: 16 }}>{tr.inv_gallery_btn}</a>
+                <a data-press href={gallery.photoShareUrl} style={{ ...btn(C)(true), marginTop: 16 }}>{tr.inv_gallery_btn}</a>
                 <p style={{ margin: '16px auto 0', maxWidth: 340, fontSize: 15.5, color: C.MUTED, lineHeight: 1.65 }}>{kidsGalleryDesc(props.adminOverrides, tr, lang)}</p>
               </div>
             </Act>
@@ -376,7 +384,7 @@ export default function CircusShowTemplate(props) {
                 font: body, display: body, btnFont: body, btnUpper: true, btnTracking: '.1em',
                 doneMark: <TopHat size={48} style={{ margin: '0 auto 10px' }} />,
                 marker: (a) => (a ? <Star size={18} color={C.RED} /> : <span style={{ display: 'block', width: 12, height: 12, borderRadius: '50%', border: `2px solid ${alpha(C.NAVY, 0.4)}` }} />),
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Act>
           )}
@@ -385,9 +393,9 @@ export default function CircusShowTemplate(props) {
           {S.guestbook && (
             <Act section="guestbook" body={body} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 30 }}>
-                <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbookL.namePh} style={field} />
-                <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbookL.msgPh} rows={3} style={{ ...field, resize: 'none', lineHeight: 1.5 }} />
-                <button type="submit" disabled={!gbook.canSubmit} data-press style={{ ...btn(gbook.canSubmit), width: '100%', opacity: gbook.canSubmit ? 1 : 0.5, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed' }}>
+                <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbookL.namePh} style={field(C)} />
+                <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbookL.msgPh} rows={3} style={{ ...field(C), resize: 'none', lineHeight: 1.5 }} />
+                <button type="submit" disabled={!gbook.canSubmit} data-press style={{ ...btn(C)(gbook.canSubmit), width: '100%', opacity: gbook.canSubmit ? 1 : 0.5, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed' }}>
                   {gbook.sending ? gbookL.sending : gbookL.btn}
                 </button>
                 {gbook.error && <p role="alert" style={{ margin: 0, fontSize: 14, color: C.RED }}>⚠ {gbookL.error}</p>}
@@ -416,7 +424,7 @@ export default function CircusShowTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={body} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 

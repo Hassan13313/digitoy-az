@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C, CREAM_BG, NIGHT_BG, nameSize } from './palette'
+import { C as PAL, CREAM_BG, NIGHT_BG, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Pillow, Feather, FeatherBurst, SleepMask, Cucumber, Moon } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    PAJAMA SPA — «Pijama gecəsi» (Qız gecəsi konsepti, 2026-10)
@@ -28,7 +29,11 @@ import { Pillow, Feather, FeatherBurst, SleepMask, Cucumber, Moon } from './art'
 const BASE = getTemplateTheme('pajama-spa')
 const ID = 'pajama-spa'
 
-const KEYFRAMES = `
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['LILAC_D'], secondary: ['PEACH'], accent: ['MINT_D'], background: ['CREAM'], text: ['INK'] }
+
+const KEYFRAMES = (C) => (`
 @keyframes ps-in { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes ps-fade { from { opacity: 0 } to { opacity: 1 } }
 @keyframes ps-hint { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
@@ -42,10 +47,11 @@ const KEYFRAMES = `
 [data-ps] input:focus-visible, [data-ps] textarea:focus-visible { border-color: ${C.LILAC_D} !important; outline: none; }
 [data-ps] button:focus-visible, [data-ps] a:focus-visible, [data-ps] [role="button"]:focus-visible { outline: 2px solid ${C.LILAC_D}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-ps] *, [data-ps] { animation: none !important; transition: none !important; } }
-`
+`)
 
 /* ═══ 01 — AÇILIŞ: yastıq davası ═══ */
 function PillowOpening({ inv, theme }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -57,7 +63,7 @@ function PillowOpening({ inv, theme }) {
     <motion.div {...gate.gateProps} data-ps
       animate={go ? { opacity: 0 } : {}}
       transition={{ duration: 0.4, delay: 1.75 }}
-      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: CREAM_BG, color: C.INK, fontFamily: theme.fonts.body }}>
+      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: CREAM_BG(C), color: C.INK, fontFamily: theme.fonts.body }}>
       <Moon size={52} style={{ position: 'absolute', right: '16%', top: '9%' }} />
       <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 22px', textAlign: 'center' }}>
         <div style={{ animation: 'ps-in 1s ease-out .2s both' }}>
@@ -101,8 +107,9 @@ function PillowOpening({ inv, theme }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, dark = false }) {
+  const C = usePalette(PAL)
   return (
-    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? NIGHT_BG : CREAM_BG, color: dark ? C.LILAC_L : C.INK }}>
+    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? NIGHT_BG(C) : CREAM_BG(C), color: dark ? C.LILAC_L : C.INK }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
@@ -112,7 +119,7 @@ function Panel({ id, section, title, kicker, sub, children, head, dark = false }
               <Feather size={22} color={dark ? '#FFFFFF' : C.PEACH} style={{ transform: 'rotate(30deg)' }} />
             </div>
             {kicker && <div style={{ marginBottom: 4, fontSize: 12.5, fontWeight: 800, letterSpacing: '.22em', textTransform: 'uppercase', color: dark ? C.MINT : C.LILAC_D }}>{kicker}</div>}
-            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 400, fontSize: 'clamp(34px, 10vw, 46px)', lineHeight: 1.08, textWrap: 'balance', color: dark ? '#FFFFFF' : C.INK }}>{title}</h2>}
+            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 400, fontSize: scaleFont('clamp(34px, 10vw, 46px)', C.hs), lineHeight: 1.08, textWrap: 'balance', color: dark ? '#FFFFFF' : C.INK }}>{title}</h2>}
             {sub && <p style={{ margin: '10px auto 0', maxWidth: 340, fontSize: 16.5, color: dark ? alpha(C.LILAC_L, 0.8) : C.MUTED, lineHeight: 1.55 }}>{sub}</p>}
           </div>
         )}
@@ -122,23 +129,24 @@ function Panel({ id, section, title, kicker, sub, children, head, dark = false }
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: '#FFFFFF', border: `2px solid ${C.LINE}`, borderRadius: 18,
   padding: '14px 16px', fontSize: 16.5, color: C.INK, outline: 'none',
-}
-const darkField = { ...field, background: alpha('#FFFFFF', 0.1), border: `2px solid ${alpha(C.LILAC, 0.4)}`, color: '#FFFFFF' }
-const btn = (on) => ({
+})
+const darkField = (C) => ({ ...field(C), background: alpha('#FFFFFF', 0.1), border: `2px solid ${alpha(C.LILAC, 0.4)}`, color: '#FFFFFF' })
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 24px', borderRadius: 999,
   fontSize: 16, fontWeight: 800, textDecoration: 'none', cursor: 'pointer',
   background: on ? C.LILAC_D : '#FFFFFF', color: on ? '#FFFFFF' : C.INK, border: `2px solid ${on ? C.LILAC_D : C.LINE}`, boxShadow: on ? `0 4px 0 ${C.NIGHT}` : 'none',
-})
-const darkBtn = (on) => ({ ...btn(on), background: on ? C.MINT : 'transparent', color: on ? C.NIGHT_D : '#FFFFFF', border: `2px solid ${on ? C.MINT : alpha(C.LILAC, 0.5)}`, boxShadow: 'none' })
-const suggest = { bg: '#FFFFFF', border: `2px solid ${C.LINE}`, active: alpha(C.LILAC, 0.25), text: C.INK, table: C.LILAC_D, radius: 18 }
+}))
+const darkBtn = (C) => ((on) => ({ ...btn(C)(on), background: on ? C.MINT : 'transparent', color: on ? C.NIGHT_D : '#FFFFFF', border: `2px solid ${on ? C.MINT : alpha(C.LILAC, 0.5)}`, boxShadow: 'none' }))
+const suggest = (C) => ({ bg: '#FFFFFF', border: `2px solid ${C.LINE}`, active: alpha(C.LILAC, 0.25), text: C.INK, table: C.LILAC_D, radius: 18 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function PajamaSpaTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -147,11 +155,11 @@ export default function PajamaSpaTemplate(props) {
   const PASTELS = [C.LILAC, C.MINT, C.PEACH, C.LILAC_L]
 
   return (
-    <div data-ps lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-ps lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.CREAM, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.LILAC, 0.5),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <PillowOpening inv={inv} theme={theme} lang={lang} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.LILAC_D, boxShadow: `0 4px 0 ${C.NIGHT}, 0 10px 20px rgba(59,46,90,.3)` }}>
@@ -174,7 +182,7 @@ export default function PajamaSpaTemplate(props) {
           </header>
 
           {/* HERO — yastıqlar */}
-          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: CREAM_BG, padding: '30px 22px 64px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: CREAM_BG(C), padding: '30px 22px 64px', textAlign: 'center' }}>
             <Moon size={44} style={{ position: 'absolute', right: '12%', top: 24 }} />
             <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', height: 'min(50vw, 200px)' }}>
               <Pillow width="min(46vw, 180px)" style={{ position: 'absolute', left: '50%', bottom: 0, transform: 'translateX(-86%) rotate(-8deg)' }} />
@@ -218,13 +226,13 @@ export default function PajamaSpaTemplate(props) {
                     weddingData={weddingData} theme={theme} accent={C.LILAC_D} height="clamp(240px, 66vw, 300px)"
                     map={{ opacity: 0.92, filter: 'saturate(.7)', tintOpacity: 0.16, tint: C.LILAC, blend: 'multiply' }}
                     frame={<MapPin />}
-                    fallback={<div style={{ height: 'clamp(240px, 66vw, 300px)', position: 'relative', background: CREAM_BG }}><MapPin /></div>}
+                    fallback={<div style={{ height: 'clamp(240px, 66vw, 300px)', position: 'relative', background: CREAM_BG(C) }}><MapPin /></div>}
                   />
                 </div>
               </div>
               <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontSize: 30, lineHeight: 1.15, color: '#FFFFFF' }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 6, fontSize: 16, color: C.MINT }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn(C)} />
             </Panel>
           )}
 
@@ -253,7 +261,7 @@ export default function PajamaSpaTemplate(props) {
           {/* MASA — yuxu maskası */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="ps-seat-list" field={darkField} suggest={suggest} font={body} muted={alpha(C.LILAC_L, 0.8)} accent={C.MINT}
+              <SeatFinder inv={inv} tr={tr} listId="ps-seat-list" field={darkField(C)} suggest={suggest(C)} font={body} muted={alpha(C.LILAC_L, 0.8)} accent={C.MINT}
                 nameStyle={{ fontFamily: head, fontSize: 30, color: '#FFFFFF' }}
                 card={(num) => (
                   <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 22 }}>
@@ -281,7 +289,7 @@ export default function PajamaSpaTemplate(props) {
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.NIGHT} bg="#FFFFFF" frame={{ borderRadius: 22, border: `3px solid ${C.LILAC}` }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
             </Panel>
           )}
 
@@ -293,7 +301,7 @@ export default function PajamaSpaTemplate(props) {
                 font: body, display: head, displayItalic: false, btnFont: head,
                 doneMark: <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><Pillow width={90} /></div>,
                 marker: (a) => (a ? <Cucumber size={18} /> : <span style={{ display: 'block', width: 16, height: 16, borderRadius: '50%', border: `2px solid ${C.LINE}` }} />),
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -301,7 +309,7 @@ export default function PajamaSpaTemplate(props) {
           {/* SÖZLƏR — danışıq buludları */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.MINT} />
+              <GuestbookForm inv={inv} field={darkField(C)} btn={darkBtn(C)} errorColor={C.MINT} />
               <div style={{ display: 'grid', gap: 18 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
@@ -322,7 +330,7 @@ export default function PajamaSpaTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 

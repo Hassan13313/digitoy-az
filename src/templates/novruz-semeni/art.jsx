@@ -1,4 +1,5 @@
-import { C, EGGS, BLADES, COPPER_GRAD } from './palette'
+import { C as PAL, EGGS, BLADES, COPPER_GRAD } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* NOVRUZ SƏMƏNİ — səməni, boyanmış yumurtalar, mis xonça */
 
@@ -21,6 +22,7 @@ export function Egg({ size = 60, i = 0, children, style }) {
 
 /** Səməni qabı: `grown=false` — cücərti yeni çıxır */
 export function Semeni({ size = 220, grown = true, instant = false, style }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ position: 'relative', width: size, ...style }}>
       <svg aria-hidden="true" viewBox="0 0 100 90" width="100%" style={{ display: 'block', overflow: 'visible' }}>
@@ -50,9 +52,10 @@ export function Semeni({ size = 220, grown = true, instant = false, style }) {
 
 /** Mis xonça (sini) */
 export function Tray({ width = 300, children, style }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ position: 'relative', width, ...style }}>
-      <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '34%', borderRadius: '50%', background: COPPER_GRAD, boxShadow: '0 16px 20px -12px rgba(36,51,28,.5), inset 0 -4px 0 rgba(0,0,0,.15)' }} />
+      <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '34%', borderRadius: '50%', background: COPPER_GRAD(C), boxShadow: '0 16px 20px -12px rgba(36,51,28,.5), inset 0 -4px 0 rgba(0,0,0,.15)' }} />
       <span aria-hidden="true" style={{ position: 'absolute', left: '6%', right: '6%', bottom: '4%', height: '26%', borderRadius: '50%', border: '1.5px dashed rgba(94,58,24,.45)' }} />
       <div style={{ position: 'relative' }}>{children}</div>
     </div>
@@ -61,6 +64,7 @@ export function Tray({ width = 300, children, style }) {
 
 /** Kiçik cücərti (bullet) */
 export function Sprout({ size = 24, style }) {
+  const C = usePalette(PAL)
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" width={size} height={size} style={{ display: 'block', overflow: 'visible', ...style }}>
       <path d="M12 22V12" stroke={C.GREEN} strokeWidth="2" strokeLinecap="round" />

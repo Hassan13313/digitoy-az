@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C, GOLD_GRAD, VELVET, nameSize } from './palette'
+import { C as PAL, GOLD_GRAD, VELVET, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Trophy, Laurel, Medal, Plaque } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    AWARD NIGHT — «Mükafat gecəsi» (Korporativ konsepti, 2026-10)
@@ -31,7 +32,11 @@ import { Trophy, Laurel, Medal, Plaque } from './art'
 const BASE = getTemplateTheme('award-night')
 const ID = 'award-night'
 
-const KEYFRAMES = `
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['GOLD'], secondary: ['CARPET'], accent: ['GOLD_L'], background: ['WINE_D'], text: ['CREAM'] }
+
+const KEYFRAMES = (C) => (`
 @keyframes aw-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes aw-fade { from { opacity: 0 } to { opacity: 1 } }
 @keyframes aw-hint { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
@@ -43,13 +48,14 @@ const KEYFRAMES = `
 [data-aw] input:focus-visible, [data-aw] textarea:focus-visible { border-color: ${C.GOLD} !important; outline: none; }
 [data-aw] button:focus-visible, [data-aw] a:focus-visible, [data-aw] [role="button"]:focus-visible { outline: 2px solid ${C.GOLD_L}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-aw] *, [data-aw] { animation: none !important; transition: none !important; } }
-`
+`)
 
-const goldText = { backgroundImage: GOLD_GRAD, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' }
+const goldText = (C) => ({ backgroundImage: GOLD_GRAD(C), WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' })
 const SPARKS = [[-70, -40, 0.6], [64, -60, 0.8], [-40, 30, 1.0], [80, 20, 0.7], [0, -90, 0.9]]
 
 /* ═══ 01 — AÇILIŞ: projektor və kubok ═══ */
 function AwardOpening({ inv, theme }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -72,7 +78,7 @@ function AwardOpening({ inv, theme }) {
           </EmblemSlot>
           {ot.show('kicker') && <div style={{ fontSize: 12.5, fontWeight: 500, letterSpacing: '.4em', textTransform: 'uppercase', color: C.GOLD }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
-            <div style={{ marginTop: 8, fontFamily: head, fontWeight: 500, fontSize: 'clamp(34px, 10vw, 48px)', lineHeight: 1.06, overflowWrap: 'anywhere', ...goldText }}>
+            <div style={{ marginTop: 8, fontFamily: head, fontWeight: 500, fontSize: 'clamp(34px, 10vw, 48px)', lineHeight: 1.06, overflowWrap: 'anywhere', ...goldText(C) }}>
               {first}{second && <><span style={{ display: 'block', fontSize: '.5em' }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
@@ -81,8 +87,8 @@ function AwardOpening({ inv, theme }) {
         {/* kubok və örtük */}
         <div style={{ position: 'relative', width: 'min(42vw, 160px)', marginTop: 26 }}>
           <Trophy width="100%" uid="aw-op" style={{ filter: go ? 'drop-shadow(0 0 24px rgba(246,221,149,.6))' : 'brightness(.35)', transition: 'filter .6s ease .4s' }} />
-          <div aria-hidden="true" style={{ position: 'absolute', left: '-8%', right: '-8%', top: '-6%', height: '82%', borderRadius: '50% 50% 12% 12% / 60% 60% 12% 12%', background: VELVET, boxShadow: `inset 0 -6px 0 ${C.GOLD_D}, 0 10px 18px rgba(0,0,0,.5)`, transform: go ? 'translateY(-160%) rotate(-8deg)' : 'none', opacity: go ? 0 : 1, transition: 'transform .9s cubic-bezier(.5,0,.3,1) .2s, opacity .5s ease .5s' }}>
-            <span style={{ position: 'absolute', left: '50%', top: -10, width: 14, height: 14, marginLeft: -7, borderRadius: '50%', background: GOLD_GRAD }} />
+          <div aria-hidden="true" style={{ position: 'absolute', left: '-8%', right: '-8%', top: '-6%', height: '82%', borderRadius: '50% 50% 12% 12% / 60% 60% 12% 12%', background: VELVET(C), boxShadow: `inset 0 -6px 0 ${C.GOLD_D}, 0 10px 18px rgba(0,0,0,.5)`, transform: go ? 'translateY(-160%) rotate(-8deg)' : 'none', opacity: go ? 0 : 1, transition: 'transform .9s cubic-bezier(.5,0,.3,1) .2s, opacity .5s ease .5s' }}>
+            <span style={{ position: 'absolute', left: '50%', top: -10, width: 14, height: 14, marginLeft: -7, borderRadius: '50%', background: GOLD_GRAD(C) }} />
           </div>
           {go && SPARKS.map(([x, y, d], i) => (
             <span key={i} aria-hidden="true" style={{ position: 'absolute', left: `calc(50% + ${x}px)`, top: `calc(40% + ${y}px)`, width: 16, height: 16, background: C.GOLD_L, clipPath: 'polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%)', animation: `aw-sparkle 1s ease-in-out ${d}s 2` }} />
@@ -90,7 +96,7 @@ function AwardOpening({ inv, theme }) {
         </div>
         <motion.div animate={go ? { opacity: 0, y: 8 } : {}} transition={{ duration: 0.3 }} style={{ marginTop: 26 }}>
           {ot.show('cta') && (
-            <div style={{ minHeight: 50, padding: '12px 30px', display: 'inline-flex', alignItems: 'center', borderRadius: 999, background: GOLD_GRAD, color: C.INK, fontWeight: 600, fontSize: 13.5, letterSpacing: '.2em', textTransform: 'uppercase', boxShadow: '0 14px 26px -12px rgba(225,181,78,.6)', animation: 'aw-rise .8s ease-out .8s both' }}>
+            <div style={{ minHeight: 50, padding: '12px 30px', display: 'inline-flex', alignItems: 'center', borderRadius: 999, background: GOLD_GRAD(C), color: C.INK, fontWeight: 600, fontSize: 13.5, letterSpacing: '.2em', textTransform: 'uppercase', boxShadow: '0 14px 26px -12px rgba(225,181,78,.6)', animation: 'aw-rise .8s ease-out .8s both' }}>
               {ot.text('cta')}
             </div>
           )}
@@ -103,14 +109,15 @@ function AwardOpening({ inv, theme }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, cream = false }) {
+  const C = usePalette(PAL)
   const mute = cream ? '#7A5A52' : C.MUTED
   return (
-    <section id={id} data-section={section} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: cream ? `radial-gradient(90% 60% at 50% 0%, #FFFBF1, transparent 70%), ${C.CREAM}` : VELVET, color: cream ? C.INK : C.CREAM }}>
+    <section id={id} data-section={section} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: cream ? `radial-gradient(90% 60% at 50% 0%, #FFFBF1, transparent 70%), ${C.CREAM}` : VELVET(C), color: cream ? C.INK : C.CREAM }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <Laurel width={120} color={cream ? C.GOLD_D : C.GOLD} />
-            {title && <h2 style={{ margin: '4px 0 0', fontFamily: head, fontWeight: 500, fontSize: 'clamp(29px, 8.4vw, 38px)', lineHeight: 1.12, textWrap: 'balance', ...(cream ? { color: C.WINE } : goldText) }}>{title}</h2>}
+            {title && <h2 style={{ margin: '4px 0 0', fontFamily: head, fontWeight: 500, fontSize: scaleFont('clamp(29px, 8.4vw, 38px)', C.hs), lineHeight: 1.12, textWrap: 'balance', ...(cream ? { color: C.WINE } : goldText(C)) }}>{title}</h2>}
             {kicker && <div style={{ marginTop: 8, fontSize: 12.5, fontWeight: 500, letterSpacing: '.28em', textTransform: 'uppercase', color: mute }}>{kicker}</div>}
             {sub && <p style={{ margin: '10px auto 0', maxWidth: 340, fontSize: 15.5, color: mute, lineHeight: 1.6 }}>{sub}</p>}
           </div>
@@ -121,21 +128,22 @@ function Panel({ id, section, title, kicker, sub, children, head, cream = false 
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: '#FFFCF5', border: `1px solid ${alpha(C.GOLD_D, 0.45)}`, borderRadius: 4,
   padding: '14px 16px', fontSize: 16, color: C.INK, outline: 'none',
-}
-const btn = (on) => ({
+})
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 22px', borderRadius: 999,
   fontSize: 13, fontWeight: 600, letterSpacing: '.16em', textTransform: 'uppercase', textDecoration: 'none', cursor: 'pointer',
-  background: on ? GOLD_GRAD : 'transparent', color: on ? C.INK : C.GOLD_L, border: `1px solid ${on ? C.GOLD : alpha(C.GOLD, 0.5)}`,
-})
-const suggest = { bg: '#FFFCF5', border: `1px solid ${alpha(C.GOLD_D, 0.4)}`, active: alpha(C.GOLD_L, 0.4), text: C.INK, table: C.WINE, radius: 4 }
+  background: on ? GOLD_GRAD(C) : 'transparent', color: on ? C.INK : C.GOLD_L, border: `1px solid ${on ? C.GOLD : alpha(C.GOLD, 0.5)}`,
+}))
+const suggest = (C) => ({ bg: '#FFFCF5', border: `1px solid ${alpha(C.GOLD_D, 0.4)}`, active: alpha(C.GOLD_L, 0.4), text: C.INK, table: C.WINE, radius: 4 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function AwardNightTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -144,14 +152,14 @@ export default function AwardNightTemplate(props) {
   const host = inv.isCorp ? weddingData.organizer?.trim() : ''
 
   return (
-    <div data-aw lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-aw lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.WINE_D, minHeight: '100vh', fontFamily: body, color: C.CREAM, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.GOLD, 0.3),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <AwardOpening inv={inv} theme={theme} />}
 
-      <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: GOLD_GRAD, boxShadow: '0 8px 20px rgba(0,0,0,.55)' }}>
+      <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: GOLD_GRAD(C), boxShadow: '0 8px 20px rgba(0,0,0,.55)' }}>
         {({ playing }) => <EqBars playing={playing} color={C.INK} idle={alpha(C.INK, 0.4)} />}
       </MusicFab>
 
@@ -166,19 +174,19 @@ export default function AwardNightTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 14, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontWeight: 600, fontSize: 19, letterSpacing: '.08em', ...goldText }}>{T.brand}</div>
+            <div style={{ fontFamily: head, fontWeight: 600, fontSize: 19, letterSpacing: '.08em', ...goldText(C) }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
           {/* HERO — çələng və kubok */}
-          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: VELVET, padding: '40px 22px 58px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: VELVET(C), padding: '40px 22px 58px', textAlign: 'center' }}>
             <div aria-hidden="true" style={{ position: 'absolute', left: '50%', top: -20, width: 520, height: 420, transform: 'translateX(-50%)', background: 'linear-gradient(180deg, rgba(255,240,200,.28), transparent 85%)', clipPath: 'polygon(42% 0, 58% 0, 92% 100%, 8% 100%)', filter: 'blur(3px)' }} />
             <div style={{ position: 'relative' }}>
               <Laurel width="min(80vw, 300px)">
                 <div style={{ width: '46%', marginTop: '6%' }}><Trophy width="100%" uid="aw-hero" style={{ filter: 'drop-shadow(0 0 18px rgba(246,221,149,.45))' }} /></div>
               </Laurel>
               <div style={{ marginTop: 18, fontSize: 12.5, fontWeight: 500, letterSpacing: '.4em', textTransform: 'uppercase', color: C.GOLD }}>{L('hero', 'kicker', inv.eventLabel)}</div>
-              <h1 style={{ margin: '10px 0 0', fontFamily: head, fontWeight: 500, fontSize: nameSize(heroName), lineHeight: 1.05, overflowWrap: 'anywhere', ...goldText, animation: 'aw-rise 1s ease-out .2s both' }}>{heroName}</h1>
+              <h1 style={{ margin: '10px 0 0', fontFamily: head, fontWeight: 500, fontSize: nameSize(heroName), lineHeight: 1.05, overflowWrap: 'anywhere', ...goldText(C), animation: 'aw-rise 1s ease-out .2s both' }}>{heroName}</h1>
               {host && <div style={{ marginTop: 10, fontSize: 13, letterSpacing: '.2em', textTransform: 'uppercase', color: C.MUTED }}>{T.host} · <span style={{ color: C.CREAM }}>{host}</span></div>}
               <Plaque style={{ display: 'inline-block', marginTop: 22 }}>
                 <div style={{ fontFamily: head, fontWeight: 600, fontSize: 'clamp(18px, 5vw, 22px)', letterSpacing: '.04em' }}>{inv.fullDate}</div>
@@ -209,7 +217,7 @@ export default function AwardNightTemplate(props) {
           {/* MƏKAN */}
           {S.venue && (
             <Panel section="venue" head={head} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
-              <div style={{ maxWidth: 430, margin: '0 auto', padding: 4, background: GOLD_GRAD, boxShadow: '0 26px 40px -24px rgba(0,0,0,.8)' }}>
+              <div style={{ maxWidth: 430, margin: '0 auto', padding: 4, background: GOLD_GRAD(C), boxShadow: '0 26px 40px -24px rgba(0,0,0,.8)' }}>
                 <div style={{ padding: 10, background: C.WINE_D }}>
                   <div style={{ overflow: 'hidden', isolation: 'isolate', outline: `1px solid ${alpha(C.GOLD, 0.5)}` }}>
                     <MapSection
@@ -223,7 +231,7 @@ export default function AwardNightTemplate(props) {
               </div>
               <div style={{ textAlign: 'center', marginTop: 26, fontFamily: head, fontWeight: 500, fontSize: 26, lineHeight: 1.2, color: C.CREAM }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 6, fontSize: 12.5, letterSpacing: '.24em', textTransform: 'uppercase', color: C.MUTED }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn(C)} />
             </Panel>
           )}
 
@@ -251,7 +259,7 @@ export default function AwardNightTemplate(props) {
           {/* MASA — mis lövhə */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} cream title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="aw-seat-list" field={field} suggest={suggest} font={body} muted="#7A5A52" accent={C.WINE}
+              <SeatFinder inv={inv} tr={tr} listId="aw-seat-list" field={field(C)} suggest={suggest(C)} font={body} muted="#7A5A52" accent={C.WINE}
                 nameStyle={{ fontFamily: head, fontWeight: 500, fontSize: 24 }}
                 card={(num) => (
                   <Plaque style={{ display: 'inline-block', minWidth: 200, padding: '22px 30px 18px', overflow: 'hidden', animation: 'aw-plaque .7s cubic-bezier(.3,.8,.4,1) both' }}>
@@ -276,7 +284,7 @@ export default function AwardNightTemplate(props) {
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.WINE_D} bg="#FFFCF5" frame={{ boxShadow: `0 0 0 6px ${C.WINE_D}, 0 0 0 8px ${C.GOLD}` }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'event')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'event')} />
             </Panel>
           )}
 
@@ -287,8 +295,8 @@ export default function AwardNightTemplate(props) {
                 ink: C.INK, muted: '#7A5A52', line: alpha(C.WINE, 0.4), hair: alpha(C.WINE, 0.18), accent: C.WINE,
                 font: body, display: head, btnFont: body,
                 doneMark: <div style={{ width: 70, margin: '0 auto 10px' }}><Trophy width="100%" uid="aw-done" /></div>,
-                marker: (a) => (a ? <span style={{ display: 'block', width: 14, height: 14, borderRadius: '50%', background: GOLD_GRAD, boxShadow: `0 0 0 2px ${C.WINE}` }} /> : <span style={{ display: 'block', width: 14, height: 14, borderRadius: '50%', border: `1px solid ${alpha(C.WINE, 0.45)}` }} />),
-                suggest: { ...suggest, font: body },
+                marker: (a) => (a ? <span style={{ display: 'block', width: 14, height: 14, borderRadius: '50%', background: GOLD_GRAD(C), boxShadow: `0 0 0 2px ${C.WINE}` }} /> : <span style={{ display: 'block', width: 14, height: 14, borderRadius: '50%', border: `1px solid ${alpha(C.WINE, 0.45)}` }} />),
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -296,7 +304,7 @@ export default function AwardNightTemplate(props) {
           {/* TƏBRİKLƏR */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.GOLD_L} />
+              <GuestbookForm inv={inv} field={field(C)} btn={btn(C)} errorColor={C.GOLD_L} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
@@ -315,7 +323,7 @@ export default function AwardNightTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 

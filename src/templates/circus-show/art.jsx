@@ -3,10 +3,13 @@
    Zolaqlı sirk çadırı, nağara, bayraqcıq girləndi, lampa girləndi, ulduz
    partlayışı, silindr papaq, halqa, ulduz. Hamısı aria-hidden.
    ───────────────────────────────────────────────────────────────────────── */
-import { C } from './palette'
+import { C as PAL } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* Beşguşəli ulduz */
-export function Star({ size = 16, color = C.MUSTARD, style }) {
+export function Star($p) {
+  const C = usePalette(PAL)
+  const { size = 16, color = C.MUSTARD, style } = $p
   return (
     <svg viewBox="-10 -10 20 20" width={size} height={size} aria-hidden="true" style={{ display: 'inline-block', verticalAlign: 'middle', overflow: 'visible', ...style }}>
       <path d="M0 -9.5L2.8 -3L9.6 -3L4.2 1.2L6.2 8.4L0 4.2L-6.2 8.4L-4.2 1.2L-9.6 -3L-2.8 -3Z" fill={color} />
@@ -16,6 +19,7 @@ export function Star({ size = 16, color = C.MUSTARD, style }) {
 
 /* Bayraqcıq girləndi — enə uzanır */
 export function Bunting({ count = 11, height = 46, style }) {
+  const C = usePalette(PAL)
   const cols = [C.RED, C.MUSTARD, C.TEAL, C.CREAM, C.NAVY]
   const w = 400 / count
   return (
@@ -34,6 +38,7 @@ export function Bunting({ count = 11, height = 46, style }) {
 
 /* Lampa girləndi — gecə səhnəsi */
 export function StringLights({ count = 12, style }) {
+  const C = usePalette(PAL)
   return (
     <svg viewBox="0 0 400 60" preserveAspectRatio="none" width="100%" height="60" aria-hidden="true" style={{ display: 'block', overflow: 'visible', ...style }}>
       <path d="M-10 6Q100 52 200 18Q300 -10 410 34" fill="none" stroke="#0A0F26" strokeWidth="1.5" />
@@ -54,6 +59,7 @@ export function StringLights({ count = 12, style }) {
 
 /* Sirk çadırı — viewBox 0 0 300 230; `open` → giriş pərdələri yığılır */
 export function Tent({ width = 280, open = false, glow = false, style }) {
+  const C = usePalette(PAL)
   const wedges = 10
   const roof = []
   for (let i = 0; i < wedges; i++) {
@@ -105,6 +111,7 @@ export function Tent({ width = 280, open = false, glow = false, style }) {
 
 /* Sirk nağarası — viewBox 0 0 140 110 */
 export function Drum({ width = 130, style }) {
+  const C = usePalette(PAL)
   const zig = []
   for (let i = 0; i < 9; i++) {
     const x = 14 + i * 14
@@ -141,6 +148,7 @@ const BURST = (() => {
   return d + 'Z'
 })()
 export function Starburst({ size = 120, children, style }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ position: 'relative', width: size, height: size, ...style }}>
       <svg viewBox="-52 -52 104 104" width={size} height={size} aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'visible' }}>
@@ -155,6 +163,7 @@ export function Starburst({ size = 120, children, style }) {
 
 /* Silindr papaq — «cavab göndərildi» */
 export function TopHat({ size = 46, style }) {
+  const C = usePalette(PAL)
   return (
     <svg viewBox="0 0 60 50" width={size} height={size * 0.83} aria-hidden="true" style={{ display: 'block', overflow: 'visible', ...style }}>
       <ellipse cx="30" cy="42" rx="27" ry="6" fill={C.NAVY} />
@@ -168,6 +177,7 @@ export function TopHat({ size = 46, style }) {
 
 /* Zolaqlı halqa — masa nömrəsi */
 export function Hoop({ size = 220, children }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ position: 'relative', width: size, height: size, margin: '0 auto' }}>
       <svg viewBox="-60 -60 120 120" width={size} height={size} aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'visible', animation: 'cs-spin 18s linear infinite' }}>
@@ -186,7 +196,9 @@ export function Hoop({ size = 220, children }) {
 }
 
 /* Nağara postamenti — sayğac */
-export function Pedestal({ color = C.RED, band = C.MUSTARD, children }) {
+export function Pedestal($p) {
+  const C = usePalette(PAL)
+  const { color = C.RED, band = C.MUSTARD, children } = $p
   return (
     <div style={{ position: 'relative' }}>
       <svg viewBox="0 0 80 96" width="100%" aria-hidden="true" style={{ display: 'block', overflow: 'visible' }}>

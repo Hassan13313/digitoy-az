@@ -5,11 +5,11 @@ export const C = {
   GOLD: '#E2BD6A', GOLD_L: '#F7E2A8', BRASS: '#C9A04A', WOOD: '#7A4B2A', INK: '#1C2A4A', MUTED: '#6A7387', LINE: '#E1E5EE',
 }
 
-export const SASH = `linear-gradient(180deg, #E0213F 0%, #C8102E 45%, #A50D26 100%)`
-export const GOLD_GRAD = 'linear-gradient(160deg, #B8913E 0%, #F7E2A8 40%, #E2BD6A 62%, #B8913E 100%)'
+export const SASH = (C) => (`linear-gradient(180deg, #E0213F 0%, ${C.RED} 45%, #A50D26 100%)`)
+export const GOLD_GRAD = (C) => (`linear-gradient(160deg, #B8913E 0%, #F7E2A8 40%, ${C.GOLD} 62%, #B8913E 100%)`)
 /* Dama-dama dəftər vərəqi */
-export const GRID_BG = `linear-gradient(rgba(28,42,74,.06) 1px, transparent 1px) 0 0 / 22px 22px, linear-gradient(90deg, rgba(28,42,74,.06) 1px, transparent 1px) 0 0 / 22px 22px, #FFFFFF`
-export const NAVY_BG = `radial-gradient(70% 50% at 50% 0%, rgba(226,189,106,.14), transparent 70%), linear-gradient(180deg, #22325A, #1C2A4A)`
+export const GRID_BG = (C) => (`linear-gradient(rgba(28,42,74,.06) 1px, transparent 1px) 0 0 / 22px 22px, linear-gradient(90deg, rgba(28,42,74,.06) 1px, transparent 1px) 0 0 / 22px 22px, ${C.WHITE}`)
+export const NAVY_BG = (C) => (`radial-gradient(70% 50% at 50% 0%, rgba(226,189,106,.14), transparent 70%), linear-gradient(180deg, #22325A, ${C.NAVY})`)
 
 /* Ad uzunluğuna görə ölçü */
 export function nameSize(text) {

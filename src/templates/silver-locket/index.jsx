@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize, yearsSentence } from '../_shared/kids'
-import { C, SILVER_GRAD, NIGHT_BG, nameSize } from './palette'
+import { C as PAL, SILVER_GRAD, NIGHT_BG, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Locket, SmallHeart, ChainRule } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    SILVER LOCKET — «Gümüş medalyon» (İldönümü konsepti, 2026-10)
@@ -30,7 +31,11 @@ import { Locket, SmallHeart, ChainRule } from './art'
 const BASE = getTemplateTheme('silver-locket')
 const ID = 'silver-locket'
 
-const KEYFRAMES = `
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['ROSE_D'], secondary: ['ROSE'], accent: ['SILVER'], background: ['IVORY'], text: ['INK'] }
+
+const KEYFRAMES = (C) => (`
 @keyframes sl2-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes sl2-fade { from { opacity: 0 } to { opacity: 1 } }
 @keyframes sl2-hint { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
@@ -42,10 +47,10 @@ const KEYFRAMES = `
 [data-sl2] input:focus-visible, [data-sl2] textarea:focus-visible { border-color: ${C.ROSE_D} !important; outline: none; }
 [data-sl2] button:focus-visible, [data-sl2] a:focus-visible, [data-sl2] [role="button"]:focus-visible { outline: 2px solid ${C.SILVER}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-sl2] *, [data-sl2] { animation: none !important; transition: none !important; } }
-`
+`)
 
-const IVORY_BG = `radial-gradient(90% 60% at 50% 0%, #FFFFFF, transparent 70%), ${C.IVORY}`
-const silverText = { backgroundImage: SILVER_GRAD, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' }
+const IVORY_BG = (C) => (`radial-gradient(90% 60% at 50% 0%, #FFFFFF, transparent 70%), ${C.IVORY}`)
+const silverText = (C) => ({ backgroundImage: SILVER_GRAD(C), WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' })
 
 function yearsParts(age, lang) {
   if (!age) return null
@@ -55,6 +60,7 @@ function yearsParts(age, lang) {
 
 /* ═══ 01 — AÇILIŞ: medalyon açılır ═══ */
 function LocketOpening({ inv, theme, lang }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -86,7 +92,7 @@ function LocketOpening({ inv, theme, lang }) {
         <div style={{ marginTop: 30, animation: 'sl2-rise 1s ease-out .3s both' }}>
           {ot.show('kicker') && <div style={{ fontSize: 12.5, fontWeight: 600, letterSpacing: '.32em', textTransform: 'uppercase', color: C.SILVER_D }}>{ot.text('kicker')}</div>}
           {titleOv !== '' && (
-            <div style={{ marginTop: 8, fontFamily: head, fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(38px, 11.4vw, 54px)', lineHeight: 1.06, overflowWrap: 'anywhere', ...silverText }}>
+            <div style={{ marginTop: 8, fontFamily: head, fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(38px, 11.4vw, 54px)', lineHeight: 1.06, overflowWrap: 'anywhere', ...silverText(C) }}>
               {first}{second && <><span style={{ display: 'inline-block', margin: '0 .2em', color: C.ROSE, WebkitTextFillColor: C.ROSE }}>{ot.text('and')}</span>{second}</>}
             </div>
           )}
@@ -94,7 +100,7 @@ function LocketOpening({ inv, theme, lang }) {
         </div>
         <motion.div animate={go ? { opacity: 0, y: 8 } : {}} transition={{ duration: 0.3 }} style={{ marginTop: 24 }}>
           {ot.show('cta') && (
-            <div style={{ minHeight: 50, padding: '12px 30px', display: 'inline-flex', alignItems: 'center', borderRadius: 999, background: SILVER_GRAD, color: C.INK, fontWeight: 600, fontSize: 14.5, letterSpacing: '.06em', boxShadow: '0 12px 26px -12px rgba(201,206,214,.5)', animation: 'sl2-rise .8s ease-out .8s both' }}>
+            <div style={{ minHeight: 50, padding: '12px 30px', display: 'inline-flex', alignItems: 'center', borderRadius: 999, background: SILVER_GRAD(C), color: C.INK, fontWeight: 600, fontSize: 14.5, letterSpacing: '.06em', boxShadow: '0 12px 26px -12px rgba(201,206,214,.5)', animation: 'sl2-rise .8s ease-out .8s both' }}>
               {ot.text('cta')}
             </div>
           )}
@@ -107,14 +113,15 @@ function LocketOpening({ inv, theme, lang }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, dark = false }) {
+  const C = usePalette(PAL)
   const mute = dark ? C.MUTED : C.MUTED
   return (
-    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? NIGHT_BG : IVORY_BG, color: dark ? C.IVORY : C.INK }}>
+    <section id={id} data-section={section} data-dark={dark ? '' : undefined} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: dark ? NIGHT_BG : IVORY_BG(C), color: dark ? C.IVORY : C.INK }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <ChainRule width={200} color={dark ? C.SILVER : C.SILVER_D} />
-            {title && <h2 style={{ margin: '14px 0 0', fontFamily: head, fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(32px, 9.4vw, 44px)', lineHeight: 1.1, textWrap: 'balance', ...(dark ? silverText : { color: C.INK }) }}>{title}</h2>}
+            {title && <h2 style={{ margin: '14px 0 0', fontFamily: head, fontStyle: 'italic', fontWeight: 400, fontSize: scaleFont('clamp(32px, 9.4vw, 44px)', C.hs), lineHeight: 1.1, textWrap: 'balance', ...(dark ? silverText(C) : { color: C.INK }) }}>{title}</h2>}
             {kicker && <div style={{ marginTop: 8, fontSize: 12.5, fontWeight: 600, letterSpacing: '.26em', textTransform: 'uppercase', color: mute }}>{kicker}</div>}
             {sub && <p style={{ margin: '10px auto 0', maxWidth: 340, fontSize: 15.5, color: mute, lineHeight: 1.6 }}>{sub}</p>}
           </div>
@@ -125,23 +132,24 @@ function Panel({ id, section, title, kicker, sub, children, head, dark = false }
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: '#FFFFFF', border: `1px solid ${alpha(C.SILVER_D, 0.5)}`, borderRadius: 12,
   padding: '14px 16px', fontSize: 16, color: C.INK, outline: 'none',
-}
-const darkField = { ...field, background: alpha('#000000', 0.25), border: `1px solid ${alpha(C.SILVER, 0.35)}`, color: C.IVORY }
-const btn = (on) => ({
+})
+const darkField = (C) => ({ ...field(C), background: alpha('#000000', 0.25), border: `1px solid ${alpha(C.SILVER, 0.35)}`, color: C.IVORY })
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 24px', borderRadius: 999,
   fontSize: 14.5, fontWeight: 600, letterSpacing: '.04em', textDecoration: 'none', cursor: 'pointer',
   background: on ? C.INK : 'transparent', color: on ? C.SILVER_L : C.INK, border: `1px solid ${on ? C.INK : alpha(C.INK, 0.35)}`,
-})
-const darkBtn = (on) => ({ ...btn(on), background: on ? SILVER_GRAD : 'transparent', color: on ? C.INK : C.SILVER_L, border: `1px solid ${on ? C.SILVER : alpha(C.SILVER, 0.45)}` })
-const suggest = { bg: '#FFFFFF', border: `1px solid ${alpha(C.SILVER_D, 0.45)}`, active: alpha(C.ROSE, 0.2), text: C.INK, table: C.ROSE_D, radius: 12 }
+}))
+const darkBtn = (C) => ((on) => ({ ...btn(C)(on), background: on ? SILVER_GRAD(C) : 'transparent', color: on ? C.INK : C.SILVER_L, border: `1px solid ${on ? C.SILVER : alpha(C.SILVER, 0.45)}` }))
+const suggest = (C) => ({ bg: '#FFFFFF', border: `1px solid ${alpha(C.SILVER_D, 0.45)}`, active: alpha(C.ROSE, 0.2), text: C.INK, table: C.ROSE_D, radius: 12 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function SilverLocketTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -150,14 +158,14 @@ export default function SilverLocketTemplate(props) {
   const yp = yearsParts(inv.age, lang)
 
   return (
-    <div data-sl2 lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-sl2 lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.IVORY, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.SILVER, 0.35),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <LocketOpening inv={inv} theme={theme} lang={lang} />}
 
-      <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: SILVER_GRAD, boxShadow: '0 8px 20px rgba(20,25,35,.4)' }}>
+      <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: SILVER_GRAD(C), boxShadow: '0 8px 20px rgba(20,25,35,.4)' }}>
         {({ playing }) => <EqBars playing={playing} color={C.INK} idle={alpha(C.INK, 0.35)} />}
       </MusicFab>
 
@@ -172,7 +180,7 @@ export default function SilverLocketTemplate(props) {
             <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: C.MUTED, fontSize: 14.5, cursor: 'pointer', minHeight: 44, padding: '0 8px 0 0', fontFamily: body }}>
               <span aria-hidden="true">←</span>{tr.btn_back}
             </button>
-            <div style={{ fontFamily: head, fontStyle: 'italic', fontSize: 21, ...silverText }}>{T.brand}</div>
+            <div style={{ fontFamily: head, fontStyle: 'italic', fontSize: 21, ...silverText(C) }}>{T.brand}</div>
             <LanguageSwitcher lang={lang} setLang={setLang} theme={theme} />
           </header>
 
@@ -188,7 +196,7 @@ export default function SilverLocketTemplate(props) {
                 ) : <SmallHeart size={38} color={C.ROSE_D} />} style={{ transform: 'translateX(44%)' }} />
             </div>
             <div style={{ marginTop: 28, fontSize: 12.5, fontWeight: 600, letterSpacing: '.32em', textTransform: 'uppercase', color: C.SILVER_D }}>{L('hero', 'kicker', inv.eventLabel)}</div>
-            <h1 style={{ margin: '10px 0 0', fontFamily: head, fontStyle: 'italic', fontWeight: 400, fontSize: nameSize(heroName), lineHeight: 1.05, overflowWrap: 'anywhere', ...silverText, animation: 'sl2-rise 1s ease-out .2s both' }}>{heroName}</h1>
+            <h1 style={{ margin: '10px 0 0', fontFamily: head, fontStyle: 'italic', fontWeight: 400, fontSize: nameSize(heroName), lineHeight: 1.05, overflowWrap: 'anywhere', ...silverText(C), animation: 'sl2-rise 1s ease-out .2s both' }}>{heroName}</h1>
             {yp && <div style={{ marginTop: 10, fontFamily: head, fontStyle: 'italic', fontSize: 22, color: C.ROSE }}>{yearsSentence(inv.age, lang)}</div>}
             <ChainRule width={220} style={{ marginTop: 18 }} />
             <div style={{ marginTop: 16, fontFamily: head, fontSize: 'clamp(21px, 6vw, 26px)', color: C.IVORY }}>{inv.fullDate}</div>
@@ -203,7 +211,7 @@ export default function SilverLocketTemplate(props) {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 3vw, 14px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop]) => (
                   <div key={l} style={{ textAlign: 'center' }}>
-                    <div style={{ aspectRatio: '1', borderRadius: '50%', padding: 4, background: 'conic-gradient(from 200deg, #8D949E, #F4F6F9, #C9CED6, #FFFFFF, #9AA1AB, #DDE1E6, #8D949E)', boxShadow: '0 12px 20px -12px rgba(20,25,35,.55)' }}>
+                    <div style={{ aspectRatio: '1', borderRadius: '50%', padding: 4, background: `conic-gradient(from 200deg, #8D949E, #F4F6F9, ${C.SILVER}, #FFFFFF, #9AA1AB, #DDE1E6, #8D949E)`, boxShadow: '0 12px 20px -12px rgba(20,25,35,.55)' }}>
                       <div style={{ height: '100%', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(circle at 40% 35%, #FFFFFF, #E4E7EB 70%)', boxShadow: 'inset 0 2px 6px rgba(0,0,0,.15)' }}>
                         <span style={{ fontFamily: head, fontWeight: 500, fontSize: 'clamp(24px, 7vw, 32px)', lineHeight: 1, color: C.INK, fontVariantNumeric: 'tabular-nums' }}><PopDigit value={v} pop={pop} /></span>
                       </div>
@@ -220,19 +228,19 @@ export default function SilverLocketTemplate(props) {
           {/* MƏKAN */}
           {S.venue && (
             <Panel section="venue" head={head} dark title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
-              <div style={{ maxWidth: 430, margin: '0 auto', padding: 5, borderRadius: 26, background: SILVER_GRAD, boxShadow: '0 26px 40px -24px rgba(0,0,0,.8)' }}>
+              <div style={{ maxWidth: 430, margin: '0 auto', padding: 5, borderRadius: 26, background: SILVER_GRAD(C), boxShadow: '0 26px 40px -24px rgba(0,0,0,.8)' }}>
                 <div style={{ borderRadius: 21, overflow: 'hidden', isolation: 'isolate' }}>
                   <MapSection
                     weddingData={weddingData} theme={theme} accent={C.ROSE_D} height="clamp(250px, 70vw, 320px)"
                     map={{ opacity: 0.85, filter: 'grayscale(.7) brightness(1.02)', tintOpacity: 0.12, tint: C.ROSE, blend: 'multiply' }}
                     frame={<MapPin />}
-                    fallback={<div style={{ height: 'clamp(250px, 70vw, 320px)', position: 'relative', background: IVORY_BG }}><MapPin /></div>}
+                    fallback={<div style={{ height: 'clamp(250px, 70vw, 320px)', position: 'relative', background: IVORY_BG(C) }}><MapPin /></div>}
                   />
                 </div>
               </div>
               <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontStyle: 'italic', fontSize: 27, lineHeight: 1.2, color: C.IVORY }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 6, fontSize: 12.5, fontWeight: 600, letterSpacing: '.22em', textTransform: 'uppercase', color: C.MUTED }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={darkBtn(C)} />
             </Panel>
           )}
 
@@ -264,7 +272,7 @@ export default function SilverLocketTemplate(props) {
           {/* MASA — medalyonun içi */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} dark title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="sl2-seat-list" field={darkField} suggest={suggest} font={body} muted={C.MUTED} accent={C.SILVER_L}
+              <SeatFinder inv={inv} tr={tr} listId="sl2-seat-list" field={darkField(C)} suggest={suggest(C)} font={body} muted={C.MUTED} accent={C.SILVER_L}
                 nameStyle={{ fontFamily: head, fontStyle: 'italic', fontSize: 26 }}
                 card={(num) => (
                   <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 20 }}>
@@ -293,7 +301,7 @@ export default function SilverLocketTemplate(props) {
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.INK} bg="#FFFFFF" frame={{ borderRadius: 18, border: '4px solid #DDE1E6', boxShadow: '0 0 0 1px #9AA1AB' }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
             </Panel>
           )}
 
@@ -305,7 +313,7 @@ export default function SilverLocketTemplate(props) {
                 font: body, display: head, displayItalic: true, btnFont: body,
                 doneMark: <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><SmallHeart size={34} color={C.ROSE_D} /></div>,
                 marker: (a) => (a ? <SmallHeart size={14} color={C.ROSE_D} /> : <span style={{ display: 'block', width: 14, height: 14, borderRadius: '50%', border: `1px solid ${alpha(C.SILVER_D, 0.7)}` }} />),
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -313,7 +321,7 @@ export default function SilverLocketTemplate(props) {
           {/* ARZULAR */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} dark title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={darkField} btn={darkBtn} errorColor={C.ROSE} />
+              <GuestbookForm inv={inv} field={darkField(C)} btn={darkBtn(C)} errorColor={C.ROSE} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
@@ -333,11 +341,12 @@ export default function SilverLocketTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 
 function MapPin() {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
       <span style={{ position: 'absolute', left: -18, top: -40, filter: 'drop-shadow(0 6px 8px rgba(0,0,0,.35))' }}><SmallHeart size={36} color={C.ROSE_D} /></span>

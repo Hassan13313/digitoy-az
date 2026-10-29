@@ -5,9 +5,9 @@ export const C = {
   CREAM: '#F7EEDC', INK: '#1B0A0E', MUTED: '#CDB1A8', FAINT: '#8E6F69',
 }
 
-export const GOLD_GRAD = 'linear-gradient(160deg, #A07A22 0%, #F6DD95 40%, #E1B54E 60%, #8C6618 100%)'
+export const GOLD_GRAD = (C) => (`linear-gradient(160deg, #A07A22 0%, ${C.GOLD_L} 40%, ${C.GOLD} 60%, #8C6618 100%)`)
 export const BRASS = 'linear-gradient(180deg, #F3D98E 0%, #D9AE4A 45%, #B98C2C 55%, #E6C470 100%)'
-export const VELVET = `repeating-linear-gradient(90deg, rgba(0,0,0,.18) 0 3%, rgba(255,255,255,.03) 6%, rgba(0,0,0,.14) 10%), radial-gradient(90% 60% at 50% 0%, #6E1426, ${C.WINE} 50%, ${C.WINE_D})`
+export const VELVET = (C) => (`repeating-linear-gradient(90deg, rgba(0,0,0,.18) 0 3%, rgba(255,255,255,.03) 6%, rgba(0,0,0,.14) 10%), radial-gradient(90% 60% at 50% 0%, #6E1426, ${C.WINE} 50%, ${C.WINE_D})`)
 
 /* Ad uzunluğuna görə ölçü (Cormorant SC) */
 export function nameSize(text) {

@@ -6,7 +6,7 @@ export const C = {
 }
 
 /* Köhnə kağız */
-export const PAPER_BG = `radial-gradient(120% 70% at 50% 0%, rgba(255,255,255,.55), transparent 70%), radial-gradient(circle, rgba(154,123,87,.05) 1px, transparent 1.5px) 0 0 / 5px 5px, ${C.PAPER}`
+export const PAPER_BG = (C) => (`radial-gradient(120% 70% at 50% 0%, rgba(255,255,255,.55), transparent 70%), radial-gradient(circle, rgba(154,123,87,.05) 1px, transparent 1.5px) 0 0 / 5px 5px, ${C.PAPER}`)
 
 /* Poçt markası kənarı (perforasiya) */
 export const PERF = {

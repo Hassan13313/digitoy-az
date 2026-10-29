@@ -1,14 +1,16 @@
-import { C } from './palette'
+import { C as PAL } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* AWARD NIGHT — dekor */
 
 /** Kubok (iki qulplu, postamentli) */
 export function Trophy({ width = 150, uid = 'aw', style }) {
+  const C = usePalette(PAL)
   return (
     <svg aria-hidden="true" viewBox="0 0 120 150" width={width} style={{ display: 'block', overflow: 'visible', ...style }}>
       <defs>
         <linearGradient id={`${uid}-g`} x1="0" x2="1">
-          <stop offset="0" stopColor="#8C6618" /><stop offset=".25" stopColor="#E1B54E" /><stop offset=".45" stopColor="#FFF1C2" /><stop offset=".65" stopColor="#E1B54E" /><stop offset="1" stopColor="#7A5612" />
+          <stop offset="0" stopColor="#8C6618" /><stop offset=".25" stopColor={C.GOLD} /><stop offset=".45" stopColor="#FFF1C2" /><stop offset=".65" stopColor={C.GOLD} /><stop offset="1" stopColor="#7A5612" />
         </linearGradient>
       </defs>
       {/* qulplar */}
@@ -23,7 +25,7 @@ export function Trophy({ width = 150, uid = 'aw', style }) {
       <ellipse cx="60" cy="98" rx="16" ry="4" fill={`url(#${uid}-g)`} />
       {/* postament */}
       <rect x="34" y="102" width="52" height="12" rx="2" fill={`url(#${uid}-g)`} />
-      <rect x="28" y="114" width="64" height="26" rx="2" fill="#2A060E" stroke={`url(#${uid}-g)`} strokeWidth="2" />
+      <rect x="28" y="114" width="64" height="26" rx="2" fill={C.WINE_D} stroke={`url(#${uid}-g)`} strokeWidth="2" />
       <rect x="40" y="121" width="40" height="12" rx="1" fill={`url(#${uid}-g)`} opacity=".9" />
       {/* ulduz */}
       <path d="M60 28l3.5 7.2 8 1.1-5.8 5.6 1.4 7.9L60 46l-7.1 3.8 1.4-7.9-5.8-5.6 8-1.1z" fill="#FFF6D6" opacity=".9" />
@@ -32,7 +34,9 @@ export function Trophy({ width = 150, uid = 'aw', style }) {
 }
 
 /** Dəfnə çələngi (yarım) — iki tərəfli */
-export function Laurel({ width = 220, color = C.GOLD, style, children }) {
+export function Laurel($p) {
+  const C = usePalette(PAL)
+  const { width = 220, color = C.GOLD, style, children } = $p
   const leaves = (flip) => (
     <g transform={flip ? 'translate(200 0) scale(-1 1)' : undefined}>
       <path d="M100 96C60 96 30 70 24 30" fill="none" stroke={color} strokeWidth="1.6" />
@@ -56,12 +60,14 @@ export function Laurel({ width = 220, color = C.GOLD, style, children }) {
 }
 
 /** Medal — lentli */
-export function Medal({ size = 80, children, ribbon = [C.CARPET, C.GOLD], style }) {
+export function Medal($p) {
+  const C = usePalette(PAL)
+  const { size = 80, children, ribbon = [C.CARPET, C.GOLD], style } = $p
   return (
     <div style={{ position: 'relative', width: size, margin: '0 auto', paddingTop: size * 0.42, ...style }}>
       <span aria-hidden="true" style={{ position: 'absolute', left: '22%', top: 0, width: '26%', height: size * 0.58, background: ribbon[0], clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 85%, 0 100%)', transform: 'rotate(14deg)', transformOrigin: '50% 0' }} />
       <span aria-hidden="true" style={{ position: 'absolute', right: '22%', top: 0, width: '26%', height: size * 0.58, background: ribbon[1], clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 85%, 0 100%)', transform: 'rotate(-14deg)', transformOrigin: '50% 0' }} />
-      <div style={{ position: 'relative', width: size, height: size, borderRadius: '50%', background: 'conic-gradient(from 200deg, #8C6618, #F6DD95, #E1B54E, #FFF1C2, #A07A22, #E1B54E, #8C6618)', boxShadow: '0 10px 16px -8px rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ position: 'relative', width: size, height: size, borderRadius: '50%', background: `conic-gradient(from 200deg, #8C6618, ${C.GOLD_L}, ${C.GOLD}, #FFF1C2, #A07A22, ${C.GOLD}, #8C6618)`, boxShadow: '0 10px 16px -8px rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ position: 'absolute', inset: '10%', borderRadius: '50%', border: '1px dashed rgba(90,60,10,.45)' }} />
         <div style={{ position: 'relative', textAlign: 'center' }}>{children}</div>
       </div>
@@ -71,6 +77,7 @@ export function Medal({ size = 80, children, ribbon = [C.CARPET, C.GOLD], style 
 
 /** Mis lövhə — vintli */
 export function Plaque({ children, style }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ position: 'relative', padding: '16px 26px', borderRadius: 4, background: 'linear-gradient(180deg, #F3D98E 0%, #D9AE4A 45%, #B98C2C 55%, #E6C470 100%)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,.6), inset 0 -2px 0 rgba(90,60,10,.3), 0 14px 24px -14px rgba(0,0,0,.7)', color: C.INK, ...style }}>
       {[[8, 8], [8, null], [null, 8], [null, null]].map(([l, t], i) => (

@@ -6,7 +6,7 @@ export const C = {
 }
 
 /* Akvarel kağızı — incə dən */
-export const PAPER_BG = `radial-gradient(circle at 20% 30%, rgba(239,184,184,.10), transparent 40%), radial-gradient(circle at 80% 70%, rgba(169,194,162,.12), transparent 42%), radial-gradient(circle, rgba(78,63,69,.035) 1px, transparent 1.4px) 0 0 / 6px 6px, ${C.PAPER}`
+export const PAPER_BG = (C) => (`radial-gradient(circle at 20% 30%, rgba(239,184,184,.10), transparent 40%), radial-gradient(circle at 80% 70%, rgba(169,194,162,.12), transparent 42%), radial-gradient(circle, rgba(78,63,69,.035) 1px, transparent 1.4px) 0 0 / 6px 6px, ${C.PAPER}`)
 
 /* Çiçəklər: [x%, y%, ölçü px, rəng, gecikmə, fırlanma] — açılış və hero çələngi */
 export const OPEN_BLOOMS = [
@@ -18,13 +18,13 @@ export const WREATH = Array.from({ length: 12 }, (_, i) => {
   const tones = ['blush', 'sage', 'butter', 'lavender', 'blush', 'sky', 'sage', 'blush', 'butter', 'lavender', 'sage', 'blush']
   return { x: 50 + Math.cos(a) * 39, y: 50 + Math.sin(a) * 39, s: i % 3 === 0 ? 86 : i % 3 === 1 ? 58 : 70, tone: tones[i], r: (i * 47) % 360 }
 })
-export const TONES = {
-  blush: ['#F7D3D2', '#EBA9AC', '#D98E93'],
-  sage: ['#D5E3D0', '#A9C2A2', '#7E9C78'],
+export const TONES = (C) => ({
+  blush: ['#F7D3D2', '#EBA9AC', C.BLUSH_D],
+  sage: ['#D5E3D0', C.SAGE, '#7E9C78'],
   butter: ['#FBEBC6', '#F0D293', '#DDB66A'],
-  lavender: ['#E7DFF4', '#CDBFE6', '#A898CF'],
+  lavender: ['#E7DFF4', C.LAVENDER, '#A898CF'],
   sky: ['#DDEBF5', '#B9D6EA', '#8DB6D3'],
-}
+})
 
 /* Ad uzunluğuna görə ölçü */
 export function nameSize(text) {

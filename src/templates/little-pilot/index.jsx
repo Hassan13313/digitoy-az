@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize, ageWord } from '../_shared/kids'
-import { C, SKY_BG, nameSize } from './palette'
+import { C as PAL, SKY_BG, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Cloud, Sky, Plane, PlaneIcon, TailFin } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    LITTLE PILOT — «Kiçik pilot» (Sünnət toyu konsepti, 2026-10)
@@ -31,7 +32,11 @@ import { Cloud, Sky, Plane, PlaneIcon, TailFin } from './art'
 const BASE = getTemplateTheme('little-pilot')
 const ID = 'little-pilot'
 
-const KEYFRAMES = `
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['RED'], secondary: ['SKY_D'], accent: ['YELLOW'], background: ['CREAM'], text: ['NAVY'] }
+
+const KEYFRAMES = (C) => (`
 @keyframes lp2-drift { from { transform: translateX(-14px) } to { transform: translateX(14px) } }
 @keyframes lp2-prop { from { transform: scaleY(1) } 50% { transform: scaleY(.2) } to { transform: scaleY(1) } }
 @keyframes lp2-bob { 0%,100% { transform: translateY(0) rotate(-1deg) } 50% { transform: translateY(-8px) rotate(1deg) } }
@@ -45,16 +50,17 @@ const KEYFRAMES = `
 [data-lp2] input:focus-visible, [data-lp2] textarea:focus-visible { border-color: ${C.SKY_D} !important; outline: none; }
 [data-lp2] button:focus-visible, [data-lp2] a:focus-visible, [data-lp2] [role="button"]:focus-visible { outline: 3px solid ${C.NAVY}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-lp2] *, [data-lp2] { animation: none !important; transition: none !important; } }
-`
+`)
 
-const LIGHT_BG = `radial-gradient(90% 60% at 50% 0%, #FFFFFF, transparent 70%), ${C.CREAM}`
+const LIGHT_BG = (C) => (`radial-gradient(90% 60% at 50% 0%, #FFFFFF, transparent 70%), ${C.CREAM}`)
 
 /** Bayraq (adı daşıyır) + kəndir + təyyarə */
 function Towline({ children, planeW = 112, badge }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ position: 'relative', flex: '0 1 auto', minWidth: 0, transformOrigin: '100% 50%', animation: 'lp2-wave 2.4s ease-in-out infinite' }}>
-        <div style={{ position: 'relative', padding: '12px 22px 12px 34px', background: C.CREAM, clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 9% 50%)', boxShadow: 'inset 0 4px 0 #E5533D, inset 0 -4px 0 #E5533D' }}>
+        <div style={{ position: 'relative', padding: '12px 22px 12px 34px', background: C.CREAM, clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 9% 50%)', boxShadow: `inset 0 4px 0 ${C.RED}, inset 0 -4px 0 ${C.RED}` }}>
           {children}
         </div>
       </div>
@@ -68,6 +74,7 @@ function Towline({ children, planeW = 112, badge }) {
 
 /* ═══ 01 — AÇILIŞ: təyyarə uçur ═══ */
 function PilotOpening({ inv, theme }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -78,7 +85,7 @@ function PilotOpening({ inv, theme }) {
     <motion.div {...gate.gateProps} data-lp2
       animate={go ? { opacity: 0 } : {}}
       transition={{ duration: 0.4, delay: 1.7 }}
-      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: SKY_BG, color: C.NAVY, fontFamily: theme.fonts.body }}>
+      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: SKY_BG(C), color: C.NAVY, fontFamily: theme.fonts.body }}>
       <Sky part={go} />
       <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 12px', textAlign: 'center' }}>
         <div style={{ animation: 'lp2-rise 1s ease-out .2s both' }}>
@@ -119,8 +126,9 @@ function PilotOpening({ inv, theme }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, sky = false }) {
+  const C = usePalette(PAL)
   return (
-    <section id={id} data-section={section} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: sky ? SKY_BG : LIGHT_BG, color: C.NAVY }}>
+    <section id={id} data-section={section} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: sky ? SKY_BG(C) : LIGHT_BG(C), color: C.NAVY }}>
       {sky && <Sky opacity={0.6} />}
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
@@ -130,7 +138,7 @@ function Panel({ id, section, title, kicker, sub, children, head, sky = false })
               <PlaneIcon size={24} color={sky ? C.CLOUD : C.RED} />
               <span style={{ width: 56, borderTop: `2px dashed ${sky ? C.CLOUD : alpha(C.SKY_D, 0.6)}` }} />
             </div>
-            {title && <h2 style={{ margin: '12px 0 0', fontFamily: head, fontWeight: 800, fontSize: 'clamp(26px, 7.6vw, 34px)', lineHeight: 1.15, color: sky ? C.CLOUD : C.NAVY, textShadow: sky ? '0 2px 10px rgba(24,50,79,.3)' : 'none', textWrap: 'balance' }}>{title}</h2>}
+            {title && <h2 style={{ margin: '12px 0 0', fontFamily: head, fontWeight: 800, fontSize: scaleFont('clamp(26px, 7.6vw, 34px)', C.hs), lineHeight: 1.15, color: sky ? C.CLOUD : C.NAVY, textShadow: sky ? '0 2px 10px rgba(24,50,79,.3)' : 'none', textWrap: 'balance' }}>{title}</h2>}
             {kicker && <div style={{ marginTop: 8, fontWeight: 600, fontSize: 15.5, color: sky ? C.NAVY : C.MUTED }}>{kicker}</div>}
             {sub && <p style={{ margin: '8px auto 0', maxWidth: 340, fontSize: 15.5, color: sky ? C.NAVY : C.MUTED, lineHeight: 1.6 }}>{sub}</p>}
           </div>
@@ -141,19 +149,20 @@ function Panel({ id, section, title, kicker, sub, children, head, sky = false })
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: C.CLOUD, border: `2px solid ${alpha(C.SKY_D, 0.3)}`, borderRadius: 16,
   padding: '13px 16px', fontSize: 16, color: C.NAVY, outline: 'none',
-}
-const btn = (on) => ({
+})
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 22px', borderRadius: 999,
   fontSize: 15.5, fontWeight: 700, textDecoration: 'none', cursor: 'pointer',
   background: on ? C.RED : C.CLOUD, color: on ? C.CLOUD : C.NAVY, border: `2px solid ${on ? C.RED : alpha(C.NAVY, 0.25)}`,
-})
-const suggest = { bg: C.CLOUD, border: `2px solid ${alpha(C.SKY_D, 0.25)}`, active: alpha(C.SKY, 0.4), text: C.NAVY, table: C.RED, radius: 16 }
+}))
+const suggest = (C) => ({ bg: C.CLOUD, border: `2px solid ${alpha(C.SKY_D, 0.25)}`, active: alpha(C.SKY, 0.4), text: C.NAVY, table: C.RED, radius: 16 })
 
 /* Pilot cihazı — sayğac */
 function Gauge({ value, max, label, pop, head }) {
+  const C = usePalette(PAL)
   const angle = -135 + Math.min(1, (Number(value) || 0) / max) * 270
   return (
     <div style={{ textAlign: 'center' }}>
@@ -179,6 +188,7 @@ function Gauge({ value, max, label, pop, head }) {
 export default function LittlePilotTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -187,11 +197,11 @@ export default function LittlePilotTemplate(props) {
   const age = inv.age
 
   return (
-    <div data-lp2 lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-lp2 lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.CREAM, minHeight: '100vh', fontFamily: body, color: C.NAVY, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.SKY, 0.4),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <PilotOpening inv={inv} theme={theme} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.RED, border: `3px solid ${C.CLOUD}`, boxShadow: '0 8px 18px rgba(184,58,40,.4)' }}>
@@ -214,7 +224,7 @@ export default function LittlePilotTemplate(props) {
           </header>
 
           {/* HERO — göy üzü və bayraq */}
-          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: SKY_BG, padding: '46px 12px 56px', textAlign: 'center' }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: SKY_BG(C), padding: '46px 12px 56px', textAlign: 'center' }}>
             <Sky />
             <div style={{ position: 'relative' }}>
               <div style={{ fontFamily: head, fontWeight: 700, fontSize: 15, letterSpacing: '.12em', textTransform: 'uppercase', color: C.CLOUD, textShadow: '0 1px 6px rgba(24,50,79,.35)' }}>{L('hero', 'kicker', inv.eventLabel)}</div>
@@ -259,13 +269,13 @@ export default function LittlePilotTemplate(props) {
                     weddingData={weddingData} theme={theme} accent={C.RED} height="min(100vw, 400px)"
                     map={{ opacity: 0.95, filter: 'saturate(1.05)', tintOpacity: 0.1, tint: C.SKY, blend: 'multiply' }}
                     frame={<MapPin />}
-                    fallback={<div style={{ height: 'min(100vw, 400px)', position: 'relative', background: SKY_BG }}><MapPin /></div>}
+                    fallback={<div style={{ height: 'min(100vw, 400px)', position: 'relative', background: SKY_BG(C) }}><MapPin /></div>}
                   />
                 </div>
               </div>
               <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontWeight: 800, fontSize: 22, lineHeight: 1.25, color: C.NAVY }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontWeight: 600, fontSize: 15, color: C.NAVY, opacity: 0.8 }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn(C)} />
             </Panel>
           )}
 
@@ -301,7 +311,7 @@ export default function LittlePilotTemplate(props) {
           {/* MASA — quyruq */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} sky title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="lp2-seat-list" field={field} suggest={suggest} font={body} muted={C.NAVY} accent={C.RED}
+              <SeatFinder inv={inv} tr={tr} listId="lp2-seat-list" field={field(C)} suggest={suggest(C)} font={body} muted={C.NAVY} accent={C.RED}
                 nameStyle={{ fontFamily: head, fontWeight: 800, fontSize: 20, color: C.NAVY }}
                 card={(num) => (
                   <TailFin width={190} style={{ animation: 'lp2-land .8s cubic-bezier(.3,.8,.4,1) both' }}>
@@ -325,7 +335,7 @@ export default function LittlePilotTemplate(props) {
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.NAVY} bg={C.CLOUD} frame={{ borderRadius: 24, border: '6px solid #EEF3F7', boxShadow: '0 0 0 1px #C8D5E0' }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
             </Panel>
           )}
 
@@ -337,7 +347,7 @@ export default function LittlePilotTemplate(props) {
                 font: body, display: head, btnFont: head,
                 doneMark: <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><Plane width={90} /></div>,
                 marker: (a) => (a ? <PlaneIcon size={16} color={C.RED} /> : <span style={{ display: 'block', width: 14, height: 14, borderRadius: '50%', border: `2px solid ${alpha(C.SKY_D, 0.5)}` }} />),
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -345,7 +355,7 @@ export default function LittlePilotTemplate(props) {
           {/* MESAJLAR */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} sky title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.RED_D} />
+              <GuestbookForm inv={inv} field={field(C)} btn={btn(C)} errorColor={C.RED_D} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
@@ -366,11 +376,12 @@ export default function LittlePilotTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 
 function MapPin() {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
       <span style={{ position: 'absolute', left: -20, top: -48, display: 'flex', padding: 8, borderRadius: '50%', background: C.RED, boxShadow: `0 0 0 3px ${C.CLOUD}, 0 8px 14px rgba(24,50,79,.4)` }}>

@@ -1,4 +1,5 @@
-import { C } from './palette'
+import { C as PAL } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* RED VEIL — dekor (hamısı aria-hidden) */
 
@@ -6,7 +7,9 @@ const BUTA = 'M20 57C9 57 3 48 3 38C3 24 15 15 22 8C25 5 29 3 32 5C35 8 31 11 29
 const BUTA_IN = 'M20 50C13 50 9 44 9 38C9 29 16 23 21 18C27 23 31 30 31 37C31 45 26 50 20 50Z'
 
 /** Buta — Azərbaycan ornamentinin «badam» motivi */
-export function Buta({ size = 26, color = C.GOLD, fill = 'none', flip = false, style }) {
+export function Buta($p) {
+  const C = usePalette(PAL)
+  const { size = 26, color = C.GOLD, fill = 'none', flip = false, style } = $p
   return (
     <svg aria-hidden="true" viewBox="0 0 40 60" width={size} height={size * 1.5} style={{ display: 'block', transform: flip ? 'scaleX(-1)' : undefined, overflow: 'visible', ...style }}>
       <path d={BUTA} fill={fill} stroke={color} strokeWidth="1.6" />
@@ -19,7 +22,9 @@ export function Buta({ size = 26, color = C.GOLD, fill = 'none', flip = false, s
 }
 
 /** Buta xətti — bölmə başlığının ornamenti */
-export function ButaRule({ color = C.GOLD, width = 220, style }) {
+export function ButaRule($p) {
+  const C = usePalette(PAL)
+  const { color = C.GOLD, width = 220, style } = $p
   return (
     <div aria-hidden="true" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width, maxWidth: '100%', margin: '0 auto', ...style }}>
       <span style={{ flex: 1, height: 1, background: `linear-gradient(90deg, transparent, ${color})` }} />
@@ -33,7 +38,9 @@ export function ButaRule({ color = C.GOLD, width = 220, style }) {
 }
 
 /** Qızılı qotaz (püskül) */
-export function Tassel({ h = 36, color = C.GOLD, style }) {
+export function Tassel($p) {
+  const C = usePalette(PAL)
+  const { h = 36, color = C.GOLD, style } = $p
   return (
     <svg aria-hidden="true" viewBox="0 0 16 44" width={(h * 16) / 44} height={h} style={{ display: 'block', ...style }}>
       <path d="M8 0V10" stroke={color} strokeWidth="1.2" />
@@ -48,7 +55,9 @@ export function Tassel({ h = 36, color = C.GOLD, style }) {
 }
 
 /** Örpəyin ətəyi: qızılı tikmə zolağı (naxışlı) */
-export function EmbroideryBand({ id, color = C.GOLD, height = 22, style }) {
+export function EmbroideryBand($p) {
+  const C = usePalette(PAL)
+  const { id, color = C.GOLD, height = 22, style } = $p
   return (
     <svg aria-hidden="true" width="100%" height={height} style={{ display: 'block', ...style }}>
       <defs>
@@ -69,6 +78,7 @@ export function EmbroideryBand({ id, color = C.GOLD, height = 22, style }) {
 
 /** Hero-nun yuxarısında asılan qırmızı örpək qıvrımı */
 export function VeilDrape({ height = 120 }) {
+  const C = usePalette(PAL)
   return (
     <div aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 0, height }}>
       <svg viewBox="0 0 400 120" preserveAspectRatio="none" width="100%" height="100%" style={{ display: 'block' }}>

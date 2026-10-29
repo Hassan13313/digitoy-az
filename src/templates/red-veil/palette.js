@@ -7,10 +7,10 @@ export const C = {
 }
 
 /* Məxmər örpək: dərin qırmızı + yumşaq qıvrımlar */
-export const VELVET_BG = [
+export const VELVET_BG = (C) => ([
   'repeating-linear-gradient(90deg, rgba(0,0,0,.20) 0%, rgba(255,255,255,.045) 5%, rgba(0,0,0,.16) 11%, rgba(0,0,0,.05) 16%, rgba(0,0,0,.20) 22%)',
   `radial-gradient(120% 80% at 50% 0%, ${C.RED} 0%, ${C.VELVET} 48%, ${C.WINE} 100%)`,
-].join(', ')
+].join(', '))
 
 /* Örpəyin üstündəki qızılı tikmə — kiçik butalar şəbəkəsi (data URI) */
 const BUTA_D = 'M12 38c-7 0-11-6-11-12 0-9 8-15 13-19 2-2 4-3 6-2 2 2-1 4-2 5 4 4 6 10 6 15 0 8-5 13-12 13z'

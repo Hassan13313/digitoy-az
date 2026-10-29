@@ -1,4 +1,5 @@
-import { C, SHUTTER, HAZARD, STEEL_GRAD, INTERIOR } from './palette'
+import { C as PAL, SHUTTER, HAZARD, STEEL_GRAD, INTERIOR } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* ROLLER SHUTTER — metal jalüz, neon lövhə, perçinli lövhələr */
 
@@ -12,6 +13,7 @@ export function Rivets({ inset = 8, size = 7 }) {
 
 /** Neon «Açıq» lövhəsi (dükanın içində) */
 export function NeonOpen({ text, size = 34, on = true, font, delay = 0 }) {
+  const C = usePalette(PAL)
   return (
     <span style={{
       display: 'inline-block', padding: '6px 16px 8px', borderRadius: 12, border: `2.5px solid ${on ? '#FFF3D6' : '#6B5A40'}`,
@@ -40,6 +42,7 @@ export function ShopInterior({ children }) {
 
 /** Vitrin: üstdə jalüz qutusu, `open` olanda jalüz yuxarı qalxır */
 export function Storefront({ open = false, instant = false, children, aspect = '0.95', style }) {
+  const C = usePalette(PAL)
   return (
     <div style={{ position: 'relative', ...style }}>
       {/* jalüz qutusu */}
@@ -52,7 +55,7 @@ export function Storefront({ open = false, instant = false, children, aspect = '
           position: 'absolute', inset: 0, background: SHUTTER, transform: open ? 'translateY(-101%)' : 'none',
           transition: instant ? 'none' : 'transform 1.15s cubic-bezier(.6,0,.3,1) .1s', boxShadow: 'inset 0 -14px 18px -12px rgba(0,0,0,.35)',
         }}>
-          <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 18, background: HAZARD, borderTop: '3px solid #5E666E' }} />
+          <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 18, background: HAZARD(C), borderTop: '3px solid #5E666E' }} />
           <span aria-hidden="true" style={{ position: 'absolute', left: '50%', bottom: 18, width: 46, height: 10, marginLeft: -23, borderRadius: '0 0 6px 6px', background: '#5E666E' }} />
         </div>
       </div>

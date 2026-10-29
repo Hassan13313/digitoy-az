@@ -1,9 +1,11 @@
-import { C, BURST } from './palette'
+import { C as PAL, BURST } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* HERO COMIC — dekor */
 
 /** Qəhrəman nişanı: dairə içində ildırım */
 export function Emblem({ size = 64, style }) {
+  const C = usePalette(PAL)
   return (
     <svg aria-hidden="true" viewBox="0 0 64 64" width={size} height={size} style={{ display: 'block', overflow: 'visible', ...style }}>
       <circle cx="32" cy="32" r="29" fill={C.RED} stroke={C.INK} strokeWidth="3.5" />
@@ -14,7 +16,9 @@ export function Emblem({ size = 64, style }) {
 }
 
 /** Partlayış: içində söz və ya rəqəm */
-export function Burst({ size = 120, color = C.YELLOW, edge = C.RED, children, style, shape = BURST }) {
+export function Burst($p) {
+  const C = usePalette(PAL)
+  const { size = 120, color = C.YELLOW, edge = C.RED, children, style, shape = BURST } = $p
   return (
     <div style={{ position: 'relative', width: size, height: size, ...style }}>
       <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: C.INK, clipPath: shape, transform: 'translate(5px, 5px)' }} />
@@ -26,7 +30,9 @@ export function Burst({ size = 120, color = C.YELLOW, edge = C.RED, children, st
 }
 
 /** Danışıq balonu (quyruqlu) */
-export function Bubble({ children, tail = 'left', bg = C.WHITE, style }) {
+export function Bubble($p) {
+  const C = usePalette(PAL)
+  const { children, tail = 'left', bg = C.WHITE, style } = $p
   return (
     <div style={{ position: 'relative', background: bg, border: `3px solid ${C.INK}`, borderRadius: 26, padding: '14px 18px', boxShadow: `4px 4px 0 ${C.INK}`, ...style }}>
       {children}
@@ -39,7 +45,9 @@ export function Bubble({ children, tail = 'left', bg = C.WHITE, style }) {
 }
 
 /** Sarı başlıq qutusu (caption) */
-export function Caption({ children, head, rotate = -2, bg = C.YELLOW, style }) {
+export function Caption($p) {
+  const C = usePalette(PAL)
+  const { children, head, rotate = -2, bg = C.YELLOW, style } = $p
   return (
     <div style={{ display: 'inline-block', padding: '7px 14px 6px', background: bg, border: `3px solid ${C.INK}`, boxShadow: `4px 4px 0 ${C.INK}`, transform: `rotate(${rotate}deg)`, fontFamily: head, fontWeight: 800, fontSize: 14, letterSpacing: '.06em', textTransform: 'uppercase', color: C.INK, ...style }}>
       {children}

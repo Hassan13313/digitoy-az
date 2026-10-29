@@ -6,10 +6,10 @@ export const C = {
   RASPBERRY: '#E46A8C', MUTED: '#776C84', LINE: '#F0D7DD', MOON: '#FFF3D6',
 }
 
-export const NIGHT_BG = `radial-gradient(1.4px 1.4px at 12% 14%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 30% 6%, #fff 50%, transparent 51%), radial-gradient(1.2px 1.2px at 58% 12%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 78% 8%, #fff 50%, transparent 51%), radial-gradient(1.4px 1.4px at 90% 24%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 44% 28%, #fff 50%, transparent 51%), radial-gradient(70% 45% at 50% 100%, rgba(229,143,163,.22), transparent 70%), linear-gradient(180deg, #0F1229, #1C2140 55%, #2A2650)`
-export const PAPER_BG = `repeating-linear-gradient(90deg, rgba(247,214,220,.24) 0 18px, transparent 18px 36px), #FFF7F7`
-export const STRIPES = 'repeating-linear-gradient(90deg, #1C2140 0 10px, #FFFFFF 10px 20px)'
-export const MACARONS = ['#E58FA3', '#BFDDA8', '#CDB8EA', '#F4DE8E', '#E46A8C', '#A9D4E8']
+export const NIGHT_BG = (C) => (`radial-gradient(1.4px 1.4px at 12% 14%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 30% 6%, #fff 50%, transparent 51%), radial-gradient(1.2px 1.2px at 58% 12%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 78% 8%, #fff 50%, transparent 51%), radial-gradient(1.4px 1.4px at 90% 24%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 44% 28%, #fff 50%, transparent 51%), radial-gradient(70% 45% at 50% 100%, rgba(229,143,163,.22), transparent 70%), linear-gradient(180deg, #0F1229, ${C.INK} 55%, #2A2650)`)
+export const PAPER_BG = (C) => (`repeating-linear-gradient(90deg, rgba(247,214,220,.24) 0 18px, transparent 18px 36px), ${C.PAPER}`)
+export const STRIPES = (C) => (`repeating-linear-gradient(90deg, ${C.INK} 0 10px, #FFFFFF 10px 20px)`)
+export const MACARONS = (C) => ([C.ROSE, '#BFDDA8', '#CDB8EA', '#F4DE8E', '#E46A8C', '#A9D4E8'])
 
 /* Qüllənin yarım eni (viewBox 100×200) */
 export function halfWidth(y) {

@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C, KNIT, nameSize } from './palette'
+import { C as PAL, KNIT, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Teddy, Heart, Button, Bunting, Patch } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    TEDDY BEAR — «Ayıcıq» (Baby shower konsepti, 2026-10)
@@ -31,9 +32,13 @@ import { Teddy, Heart, Button, Bunting, Patch } from './art'
 const BASE = getTemplateTheme('teddy-bear')
 const ID = 'teddy-bear'
 
-const PATCHES = [C.SKY, C.BLUSH, '#F2E2B8', C.SAGE]
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['HONEY_D'], secondary: ['BLUSH'], accent: ['SKY'], background: ['CREAM'], text: ['INK'] }
 
-const KEYFRAMES = `
+const PATCHES = (C) => ([C.SKY, C.BLUSH, '#F2E2B8', C.SAGE])
+
+const KEYFRAMES = (C) => (`
 @keyframes tb-wave { from { transform: rotate(-6deg) } to { transform: rotate(22deg) } }
 @keyframes tb-flag { from { transform: rotate(-4deg) } to { transform: rotate(4deg) } }
 @keyframes tb-float { 0% { transform: translateY(0) scale(.6); opacity: 0 } 20% { opacity: 1 } 100% { transform: translateY(-220px) scale(1.1); opacity: 0 } }
@@ -47,14 +52,15 @@ const KEYFRAMES = `
 [data-tb] input:focus-visible, [data-tb] textarea:focus-visible { border-color: ${C.HONEY} !important; outline: none; }
 [data-tb] button:focus-visible, [data-tb] a:focus-visible, [data-tb] [role="button"]:focus-visible { outline: 3px solid ${C.SKY_D}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-tb] *, [data-tb] { animation: none !important; transition: none !important; } }
-`
+`)
 
-const CREAM_BG = `radial-gradient(90% 60% at 50% 0%, #FFFFFF, transparent 70%), ${C.CREAM}`
-const OAT_BG = `${KNIT('#8E6440', 0.05)}, ${C.OAT}`
-const HEARTS = [[-70, 0.0, C.BLUSH_D], [-20, 0.25, C.SKY_D], [40, 0.12, C.BLUSH_D], [80, 0.35, '#E3B76B'], [0, 0.45, C.BLUSH_D]]
+const CREAM_BG = (C) => (`radial-gradient(90% 60% at 50% 0%, #FFFFFF, transparent 70%), ${C.CREAM}`)
+const OAT_BG = (C) => (`${KNIT(C)(C.HONEY_D, 0.05)}, ${C.OAT}`)
+const HEARTS = (C) => ([[-70, 0.0, C.BLUSH_D], [-20, 0.25, C.SKY_D], [40, 0.12, C.BLUSH_D], [80, 0.35, '#E3B76B'], [0, 0.45, C.BLUSH_D]])
 
 /* ═══ 01 — AÇILIŞ: ayıcıq yorğanın arxasından çıxır ═══ */
 function TeddyOpening({ inv, theme }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -82,12 +88,12 @@ function TeddyOpening({ inv, theme }) {
       {/* ayıcıq */}
       <div style={{ position: 'absolute', left: '50%', bottom: '18%', width: 'min(56vw, 220px)', marginLeft: 'calc(min(56vw, 220px) / -2)', transform: go ? 'translateY(-18%)' : 'translateY(42%)', transition: 'transform .9s cubic-bezier(.3,1.4,.5,1)', animation: go ? 'none' : 'tb-peek 1s ease-out .3s both' }}>
         <Teddy width="100%" wave={go} />
-        {go && HEARTS.map(([x, d, c], i) => (
+        {go && HEARTS(C).map(([x, d, c], i) => (
           <span key={i} aria-hidden="true" style={{ position: 'absolute', left: `calc(50% + ${x}px)`, top: '10%', animation: `tb-float 1.3s ease-out ${d + 0.4}s both` }}><Heart size={20 + (i % 2) * 6} color={c} /></span>
         ))}
       </div>
       {/* yorğan */}
-      <div style={{ position: 'absolute', left: -10, right: -10, bottom: 0, height: '34%', background: `${KNIT('#FFFFFF', 0.45)}, ${C.SKY}`, borderRadius: '50% 50% 0 0 / 22px 22px 0 0', boxShadow: '0 -10px 24px -10px rgba(91,67,50,.25)', transform: go ? 'translateY(30%)' : 'none', transition: 'transform .8s ease' }}>
+      <div style={{ position: 'absolute', left: -10, right: -10, bottom: 0, height: '34%', background: `${KNIT(C)('#FFFFFF', 0.45)}, ${C.SKY}`, borderRadius: '50% 50% 0 0 / 22px 22px 0 0', boxShadow: '0 -10px 24px -10px rgba(91,67,50,.25)', transform: go ? 'translateY(30%)' : 'none', transition: 'transform .8s ease' }}>
         <div aria-hidden="true" style={{ position: 'absolute', left: 16, right: 16, top: 10, borderTop: '2px dashed rgba(255,255,255,.9)', borderRadius: '50% 50% 0 0 / 14px 14px 0 0' }} />
         <motion.div animate={go ? { opacity: 0 } : {}} transition={{ duration: 0.25 }} style={{ position: 'absolute', left: 0, right: 0, top: '30%', textAlign: 'center' }}>
           {ot.show('cta') && (
@@ -104,15 +110,16 @@ function TeddyOpening({ inv, theme }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, oat = false }) {
+  const C = usePalette(PAL)
   return (
-    <section id={id} data-section={section} style={{ position: 'relative', padding: '62px 20px 68px', overflow: 'hidden', background: oat ? OAT_BG : CREAM_BG }}>
+    <section id={id} data-section={section} style={{ position: 'relative', padding: '62px 20px 68px', overflow: 'hidden', background: oat ? OAT_BG(C) : CREAM_BG(C) }}>
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 30 }}>
             <div aria-hidden="true" style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
               <Button size={16} color={C.SKY} /><Button size={22} color={C.BLUSH} /><Button size={16} color={C.SAGE} />
             </div>
-            {title && <h2 style={{ margin: '12px 0 0', fontFamily: head, fontWeight: 700, fontSize: 'clamp(25px, 7.4vw, 33px)', lineHeight: 1.2, color: C.INK, textWrap: 'balance' }}>{title}</h2>}
+            {title && <h2 style={{ margin: '12px 0 0', fontFamily: head, fontWeight: 700, fontSize: scaleFont('clamp(25px, 7.4vw, 33px)', C.hs), lineHeight: 1.2, color: C.INK, textWrap: 'balance' }}>{title}</h2>}
             {kicker && <div style={{ marginTop: 8, fontWeight: 600, fontSize: 15.5, color: C.MUTED }}>{kicker}</div>}
             {sub && <p style={{ margin: '8px auto 0', maxWidth: 340, fontSize: 15.5, color: C.MUTED, lineHeight: 1.6 }}>{sub}</p>}
           </div>
@@ -123,21 +130,22 @@ function Panel({ id, section, title, kicker, sub, children, head, oat = false })
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: '#FFFFFF', border: `2px solid ${alpha(C.HONEY, 0.35)}`, borderRadius: 18,
   padding: '13px 16px', fontSize: 16, color: C.INK, outline: 'none',
-}
-const btn = (on) => ({
+})
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 22px', borderRadius: 999,
   fontSize: 15.5, fontWeight: 700, textDecoration: 'none', cursor: 'pointer',
   background: on ? C.HONEY_D : '#FFFFFF', color: on ? '#FFFFFF' : C.HONEY_D, border: `2px solid ${on ? C.HONEY_D : alpha(C.HONEY_D, 0.35)}`,
-})
-const suggest = { bg: '#FFFFFF', border: `2px solid ${alpha(C.HONEY, 0.3)}`, active: alpha(C.HONEY_L, 0.4), text: C.INK, table: C.HONEY_D, radius: 18 }
+}))
+const suggest = (C) => ({ bg: '#FFFFFF', border: `2px solid ${alpha(C.HONEY, 0.3)}`, active: alpha(C.HONEY_L, 0.4), text: C.INK, table: C.HONEY_D, radius: 18 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function TeddyBearTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -145,11 +153,11 @@ export default function TeddyBearTemplate(props) {
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
   return (
-    <div data-tb lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-tb lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.CREAM, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.HONEY_L, 0.4),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <TeddyOpening inv={inv} theme={theme} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.HONEY_D, border: '3px solid #FFFFFF', boxShadow: '0 8px 18px rgba(142,100,64,.4)' }}>
@@ -190,7 +198,7 @@ export default function TeddyBearTemplate(props) {
             <Panel section="countdown" head={head} oat title={L('countdown', 'title', cd.title)} kicker={K('countdown')}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'clamp(8px, 2.6vw, 12px)', maxWidth: 400, margin: '0 auto' }}>
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
-                  <Patch key={l} color={PATCHES[i]} style={{ padding: '18px 4px 14px', textAlign: 'center', transform: `rotate(${[-2, 1.5, -1, 2][i]}deg)` }}>
+                  <Patch key={l} color={PATCHES(C)[i]} style={{ padding: '18px 4px 14px', textAlign: 'center', transform: `rotate(${[-2, 1.5, -1, 2][i]}deg)` }}>
                     <div style={{ fontFamily: head, fontWeight: 700, fontSize: 'clamp(22px, 6.6vw, 30px)', lineHeight: 1, color: C.INK, fontVariantNumeric: 'tabular-nums' }}><PopDigit value={v} pop={pop} /></div>
                     <div style={{ marginTop: 6, fontWeight: 700, fontSize: 12.5, color: C.INK, opacity: 0.75 }}>{l}</div>
                   </Patch>
@@ -210,13 +218,13 @@ export default function TeddyBearTemplate(props) {
                     weddingData={weddingData} theme={theme} accent={C.HONEY_D} height="clamp(250px, 70vw, 320px)"
                     map={{ opacity: 0.9, filter: 'saturate(.7) brightness(1.05)', tintOpacity: 0.12, tint: C.HONEY, blend: 'multiply' }}
                     frame={<MapPin />}
-                    fallback={<div style={{ height: 'clamp(250px, 70vw, 320px)', position: 'relative', background: OAT_BG }}><MapPin /></div>}
+                    fallback={<div style={{ height: 'clamp(250px, 70vw, 320px)', position: 'relative', background: OAT_BG(C) }}><MapPin /></div>}
                   />
                 </div>
               </Patch>
               <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontWeight: 700, fontSize: 22, lineHeight: 1.25, color: C.INK }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontWeight: 600, fontSize: 15, color: C.MUTED }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn(C)} />
             </Panel>
           )}
 
@@ -227,7 +235,7 @@ export default function TeddyBearTemplate(props) {
                 <span aria-hidden="true" style={{ position: 'absolute', left: 27, top: 24, bottom: 24, borderLeft: `2px dashed ${alpha(C.HONEY_D, 0.45)}` }} />
                 {timeline.events.map((ev, i) => (
                   <div key={i} style={{ position: 'relative', display: 'grid', gridTemplateColumns: '56px minmax(0, 1fr)', gap: 10, alignItems: 'center', padding: '8px 0' }}>
-                    <div style={{ display: 'flex', justifyContent: 'center' }}><Button size={38} color={PATCHES[i % 4]} /></div>
+                    <div style={{ display: 'flex', justifyContent: 'center' }}><Button size={38} color={PATCHES(C)[i % 4]} /></div>
                     <div style={{ padding: '12px 16px', borderRadius: 18, background: '#FFFFFF', boxShadow: '0 8px 16px -12px rgba(91,67,50,.4)' }}>
                       <div style={{ fontFamily: head, fontWeight: 700, fontSize: 15, color: C.HONEY_D, fontVariantNumeric: 'tabular-nums' }}>{ev.time}</div>
                       <div style={{ marginTop: 2, fontWeight: 600, fontSize: 16.5, lineHeight: 1.35, color: C.INK }}>{ev.label}</div>
@@ -248,7 +256,7 @@ export default function TeddyBearTemplate(props) {
           {/* MASA — ayıcığın lövhəsi */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} oat title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="tb-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.HONEY_D}
+              <SeatFinder inv={inv} tr={tr} listId="tb-seat-list" field={field(C)} suggest={suggest(C)} font={body} muted={C.MUTED} accent={C.HONEY_D}
                 nameStyle={{ fontFamily: head, fontWeight: 700, fontSize: 19, color: C.INK }}
                 card={(num) => (
                   <div style={{ position: 'relative', width: 220, margin: '0 auto', animation: 'tb-rise .6s ease-out both' }}>
@@ -268,14 +276,14 @@ export default function TeddyBearTemplate(props) {
               {gallery.demoPhotos.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, marginBottom: 32 }}>
                   {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ aspectRatio: '1', overflow: 'hidden', borderRadius: 20, background: PATCHES[i % 4], border: `6px solid ${PATCHES[i % 4]}`, outline: '2px dashed rgba(255,255,255,.95)', outlineOffset: -4, boxShadow: '0 10px 18px -12px rgba(91,67,50,.45)' }}>
+                    <div key={i} style={{ aspectRatio: '1', overflow: 'hidden', borderRadius: 20, background: PATCHES(C)[i % 4], border: `6px solid ${PATCHES(C)[i % 4]}`, outline: '2px dashed rgba(255,255,255,.95)', outlineOffset: -4, boxShadow: '0 10px 18px -12px rgba(91,67,50,.45)' }}>
                       <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: 12 }} />
                     </div>
                   ))}
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.INK} bg="#FFFFFF" frame={{ borderRadius: 20, outline: `2px dashed ${alpha(C.HONEY, 0.6)}`, outlineOffset: 4 }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
             </Panel>
           )}
 
@@ -287,7 +295,7 @@ export default function TeddyBearTemplate(props) {
                 font: body, display: head, btnFont: head,
                 doneMark: <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><Heart size={34} /></div>,
                 marker: (a) => (a ? <Heart size={16} /> : <span style={{ display: 'block', width: 14, height: 14, borderRadius: '50%', border: `2px solid ${alpha(C.HONEY_D, 0.4)}` }} />),
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -295,12 +303,12 @@ export default function TeddyBearTemplate(props) {
           {/* XOŞ SÖZLƏR */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.BLUSH_D} />
+              <GuestbookForm inv={inv} field={field(C)} btn={btn(C)} errorColor={C.BLUSH_D} />
               <div style={{ display: 'grid', gap: 14 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
                   return (
-                    <Patch key={msg.name + i} color={PATCHES[i % 4]} style={{ padding: '20px 20px 16px' }}>
+                    <Patch key={msg.name + i} color={PATCHES(C)[i % 4]} style={{ padding: '20px 20px 16px' }}>
                       <figure style={{ margin: 0 }}>
                         <Heart size={18} color="#FFFFFF" style={{ position: 'absolute', right: 18, top: 16 }} />
                         <blockquote style={{ margin: 0, paddingRight: 18, fontSize: 16.5, fontWeight: 600, lineHeight: 1.55, color: C.INK }}>{msg.text}</blockquote>
@@ -316,7 +324,7 @@ export default function TeddyBearTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 

@@ -6,7 +6,7 @@ export const C = {
 }
 
 /* Kəlağayı haşiyəsi — üç rəngli zolaq (çərçivələr və ayırıcılar üçün) */
-export const BAND = `linear-gradient(90deg, ${C.CRIMSON} 0 33.3%, ${C.SAFFRON} 33.3% 66.6%, ${C.INDIGO} 66.6% 100%)`
+export const BAND = (C) => (`linear-gradient(90deg, ${C.CRIMSON} 0 33.3%, ${C.SAFFRON} 33.3% 66.6%, ${C.INDIGO} 66.6% 100%)`)
 
 /* İpək parıltısı — üzərindən keçən işıq */
 export const SHEEN = 'linear-gradient(115deg, transparent 30%, rgba(255,255,255,.38) 45%, transparent 60%)'

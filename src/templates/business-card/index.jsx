@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C, nameSize } from './palette'
+import { C as PAL, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Card, CropMarks } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    BUSINESS CARD — «Vizit kartı» (Korporativ konsepti, 2026-10)
@@ -30,9 +31,13 @@ import { Card, CropMarks } from './art'
 
 const BASE = getTemplateTheme('business-card')
 const ID = 'business-card'
+
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['KLEIN'], secondary: ['MUTED'], accent: ['INK'], background: ['PAPER'], text: ['INK'] }
 const MONO = "'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace"
 
-const KEYFRAMES = `
+const KEYFRAMES = (C) => (`
 @keyframes bc-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes bc-fade { from { opacity: 0 } to { opacity: 1 } }
 @keyframes bc-hint { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
@@ -42,12 +47,13 @@ const KEYFRAMES = `
 [data-bc] input:focus-visible, [data-bc] textarea:focus-visible { border-color: ${C.KLEIN} !important; outline: none; }
 [data-bc] button:focus-visible, [data-bc] a:focus-visible, [data-bc] [role="button"]:focus-visible { outline: 2px solid ${C.KLEIN}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-bc] *, [data-bc] { animation: none !important; transition: none !important; } }
-`
+`)
 
-const lbl = { fontFamily: MONO, fontSize: 11, letterSpacing: '.12em', textTransform: 'uppercase', color: C.MUTED }
+const lbl = (C) => ({ fontFamily: MONO, fontSize: 11, letterSpacing: '.12em', textTransform: 'uppercase', color: C.MUTED })
 
 /* ═══ 01 — AÇILIŞ: kart çevrilir ═══ */
 function CardOpening({ inv, theme, T, weddingData }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -69,7 +75,7 @@ function CardOpening({ inv, theme, T, weddingData }) {
                   <EmblemSlot mono={ot.mono} size={36} border={`1px solid ${C.HAIR}`} background={C.WHITE} color={C.KLEIN} font={head} style={{ animation: 'none', margin: 0 }}>
                     <span style={{ display: 'block', width: 22, height: 22, background: C.KLEIN }} />
                   </EmblemSlot>
-                  {ot.show('kicker') && <span style={lbl}>{ot.text('kicker')}</span>}
+                  {ot.show('kicker') && <span style={lbl(C)}>{ot.text('kicker')}</span>}
                 </div>
                 {titleOv !== '' && (
                   <div style={{ fontFamily: head, fontWeight: 600, fontSize: 'clamp(22px, 6.6vw, 30px)', lineHeight: 1.02, letterSpacing: '-.03em', overflowWrap: 'anywhere' }}>
@@ -94,7 +100,7 @@ function CardOpening({ inv, theme, T, weddingData }) {
               {ot.text('cta')}<span aria-hidden="true" style={{ width: 10, height: 10, background: C.KLEIN }} />
             </div>
           )}
-          {ot.show('hint') && <div style={{ ...lbl, marginTop: 14, animation: 'bc-fade .8s ease-out 1.1s both, bc-hint 3s ease-in-out 2s infinite' }}>{ot.text('hint')}</div>}
+          {ot.show('hint') && <div style={{ ...lbl(C), marginTop: 14, animation: 'bc-fade .8s ease-out 1.1s both, bc-hint 3s ease-in-out 2s infinite' }}>{ot.text('hint')}</div>}
         </motion.div>
       </div>
     </motion.div>
@@ -103,6 +109,7 @@ function CardOpening({ inv, theme, T, weddingData }) {
 
 /* Bölmə — sol hizalı İsveçrə başlığı */
 function Panel({ id, section, title, kicker, sub, children, head, alt = false }) {
+  const C = usePalette(PAL)
   return (
     <section id={id} data-section={section} style={{ position: 'relative', padding: '56px 20px 64px', background: alt ? C.WHITE : C.PAPER, color: C.INK, borderTop: `1px solid ${C.HAIR}` }}>
       <Reveal style={{ position: 'relative', maxWidth: 520, margin: '0 auto' }}>
@@ -110,8 +117,8 @@ function Panel({ id, section, title, kicker, sub, children, head, alt = false })
           <div style={{ display: 'grid', gridTemplateColumns: '14px minmax(0, 1fr)', gap: 12, marginBottom: 28 }}>
             <span aria-hidden="true" style={{ width: 14, height: 14, marginTop: 10, background: C.KLEIN }} />
             <div>
-              {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 600, fontSize: 'clamp(30px, 8.8vw, 42px)', lineHeight: 1, letterSpacing: '-.035em', color: C.INK, textWrap: 'balance' }}>{title}</h2>}
-              {kicker && <div style={{ ...lbl, marginTop: 10 }}>{kicker}</div>}
+              {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 600, fontSize: scaleFont('clamp(30px, 8.8vw, 42px)', C.hs), lineHeight: 1, letterSpacing: '-.035em', color: C.INK, textWrap: 'balance' }}>{title}</h2>}
+              {kicker && <div style={{ ...lbl(C), marginTop: 10 }}>{kicker}</div>}
               {sub && <p style={{ margin: '10px 0 0', maxWidth: 380, fontSize: 15.5, color: C.GRAPHITE, lineHeight: 1.55 }}>{sub}</p>}
             </div>
           </div>
@@ -122,21 +129,22 @@ function Panel({ id, section, title, kicker, sub, children, head, alt = false })
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: C.WHITE, border: `1px solid ${C.HAIR}`, borderRadius: 0,
   padding: '14px 14px', fontSize: 16, color: C.INK, outline: 'none',
-}
-const btn = (on) => ({
+})
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 20px',
   fontSize: 15, fontWeight: 500, textDecoration: 'none', cursor: 'pointer',
   background: on ? C.INK : 'transparent', color: on ? C.WHITE : C.INK, border: `1px solid ${C.INK}`,
-})
-const suggest = { bg: C.WHITE, border: `1px solid ${C.HAIR}`, active: alpha(C.KLEIN, 0.08), text: C.INK, table: C.KLEIN, radius: 0 }
+}))
+const suggest = (C) => ({ bg: C.WHITE, border: `1px solid ${C.HAIR}`, active: alpha(C.KLEIN, 0.08), text: C.INK, table: C.KLEIN, radius: 0 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function BusinessCardTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -146,11 +154,11 @@ export default function BusinessCardTemplate(props) {
   const rows = [[T.date, inv.fullDate], [T.time, inv.time], [T.venue, weddingData.venueName], [T.host, host]].filter(([, v]) => v)
 
   return (
-    <div data-bc lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-bc lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.PAPER, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.KLEIN, 0.25),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <CardOpening inv={inv} theme={theme} T={T} weddingData={weddingData} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: 0, background: C.KLEIN, boxShadow: '0 8px 20px rgba(36,56,232,.35)' }}>
@@ -175,7 +183,7 @@ export default function BusinessCardTemplate(props) {
           {/* HERO — iri ad və cədvəl */}
           <section data-section="hero" style={{ position: 'relative', background: C.PAPER, padding: '36px 20px 56px' }}>
             <div style={{ maxWidth: 520, margin: '0 auto' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', ...lbl }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', ...lbl(C) }}>
                 <span>{L('hero', 'kicker', inv.eventLabel)}</span>
                 <span>{inv.dp?.year || ''}</span>
               </div>
@@ -188,7 +196,7 @@ export default function BusinessCardTemplate(props) {
               <div style={{ marginTop: 28, borderTop: `1px solid ${C.INK}` }}>
                 {rows.map(([k, v]) => (
                   <div key={k} style={{ display: 'grid', gridTemplateColumns: '108px minmax(0, 1fr)', gap: 12, alignItems: 'baseline', padding: '13px 0', borderBottom: `1px solid ${C.HAIR}` }}>
-                    <span style={lbl}>{k}</span>
+                    <span style={lbl(C)}>{k}</span>
                     <span style={{ fontSize: 17, fontWeight: 500, lineHeight: 1.35, overflowWrap: 'anywhere' }}>{v}</span>
                   </div>
                 ))}
@@ -203,7 +211,7 @@ export default function BusinessCardTemplate(props) {
                 {[[cd.days, cd.labels.days], [cd.hours, cd.labels.hours], [cd.minutes, cd.labels.minutes], [cd.seconds, cd.labels.seconds, true]].map(([v, l, pop], i) => (
                   <div key={l} style={{ padding: '18px 6px 14px', borderLeft: i ? `1px solid ${C.HAIR}` : 'none' }}>
                     <div style={{ fontFamily: head, fontWeight: 600, fontSize: 'clamp(30px, 9vw, 44px)', lineHeight: 1, letterSpacing: '-.04em', color: i === 3 ? C.KLEIN : C.INK, fontVariantNumeric: 'tabular-nums' }}><PopDigit value={v} pop={pop} /></div>
-                    <div style={{ ...lbl, marginTop: 8 }}>{l}</div>
+                    <div style={{ ...lbl(C), marginTop: 8 }}>{l}</div>
                   </div>
                 ))}
               </div>
@@ -227,13 +235,13 @@ export default function BusinessCardTemplate(props) {
                 </div>
               </div>
               <div style={{ marginTop: 22, display: 'grid', gridTemplateColumns: '108px minmax(0, 1fr)', gap: 12, alignItems: 'baseline', borderTop: `1px solid ${C.INK}`, paddingTop: 12 }}>
-                <span style={lbl}>{T.venue}</span>
+                <span style={lbl(C)}>{T.venue}</span>
                 <div>
                   <div style={{ fontSize: 19, fontWeight: 600, letterSpacing: '-.01em', lineHeight: 1.25 }}>{weddingData.venueName}</div>
                   {weddingData.venueNote && <div style={{ marginTop: 2, fontSize: 15, color: C.MUTED }}>{weddingData.venueNote}</div>}
                 </div>
               </div>
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn} style={{ justifyContent: 'flex-start' }} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={btn(C)} style={{ justifyContent: 'flex-start' }} />
             </Panel>
           )}
 
@@ -261,18 +269,18 @@ export default function BusinessCardTemplate(props) {
           {/* MASA — vizit kartı */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} alt title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="bc-seat-list" field={field} suggest={suggest} font={body} muted={C.MUTED} accent={C.KLEIN}
+              <SeatFinder inv={inv} tr={tr} listId="bc-seat-list" field={field(C)} suggest={suggest(C)} font={body} muted={C.MUTED} accent={C.KLEIN}
                 nameStyle={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
                 card={(num) => (
                   <div style={{ position: 'relative', display: 'inline-block', margin: '4px 0 8px', animation: 'bc-slide .7s cubic-bezier(.3,.8,.4,1) both' }}>
                     <CropMarks />
                     <div style={{ width: 'min(80vw, 320px)', aspectRatio: '85 / 55', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 36%', background: C.WHITE, boxShadow: '0 24px 40px -22px rgba(0,0,0,.35)', textAlign: 'left' }}>
                       <div style={{ padding: '8% 8%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                        <span style={lbl}>{T.guest}</span>
+                        <span style={lbl(C)}>{T.guest}</span>
                         <span style={{ fontFamily: head, fontWeight: 600, fontSize: 19, lineHeight: 1.1, letterSpacing: '-.02em', overflowWrap: 'anywhere' }}>{seating.selected?.full_name}</span>
                       </div>
                       <div style={{ background: C.KLEIN, color: C.WHITE, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-                        <span style={{ ...lbl, color: alpha(C.WHITE, 0.8) }}>{T.table}</span>
+                        <span style={{ ...lbl(C), color: alpha(C.WHITE, 0.8) }}>{T.table}</span>
                         <span style={{ fontFamily: head, fontWeight: 600, fontSize: tableSize(num, 52), lineHeight: 1, letterSpacing: '-.03em' }}>{num}</span>
                       </div>
                     </div>
@@ -294,7 +302,7 @@ export default function BusinessCardTemplate(props) {
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.INK} bg={C.WHITE} frame={{ border: `1px solid ${C.INK}` }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'event')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'event')} />
             </Panel>
           )}
 
@@ -306,7 +314,7 @@ export default function BusinessCardTemplate(props) {
                 font: body, display: head, btnFont: body,
                 doneMark: <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><span style={{ width: 28, height: 28, background: C.KLEIN }} /></div>,
                 marker: (a) => (a ? <span style={{ display: 'block', width: 14, height: 14, background: C.KLEIN }} /> : <span style={{ display: 'block', width: 14, height: 14, border: `1px solid ${C.INK}` }} />),
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -314,13 +322,13 @@ export default function BusinessCardTemplate(props) {
           {/* QEYDLƏR */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={field} btn={btn} errorColor={C.KLEIN} />
+              <GuestbookForm inv={inv} field={field(C)} btn={btn(C)} errorColor={C.KLEIN} />
               <div style={{ borderTop: `1px solid ${C.INK}` }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
                   return (
                     <figure key={msg.name + i} style={{ margin: 0, display: 'grid', gridTemplateColumns: '108px minmax(0, 1fr)', gap: 12, padding: '16px 0', borderBottom: `1px solid ${C.HAIR}` }}>
-                      <figcaption style={{ fontSize: 14.5, fontWeight: 600, lineHeight: 1.3 }}>{msg.name}{msg.date ? <div style={{ ...lbl, marginTop: 4 }}>{gbook.formatDate(msg.date)}</div> : null}</figcaption>
+                      <figcaption style={{ fontSize: 14.5, fontWeight: 600, lineHeight: 1.3 }}>{msg.name}{msg.date ? <div style={{ ...lbl(C), marginTop: 4 }}>{gbook.formatDate(msg.date)}</div> : null}</figcaption>
                       <blockquote style={{ margin: 0, fontSize: 16, lineHeight: 1.55, color: C.GRAPHITE }}>{msg.text}</blockquote>
                     </figure>
                   )
@@ -332,11 +340,12 @@ export default function BusinessCardTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 
 function MapPin() {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
       <span style={{ position: 'absolute', left: -1, top: -40, width: 2, height: 40, background: C.KLEIN }} />

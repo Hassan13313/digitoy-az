@@ -9,9 +9,10 @@ import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { ageSentence, ageWord, kidsGalleryDesc, tableNum, tableSize } from '../_shared/kids'
-import { C } from './palette'
+import { C as PAL } from './palette'
 import { LABELS, TXT } from './copy'
 import { HatchEgg, DinoBadge, NumberEgg, Fern, Volcano, Brachio, Footprint, Bone, Nest } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    DINO ADVENTURE — «Dinozavr ekspedisiyası» (Uşaq ad günü konsepti, 2026-10)
@@ -33,7 +34,11 @@ import { HatchEgg, DinoBadge, NumberEgg, Fern, Volcano, Brachio, Footprint, Bone
 const BASE = getTemplateTheme('dino-adventure')
 const ID = 'dino-adventure'
 
-const KEYFRAMES = `
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['LEAF'], secondary: ['JUNGLE'], accent: ['LAVA'], background: ['SAND'], text: ['INK'] }
+
+const KEYFRAMES = (C) => (`
 @keyframes da-wobble { 0%,100% { transform: rotate(0) } 20% { transform: rotate(-6deg) } 40% { transform: rotate(5deg) } 60% { transform: rotate(-3deg) } 80% { transform: rotate(2deg) } }
 @keyframes da-idle { 0%,82%,100% { transform: rotate(0) } 86% { transform: rotate(-5deg) } 90% { transform: rotate(4deg) } 94% { transform: rotate(-2deg) } }
 @keyframes da-shake { 0%,100% { transform: rotate(0) } 25% { transform: rotate(-7deg) } 75% { transform: rotate(7deg) } }
@@ -50,12 +55,13 @@ const KEYFRAMES = `
 [data-da] input:focus-visible, [data-da] textarea:focus-visible { border-color: ${C.LEAF} !important; outline: none; }
 [data-da] button:focus-visible, [data-da] a:focus-visible, [data-da] [role="button"]:focus-visible { outline: 2px solid ${C.LAVA}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-da] *, [data-da] { animation: none !important; transition: none !important; } }
-`
+`)
 
 const STONE_BG = `radial-gradient(rgba(0,0,0,.06) 1px, transparent 1.4px) 0 0 / 9px 9px, radial-gradient(rgba(255,255,255,.18) 1px, transparent 1.4px) 4px 5px / 13px 13px, linear-gradient(160deg, #D3C9B4, #B9AE98 60%, #A89C84)`
 
 /* ═══ 01 — AÇILIŞ: dinozavr yumurtası ═══ */
 function EggOpening({ inv, theme }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -114,6 +120,7 @@ function EggOpening({ inv, theme }) {
 
 /* Bölmə — düşərgə */
 function Camp({ id, section, title, kicker, sub, children, disp, tone = 'sand' }) {
+  const C = usePalette(PAL)
   const jungle = tone === 'jungle'
   const bg = jungle ? `linear-gradient(180deg, ${C.JUNGLE}, #1C3825)` : tone === 'egg' ? C.EGG : C.SAND
   return (
@@ -127,7 +134,7 @@ function Camp({ id, section, title, kicker, sub, children, disp, tone = 'sand' }
               <Footprint size={18} color={jungle ? C.FERN : C.LEAF} style={{ transform: 'rotate(-14deg)' }} />
               <Footprint size={18} color={jungle ? C.FERN : C.LEAF} style={{ transform: 'rotate(14deg) translateY(-6px)' }} />
             </div>
-            {title && <h2 style={{ margin: 0, fontFamily: disp, fontWeight: 800, fontSize: 'clamp(28px, 8vw, 36px)', lineHeight: 1.12, color: jungle ? C.SAND : C.JUNGLE, textWrap: 'balance' }}>{title}</h2>}
+            {title && <h2 style={{ margin: 0, fontFamily: disp, fontWeight: 800, fontSize: scaleFont('clamp(28px, 8vw, 36px)', C.hs), lineHeight: 1.12, color: jungle ? C.SAND : C.JUNGLE, textWrap: 'balance' }}>{title}</h2>}
             {kicker && <div style={{ marginTop: 8, fontSize: 15.5, color: jungle ? alpha(C.SAND, 0.8) : C.MUTED }}>{kicker}</div>}
             {sub && <p style={{ margin: '8px auto 0', maxWidth: 330, fontSize: 15.5, color: jungle ? alpha(C.SAND, 0.8) : C.MUTED, lineHeight: 1.55 }}>{sub}</p>}
           </div>
@@ -138,22 +145,23 @@ function Camp({ id, section, title, kicker, sub, children, disp, tone = 'sand' }
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: '#FFFDF6', border: `2px solid ${alpha(C.LEAF, 0.28)}`, borderRadius: 16,
   padding: '13px 16px', fontSize: 16, color: C.INK, outline: 'none',
-}
-const btn = (on) => ({
+})
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 22px', borderRadius: 999,
   fontSize: 15.5, fontWeight: 700, textDecoration: 'none', cursor: 'pointer',
   background: on ? C.LEAF : 'transparent', color: on ? '#FFFFFF' : C.LEAF, border: `2px solid ${C.LEAF}`,
   boxShadow: on ? `0 4px 0 ${C.JUNGLE}` : 'none',
-})
-const suggest = { bg: '#FFFDF6', border: `2px solid ${alpha(C.LEAF, 0.22)}`, active: alpha(C.FERN, 0.2), text: C.INK, table: C.LEAF, radius: 16 }
+}))
+const suggest = (C) => ({ bg: '#FFFDF6', border: `2px solid ${alpha(C.LEAF, 0.22)}`, active: alpha(C.FERN, 0.2), text: C.INK, table: C.LEAF, radius: 16 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function DinoAdventureTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const disp = theme.fonts.heading
   const body = theme.fonts.body
@@ -161,12 +169,12 @@ export default function DinoAdventureTemplate(props) {
   const age = inv.age
 
   return (
-    <div data-da lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-da lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.SAND,
       minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.LEAF, 0.2),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <EggOpening inv={inv} theme={theme} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.LEAF, border: 'none', boxShadow: `0 4px 0 ${C.JUNGLE}, 0 10px 18px rgba(0,0,0,.25)` }}>
@@ -270,10 +278,10 @@ export default function DinoAdventureTemplate(props) {
               <div style={{ textAlign: 'center', marginTop: 22, fontFamily: disp, fontWeight: 800, fontSize: 24, lineHeight: 1.2, color: C.JUNGLE }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontSize: 15.5, color: C.MUTED }}>{weddingData.venueNote}</div>}
               <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
-                {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(true)}>{tr.inv_directions_btn}</a>}
-                {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(!inv.dirUrl)}>Maps</a>}
-                {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Waze</a>}
-                {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Apple</a>}
+                {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(true)}>{tr.inv_directions_btn}</a>}
+                {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(!inv.dirUrl)}>Maps</a>}
+                {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>Waze</a>}
+                {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>Apple</a>}
               </div>
             </Camp>
           )}
@@ -310,8 +318,8 @@ export default function DinoAdventureTemplate(props) {
           {/* MASA — qazıntı sahəsi */}
           {S.seating && !seating.isEmpty && (
             <Camp section="seating" disp={disp} tone="egg" title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <input {...seatInputProps(inv, 'da-seat-list')} style={field} />
-              <SeatSuggest inv={inv} id="da-seat-list" c={{ ...suggest, font: body }} />
+              <input {...seatInputProps(inv, 'da-seat-list')} style={field(C)} />
+              <SeatSuggest inv={inv} id="da-seat-list" c={{ ...suggest(C), font: body }} />
               {seating.showNotFound && <div style={{ marginTop: 12, fontSize: 15, color: C.MUTED, textAlign: 'center' }}>{tr.inv_seat_fullname}</div>}
               {seating.selected && (
                 <div key={seating.selected.full_name} style={{ marginTop: 26, textAlign: 'center' }}>
@@ -354,7 +362,7 @@ export default function DinoAdventureTemplate(props) {
                   <QRCodeSVG value={gallery.photoShareUrl} size={126} bgColor="#FFFFFF" fgColor={C.JUNGLE} level="M" />
                 </div>
                 <div style={{ marginTop: 18, fontSize: 15, color: C.MUTED }}>{tr.inv_scan_upload}</div>
-                <a data-press href={gallery.photoShareUrl} style={{ ...btn(true), marginTop: 16 }}>{tr.inv_gallery_btn}</a>
+                <a data-press href={gallery.photoShareUrl} style={{ ...btn(C)(true), marginTop: 16 }}>{tr.inv_gallery_btn}</a>
                 <p style={{ margin: '16px auto 0', maxWidth: 340, fontSize: 15.5, color: C.MUTED, lineHeight: 1.65 }}>{kidsGalleryDesc(props.adminOverrides, tr, lang)}</p>
               </div>
             </Camp>
@@ -368,7 +376,7 @@ export default function DinoAdventureTemplate(props) {
                 font: body, display: disp, btnFont: disp,
                 doneMark: <DinoBadge size={46} style={{ margin: '0 auto 8px' }} />,
                 marker: (a) => (a ? <Footprint size={18} color={C.LEAF} /> : <span style={{ display: 'block', width: 12, height: 12, borderRadius: '50%', border: `2px solid ${alpha(C.LEAF, 0.45)}` }} />),
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Camp>
           )}
@@ -377,9 +385,9 @@ export default function DinoAdventureTemplate(props) {
           {S.guestbook && (
             <Camp section="guestbook" disp={disp} tone="jungle" title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
               <form onSubmit={gbook.handleAdd} style={{ display: 'grid', gap: 10, marginBottom: 30 }}>
-                <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbookL.namePh} style={field} />
-                <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbookL.msgPh} rows={3} style={{ ...field, resize: 'none', lineHeight: 1.5 }} />
-                <button type="submit" disabled={!gbook.canSubmit} data-press style={{ ...btn(gbook.canSubmit), width: '100%', opacity: gbook.canSubmit ? 1 : 0.55, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed', background: gbook.canSubmit ? C.LAVA : 'transparent', borderColor: gbook.canSubmit ? C.LAVA : alpha(C.SAND, 0.5), color: gbook.canSubmit ? '#FFFFFF' : alpha(C.SAND, 0.8), boxShadow: gbook.canSubmit ? `0 4px 0 ${C.LAVA_D}` : 'none' }}>
+                <input type="text" value={gbook.name} onChange={(e) => gbook.setName(e.target.value)} placeholder={gbookL.namePh} style={field(C)} />
+                <textarea value={gbook.text} onChange={(e) => gbook.setText(e.target.value)} placeholder={gbookL.msgPh} rows={3} style={{ ...field(C), resize: 'none', lineHeight: 1.5 }} />
+                <button type="submit" disabled={!gbook.canSubmit} data-press style={{ ...btn(C)(gbook.canSubmit), width: '100%', opacity: gbook.canSubmit ? 1 : 0.55, cursor: gbook.canSubmit ? 'pointer' : 'not-allowed', background: gbook.canSubmit ? C.LAVA : 'transparent', borderColor: gbook.canSubmit ? C.LAVA : alpha(C.SAND, 0.5), color: gbook.canSubmit ? '#FFFFFF' : alpha(C.SAND, 0.8), boxShadow: gbook.canSubmit ? `0 4px 0 ${C.LAVA_D}` : 'none' }}>
                   {gbook.sending ? gbookL.sending : gbookL.btn}
                 </button>
                 {gbook.error && <p role="alert" style={{ margin: 0, fontSize: 14, color: C.AMBER_L }}>⚠ {gbookL.error}</p>}
@@ -403,11 +411,12 @@ export default function DinoAdventureTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={disp} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 
 function TrailPin() {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
       {[[14, 82, -30], [24, 74, 20], [32, 66, -20], [40, 60, 24]].map(([x, y, r], i) => (

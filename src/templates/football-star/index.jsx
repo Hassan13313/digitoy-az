@@ -10,9 +10,10 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, ageWord } from '../_shared/kids'
-import { C, PITCH_BG, NIGHT_BG, GOAL_WORD, nameSize } from './palette'
+import { C as PAL, PITCH_BG, NIGHT_BG, GOAL_WORD, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Ball, Goal, Jersey, Whistle } from './art'
+import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    FOOTBALL STAR — «Futbol ulduzu» (Sünnət toyu konsepti, 2026-10)
@@ -31,9 +32,13 @@ import { Ball, Goal, Jersey, Whistle } from './art'
 
 const BASE = getTemplateTheme('football-star')
 const ID = 'football-star'
+
+/* Admin «Rəng» tabının token-i → bu palitranın açarları (bax _shared/palette.js).
+   Override yoxdursa PAL olduğu kimi qalır. */
+const LINKS = { primary: ['PITCH_D'], secondary: ['NAVY'], accent: ['GOLD'], background: ['GRASS_L'], text: ['INK'] }
 const LED = "'Tektur', 'Oswald', system-ui, sans-serif"
 
-const KEYFRAMES = `
+const KEYFRAMES = (C) => (`
 @keyframes fs-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 @keyframes fs-fade { from { opacity: 0 } to { opacity: 1 } }
 @keyframes fs-hint { 0%,100% { opacity: .55 } 50% { opacity: 1 } }
@@ -46,12 +51,13 @@ const KEYFRAMES = `
 [data-fs] input:focus-visible, [data-fs] textarea:focus-visible { border-color: ${C.PITCH} !important; outline: none; }
 [data-fs] button:focus-visible, [data-fs] a:focus-visible, [data-fs] [role="button"]:focus-visible { outline: 3px solid ${C.GOLD}; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { [data-fs] *, [data-fs] { animation: none !important; transition: none !important; } }
-`
+`)
 
-const LIGHT_BG = `radial-gradient(90% 60% at 50% 0%, #FFFFFF, transparent 70%), ${C.GRASS_L}`
+const LIGHT_BG = (C) => (`radial-gradient(90% 60% at 50% 0%, #FFFFFF, transparent 70%), ${C.GRASS_L}`)
 
 /* ═══ 01 — AÇILIŞ: zərbə və qol ═══ */
 function GoalOpening({ inv, theme, lang }) {
+  const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
@@ -62,7 +68,7 @@ function GoalOpening({ inv, theme, lang }) {
     <motion.div {...gate.gateProps} data-fs
       animate={go ? { opacity: 0 } : {}}
       transition={{ duration: 0.4, delay: 1.7 }}
-      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: NIGHT_BG, color: C.WHITE, fontFamily: theme.fonts.body }}>
+      style={{ position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: NIGHT_BG(C), color: C.WHITE, fontFamily: theme.fonts.body }}>
       {/* meydança xətləri */}
       <div aria-hidden="true" style={{ position: 'absolute', left: '-20%', right: '-20%', top: '40%', bottom: 0, background: 'repeating-linear-gradient(180deg, rgba(255,255,255,.05) 0 40px, transparent 40px 80px)', transform: 'perspective(400px) rotateX(30deg)', transformOrigin: '50% 0' }} />
       <div aria-hidden="true" style={{ position: 'absolute', left: '50%', bottom: '8%', width: 260, height: 90, marginLeft: -130, border: `3px solid ${alpha(C.LINE, 0.55)}`, borderBottom: 'none', borderRadius: '130px 130px 0 0 / 90px 90px 0 0' }} />
@@ -106,15 +112,16 @@ function GoalOpening({ inv, theme, lang }) {
 
 /* Bölmə */
 function Panel({ id, section, title, kicker, sub, children, head, pitch = false }) {
+  const C = usePalette(PAL)
   const mute = pitch ? alpha(C.WHITE, 0.82) : C.MUTED
   return (
-    <section id={id} data-section={section} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: pitch ? PITCH_BG : LIGHT_BG, color: pitch ? C.WHITE : C.INK }}>
+    <section id={id} data-section={section} style={{ position: 'relative', padding: '64px 20px 70px', overflow: 'hidden', background: pitch ? PITCH_BG(C) : LIGHT_BG(C), color: pitch ? C.WHITE : C.INK }}>
       {pitch && <div aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 300, height: 300, margin: '-150px 0 0 -150px', borderRadius: '50%', border: `3px solid ${alpha(C.LINE, 0.18)}` }} />}
       <Reveal style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 30 }}>
             <Ball size={26} style={{ margin: '0 auto 10px' }} />
-            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 600, fontSize: 'clamp(28px, 8.4vw, 38px)', lineHeight: 1.1, textTransform: 'uppercase', letterSpacing: '.02em', color: pitch ? C.WHITE : C.NAVY, textWrap: 'balance' }}>{title}</h2>}
+            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 600, fontSize: scaleFont('clamp(28px, 8.4vw, 38px)', C.hs), lineHeight: 1.1, textTransform: 'uppercase', letterSpacing: '.02em', color: pitch ? C.WHITE : C.NAVY, textWrap: 'balance' }}>{title}</h2>}
             {kicker && <div style={{ marginTop: 8, fontSize: 15.5, color: mute }}>{kicker}</div>}
             {sub && <p style={{ margin: '8px auto 0', maxWidth: 340, fontSize: 15.5, color: mute, lineHeight: 1.6 }}>{sub}</p>}
           </div>
@@ -125,21 +132,22 @@ function Panel({ id, section, title, kicker, sub, children, head, pitch = false 
   )
 }
 
-const field = {
+const field = (C) => ({
   width: '100%', background: C.WHITE, border: `2px solid ${alpha(C.NAVY, 0.18)}`, borderRadius: 12,
   padding: '13px 16px', fontSize: 16, color: C.INK, outline: 'none',
-}
-const btn = (on) => ({
+})
+const btn = (C) => ((on) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '12px 22px', borderRadius: 12,
   fontSize: 15.5, fontWeight: 600, textDecoration: 'none', cursor: 'pointer',
   background: on ? C.NAVY : C.WHITE, color: on ? C.GOLD : C.NAVY, border: `2px solid ${on ? C.NAVY : alpha(C.NAVY, 0.25)}`,
-})
-const suggest = { bg: C.WHITE, border: `2px solid ${alpha(C.NAVY, 0.18)}`, active: alpha(C.GOLD, 0.25), text: C.INK, table: C.PITCH, radius: 12 }
+}))
+const suggest = (C) => ({ bg: C.WHITE, border: `2px solid ${alpha(C.NAVY, 0.18)}`, active: alpha(C.GOLD, 0.25), text: C.INK, table: C.PITCH, radius: 12 })
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function FootballStarTemplate(props) {
   const { lang, setLang, weddingData, onBack, isDemoMode = false } = props
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
+  const C = resolvePalette(PAL, LINKS, inv.theme, BASE)
   const { theme, tr, L, K, S, cd, timeline, seating, gbook, gallery, rsvpL, gbookL, seatingL } = inv
   const head = theme.fonts.heading
   const body = theme.fonts.body
@@ -148,11 +156,11 @@ export default function FootballStarTemplate(props) {
   const age = inv.age
 
   return (
-    <div data-fs lang={lang} data-enter={enterDirection(ID)} style={{
+    <PaletteContext.Provider value={C}><div data-fs lang={lang} data-enter={enterDirection(ID)} style={{
       backgroundColor: C.GRASS_L, minHeight: '100vh', fontFamily: body, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.GOLD, 0.35),
     }}>
-      <style>{KEYFRAMES}</style>
+      <style>{KEYFRAMES(C)}</style>
       {!inv.opened && <GoalOpening inv={inv} theme={theme} lang={lang} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.NAVY, border: `2px solid ${C.GOLD}`, boxShadow: '0 8px 18px rgba(8,26,46,.45)' }}>
@@ -175,7 +183,7 @@ export default function FootballStarTemplate(props) {
           </header>
 
           {/* HERO — forma */}
-          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: NIGHT_BG, padding: '40px 20px 56px', textAlign: 'center', color: C.WHITE }}>
+          <section data-section="hero" style={{ position: 'relative', overflow: 'hidden', background: NIGHT_BG(C), padding: '40px 20px 56px', textAlign: 'center', color: C.WHITE }}>
             <div style={{ fontFamily: head, fontWeight: 500, fontSize: 15, letterSpacing: '.24em', textTransform: 'uppercase', color: C.GOLD }}>{L('hero', 'kicker', inv.eventLabel)}</div>
             <h1 style={{ margin: '6px 0 0', fontFamily: head, fontWeight: 600, fontSize: nameSize(heroName), lineHeight: 1, textTransform: 'uppercase', color: C.WHITE, overflowWrap: 'anywhere', textShadow: '0 4px 0 rgba(0,0,0,.3)', animation: 'fs-rise 1s ease-out .2s both' }}>{heroName}</h1>
             <div style={{ perspective: 800, marginTop: 22 }}>
@@ -222,13 +230,13 @@ export default function FootballStarTemplate(props) {
                     weddingData={weddingData} theme={theme} accent={C.PITCH} height="clamp(250px, 70vw, 320px)"
                     map={{ opacity: 0.92, filter: 'saturate(.9)', tintOpacity: 0.14, tint: C.PITCH, blend: 'multiply' }}
                     frame={<MapPin />}
-                    fallback={<div style={{ height: 'clamp(250px, 70vw, 320px)', position: 'relative', background: PITCH_BG }}><MapPin /></div>}
+                    fallback={<div style={{ height: 'clamp(250px, 70vw, 320px)', position: 'relative', background: PITCH_BG(C) }}><MapPin /></div>}
                   />
                 </div>
               </div>
               <div style={{ textAlign: 'center', marginTop: 24, fontFamily: head, fontWeight: 600, fontSize: 24, lineHeight: 1.2, textTransform: 'uppercase', color: C.WHITE }}>{weddingData.venueName}</div>
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontSize: 15.5, color: alpha(C.WHITE, 0.8) }}>{weddingData.venueNote}</div>}
-              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={(on) => ({ ...btn(on), background: on ? C.GOLD : C.WHITE, color: C.NAVY, border: `2px solid ${on ? C.GOLD : C.WHITE}` })} />
+              <VenueLinks inv={inv} weddingData={weddingData} tr={tr} btn={(on) => ({ ...btn(C)(on), background: on ? C.GOLD : C.WHITE, color: C.NAVY, border: `2px solid ${on ? C.GOLD : C.WHITE}` })} />
             </Panel>
           )}
 
@@ -257,7 +265,7 @@ export default function FootballStarTemplate(props) {
           {/* MASA — forma */}
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} pitch title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>
-              <SeatFinder inv={inv} tr={tr} listId="fs-seat-list" field={field} suggest={suggest} font={body} muted={alpha(C.WHITE, 0.85)} accent={C.GOLD}
+              <SeatFinder inv={inv} tr={tr} listId="fs-seat-list" field={field(C)} suggest={suggest(C)} font={body} muted={alpha(C.WHITE, 0.85)} accent={C.GOLD}
                 nameStyle={{ fontFamily: head, fontWeight: 600, fontSize: 20, letterSpacing: '.04em', textTransform: 'uppercase' }}
                 card={(num) => (
                   <div style={{ perspective: 800 }}>
@@ -280,7 +288,7 @@ export default function FootballStarTemplate(props) {
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.NAVY} bg={C.WHITE} frame={{ borderRadius: 14, boxShadow: `0 0 0 3px ${C.NAVY}, 0 0 0 6px ${C.GOLD}` }}
-                btn={btn} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
+                btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
             </Panel>
           )}
 
@@ -292,7 +300,7 @@ export default function FootballStarTemplate(props) {
                 font: body, display: head, btnFont: head,
                 doneMark: <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><Ball size={44} /></div>,
                 marker: (a) => (a ? <Ball size={15} /> : <span style={{ display: 'block', width: 14, height: 14, borderRadius: '50%', border: `2px solid ${alpha(C.NAVY, 0.35)}` }} />),
-                suggest: { ...suggest, font: body },
+                suggest: { ...suggest(C), font: body },
               }} />
             </Panel>
           )}
@@ -300,7 +308,7 @@ export default function FootballStarTemplate(props) {
           {/* AZARKEŞ SÖZLƏRİ */}
           {S.guestbook && (
             <Panel section="guestbook" head={head} pitch title={L('guestbook', 'title', gbookL.title)} kicker={K('guestbook')}>
-              <GuestbookForm inv={inv} field={field} btn={(on) => ({ ...btn(on), background: on ? C.GOLD : C.WHITE, color: C.NAVY, border: `2px solid ${on ? C.GOLD : C.WHITE}` })} errorColor={C.GOLD} />
+              <GuestbookForm inv={inv} field={field(C)} btn={(on) => ({ ...btn(C)(on), background: on ? C.GOLD : C.WHITE, color: C.NAVY, border: `2px solid ${on ? C.GOLD : C.WHITE}` })} errorColor={C.GOLD} />
               <div style={{ display: 'grid', gap: 12 }}>
                 {gbook.messages.map((raw, i) => {
                   const msg = gbook.readMessage(raw)
@@ -318,7 +326,7 @@ export default function FootballStarTemplate(props) {
           <InvitationEnd inv={inv} theme={theme} weddingData={weddingData} lang={lang} isDemoMode={isDemoMode} serif={head} />
         </motion.div>
       )}
-    </div>
+    </div></PaletteContext.Provider>
   )
 }
 

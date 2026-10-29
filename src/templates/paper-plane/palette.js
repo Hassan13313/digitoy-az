@@ -6,10 +6,10 @@ export const C = {
 }
 
 export const SKY_BG = `radial-gradient(40% 30% at 85% 8%, rgba(255,200,87,.45), transparent 70%), linear-gradient(180deg, #A9D4F2 0%, #CFE8F8 55%, #EAF6FD 100%)`
-export const NIGHT_BG = `radial-gradient(1.5px 1.5px at 20% 30%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 70% 20%, #fff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 85% 65%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 35% 80%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 55% 50%, #fff 50%, transparent 51%), linear-gradient(180deg, #1B2D4F, #111E36)`
-export const LINED = `linear-gradient(90deg, transparent 30px, rgba(224,72,62,.35) 30px 31.5px, transparent 31.5px), repeating-linear-gradient(180deg, transparent 0 27px, rgba(47,111,219,.16) 27px 28px), #FFFFFF`
+export const NIGHT_BG = (C) => (`radial-gradient(1.5px 1.5px at 20% 30%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 70% 20%, #fff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 85% 65%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 35% 80%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 55% 50%, #fff 50%, transparent 51%), linear-gradient(180deg, ${C.NAVY}, #111E36)`)
+export const LINED = (C) => (`linear-gradient(90deg, transparent 30px, rgba(224,72,62,.35) 30px 31.5px, transparent 31.5px), repeating-linear-gradient(180deg, transparent 0 27px, rgba(47,111,219,.16) 27px 28px), ${C.WHITE}`)
 /* Hava poçtu zolağı */
-export const AIRMAIL = `repeating-linear-gradient(135deg, #E0483E 0 12px, #FFFFFF 12px 20px, #2F6FDB 20px 32px, #FFFFFF 32px 40px)`
+export const AIRMAIL = (C) => (`repeating-linear-gradient(135deg, ${C.RED} 0 12px, ${C.WHITE} 12px 20px, ${C.BLUE} 20px 32px, ${C.WHITE} 32px 40px)`)
 
 /* Ad uzunluğuna görə ölçü */
 export function nameSize(text) {

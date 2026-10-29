@@ -1,10 +1,12 @@
-import { C, AIRMAIL } from './palette'
+import { C as PAL, AIRMAIL } from './palette'
+import { usePalette } from '../_shared/palette'
 
 /* PAPER PLANE — kağız təyyarə, buludlar, hava poçtu */
 
 /** Kağız təyyarə (yandan) */
 export function Plane({ size = 80, tone = 'white', style }) {
-  const f = tone === 'blue' ? ['#3B7BE6', '#2558B8', '#1B4590', '#1B4590'] : ['#FFFFFF', '#DCE8F7', '#B9CCE6', '#9FB6D6']
+  const C = usePalette(PAL)
+  const f = tone === 'blue' ? ['#3B7BE6', '#2558B8', '#1B4590', '#1B4590'] : [C.WHITE, '#DCE8F7', '#B9CCE6', '#9FB6D6']
   return (
     <svg aria-hidden="true" viewBox="0 0 100 60" width={size} height={size * 0.6} style={{ display: 'block', overflow: 'visible', ...style }}>
       <path d="M2 30L98 4L40 40Z" fill={f[0]} />
@@ -17,17 +19,20 @@ export function Plane({ size = 80, tone = 'white', style }) {
 
 /** Yumşaq bulud */
 export function Cloud({ w = 120, opacity = 0.9, style }) {
+  const C = usePalette(PAL)
   return (
     <span aria-hidden="true" style={{ position: 'absolute', display: 'block', width: w, height: w * 0.42, opacity, pointerEvents: 'none', ...style }}>
-      <span style={{ position: 'absolute', left: '8%', bottom: 0, width: '84%', height: '52%', borderRadius: 999, background: '#FFFFFF' }} />
-      <span style={{ position: 'absolute', left: '20%', bottom: '22%', width: '36%', height: '74%', borderRadius: '50%', background: '#FFFFFF' }} />
-      <span style={{ position: 'absolute', left: '44%', bottom: '18%', width: '42%', height: '86%', borderRadius: '50%', background: '#FFFFFF' }} />
+      <span style={{ position: 'absolute', left: '8%', bottom: 0, width: '84%', height: '52%', borderRadius: 999, background: C.WHITE }} />
+      <span style={{ position: 'absolute', left: '20%', bottom: '22%', width: '36%', height: '74%', borderRadius: '50%', background: C.WHITE }} />
+      <span style={{ position: 'absolute', left: '44%', bottom: '18%', width: '42%', height: '86%', borderRadius: '50%', background: C.WHITE }} />
     </span>
   )
 }
 
 /** Təyyarənin qırıq-qırıq izi (əyri) */
-export function Trail({ d = 'M10 150C80 140 120 60 200 70S330 20 390 10', on = true, delay = 0, dur = 0.9, color = C.BLUE, style }) {
+export function Trail($p) {
+  const C = usePalette(PAL)
+  const { d = 'M10 150C80 140 120 60 200 70S330 20 390 10', on = true, delay = 0, dur = 0.9, color = C.BLUE, style } = $p
   return (
     <svg aria-hidden="true" viewBox="0 0 400 160" preserveAspectRatio="none" style={{ position: 'absolute', overflow: 'visible', pointerEvents: 'none', clipPath: on ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', transition: `clip-path ${dur}s cubic-bezier(.4,0,.6,1) ${delay}s`, ...style }}>
       <path d={d} fill="none" stroke={color} strokeWidth="2.4" strokeDasharray="7 9" strokeLinecap="round" vectorEffect="non-scaling-stroke" opacity=".7" />
@@ -37,15 +42,18 @@ export function Trail({ d = 'M10 150C80 140 120 60 200 70S330 20 390 10', on = t
 
 /** Hava poçtu çərçivəsi (zolaqlı kənar) */
 export function Airmail({ children, pad = 8, radius = 10, style }) {
+  const C = usePalette(PAL)
   return (
-    <div style={{ padding: pad, borderRadius: radius, background: AIRMAIL, boxShadow: '0 14px 24px -14px rgba(27,45,79,.45)', ...style }}>
-      <div style={{ position: 'relative', height: '100%', borderRadius: Math.max(0, radius - 4), background: '#FFFFFF', overflow: 'hidden' }}>{children}</div>
+    <div style={{ padding: pad, borderRadius: radius, background: AIRMAIL(C), boxShadow: '0 14px 24px -14px rgba(27,45,79,.45)', ...style }}>
+      <div style={{ position: 'relative', height: '100%', borderRadius: Math.max(0, radius - 4), background: C.WHITE, overflow: 'hidden' }}>{children}</div>
     </div>
   )
 }
 
 /** Poçt möhürü (dalğalı xətli dairə) */
-export function Postmark({ size = 74, children, color = C.BLUE, style }) {
+export function Postmark($p) {
+  const C = usePalette(PAL)
+  const { size = 74, children, color = C.BLUE, style } = $p
   return (
     <div aria-hidden="true" style={{ position: 'relative', width: size, height: size, ...style }}>
       <svg viewBox="0 0 100 100" width={size} height={size} style={{ position: 'absolute', inset: 0, overflow: 'visible' }}>
