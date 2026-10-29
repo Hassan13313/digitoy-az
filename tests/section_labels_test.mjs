@@ -64,6 +64,12 @@ const REDESIGNED = [
   'last-bell',
   'chalkboard',
   'paper-plane',
+  /* 2026-10 — «Açılış və təqdimat» konsepti */
+  'ribbon-cut',
+  'bistro-sign',
+  'roller-shutter',
+  'unboxing',
+  'gallery-unveil',
 ]
 const SECTIONS = ['countdown', 'venue', 'program', 'dresscode', 'seating', 'gallery', 'rsvp', 'guestbook', 'hero', 'story']
 

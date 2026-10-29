@@ -51,6 +51,12 @@ const WITH_IMAGE = new Set([
   'last-bell',
   'chalkboard',
   'paper-plane',
+  /* 2026-10 — «Açılış və təqdimat» konsepti */
+  'ribbon-cut',
+  'bistro-sign',
+  'roller-shutter',
+  'unboxing',
+  'gallery-unveil',
 ])
 
 export const TEMPLATE_IMAGE_SIZE = { width: 780, height: 1688 }

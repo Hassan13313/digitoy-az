@@ -74,6 +74,12 @@ const COMPONENTS = {
   'last-bell': lazy(() => import('./last-bell')),
   'chalkboard': lazy(() => import('./chalkboard')),
   'paper-plane': lazy(() => import('./paper-plane')),
+  /* 2026-10 — «Açılış və təqdimat» konsepti */
+  'ribbon-cut': lazy(() => import('./ribbon-cut')),
+  'bistro-sign': lazy(() => import('./bistro-sign')),
+  'roller-shutter': lazy(() => import('./roller-shutter')),
+  'unboxing': lazy(() => import('./unboxing')),
+  'gallery-unveil': lazy(() => import('./gallery-unveil')),
 }
 
 /** Şablonun öz komponenti varmı (yoxsa scaffold göstəriləcək)? */

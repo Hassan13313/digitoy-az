@@ -114,6 +114,13 @@ const FAMILY = {
   ysabeauOffice: 'Ysabeau+Office:wght@400;600',
   ysabeau: 'Ysabeau:ital,wght@0,600;0,700;0,800;1,700',
   martianMono: 'Martian+Mono:wght@400;600',
+  bonaNovaSC: 'Bona+Nova+SC:ital,wght@0,400;0,700;1,400',
+  robotoCondensed: 'Roboto+Condensed:wght@400;600',
+  ibmPlexMono: 'IBM+Plex+Mono:wght@400;500',
+  alumniSans: 'Alumni+Sans:wght@600;700;800;900',
+  notoSansDisplay: 'Noto+Sans+Display:ital,wght@0,300;0,400;0,600;0,800;1,300',
+  ibmPlexSerif: 'IBM+Plex+Serif:ital,wght@0,300;0,400;0,500;1,300;1,400',
+  ibmPlexSans: 'IBM+Plex+Sans:wght@400;500',
 }
 
 /* Hər şablonun öz ailələri */
@@ -174,6 +181,12 @@ const TEMPLATE_FONTS = {
   'last-bell': ['robotoSerif', 'notoSans', 'comforter'],
   'chalkboard': ['amatic', 'ysabeauOffice'],
   'paper-plane': ['ysabeau', 'ysabeauOffice', 'martianMono'],
+  /* 2026-10 — «Açılış və təqdimat» konsepti */
+  'ribbon-cut': ['bonaNovaSC', 'robotoCondensed'],
+  'bistro-sign': ['playfair', 'notoSans', 'ibmPlexMono'],
+  'roller-shutter': ['alumniSans', 'robotoCondensed', 'ibmPlexMono'],
+  'unboxing': ['notoSansDisplay'],
+  'gallery-unveil': ['ibmPlexSerif', 'ibmPlexSans'],
 }
 
 const ALL = Object.keys(FAMILY)

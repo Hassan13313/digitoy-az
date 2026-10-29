@@ -116,6 +116,13 @@ const F = {
   ysabeauOffice: FONT_STACKS.ysabeauOffice,
   ysabeau: FONT_STACKS.ysabeau,
   martianMono: FONT_STACKS.martianMono,
+  bonaNovaSC: FONT_STACKS.bonaNovaSC,
+  robotoCondensed: FONT_STACKS.robotoCondensed,
+  ibmPlexMono: FONT_STACKS.ibmPlexMono,
+  alumniSans: FONT_STACKS.alumniSans,
+  notoSansDisplay: FONT_STACKS.notoSansDisplay,
+  ibmPlexSerif: FONT_STACKS.ibmPlexSerif,
+  ibmPlexSans: FONT_STACKS.ibmPlexSans,
 }
 export const STORY_FONTS = F
 
@@ -186,6 +193,12 @@ const T = {
   'last-bell': { bg: '#FFFFFF', surf: '#F5F6F9', ink: '#1C2A4A', mute: '#6A7387', hi: '#C8102E', line: '#E2BD6A', paper: '#FFFFFF', paperInk: '#6A7387', head: F.robotoSerif, body: F.notoSans, cap: F.comforter, capItalic: false, titleFont: F.robotoSerif, titleSize: 36, frame: 'clipping', hero: 'rounded', labels: 'num', textItalic: false },
   'chalkboard': { bg: 'linear-gradient(180deg,#2A4B42,#22403A)', surf: '#1A322C', ink: '#F3F0E6', mute: 'rgba(243,240,230,.65)', hi: '#F5DE7A', line: '#F3A9B9', head: F.ysabeauOffice, body: F.ysabeauOffice, cap: F.amatic, capItalic: false, titleFont: F.amatic, titleSize: 56, frame: 'minimal', hero: 'rect', labels: 'num', dash: '6 4', textItalic: false },
   'paper-plane': { bg: 'linear-gradient(180deg,#CFE8F8,#FFFFFF)', surf: '#FFFFFF', ink: '#1B2D4F', mute: '#5E7290', hi: '#2F6FDB', line: '#E0483E', paper: '#FFFFFF', paperInk: '#5E7290', head: F.ysabeau, body: F.ysabeauOffice, cap: F.martianMono, capItalic: false, titleFont: F.ysabeau, titleSize: 38, frame: 'ticket', hero: 'rounded', labels: 'num2', textItalic: false },
+  /* 2026-10 — «Açılış və təqdimat» konsepti */
+  'ribbon-cut': { bg: 'linear-gradient(180deg,#175443,#0F3D30)', surf: '#0B3127', ink: '#F7F2E6', mute: '#B9C6BE', hi: '#F5DE9C', line: '#D8B25A', head: F.robotoCondensed, body: F.robotoCondensed, cap: F.bonaNovaSC, capItalic: false, titleFont: F.bonaNovaSC, titleSize: 36, frame: 'mat', hero: 'arch', labels: 'roman', textItalic: false },
+  'bistro-sign': { bg: '#F4ECDC', surf: '#FBF6EC', ink: '#1F2A24', mute: '#7A786C', hi: '#7A1F2B', line: '#C9A04A', paper: '#FBF6EC', paperInk: '#7A786C', head: F.playfair, body: F.notoSans, cap: F.playfair, capItalic: true, titleFont: F.playfair, titleItalic: true, titleSize: 40, frame: 'mat', hero: 'arch', labels: 'num', textItalic: false },
+  'roller-shutter': { bg: 'linear-gradient(180deg,#2A2E33,#1D2023)', surf: '#141618', ink: '#F7F8F9', mute: '#A7AFB7', hi: '#FFD23F', line: '#FFD23F', head: F.robotoCondensed, body: F.robotoCondensed, cap: F.ibmPlexMono, capItalic: false, titleFont: F.alumniSans, titleUpper: true, titleSize: 52, frame: 'minimal', hero: 'rect', labels: 'num2', dash: '0', textItalic: false },
+  'unboxing': { bg: 'linear-gradient(180deg,#17163A,#101024)', surf: '#1B1A3A', ink: '#F4F3FA', mute: '#A9AAC4', hi: '#B9A8FF', line: '#7C5CFF', head: F.notoSansDisplay, body: F.notoSansDisplay, cap: F.notoSansDisplay, capItalic: false, titleFont: F.notoSansDisplay, titleSize: 38, frame: 'glass', hero: 'rounded', labels: 'num2', textItalic: false },
+  'gallery-unveil': { bg: '#EEEDEA', surf: '#FFFFFF', ink: '#171717', mute: '#77746E', hi: '#5A1F3A', line: '#C8A55A', paper: '#FFFFFF', paperInk: '#77746E', head: F.ibmPlexSerif, body: F.ibmPlexSans, cap: F.ibmPlexSans, capItalic: false, titleFont: F.ibmPlexSerif, titleSize: 38, frame: 'mat', hero: 'rect', labels: 'num', textItalic: true },
 }
 
 /* ── Mətnlər (AZ/EN/RU) ── dizayndakı şablon adlandırmaları */
@@ -451,6 +464,47 @@ const COPY = {
     end:    { az: '…və qarşıda yeni yol var', en: '…and a new road lies ahead', ru: '…а впереди новый путь' },
     endSub: { az: 'Bu günü sizinlə qeyd etmək istəyirəm.', en: 'I want to celebrate this day with you.', ru: 'Я хочу отметить этот день вместе с вами.' },
     kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  /* 2026-10 — «Açılış və təqdimat» konsepti */
+  'ribbon-cut': {
+    kicker: { az: 'Tariximiz', en: 'Our history', ru: 'Наша история' },
+    title:  { az: 'Necə başladı', en: 'How it started', ru: 'Как всё начиналось' },
+    sub:    { az: 'İdeyadan açılış gününə qədər', en: 'From the idea to opening day', ru: 'От идеи до дня открытия' },
+    end:    { az: '…və qapılarımız sizin üçün açıqdır', en: '…and our doors are open for you', ru: '…и наши двери открыты для вас' },
+    endSub: { az: 'Bu günü sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this day with you.', ru: 'Мы хотим отметить этот день вместе с вами.' },
+    kpre:   { az: 'Mərhələ', en: 'Step', ru: 'Этап' },
+  },
+  'bistro-sign': {
+    kicker: { az: 'Tariximiz', en: 'Our history', ru: 'Наша история' },
+    title:  { az: 'Necə başladı', en: 'How it started', ru: 'Как всё начиналось' },
+    sub:    { az: 'İdeyadan açılış gününə qədər', en: 'From the idea to opening day', ru: 'От идеи до дня открытия' },
+    end:    { az: '…və qapılarımız sizin üçün açıqdır', en: '…and our doors are open for you', ru: '…и наши двери открыты для вас' },
+    endSub: { az: 'Bu günü sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this day with you.', ru: 'Мы хотим отметить этот день вместе с вами.' },
+    kpre:   { az: 'Mərhələ', en: 'Step', ru: 'Этап' },
+  },
+  'roller-shutter': {
+    kicker: { az: 'Tariximiz', en: 'Our history', ru: 'Наша история' },
+    title:  { az: 'Necə başladı', en: 'How it started', ru: 'Как всё начиналось' },
+    sub:    { az: 'İdeyadan açılış gününə qədər', en: 'From the idea to opening day', ru: 'От идеи до дня открытия' },
+    end:    { az: '…və qapılarımız sizin üçün açıqdır', en: '…and our doors are open for you', ru: '…и наши двери открыты для вас' },
+    endSub: { az: 'Bu günü sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this day with you.', ru: 'Мы хотим отметить этот день вместе с вами.' },
+    kpre:   { az: 'Mərhələ', en: 'Step', ru: 'Этап' },
+  },
+  'unboxing': {
+    kicker: { az: 'Tariximiz', en: 'Our history', ru: 'Наша история' },
+    title:  { az: 'Necə başladı', en: 'How it started', ru: 'Как всё начиналось' },
+    sub:    { az: 'İdeyadan açılış gününə qədər', en: 'From the idea to opening day', ru: 'От идеи до дня открытия' },
+    end:    { az: '…və qapılarımız sizin üçün açıqdır', en: '…and our doors are open for you', ru: '…и наши двери открыты для вас' },
+    endSub: { az: 'Bu günü sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this day with you.', ru: 'Мы хотим отметить этот день вместе с вами.' },
+    kpre:   { az: 'Mərhələ', en: 'Step', ru: 'Этап' },
+  },
+  'gallery-unveil': {
+    kicker: { az: 'Tariximiz', en: 'Our history', ru: 'Наша история' },
+    title:  { az: 'Necə başladı', en: 'How it started', ru: 'Как всё начиналось' },
+    sub:    { az: 'İdeyadan açılış gününə qədər', en: 'From the idea to opening day', ru: 'От идеи до дня открытия' },
+    end:    { az: '…və qapılarımız sizin üçün açıqdır', en: '…and our doors are open for you', ru: '…и наши двери открыты для вас' },
+    endSub: { az: 'Bu günü sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this day with you.', ru: 'Мы хотим отметить этот день вместе с вами.' },
+    kpre:   { az: 'Mərhələ', en: 'Step', ru: 'Этап' },
   },
 }
 

@@ -85,6 +85,14 @@ export const OPENING_PHRASES = {
   ringBell: { az: 'Zəngi çal', en: 'Ring the bell', ru: 'Дать звонок' },
   writeChalk: { az: 'Lövhəyə yaz', en: 'Write on the board', ru: 'Написать на доске' },
   launchPlane: { az: 'Təyyarəni burax', en: 'Launch the plane', ru: 'Запустить самолётик' },
+  grandOpening: { az: 'Təntənəli açılış', en: 'Grand opening', ru: 'Торжественное открытие' },
+  cutRibbon: { az: 'Lenti kəs', en: 'Cut the ribbon', ru: 'Перерезать ленту' },
+  flipSign: { az: 'Lövhəni çevir', en: 'Flip the sign', ru: 'Перевернуть табличку' },
+  raiseShutter: { az: 'Jalüzü qaldır', en: 'Raise the shutter', ru: 'Поднять ролл-ставню' },
+  productLaunch: { az: 'Təqdimat', en: 'Launch', ru: 'Презентация' },
+  unboxProduct: { az: 'Qutunu aç', en: 'Unbox it', ru: 'Распаковать' },
+  exhibitionOpening: { az: 'Sərginin açılışı', en: 'Exhibition opening', ru: 'Открытие выставки' },
+  unveilArt: { az: 'Örtüyü götür', en: 'Unveil', ru: 'Снять покрывало' },
 }
 
 /* Gazette rubrikası — tədbir növünə görə (əvvəl hər tədbirdə «Toy elanı» idi) */
@@ -202,6 +210,12 @@ export const OPENING_SPEC = {
   'last-bell': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
   'chalkboard': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
   'paper-plane': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  /* 2026-10 — «Açılış və təqdimat» konsepti */
+  'ribbon-cut': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'bistro-sign': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'roller-shutter': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'unboxing': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'gallery-unveil': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
 }
 
 /** Şablonun açılış təsviri (naməlum id → simple-luxury) */
@@ -381,6 +395,16 @@ export function openingDefaults(templateId, ctx) {
       return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('writeChalk') }
     case 'paper-plane':
       return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('launchPlane') }
+    case 'ribbon-cut':
+      return { ...base, kicker: P('grandOpening'), meta: fullDate, cta: P('cutRibbon') }
+    case 'bistro-sign':
+      return { ...base, kicker: P('grandOpening'), meta: fullDate, cta: P('flipSign') }
+    case 'roller-shutter':
+      return { ...base, kicker: P('grandOpening'), meta: fullDate, cta: P('raiseShutter') }
+    case 'unboxing':
+      return { ...base, kicker: P('productLaunch'), meta: fullDate, cta: P('unboxProduct') }
+    case 'gallery-unveil':
+      return { ...base, kicker: P('exhibitionOpening'), meta: fullDate, cta: P('unveilArt') }
     case 'simple-luxury':
     default:
       return { brand: 'Digitoy.az',

@@ -71,6 +71,11 @@ const EMBLEM_NAMES = {
   'last-bell': 'məktəb zəngi',
   'chalkboard': 'təbaşir dairə',
   'paper-plane': 'poçt möhürü',
+  'ribbon-cut': 'qapı monoqramı',
+  'bistro-sign': 'kafe monoqramı',
+  'roller-shutter': 'sarı nişan',
+  'unboxing': 'parlayan orb',
+  'gallery-unveil': 'əsər monoqramı',
 }
 
 export default function OpeningEditor({

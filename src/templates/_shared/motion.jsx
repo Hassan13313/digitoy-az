@@ -66,6 +66,12 @@ const ENTER = {
   'last-bell': 'up',
   'chalkboard': 'up',
   'paper-plane': 'up',
+  /* 2026-10 — «Açılış və təqdimat» konsepti */
+  'ribbon-cut': 'up',
+  'bistro-sign': 'up',
+  'roller-shutter': 'up',
+  'unboxing': 'up',
+  'gallery-unveil': 'up',
 }
 
 /** templateId → giriş istiqaməti (`data-enter` üçün). */
