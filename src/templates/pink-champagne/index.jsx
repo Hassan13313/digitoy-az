@@ -44,7 +44,7 @@ const KEYFRAMES = `
 `
 
 /* ═══ 01 — AÇILIŞ: tıxac atılır ═══ */
-function PopOpening({ inv, theme, lang }) {
+function PopOpening({ inv, theme }) {
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null

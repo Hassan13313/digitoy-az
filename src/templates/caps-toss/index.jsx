@@ -53,7 +53,7 @@ const CAPS = [
 ]
 
 /* ═══ 01 — AÇILIŞ: papaqlar havaya ═══ */
-function CapsOpening({ inv, theme, lang, year }) {
+function CapsOpening({ inv, theme, year }) {
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null

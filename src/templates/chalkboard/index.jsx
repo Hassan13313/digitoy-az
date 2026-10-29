@@ -55,7 +55,7 @@ function WriteLine({ children, on, delay = 0, dur = 0.7, ghost = false, style })
 }
 
 /* ═══ 01 — AÇILIŞ: təbaşir yazır ═══ */
-function ChalkOpening({ inv, theme, lang, year }) {
+function ChalkOpening({ inv, theme, year }) {
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null

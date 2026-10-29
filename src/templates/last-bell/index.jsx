@@ -47,7 +47,7 @@ const KEYFRAMES = `
 const goldText = { backgroundImage: GOLD_GRAD, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' }
 
 /* ═══ 01 — AÇILIŞ: son zəng çalınır ═══ */
-function BellOpening({ inv, theme, lang, year, script }) {
+function BellOpening({ inv, theme, year, script }) {
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null

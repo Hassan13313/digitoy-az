@@ -56,7 +56,7 @@ function SignBack({ T, head }) {
 }
 
 /* ═══ 01 — AÇILIŞ: lövhə «Açıq» tərəfə çevrilir ═══ */
-function SignOpening({ inv, theme, lang }) {
+function SignOpening({ inv, theme }) {
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null

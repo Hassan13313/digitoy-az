@@ -41,7 +41,7 @@ const KEYFRAMES = `
 `
 
 /* ═══ 01 — AÇILIŞ: örtük düşür ═══ */
-function UnveilOpening({ inv, theme, lang }) {
+function UnveilOpening({ inv, theme }) {
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null

@@ -45,7 +45,7 @@ const KEYFRAMES = `
 `
 
 /* ═══ 01 — AÇILIŞ: məktub təyyarəyə çevrilib uçur ═══ */
-function PlaneOpening({ inv, theme, lang, year, mono }) {
+function PlaneOpening({ inv, theme, year, mono }) {
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null

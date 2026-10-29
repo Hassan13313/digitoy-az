@@ -46,7 +46,7 @@ const KEYFRAMES = `
 const violetText = { backgroundImage: 'linear-gradient(120deg, #FFFFFF 10%, #B9A8FF 55%, #7C5CFF)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' }
 
 /* ═══ 01 — AÇILIŞ: qutu açılır ═══ */
-function UnboxOpening({ inv, theme, lang }) {
+function UnboxOpening({ inv, theme }) {
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null

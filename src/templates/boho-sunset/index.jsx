@@ -42,7 +42,7 @@ const KEYFRAMES = `
 `
 
 /* ═══ 01 — AÇILIŞ: gün batımı ═══ */
-function SunsetOpening({ inv, theme, lang }) {
+function SunsetOpening({ inv, theme }) {
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null

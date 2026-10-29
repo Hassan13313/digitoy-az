@@ -54,7 +54,7 @@ function newYearOf(raw) {
 }
 
 /* ═══ 01 — AÇILIŞ: saat XII-ni vurur ═══ */
-function ClockOpening({ inv, theme, lang, nyYear }) {
+function ClockOpening({ inv, theme, nyYear }) {
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null

@@ -52,7 +52,7 @@ function SignBox({ children, head, style }) {
 }
 
 /* ═══ 01 — AÇILIŞ: jalüz qalxır ═══ */
-function ShutterOpening({ inv, theme, lang, mono }) {
+function ShutterOpening({ inv, theme, mono }) {
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null

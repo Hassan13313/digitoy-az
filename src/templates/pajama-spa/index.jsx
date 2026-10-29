@@ -45,7 +45,7 @@ const KEYFRAMES = `
 `
 
 /* ═══ 01 — AÇILIŞ: yastıq davası ═══ */
-function PillowOpening({ inv, theme, lang }) {
+function PillowOpening({ inv, theme }) {
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
   if (gate.gone) return null
