@@ -28,6 +28,62 @@ import { readFileSync } from 'node:fs'
 const REDESIGNED = [
   'modern-black', 'white-elegance', 'night-sky', 'oriental-luxe', 'nature-touch', 'crystal-glass',
   'boarding-pass', 'cinema-premiere', 'vinyl-record', 'royal-palace', 'mediterranean', 'gazette', 'luxury-jewelry',
+  /* 2026-10 — «Uşaq ad günü» konsepti */
+  'fairy-tale', 'space-mission', 'circus-show', 'dino-adventure', 'balloon-party',
+  /* 2026-10 — «Xına gecəsi» konsepti */
+  'red-veil',
+  'xonca',
+  'henna-buta',
+  'mirror-candle',
+  'kelagayi',
+  /* 2026-10 — «Sünnət toyu» konsepti */
+  'little-prince',
+  'hero-comic',
+  'mashallah',
+  'little-pilot',
+  'football-star',
+  /* 2026-10 — «Baby shower» konsepti */
+  'pastel-bloom',
+  'teddy-bear',
+  'gender-reveal',
+  'stork-letter',
+  'baby-mobile',
+  /* 2026-10 — «Korporativ» konsepti */
+  'gala-night',
+  'keynote',
+  'award-night',
+  'business-card',
+  'neon-party',
+  /* 2026-10 — «İldönümü» konsepti */
+  'silver-locket',
+  'golden-jubilee',
+  'first-paper',
+  'retro-polaroid',
+  'love-letters',
+  /* 2026-10 — «Məzuniyyət» konsepti */
+  'caps-toss',
+  'yearbook',
+  'last-bell',
+  'chalkboard',
+  'paper-plane',
+  /* 2026-10 — «Açılış və təqdimat» konsepti */
+  'ribbon-cut',
+  'bistro-sign',
+  'roller-shutter',
+  'unboxing',
+  'gallery-unveil',
+  /* 2026-10 — «Bayram gecələri» konsepti */
+  'novruz-bonfire',
+  'novruz-semeni',
+  'midnight-clock',
+  'snow-globe',
+  'masquerade-ball',
+  /* 2026-10 — «Qız gecəsi» konsepti */
+  'pink-champagne',
+  'disco-ball',
+  'pajama-spa',
+  'paris-night',
+  'boho-sunset',
 ]
 const SECTIONS = ['countdown', 'venue', 'program', 'dresscode', 'seating', 'gallery', 'rsvp', 'guestbook', 'hero', 'story']
 

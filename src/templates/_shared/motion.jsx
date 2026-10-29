@@ -25,6 +25,65 @@ const ENTER = {
   'oriental-luxe':  'zoom',
   'nature-touch':   'left',
   'crystal-glass':  'right',
+  'fairy-tale':     'zoom',
+  'space-mission':  'up',
+  'circus-show':    'zoom',
+  'dino-adventure': 'up',
+  'balloon-party':  'down',
+  /* 2026-10 — «Xına gecəsi» konsepti */
+  'red-veil': 'up',
+  'xonca': 'zoom',
+  'henna-buta': 'left',
+  'mirror-candle': 'down',
+  'kelagayi': 'right',
+  /* 2026-10 — «Sünnət toyu» konsepti */
+  'little-prince': 'zoom',
+  'hero-comic': 'up',
+  'mashallah': 'left',
+  'little-pilot': 'right',
+  'football-star': 'up',
+  /* 2026-10 — «Baby shower» konsepti */
+  'pastel-bloom': 'zoom',
+  'teddy-bear': 'down',
+  'gender-reveal': 'left',
+  'stork-letter': 'right',
+  'baby-mobile': 'down',
+  /* 2026-10 — «Korporativ» konsepti */
+  'gala-night': 'zoom',
+  'keynote': 'up',
+  'award-night': 'left',
+  'business-card': 'right',
+  'neon-party': 'down',
+  /* 2026-10 — «İldönümü» konsepti */
+  'silver-locket': 'down',
+  'golden-jubilee': 'up',
+  'first-paper': 'up',
+  'retro-polaroid': 'up',
+  'love-letters': 'up',
+  /* 2026-10 — «Məzuniyyət» konsepti */
+  'caps-toss': 'up',
+  'yearbook': 'up',
+  'last-bell': 'up',
+  'chalkboard': 'up',
+  'paper-plane': 'up',
+  /* 2026-10 — «Açılış və təqdimat» konsepti */
+  'ribbon-cut': 'up',
+  'bistro-sign': 'up',
+  'roller-shutter': 'up',
+  'unboxing': 'up',
+  'gallery-unveil': 'up',
+  /* 2026-10 — «Bayram gecələri» konsepti */
+  'novruz-bonfire': 'up',
+  'novruz-semeni': 'up',
+  'midnight-clock': 'up',
+  'snow-globe': 'up',
+  'masquerade-ball': 'up',
+  /* 2026-10 — «Qız gecəsi» konsepti */
+  'pink-champagne': 'up',
+  'disco-ball': 'up',
+  'pajama-spa': 'up',
+  'paris-night': 'up',
+  'boho-sunset': 'up',
 }
 
 /** templateId → giriş istiqaməti (`data-enter` üçün). */

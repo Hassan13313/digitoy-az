@@ -27,7 +27,10 @@ import { templateMeta } from './templateMeta'
    ───────────────────────────────────────────────────────────────────────── */
 
 /* Tədbir növü — əvvəl xam açar («corporate») göstərilirdi */
-const EVENT_LABELS = { toy: 'Toy', nishan: 'Nişan', birthday: 'Ad günü', corporate: 'Korporativ', other: 'Digər' }
+const EVENT_LABELS = {
+  toy: 'Toy', nishan: 'Nişan', birthday: 'Ad günü', corporate: 'Korporativ', other: 'Digər',
+  xina: 'Xına gecəsi', sunnet: 'Sünnət toyu', baby: 'Baby shower', anniversary: 'İldönümü', graduation: 'Məzuniyyət', bachelorette: 'Qız gecəsi',
+}
 const PKG_LABEL = { SADE: 'Sadə (59₼)', VIP: 'VİP (89₼)', PREMIUM: 'Premium (129₼)' }
 const VIEW_STATUS = { submitted: 'new' }
 

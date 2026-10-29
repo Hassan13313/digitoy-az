@@ -230,7 +230,7 @@ function seoNoscript(string $path, callable $e, ?array $guide = null): string {
               . '<h2>Tez-tez verilən suallar</h2>' . $faq;
     } elseif ($path === '/templates') {
         $body = '<h1>Dəvətnamə Şablonları</h1>'
-              . '<p>Toy, nişan və ad günü üçün online dəvətnamə şablonları. Hər şablon ayrıca dizayn dilidir — rəng, şrift, animasiya və açılış ekranı fərqlidir. Bəyəndiyinizi seçin, məlumatlarınız eyni qalır.</p>';
+              . '<p>Toy, nişan, ad günü və uşaq ad günü üçün online dəvətnamə şablonları. Əvvəlcə tədbirinizi seçin: hər tədbirin öz dizaynları var — rəng, şrift, animasiya və açılış ekranı fərqlidir.</p>';
     } elseif ($path === '/demo') {
         $body = '<h1>Online Dəvətnamə Nümunəsi</h1>'
               . '<p>Online dəvətnamə necə görünür? DigiToy rəqəmsal toy dəvətnaməsinin canlı nümunəsi: İştirak Təsdiqi, oturma planı, QR foto paylaşımı və premium dizayn bir arada.</p>';
@@ -302,6 +302,13 @@ function seoInviteMeta(?array $d): array {
         'toy'      => ['Toy Dəvətnaməsi',     'toy mərasiminə'],
         'nishan'   => ['Nişan Dəvətnaməsi',   'nişan mərasiminə'],
         'birthday' => ['Ad Günü Dəvətnaməsi', 'ad gününə'],
+        /* 2026-10 — konsept tədbir növləri (src/utils/inviteSeo.js ilə eyni) */
+        'xina'         => ['Xına Gecəsi Dəvətnaməsi', 'xına gecəsinə'],
+        'sunnet'       => ['Sünnət Toyu Dəvətnaməsi', 'sünnət toyuna'],
+        'baby'         => ['Baby Shower Dəvətnaməsi', 'baby shower bayramına'],
+        'anniversary'  => ['İldönümü Dəvətnaməsi',    'ildönümü məclisinə'],
+        'graduation'   => ['Məzuniyyət Dəvətnaməsi',  'məzuniyyət gecəsinə'],
+        'bachelorette' => ['Qız Gecəsi Dəvətnaməsi',  'qız gecəsinə'],
     ];
     $kind = $kinds[($d['type'] ?? '') !== '' ? $d['type'] : 'toy'] ?? null;
     if ($kind !== null) {

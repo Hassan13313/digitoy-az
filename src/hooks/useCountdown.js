@@ -27,6 +27,10 @@ export function getTimeLeft(targetDate, targetTime) {
 export function countdownTitle(tr, eventType, eventName) {
   if (eventType === 'nishan')   return tr.inv_countdown_nishan
   if (eventType === 'birthday') return tr.inv_countdown_birthday
+  /* 2026-10 — konsept tədbir növləri */
+  if (['xina', 'sunnet', 'baby', 'anniversary', 'graduation', 'bachelorette'].includes(eventType)) {
+    return tr[`inv_countdown_${eventType}`] || tr.inv_countdown
+  }
   if (eventType === 'corporate' || eventType === 'other') {
     const name = (eventName || '').trim()
     return name ? `${name} ${tr.inv_countdown_event}` : tr.inv_countdown

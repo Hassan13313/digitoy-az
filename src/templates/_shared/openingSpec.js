@@ -46,6 +46,69 @@ export const OPENING_PHRASES = {
   openSeal:     { az: 'Möhürü aç',               en: 'Break the seal',          ru: 'Открыть печать' },
   tagline:      { az: 'Bir Dəvətnamədən Daha Artığı', en: 'MORE THAN AN INVITATION', ru: 'БОЛЬШЕ, ЧЕМ ПРИГЛАШЕНИЕ' },
   skip:         { az: 'Keç →',                   en: 'Skip →',                  ru: 'Пропустить →' },
+  /* Uşaq ad günü konsepti (2026-10) */
+  onceUpon:     { az: 'Biri var idi, biri yox idi…', en: 'Once upon a time…',   ru: 'Жили-были…' },
+  openTale:     { az: 'Nağılı aç',               en: 'Open the story',          ru: 'Открыть сказку' },
+  launch:       { az: 'Raketi burax',            en: 'Launch the rocket',       ru: 'Запустить ракету' },
+  rollUp:       { az: 'Diqqət, diqqət!',         en: 'Roll up, roll up!',       ru: 'Внимание, внимание!' },
+  showBegin:    { az: 'Şou başlasın!',           en: 'Let the show begin!',     ru: 'Шоу начинается!' },
+  hatch:        { az: 'Yumurtanı çatlat',        en: 'Hatch the egg',           ru: 'Разбить скорлупу' },
+  letGo:        { az: 'Şarları burax',           en: 'Let the balloons go',     ru: 'Отпустить шарики' },
+  /* konseptlər II (2026-10) */
+  liftVeil: { az: 'Örpəyi qaldır', en: 'Lift the veil', ru: 'Поднять покрывало' },
+  lightCandles: { az: 'Şamları yandır', en: 'Light the candles', ru: 'Зажечь свечи' },
+  applyHenna: { az: 'Xınanı yax', en: 'Apply the henna', ru: 'Нанести хну' },
+  lightMirror: { az: 'Güzgünü işıqlandır', en: 'Light up the mirror', ru: 'Осветить зеркало' },
+  unfoldScarf: { az: 'Kəlağayını aç', en: 'Unfold the scarf', ru: 'Развернуть платок' },
+  raiseCrown: { az: 'Tacı qaldır', en: 'Raise the crown', ru: 'Поднять корону' },
+  startAdventure: { az: 'Macəranı başlat', en: 'Start the adventure', ru: 'Начать приключение' },
+  touchCharm: { az: 'Muncuğa toxun', en: 'Touch the charm', ru: 'Коснуться оберега' },
+  takeOff: { az: 'Uçuşa başla', en: 'Take off', ru: 'На взлёт' },
+  takeShot: { az: 'Zərbəni vur', en: 'Take the shot', ru: 'Пробить' },
+  letBloom: { az: 'Çiçəkləri aç', en: 'Let it bloom', ru: 'Пусть расцветёт' },
+  wakeTeddy: { az: 'Ayıcığı oyat', en: 'Wake the teddy', ru: 'Разбудить мишку' },
+  breakSeal: { az: 'Möhürü aç', en: 'Break the seal', ru: 'Вскрыть печать' },
+  spinMobile: { az: 'Mobili fırlat', en: 'Spin the mobile', ru: 'Закружить мобиль' },
+  openGift: { az: 'Hədiyyəni aç', en: 'Open the gift', ru: 'Открыть подарок' },
+  fillGlasses: { az: 'Qədəhləri doldur', en: 'Fill the glasses', ru: 'Наполнить бокалы' },
+  goLive: { az: 'Ekranı yandır', en: 'Go live', ru: 'Включить экран' },
+  unveilAward: { az: 'Mükafatı aç', en: 'Unveil the award', ru: 'Открыть награду' },
+  flipCard: { az: 'Kartı çevir', en: 'Flip the card', ru: 'Перевернуть карточку' },
+  switchOn: { az: 'İşıqları yandır', en: 'Switch on the lights', ru: 'Включить свет' },
+  openLocket: { az: 'Medalyonu aç', en: 'Open the locket', ru: 'Открыть медальон' },
+  openAlbum: { az: 'Albomu aç', en: 'Open the album', ru: 'Открыть альбом' },
+  unfoldPaper: { az: 'Vərəqi aç', en: 'Unfold the paper', ru: 'Развернуть лист' },
+  takePhoto: { az: 'Şəkil çək', en: 'Take a photo', ru: 'Сделать снимок' },
+  untieLetters: { az: 'Məktubları aç', en: 'Untie the letters', ru: 'Развязать письма' },
+  tossCaps: { az: 'Papaqları at', en: 'Toss the caps', ru: 'Подбросить шапочки' },
+  signYearbook: { az: 'Albomu imzala', en: 'Sign the yearbook', ru: 'Подписать альбом' },
+  ringBell: { az: 'Zəngi çal', en: 'Ring the bell', ru: 'Дать звонок' },
+  writeChalk: { az: 'Lövhəyə yaz', en: 'Write on the board', ru: 'Написать на доске' },
+  launchPlane: { az: 'Təyyarəni burax', en: 'Launch the plane', ru: 'Запустить самолётик' },
+  grandOpening: { az: 'Təntənəli açılış', en: 'Grand opening', ru: 'Торжественное открытие' },
+  cutRibbon: { az: 'Lenti kəs', en: 'Cut the ribbon', ru: 'Перерезать ленту' },
+  flipSign: { az: 'Lövhəni çevir', en: 'Flip the sign', ru: 'Перевернуть табличку' },
+  raiseShutter: { az: 'Jalüzü qaldır', en: 'Raise the shutter', ru: 'Поднять ролл-ставню' },
+  productLaunch: { az: 'Təqdimat', en: 'Launch', ru: 'Презентация' },
+  unboxProduct: { az: 'Qutunu aç', en: 'Unbox it', ru: 'Распаковать' },
+  exhibitionOpening: { az: 'Sərginin açılışı', en: 'Exhibition opening', ru: 'Открытие выставки' },
+  unveilArt: { az: 'Örtüyü götür', en: 'Unveil', ru: 'Снять покрывало' },
+  lightBonfire: { az: 'Tonqalı yandır', en: 'Light the bonfire', ru: 'Разжечь костёр' },
+  novruzFest: { az: 'Novruz bayramı', en: 'Novruz holiday', ru: 'Праздник Новруз' },
+  growSemeni: { az: 'Səmənini göyərt', en: 'Let it sprout', ru: 'Прорастить семени' },
+  happyNewYear: { az: 'Yeni iliniz mübarək', en: 'Happy New Year', ru: 'С Новым годом' },
+  strikeMidnight: { az: 'Saatı 12-yə çatdır', en: 'Strike midnight', ru: 'Пробить полночь' },
+  shakeGlobe: { az: 'Kürəni silkələ', en: 'Shake the globe', ru: 'Встряхнуть шар' },
+  masqueradeBall: { az: 'Maskarad balı', en: 'Masquerade ball', ru: 'Бал-маскарад' },
+  wearMask: { az: 'Maskanı tax', en: 'Put on the mask', ru: 'Надеть маску' },
+  popChampagne: { az: 'Şampanı aç', en: 'Pop the champagne', ru: 'Открыть шампанское' },
+  lightsOn: { az: 'İşıqları yandır!', en: 'Lights on!', ru: 'Включить свет!' },
+  pillowFight: { az: 'Yastıq davası!', en: 'Pillow fight!', ru: 'Бой подушками!' },
+  pajamaParty: { az: 'Pijama gecəsi', en: 'Pajama night', ru: 'Пижамная ночь' },
+  parisNight: { az: 'Paris gecəsi', en: 'A night in Paris', ru: 'Ночь в Париже' },
+  openHatbox: { az: 'Qutunu aç', en: 'Open the hatbox', ru: 'Открыть коробку' },
+  sunsetParty: { az: 'Gün batımı gecəsi', en: 'Sunset soirée', ru: 'Вечер на закате' },
+  watchSunset: { az: 'Gün batımına bax', en: 'Watch the sunset', ru: 'Смотреть закат' },
 }
 
 /* Gazette rubrikası — tədbir növünə görə (əvvəl hər tədbirdə «Toy elanı» idi) */
@@ -55,6 +118,12 @@ const GAZETTE_RUBRIC = {
   birthday:  { az: 'Ad günü elanı · Bakı',  en: 'Birthday notice · Baku',   ru: 'Объявление о дне рождения · Баку' },
   corporate: { az: 'Tədbir elanı · Bakı',   en: 'Event notice · Baku',      ru: 'Объявление о событии · Баку' },
   other:     { az: 'Tədbir elanı · Bakı',   en: 'Event notice · Baku',      ru: 'Объявление о событии · Баку' },
+  xina:         { az: 'Xına gecəsi elanı · Bakı', en: 'Henna night notice · Baku', ru: 'Объявление о вечере хны · Баку' },
+  sunnet:       { az: 'Sünnət toyu elanı · Bakı', en: 'Celebration notice · Baku', ru: 'Объявление о празднике · Баку' },
+  baby:         { az: 'Baby shower elanı · Bakı', en: 'Baby shower notice · Baku', ru: 'Объявление о бэби шауэре · Баку' },
+  anniversary:  { az: 'İldönümü elanı · Bakı',    en: 'Anniversary notice · Baku', ru: 'Объявление о годовщине · Баку' },
+  graduation:   { az: 'Məzuniyyət elanı · Bakı',  en: 'Graduation notice · Baku',  ru: 'Объявление о выпускном · Баку' },
+  bachelorette: { az: 'Qız gecəsi elanı · Bakı',  en: 'Bachelorette notice · Baku', ru: 'Объявление о девичнике · Баку' },
 }
 
 export const OPENING_LANGS = ['az', 'en', 'ru']
@@ -112,9 +181,69 @@ export const OPENING_SPEC = {
   'mediterranean':   { mono: null, slots: ['title', 'and', 'kicker', 'meta', 'cta', 'hint'] },
   'modern-black':    { mono: null, slots: ['brand', 'no', 'kicker', 'title', 'and', 'meta', 'cta', 'hint'] },
   'night-sky':       { mono: null, slots: ['kicker', 'title', 'and', 'meta', 'cta', 'hint'] },
+  /* Uşaq ad günü konsepti (2026-10) */
+  'fairy-tale':      { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'], hints: { kicker: 'Kitabın üstündəki nağıl başlanğıcı' } },
+  'space-mission':   { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'circus-show':     { mono: null,     slots: ['kicker', 'sub', 'title', 'meta', 'cta', 'hint'], hints: { sub: 'Adın üstündəki lent' } },
+  'dino-adventure':  { mono: null,     slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'balloon-party':   { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
   /* Simple Luxury açılışı videodur — mətnlər yalnız video gecikəndə görünən
      afişada və «Keç» düyməsindədir. */
   'simple-luxury':   { mono: null, slots: ['brand', 'title', 'sub', 'skip'], hints: { sub: 'Afişadakı şüar', title: 'Yalnız video gecikəndə görünür' } },
+  /* 2026-10 — «Xına gecəsi» konsepti */
+  'red-veil': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'xonca': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'henna-buta': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'mirror-candle': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'kelagayi': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  /* 2026-10 — «Sünnət toyu» konsepti */
+  'little-prince': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'hero-comic': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'mashallah': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'little-pilot': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'football-star': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  /* 2026-10 — «Baby shower» konsepti */
+  'pastel-bloom': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'teddy-bear': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'gender-reveal': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'stork-letter': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'baby-mobile': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  /* 2026-10 — «Korporativ» konsepti */
+  'gala-night': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'keynote': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'award-night': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'business-card': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'neon-party': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  /* 2026-10 — «İldönümü» konsepti */
+  'silver-locket': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'golden-jubilee': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'first-paper': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'retro-polaroid': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'love-letters': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  /* 2026-10 — «Məzuniyyət» konsepti */
+  'caps-toss': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'yearbook': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'last-bell': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'chalkboard': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'paper-plane': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  /* 2026-10 — «Açılış və təqdimat» konsepti */
+  'ribbon-cut': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'bistro-sign': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'roller-shutter': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'unboxing': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'gallery-unveil': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  /* 2026-10 — «Bayram gecələri» konsepti */
+  'novruz-bonfire': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'novruz-semeni': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'midnight-clock': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'snow-globe': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'masquerade-ball': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  /* 2026-10 — «Qız gecəsi» konsepti */
+  'pink-champagne': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'disco-ball': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'pajama-spa': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'paris-night': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'boho-sunset': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
 }
 
 /** Şablonun açılış təsviri (naməlum id → simple-luxury) */
@@ -224,6 +353,108 @@ export function openingDefaults(templateId, ctx) {
         cta: P('openShort') }
     case 'night-sky':
       return { ...base, kicker: P('skyNight'), meta: `${fullDate} · ${nightCoords(wd)}` }
+    /* ── Uşaq ad günü konsepti ── */
+    case 'fairy-tale':
+      return { ...base, kicker: P('onceUpon'), meta: fullDate, cta: P('openTale') }
+    case 'space-mission':
+      return { ...base, kicker: ctx.eventLabel || '', meta: dotDate(wd, ' · '), cta: P('launch') }
+    case 'circus-show':
+      return { ...base, kicker: P('rollUp'), sub: ctx.eventLabel || '',
+        meta: [fullDate, wd.time ? formatTime24(wd.time) : ''].filter(Boolean).join(' · '), cta: P('showBegin') }
+    case 'dino-adventure':
+      return { ...base, kicker: ctx.eventLabel || '', meta: dotDate(wd, ' · '), cta: P('hatch') }
+    case 'balloon-party':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('letGo') }
+    case 'red-veil':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('liftVeil') }
+    case 'xonca':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('lightCandles') }
+    case 'henna-buta':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('applyHenna') }
+    case 'mirror-candle':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('lightMirror') }
+    case 'kelagayi':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('unfoldScarf') }
+    case 'little-prince':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('raiseCrown') }
+    case 'hero-comic':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('startAdventure') }
+    case 'mashallah':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('touchCharm') }
+    case 'little-pilot':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('takeOff') }
+    case 'football-star':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('takeShot') }
+    case 'pastel-bloom':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('letBloom') }
+    case 'teddy-bear':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('wakeTeddy') }
+    case 'gender-reveal':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('openGift') }
+    case 'stork-letter':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('breakSeal') }
+    case 'baby-mobile':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('spinMobile') }
+    case 'gala-night':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('fillGlasses') }
+    case 'keynote':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('goLive') }
+    case 'award-night':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('unveilAward') }
+    case 'business-card':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('flipCard') }
+    case 'neon-party':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('switchOn') }
+    case 'silver-locket':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('openLocket') }
+    case 'golden-jubilee':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('openAlbum') }
+    case 'first-paper':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('unfoldPaper') }
+    case 'retro-polaroid':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('takePhoto') }
+    case 'love-letters':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('untieLetters') }
+    case 'caps-toss':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('tossCaps') }
+    case 'yearbook':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('signYearbook') }
+    case 'last-bell':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('ringBell') }
+    case 'chalkboard':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('writeChalk') }
+    case 'paper-plane':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('launchPlane') }
+    case 'ribbon-cut':
+      return { ...base, kicker: P('grandOpening'), meta: fullDate, cta: P('cutRibbon') }
+    case 'bistro-sign':
+      return { ...base, kicker: P('grandOpening'), meta: fullDate, cta: P('flipSign') }
+    case 'roller-shutter':
+      return { ...base, kicker: P('grandOpening'), meta: fullDate, cta: P('raiseShutter') }
+    case 'unboxing':
+      return { ...base, kicker: P('productLaunch'), meta: fullDate, cta: P('unboxProduct') }
+    case 'gallery-unveil':
+      return { ...base, kicker: P('exhibitionOpening'), meta: fullDate, cta: P('unveilArt') }
+    case 'novruz-bonfire':
+      return { ...base, kicker: P('novruzFest'), meta: fullDate, cta: P('lightBonfire') }
+    case 'novruz-semeni':
+      return { ...base, kicker: P('novruzFest'), meta: fullDate, cta: P('growSemeni') }
+    case 'midnight-clock':
+      return { ...base, kicker: P('happyNewYear'), meta: fullDate, cta: P('strikeMidnight') }
+    case 'snow-globe':
+      return { ...base, kicker: P('happyNewYear'), meta: fullDate, cta: P('shakeGlobe') }
+    case 'masquerade-ball':
+      return { ...base, kicker: P('masqueradeBall'), meta: fullDate, cta: P('wearMask') }
+    case 'pink-champagne':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('popChampagne') }
+    case 'disco-ball':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('lightsOn') }
+    case 'pajama-spa':
+      return { ...base, kicker: P('pajamaParty'), meta: fullDate, cta: P('pillowFight') }
+    case 'paris-night':
+      return { ...base, kicker: P('parisNight'), meta: fullDate, cta: P('openHatbox') }
+    case 'boho-sunset':
+      return { ...base, kicker: P('sunsetParty'), meta: fullDate, cta: P('watchSunset') }
     case 'simple-luxury':
     default:
       return { brand: 'Digitoy.az',

@@ -52,6 +52,8 @@ export default function Preview({ lang, data, onEdit, onView }) {
     toy: tr.event_toy, nishan: tr.event_nishan,
     birthday: tr.event_birthday, corporate: tr.event_corporate,
     other: data.eventName || tr.event_other,
+    xina: tr.event_xina, sunnet: tr.event_sunnet, baby: tr.event_baby,
+    anniversary: tr.event_anniversary, graduation: tr.event_graduation, bachelorette: tr.event_bachelorette,
   }
 
   const { formattedDate, dayName } = formatAzDate(data.date, lang)

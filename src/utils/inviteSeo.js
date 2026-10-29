@@ -11,6 +11,13 @@ const COUPLE_KINDS = {
   toy:      { label: 'Toy Dəvətnaməsi',     invite: 'toy mərasiminə' },
   nishan:   { label: 'Nişan Dəvətnaməsi',   invite: 'nişan mərasiminə' },
   birthday: { label: 'Ad Günü Dəvətnaməsi', invite: 'ad gününə' },
+  /* 2026-10 — konsept tədbir növləri (tək ad: brideName) */
+  xina:         { label: 'Xına Gecəsi Dəvətnaməsi', invite: 'xına gecəsinə' },
+  sunnet:       { label: 'Sünnət Toyu Dəvətnaməsi', invite: 'sünnət toyuna' },
+  baby:         { label: 'Baby Shower Dəvətnaməsi', invite: 'baby shower bayramına' },
+  anniversary:  { label: 'İldönümü Dəvətnaməsi',    invite: 'ildönümü məclisinə' },
+  graduation:   { label: 'Məzuniyyət Dəvətnaməsi',  invite: 'məzuniyyət gecəsinə' },
+  bachelorette: { label: 'Qız Gecəsi Dəvətnaməsi',  invite: 'qız gecəsinə' },
 }
 const TAIL = 'Rəqəmsal dəvətnaməyə baxın, İştirak Təsdiqi göndərin.'
 

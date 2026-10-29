@@ -32,6 +32,66 @@ const COMPONENTS = {
   'mediterranean':   lazy(() => import('./mediterranean')),
   'gazette':         lazy(() => import('./gazette')),
   'luxury-jewelry':  lazy(() => import('./luxury-jewelry')),
+  /* 2026-10 — «Uşaq ad günü» konsepti */
+  'fairy-tale':      lazy(() => import('./fairy-tale')),
+  'space-mission':   lazy(() => import('./space-mission')),
+  'circus-show':     lazy(() => import('./circus-show')),
+  'dino-adventure':  lazy(() => import('./dino-adventure')),
+  'balloon-party':   lazy(() => import('./balloon-party')),
+  /* 2026-10 — «Xına gecəsi» konsepti */
+  'red-veil': lazy(() => import('./red-veil')),
+  'xonca': lazy(() => import('./xonca')),
+  'henna-buta': lazy(() => import('./henna-buta')),
+  'mirror-candle': lazy(() => import('./mirror-candle')),
+  'kelagayi': lazy(() => import('./kelagayi')),
+  /* 2026-10 — «Sünnət toyu» konsepti */
+  'little-prince': lazy(() => import('./little-prince')),
+  'hero-comic': lazy(() => import('./hero-comic')),
+  'mashallah': lazy(() => import('./mashallah')),
+  'little-pilot': lazy(() => import('./little-pilot')),
+  'football-star': lazy(() => import('./football-star')),
+  /* 2026-10 — «Baby shower» konsepti */
+  'pastel-bloom': lazy(() => import('./pastel-bloom')),
+  'teddy-bear': lazy(() => import('./teddy-bear')),
+  'gender-reveal': lazy(() => import('./gender-reveal')),
+  'stork-letter': lazy(() => import('./stork-letter')),
+  'baby-mobile': lazy(() => import('./baby-mobile')),
+  /* 2026-10 — «Korporativ» konsepti */
+  'gala-night': lazy(() => import('./gala-night')),
+  'keynote': lazy(() => import('./keynote')),
+  'award-night': lazy(() => import('./award-night')),
+  'business-card': lazy(() => import('./business-card')),
+  'neon-party': lazy(() => import('./neon-party')),
+  /* 2026-10 — «İldönümü» konsepti */
+  'silver-locket': lazy(() => import('./silver-locket')),
+  'golden-jubilee': lazy(() => import('./golden-jubilee')),
+  'first-paper': lazy(() => import('./first-paper')),
+  'retro-polaroid': lazy(() => import('./retro-polaroid')),
+  'love-letters': lazy(() => import('./love-letters')),
+  /* 2026-10 — «Məzuniyyət» konsepti */
+  'caps-toss': lazy(() => import('./caps-toss')),
+  'yearbook': lazy(() => import('./yearbook')),
+  'last-bell': lazy(() => import('./last-bell')),
+  'chalkboard': lazy(() => import('./chalkboard')),
+  'paper-plane': lazy(() => import('./paper-plane')),
+  /* 2026-10 — «Açılış və təqdimat» konsepti */
+  'ribbon-cut': lazy(() => import('./ribbon-cut')),
+  'bistro-sign': lazy(() => import('./bistro-sign')),
+  'roller-shutter': lazy(() => import('./roller-shutter')),
+  'unboxing': lazy(() => import('./unboxing')),
+  'gallery-unveil': lazy(() => import('./gallery-unveil')),
+  /* 2026-10 — «Bayram gecələri» konsepti */
+  'novruz-bonfire': lazy(() => import('./novruz-bonfire')),
+  'novruz-semeni': lazy(() => import('./novruz-semeni')),
+  'midnight-clock': lazy(() => import('./midnight-clock')),
+  'snow-globe': lazy(() => import('./snow-globe')),
+  'masquerade-ball': lazy(() => import('./masquerade-ball')),
+  /* 2026-10 — «Qız gecəsi» konsepti */
+  'pink-champagne': lazy(() => import('./pink-champagne')),
+  'disco-ball': lazy(() => import('./disco-ball')),
+  'pajama-spa': lazy(() => import('./pajama-spa')),
+  'paris-night': lazy(() => import('./paris-night')),
+  'boho-sunset': lazy(() => import('./boho-sunset')),
 }
 
 /** Şablonun öz komponenti varmı (yoxsa scaffold göstəriləcək)? */
