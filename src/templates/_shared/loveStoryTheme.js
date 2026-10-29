@@ -123,6 +123,9 @@ const F = {
   notoSansDisplay: FONT_STACKS.notoSansDisplay,
   ibmPlexSerif: FONT_STACKS.ibmPlexSerif,
   ibmPlexSans: FONT_STACKS.ibmPlexSans,
+  robotoSlab: FONT_STACKS.robotoSlab,
+  bellota: FONT_STACKS.bellota,
+  cormorantFull: FONT_STACKS.cormorantFull,
 }
 export const STORY_FONTS = F
 
@@ -199,6 +202,12 @@ const T = {
   'roller-shutter': { bg: 'linear-gradient(180deg,#2A2E33,#1D2023)', surf: '#141618', ink: '#F7F8F9', mute: '#A7AFB7', hi: '#FFD23F', line: '#FFD23F', head: F.robotoCondensed, body: F.robotoCondensed, cap: F.ibmPlexMono, capItalic: false, titleFont: F.alumniSans, titleUpper: true, titleSize: 52, frame: 'minimal', hero: 'rect', labels: 'num2', dash: '0', textItalic: false },
   'unboxing': { bg: 'linear-gradient(180deg,#17163A,#101024)', surf: '#1B1A3A', ink: '#F4F3FA', mute: '#A9AAC4', hi: '#B9A8FF', line: '#7C5CFF', head: F.notoSansDisplay, body: F.notoSansDisplay, cap: F.notoSansDisplay, capItalic: false, titleFont: F.notoSansDisplay, titleSize: 38, frame: 'glass', hero: 'rounded', labels: 'num2', textItalic: false },
   'gallery-unveil': { bg: '#EEEDEA', surf: '#FFFFFF', ink: '#171717', mute: '#77746E', hi: '#5A1F3A', line: '#C8A55A', paper: '#FFFFFF', paperInk: '#77746E', head: F.ibmPlexSerif, body: F.ibmPlexSans, cap: F.ibmPlexSans, capItalic: false, titleFont: F.ibmPlexSerif, titleSize: 38, frame: 'mat', hero: 'rect', labels: 'num', textItalic: true },
+  /* 2026-10 — «Bayram gecələri» konsepti */
+  'novruz-bonfire': { bg: 'linear-gradient(180deg,#1A1230,#241838)', surf: '#2A1E4A', ink: '#FBF3E4', mute: '#C9B8A6', hi: '#FFC23D', line: '#FF7A1A', head: F.notoSans, body: F.notoSans, cap: F.robotoSlab, capItalic: false, titleFont: F.robotoSlab, titleSize: 36, frame: 'glow', hero: 'arch', labels: 'num', textItalic: false },
+  'novruz-semeni': { bg: '#FFF8EA', surf: '#FFFFFF', ink: '#24331C', mute: '#6F7A62', hi: '#D7263D', line: '#8CCB4A', paper: '#FFFFFF', paperInk: '#6F7A62', head: F.bellota, body: F.bellotaText, cap: F.bellota, capItalic: false, titleFont: F.bellota, titleSize: 40, frame: 'polaroid', hero: 'oval', labels: 'num', textItalic: false },
+  'midnight-clock': { bg: 'linear-gradient(180deg,#1A2350,#0E1430)', surf: '#1A2350', ink: '#F6E7C1', mute: '#B9BCCB', hi: '#F8E6B0', line: '#E8C46A', head: F.ysabeauOffice, body: F.ysabeauOffice, cap: F.cormorantFull, capItalic: true, titleFont: F.cormorantFull, titleSize: 42, frame: 'glow', hero: 'circle', labels: 'roman' },
+  'snow-globe': { bg: 'linear-gradient(180deg,#2C4F7C,#1E3A5F)', surf: '#1E3A5F', ink: '#FFFFFF', mute: '#C4D6EA', hi: '#E2B65C', line: '#DCEBF7', head: F.nunito, body: F.nunito, cap: F.pacifico, capItalic: false, titleFont: F.pacifico, titleSize: 38, frame: 'polaroid', hero: 'circle', labels: 'num', textItalic: false },
+  'masquerade-ball': { bg: 'linear-gradient(180deg,#1A0E18,#0D0A10)', surf: '#22091C', ink: '#F5EEE3', mute: '#C2B1BC', hi: '#F4DC9C', line: '#D9B25F', head: F.cormorant, body: F.cormorant, cap: F.playfairSC, capItalic: false, titleFont: F.playfairSC, titleSize: 34, frame: 'heraldic', hero: 'oval', labels: 'roman' },
 }
 
 /* ── Mətnlər (AZ/EN/RU) ── dizayndakı şablon adlandırmaları */
@@ -505,6 +514,47 @@ const COPY = {
     end:    { az: '…və qapılarımız sizin üçün açıqdır', en: '…and our doors are open for you', ru: '…и наши двери открыты для вас' },
     endSub: { az: 'Bu günü sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this day with you.', ru: 'Мы хотим отметить этот день вместе с вами.' },
     kpre:   { az: 'Mərhələ', en: 'Step', ru: 'Этап' },
+  },
+  /* 2026-10 — «Bayram gecələri» konsepti */
+  'novruz-bonfire': {
+    kicker: { az: 'Ənənə', en: 'Tradition', ru: 'Традиция' },
+    title:  { az: 'Bayram hekayəsi', en: 'Holiday story', ru: 'Праздничная история' },
+    sub:    { az: 'İllər boyu bizimlə olan bayram anları', en: 'Festive moments that stayed with us over the years', ru: 'Праздничные моменты, которые с нами годами' },
+    end:    { az: '…və yeni bayram başlayır', en: '…and a new celebration begins', ru: '…и начинается новый праздник' },
+    endSub: { az: 'Bu bayramı sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this holiday with you.', ru: 'Мы хотим отметить этот праздник вместе с вами.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  'novruz-semeni': {
+    kicker: { az: 'Ənənə', en: 'Tradition', ru: 'Традиция' },
+    title:  { az: 'Bayram hekayəsi', en: 'Holiday story', ru: 'Праздничная история' },
+    sub:    { az: 'İllər boyu bizimlə olan bayram anları', en: 'Festive moments that stayed with us over the years', ru: 'Праздничные моменты, которые с нами годами' },
+    end:    { az: '…və yeni bayram başlayır', en: '…and a new celebration begins', ru: '…и начинается новый праздник' },
+    endSub: { az: 'Bu bayramı sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this holiday with you.', ru: 'Мы хотим отметить этот праздник вместе с вами.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  'midnight-clock': {
+    kicker: { az: 'Ənənə', en: 'Tradition', ru: 'Традиция' },
+    title:  { az: 'Bayram hekayəsi', en: 'Holiday story', ru: 'Праздничная история' },
+    sub:    { az: 'İllər boyu bizimlə olan bayram anları', en: 'Festive moments that stayed with us over the years', ru: 'Праздничные моменты, которые с нами годами' },
+    end:    { az: '…və yeni bayram başlayır', en: '…and a new celebration begins', ru: '…и начинается новый праздник' },
+    endSub: { az: 'Bu bayramı sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this holiday with you.', ru: 'Мы хотим отметить этот праздник вместе с вами.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  'snow-globe': {
+    kicker: { az: 'Ənənə', en: 'Tradition', ru: 'Традиция' },
+    title:  { az: 'Bayram hekayəsi', en: 'Holiday story', ru: 'Праздничная история' },
+    sub:    { az: 'İllər boyu bizimlə olan bayram anları', en: 'Festive moments that stayed with us over the years', ru: 'Праздничные моменты, которые с нами годами' },
+    end:    { az: '…və yeni bayram başlayır', en: '…and a new celebration begins', ru: '…и начинается новый праздник' },
+    endSub: { az: 'Bu bayramı sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this holiday with you.', ru: 'Мы хотим отметить этот праздник вместе с вами.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
+  },
+  'masquerade-ball': {
+    kicker: { az: 'Ənənə', en: 'Tradition', ru: 'Традиция' },
+    title:  { az: 'Bayram hekayəsi', en: 'Holiday story', ru: 'Праздничная история' },
+    sub:    { az: 'İllər boyu bizimlə olan bayram anları', en: 'Festive moments that stayed with us over the years', ru: 'Праздничные моменты, которые с нами годами' },
+    end:    { az: '…və yeni bayram başlayır', en: '…and a new celebration begins', ru: '…и начинается новый праздник' },
+    endSub: { az: 'Bu bayramı sizinlə qeyd etmək istəyirik.', en: 'We want to celebrate this holiday with you.', ru: 'Мы хотим отметить этот праздник вместе с вами.' },
+    kpre:   { az: 'İl', en: 'Year', ru: 'Год' },
   },
 }
 

@@ -57,6 +57,12 @@ const WITH_IMAGE = new Set([
   'roller-shutter',
   'unboxing',
   'gallery-unveil',
+  /* 2026-10 — «Bayram gecələri» konsepti */
+  'novruz-bonfire',
+  'novruz-semeni',
+  'midnight-clock',
+  'snow-globe',
+  'masquerade-ball',
 ])
 
 export const TEMPLATE_IMAGE_SIZE = { width: 780, height: 1688 }

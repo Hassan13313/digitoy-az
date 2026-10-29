@@ -76,6 +76,11 @@ const EMBLEM_NAMES = {
   'roller-shutter': 'sarı nişan',
   'unboxing': 'parlayan orb',
   'gallery-unveil': 'əsər monoqramı',
+  'novruz-bonfire': 'köz dairəsi',
+  'novruz-semeni': 'qırmızı nişan',
+  'midnight-clock': 'saat mərkəzi',
+  'snow-globe': 'qar dənəsi',
+  'masquerade-ball': 'maska monoqramı',
 }
 
 export default function OpeningEditor({

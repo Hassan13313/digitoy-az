@@ -72,6 +72,12 @@ const ENTER = {
   'roller-shutter': 'up',
   'unboxing': 'up',
   'gallery-unveil': 'up',
+  /* 2026-10 — «Bayram gecələri» konsepti */
+  'novruz-bonfire': 'up',
+  'novruz-semeni': 'up',
+  'midnight-clock': 'up',
+  'snow-globe': 'up',
+  'masquerade-ball': 'up',
 }
 
 /** templateId → giriş istiqaməti (`data-enter` üçün). */

@@ -93,6 +93,14 @@ export const OPENING_PHRASES = {
   unboxProduct: { az: 'Qutunu aç', en: 'Unbox it', ru: 'Распаковать' },
   exhibitionOpening: { az: 'Sərginin açılışı', en: 'Exhibition opening', ru: 'Открытие выставки' },
   unveilArt: { az: 'Örtüyü götür', en: 'Unveil', ru: 'Снять покрывало' },
+  lightBonfire: { az: 'Tonqalı yandır', en: 'Light the bonfire', ru: 'Разжечь костёр' },
+  novruzFest: { az: 'Novruz bayramı', en: 'Novruz holiday', ru: 'Праздник Новруз' },
+  growSemeni: { az: 'Səmənini göyərt', en: 'Let it sprout', ru: 'Прорастить семени' },
+  happyNewYear: { az: 'Yeni iliniz mübarək', en: 'Happy New Year', ru: 'С Новым годом' },
+  strikeMidnight: { az: 'Saatı 12-yə çatdır', en: 'Strike midnight', ru: 'Пробить полночь' },
+  shakeGlobe: { az: 'Kürəni silkələ', en: 'Shake the globe', ru: 'Встряхнуть шар' },
+  masqueradeBall: { az: 'Maskarad balı', en: 'Masquerade ball', ru: 'Бал-маскарад' },
+  wearMask: { az: 'Maskanı tax', en: 'Put on the mask', ru: 'Надеть маску' },
 }
 
 /* Gazette rubrikası — tədbir növünə görə (əvvəl hər tədbirdə «Toy elanı» idi) */
@@ -216,6 +224,12 @@ export const OPENING_SPEC = {
   'roller-shutter': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
   'unboxing': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
   'gallery-unveil': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  /* 2026-10 — «Bayram gecələri» konsepti */
+  'novruz-bonfire': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'novruz-semeni': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'midnight-clock': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'snow-globe': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'masquerade-ball': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
 }
 
 /** Şablonun açılış təsviri (naməlum id → simple-luxury) */
@@ -405,6 +419,16 @@ export function openingDefaults(templateId, ctx) {
       return { ...base, kicker: P('productLaunch'), meta: fullDate, cta: P('unboxProduct') }
     case 'gallery-unveil':
       return { ...base, kicker: P('exhibitionOpening'), meta: fullDate, cta: P('unveilArt') }
+    case 'novruz-bonfire':
+      return { ...base, kicker: P('novruzFest'), meta: fullDate, cta: P('lightBonfire') }
+    case 'novruz-semeni':
+      return { ...base, kicker: P('novruzFest'), meta: fullDate, cta: P('growSemeni') }
+    case 'midnight-clock':
+      return { ...base, kicker: P('happyNewYear'), meta: fullDate, cta: P('strikeMidnight') }
+    case 'snow-globe':
+      return { ...base, kicker: P('happyNewYear'), meta: fullDate, cta: P('shakeGlobe') }
+    case 'masquerade-ball':
+      return { ...base, kicker: P('masqueradeBall'), meta: fullDate, cta: P('wearMask') }
     case 'simple-luxury':
     default:
       return { brand: 'Digitoy.az',

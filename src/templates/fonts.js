@@ -121,6 +121,9 @@ const FAMILY = {
   notoSansDisplay: 'Noto+Sans+Display:ital,wght@0,300;0,400;0,600;0,800;1,300',
   ibmPlexSerif: 'IBM+Plex+Serif:ital,wght@0,300;0,400;0,500;1,300;1,400',
   ibmPlexSans: 'IBM+Plex+Sans:wght@400;500',
+  robotoSlab: 'Roboto+Slab:wght@600;700;800',
+  bellota: 'Bellota:wght@400;700',
+  cormorantFull: 'Cormorant:ital,wght@0,500;0,600;0,700;1,500',
 }
 
 /* Hər şablonun öz ailələri */
@@ -187,6 +190,12 @@ const TEMPLATE_FONTS = {
   'roller-shutter': ['alumniSans', 'robotoCondensed', 'ibmPlexMono'],
   'unboxing': ['notoSansDisplay'],
   'gallery-unveil': ['ibmPlexSerif', 'ibmPlexSans'],
+  /* 2026-10 — «Bayram gecələri» konsepti */
+  'novruz-bonfire': ['robotoSlab', 'notoSans'],
+  'novruz-semeni': ['bellota', 'bellotaText'],
+  'midnight-clock': ['cormorantFull', 'ysabeauOffice'],
+  'snow-globe': ['pacifico', 'nunito'],
+  'masquerade-ball': ['playfairSC'],
 }
 
 const ALL = Object.keys(FAMILY)

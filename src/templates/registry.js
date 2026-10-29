@@ -80,6 +80,12 @@ const COMPONENTS = {
   'roller-shutter': lazy(() => import('./roller-shutter')),
   'unboxing': lazy(() => import('./unboxing')),
   'gallery-unveil': lazy(() => import('./gallery-unveil')),
+  /* 2026-10 — «Bayram gecələri» konsepti */
+  'novruz-bonfire': lazy(() => import('./novruz-bonfire')),
+  'novruz-semeni': lazy(() => import('./novruz-semeni')),
+  'midnight-clock': lazy(() => import('./midnight-clock')),
+  'snow-globe': lazy(() => import('./snow-globe')),
+  'masquerade-ball': lazy(() => import('./masquerade-ball')),
 }
 
 /** Şablonun öz komponenti varmı (yoxsa scaffold göstəriləcək)? */

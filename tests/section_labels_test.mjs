@@ -70,6 +70,12 @@ const REDESIGNED = [
   'roller-shutter',
   'unboxing',
   'gallery-unveil',
+  /* 2026-10 — «Bayram gecələri» konsepti */
+  'novruz-bonfire',
+  'novruz-semeni',
+  'midnight-clock',
+  'snow-globe',
+  'masquerade-ball',
 ]
 const SECTIONS = ['countdown', 'venue', 'program', 'dresscode', 'seating', 'gallery', 'rsvp', 'guestbook', 'hero', 'story']
 
