@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { listTemplates, listTemplateFacets, isTemplateSelectable, getStatusMeta, getTemplateTheme, getCategoryLabel, getConceptLabel } from '../../templates/templateConfig'
+import { listTemplates, listTemplateFacets, isTemplateSelectable, getStatusMeta, getTemplateTheme, getCategoryLabel, groupTemplatesByConcept } from '../../templates/templateConfig'
 import { ensureTemplateFonts } from '../../templates/fonts'
 import { trackTemplatePreviewed } from '../../templates/templateAnalytics'
 import LanguageSwitcher from '../LanguageSwitcher'
@@ -123,6 +123,10 @@ export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCrea
     (concept === 'all' || tpl.concept === concept)
   )), [templates, status, category, concept])
 
+  /* «Hamısı»: hər tədbir öz başlıqlı bölməsində (Toy, Nişan, Uşaq ad günü…).
+     Bir tədbir seçiləndə bölmə başlığı lazım deyil — tək şəbəkə qalır. */
+  const groups = useMemo(() => (concept === 'all' ? groupTemplatesByConcept(visible, lang) : null), [concept, visible, lang])
+
   /* Kart yer tutucuları şablon şriftlərini işlədə bilər — bu səhifədə yüklə */
   useEffect(() => { ensureTemplateFonts() }, [])
 
@@ -149,6 +153,34 @@ export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCrea
   }
 
   const resetFilters = () => { setStatus('all'); setCategory('all'); setConcept('all') }
+
+  /* Kart: tədbir bölmə başlığında / çipdədir, kartda üslub (Lüks, Vintage…) görünür.
+     `eager` yalnız ilk görünən 3 şəkil üçün. */
+  const renderCard = (tpl, i, groupIndex = 0) => {
+    const theme = getTemplateTheme(tpl.id) || {}
+    const badge = getStatusMeta(tpl.status, lang)
+    return (
+      <TemplateCard
+        lang={lang}
+        name={tpl.name}
+        statusLabel={badge.label}
+        statusTone={badge.tone}
+        categoryLabel={getCategoryLabel(tpl.category, lang)}
+        description={tpl.shortDescription?.[lang] || tpl.shortDescription?.az || tpl.tagline}
+        image={templateImage(tpl.id) || undefined}
+        imageWidth={TEMPLATE_IMAGE_SIZE.width}
+        imageHeight={TEMPLATE_IMAGE_SIZE.height}
+        loading={groupIndex === 0 && i < 3 ? 'eager' : 'lazy'}
+        accent={theme.primary || '#C5A059'}
+        background={theme.background || '#FDFBF7'}
+        locked={!isTemplateSelectable(tpl.id)}
+        lockedLabel={ui.locked}
+        onPreview={() => handlePreview(tpl)}
+        previewLabel={ui.preview}
+      />
+    )
+  }
+
   const legal = legalUi(lang).links
 
   return (
@@ -187,37 +219,25 @@ export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCrea
           />
         </div>
 
-        {visible.length > 0 ? (
+        {visible.length > 0 && groups ? (
+          <div className="mt-8 space-y-14 sm:space-y-16">
+            {groups.map((g, gi) => (
+              <section key={g.id} aria-labelledby={`tpl-concept-${g.id}`}>
+                <div className="flex items-end justify-between gap-4 border-b border-beige-dark pb-3">
+                  <h2 id={`tpl-concept-${g.id}`} className="font-serif text-[1.85rem] font-medium leading-tight text-ink sm:text-[2.25rem]">
+                    {g.label}
+                  </h2>
+                  <span className="shrink-0 pb-1 text-[13px] text-brown-muted">{ui.count(g.items.length, g.items.length)}</span>
+                </div>
+                <div className="mt-6">
+                  <TemplatesGrid label={g.label} items={g.items} getKey={(tpl) => tpl.id} renderItem={(tpl, i) => renderCard(tpl, i, gi)} />
+                </div>
+              </section>
+            ))}
+          </div>
+        ) : visible.length > 0 ? (
           <div className="mt-8">
-            <TemplatesGrid
-              label={ui.list}
-              items={visible}
-              getKey={(tpl) => tpl.id}
-              renderItem={(tpl, i) => {
-                const theme = getTemplateTheme(tpl.id) || {}
-                const badge = getStatusMeta(tpl.status, lang)
-                return (
-                  <TemplateCard
-                    lang={lang}
-                    name={tpl.name}
-                    statusLabel={badge.label}
-                    statusTone={badge.tone}
-                    categoryLabel={tpl.concept ? getConceptLabel(tpl.concept, lang) : getCategoryLabel(tpl.category, lang)}
-                    description={tpl.shortDescription?.[lang] || tpl.shortDescription?.az || tpl.tagline}
-                    image={templateImage(tpl.id) || undefined}
-                    imageWidth={TEMPLATE_IMAGE_SIZE.width}
-                    imageHeight={TEMPLATE_IMAGE_SIZE.height}
-                    loading={i < 3 ? 'eager' : 'lazy'}
-                    accent={theme.primary || '#C5A059'}
-                    background={theme.background || '#FDFBF7'}
-                    locked={!isTemplateSelectable(tpl.id)}
-                    lockedLabel={ui.locked}
-                    onPreview={() => handlePreview(tpl)}
-                    previewLabel={ui.preview}
-                  />
-                )
-              }}
-            />
+            <TemplatesGrid label={ui.list} items={visible} getKey={(tpl) => tpl.id} renderItem={renderCard} />
           </div>
         ) : (
           <div className="mt-8">

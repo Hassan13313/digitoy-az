@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Check, Lock } from 'lucide-react'
-import { listTemplates, listTemplateFacets, isTemplateSelectable, getTemplateTheme } from '../../templates/templateConfig'
+import { listTemplates, listTemplateFacets, isTemplateSelectable, getTemplateTheme, groupTemplatesByConcept } from '../../templates/templateConfig'
 import { ChipRow } from '../public/templates'
 import { DEMO_DATE } from '../../data/demoInvitation'
 import { trackTemplateSelected, trackTemplatePreviewed } from '../../templates/templateAnalytics'
@@ -227,6 +227,8 @@ export default function TemplateSelect({ value, onChange, lang = 'az', hideHeadi
   const concepts = useMemo(() => listTemplateFacets(lang).concepts, [lang])
   const [concept, setConcept] = useState('all')
   const templates = concept === 'all' ? all : all.filter((tpl) => tpl.concept === concept)
+  /* «Hamısı»: hər tədbir öz başlıqlı bölməsində; tədbir seçiləndə tək şəbəkə */
+  const groups = concept === 'all' ? groupTemplatesByConcept(all, lang) : [{ id: concept, label: null, items: templates }]
 
   /* Thumbnail-lar 8 fərqli şrift ailəsi işlədir — yalnız bu blok
      görünəndə yüklənir, landing-in ilk yüklənməsinə təsir etmir. */
@@ -260,58 +262,66 @@ export default function TemplateSelect({ value, onChange, lang = 'az', hideHeadi
 
       {/* UI redesign (2026-10): yeni TemplateCard — real şablon şəkli (data/templateImages.js);
           şəkli olmayan şablon üçün metadata-dan qurulan miniatür qalır. Seçim/önbaxış/analitika eynidir. */}
-      <div
-        role="radiogroup"
-        aria-label={ui.title}
-        className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4"
-      >
-        {templates.map((tpl) => {
-          const selected  = value === tpl.id
-          /* Seçilə bilmə YALNIZ statusdan gəlir — hardcode yoxdur */
-          const available = isTemplateSelectable(tpl.id)
+      <div role="radiogroup" aria-label={ui.title} className="space-y-8">
+        {groups.map((g) => (
+          <section key={g.id} aria-labelledby={g.label ? `tpl-pick-${g.id}` : undefined}>
+            {g.label && (
+              <div className="mb-3 flex items-end justify-between gap-3 border-b border-beige-dark pb-2">
+                <h3 id={`tpl-pick-${g.id}`} className="font-serif text-[1.35rem] font-medium leading-tight text-ink sm:text-[1.5rem]">{g.label}</h3>
+                <span className="shrink-0 pb-0.5 text-[12px] text-brown-muted">{g.items.length}</span>
+              </div>
+            )}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+              {g.items.map((tpl) => {
+                const selected  = value === tpl.id
+                /* Seçilə bilmə YALNIZ statusdan gəlir — hardcode yoxdur */
+                const available = isTemplateSelectable(tpl.id)
 
-          const handleSelect = () => {
-            if (!available) return
-            onChange?.(tpl.id)
-            trackTemplateSelected(tpl.id, { source: 'builder' })
-          }
+                const handleSelect = () => {
+                  if (!available) return
+                  onChange?.(tpl.id)
+                  trackTemplateSelected(tpl.id, { source: 'builder' })
+                }
 
-          /* ⚠ Phase 27.1: önbaxış EYNİ tabda açılır (əvvəl `window.open(_blank)`
-             idi → yeni tab təmiz mount olurdu və qayıdanda paket seçimi
-             yenidən soruşulurdu). Qayıdış konteksti sessionStorage-a yazılır;
-             `App.goToBuilder` onu oxuyub builder-i paket seçmədən bərpa edir. */
-          const handlePreview = (e) => {
-            e?.stopPropagation?.()
-            trackTemplatePreviewed(tpl.id, { source: 'builder' })
-            try {
-              sessionStorage.setItem('digitoy_preview_return', JSON.stringify({
-                origin: 'builder',
-                pkg: localStorage.getItem('selected_package') || null,
-                templateId: tpl.id,
-                scrollY: Math.round(window.scrollY),
-              }))
-            } catch { /* private mode — sadəcə paket bərpası olmayacaq */ }
-            window.dispatchEvent(new CustomEvent('digitoy:preview', { detail: { id: tpl.id } }))
-          }
+                /* ⚠ Phase 27.1: önbaxış EYNİ tabda açılır (əvvəl `window.open(_blank)`
+                   idi → yeni tab təmiz mount olurdu və qayıdanda paket seçimi
+                   yenidən soruşulurdu). Qayıdış konteksti sessionStorage-a yazılır;
+                   `App.goToBuilder` onu oxuyub builder-i paket seçmədən bərpa edir. */
+                const handlePreview = (e) => {
+                  e?.stopPropagation?.()
+                  trackTemplatePreviewed(tpl.id, { source: 'builder' })
+                  try {
+                    sessionStorage.setItem('digitoy_preview_return', JSON.stringify({
+                      origin: 'builder',
+                      pkg: localStorage.getItem('selected_package') || null,
+                      templateId: tpl.id,
+                      scrollY: Math.round(window.scrollY),
+                    }))
+                  } catch { /* private mode — sadəcə paket bərpası olmayacaq */ }
+                  window.dispatchEvent(new CustomEvent('digitoy:preview', { detail: { id: tpl.id } }))
+                }
 
-          return (
-            <TemplateCard
-              key={tpl.id}
-              name="template"
-              value={tpl.id}
-              title={tpl.name}
-              description={tpl.shortDescription?.[lang] || tpl.shortDescription?.az || tpl.tagline}
-              selected={selected}
-              onSelect={handleSelect}
-              imageSrc={templateImage(tpl.id) || undefined}
-              preview={<TemplateThumbnail tpl={tpl} selected={false} locked={false} />}
-              live={tpl.status === 'live'}
-              locked={!available}
-              onPreview={handlePreview}
-              lang={lang}
-            />
-          )
-        })}
+                return (
+                  <TemplateCard
+                    key={tpl.id}
+                    name="template"
+                    value={tpl.id}
+                    title={tpl.name}
+                    description={tpl.shortDescription?.[lang] || tpl.shortDescription?.az || tpl.tagline}
+                    selected={selected}
+                    onSelect={handleSelect}
+                    imageSrc={templateImage(tpl.id) || undefined}
+                    preview={<TemplateThumbnail tpl={tpl} selected={false} locked={false} />}
+                    live={tpl.status === 'live'}
+                    locked={!available}
+                    onPreview={handlePreview}
+                    lang={lang}
+                  />
+                )
+              })}
+            </div>
+          </section>
+        ))}
       </div>
     </div>
   )

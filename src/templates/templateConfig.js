@@ -101,6 +101,22 @@ export function getConceptLabel(concept, lang = 'az') {
   return m ? (m[lang] || m.az) : (concept || '')
 }
 
+const OTHER_CONCEPT = { az: 'Digər', en: 'Other', ru: 'Другое' }
+
+/**
+ * Şablonları tədbir bölmələrinə ayırır — vitrin və builder «Hamısı» seçiləndə
+ * hər tədbiri ayrıca başlıqla göstərir. Sıra CONCEPT_META-dakı kimidir, boş
+ * bölmə qayıtmır; konsepti olmayan şablon (gələcəkdə) sonda «Digər»-dədir.
+ * @param {Array<{concept?: string}>} list  artıq süzülmüş şablonlar (sıra saxlanılır)
+ * @returns {Array<{ id: string, label: string, items: Array }>}
+ */
+export function groupTemplatesByConcept(list, lang = 'az') {
+  const groups = CONCEPT_ORDER.map((id) => ({ id, label: getConceptLabel(id, lang), items: list.filter((tpl) => tpl.concept === id) }))
+  const rest = list.filter((tpl) => !CONCEPT_META[tpl.concept])
+  if (rest.length) groups.push({ id: 'other', label: OTHER_CONCEPT[lang] || OTHER_CONCEPT.az, items: rest })
+  return groups.filter((g) => g.items.length > 0)
+}
+
 /** Şablonun konseptinə uyğun ilkin tədbir növü (yoxdursa null) */
 export function conceptEventType(templateId) {
   const c = BY_ID[templateId]?.concept
