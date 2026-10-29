@@ -57,6 +57,8 @@ export function useInvitation({
     toy: tr.event_toy, nishan: tr.event_nishan,
     birthday: tr.event_birthday, corporate: tr.event_corporate,
     other: weddingData.eventName || tr.event_other,
+    xina: tr.event_xina, sunnet: tr.event_sunnet, baby: tr.event_baby,
+    anniversary: tr.event_anniversary, graduation: tr.event_graduation, bachelorette: tr.event_bachelorette,
   }
   const eventLabel = eventLabels[weddingData.eventType] || tr.event_toy
   const ot = makeOpeningText(templateId, { weddingData, lang, isCouple, isCorp, eventLabel }, adminOverrides?.opening || null)
@@ -109,7 +111,8 @@ export function useInvitation({
     formattedDate, dayName, dp, time, fullDate,
     heroTitle, single,
     /* Ad günü: istəyə bağlı yaş (1–120), yoxdursa null — bax _shared/kids.js */
-    age: weddingData.eventType === 'birthday' ? parseAge(weddingData.age) : null,
+    /* ad günü / sünnət → yaş; ildönümü → neçənci il */
+    age: ['birthday', 'sunnet', 'anniversary'].includes(weddingData.eventType) ? parseAge(weddingData.age) : null,
     groom: weddingData.groomName || '', bride: weddingData.brideName || '',
     footer: sectionHead(L, 'footer'),
     storyAdminTheme: adminOverrides?.theme || null,

@@ -15,6 +15,12 @@ const WITH_IMAGE = new Set([
   'mediterranean', 'modern-black', 'night-sky', 'simple-luxury',
   /* 2026-10 — «Uşaq ad günü» konsepti */
   'fairy-tale', 'space-mission', 'circus-show', 'dino-adventure', 'balloon-party',
+  /* 2026-10 — «Xına gecəsi» konsepti */
+  'red-veil',
+  'xonca',
+  'henna-buta',
+  'mirror-candle',
+  'kelagayi',
 ])
 
 export const TEMPLATE_IMAGE_SIZE = { width: 780, height: 1688 }

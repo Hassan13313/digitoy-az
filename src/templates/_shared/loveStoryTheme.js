@@ -77,6 +77,12 @@ const F = {
   andika:     FONT_STACKS.andika,
   mplusRounded: FONT_STACKS.mplusRounded,
   pacifico:   FONT_STACKS.pacifico,
+  /* Konseptlər II (2026-10) */
+  lora: FONT_STACKS.lora,
+  alegreyaSans: FONT_STACKS.alegreyaSans,
+  badScript: FONT_STACKS.badScript,
+  playfairSC: FONT_STACKS.playfairSC,
+  merriweather: FONT_STACKS.merriweather,
 }
 export const STORY_FONTS = F
 
@@ -111,6 +117,12 @@ const T = {
   'dino-adventure':  { bg: '#F5EBD3', surf: '#FBF4E2', ink: '#2B2A20', mute: '#615C47', hi: '#3E7A3A', line: '#E4683A', paper: '#FFFFFF', paperInk: '#615C47', head: F.shantell, body: F.andika, cap: F.shantell, capItalic: false, titleFont: F.shantell, titleSize: 38, frame: 'polaroid', hero: 'arch', tilt: true, labels: 'num', textItalic: false },
   'balloon-party':   { bg: 'linear-gradient(170deg,#FFF8F3,#FBEAF0)', surf: '#FFFFFF', ink: '#4A3046', mute: '#7D6479', hi: '#C9577C', line: '#EF8FA8', paper: '#FFFFFF', paperInk: '#7D6479', head: F.mplusRounded, body: F.mplusRounded, cap: F.pacifico, capItalic: false, titleFont: F.pacifico, titleSize: 42, frame: 'polaroid', hero: 'circle', tilt: true, labels: 'num', textItalic: false },
   'luxury-jewelry':  { bg: 'radial-gradient(120% 50% at 50% 0%,#143A31,#07110E 60%)', surf: '#0E2A23', ink: '#F4F1EA', mute: '#9DB5AE', hi: '#A3D6C7', line: '#D9DEE0', head: F.libreCaslon, body: F.raleway, cap: F.libreCaslon, titleFont: F.libreCaslon, titleSize: 42, frame: 'gem', hero: 'octagon' },
+  /* 2026-10 — «Xına gecəsi» konsepti */
+  'red-veil': { bg: 'linear-gradient(180deg,#F8EEE2,#EFE0CD)', surf: '#FFFDF9', ink: '#2A1014', mute: '#76524C', hi: '#8E1B2B', line: '#D4A64A', paper: '#FFFFFF', paperInk: '#76524C', head: F.cormorant, body: F.lora, cap: F.vibes, script: true, titleFont: F.vibes, titleSize: 54, frame: 'mat', hero: 'arch' },
+  'xonca': { bg: 'linear-gradient(180deg,#341C11,#22120B)', surf: '#2C170E', ink: '#FFF1D6', mute: '#D9C1A0', hi: '#E3A06C', line: '#D9A54A', head: F.alegreya, body: F.alegreyaSans, cap: F.alegreya, titleFont: F.alegreya, titleItalic: true, titleSize: 42, frame: 'glow', hero: 'circle' },
+  'henna-buta': { bg: 'linear-gradient(180deg,#FBF3E8,#F3E3CF)', surf: '#FFFCF7', ink: '#3A1E12', mute: '#7B5A48', hi: '#8A3A18', line: '#B5552B', paper: '#FFFFFF', paperInk: '#7B5A48', head: F.spectral, body: F.commissioner, cap: F.badScript, capItalic: false, titleFont: F.spectral, titleItalic: true, titleSize: 42, frame: 'polaroid', hero: 'oval', tilt: true },
+  'mirror-candle': { bg: 'linear-gradient(180deg,#211A15,#14100D)', surf: '#1B1511', ink: '#F4ECDD', mute: '#B8AA94', hi: '#F6DFA0', line: '#E0B864', head: F.notoDisplay, body: F.ebGaramond, cap: F.notoDisplay, titleFont: F.notoDisplay, titleItalic: true, titleSize: 40, frame: 'glow', hero: 'oval' },
+  'kelagayi': { bg: 'linear-gradient(180deg,#F7EED9,#F1E2C4)', surf: '#FFFCF4', ink: '#1E1A17', mute: '#6E5F4E', hi: '#9E1F32', line: '#24305E', paper: '#FFFCF4', paperInk: '#6E5F4E', head: F.playfairSC, body: F.merriweather, cap: F.merriweather, titleFont: F.playfairSC, titleSize: 34, frame: 'mat', hero: 'rect', labels: 'num2', textItalic: false },
 }
 
 /* ── Mətnlər (AZ/EN/RU) ── dizayndakı şablon adlandırmaları */

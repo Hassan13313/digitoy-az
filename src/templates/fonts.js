@@ -76,6 +76,13 @@ const FAMILY = {
   andika:       'Andika:ital,wght@0,400;0,700;1,400',
   mplusRounded: 'M+PLUS+Rounded+1c:wght@400;500;700;800;900',
   pacifico:     'Pacifico',
+  /* konseptlər II (2026-10) */
+  lora: 'Lora:ital,wght@0,400;0,500;1,400',
+  greatVibes: 'Great+Vibes',
+  alegreyaSans: 'Alegreya+Sans:ital,wght@0,300;0,400;0,500;1,400',
+  badScript: 'Bad+Script',
+  playfairSC: 'Playfair+Display+SC:wght@400;700',
+  merriweather: 'Merriweather:ital,wght@0,300;0,400;1,300',
 }
 
 /* Hər şablonun öz ailələri */
@@ -100,6 +107,12 @@ const TEMPLATE_FONTS = {
   'circus-show':     ['oi', 'podkova'],
   'dino-adventure':  ['shantell', 'andika'],
   'balloon-party':   ['mplusRounded', 'pacifico'],
+  /* 2026-10 — «Xına gecəsi» konsepti */
+  'red-veil': ['lora', 'greatVibes'],
+  'xonca': ['alegreya', 'alegreyaSans'],
+  'henna-buta': ['spectral', 'commissioner', 'badScript'],
+  'mirror-candle': ['notoDisplay', 'ebGaramond'],
+  'kelagayi': ['playfairSC', 'merriweather'],
 }
 
 const ALL = Object.keys(FAMILY)

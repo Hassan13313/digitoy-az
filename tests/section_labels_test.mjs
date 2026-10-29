@@ -28,6 +28,12 @@ const REDESIGNED = [
   'boarding-pass', 'cinema-premiere', 'vinyl-record', 'royal-palace', 'mediterranean', 'gazette', 'luxury-jewelry',
   /* 2026-10 — «Uşaq ad günü» konsepti */
   'fairy-tale', 'space-mission', 'circus-show', 'dino-adventure', 'balloon-party',
+  /* 2026-10 — «Xına gecəsi» konsepti */
+  'red-veil',
+  'xonca',
+  'henna-buta',
+  'mirror-candle',
+  'kelagayi',
 ]
 const SECTIONS = ['countdown', 'venue', 'program', 'dresscode', 'seating', 'gallery', 'rsvp', 'guestbook', 'hero', 'story']
 

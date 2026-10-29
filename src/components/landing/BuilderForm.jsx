@@ -7,6 +7,8 @@ import {
   Martini, Palette,
   /* Phase 35 — bölmələr addımı + şablon addımı ikonları */
   Clock, ListOrdered, Users, Image as ImageIcon, UserCheck, Music,
+  /* 2026-10 — konsept tədbir növləri */
+  Flame, Baby, HeartHandshake, GraduationCap, PartyPopper,
 } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 /* Google Maps JS API — singleton promise, script injected once */
@@ -25,7 +27,7 @@ function loadGoogleMaps(apiKey) {
   })
   return _mapsPromise
 }
-import { DRESS_CODE_PALETTES, EVENT_TYPES } from '../../data/constants'
+import { DRESS_CODE_PALETTES, EVENT_TYPES, AGE_EVENT_TYPES } from '../../data/constants'
 import { resolveDressGenders } from '../../data/dressCode'
 import { PACKAGE_DEFS, getLockedSteps } from '../../data/packages'
 import { listBuilderSections, isSectionOn } from '../../data/sections'
@@ -51,7 +53,10 @@ import { Notice, NoticeButton, ConfirmDialog } from '../builder/feedback'
 import { inputBase, ringState, labelClass, hintClass } from '../builder/styles'
 import { trackEvent } from '../../utils/analytics'
 
-const EVENT_ICONS = { toy: Heart, nishan: Diamond, birthday: Cake, corporate: Briefcase, other: Sparkles }
+const EVENT_ICONS = {
+  toy: Heart, nishan: Diamond, birthday: Cake, corporate: Briefcase, other: Sparkles,
+  xina: Flame, sunnet: Crown, baby: Baby, anniversary: HeartHandshake, graduation: GraduationCap, bachelorette: PartyPopper,
+}
 const COUPLE_TYPES = ['toy', 'nishan']
 const CORP_TYPES   = ['corporate', 'other']
 
@@ -1986,29 +1991,34 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
                 </div>
               </div>
             ) : (
-              /* Ad günü — tək ad + istəyə bağlı yaş (2026-10: uşaq şablonları
-                 yaşı böyük rəqəmlə göstərir; boşdursa heç yerdə görünmür) */
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8">
+              /* Ad günü və digər «tək ad»lı tədbirlər (xına, sünnət, baby shower,
+                 ildönümü, məzuniyyət, qız gecəsi). Ad sahəsinin başlığı tədbirə
+                 görədir; ad günü / sünnət / ildönümündə istəyə bağlı rəqəm
+                 sahəsi var (2026-10: konsept şablonları onu iri göstərir;
+                 boşdursa heç yerdə görünmür). */
+              <div className={`grid grid-cols-1 gap-6 sm:gap-8 ${AGE_EVENT_TYPES.includes(data.eventType) ? 'sm:grid-cols-2' : ''}`}>
                 <div>
-                  <Label required>{tr.person_name_label}</Label>
+                  <Label required>{tr[`name_label_${data.eventType}`] || tr.person_name_label}</Label>
                   <Input
                     value={data.brideName}
                     onChange={(e) => set('brideName', e.target.value)}
-                    placeholder={tr.person_name_label}
+                    placeholder={tr[`name_label_${data.eventType}`] || tr.person_name_label}
                     invalid={!!errors.brideName}
                   />
                 </div>
-                <div>
-                  <Label>{tr.age_label}</Label>
-                  <Input
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={3}
-                    value={data.age || ''}
-                    onChange={(e) => set('age', e.target.value.replace(/\D/g, '').slice(0, 3))}
-                    placeholder={tr.age_placeholder}
-                  />
-                </div>
+                {AGE_EVENT_TYPES.includes(data.eventType) && (
+                  <div>
+                    <Label>{tr[`age_label_${data.eventType}`] || tr.age_label}</Label>
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={3}
+                      value={data.age || ''}
+                      onChange={(e) => set('age', e.target.value.replace(/\D/g, '').slice(0, 3))}
+                      placeholder={tr.age_placeholder}
+                    />
+                  </div>
+                )}
               </div>
             )}
 

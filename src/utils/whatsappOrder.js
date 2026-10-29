@@ -41,6 +41,8 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '', draftCode = '
     birthday:  t.az.event_birthday,
     corporate: t.az.event_corporate,
     other:     data.eventName || t.az.event_other,
+    xina: t.az.event_xina, sunnet: t.az.event_sunnet, baby: t.az.event_baby,
+    anniversary: t.az.event_anniversary, graduation: t.az.event_graduation, bachelorette: t.az.event_bachelorette,
   }
 
   const { formattedDate, dayName } = formatAzDate(data.date, lang)

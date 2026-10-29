@@ -302,6 +302,13 @@ function seoInviteMeta(?array $d): array {
         'toy'      => ['Toy Dəvətnaməsi',     'toy mərasiminə'],
         'nishan'   => ['Nişan Dəvətnaməsi',   'nişan mərasiminə'],
         'birthday' => ['Ad Günü Dəvətnaməsi', 'ad gününə'],
+        /* 2026-10 — konsept tədbir növləri (src/utils/inviteSeo.js ilə eyni) */
+        'xina'         => ['Xına Gecəsi Dəvətnaməsi', 'xına gecəsinə'],
+        'sunnet'       => ['Sünnət Toyu Dəvətnaməsi', 'sünnət toyuna'],
+        'baby'         => ['Baby Shower Dəvətnaməsi', 'baby shower bayramına'],
+        'anniversary'  => ['İldönümü Dəvətnaməsi',    'ildönümü məclisinə'],
+        'graduation'   => ['Məzuniyyət Dəvətnaməsi',  'məzuniyyət gecəsinə'],
+        'bachelorette' => ['Qız Gecəsi Dəvətnaməsi',  'qız gecəsinə'],
     ];
     $kind = $kinds[($d['type'] ?? '') !== '' ? $d['type'] : 'toy'] ?? null;
     if ($kind !== null) {

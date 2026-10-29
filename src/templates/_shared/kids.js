@@ -54,6 +54,41 @@ export function kidsGalleryDesc(adminOverrides, tr, lang = 'az') {
   return GALLERY_DESC[lang] || GALLERY_DESC.az
 }
 
+/* Digər konseptlər üçün eyni neytral mətn — tədbirin adı ilə:
+   «night» (xına, qız gecəsi, bayram), «event» (korporativ, açılış),
+   «celebration» (sünnət, ildönümü, baby shower, məzuniyyət) */
+const GALLERY_BY_KIND = {
+  night: {
+    az: 'Bu gecə çəkdiyiniz şəkilləri buradan yükləyin — hamısı bir albomda toplanacaq.',
+    en: 'Upload the photos you take tonight here — they will all gather in one album.',
+    ru: 'Загружайте сюда фото этого вечера — все они соберутся в одном альбоме.',
+  },
+  event: {
+    az: 'Tədbirdə çəkdiyiniz şəkilləri buradan yükləyin — hamısı bir albomda toplanacaq.',
+    en: 'Upload the photos you take at the event here — they will all gather in one album.',
+    ru: 'Загружайте сюда фото с мероприятия — все они соберутся в одном альбоме.',
+  },
+  celebration: {
+    az: 'Məclisdə çəkdiyiniz şəkilləri buradan yükləyin — hamısı bir albomda toplanacaq.',
+    en: 'Upload the photos you take at the celebration here — they will all gather in one album.',
+    ru: 'Загружайте сюда фото с торжества — все они соберутся в одном альбоме.',
+  },
+}
+export function galleryDesc(adminOverrides, tr, lang = 'az', kind = 'celebration') {
+  const own = adminOverrides?.strings?.inv_gallery_desc
+  if (own && (own[lang] || own.az)) return tr.inv_gallery_desc
+  const set = GALLERY_BY_KIND[kind] || GALLERY_DESC
+  return set[lang] || set.az
+}
+
+/** «25 il birlikdə» — ildönümü şablonları üçün (yaş sahəsi = il sayı) */
+export function yearsSentence(n, lang = 'az') {
+  if (!n) return ''
+  if (lang === 'ru') return `${n} ${ruYears(n)} вместе`
+  if (lang === 'en') return `${n} ${n === 1 ? 'year' : 'years'} together`
+  return `${n} il birlikdə`
+}
+
 /* Masa adı: oturma planında «Masa 4: …» yazılır və `table_id` = «Masa 4».
    Uşaq şablonları «Masa» sözünü ayrıca kiçik yazır, iri rəqəm üçün yalnız
    «4» lazımdır. «VIP», «Ailə masası» kimi adlar olduğu kimi qalır. */

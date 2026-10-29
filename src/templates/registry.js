@@ -38,6 +38,12 @@ const COMPONENTS = {
   'circus-show':     lazy(() => import('./circus-show')),
   'dino-adventure':  lazy(() => import('./dino-adventure')),
   'balloon-party':   lazy(() => import('./balloon-party')),
+  /* 2026-10 — «Xına gecəsi» konsepti */
+  'red-veil': lazy(() => import('./red-veil')),
+  'xonca': lazy(() => import('./xonca')),
+  'henna-buta': lazy(() => import('./henna-buta')),
+  'mirror-candle': lazy(() => import('./mirror-candle')),
+  'kelagayi': lazy(() => import('./kelagayi')),
 }
 
 /** Şablonun öz komponenti varmı (yoxsa scaffold göstəriləcək)? */

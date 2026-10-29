@@ -686,7 +686,7 @@ export default function App() {
      isPreview={true} → hazırlanmaqda olan (enabled=false) şablonlar da açılır. */
   if (view === 'template-preview') {
     /* 2026-10: demo şablonun konseptinə uyğundur (uşaq şablonu → uşaq ad günü) */
-    const demo = demoForConcept(getTemplateConfig(previewTemplateId)?.concept)
+    const demo = demoForConcept(getTemplateConfig(previewTemplateId)?.concept, previewTemplateId)
     return (
       <div className="min-h-screen bg-cream">
         <TemplateRenderer

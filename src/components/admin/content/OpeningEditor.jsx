@@ -41,6 +41,11 @@ const EMBLEM_NAMES = {
   'space-mission':  'planet nişanı',
   'dino-adventure': 'yumurta nişanı',
   'balloon-party':  'şar nişanı',
+  'red-veil': 'buta nişanı',
+  'xonca': 'səkkizguşəli ulduz',
+  'henna-buta': 'xına gülü',
+  'mirror-candle': 'parıltı',
+  'kelagayi': 'buta',
 }
 
 export default function OpeningEditor({

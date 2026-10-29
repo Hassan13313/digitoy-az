@@ -30,6 +30,12 @@ const ENTER = {
   'circus-show':    'zoom',
   'dino-adventure': 'up',
   'balloon-party':  'down',
+  /* 2026-10 — «Xına gecəsi» konsepti */
+  'red-veil': 'up',
+  'xonca': 'zoom',
+  'henna-buta': 'left',
+  'mirror-candle': 'down',
+  'kelagayi': 'right',
 }
 
 /** templateId → giriş istiqaməti (`data-enter` üçün). */

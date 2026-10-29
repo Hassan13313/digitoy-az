@@ -41,13 +41,25 @@ export const DRESS_CODE_PALETTES = [
   },
 ]
 
+/* 2026-10 — konsept şablonları üçün yeni tədbir növləri. Hamısı «tək ad»
+   (ad günü kimi `brideName`) qrupundadır, ona görə cütlük/korporativ
+   siyahılarına (client + server) toxunmaq lazım olmadı. */
 export const EVENT_TYPES = [
   { id: 'toy', icon: 'Heart' },
   { id: 'nishan', icon: 'Diamond' },
+  { id: 'xina', icon: 'Flame' },
   { id: 'birthday', icon: 'Cake' },
+  { id: 'sunnet', icon: 'Crown' },
+  { id: 'baby', icon: 'Baby' },
+  { id: 'anniversary', icon: 'HeartHandshake' },
+  { id: 'graduation', icon: 'GraduationCap' },
+  { id: 'bachelorette', icon: 'PartyPopper' },
   { id: 'corporate', icon: 'Briefcase' },
   { id: 'other', icon: 'Sparkles' },
 ]
+
+/* Bu tədbir növlərində istəyə bağlı rəqəm sahəsi göstərilir (yaş / il) */
+export const AGE_EVENT_TYPES = ['birthday', 'sunnet', 'anniversary']
 
 export const PRICING = [
   {

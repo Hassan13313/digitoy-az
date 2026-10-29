@@ -54,6 +54,12 @@ export const OPENING_PHRASES = {
   showBegin:    { az: 'Şou başlasın!',           en: 'Let the show begin!',     ru: 'Шоу начинается!' },
   hatch:        { az: 'Yumurtanı çatlat',        en: 'Hatch the egg',           ru: 'Разбить скорлупу' },
   letGo:        { az: 'Şarları burax',           en: 'Let the balloons go',     ru: 'Отпустить шарики' },
+  /* konseptlər II (2026-10) */
+  liftVeil: { az: 'Örpəyi qaldır', en: 'Lift the veil', ru: 'Поднять покрывало' },
+  lightCandles: { az: 'Şamları yandır', en: 'Light the candles', ru: 'Зажечь свечи' },
+  applyHenna: { az: 'Xınanı yax', en: 'Apply the henna', ru: 'Нанести хну' },
+  lightMirror: { az: 'Güzgünü işıqlandır', en: 'Light up the mirror', ru: 'Осветить зеркало' },
+  unfoldScarf: { az: 'Kəlağayını aç', en: 'Unfold the scarf', ru: 'Развернуть платок' },
 }
 
 /* Gazette rubrikası — tədbir növünə görə (əvvəl hər tədbirdə «Toy elanı» idi) */
@@ -63,6 +69,12 @@ const GAZETTE_RUBRIC = {
   birthday:  { az: 'Ad günü elanı · Bakı',  en: 'Birthday notice · Baku',   ru: 'Объявление о дне рождения · Баку' },
   corporate: { az: 'Tədbir elanı · Bakı',   en: 'Event notice · Baku',      ru: 'Объявление о событии · Баку' },
   other:     { az: 'Tədbir elanı · Bakı',   en: 'Event notice · Baku',      ru: 'Объявление о событии · Баку' },
+  xina:         { az: 'Xına gecəsi elanı · Bakı', en: 'Henna night notice · Baku', ru: 'Объявление о вечере хны · Баку' },
+  sunnet:       { az: 'Sünnət toyu elanı · Bakı', en: 'Celebration notice · Baku', ru: 'Объявление о празднике · Баку' },
+  baby:         { az: 'Baby shower elanı · Bakı', en: 'Baby shower notice · Baku', ru: 'Объявление о бэби шауэре · Баку' },
+  anniversary:  { az: 'İldönümü elanı · Bakı',    en: 'Anniversary notice · Baku', ru: 'Объявление о годовщине · Баку' },
+  graduation:   { az: 'Məzuniyyət elanı · Bakı',  en: 'Graduation notice · Baku',  ru: 'Объявление о выпускном · Баку' },
+  bachelorette: { az: 'Qız gecəsi elanı · Bakı',  en: 'Bachelorette notice · Baku', ru: 'Объявление о девичнике · Баку' },
 }
 
 export const OPENING_LANGS = ['az', 'en', 'ru']
@@ -129,6 +141,12 @@ export const OPENING_SPEC = {
   /* Simple Luxury açılışı videodur — mətnlər yalnız video gecikəndə görünən
      afişada və «Keç» düyməsindədir. */
   'simple-luxury':   { mono: null, slots: ['brand', 'title', 'sub', 'skip'], hints: { sub: 'Afişadakı şüar', title: 'Yalnız video gecikəndə görünür' } },
+  /* 2026-10 — «Xına gecəsi» konsepti */
+  'red-veil': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'xonca': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'henna-buta': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'mirror-candle': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
+  'kelagayi': { mono: 'emblem', slots: ['kicker', 'title', 'meta', 'cta', 'hint'] },
 }
 
 /** Şablonun açılış təsviri (naməlum id → simple-luxury) */
@@ -248,6 +266,16 @@ export function openingDefaults(templateId, ctx) {
       return { ...base, kicker: ctx.eventLabel || '', meta: dotDate(wd, ' · '), cta: P('hatch') }
     case 'balloon-party':
       return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('letGo') }
+    case 'red-veil':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('liftVeil') }
+    case 'xonca':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('lightCandles') }
+    case 'henna-buta':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('applyHenna') }
+    case 'mirror-candle':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('lightMirror') }
+    case 'kelagayi':
+      return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('unfoldScarf') }
     case 'simple-luxury':
     default:
       return { brand: 'Digitoy.az',
