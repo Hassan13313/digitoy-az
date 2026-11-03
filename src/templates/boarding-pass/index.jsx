@@ -11,7 +11,8 @@ import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 import { tableParts, tableFontPx } from '../_shared/tableBadge'
-import { LABELS, TXT } from './copy'
+import { LABELS, TXT, VARIANTS } from './copy'
+import { variantCopy } from '../_shared/copyText'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    BOARDING PASS — «Birinci sinif» (premium redizayn, 2026-10)
@@ -212,7 +213,7 @@ function BoardOpening({ inv, theme, weddingData }) {
             {[
               ot.show('fDate') && [ot.text('fDate'), dateV],
               ot.show('fTime') && [ot.text('fTime'), weddingData.time || ''],
-              ot.show('fGate') && [ot.text('fGate'), inv.copy(TXT).gateNo],
+              ot.show('fGate') && [ot.text('fGate'), inv.copy(variantCopy(TXT, VARIANTS, inv.eventType)).gateNo],
             ].filter(Boolean).map(([lab, val], i) => (
               <div key={lab} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <span style={{ fontFamily: mono, fontSize: 10.5, letterSpacing: '.16em', color: C.MUTED }}>{upper(lab, lang)}</span>
@@ -277,9 +278,9 @@ export default function BoardingPassTemplate(props) {
   const head = theme.fonts.heading
   const body = theme.fonts.body
   const mono = theme.fonts.mono || "'IBM Plex Mono', ui-monospace, monospace"
-  const T = inv.copy(TXT)
+  const T = inv.copy(variantCopy(TXT, VARIANTS, inv.eventType))
   const [y, m, d] = String(weddingData.date || '').split('-')
-  const flight = `DT ${d || '00'}${m || '00'}`
+  const flight = `${T.flightPrefix} ${d || '00'}${m || '00'}`
   const dateTicket = d ? `${d} ${(MONTHS[lang] || MONTHS.az)[Number(m) - 1] || ''} ${y}` : ''
   const dest = inv.isCouple ? <Heart /> : '★'
   const P = { lang, head, mono }
@@ -331,6 +332,7 @@ export default function BoardingPassTemplate(props) {
                     <h1 data-fit style={{ margin: '4px 0 0', fontFamily: head, fontWeight: 500, fontSize: 'clamp(30px, 9.6vw, 42px)', lineHeight: 1.05, letterSpacing: '.01em', color: C.INK, textWrap: 'balance' }}>
                       {upper(inv.heroTitle ? inv.heroTitle : inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single, lang)}
                     </h1>
+                    {inv.ageLine && <div style={{ marginTop: 6, fontFamily: mono, fontSize: 12, letterSpacing: '.14em', color: C.COPPER }}>{upper(inv.ageLine, lang)}</div>}
                     {inv.isCorp && weddingData.organizer?.trim() && <div style={{ marginTop: 6, fontSize: 14, color: alpha(C.INK, 0.7) }}>{tr.organizer_display}: {weddingData.organizer}</div>}
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', margin: '20px 0 4px' }}>
@@ -378,7 +380,7 @@ export default function BoardingPassTemplate(props) {
                 <div style={{ background: C.IVORY, borderRadius: '0 0 10px 10px', padding: '12px 18px 18px', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 14 }}>
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontFamily: mono, fontSize: 10.5, letterSpacing: '.16em', color: alpha(C.INK, 0.55) }}>{flight} · {dateTicket}</div>
-                    <div style={{ marginTop: 4, fontFamily: head, fontWeight: 500, fontSize: 18, letterSpacing: '.04em' }}>GYD → {dest}</div>
+                    <div style={{ marginTop: 4, fontFamily: head, fontWeight: 500, fontSize: 18, letterSpacing: '.04em' }}>{T.code} → {dest}</div>
                   </div>
                   <Barcode seed={flight + (inv.groom || inv.single || '')} height={40} bars={30} />
                 </div>
@@ -429,9 +431,9 @@ export default function BoardingPassTemplate(props) {
                 {weddingData.venueNote && <div style={{ marginTop: 4, fontSize: 15, color: C.MUTED }}>{weddingData.venueNote}</div>}
                 <div style={{ display: 'flex', gap: 8, marginTop: 18, flexWrap: 'wrap' }}>
                   {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(C, true)}>{tr.inv_directions_btn}</a>}
-                  {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C, !inv.dirUrl)}>Maps</a>}
-                  {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C, false)}>Waze</a>}
-                  {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C, false)}>Apple</a>}
+                  {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C, !inv.dirUrl)}>{tr.inv_btn_maps}</a>}
+                  {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C, false)}>{tr.inv_btn_waze}</a>}
+                  {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C, false)}>{tr.inv_btn_apple}</a>}
                 </div>
               </Leg>
             )}

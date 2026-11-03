@@ -429,7 +429,7 @@ export default function SimpleLuxuryTemplate({
                       style={{ flex: '1 1 128px', minWidth: 0 }}
                     >
                       <MapPin size={13} strokeWidth={1.5} />
-                      <span className="hidden sm:inline">Google Maps</span>
+                      <span className="hidden sm:inline">{tr.inv_maps_btn}</span>
                       <span className="sm:hidden">Maps</span>
                     </a>
                   )}

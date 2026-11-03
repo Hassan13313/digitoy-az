@@ -11,7 +11,6 @@ export const GLASS = 'radial-gradient(60% 45% at 34% 26%, rgba(255,255,255,.75),
 
 /* Atlas lent — «Maşallah» */
 export const SASH = (C) => (`linear-gradient(180deg, #1A55B8 0%, ${C.COBALT} 45%, ${C.COBALT_D} 100%)`)
-export const SASH_WORD = { az: 'Maşallah', en: 'Mashallah', ru: 'Машаллах' }
 
 /* Krem fonda incə mavi kaşı naxışı */
 const tile = `<svg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'><g fill='none' stroke='%230D3B8E' stroke-opacity='.08' stroke-width='1'><path d='M28 4l6 10 10 4-10 4-6 10-6-10-10-4 10-4z'/><circle cx='0' cy='0' r='8'/><circle cx='56' cy='0' r='8'/><circle cx='0' cy='56' r='8'/><circle cx='56' cy='56' r='8'/></g></svg>`

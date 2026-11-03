@@ -52,7 +52,7 @@ for (const id of REDESIGNED) {
   ok(`${id}: ən azı bir öz sətri var`, fields.length > 0)
   ok(`${id}: LABELS reyestrdədir`, !!templateLabels(id))
   ok(`${id}: copy.js idxal olunur`, /import \{[^}]*\bTXT\b[^}]*\} from '\.\/copy'/.test(src))
-  ok(`${id}: inv.copy(TXT) işlədilir`, src.includes('inv.copy(TXT)'))
+  ok(`${id}: inv.copy(TXT) işlədilir`, /inv\.copy\((TXT|variantCopy\(TXT, VARIANTS, inv\.eventType\))\)/.test(src))
   for (const f of fields) {
     const k = f.key.slice(copyPrefix(id).length)
     ok(`${f.key}: prefiks düzgündür`, f.key.startsWith(copyPrefix(id)))

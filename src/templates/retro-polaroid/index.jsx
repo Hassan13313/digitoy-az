@@ -60,7 +60,7 @@ function ScenePhoto({ inv, lang, head, big = 'clamp(54px, 17vw, 76px)' }) {
       {inv.age ? (
         <div style={{ marginTop: '-14%' }}>
           <div style={{ fontFamily: head, fontSize: big, lineHeight: 1, color: '#FFF4D6', textShadow: OUTLINE }}>{inv.age}</div>
-          <div style={{ display: 'inline-block', marginTop: 6, padding: '3px 12px 4px', borderRadius: 999, background: '#7A3B2A', fontFamily: head, fontSize: 14, color: '#FFF4D6' }}>{yearsSentence(inv.age, lang).replace(String(inv.age), '').trim()}</div>
+          <div style={{ display: 'inline-block', marginTop: 6, padding: '3px 12px 4px', borderRadius: 999, background: '#7A3B2A', fontFamily: head, fontSize: 14, color: '#FFF4D6' }}>{yearsSentence(inv.age, lang, inv.strings).replace(String(inv.age), '').trim()}</div>
         </div>
       ) : null}
     </SunsetScene>

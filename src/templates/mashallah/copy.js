@@ -16,14 +16,17 @@ export const LABELS = {
 
 export const TXT = {
   az: {
+    sash: 'Maşallah',
     brand: 'Digitoy',
     table: 'Masa',
   },
   en: {
+    sash: 'Mashallah',
     brand: 'Digitoy',
     table: 'Table',
   },
   ru: {
+    sash: 'Машаллах',
     brand: 'Digitoy',
     table: 'Стол',
   },
@@ -31,6 +34,7 @@ export const TXT = {
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
+  ['sash', 'hero', 'Lentin yazısı'],
   ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
   ['table', 'seating', 'Dizayn mətni: «Masa»'],
 ]

@@ -310,7 +310,7 @@ function rateGate(string $key, int $limit, int $window): bool {
 /* ── Sxem versiyası (Phase 39) ──
    Sütun və ya cədvəl əlavə edəndə BU RƏQƏMİ ARTIR — əks halda miqrasiya
    canlıda işləməz. */
-const SCHEMA_VERSION = 47;
+const SCHEMA_VERSION = 48;
 
 /* ── Cədvəlləri avtomatik yarat ──
    Phase 39 OPTİMİZASİYASI: əvvəl bu funksiya HƏR sorğuda 6 `CREATE TABLE
@@ -677,6 +677,16 @@ function runMigrations(PDO $db): void {
             if ((int) ($e->errorInfo[1] ?? 0) !== 1060) throw $e;   /* paralel sorğu artıq əlavə edib */
         }
     }
+
+    /* ── Şablon səviyyəli məzmun (2026-11, admin «Şablonlar») ──
+       Açar: `boarding-pass` və ya ad günü versiyası `boarding-pass@birthday`. */
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS template_content (
+            template_key VARCHAR(80) NOT NULL PRIMARY KEY,
+            content      MEDIUMTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+            updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
 
     /* ── Sxem versiyasını qeyd et ──
        Bu sətir olmasa ensureTables() hər sorğuda tam miqrasiya işlədər. */

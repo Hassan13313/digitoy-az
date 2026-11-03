@@ -11,7 +11,8 @@ import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 import { tableParts, tableFontPx } from '../_shared/tableBadge'
-import { LABELS, TXT } from './copy'
+import { LABELS, TXT, VARIANTS } from './copy'
+import { variantCopy } from '../_shared/copyText'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    VINYL RECORD — «Məhdud tirajlı LP» (premium redizayn, 2026-10)
@@ -216,7 +217,7 @@ export default function VinylRecordTemplate(props) {
   const tb = tableParts(seating.selected?.table_id)
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const T = inv.copy(TXT)
+  const T = inv.copy(variantCopy(TXT, VARIANTS, inv.eventType))
   let tn = 0
   const next = () => ++tn
   const P = { head, T }
@@ -257,7 +258,7 @@ export default function VinylRecordTemplate(props) {
             <section data-section="hero" style={{ padding: '30px 16px 30px' }}>
               <div style={{ position: 'relative', maxWidth: 440, margin: '0 auto', paddingRight: '16%' }}>
                 <div aria-hidden="true" style={{ position: 'absolute', right: 0, top: '4%', width: '78%', animation: 'vr-rise 1s ease-out .3s both' }}>
-                  <Record head={head} arcText="DIGITOY RECORDS · STEREO · 33⅓ RPM" uid="hero" />
+                  <Record head={head} arcText={T.arc} uid="hero" />
                 </div>
                 <div style={{
                   position: 'relative', aspectRatio: '1', overflow: 'hidden', background: C.TEAL, boxShadow: '12px 0 24px rgba(0,0,0,.45), 0 30px 50px -30px #000',
@@ -280,11 +281,12 @@ export default function VinylRecordTemplate(props) {
               </div>
               <div style={{ maxWidth: 440, margin: '22px auto 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 14 }}>
                 <div style={{ minWidth: 0 }}>
+                  {inv.ageLine && <div style={{ marginBottom: 6, fontSize: 13, fontWeight: 600, letterSpacing: '.14em', color: C.MUSTARD }}>{upper(inv.ageLine, lang)}</div>}
                   <div style={{ fontFamily: head, fontSize: 21 }}>{inv.fullDate}</div>
                   <div style={{ marginTop: 4, fontSize: 14.5, color: C.MUTED }}>{[inv.time, weddingData.venueName].filter(Boolean).join(' · ')}</div>
                   {inv.isCorp && weddingData.organizer?.trim() && <div style={{ marginTop: 4, fontSize: 14, color: C.MUTED }}>{tr.organizer_display}: {weddingData.organizer}</div>}
                 </div>
-                <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.16em', color: C.ORANGE, whiteSpace: 'nowrap' }}>DTR-{d}{m}</div>
+                <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.16em', color: C.ORANGE, whiteSpace: 'nowrap' }}>{T.catNo}{d}{m}</div>
               </div>
               <p style={{ maxWidth: 440, margin: '18px auto 0', fontSize: 15.5, lineHeight: 1.6, color: C.MUTED }}>{tr.inv_join}</p>
             </section>
@@ -346,9 +348,9 @@ export default function VinylRecordTemplate(props) {
                 {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontSize: 14.5, color: C.MUTED }}>{weddingData.venueNote}</div>}
                 <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
                   {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(C, true)}>{tr.inv_directions_btn}</a>}
-                  {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C, !inv.dirUrl)}>Maps</a>}
-                  {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C, false)}>Waze</a>}
-                  {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C, false)}>Apple</a>}
+                  {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C, !inv.dirUrl)}>{tr.inv_btn_maps}</a>}
+                  {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C, false)}>{tr.inv_btn_waze}</a>}
+                  {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C, false)}>{tr.inv_btn_apple}</a>}
                 </div>
               </Track>
             )}
@@ -379,7 +381,7 @@ export default function VinylRecordTemplate(props) {
                     )
                   })}
                   <div style={{ marginTop: 14, display: 'flex', justifyContent: 'space-between', fontSize: 10, fontWeight: 600, letterSpacing: '.18em', color: alpha(C.CHAR, 0.55) }}>
-                    <span>{String(T.label).toLocaleUpperCase('en')}</span><span>{`${T.stereo} · 33⅓`}</span>
+                    <span>{String(T.label).toLocaleUpperCase('en')}</span><span>{`${T.stereo} · ${T.rpm}`}</span>
                   </div>
                 </div>
               </Track>

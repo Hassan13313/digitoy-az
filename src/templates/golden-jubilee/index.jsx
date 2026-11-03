@@ -87,7 +87,7 @@ function AlbumOpening({ inv, theme, lang }) {
                     <Flourish width={110} color={C.GOLD} />
                   </EmblemSlot>
                 )}
-                {inv.age && <div style={{ marginTop: 4, fontStyle: 'italic', fontSize: 15, color: C.GOLD_L, opacity: 0.85 }}>{yearsSentence(inv.age, lang).replace(String(inv.age), '').trim()}</div>}
+                {inv.age && <div style={{ marginTop: 4, fontStyle: 'italic', fontSize: 15, color: C.GOLD_L, opacity: 0.85 }}>{yearsSentence(inv.age, lang, inv.strings).replace(String(inv.age), '').trim()}</div>}
                 <Flourish width={120} color={C.GOLD} style={{ marginTop: 14 }} />
               </div>
             )}
@@ -204,7 +204,7 @@ export default function GoldenJubileeTemplate(props) {
               {inv.age ? (
                 <>
                   <div style={{ marginTop: 6, fontFamily: head, fontWeight: 700, fontSize: 'clamp(96px, 30vw, 150px)', lineHeight: 0.92, ...goldText(C), backgroundSize: '220% 100%', animation: 'gj-shine 4s ease-in-out .8s infinite' }}>{inv.age}</div>
-                  <div style={{ marginTop: 2, fontStyle: 'italic', fontSize: 19, color: C.GOLD_L, opacity: 0.85 }}>{yearsSentence(inv.age, lang).replace(String(inv.age), '').trim()}</div>
+                  <div style={{ marginTop: 2, fontStyle: 'italic', fontSize: 19, color: C.GOLD_L, opacity: 0.85 }}>{yearsSentence(inv.age, lang, inv.strings).replace(String(inv.age), '').trim()}</div>
                 </>
               ) : <Flourish width={160} color={C.GOLD} style={{ marginTop: 18 }} />}
               <h1 style={{ margin: '22px 0 0', fontFamily: head, fontWeight: 600, fontSize: nameSize(heroName), lineHeight: 1.08, overflowWrap: 'anywhere', ...goldText(C), animation: 'gj-rise 1s ease-out .2s both' }}>{heroName}</h1>

@@ -22,3 +22,14 @@ export function copyPrefix(templateId) {
 export function fill(str, vars) {
   return String(str ?? '').replace(/\{(\w+)\}/g, (m, k) => (Object.prototype.hasOwnProperty.call(vars, k) ? String(vars[k] ?? '') : m))
 }
+
+/**
+ * Tədbirə görə mətn versiyası: `TXT` + `VARIANTS[eventType]` (dil üzrə birləşir).
+ * Məs. Cinema Premiere ad günündə «Baş rolda …» yazır, toyda «Baş rollarda …».
+ * Versiya yoxdursa EYNİ obyekt qayıdır.
+ */
+export function variantCopy(txt, variants, eventType) {
+  const v = variants?.[eventType]
+  if (!v) return txt
+  return Object.fromEntries(Object.keys(txt).map((lg) => [lg, { ...txt[lg], ...(v[lg] || {}) }]))
+}

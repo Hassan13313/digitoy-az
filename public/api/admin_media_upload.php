@@ -40,11 +40,14 @@ if (!isValidSlug($slug)) {
     adminMediaFail(400, 'BAD_SLUG', 'Dəvətnamə tanınmadı.');
 }
 
-/* Yalnız MÖVCUD dəvətnamə üçün qovluq yaradılır */
-$st = getDB()->prepare('SELECT 1 FROM invitations WHERE slug = :s LIMIT 1');
-$st->execute([':s' => $slug]);
-if (!$st->fetchColumn()) {
-    adminMediaFail(404, 'NOT_FOUND', 'Dəvətnamə tapılmadı.');
+/* Yalnız MÖVCUD dəvətnamə üçün qovluq yaradılır.
+   `tpl-<şablon>` — şablon səviyyəli məzmun («Şablonlar» bölməsi), dəvətnaməsi yoxdur. */
+if (!preg_match('/^tpl-[a-z0-9-]{1,70}$/', $slug)) {
+    $st = getDB()->prepare('SELECT 1 FROM invitations WHERE slug = :s LIMIT 1');
+    $st->execute([':s' => $slug]);
+    if (!$st->fetchColumn()) {
+        adminMediaFail(404, 'NOT_FOUND', 'Dəvətnamə tapılmadı.');
+    }
 }
 
 $file = $_FILES['photo'] ?? null;

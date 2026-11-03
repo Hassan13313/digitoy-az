@@ -10,7 +10,8 @@ import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 import { tableParts, tableFontPx } from '../_shared/tableBadge'
-import { LABELS, TXT } from './copy'
+import { LABELS, TXT, VARIANTS } from './copy'
+import { variantCopy } from '../_shared/copyText'
 import { fill } from '../_shared/copyText'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -195,7 +196,7 @@ export default function GazetteTemplate(props) {
   const tb = tableParts(seating.selected?.table_id)
   const disp = theme.fonts.heading
   const body = theme.fonts.body
-  const T = inv.copy(TXT)
+  const T = inv.copy(variantCopy(TXT, VARIANTS, inv.eventType))
   let pg = 1
   const P = { disp, T, lang }
   const nextPage = () => ++pg
@@ -237,6 +238,7 @@ export default function GazetteTemplate(props) {
                   rubric={L('hero', 'kicker', ot.text('sub'))} title={inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)}
                   venue={weddingData.venueName} meta={inv.time} />
                 {inv.isCorp && weddingData.organizer?.trim() && <div style={{ marginTop: 10, fontSize: 14, color: C.GREY }}>{tr.organizer_display}: {weddingData.organizer}</div>}
+                {inv.ageLine && <div style={{ marginTop: 12, fontSize: 13, fontWeight: 700, letterSpacing: '.14em', color: C.INK }}>{upper(inv.ageLine, lang)}</div>}
                 <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: '1fr auto', gap: 14, alignItems: 'stretch' }}>
                   <p style={{ margin: 0, fontFamily: disp, fontStyle: 'italic', fontSize: 17, lineHeight: 1.45 }}>{tr.inv_join}</p>
                   <div style={{ width: 118, border: `1.5px solid ${C.INK}`, padding: '8px 10px', textAlign: 'center' }}>
@@ -288,9 +290,9 @@ export default function GazetteTemplate(props) {
                 <div style={{ marginTop: 14, fontFamily: disp, fontWeight: 900, fontSize: 26, lineHeight: 1.1 }}>{weddingData.venueName}</div>
                 <div style={{ display: 'flex', gap: 8, marginTop: 16, flexWrap: 'wrap' }}>
                   {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(C, true, disp)}>{tr.inv_directions_btn}</a>}
-                  {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C, !inv.dirUrl, disp)}>Maps</a>}
-                  {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C, false, disp)}>Waze</a>}
-                  {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C, false, disp)}>Apple</a>}
+                  {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C, !inv.dirUrl, disp)}>{tr.inv_btn_maps}</a>}
+                  {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C, false, disp)}>{tr.inv_btn_waze}</a>}
+                  {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C, false, disp)}>{tr.inv_btn_apple}</a>}
                 </div>
               </Column>
             )}

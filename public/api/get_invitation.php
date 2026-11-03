@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/template_version.php';
+require_once __DIR__ . '/template_content_lib.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
@@ -66,5 +67,12 @@ if (empty($data['templateId'])) {
 
 /* Şablon versiyası: açarı olmayan (redizayndan əvvəlki) dəvətnamə köhnə görünüşdə qalır */
 $data = tvForRead($data);
+
+/* Adminin şablon səviyyəli məzmunu («Şablonlar» bölməsi). Köhnə dizaynda (v1)
+   qalan dəvətnamə toxunulmur. Şablon bunu ayrıca sorğu ilə gözləməsin deyə
+   burada gəlir: açılış ekranı ilk kadrdan düzgün mətni göstərir. */
+if ((int)($data['templateVersion'] ?? 2) !== 1) {
+    $data['templateDefaults'] = tcRead($db, tcKey((string)$data['templateId'], (string)($data['eventType'] ?? '')));
+}
 
 echo json_encode(['ok' => true, 'slug' => $slug, 'active' => true, 'data' => $data]);

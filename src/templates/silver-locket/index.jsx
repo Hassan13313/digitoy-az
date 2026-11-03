@@ -52,9 +52,9 @@ const KEYFRAMES = (C) => (`
 const IVORY_BG = (C) => (`radial-gradient(90% 60% at 50% 0%, #FFFFFF, transparent 70%), ${C.IVORY}`)
 const silverText = (C) => ({ backgroundImage: SILVER_GRAD(C), WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' })
 
-function yearsParts(age, lang) {
+function yearsParts(age, lang, strings) {
   if (!age) return null
-  const s = yearsSentence(age, lang)
+  const s = yearsSentence(age, lang, strings)
   return { n: String(age), word: s.replace(String(age), '').trim() }
 }
 
@@ -67,7 +67,7 @@ function LocketOpening({ inv, theme, lang }) {
   const { titleOv, first, second } = openingNames(inv)
   const go = gate.opening
   const head = theme.fonts.heading
-  const yp = yearsParts(inv.age, lang)
+  const yp = yearsParts(inv.age, lang, inv.strings)
   return (
     <motion.div {...gate.gateProps} data-sl2
       animate={go ? { opacity: 0 } : {}}
@@ -155,7 +155,7 @@ export default function SilverLocketTemplate(props) {
   const body = theme.fonts.body
   const T = inv.copy(TXT)
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
-  const yp = yearsParts(inv.age, lang)
+  const yp = yearsParts(inv.age, lang, inv.strings)
 
   return (
     <PaletteContext.Provider value={C}><div data-sl2 lang={lang} data-enter={enterDirection(ID)} style={{
@@ -197,7 +197,7 @@ export default function SilverLocketTemplate(props) {
             </div>
             <div style={{ marginTop: 28, fontSize: 12.5, fontWeight: 600, letterSpacing: '.32em', textTransform: 'uppercase', color: C.SILVER_D }}>{L('hero', 'kicker', inv.eventLabel)}</div>
             <h1 style={{ margin: '10px 0 0', fontFamily: head, fontStyle: 'italic', fontWeight: 400, fontSize: nameSize(heroName), lineHeight: 1.05, overflowWrap: 'anywhere', ...silverText(C), animation: 'sl2-rise 1s ease-out .2s both' }}>{heroName}</h1>
-            {yp && <div style={{ marginTop: 10, fontFamily: head, fontStyle: 'italic', fontSize: 22, color: C.ROSE }}>{yearsSentence(inv.age, lang)}</div>}
+            {yp && <div style={{ marginTop: 10, fontFamily: head, fontStyle: 'italic', fontSize: 22, color: C.ROSE }}>{yearsSentence(inv.age, lang, inv.strings)}</div>}
             <ChainRule width={220} style={{ marginTop: 18 }} />
             <div style={{ marginTop: 16, fontFamily: head, fontSize: 'clamp(21px, 6vw, 26px)', color: C.IVORY }}>{inv.fullDate}</div>
             <div style={{ marginTop: 6, fontSize: 15, color: C.MUTED }}>{[inv.time, weddingData.venueName].filter(Boolean).join(' · ')}</div>

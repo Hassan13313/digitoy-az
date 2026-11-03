@@ -1,15 +1,16 @@
-import { createElement, useEffect, useMemo, Suspense } from 'react'
+import { createElement, useEffect, useMemo, useState, Suspense } from 'react'
 import { TemplateProvider } from './TemplateProvider'
 import TemplateBoundary from './TemplateBoundary'
 import { getTemplateComponent } from './registry'
-import { DEFAULT_TEMPLATE_ID, resolveTemplateId } from './templateConfig'
+import { DEFAULT_TEMPLATE_ID, resolveTemplateId, templateContentKey } from './templateConfig'
 import { ensureTemplateFonts } from './fonts'
 import { ensureTemplateFonts as ensureLegacyFonts } from './legacy/fonts'
 import { isLegacyInvitation, getLegacyComponent } from './legacy/registry'
 import { useAutoFit } from './_shared/fitText'
 import { trackTemplateView, trackTemplateFallback } from './templateAnalytics'
 import { resolveWeddingContent } from '../data/contentI18n'
-import { readOverrides, applyStoryOverrides } from '../data/adminOverrides'
+import { readOverrides, applyStoryOverrides, withTemplateDefaults } from '../data/adminOverrides'
+import { fetchTemplateDefaults } from '../utils/api'
 
 /* Şablon chunk-ı yüklənənə qədər krem fon (yalnız lazy şablonlarda görünür —
    simple-luxury statik import olduğu üçün heç vaxt bu vəziyyətə düşmür). */
@@ -26,6 +27,28 @@ function TemplateLoader() {
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   )
+}
+
+/* ── ŞABLON SƏVİYYƏLİ MƏZMUN (2026-11, admin «Şablonlar») ──
+   Real dəvətnamədə server `templateDefaults`-u datanın içində verir (get_invitation.php),
+   admin önbaxışı öz redaktə etdiyini ötürür — sorğu YOXDUR. Demo və builder önbaxışında
+   açar yoxdur: burada bir dəfə çəkilir. Köhnə dizayn (v1) bu qata qoşulmur.
+   `undefined` = hələ yüklənir: açılış mətni gözümüzün qarşısında dəyişməsin. */
+const NO_DEFAULTS = {}
+function useTemplateDefaults(templateId, weddingData, legacy) {
+  const given = weddingData?.templateDefaults
+  const key = templateContentKey(templateId, weddingData?.eventType)
+  const needFetch = !legacy && given === undefined
+  const [fetched, setFetched] = useState({ key: null, value: null })
+  useEffect(() => {
+    if (!needFetch) return undefined
+    let alive = true
+    fetchTemplateDefaults(key).then((value) => { if (alive) setFetched({ key, value }) })
+    return () => { alive = false }
+  }, [needFetch, key])
+  if (legacy) return NO_DEFAULTS
+  if (given !== undefined) return given || NO_DEFAULTS
+  return fetched.key === key ? fetched.value : undefined
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -71,9 +94,16 @@ export default function TemplateRenderer({ template, isPreview = false, weddingD
      yazılır. Burada bir dəfə oxunub təmizlənir və şablona ötürülür — heç bir
      şablon faylı `form_data`-ya birbaşa baxmır.
      ⚠ Açar yoxdursa `null` → bütün şablonlar əvvəlki kimi işləyir. */
+  /* Şablon qatı + dəvətnamənin öz düzəlişləri (bax mergeTemplateDefaults) */
+  const legacy = isLegacyInvitation(weddingData, templateId)
+  const templateDefaults = useTemplateDefaults(templateId, weddingData, legacy)
+  const withDefaults = useMemo(
+    () => withTemplateDefaults(localizedWedding, templateDefaults),
+    [localizedWedding, templateDefaults],
+  )
   const adminOverrides = useMemo(
-    () => readOverrides(localizedWedding),
-    [localizedWedding],
+    () => readOverrides(withDefaults),
+    [withDefaults],
   )
 
   /* Şriftlər: simple-luxury-dən başqa şablonlar render anında ÖZ ailələrini
@@ -84,7 +114,6 @@ export default function TemplateRenderer({ template, isPreview = false, weddingD
      Premium redizayndan əvvəl təsdiqlənmiş dəvətnamələr (`templateVersion: 1`)
      köhnə görünüşdə qalır — kod `legacy/`-dədir (bax legacy/registry.js).
      Builder, demo və kataloq datasında açar yoxdur → həmişə yeni versiya. */
-  const legacy = isLegacyInvitation(weddingData, templateId)
   /* Uzun ad/başlıq çərçivədən çıxmasın — yalnız `data-fit` elementləri (bax _shared/fitText.js) */
   useAutoFit()
 
@@ -99,9 +128,12 @@ export default function TemplateRenderer({ template, isPreview = false, weddingD
      eyni `weddingData`-nı alır, heç birinin faylında ayrıca məntiq yoxdur.
      ⚠ `admin.story` yoxdursa EYNİ referans qayıdır (davranış dəyişmir). */
   const renderWedding = useMemo(
-    () => applyStoryOverrides(localizedWedding, adminOverrides?.story || null, lang, weddingData),
-    [localizedWedding, adminOverrides, lang, weddingData],
+    () => applyStoryOverrides(withDefaults, adminOverrides?.story || null, lang, weddingData),
+    [withDefaults, adminOverrides, lang, weddingData],
   )
+
+  /* Şablon məzmunu hələ gəlməyib (yalnız demo/builder) */
+  if (templateDefaults === undefined) return <TemplateLoader />
 
   const localizedProps = { ...restProps, lang, weddingData: renderWedding, adminOverrides }
 
@@ -119,7 +151,7 @@ export default function TemplateRenderer({ template, isPreview = false, weddingD
     : createElement(getTemplateComponent(DEFAULT_TEMPLATE_ID), { ...localizedProps, isPreview })
 
   return (
-    <TemplateProvider templateId={templateId} isPreview={isPreview}>
+    <TemplateProvider templateId={templateId} isPreview={isPreview} strings={adminOverrides?.strings || null}>
       <TemplateBoundary templateId={templateId} fallback={safeFallback}>
         {templateId === DEFAULT_TEMPLATE_ID
           ? content /* statik import — Suspense lazım deyil, render axını dəyişmir */

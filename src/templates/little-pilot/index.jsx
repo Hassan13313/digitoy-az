@@ -233,7 +233,7 @@ export default function LittlePilotTemplate(props) {
                   <h1 style={{ margin: 0, fontFamily: head, fontWeight: 800, fontSize: nameSize(heroName), lineHeight: 1.05, color: C.RED, overflowWrap: 'break-word' }}>{heroName}</h1>
                 </Towline>
               </div>
-              {age && <div style={{ marginTop: 14, fontWeight: 700, fontSize: 16, color: C.NAVY }}>{age} {ageWord(age, lang)}</div>}
+              {age && <div style={{ marginTop: 14, fontWeight: 700, fontSize: 16, color: C.NAVY }}>{age} {ageWord(age, lang, inv.strings)}</div>}
               <div style={{ position: 'relative', display: 'inline-block', margin: '34px auto 0', padding: '20px 30px 16px' }}>
                 <Cloud w={320} style={{ left: '50%', top: '50%', marginLeft: -160, marginTop: -80 }} />
                 <div style={{ position: 'relative' }}>

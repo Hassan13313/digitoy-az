@@ -31,6 +31,7 @@ export const OPENING_PHRASES = {
   premiere:     { az: 'Premyera',                en: 'Premiere',                ru: 'Премьера' },
   openPremiere: { az: 'Premyeranı aç',           en: 'Start the premiere',      ru: 'Начать премьеру' },
   lifeFilm:     { az: 'bir ömürlük film',        en: 'a film for a lifetime',   ru: 'фильм длиною в жизнь' },
+  yearFilm:     { az: 'yeni yaşın filmi',        en: 'the film of a new year',  ru: 'фильм нового года жизни' },
   playRecord:   { az: 'Plyonkanı işə sal',       en: 'Play the record',         ru: 'Включить пластинку' },
   readIssue:    { az: 'Buraxılışı oxu',          en: 'Read the issue',          ru: 'Читать выпуск' },
   specialEd:    { az: 'Xüsusi buraxılış',        en: 'Special edition',         ru: 'Специальный выпуск' },
@@ -330,11 +331,11 @@ export function openingDefaults(templateId, ctx) {
       return { ...base, kicker: ctx.eventLabel || '', meta: fullDate,
         cta: ctx.isCorp ? P('enterEvent') : P('enterInv') }
     case 'boarding-pass':
-      return { ...base, brand: 'DIGITOY AIR', pass: 'BOARDING PASS', route: 'GYD → ♥',
+      return { ...base, brand: 'DIGITOY AIR', pass: 'BOARDING PASS', route: ctx.isCouple ? 'GYD → ♥' : 'GYD → ★',
         fDate: P('fDate'), fTime: P('fTime'), fGate: P('fGate'),
         kicker: P('invitation'), meta: wd.venueName || '', cta: P('checkin') }
     case 'cinema-premiere':
-      return { ...base, sub: P('lifeFilm'), kicker: P('premiere'),
+      return { ...base, sub: wd.eventType === 'birthday' ? P('yearFilm') : P('lifeFilm'), kicker: P('premiere'),
         meta: [dotDate(wd, '.'), wd.venueName].filter(Boolean).join(' · '), cta: P('openPremiere') }
     case 'gazette': {
       const rubric = GAZETTE_RUBRIC[wd.eventType] || GAZETTE_RUBRIC.toy

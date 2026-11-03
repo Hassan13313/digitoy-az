@@ -16,7 +16,7 @@
    Hero (adlar + tarix) və outro/footer siyahıda yoxdur: onlar dəvətnamənin
    skeletidir, söndürülə bilməz.
    ───────────────────────────────────────────────────────────────────────── */
-import { getPackageGates } from './packages'
+import { getPackageGates } from './packages.js'
 
 /* Dəvətnamədəki görünmə sırası ilə eyni sıradadır — builder-dəki siyahı
    istifadəçiyə səhifənin özünü xatırlatsın deyə. */

@@ -249,7 +249,7 @@ export default function BalloonPartyTemplate(props) {
             <div style={{ position: 'relative', textAlign: 'center', padding: '4px 16px 0' }}>
               <div style={{ fontFamily: script, fontSize: 24, color: C.PINK_D, animation: 'bp-rise .8s ease-out .2s both' }}>{L('hero', 'kicker', inv.eventLabel)}</div>
               <FoilLetters text={heroName} disp={disp} size={letterSize(heroName)} />
-              {age && <div style={{ marginTop: 4, fontWeight: 700, fontSize: 17, color: C.MUTED }}>{ageSentence(age, lang)}</div>}
+              {age && <div style={{ marginTop: 4, fontWeight: 700, fontSize: 17, color: C.MUTED }}>{ageSentence(age, lang, inv.strings)}</div>}
             </div>
 
             {/* yaş — nəhəng folqa rəqəm, yanında şarlar */}
@@ -314,9 +314,9 @@ export default function BalloonPartyTemplate(props) {
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontSize: 15.5, color: C.MUTED }}>{weddingData.venueNote}</div>}
               <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
                 {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(true)}>{tr.inv_directions_btn}</a>}
-                {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(!inv.dirUrl)}>Maps</a>}
-                {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>Waze</a>}
-                {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>Apple</a>}
+                {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(!inv.dirUrl)}>{tr.inv_btn_maps}</a>}
+                {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>{tr.inv_btn_waze}</a>}
+                {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>{tr.inv_btn_apple}</a>}
               </div>
             </Party>
           )}

@@ -10,7 +10,8 @@ import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
 import { tableParts, tableFontPx } from '../_shared/tableBadge'
-import { LABELS, TXT } from './copy'
+import { LABELS, TXT, VARIANTS } from './copy'
+import { variantCopy } from '../_shared/copyText'
 import { fill } from '../_shared/copyText'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -222,7 +223,7 @@ export default function CinemaPremiereTemplate(props) {
   const tb = tableParts(seating.selected?.table_id)
   const head = theme.fonts.heading
   const body = theme.fonts.body
-  const CR = inv.copy(TXT)
+  const CR = inv.copy(variantCopy(TXT, VARIANTS, inv.eventType))
   const names = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const [y, m, d] = String(weddingData.date || '').split('-')
   const dotted = d ? `${d}.${m}.${y}` : ''
@@ -274,6 +275,7 @@ export default function CinemaPremiereTemplate(props) {
                 <h1 data-fit style={{ margin: '10px 0 0', fontFamily: head, fontWeight: 800, fontSize: 'clamp(46px, 15vw, 72px)', lineHeight: 0.95, letterSpacing: '.02em', background: GOLD_TEXT(C), WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', textWrap: 'balance' }}>
                   {inv.heroTitle ? upper(inv.heroTitle, lang) : inv.isCouple ? <>{upper(inv.groom, lang)}<span style={{ display: 'block', fontFamily: body, fontStyle: 'italic', fontWeight: 400, fontSize: '.42em', lineHeight: 1.4 }}>{inv.and}</span>{upper(inv.bride, lang)}</> : upper(inv.single, lang)}
                 </h1>
+                {inv.ageLine && <div style={{ marginTop: 12, fontFamily: head, fontWeight: 600, fontSize: 15, letterSpacing: '.18em', color: C.GOLD_L }}>{upper(inv.ageLine, lang)}</div>}
                 {inv.ot.show('sub') && <div style={{ marginTop: 16, fontStyle: 'italic', fontSize: 19, color: C.IVORY }}>{inv.ot.text('sub')}</div>}
                 <div style={{ margin: '28px auto 0', display: 'inline-flex', alignItems: 'center', gap: 12, fontFamily: head, fontWeight: 700, fontSize: 24, letterSpacing: '.08em' }}>
                   <span style={{ width: 28, height: 1, background: C.GOLD }} />{dotted}<span style={{ width: 28, height: 1, background: C.GOLD }} />

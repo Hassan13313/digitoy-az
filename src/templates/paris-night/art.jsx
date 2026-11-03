@@ -111,12 +111,12 @@ export function Awning($p) {
 /** Poçt möhürü */
 export function Postmark($p) {
   const C = usePalette(PAL)
-  const { size = 54, color = C.ROSE_D, style } = $p
+  const { size = 54, color = C.ROSE_D, style, label = 'PARIS' } = $p
   return (
     <svg aria-hidden="true" viewBox="0 0 80 50" width={size * 1.6} height={size} style={{ display: 'block', overflow: 'visible', ...style }}>
       <circle cx="25" cy="25" r="21" fill="none" stroke={color} strokeWidth="1.6" />
       <circle cx="25" cy="25" r="15" fill="none" stroke={color} strokeWidth=".8" />
-      <text x="25" y="28.5" textAnchor="middle" fontSize="10" fontWeight="700" letterSpacing="1" fill={color} style={{ fontFamily: 'system-ui, sans-serif' }}>PARIS</text>
+      <text x="25" y="28.5" textAnchor="middle" fontSize="10" fontWeight="700" letterSpacing="1" fill={color} style={{ fontFamily: 'system-ui, sans-serif' }}>{label}</text>
       {[16, 22, 28, 34].map((y) => <path key={y} d={`M48 ${y} q5 -3 10 0 t10 0 t10 0`} fill="none" stroke={color} strokeWidth="1.4" />)}
     </svg>
   )

@@ -217,6 +217,7 @@ export function StoryBlock({ inv, templateId, weddingData, lang, style = {}, bef
           story={weddingData.loveStory} templateId={templateId} lang={lang}
           kicker={inv.L('lovestory', 'kicker', null)} title={inv.L('lovestory', 'title', null)}
           adminTheme={inv.storyAdminTheme} copyOverrides={inv.storyCopy}
+          eventType={weddingData.eventType}
         />
       </Reveal>
     </section>

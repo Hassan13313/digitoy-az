@@ -79,3 +79,8 @@ RedirectMatch 404 ^/api/migrations/
 <Files "phone_lib.php">
     Require all denied
 </Files>
+
+# 2026-11 — sablon seviyyeli mezmunun komekcileri (yalniz include)
+<Files "template_content_lib.php">
+    Require all denied
+</Files>

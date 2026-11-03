@@ -1,6 +1,8 @@
 import { resolveDressCode, resolveDressGenders } from '../../data/dressCode'
 import { alpha, readableOn } from './geo'
 import t from '../../data/translations'
+import { useTemplate } from '../TemplateProvider'
+import { withStringOverrides } from '../../data/adminOverrides'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    DRESS CODE — 9 şablonun YEGANƏ geyim tərzi bölməsi.
@@ -114,9 +116,14 @@ export default function DressCodeSection({
   theme, paletteId, customLabels, customGenders, note, title, kicker, lang = 'az',
   serif, align = 'left', onDark = false, italic = false,
 }) {
-  const tr = t[lang] || t.az
-  const dc = resolveDressCode(paletteId, lang, customLabels)
-  const genders = resolveDressGenders(paletteId, lang, customGenders)
+  /* Admin «Mətnlər › Geyim kodu»: başlıqlar və müştərinin seçdiyi tərzin adları */
+  const { strings } = useTemplate()
+  const tr = withStringOverrides(t[lang] || t.az, strings, lang)
+  const own = withStringOverrides({}, strings, lang, 'dress.')
+  const dcBase = resolveDressCode(paletteId, lang, customLabels)
+  const dc = own.style ? { ...dcBase, label: own.style } : dcBase
+  const gendersBase = resolveDressGenders(paletteId, lang, customGenders)
+  const genders = { ...gendersBase, male: own.men || gendersBase.male, female: own.women || gendersBase.female }
   const labels = { male: tr.dresscode_male_label, female: tr.dresscode_female_label }
   /* Qeyd = YALNIZ müştərinin builder-də yazdığı mətn. Palitranın öz izahı
      burada göstərilmir, çünki ikonların altındakı kişi/qadın yazıları onsuz da

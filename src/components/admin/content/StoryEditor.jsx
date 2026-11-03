@@ -151,7 +151,7 @@ function smallBtn(narrow) {
 
 export default function StoryEditor({
   templateId, wedding, lang, story, setStory, slug, narrow,
-  sectionOn, onEnableSection, onFocusPreview,
+  sectionOn, onEnableSection, onFocusPreview, textOnly = false,
 }) {
   const [open, setOpen] = useState(() => new Set())
 
@@ -161,7 +161,7 @@ export default function StoryEditor({
     return Array.isArray(wd.loveStory) ? wd.loveStory : base
   }, [wedding, lang, base])
 
-  const copy = getStoryCopy(templateId, lang)
+  const copy = getStoryCopy(templateId, lang, wedding?.eventType)
   const theme = getStoryTheme(templateId)
   const textKeys = STORY_TEXT_KEYS.filter((k) => (k === 'kpre' ? theme.kpre : k === 'photo' ? theme.frame === 'clipping' : true))
 
@@ -232,8 +232,9 @@ export default function StoryEditor({
   return (
     <div style={{ display: 'grid', gap: 12 }}>
       <p style={{ fontSize: narrow ? 13 : 11.5, color: C.sub, lineHeight: 1.6, margin: 0 }}>
-        Hekayənin bütün yazılarını, tarixləri, stikerləri və şəkilləri dəyişə, fəsil gizlədə
-        və ya yeni fəsil əlavə edə bilərsiniz. Boş sahə müştərinin öz mətnini saxlayır.
+        {textOnly
+          ? 'Hekayə bölməsinin yazıları. Fəsillər (mətn, tarix, şəkil) müştərinin özününkü olduğu üçün dəvətnamənin «Məzmun» pəncərəsindən dəyişilir.'
+          : 'Hekayənin bütün yazılarını, tarixləri, stikerləri və şəkilləri dəyişə, fəsil gizlədə və ya yeni fəsil əlavə edə bilərsiniz. Boş sahə müştərinin öz mətnini saxlayır.'}
       </p>
 
       {!sectionOn && (
@@ -267,7 +268,7 @@ export default function StoryEditor({
         </div>
       </Card>
 
-      <Card
+      {!textOnly && <Card
         title={`Fəsillər (${visibleBase + add.length})`}
         hint={base.length ? 'Müştərinin yazdığı fəsillər. Açmaq üçün toxunun.' : 'Müştəri hekayə yazmayıb — aşağıdan fəsil əlavə edə bilərsiniz.'}
       >
@@ -399,7 +400,7 @@ export default function StoryEditor({
         <div style={{ fontSize: 11, color: C.faint, marginTop: 8, lineHeight: 1.55 }}>
           Yeni fəsil yalnız başlıq, mətn və ya şəkil olduqda görünür. Tarixi «2019-06» yazsanız ay adı dilə görə göstərilir.
         </div>
-      </Card>
+      </Card>}
     </div>
   )
 }

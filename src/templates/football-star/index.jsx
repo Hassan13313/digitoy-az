@@ -191,7 +191,7 @@ export default function FootballStarTemplate(props) {
                 {!age && <div style={{ marginTop: 10 }}><svg aria-hidden="true" viewBox="0 0 24 24" width="72" height="72"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7.1L12 17.3 5.7 21l1.7-7.1L2 9.2l7.1-.6z" fill={C.GOLD} /></svg></div>}
               </Jersey>
             </div>
-            {age && <div style={{ marginTop: 10, fontFamily: head, fontWeight: 500, fontSize: 17, letterSpacing: '.12em', textTransform: 'uppercase', color: C.GOLD }}>{age} {ageWord(age, lang)}</div>}
+            {age && <div style={{ marginTop: 10, fontFamily: head, fontWeight: 500, fontSize: 17, letterSpacing: '.12em', textTransform: 'uppercase', color: C.GOLD }}>{age} {ageWord(age, lang, inv.strings)}</div>}
             <div style={{ display: 'inline-block', marginTop: 20, padding: '12px 22px', borderRadius: 12, background: alpha(C.NAVY_D, 0.65), border: `1px solid ${alpha(C.WHITE, 0.2)}` }}>
               <div style={{ fontFamily: head, fontWeight: 500, fontSize: 'clamp(19px, 5.4vw, 23px)', letterSpacing: '.04em', color: C.WHITE }}>{inv.fullDate}</div>
               <div style={{ marginTop: 4, fontSize: 15, color: alpha(C.WHITE, 0.78) }}>{[inv.time, weddingData.venueName].filter(Boolean).join(' · ')}</div>

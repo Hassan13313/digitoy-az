@@ -42,7 +42,7 @@ export function countdownTitle(tr, eventType, eventName) {
  * @returns {{ days, hours, minutes, seconds, past, title, labels }}
  *   labels — { days, hours, minutes, seconds } dilə uyğun etiketlər
  */
-export function useCountdown({ date, time, lang = 'az', eventType = 'toy', eventName = '' }) {
+export function useCountdown({ date, time, lang = 'az', eventType = 'toy', eventName = '', adminStrings = null }) {
   const tr = t[lang] || t.az
   const [timeLeft, setTimeLeft] = useState(() => getTimeLeft(date, time))
 
@@ -55,7 +55,7 @@ export function useCountdown({ date, time, lang = 'az', eventType = 'toy', event
     ...timeLeft,
     title: countdownTitle(tr, eventType, eventName),
     /* Phase 45.2 — RU/EN etiketi saya görə («72 ДНЯ», «1 DAY») */
-    labels: countdownLabels(lang, timeLeft),
+    labels: countdownLabels(lang, timeLeft, adminStrings),
   }
 }
 

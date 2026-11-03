@@ -8,13 +8,6 @@ export const C = {
 /* Yarı çəhrayı, yarı mavi */
 export const SPLIT = (C) => ((a = C.BLUE_L, b = C.PINK_L, deg = 115) => `linear-gradient(${deg}deg, ${a} 0 50%, ${b} 50% 100%)`)
 
-/* Sual — dil üzrə */
-export const QUESTION = { az: 'Oğlan, yoxsa qız?', en: 'Boy or girl?', ru: 'Мальчик или девочка?' }
-export const SIDES = {
-  az: ['Oğlan', 'Qız'],
-  en: ['Boy', 'Girl'],
-  ru: ['Мальчик', 'Девочка'],
-}
 
 /* Qutudan uçan şarlar: x (px, mərkəzə görə), rəng, gecikmə, ölçü */
 export const RELEASE = [

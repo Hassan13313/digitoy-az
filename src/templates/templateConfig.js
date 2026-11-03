@@ -79,21 +79,33 @@ export const CATEGORY_META = {
    `eventType` — builder-də bu konseptin şablonu seçiləndə formanın ilkin
    tədbir növü (müştəri 1-ci addımda yenə dəyişə bilər). */
 export const CONCEPT_META = {
-  toy:          { az: 'Toy',            en: 'Wedding',           ru: 'Свадьба',            eventType: 'toy' },
-  nishan:       { az: 'Nişan',          en: 'Engagement',        ru: 'Помолвка',           eventType: 'nishan' },
-  birthday:     { az: 'Ad günü',        en: 'Birthday',          ru: 'День рождения',      eventType: 'birthday' },
-  kids:         { az: 'Uşaq ad günü',   en: 'Kids’ birthday',    ru: 'Детский праздник',   eventType: 'birthday' },
-  xina:         { az: 'Xına gecəsi',    en: 'Henna night',       ru: 'Вечер хны',          eventType: 'xina' },
-  sunnet:       { az: 'Sünnət toyu',    en: 'Sunnat celebration', ru: 'Сюннет-той',        eventType: 'sunnet' },
-  baby:         { az: 'Baby shower',    en: 'Baby shower',       ru: 'Бэби шауэр',         eventType: 'baby' },
-  corporate:    { az: 'Korporativ',     en: 'Corporate',         ru: 'Корпоратив',         eventType: 'corporate' },
-  anniversary:  { az: 'İldönümü',       en: 'Anniversary',       ru: 'Годовщина',          eventType: 'anniversary' },
-  graduation:   { az: 'Məzuniyyət',     en: 'Graduation',        ru: 'Выпускной',          eventType: 'graduation' },
-  opening:      { az: 'Açılış',         en: 'Grand opening',     ru: 'Открытие',           eventType: 'corporate' },
-  holiday:      { az: 'Bayram gecəsi',  en: 'Holiday party',     ru: 'Праздничный вечер',  eventType: 'other' },
-  bachelorette: { az: 'Qız gecəsi',     en: 'Bachelorette',      ru: 'Девичник',           eventType: 'bachelorette' },
+  /* ⚠ 2026-11 (Həsənin qərarı): Toy və Nişan BİR bölmədir, köhnə 16 şablonun
+     hamısı buradadır. `eventTypes` — bu bölmənin şablonu ilə uyğun tədbir
+     növləri: müştəri «Nişan» seçibsə, «Toy / Nişan» şablonuna keçəndə seçimi
+     «Toy»a dəyişmir. */
+  toy:          { az: 'Toy / Nişan',    en: 'Wedding / Engagement', ru: 'Свадьба / Помолвка', eventType: 'toy', eventTypes: ['toy', 'nishan'], slug: 'toy-nisan' },
+  xina:         { az: 'Xına gecəsi',    en: 'Henna night',       ru: 'Вечер хны',          eventType: 'xina', slug: 'xina-gecesi' },
+  birthday:     { az: 'Ad günü',        en: 'Birthday',          ru: 'День рождения',      eventType: 'birthday', slug: 'ad-gunu' },
+  anniversary:  { az: 'İldönümü',       en: 'Anniversary',       ru: 'Годовщина',          eventType: 'anniversary', slug: 'ildonumu' },
+  /* Uşaqlara aid olanlar */
+  kids:         { az: 'Uşaq ad günü',   en: 'Kids’ birthday',    ru: 'Детский праздник',   eventType: 'birthday', slug: 'usaq-ad-gunu' },
+  sunnet:       { az: 'Sünnət toyu',    en: 'Sunnat celebration', ru: 'Сюннет-той',        eventType: 'sunnet', slug: 'sunnet-toyu' },
+  baby:         { az: 'Baby shower',    en: 'Baby shower',       ru: 'Бэби шауэр',         eventType: 'baby', slug: 'baby-shower' },
+  /* Digərləri */
+  corporate:    { az: 'Korporativ',     en: 'Corporate',         ru: 'Корпоратив',         eventType: 'corporate', slug: 'korporativ' },
+  graduation:   { az: 'Məzuniyyət',     en: 'Graduation',        ru: 'Выпускной',          eventType: 'graduation', slug: 'mezuniyyet' },
+  opening:      { az: 'Açılış',         en: 'Grand opening',     ru: 'Открытие',           eventType: 'corporate', slug: 'acilis' },
+  holiday:      { az: 'Bayram gecəsi',  en: 'Holiday party',     ru: 'Праздничный вечер',  eventType: 'other', slug: 'bayram-gecesi' },
+  bachelorette: { az: 'Qız gecəsi',     en: 'Bachelorette',      ru: 'Девичник',           eventType: 'bachelorette', slug: 'qiz-gecesi' },
 }
 const CONCEPT_ORDER = Object.keys(CONCEPT_META)
+
+/** Şablonun göründüyü bölmələr. Bir dizayn bir neçə bölmədə ola bilər
+    (`concepts`): Boarding Pass həm «Toy / Nişan», həm «Ad günü»-ndədir. */
+export function templateConcepts(tpl) {
+  if (!tpl) return []
+  return tpl.concepts || (tpl.concept ? [tpl.concept] : [])
+}
 
 /** Konsept id → görünən ad (naməlum id-də id-nin özü) */
 export function getConceptLabel(concept, lang = 'az') {
@@ -107,20 +119,67 @@ const OTHER_CONCEPT = { az: 'Digər', en: 'Other', ru: 'Другое' }
  * Şablonları tədbir bölmələrinə ayırır — vitrin və builder «Hamısı» seçiləndə
  * hər tədbiri ayrıca başlıqla göstərir. Sıra CONCEPT_META-dakı kimidir, boş
  * bölmə qayıtmır; konsepti olmayan şablon (gələcəkdə) sonda «Digər»-dədir.
+ * Bir neçə bölməli şablon hər bölməsində ayrıca görünür.
  * @param {Array<{concept?: string}>} list  artıq süzülmüş şablonlar (sıra saxlanılır)
  * @returns {Array<{ id: string, label: string, items: Array }>}
  */
 export function groupTemplatesByConcept(list, lang = 'az') {
-  const groups = CONCEPT_ORDER.map((id) => ({ id, label: getConceptLabel(id, lang), items: list.filter((tpl) => tpl.concept === id) }))
-  const rest = list.filter((tpl) => !CONCEPT_META[tpl.concept])
+  const groups = CONCEPT_ORDER.map((id) => ({ id, label: getConceptLabel(id, lang), items: list.filter((tpl) => templateConcepts(tpl).includes(id)) }))
+  const rest = list.filter((tpl) => !templateConcepts(tpl).some((c) => CONCEPT_META[c]))
   if (rest.length) groups.push({ id: 'other', label: OTHER_CONCEPT[lang] || OTHER_CONCEPT.az, items: rest })
   return groups.filter((g) => g.items.length > 0)
 }
 
-/** Şablonun konseptinə uyğun ilkin tədbir növü (yoxdursa null) */
-export function conceptEventType(templateId) {
-  const c = BY_ID[templateId]?.concept
+/**
+ * Şablonun konseptinə uyğun ilkin tədbir növü (yoxdursa null).
+ * `concept` — müştərinin şablonu HANSI bölmədən seçdiyi (bir neçə bölməli
+ * şablonda məzmun buna görə dəyişir); verilməyibsə şablonun əsas konsepti.
+ */
+export function conceptEventType(templateId, concept = null) {
+  const tpl = BY_ID[templateId]
+  const c = concept && templateConcepts(tpl).includes(concept) ? concept : tpl?.concept
   return (c && CONCEPT_META[c]?.eventType) || null
+}
+
+/** Bu tədbir növü konseptə uyğundur? («Toy / Nişan» → toy və nishan) */
+export function conceptAcceptsEvent(concept, eventType) {
+  const m = CONCEPT_META[concept]
+  return !!m && (m.eventTypes || [m.eventType]).includes(eventType)
+}
+
+/** Dizaynın bir neçə bölməsi var? (məzmunu tədbirə görə dəyişən şablon) */
+export function isMultiConcept(templateId) {
+  return templateConcepts(BY_ID[templateId]).length > 1
+}
+
+/**
+ * Şablon səviyyəli məzmunun açarı (admin «Şablonlar», api/template_content_lib.php › tcKey).
+ * Ad günü versiyasının məzmunu ayrıdır: `boarding-pass@birthday`.
+ */
+export function templateContentKey(templateId, eventType = null) {
+  return eventType === 'birthday' && isMultiConcept(templateId) ? `${templateId}@birthday` : templateId
+}
+
+/** Bölmənin öz versiyası varsa onun id-si, əsas versiyadırsa null */
+export function previewConceptOf(templateId, concept = null) {
+  const tpl = BY_ID[templateId]
+  return concept && concept !== tpl?.concept && templateConcepts(tpl).includes(concept) ? concept : null
+}
+
+/** Önbaxış URL-i: bir neçə bölməli şablonda seçilən bölmənin versiyası */
+export function templatePreviewPath(templateId, concept = null) {
+  const c = previewConceptOf(templateId, concept)
+  return `/demo/template/${templateId}${c ? `?tedbir=${c}` : ''}`
+}
+
+/** /sablonlar/<slug> → konsept id (naməlum slug-da null) */
+export function conceptBySlug(slug) {
+  return CONCEPT_ORDER.find((id) => CONCEPT_META[id].slug === slug) || null
+}
+
+/** Vitrindəki kartların sayı: bir dizayn iki bölmədədirsə iki kart */
+export function countTemplateCards(list) {
+  return list.reduce((n, tpl) => n + Math.max(1, templateConcepts(tpl).length), 0)
 }
 
 /** Kateqoriya id → görünən ad (naməlum id-də id-nin özü) */
@@ -162,7 +221,8 @@ export function listTemplateFacets(lang = 'az') {
 
   /* Konseptlər CONCEPT_META sırası ilə (sayına görə yox) — müştəri tədbirini
      həmişə eyni yerdə tapsın */
-  const kMap = tally('concept')
+  const kMap = new Map()
+  list.forEach((tpl) => templateConcepts(tpl).forEach((c) => kMap.set(c, (kMap.get(c) || 0) + 1)))
   const concepts = CONCEPT_ORDER
     .filter((k) => kMap.has(k))
     .map((k) => ({ id: k, label: getConceptLabel(k, lang), count: kMap.get(k) }))
@@ -382,7 +442,7 @@ export const TEMPLATES = [
     shortDescription: { az: 'Botanik bağ mərasimi üslubu', en: 'Botanical garden ceremony style' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'classic',
-    concept: 'nishan',
+    concept: 'toy',
     version: 1,
     previewRoute: '/demo/template/floral-garden',
     theme: {
@@ -413,7 +473,8 @@ export const TEMPLATES = [
     shortDescription: { az: 'Minimalist tipoqrafik dizayn', en: 'Minimalist typographic design' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'minimal',
-    concept: 'birthday',
+    concept: 'toy',
+    concepts: ['toy', 'birthday'],
     version: 0,
     previewRoute: '/demo/template/modern-black',
     theme: {
@@ -474,7 +535,7 @@ export const TEMPLATES = [
     shortDescription: { az: 'Gecə səması və ulduz xəritəsi', en: 'Night sky and star map' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'celestial',
-    concept: 'nishan',
+    concept: 'toy',
     version: 0,
     previewRoute: '/demo/template/night-sky',
     theme: {
@@ -536,7 +597,7 @@ export const TEMPLATES = [
     shortDescription: { az: 'Kətan və meşə yaşılı təbiət üslubu', en: 'Linen and forest green nature style' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'nature',
-    concept: 'nishan',
+    concept: 'toy',
     version: 0,
     previewRoute: '/demo/template/nature-touch',
     theme: {
@@ -606,7 +667,8 @@ export const TEMPLATES = [
     shortDescription: { az: 'Uçuş bileti üslubunda mono dizayn', en: 'Boarding-pass styled mono design' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'editorial',
-    concept: 'birthday',
+    concept: 'toy',
+    concepts: ['toy', 'birthday'],
     version: 1,
     previewRoute: '/demo/template/boarding-pass',
     theme: {
@@ -637,7 +699,8 @@ export const TEMPLATES = [
     shortDescription: { az: 'Film premyerası üslubu', en: 'Film premiere styling' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'vintage',
-    concept: 'birthday',
+    concept: 'toy',
+    concepts: ['toy', 'birthday'],
     version: 1,
     previewRoute: '/demo/template/cinema-premiere',
     theme: {
@@ -668,7 +731,8 @@ export const TEMPLATES = [
     shortDescription: { az: 'Vinil plyonka üslubu', en: 'Vinyl record styling' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'vintage',
-    concept: 'birthday',
+    concept: 'toy',
+    concepts: ['toy', 'birthday'],
     version: 1,
     previewRoute: '/demo/template/vinyl-record',
     theme: {
@@ -730,7 +794,7 @@ export const TEMPLATES = [
     shortDescription: { az: 'Aralıq dənizi sahil üslubu', en: 'Mediterranean coastal style' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'nature',
-    concept: 'nishan',
+    concept: 'toy',
     version: 1,
     previewRoute: '/demo/template/mediterranean',
     theme: {
@@ -761,7 +825,8 @@ export const TEMPLATES = [
     shortDescription: { az: 'Qəzet xüsusi buraxılışı', en: 'Newspaper special edition' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'editorial',
-    concept: 'birthday',
+    concept: 'toy',
+    concepts: ['toy', 'birthday'],
     version: 1,
     previewRoute: '/demo/template/gazette',
     theme: {
@@ -792,7 +857,7 @@ export const TEMPLATES = [
     shortDescription: { az: 'Zümrüd zərgərlik vitrini', en: 'Emerald jewelry showcase' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'luxury',
-    concept: 'nishan',
+    concept: 'toy',
     version: 1,
     previewRoute: '/demo/template/luxury-jewelry',
     theme: {
@@ -2454,7 +2519,7 @@ export function listTemplates({ onlySelectable = false, category = null, concept
   let list = TEMPLATES.filter((tpl) => tpl.status !== TEMPLATE_STATUS.DISABLED)
   if (onlySelectable) list = list.filter((tpl) => SELECTABLE_STATUSES.includes(tpl.status))
   if (category) list = list.filter((tpl) => tpl.category === category)
-  if (concept) list = list.filter((tpl) => tpl.concept === concept)
+  if (concept) list = list.filter((tpl) => templateConcepts(tpl).includes(concept))
   return list
 }
 

@@ -243,6 +243,45 @@ export async function saveInvitationContent(slug, admin, sections = null) {
   return res.json() /* { ok, admin, sections } */
 }
 
+/* ── 2026-11: şablon səviyyəli məzmun (admin «Şablonlar») ── */
+export async function listTemplateContent() {
+  const res = await fetch(`${BASE}/admin_template_content.php`, { headers: adminHeaders() })
+  if (!res.ok) throw await toApiError(res, 'Siyahı yüklənmədi')
+  return res.json() /* { items: [{ key, updated_at }] } */
+}
+
+export async function getTemplateContent(key) {
+  const res = await fetch(`${BASE}/admin_template_content.php?key=${encodeURIComponent(key)}`, { headers: adminHeaders() })
+  if (!res.ok) throw await toApiError(res, 'Məzmun yüklənmədi')
+  return res.json() /* { key, admin, sections } */
+}
+
+export async function saveTemplateContent(key, admin, sections = null) {
+  const res = await fetch(`${BASE}/admin_template_content.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminHeaders() },
+    body: JSON.stringify({ key, admin, sections }),
+  })
+  if (!res.ok) throw await toApiError(res, 'Məzmun saxlanılmadı')
+  templateDefaultsCache.delete(key)
+  return res.json() /* { ok, admin, sections } */
+}
+
+/* Şablon önbaxışı/builder üçün ictimai oxuma. Səhv və ya gecikmə önbaxışı dayandırmır:
+   1.2 saniyəyə cavab yoxdursa şablon öz mətni ilə açılır. */
+const templateDefaultsCache = new Map()
+export function fetchTemplateDefaults(key) {
+  if (!templateDefaultsCache.has(key)) {
+    const ctl = new AbortController()
+    const timer = setTimeout(() => ctl.abort(), 1200)
+    templateDefaultsCache.set(key, fetch(`${BASE}/template_content.php?key=${encodeURIComponent(key)}`, { signal: ctl.signal })
+      .then((r) => (r.ok ? r.json() : {}))
+      .catch(() => ({}))
+      .finally(() => clearTimeout(timer)))
+  }
+  return templateDefaultsCache.get(key)
+}
+
 /* ── 2026-10-28: şablon versiyası (1 = redizayndan əvvəlki görünüş, 2 = yeni) ──
    YALNIZ `form_data.templateVersion` dəyişir (bax api/admin_template_version.php). */
 export async function setInvitationTemplateVersion(slug, version) {

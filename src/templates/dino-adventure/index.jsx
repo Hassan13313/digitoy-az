@@ -215,14 +215,14 @@ export default function DinoAdventureTemplate(props) {
               <h1 style={{ margin: '6px 0 0', fontFamily: disp, fontWeight: 800, fontSize: 'clamp(42px, 13vw, 64px)', lineHeight: 1.02, color: '#4E463A', textShadow: '0 1px 0 rgba(255,255,255,.55), 0 -1px 0 rgba(0,0,0,.25)', textWrap: 'balance', overflowWrap: 'anywhere' }}>
                 {inv.heroTitle ? inv.heroTitle : inv.isCouple ? <>{inv.groom} {inv.and} {inv.bride}</> : inv.single}
               </h1>
-              {age && <div style={{ marginTop: 6, fontFamily: disp, fontWeight: 600, fontSize: 17, color: C.JUNGLE }}>{ageSentence(age, lang)}</div>}
+              {age && <div style={{ marginTop: 6, fontFamily: disp, fontWeight: 600, fontSize: 17, color: C.JUNGLE }}>{ageSentence(age, lang, inv.strings)}</div>}
               <Bone width={56} style={{ position: 'absolute', left: 14, bottom: 10, transform: 'rotate(-18deg)', opacity: 0.9 }} />
               {/* yaş — nəhəng iz (lövhənin küncündə möhür kimi) */}
               <Footprint size={88} color={C.LAVA} style={{ position: 'absolute', right: -8, top: -58, transform: 'rotate(14deg)', filter: 'drop-shadow(0 6px 8px rgba(0,0,0,.2))', animation: 'da-pop .8s cubic-bezier(.2,.9,.3,1.3) .3s both' }}>
                 {age ? (
                   <>
                     <span style={{ fontFamily: disp, fontWeight: 800, fontSize: age > 9 ? 26 : 32, lineHeight: 0.9, color: '#FFFFFF', transform: 'rotate(-14deg)' }}>{age}</span>
-                    <span style={{ fontFamily: disp, fontWeight: 700, fontSize: 11, color: '#FFFFFF', transform: 'rotate(-14deg)' }}>{ageWord(age, lang)}</span>
+                    <span style={{ fontFamily: disp, fontWeight: 700, fontSize: 11, color: '#FFFFFF', transform: 'rotate(-14deg)' }}>{ageWord(age, lang, inv.strings)}</span>
                   </>
                 ) : null}
               </Footprint>
@@ -279,9 +279,9 @@ export default function DinoAdventureTemplate(props) {
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontSize: 15.5, color: C.MUTED }}>{weddingData.venueNote}</div>}
               <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
                 {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(true)}>{tr.inv_directions_btn}</a>}
-                {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(!inv.dirUrl)}>Maps</a>}
-                {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>Waze</a>}
-                {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>Apple</a>}
+                {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(!inv.dirUrl)}>{tr.inv_btn_maps}</a>}
+                {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>{tr.inv_btn_waze}</a>}
+                {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>{tr.inv_btn_apple}</a>}
               </div>
             </Camp>
           )}

@@ -261,7 +261,7 @@ export default function FairyTaleTemplate(props) {
               <h1 style={{ ...foilText(C), margin: '10px 0 0', fontFamily: serif, fontWeight: 600, fontSize: 'clamp(48px, 15vw, 74px)', lineHeight: 1, textWrap: 'balance', overflowWrap: 'anywhere', filter: 'drop-shadow(0 3px 10px rgba(20,24,60,.45))', animation: 'ft-shine 7s linear infinite, ft-rise 1s ease-out .35s both' }}>
                 {inv.heroTitle ? inv.heroTitle : inv.isCouple ? <>{inv.groom} {inv.and} {inv.bride}</> : inv.single}
               </h1>
-              {age && <div style={{ marginTop: 10, fontStyle: 'italic', fontSize: 18, color: C.CREAM, animation: 'ft-rise .9s ease-out .5s both' }}>{ageSentence(age, lang)}</div>}
+              {age && <div style={{ marginTop: 10, fontStyle: 'italic', fontSize: 18, color: C.CREAM, animation: 'ft-rise .9s ease-out .5s both' }}>{ageSentence(age, lang, inv.strings)}</div>}
             </div>
 
             <div style={{ position: 'relative', height: 'min(84vw, 380px)', marginTop: 8 }}>
@@ -279,7 +279,7 @@ export default function FairyTaleTemplate(props) {
                 {age ? (
                   <>
                     <span style={{ fontFamily: serif, fontWeight: 700, fontSize: age > 9 ? 34 : 40, lineHeight: 0.9, color: C.NIGHT }}>{age}</span>
-                    <span style={{ fontSize: 12, letterSpacing: '.06em', color: C.NIGHT, marginTop: 2 }}>{ageWord(age, lang)}</span>
+                    <span style={{ fontSize: 12, letterSpacing: '.06em', color: C.NIGHT, marginTop: 2 }}>{ageWord(age, lang, inv.strings)}</span>
                   </>
                 ) : <Crown size={40} color={C.NIGHT} />}
               </AgeSeal>
@@ -350,9 +350,9 @@ export default function FairyTaleTemplate(props) {
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontSize: 15.5, color: C.MUTED }}>{weddingData.venueNote}</div>}
               <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
                 {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(true)}>{tr.inv_directions_btn}</a>}
-                {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(!inv.dirUrl)}>Maps</a>}
-                {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>Waze</a>}
-                {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>Apple</a>}
+                {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(!inv.dirUrl)}>{tr.inv_btn_maps}</a>}
+                {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>{tr.inv_btn_waze}</a>}
+                {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>{tr.inv_btn_apple}</a>}
               </div>
             </Page>
           )}

@@ -10,7 +10,7 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C as PAL, MARKERS, PAGE_BG, BLUE_BG, SIGNS, varsity, nameSize } from './palette'
+import { C as PAL, MARKERS, PAGE_BG, BLUE_BG, varsity, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { fill } from '../_shared/copyText'
 import { Doodle, Patch, Signature } from './art'
@@ -81,7 +81,7 @@ function PhotoSlot({ name, head, size = 'min(46vw, 190px)', patch, year }) {
 }
 
 /* ═══ 01 — AÇILIŞ: imzalar peyda olur ═══ */
-function YearbookOpening({ inv, theme, lang, year, sign }) {
+function YearbookOpening({ inv, theme, year, sign }) {
   const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
@@ -90,7 +90,7 @@ function YearbookOpening({ inv, theme, lang, year, sign }) {
   const go = gate.opening
   const head = theme.fonts.heading
   const T = inv.copy(TXT)
-  const signs = SIGNS[lang] || SIGNS.az
+  const signs = [T.sign1, T.sign2, T.sign3, T.sign4]
   return (
     <motion.div {...gate.gateProps} data-yb
       animate={go ? { opacity: 0 } : {}}
@@ -182,7 +182,7 @@ export default function YearbookTemplate(props) {
   const T = inv.copy(TXT)
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const year = inv.dp?.year || ''
-  const signs = SIGNS[lang] || SIGNS.az
+  const signs = [T.sign1, T.sign2, T.sign3, T.sign4]
 
   return (
     <PaletteContext.Provider value={C}><div data-yb lang={lang} data-enter={enterDirection(ID)} style={{
@@ -190,7 +190,7 @@ export default function YearbookTemplate(props) {
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.YELLOW, 0.45),
     }}>
       <style>{KEYFRAMES(C)}</style>
-      {!inv.opened && <YearbookOpening inv={inv} theme={theme} lang={lang} year={year} sign={sign} />}
+      {!inv.opened && <YearbookOpening inv={inv} theme={theme} year={year} sign={sign} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.YELLOW, boxShadow: `0 4px 0 ${C.BLUE_D}, 0 10px 20px rgba(15,37,102,.3)` }}>
         {({ playing }) => <EqBars playing={playing} color={C.BLUE_DD} idle={alpha(C.BLUE_DD, 0.4)} />}

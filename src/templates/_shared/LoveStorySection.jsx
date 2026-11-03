@@ -54,7 +54,7 @@ function Framed({ t, rot, ratio, src, alt, caption, tapeStyle, wrapStyle, record
 }
 
 export default function LoveStorySection({
-  story, templateId = 'simple-luxury', lang = 'az',
+  story, templateId = 'simple-luxury', lang = 'az', eventType = null,
   kicker: kickerOverride = null, title: titleOverride = null, adminTheme = null,
   /* Phase 45 — admin panelindən bölmənin öz mətnləri (`admin.story.text`).
      Şablonun `sectionLabels`-indən (kicker/title propları) ÜSTÜNDÜR. */
@@ -67,7 +67,7 @@ export default function LoveStorySection({
   ), [story])
 
   const t = useMemo(() => getStoryTheme(templateId, adminTheme), [templateId, adminTheme])
-  const baseCopy = getStoryCopy(templateId, lang)
+  const baseCopy = getStoryCopy(templateId, lang, eventType)
   const copy = storyCopyWithOverrides(baseCopy, copyOverrides, lang)
   /* Başlıq: admin yazıbsa o → şablonun öz adı (sectionLabels) → defolt */
   const adminHead = (key) => {

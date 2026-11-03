@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Check, Lock } from 'lucide-react'
-import { listTemplates, listTemplateFacets, isTemplateSelectable, getTemplateTheme, groupTemplatesByConcept } from '../../templates/templateConfig'
+import { listTemplates, listTemplateFacets, isTemplateSelectable, getTemplateTheme, groupTemplatesByConcept, templateConcepts, isMultiConcept, conceptAcceptsEvent, countTemplateCards } from '../../templates/templateConfig'
 import { ChipRow } from '../public/templates'
 import { DEMO_DATE } from '../../data/demoInvitation'
 import { trackTemplateSelected, trackTemplatePreviewed } from '../../templates/templateAnalytics'
@@ -219,14 +219,14 @@ function TemplateThumbnail({ tpl, selected, locked }) {
 /* `hideHeading` — Phase 35: şablon seçimi builderin ayrıca 0-cı addımıdır və
    addımın öz başlığı/təsviri var; blokun daxili başlığı təkrar olmasın deyə
    söndürülür. Digər istifadə yerlərində (varsa) davranış dəyişmir. */
-export default function TemplateSelect({ value, onChange, lang = 'az', hideHeading = false }) {
+export default function TemplateSelect({ value, onChange, lang = 'az', hideHeading = false, eventType = null }) {
   const ui = UI[lang] || UI.az
   const all = listTemplates()
   /* 2026-10 — tədbir (konsept) çipləri: müştəri əvvəlcə tədbirini seçir.
      Seçim yalnız bu blokun lokal vəziyyətidir, `data`-ya yazılmır. */
   const concepts = useMemo(() => listTemplateFacets(lang).concepts, [lang])
   const [concept, setConcept] = useState('all')
-  const templates = concept === 'all' ? all : all.filter((tpl) => tpl.concept === concept)
+  const templates = concept === 'all' ? all : all.filter((tpl) => templateConcepts(tpl).includes(concept))
   /* «Hamısı»: hər tədbir öz başlıqlı bölməsində; tədbir seçiləndə tək şəbəkə */
   const groups = concept === 'all' ? groupTemplatesByConcept(all, lang) : [{ id: concept, label: null, items: templates }]
 
@@ -252,7 +252,7 @@ export default function TemplateSelect({ value, onChange, lang = 'az', hideHeadi
         <div className="mb-5">
           <ChipRow
             legend={ui.event}
-            options={[{ id: 'all', label: ui.all, count: all.length }, ...concepts]}
+            options={[{ id: 'all', label: ui.all, count: countTemplateCards(all) }, ...concepts]}
             value={concept}
             onChange={setConcept}
             bleedClassName="-mx-4 px-4 sm:mx-0 sm:px-0"
@@ -273,13 +273,15 @@ export default function TemplateSelect({ value, onChange, lang = 'az', hideHeadi
             )}
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
               {g.items.map((tpl) => {
+                /* Bir neçə bölməli dizayn: seçilmiş kart tədbir növünə uyğun bölmədədir */
                 const selected  = value === tpl.id
+                  && (!isMultiConcept(tpl.id) || conceptAcceptsEvent(g.id, eventType) || (!templateConcepts(tpl).some((c) => conceptAcceptsEvent(c, eventType)) && g.id === tpl.concept))
                 /* Seçilə bilmə YALNIZ statusdan gəlir — hardcode yoxdur */
                 const available = isTemplateSelectable(tpl.id)
 
                 const handleSelect = () => {
                   if (!available) return
-                  onChange?.(tpl.id)
+                  onChange?.(tpl.id, g.id)
                   trackTemplateSelected(tpl.id, { source: 'builder' })
                 }
 
@@ -295,22 +297,23 @@ export default function TemplateSelect({ value, onChange, lang = 'az', hideHeadi
                       origin: 'builder',
                       pkg: localStorage.getItem('selected_package') || null,
                       templateId: tpl.id,
+                      concept: g.id,
                       scrollY: Math.round(window.scrollY),
                     }))
                   } catch { /* private mode — sadəcə paket bərpası olmayacaq */ }
-                  window.dispatchEvent(new CustomEvent('digitoy:preview', { detail: { id: tpl.id } }))
+                  window.dispatchEvent(new CustomEvent('digitoy:preview', { detail: { id: tpl.id, concept: g.id } }))
                 }
 
                 return (
                   <TemplateCard
                     key={tpl.id}
-                    name="template"
+                    name={`template-${g.id}`}
                     value={tpl.id}
                     title={tpl.name}
                     description={tpl.shortDescription?.[lang] || tpl.shortDescription?.az || tpl.tagline}
                     selected={selected}
                     onSelect={handleSelect}
-                    imageSrc={templateImage(tpl.id) || undefined}
+                    imageSrc={templateImage(tpl.id, g.id) || undefined}
                     preview={<TemplateThumbnail tpl={tpl} selected={false} locked={false} />}
                     live={tpl.status === 'live'}
                     locked={!available}

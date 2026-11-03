@@ -56,7 +56,7 @@ function LetterSheet({ inv, lang, script, body }) {
       {inv.age ? (
         <>
           <div style={{ fontFamily: body, fontWeight: 500, fontSize: 'clamp(36px, 11vw, 52px)', lineHeight: 1, color: C.INK }}>{inv.age}</div>
-          <div style={{ fontFamily: script, fontSize: 'clamp(24px, 7vw, 32px)', lineHeight: 1.1, color: C.ROSE }}>{yearsSentence(inv.age, lang).replace(String(inv.age), '').trim()}</div>
+          <div style={{ fontFamily: script, fontSize: 'clamp(24px, 7vw, 32px)', lineHeight: 1.1, color: C.ROSE }}>{yearsSentence(inv.age, lang, inv.strings).replace(String(inv.age), '').trim()}</div>
         </>
       ) : <HeartLine size={40} style={{ margin: '8px auto 0' }} />}
     </div>

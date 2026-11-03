@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { listTemplates, listTemplateFacets, isTemplateSelectable, getStatusMeta, getTemplateTheme, getCategoryLabel, groupTemplatesByConcept } from '../../templates/templateConfig'
+import { listTemplates, listTemplateFacets, isTemplateSelectable, getStatusMeta, getTemplateTheme, getCategoryLabel, groupTemplatesByConcept, templateConcepts, countTemplateCards, CONCEPT_META } from '../../templates/templateConfig'
 import { ensureTemplateFonts } from '../../templates/fonts'
 import { trackTemplatePreviewed } from '../../templates/templateAnalytics'
 import LanguageSwitcher from '../LanguageSwitcher'
 import SubpageHeader, { SubpageFooter } from '../public/SubpageHeader'
 import { TemplatesIntro, FilterBar, TemplatesGrid, TemplateCard, TemplatesEmpty, TemplatesCta } from '../public/templates'
 import { templateImage, TEMPLATE_IMAGE_SIZE } from '../../data/templateImages'
+import { conceptPageFor } from '../../data/conceptPages'
 import { LEGAL_DOCS } from '../../data/legal/docs'
 import { legalUi } from '../../data/legal/ui'
 import { spaClick } from '../../utils/siteRoutes'
@@ -27,7 +28,7 @@ const UI = {
   az: {
     kicker: 'Dizayn kolleksiyası',
     title: 'Dəvətnamə Şablonları',
-    intro: 'Toy, nişan, ad günü və uşaq ad günü üçün online dəvətnamə şablonları. Əvvəlcə tədbirinizi seçin: hər tədbirin öz dizaynları var — rəng, şrift, animasiya və açılış ekranı fərqlidir.',
+    intro: 'Toy, nişan, xına gecəsi, ad günü, ildönümü, uşaq tədbirləri, korporativ və digər tədbirlər üçün online dəvətnamə şablonları. Əvvəlcə tədbirinizi seçin: hər tədbirin öz dizaynları var — rəng, şrift, animasiya və açılış ekranı fərqlidir.',
     preview: 'Önbaxış',
     back: 'Ana səhifə',
     cta: 'Dəvətnaməni hazırla',
@@ -37,6 +38,7 @@ const UI = {
     filterStatus: 'Vəziyyət',
     filterCategory: 'Üslub',
     filterConcept: 'Tədbir',
+    byEvent: 'Tədbirə görə şablonlar',
     all: 'Hamısı',
     reset: 'Filtri sıfırla',
     empty: 'Bu filtrə uyğun şablon tapılmadı.',
@@ -48,7 +50,7 @@ const UI = {
   en: {
     kicker: 'Design collection',
     title: 'Invitation Templates',
-    intro: 'Online invitation templates for weddings, engagements, birthdays and kids’ parties. Start with your event: each one has its own designs, with different colours, type, motion and opening screens.',
+    intro: 'Online invitation templates for weddings, engagements, henna nights, birthdays, anniversaries, kids’ events, corporate occasions and more. Start with your event: each one has its own designs, with different colours, type, motion and opening screens.',
     preview: 'Preview',
     back: 'Home',
     cta: 'Create your invitation',
@@ -58,6 +60,7 @@ const UI = {
     filterStatus: 'Status',
     filterCategory: 'Style',
     filterConcept: 'Event',
+    byEvent: 'Templates by event',
     all: 'All',
     reset: 'Reset filters',
     empty: 'No templates match this filter.',
@@ -69,7 +72,7 @@ const UI = {
   ru: {
     kicker: 'Коллекция дизайнов',
     title: 'Шаблоны приглашений',
-    intro: 'Шаблоны онлайн-приглашений на свадьбу, помолвку, день рождения и детский праздник. Начните с события: у каждого свои дизайны — цвета, шрифты, анимация и экран открытия.',
+    intro: 'Шаблоны онлайн-приглашений на свадьбу, помолвку, вечер хны, день рождения, годовщину, детские и корпоративные события и не только. Начните с события: у каждого свои дизайны — цвета, шрифты, анимация и экран открытия.',
     preview: 'Просмотр',
     back: 'На главную',
     cta: 'Создать приглашение',
@@ -79,6 +82,7 @@ const UI = {
     filterStatus: 'Статус',
     filterCategory: 'Стиль',
     filterConcept: 'Событие',
+    byEvent: 'Шаблоны по событиям',
     all: 'Все',
     reset: 'Сбросить фильтры',
     empty: 'Нет шаблонов по этому фильтру.',
@@ -100,7 +104,7 @@ function readTemplatesRestore() {
   } catch { return null }
 }
 
-export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCreate }) {
+export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCreate, initialConcept = null, onConceptChange }) {
   const ui = UI[lang] || UI.az
   /* `listTemplates()` disabled şablonları onsuz da süzür */
   const templates = listTemplates()
@@ -112,7 +116,21 @@ export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCrea
   /* Filtr seçimləri — 'all' = filtrsiz */
   const [status, setStatus] = useState(restore?.status || 'all')
   const [category, setCategory] = useState(restore?.category || 'all')
-  const [concept, setConcept] = useState(restore?.concept || 'all')
+  const [concept, setConceptState] = useState(initialConcept || restore?.concept || 'all')
+  /* Tədbir seçimi URL-ə yazılır: /sablonlar/ad-gunu paylaşıla və indeksləşə bilir */
+  const setConcept = (next) => {
+    setConceptState(next)
+    const slug = CONCEPT_META[next]?.slug
+    try { window.history.replaceState(window.history.state, '', slug ? `/sablonlar/${slug}` : '/templates') } catch { /* köhnə brauzer */ }
+    onConceptChange?.()
+  }
+  /* Brauzerin «geri»si URL-i dəyişəndə seçim də ona uyğunlaşır */
+  const [urlConcept, setUrlConcept] = useState(initialConcept)
+  if (urlConcept !== initialConcept) {
+    setUrlConcept(initialConcept)
+    setConceptState(initialConcept || 'all')
+  }
+  const page = conceptPageFor(concept)
 
   /* Çiplər mövcud şablonlardan hesablanır → boş filtr heç vaxt görünmür. */
   const facets = useMemo(() => listTemplateFacets(lang), [lang])
@@ -120,12 +138,16 @@ export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCrea
   const visible = useMemo(() => templates.filter((tpl) => (
     (status === 'all' || tpl.status === status) &&
     (category === 'all' || tpl.category === category) &&
-    (concept === 'all' || tpl.concept === concept)
+    (concept === 'all' || templateConcepts(tpl).includes(concept))
   )), [templates, status, category, concept])
 
   /* «Hamısı»: hər tədbir öz başlıqlı bölməsində (Toy, Nişan, Uşaq ad günü…).
      Bir tədbir seçiləndə bölmə başlığı lazım deyil — tək şəbəkə qalır. */
   const groups = useMemo(() => (concept === 'all' ? groupTemplatesByConcept(visible, lang) : null), [concept, visible, lang])
+
+  /* Bir dizayn iki bölmədədirsə iki kart görünür — saylar uyğun gəlsin */
+  const totalCards = countTemplateCards(templates)
+  const visibleCards = concept === 'all' ? countTemplateCards(visible) : visible.length
 
   /* Kart yer tutucuları şablon şriftlərini işlədə bilər — bu səhifədə yüklə */
   useEffect(() => { ensureTemplateFonts() }, [])
@@ -139,7 +161,7 @@ export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCrea
 
   /* Önbaxışdan qayıdanda səhifə eyni vəziyyətdə açılsın — filtrlər və scroll
      mövqeyi sessionStorage-a yazılır, mount-da geri oxunur. */
-  const handlePreview = (tpl) => {
+  const handlePreview = (tpl, tplConcept) => {
     trackTemplatePreviewed(tpl.id, { source: 'templates_page' })
     try {
       sessionStorage.setItem('digitoy_preview_return', JSON.stringify({
@@ -149,14 +171,14 @@ export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCrea
         status, category, concept,
       }))
     } catch { /* private mode — vəziyyət bərpa olunmayacaq */ }
-    onPreview(tpl)
+    onPreview(tpl, tplConcept)
   }
 
   const resetFilters = () => { setStatus('all'); setCategory('all'); setConcept('all') }
 
   /* Kart: tədbir bölmə başlığında / çipdədir, kartda üslub (Lüks, Vintage…) görünür.
      `eager` yalnız ilk görünən 3 şəkil üçün. */
-  const renderCard = (tpl, i, groupIndex = 0) => {
+  const renderCard = (tpl, i, groupIndex = 0, cardConcept = concept === 'all' ? tpl.concept : concept) => {
     const theme = getTemplateTheme(tpl.id) || {}
     const badge = getStatusMeta(tpl.status, lang)
     return (
@@ -167,7 +189,7 @@ export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCrea
         statusTone={badge.tone}
         categoryLabel={getCategoryLabel(tpl.category, lang)}
         description={tpl.shortDescription?.[lang] || tpl.shortDescription?.az || tpl.tagline}
-        image={templateImage(tpl.id) || undefined}
+        image={templateImage(tpl.id, cardConcept) || undefined}
         imageWidth={TEMPLATE_IMAGE_SIZE.width}
         imageHeight={TEMPLATE_IMAGE_SIZE.height}
         loading={groupIndex === 0 && i < 3 ? 'eager' : 'lazy'}
@@ -175,7 +197,7 @@ export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCrea
         background={theme.background || '#FDFBF7'}
         locked={!isTemplateSelectable(tpl.id)}
         lockedLabel={ui.locked}
-        onPreview={() => handlePreview(tpl)}
+        onPreview={() => handlePreview(tpl, cardConcept)}
         previewLabel={ui.preview}
       />
     )
@@ -193,22 +215,22 @@ export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCrea
       />
 
       <main className="mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6 sm:pt-16">
-        <TemplatesIntro lang={lang} eyebrow={ui.kicker} title={ui.title} text={ui.intro} />
+        <TemplatesIntro lang={lang} eyebrow={ui.kicker} title={page?.h1[lang] || page?.h1.az || ui.title} text={page?.intro[lang] || page?.intro.az || ui.intro} />
 
         <div className="mt-8">
           <FilterBar
             lang={lang}
-            statuses={[{ id: 'all', label: ui.all, count: templates.length }, ...facets.statuses]}
-            categories={[{ id: 'all', label: ui.all, count: templates.length }, ...facets.categories]}
-            concepts={[{ id: 'all', label: ui.all, count: templates.length }, ...facets.concepts]}
+            statuses={[{ id: 'all', label: ui.all, count: totalCards }, ...facets.statuses]}
+            categories={[{ id: 'all', label: ui.all, count: totalCards }, ...facets.categories]}
+            concepts={[{ id: 'all', label: ui.all, count: totalCards }, ...facets.concepts]}
             status={status}
             category={category}
             concept={concept}
             onStatus={setStatus}
             onCategory={setCategory}
             onConcept={setConcept}
-            total={templates.length}
-            visibleCount={visible.length}
+            total={totalCards}
+            visibleCount={visibleCards}
             onReset={resetFilters}
             statusLegend={ui.filterStatus}
             categoryLegend={ui.filterCategory}
@@ -230,7 +252,7 @@ export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCrea
                   <span className="shrink-0 pb-1 text-[13px] text-brown-muted">{ui.count(g.items.length, g.items.length)}</span>
                 </div>
                 <div className="mt-6">
-                  <TemplatesGrid label={g.label} items={g.items} getKey={(tpl) => tpl.id} renderItem={(tpl, i) => renderCard(tpl, i, gi)} />
+                  <TemplatesGrid label={g.label} items={g.items} getKey={(tpl) => tpl.id} renderItem={(tpl, i) => renderCard(tpl, i, gi, g.id)} />
                 </div>
               </section>
             ))}
@@ -244,6 +266,24 @@ export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCrea
             <TemplatesEmpty lang={lang} title={ui.empty} resetLabel={ui.reset} onReset={resetFilters} />
           </div>
         )}
+
+        <nav aria-label={ui.filterConcept} className="mt-14 border-t border-beige-dark pt-6 sm:mt-20">
+          <h2 className="text-[13px] font-medium uppercase tracking-[0.18em] text-brown-muted">{ui.byEvent}</h2>
+          <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
+            {facets.concepts.map((c) => (
+              <li key={c.id}>
+                <a
+                  href={`/sablonlar/${CONCEPT_META[c.id].slug}`}
+                  onClick={(e) => { e.preventDefault(); setConcept(c.id); window.scrollTo({ top: 0 }) }}
+                  aria-current={concept === c.id ? 'page' : undefined}
+                  className="inline-block py-1 text-[15px] text-brown-dark underline decoration-beige-dark underline-offset-4 hover:text-ink"
+                >
+                  {c.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
         <div className="mt-14 sm:mt-20">
           <TemplatesCta lang={lang} title={ui.ctaTitle} text={ui.ctaText} buttonLabel={ui.cta} onCreate={onCreate} />

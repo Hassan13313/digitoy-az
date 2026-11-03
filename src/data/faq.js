@@ -11,15 +11,15 @@ import t from './translations.js'
 export const INTRO_FAQS = {
   az: [
     { q: 'Online dəvətnamə nədir?', a: 'Online dəvətnamə (elektron və ya rəqəmsal dəvətnamə də deyilir) kağız kartın yerinə linklə göndərilən dəvətnamə səhifəsidir. Qonaqlar onu WhatsApp və ya Telegram-dan telefonda açır: tarix, məkan və xəritə, geri sayım, musiqi bir yerdədir, iştirakını da elə oradan təsdiqləyir. Çap və çatdırılma lazım deyil, məlumatları istənilən vaxt yeniləmək olar.' },
-    { q: 'Hansı tədbirlər üçün dəvətnamə hazırlamaq olar?', a: 'Toy, nişan, ad günü və korporativ tədbirlər üçün; xına, yubiley kimi digər tədbirlər üçün də tədbirin adını özünüz yazırsınız. Hər tədbir növünün mətni ayrıca uyğunlaşdırılıb, dəvətnamə Azərbaycan, ingilis və rus dillərində açılır.' },
+    { q: 'Hansı tədbirlər üçün dəvətnamə hazırlamaq olar?', a: 'Toy, nişan, xına gecəsi, ad günü, ildönümü, uşaq ad günü, sünnət toyu, baby shower, korporativ tədbir, məzuniyyət, açılış, bayram gecəsi və qız gecəsi üçün — hər tədbirin öz şablonları var. Başqa tədbir üçün adını özünüz yazırsınız. Dəvətnamə Azərbaycan, ingilis və rus dillərində açılır.' },
   ],
   en: [
     { q: 'What is an online invitation?', a: 'An online invitation (also called an electronic or digital invitation) is an invitation page sent as a link instead of a paper card. Guests open it on their phone from WhatsApp or Telegram: date, venue and map, countdown and music are all in one place, and they confirm attendance right there. No printing or delivery, and you can update the details at any time.' },
-    { q: 'Which events can I create an invitation for?', a: 'Weddings, engagements, birthdays and corporate events; for other occasions such as a henna night or an anniversary you simply type the event name yourself. Each event type has its own wording, and the invitation opens in Azerbaijani, English and Russian.' },
+    { q: 'Which events can I create an invitation for?', a: 'Weddings, engagements, henna nights, birthdays, anniversaries, kids’ parties, sunnat celebrations, baby showers, corporate events, graduations, grand openings, holiday parties and bachelorette nights — each has its own templates. For anything else you simply type the event name yourself. The invitation opens in Azerbaijani, English and Russian.' },
   ],
   ru: [
     { q: 'Что такое онлайн-приглашение?', a: 'Онлайн-приглашение (его также называют электронным или цифровым) — это страница-приглашение, которую отправляют ссылкой вместо бумажной открытки. Гости открывают её на телефоне из WhatsApp или Telegram: дата, место и карта, обратный отсчёт и музыка собраны в одном месте, там же гости подтверждают участие. Не нужны печать и доставка, а данные можно обновить в любое время.' },
-    { q: 'Для каких мероприятий можно создать приглашение?', a: 'Для свадьбы, помолвки, дня рождения и корпоративных мероприятий; для других событий, например хны или юбилея, вы просто сами пишете название мероприятия. Текст адаптирован под каждый тип события, а приглашение открывается на азербайджанском, английском и русском языках.' },
+    { q: 'Для каких мероприятий можно создать приглашение?', a: 'Свадьба, помолвка, вечер хны, день рождения, годовщина, детский праздник, сюннет-той, бэби шауэр, корпоратив, выпускной, открытие, праздничный вечер и девичник — для каждого события есть свои шаблоны. Для другого события вы просто сами пишете его название. Приглашение открывается на азербайджанском, английском и русском языках.' },
   ],
 }
 

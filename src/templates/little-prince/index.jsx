@@ -184,7 +184,7 @@ export default function LittlePrinceTemplate(props) {
               {age && (
                 <div style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6, marginTop: 14, padding: '6px 18px', borderRadius: 999, border: `1px solid ${alpha(C.GOLD, 0.6)}`, color: C.GOLD_L }}>
                   <span style={{ fontFamily: head, fontSize: 24, lineHeight: 1 }}>{age}</span>
-                  <span style={{ fontSize: 14, letterSpacing: '.08em' }}>{ageWord(age, lang)}</span>
+                  <span style={{ fontSize: 14, letterSpacing: '.08em' }}>{ageWord(age, lang, inv.strings)}</span>
                 </div>
               )}
               <CrownRule color={C.GOLD_L} width={230} style={{ marginTop: 18 }} />

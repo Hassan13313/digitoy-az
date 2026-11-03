@@ -149,6 +149,8 @@ export default function ContentManager({
   onClose,
   slug,
   templateName,
+  heading,
+  subheading,
   values,
   savedValues,
   defaults,
@@ -223,13 +225,13 @@ export default function ContentManager({
         size="full"
         bodyPadding={false}
         footerLayout="bar"
-        title="Dəvətnamə məzmunu"
-        description={
+        title={heading || 'Dəvətnamə məzmunu'}
+        description={subheading ? <span className="text-[13px]">{subheading}</span> : (
           <span className="font-mono text-[13px]">
             /{slug}
             {templateName && <span className="font-sans"> · {templateName}</span>}
           </span>
-        }
+        )}
         headerExtra={
           <div className="border-b border-[#EEE8DF] px-5 py-2 lg:hidden">
             <SegmentedControl

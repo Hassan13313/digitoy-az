@@ -1,4 +1,6 @@
 import { SOCIAL_LINKS } from '../../data/constants'
+import { useTemplate } from '../TemplateProvider'
+import { withStringOverrides } from '../../data/adminOverrides'
 import { formatFullDateByLang } from '../../utils/dateFormat'
 import { alpha, readableOn } from './geo'
 import t from '../../data/translations'
@@ -20,7 +22,7 @@ import t from '../../data/translations'
    Beləliklə builder state-i (sessionStorage snapshot) toxunulmaz qalır.
    ───────────────────────────────────────────────────────────────────────── */
 
-const CTA = {
+export const CTA = {
   az: {
     badge: 'Öz dəvətnamənizi hazırlayın',
     title: 'Sizə xüsusi hazırlansın',
@@ -97,7 +99,9 @@ export default function TemplateOutro({
   wrapNames = false,
 }) {
   const tr  = t[lang] || t.az
-  const cta = CTA[lang] || CTA.az
+  /* Admin: «Mətnlər › Alt hissə» */
+  const { strings } = useTemplate()
+  const cta = withStringOverrides(CTA[lang] || CTA.az, strings, lang, 'cta.')
 
   /* CTA fonu şablonun səthidir → mətn rəngləri ona görə seçilir */
   const ctaBg    = theme.surface || theme.background

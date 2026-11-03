@@ -51,6 +51,8 @@ $path = rtrim($path, '/');
 if ($path === '') $path = '/';
 $legal = seoLegalPages()[$path] ?? null;   /* Phase 47: [title, description] və ya null */
 $guide = $legal ? null : seoGuide($path);  /* Phase 52: public/guides/<slug>.json və ya null */
+/* 2026-11: /sablonlar/<slug> — tədbir üzrə şablon səhifəsi */
+$conceptPage = (preg_match('#^/sablonlar/([a-z0-9-]+)$#', $path, $cm)) ? (seoConceptPages()[$cm[1]] ?? null) : null;
 
 /* ── Marşruta görə meta ──
    `index` sahəsi YALNIZ ictimai marketinq səhifələri üçün true-dur.
@@ -75,9 +77,14 @@ if ($path === '/') {
     $meta['desc']  = 'Online dəvətnamə necə görünür? DigiToy rəqəmsal toy dəvətnaməsinin canlı nümunəsi: İştirak Təsdiqi, oturma planı, QR foto paylaşımı və premium dizayn bir arada.';
     $meta['canon'] = SITE . '/demo';
 } elseif ($path === '/templates') {
-    $meta['title'] = 'Online Dəvətnamə Şablonları — Toy, Nişan, Ad Günü | DigiToy';
-    $meta['desc']  = 'Online dəvətnamə şablonları: klassik qızıl, botanik bağ, modern qara, gecə səması və daha çoxu. Toy, nişan və ad günü üçün hər birinin canlı önbaxışına baxın.';
+    $meta['title'] = 'Online Dəvətnamə Şablonları — Toy, Nişan, Xına, Ad Günü | DigiToy';
+    $meta['desc']  = 'Onlarla online dəvətnamə dizaynı: toy, nişan, xına gecəsi, ad günü, ildönümü, uşaq ad günü, sünnət toyu, korporativ tədbir və daha çoxu. Hər birinin canlı önbaxışı var.';
     $meta['canon'] = SITE . '/templates';
+} elseif ($conceptPage) {
+    /* 2026-11 — tədbir üzrə şablonlar: ictimai, indekslənir */
+    $meta['title'] = $conceptPage['title'];
+    $meta['desc']  = $conceptPage['desc'];
+    $meta['canon'] = SITE . $path;
 } elseif ($legal) {
     /* Phase 47 — hüquqi səhifələr: ictimai, indekslənir */
     [$meta['title'], $meta['desc']] = $legal;
@@ -146,6 +153,109 @@ if ($path === '/') {
     }
 }
 
+/** 2026-11 — tədbir üzrə şablon səhifələri: slug → mətn və şablon adları.
+    ⚠ src/data/conceptPages.js + templateConfig.js ilə HƏRFBƏHƏRF eyni (tests/concept_pages_test.mjs). */
+function seoConceptPages(): array {
+    return [
+        'toy-nisan' => [
+            'concept' => 'toy',
+            'title' => 'Toy və Nişan Dəvətnaməsi — Online Şablonlar | DigiToy',
+            'desc' => 'Toy və nişan üçün online dəvətnamə şablonları: lüks, klassik, minimalist və vintage dizaynlar. İştirak Təsdiqi, oturma planı və QR foto paylaşımı ilə. 59 ₼-dan.',
+            'h1' => 'Toy və Nişan Dəvətnaməsi',
+            'intro' => 'Toy və nişan üçün online dəvətnamə şablonları. Hər dizaynın öz açılışı, şrifti və rəng dili var. Canlı önbaxışa baxın, bəyəndiyinizi seçin, linki qonaqlarınıza WhatsApp ilə göndərin.',
+            'names' => ['Royal Gold', 'Floral Garden', 'Modern Black', 'White Elegance', 'Night Sky', 'Oriental Luxe', 'Nature Touch', 'Crystal Glass', 'Boarding Pass', 'Cinema Premiere', 'Vinyl Record', 'Royal Palace', 'Mediterranean', 'Gazette', 'Luxury Jewelry', 'Simple Luxury'],
+        ],
+        'xina-gecesi' => [
+            'concept' => 'xina',
+            'title' => 'Xına Gecəsi Dəvətnaməsi — Online Şablonlar | DigiToy',
+            'desc' => 'Xına gecəsi üçün online dəvətnamə şablonları: qırmızı duvaq, xonça, kəlağayı, buta motivləri. Qonaqlarınıza bir linklə göndərin, iştirakı onlayn təsdiqləsinlər.',
+            'h1' => 'Xına Gecəsi Dəvətnaməsi',
+            'intro' => 'Xına gecəsi üçün milli motivli online dəvətnamə şablonları: qırmızı duvaq, xonça, kəlağayı, buta və şam işığı. Gəlinin adı, tarix və məkan bir linkdə.',
+            'names' => ['Red Veil', 'Xonça', 'Henna Buta', 'Mirror & Candle', 'Kəlağayı'],
+        ],
+        'ad-gunu' => [
+            'concept' => 'birthday',
+            'title' => 'Ad Günü Dəvətnaməsi — Online Şablonlar | DigiToy',
+            'desc' => 'Ad günü üçün online dəvətnamə şablonları: minik talonu, kino premyerası, vinil, qəzet və modern afişa. Yaş, proqram, İştirak Təsdiqi və təbriklər bir linkdə.',
+            'h1' => 'Ad Günü Dəvətnaməsi',
+            'intro' => 'Böyüklər üçün ad günü dəvətnaməsi şablonları: minik talonu, kino premyerası, vinil plastinka, qəzet və modern afişa. Hər biri tək nəfərin adı və yaşı üçün hazırlanıb.',
+            'names' => ['Modern Black', 'Boarding Pass', 'Cinema Premiere', 'Vinyl Record', 'Gazette'],
+        ],
+        'ildonumu' => [
+            'concept' => 'anniversary',
+            'title' => 'İldönümü Dəvətnaməsi — Online Şablonlar | DigiToy',
+            'desc' => 'Toy ildönümü üçün online dəvətnamə şablonları: gümüş və qızıl toy, ilk il, retro polaroid, sevgi məktubları. Xatirələriniz və proqramınız bir linkdə.',
+            'h1' => 'İldönümü Dəvətnaməsi',
+            'intro' => 'Toy ildönümü üçün online dəvətnamə şablonları: gümüş və qızıl toy, birinci il, retro polaroid və sevgi məktubları. Birlikdə keçirdiyiniz illər səhifənin mərkəzindədir.',
+            'names' => ['Silver Locket', 'Golden Jubilee', 'First Paper', 'Retro Polaroid', 'Love Letters'],
+        ],
+        'usaq-ad-gunu' => [
+            'concept' => 'kids',
+            'title' => 'Uşaq Ad Günü Dəvətnaməsi — Online Şablonlar | DigiToy',
+            'desc' => 'Uşaq ad günü üçün online dəvətnamə şablonları: nağıl, kosmos, sirk, dinozavr və şarlar. Uşağın adı və yaşı ilə, valideynlər iştirakı bir toxunuşla təsdiqləyir.',
+            'h1' => 'Uşaq Ad Günü Dəvətnaməsi',
+            'intro' => 'Uşaq ad günü üçün online dəvətnamə şablonları: nağıl kitabı, kosmos səfəri, sirk, dinozavr macərası və rəngli şarlar. Uşağın adı və yaşı ilə, açılışı oyun kimi.',
+            'names' => ['Fairy Tale', 'Space Mission', 'Circus Show', 'Dino Adventure', 'Balloon Party'],
+        ],
+        'sunnet-toyu' => [
+            'concept' => 'sunnet',
+            'title' => 'Sünnət Toyu Dəvətnaməsi — Online Şablonlar | DigiToy',
+            'desc' => 'Sünnət toyu üçün online dəvətnamə şablonları: balaca şahzadə, komiks qəhrəmanı, maşallah, balaca pilot və futbol ulduzu. Proqram və xəritə bir linkdə.',
+            'h1' => 'Sünnət Toyu Dəvətnaməsi',
+            'intro' => 'Sünnət toyu üçün online dəvətnamə şablonları: balaca şahzadə, komiks qəhrəmanı, maşallah, balaca pilot və futbol ulduzu. Oğlanın adı və yaşı ilə hazır dizaynlar.',
+            'names' => ['Little Prince', 'Hero Comic', 'Maşallah', 'Little Pilot', 'Football Star'],
+        ],
+        'baby-shower' => [
+            'concept' => 'baby',
+            'title' => 'Baby Shower Dəvətnaməsi — Online Şablonlar | DigiToy',
+            'desc' => 'Baby shower və cins açıqlama (gender reveal) üçün online dəvətnamə şablonları: pastel, ayıcıq, leylək məktubu və beşik. Qonaqlarınız bir linklə qoşulsun.',
+            'h1' => 'Baby Shower Dəvətnaməsi',
+            'intro' => 'Baby shower və cins açıqlama (gender reveal) üçün online dəvətnamə şablonları: pastel çiçəklər, ayıcıq, leylək məktubu və beşik oyuncağı. Qonaqlar iştirakını bir toxunuşla bildirir.',
+            'names' => ['Pastel Bloom', 'Teddy Bear', 'Gender Reveal', 'Stork Letter', 'Baby Mobile'],
+        ],
+        'korporativ' => [
+            'concept' => 'corporate',
+            'title' => 'Korporativ Dəvətnamə — Online Şablonlar | DigiToy',
+            'desc' => 'Korporativ tədbirlər üçün online dəvətnamə şablonları: qala gecəsi, konfrans, mükafat mərasimi, vizit kart və neon parti. Qonaq siyahısı və İştirak Təsdiqi ilə.',
+            'h1' => 'Korporativ Dəvətnamə',
+            'intro' => 'Korporativ tədbirlər üçün online dəvətnamə şablonları: qala gecəsi, konfrans, mükafat mərasimi, vizit kart və neon parti. Təşkilatçının adı, proqram və qonaq təsdiqi bir səhifədə.',
+            'names' => ['Gala Night', 'Keynote', 'Award Night', 'Business Card', 'Neon Party'],
+        ],
+        'mezuniyyet' => [
+            'concept' => 'graduation',
+            'title' => 'Məzuniyyət Dəvətnaməsi — Son Zəng Şablonları | DigiToy',
+            'desc' => 'Məzuniyyət və son zəng gecəsi üçün online dəvətnamə şablonları: papaq atma, xatirə albomu, son zəng, lövhə və kağız təyyarə. Sinif yoldaşlarınıza bir linklə göndərin.',
+            'h1' => 'Məzuniyyət Dəvətnaməsi',
+            'intro' => 'Məzuniyyət və son zəng gecəsi üçün online dəvətnamə şablonları: papaq atma, xatirə albomu, son zəng, məktəb lövhəsi və kağız təyyarə. Sinif yoldaşlarınıza bir linklə göndərin.',
+            'names' => ['Caps Toss', 'Yearbook', 'Last Bell', 'Chalkboard', 'Paper Plane'],
+        ],
+        'acilis' => [
+            'concept' => 'opening',
+            'title' => 'Açılış Dəvətnaməsi — Online Şablonlar | DigiToy',
+            'desc' => 'Mağaza, kafe və qalereya açılışı üçün online dəvətnamə şablonları: lentin kəsilməsi, bistro lövhəsi, qalereya, təqdimat. Ünvan, xəritə və proqram bir linkdə.',
+            'h1' => 'Açılış Dəvətnaməsi',
+            'intro' => 'Mağaza, kafe, salon və qalereya açılışı üçün online dəvətnamə şablonları: lentin kəsilməsi, bistro lövhəsi, qalxan jalüzi, qutu açılışı və qalereya. Ünvan və xəritə bir linkdə.',
+            'names' => ['Ribbon Cut', 'Bistro Sign', 'Roller Shutter', 'Unboxing', 'Gallery Unveil'],
+        ],
+        'bayram-gecesi' => [
+            'concept' => 'holiday',
+            'title' => 'Novruz və Yeni İl Dəvətnaməsi — Online Şablonlar | DigiToy',
+            'desc' => 'Novruz, Yeni il və bayram gecələri üçün online dəvətnamə şablonları: tonqal, səməni, gecə yarısı saatı, qar kürəsi və maskarad. Ailə və dostlar üçün bir link.',
+            'h1' => 'Bayram Gecəsi Dəvətnaməsi',
+            'intro' => 'Novruz, Yeni il və bayram gecələri üçün online dəvətnamə şablonları: tonqal, səməni, gecə yarısı saatı, qar kürəsi və maskarad balı. Ailəniz və dostlarınız üçün bir link.',
+            'names' => ['Novruz Bonfire', 'Novruz Səməni', 'Midnight Clock', 'Snow Globe', 'Masquerade Ball'],
+        ],
+        'qiz-gecesi' => [
+            'concept' => 'bachelorette',
+            'title' => 'Qız Gecəsi Dəvətnaməsi — Online Şablonlar | DigiToy',
+            'desc' => 'Qız gecəsi (bachelorette) üçün online dəvətnamə şablonları: çəhrayı şampan, disko kürəsi, pijama və spa, Paris gecəsi və boho gün batımı. Rəfiqələrə bir linklə.',
+            'h1' => 'Qız Gecəsi Dəvətnaməsi',
+            'intro' => 'Qız gecəsi üçün online dəvətnamə şablonları: çəhrayı şampan, disko kürəsi, pijama və spa, Paris gecəsi və boho gün batımı. Rəfiqələrinizə bir linklə göndərin.',
+            'names' => ['Pink Champagne', 'Disco Ball', 'Pajama Spa', 'Paris Night', 'Boho Sunset'],
+        ],
+    ];
+}
+
 /** Phase 47 — hüquqi səhifələr: path → [title, description].
     ⚠ src/data/legal/docs.js ilə HƏRFBƏHƏRF eyni (tests/site_routes_test.mjs). */
 function seoLegalPages(): array {
@@ -170,7 +280,7 @@ function seoHomeFaq(): array {
         ['Online dəvətnamə nədir?',
          'Online dəvətnamə (elektron və ya rəqəmsal dəvətnamə də deyilir) kağız kartın yerinə linklə göndərilən dəvətnamə səhifəsidir. Qonaqlar onu WhatsApp və ya Telegram-dan telefonda açır: tarix, məkan və xəritə, geri sayım, musiqi bir yerdədir, iştirakını da elə oradan təsdiqləyir. Çap və çatdırılma lazım deyil, məlumatları istənilən vaxt yeniləmək olar.'],
         ['Hansı tədbirlər üçün dəvətnamə hazırlamaq olar?',
-         'Toy, nişan, ad günü və korporativ tədbirlər üçün; xına, yubiley kimi digər tədbirlər üçün də tədbirin adını özünüz yazırsınız. Hər tədbir növünün mətni ayrıca uyğunlaşdırılıb, dəvətnamə Azərbaycan, ingilis və rus dillərində açılır.'],
+         'Toy, nişan, xına gecəsi, ad günü, ildönümü, uşaq ad günü, sünnət toyu, baby shower, korporativ tədbir, məzuniyyət, açılış, bayram gecəsi və qız gecəsi üçün — hər tədbirin öz şablonları var. Başqa tədbir üçün adını özünüz yazırsınız. Dəvətnamə Azərbaycan, ingilis və rus dillərində açılır.'],
         ['Rəqəmsal dəvətnamə necə sifariş edilir?',
          'Səhifədəki "İndi Başla" düyməsinə basaraq istəyinizə və zövqünüzə tam uyğun paketi seçib, dəvətnamənizi dərhal özünüz düzəltməyə başlaya bilərsiniz.'],
         ['Dəvətnamənin istifadə müddəti nə qədərdir?',
@@ -228,9 +338,20 @@ function seoNoscript(string $path, callable $e, ?array $guide = null): string {
               . '<p>Sadəcə online dəvətnamə deyil — İştirak Təsdiqi, oturma planı, foto paylaşımı və xatirələrin toplandığı tam bir toy təcrübəsi. Hamısı bir zərif linkdə.</p>'
               . '<h2>Paketinizi Seçin</h2><ul><li>SADƏ — 59 ₼</li><li>VİP — 89 ₼</li><li>PREMIUM — 129 ₼</li></ul>'
               . '<h2>Tez-tez verilən suallar</h2>' . $faq;
+    } elseif (str_starts_with($path, '/sablonlar/') && ($cp = seoConceptPages()[substr($path, 11)] ?? null)) {
+        $items = '';
+        foreach ($cp['names'] as $n) $items .= '<li>' . $e($n) . '</li>';
+        $others = [];
+        foreach (seoConceptPages() as $slug => $p) $others[] = '<a href="/sablonlar/' . $e($slug) . '">' . $e($p['h1']) . '</a>';
+        $body = '<h1>' . $e($cp['h1']) . '</h1><p>' . $e($cp['intro']) . '</p>'
+              . '<h2>Şablonlar</h2><ul>' . $items . '</ul>'
+              . '<p>Digər tədbirlər: ' . implode(' · ', $others) . '</p>';
     } elseif ($path === '/templates') {
+        $others = [];
+        foreach (seoConceptPages() as $slug => $p) $others[] = '<li><a href="/sablonlar/' . $e($slug) . '">' . $e($p['h1']) . '</a></li>';
         $body = '<h1>Dəvətnamə Şablonları</h1>'
-              . '<p>Toy, nişan, ad günü və uşaq ad günü üçün online dəvətnamə şablonları. Əvvəlcə tədbirinizi seçin: hər tədbirin öz dizaynları var — rəng, şrift, animasiya və açılış ekranı fərqlidir.</p>';
+              . '<p>Toy, nişan, xına gecəsi, ad günü, ildönümü, uşaq tədbirləri, korporativ və digər tədbirlər üçün online dəvətnamə şablonları. Əvvəlcə tədbirinizi seçin: hər tədbirin öz dizaynları var — rəng, şrift, animasiya və açılış ekranı fərqlidir.</p>'
+              . '<h2>Tədbirə görə şablonlar</h2><ul>' . implode('', $others) . '</ul>';
     } elseif ($path === '/demo') {
         $body = '<h1>Online Dəvətnamə Nümunəsi</h1>'
               . '<p>Online dəvətnamə necə görünür? DigiToy rəqəmsal toy dəvətnaməsinin canlı nümunəsi: İştirak Təsdiqi, oturma planı, QR foto paylaşımı və premium dizayn bir arada.</p>';
@@ -459,6 +580,30 @@ if ($path === '/') {
         'itemListElement' => [
             ['@type' => 'ListItem', 'position' => 1, 'name' => 'Ana səhifə', 'item' => SITE . '/'],
             ['@type' => 'ListItem', 'position' => 2, 'name' => $label,       'item' => SITE . $path],
+        ],
+    ];
+} elseif ($conceptPage) {
+    $jsonld[] = [
+        '@context'        => 'https://schema.org',
+        '@type'           => 'BreadcrumbList',
+        'itemListElement' => [
+            ['@type' => 'ListItem', 'position' => 1, 'name' => 'Ana səhifə', 'item' => SITE . '/'],
+            ['@type' => 'ListItem', 'position' => 2, 'name' => 'Dəvətnamə Şablonları', 'item' => SITE . '/templates'],
+            ['@type' => 'ListItem', 'position' => 3, 'name' => $conceptPage['h1'], 'item' => SITE . $path],
+        ],
+    ];
+    $jsonld[] = [
+        '@context'        => 'https://schema.org',
+        '@type'           => 'CollectionPage',
+        'name'            => $conceptPage['h1'],
+        'description'     => $conceptPage['desc'],
+        'url'             => SITE . $path,
+        'inLanguage'      => 'az',
+        'mainEntity'      => [
+            '@type'           => 'ItemList',
+            'numberOfItems'   => count($conceptPage['names']),
+            'itemListElement' => array_map(fn($n, $i) => ['@type' => 'ListItem', 'position' => $i + 1, 'name' => $n],
+                $conceptPage['names'], array_keys($conceptPage['names'])),
         ],
     ];
 } elseif ($guide) {

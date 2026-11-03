@@ -333,9 +333,9 @@ export default function NightSkyTemplate(props) {
                 {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontSize: 14.5, color: C.MUTED }}>{weddingData.venueNote}</div>}
                 <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
                   {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={pill(C, true)}>{tr.inv_directions_btn}</a>}
-                  {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={pill(C, !inv.dirUrl)}>Maps</a>}
-                  {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={pill(C, false)}>Waze</a>}
-                  {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={pill(C, false)}>Apple</a>}
+                  {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={pill(C, !inv.dirUrl)}>{tr.inv_btn_maps}</a>}
+                  {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={pill(C, false)}>{tr.inv_btn_waze}</a>}
+                  {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={pill(C, false)}>{tr.inv_btn_apple}</a>}
                 </div>
               </Field>
             )}

@@ -257,6 +257,82 @@ export const demoKidsGuestbook = [
   { name: 'Emil', text: 'Ad günün mübarək, dostum! Birlikdə çox oynayacağıq.' },
 ]
 
+/* ── Ad günü (2026-11): Modern Black, Boarding Pass, Cinema Premiere, Vinyl və
+   Gazette bu bölmədə tək nəfərin ad günü kimi açılır ── */
+export const demoBirthdayInvitation = {
+  ...demoInvitation,
+  eventType: 'birthday',
+  brideName: 'Leyla',
+  groomName: '',
+  eventName: '',
+  age: 30,
+  time: '20:00',
+  venueName: 'Sky Lounge, Bakı',
+  venueNote: 'Panorama terrası',
+  googleMapsUrl: 'https://www.google.com/maps/search/Flame+Towers+Baku/@40.3596,49.8263',
+  wazeUrl: 'https://waze.com/ul?q=Flame+Towers+Baku&navigate=yes',
+  dressCodePalette: 'cocktail',
+  dressCodeDescription: 'Kokteyl geyimi — parıltılı detallar bu axşama çox yaraşar.',
+  seatingPlan: [
+    'Masa 1: Nərgiz Əliyeva, Rauf Babayev, Günel İsmayılova, Elnar Hüseynov',
+    'Masa 2: Elnur Quliyev, Şəhla Qasımova, Orxan Nəcəfov, Türkan Muradova',
+    'Masa 3: Kamran Hümbətov, Lalə Əhmədova, Bəhruz Süleymanov, Fidan Kərimova',
+  ].join('; '),
+  demoPhotos: [
+    demoPhoto('1530103862676-de8c9debad1d', 600),
+    demoPhoto('1492684223066-81342ee5ff30', 600),
+    demoPhoto('1464349095431-e9a21285b5f3', 600),
+  ],
+  sections: { lovestory: true },
+  loveStory: [
+    { id: 'demo-bd-1', date: '1996-03-13', icon: '👶', title: 'Dünyaya gəldim', text: 'Bakıda, yazın ilk günlərində ailəmizin ən balaca üzvü oldum.', caption: 'ilk gün', photos: [demoPhoto('1519671482749-fd09be7ccebf')] },
+    {
+      id: 'demo-bd-2', date: '2014-09', icon: '🎓', title: 'Universitet illəri', text: 'Yeni şəhər, yeni dostlar və ömürlük xatirələr.', caption: 'dostlarımla',
+      photos: [demoPhoto('1522673607200-164d1b6ce486'), demoPhoto('1529156069898-49953e39b3ac'), demoPhoto('1496843916299-590492c751f4'), demoPhoto('1516450360452-9312f5e86fc7')],
+    },
+    { id: 'demo-bd-3', date: '2020-06', icon: '✈️', title: 'İlk böyük səyahət', text: 'Çantamı götürüb dünyanı kəşf etməyə çıxdım.', photos: [demoPhoto('1503095396549-807759245b35')] },
+    { id: 'demo-bd-4', date: '2026-03-13', icon: '🎂', title: '30 yaşım', text: 'Bu günü ən sevdiyim insanlarla qeyd etmək istəyirəm.', caption: 'yeni yaş', photos: [demoPhoto('1558636508-e0db3814bd1d')] },
+  ],
+  i18n: {
+    en: {
+      dressCodeDescription: 'Cocktail attire — a little sparkle will suit this evening perfectly.',
+      venueName: 'Sky Lounge, Baku', venueNote: 'Panorama terrace',
+      loveStory: {
+        0: { title: 'I was born', text: 'In Baku, in the first days of spring, I became the smallest member of our family.', caption: 'day one' },
+        1: { title: 'University years', text: 'A new city, new friends and memories for a lifetime.', caption: 'with my friends' },
+        2: { title: 'My first big journey', text: 'I grabbed my bag and set off to discover the world.' },
+        3: { title: 'Turning 30', text: 'I want to celebrate this day with the people I love most.', caption: 'a new year' },
+      },
+      programSteps: { 0: 'Welcome cocktails', 1: 'Dinner', 2: 'Toasts & memories', 3: 'Cake & candles', 4: 'Dance floor' },
+    },
+    ru: {
+      dressCodeDescription: 'Коктейльный наряд — немного блеска прекрасно подойдёт этому вечеру.',
+      venueName: 'Sky Lounge, Баку', venueNote: 'Панорамная терраса',
+      loveStory: {
+        0: { title: 'Я появилась на свет', text: 'В Баку, в первые дни весны, я стала самым маленьким членом нашей семьи.', caption: 'первый день' },
+        1: { title: 'Годы в университете', text: 'Новый город, новые друзья и воспоминания на всю жизнь.', caption: 'с друзьями' },
+        2: { title: 'Первое большое путешествие', text: 'Я взяла сумку и отправилась открывать мир.' },
+        3: { title: 'Мои 30', text: 'Я хочу отпраздновать этот день с самыми любимыми людьми.', caption: 'новый год жизни' },
+      },
+      programSteps: { 0: 'Коктейль для гостей', 1: 'Ужин', 2: 'Тосты и воспоминания', 3: 'Торт и свечи', 4: 'Танцпол' },
+    },
+  },
+  programSteps: [
+    { time: '20:00', icon: '🥂', activity: 'Xoş gəldin kokteyli' },
+    { time: '20:45', icon: '🍽️', activity: 'Şam yeməyi' },
+    { time: '21:45', icon: '🎤', activity: 'Tostlar və xatirələr' },
+    { time: '22:30', icon: '🎂', activity: 'Tort və şamlar' },
+    { time: '23:00', icon: '💃', activity: 'Rəqs meydançası' },
+  ],
+}
+
+export const demoBirthdayGuestbook = [
+  { name: 'Anam və atam', text: 'Əziz qızımız, ad günün mübarək! Həmişə belə gülərüz və xoşbəxt ol.' },
+  { name: 'Nərgiz', text: 'Leyla, 30 yaşın sənə çox yaraşır! Bu gecə bütün şamları birlikdə üfürəcəyik.' },
+  { name: 'Rauf və Günel', text: 'Ad günün mübarək! Bütün arzuların çin olsun, sənə ən gözəl illər arzulayırıq.' },
+  { name: 'Kamran', text: 'Təbriklər! Bu gecəni səbirsizliklə gözləyirik.' },
+]
+
 /* ── Digər konseptlərin demoları (2026-10) ──────────────────────────────── */
 const noStory = { sections: { lovestory: false }, loveStory: [] }
 
@@ -425,6 +501,7 @@ const GUESTBOOKS = {
 
 /* Konsept → demo dəsti. Yeni konsept demosu = bura bir sətir. */
 const DEMO_BY_CONCEPT = {
+  birthday: { weddingData: demoBirthdayInvitation, guestbook: demoBirthdayGuestbook },
   kids: { weddingData: demoKidsInvitation, guestbook: demoKidsGuestbook },
   xina: { weddingData: demoXina, guestbook: GUESTBOOKS.xina },
   sunnet: { weddingData: demoSunnet, guestbook: GUESTBOOKS.sunnet },

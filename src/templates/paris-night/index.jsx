@@ -291,7 +291,7 @@ export default function ParisNightTemplate(props) {
                   {gallery.demoPhotos.map((url, i) => (
                     <div key={i} style={{ position: 'relative', aspectRatio: '4 / 5', padding: 8, background: '#FFFFFF', transform: `rotate(${i % 2 ? 2.2 : -2}deg)`, boxShadow: '0 14px 20px -14px rgba(28,33,64,.5)' }}>
                       <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                      {i % 2 === 0 && <Postmark size={34} style={{ position: 'absolute', right: -6, top: -8, opacity: 0.85 }} />}
+                      {i % 2 === 0 && <Postmark size={34} label={T.postmark} style={{ position: 'absolute', right: -6, top: -8, opacity: 0.85 }} />}
                     </div>
                   ))}
                 </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Play } from 'lucide-react'
-import { getInvitationContent, saveInvitationContent, getInvitation, setInvitationTemplateVersion } from '../../utils/api'
+import { getInvitationContent, saveInvitationContent, getInvitation, setInvitationTemplateVersion, getTemplateContent, saveTemplateContent } from '../../utils/api'
+import { demoForConcept } from '../../data/demoInvitation'
 import { getTemplateTheme, getTemplateName, FONT_STACKS } from '../../templates/templateConfig'
 import {
   CONTENT_SECTIONS, THEME_KEYS, THEME_LABELS, FONT_CHOICES,
@@ -17,6 +18,8 @@ import translations from '../../data/translations'
 import { buildRsvpLabels } from '../../hooks/useRsvp'
 import { GUESTBOOK_LABELS } from '../../hooks/useGuestbook'
 import { SEATING_LABELS } from '../../hooks/useSeating'
+import { CTA as OUTRO_CTA } from '../../templates/_shared/TemplateOutro'
+import { UI as ACTIONS_UI } from '../../templates/_shared/TemplateActions'
 import ContentManager from './v2/ContentManager'
 import { Button, Modal, Notice, Spinner, useMediaQuery } from './v2/adminUi'
 
@@ -52,7 +55,11 @@ const LANG_IDS = ['az', 'en', 'ru']
 const isEmptyObj = (o) => !o || Object.keys(o).length === 0
 const sameJson = (a, b) => JSON.stringify(a ?? {}) === JSON.stringify(b ?? {})
 
-export default function AdminContentManager({ slug, onClose, onSaved }) {
+/* `templateEdit` ({ key, id, concept, label }) — «Şablonlar» bölməsi: dəvətnamə yoxdur,
+   önbaxış həmin bölmənin nümunəsini göstərir, saxlama şablon səviyyəsinə gedir. */
+export default function AdminContentManager({ slug: slugProp, templateEdit = null, onClose, onSaved }) {
+  /* Şəkil qovluğu: `tpl-boarding-pass`, ad günü versiyası `tpl-boarding-pass-birthday` */
+  const slug = templateEdit ? `tpl-${templateEdit.key.replace('@', '-')}` : slugProp
   const [loading, setLoading]     = useState(true)
   const [loadError, setLoadError] = useState('')
   const [saveState, setSaveState] = useState('idle')
@@ -85,11 +92,17 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
     let alive = true
     ;(async () => {
       try {
-        const [content, inv] = await Promise.all([
-          getInvitationContent(slug),
-          /* Önbaxış real məzmunla olsun deyə dəvətnamənin özü də çəkilir */
-          getInvitation(slug).catch(() => null),
-        ])
+        const [content, inv] = await (templateEdit
+          ? getTemplateContent(templateEdit.key).then((c) => [
+            { ...c, template_id: templateEdit.id },
+            /* Şablon qatının özünü redaktə edirik — üstünə ikinci dəfə qoyulmasın */
+            { data: { ...demoForConcept(templateEdit.concept, templateEdit.id).weddingData, templateDefaults: {} } },
+          ])
+          : Promise.all([
+            getInvitationContent(slug),
+            /* Önbaxış real məzmunla olsun deyə dəvətnamənin özü də çəkilir */
+            getInvitation(slug).catch(() => null),
+          ]))
         if (!alive) return
         const a = content.admin || {}
         const snap = {
@@ -110,14 +123,14 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
       }
     })()
     return () => { alive = false }
-  }, [slug])
+  }, [slug, templateEdit])
 
   /* Redizayndan əvvəl təsdiqlənmiş dəvətnamə köhnə kodla göstərilir (v1) —
      onda yeni dizaynın sahələri (copy.js, Royal Gold/Floral rəngləri) işləmir */
   const legacy = Number(wedding?.templateVersion) === TEMPLATE_VERSION_LEGACY && !!templateId && hasLegacyVersion(templateId)
   const bespoke = templateId && (BESPOKE_TEMPLATES.has(templateId) || (legacy && LEGACY_BESPOKE.has(templateId)))
   /* Şablonun öz sətirləri və bölmə başlıqları (copy.js) — yalnız yeni versiyada */
-  const copyFields = useMemo(() => (legacy ? [] : templateCopyFields(templateId)), [templateId, legacy])
+  const copyFields = useMemo(() => (legacy ? [] : templateCopyFields(templateId, wedding?.eventType)), [templateId, legacy, wedding?.eventType])
   const tplLabels = useMemo(() => (legacy ? null : templateLabels(templateId)), [templateId, legacy])
   const [versionState, setVersionState] = useState({ busy: false, confirm: false, error: '' })
 
@@ -152,7 +165,7 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
     const admin = buildAdmin()
     return {
       ...wedding,
-      sections: !isEmptyObj(sections) ? sections : wedding.sections,
+      sections: !isEmptyObj(sections) ? { ...wedding.sections, ...sections } : wedding.sections,
       admin: !isEmptyObj(admin) ? admin : undefined,
     }
   }, [wedding, sections, buildAdmin])
@@ -246,6 +259,9 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
     if (prefix === 'rsvp')    return buildRsvpLabels(lg, wedding)[sub] || ''
     if (prefix === 'gbook')   return (GUESTBOOK_LABELS[lg] || GUESTBOOK_LABELS.az)[sub] || ''
     if (prefix === 'seating') return (SEATING_LABELS[lg] || SEATING_LABELS.az)[sub] || ''
+    if (prefix === 'cta')     return (OUTRO_CTA[lg] || OUTRO_CTA.az)[sub] || ''
+    if (prefix === 'ui')      return (ACTIONS_UI[lg] || ACTIONS_UI.az)[sub] || ''
+    if (prefix === 'dress')   return 'Müştərinin seçdiyi tərz'
     return ''
   }, [wedding])
 
@@ -292,9 +308,19 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
         for (const [key] of STRING_CATALOG[sec.key] || []) t[`s:${key}`] = systemText(key, lg) || 'Sistemin öz mətni'
       }
       for (const f of copyFields) t[`s:${f.key}`] = f.defaults[lg] || f.defaults.az || ''
+      /* Şablon səviyyəsində dəyişdirilibsə placeholder onu göstərir — boş sahə elə onu verir */
+      const tplAdmin = wedding?.templateDefaults?.admin
+      if (tplAdmin) {
+        for (const [key, v] of Object.entries(tplAdmin.strings || {})) if (v?.[lg] && `s:${key}` in t) t[`s:${key}`] = v[lg]
+        for (const [key, v] of Object.entries(tplAdmin.labels || {})) {
+          if (v?.kicker && `k:${key}` in t) t[`k:${key}`] = v.kicker
+          if (v?.title?.[lg] && `t:${key}` in t) t[`t:${key}`] = v.title[lg]
+        }
+      }
       texts[lg] = t
     }
-    return { texts, colors: { ...baseTheme }, typography: { heading: '', body: '' } }
+    const tplTheme = wedding?.templateDefaults?.admin?.theme
+    return { texts, colors: { ...baseTheme, ...tplTheme }, typography: { heading: '', body: '' } }
   }, [systemText, baseTheme, tplLabels, copyFields, wedding])
 
   const schema = useMemo(() => {
@@ -377,7 +403,9 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
     setSaveError('')
     try {
       const admin = buildAdmin()
-      const res = await saveInvitationContent(slug, admin, sections)
+      const res = templateEdit
+        ? await saveTemplateContent(templateEdit.key, admin, sections)
+        : await saveInvitationContent(slug, admin, sections)
       setSaved({ theme, fonts, labels, strings, sections, opening, story })
       setSaveState('saved')
       onSaved?.(res)
@@ -430,7 +458,13 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
       /* Cihaz dəyişəndə iframe yenidən yaranır — «hazıram» siqnalını yenidən gözlə */
       onDevice={(d) => { setFrameReady(false); setDevice(d) }}
       onFocusSection={focusSection}
-      topNotice={templateId && hasLegacyVersion(templateId) ? (
+      heading={templateEdit ? 'Şablon məzmunu' : undefined}
+      subheading={templateEdit ? `${getTemplateName(templateEdit.id)} · ${templateEdit.label}` : undefined}
+      topNotice={templateEdit ? (
+        <Notice title="Bu dəyişiklik şablonu işlədən bütün yeni dəvətnamələrə və vitrinə keçir">
+          Bir dəvətnaməyə xüsusi düzəliş üçün «Dəvətnamələr › Məzmun»-dan istifadə edin. Köhnə dizaynda qalan dəvətnamələrə təsir etmir.
+        </Notice>
+      ) : templateId && hasLegacyVersion(templateId) ? (
         <VersionNotice legacy={legacy} state={versionState} setState={setVersionState} onSwitch={switchVersion} />
       ) : null}
       extraDirty={{
@@ -455,6 +489,7 @@ export default function AdminContentManager({ slug, onClose, onSaved }) {
             templateId={templateId} wedding={wedding} lang={lang}
             story={story} setStory={(fn) => { setSaveState('idle'); setStory(fn) }}
             slug={slug} narrow={isNarrow}
+            textOnly={!!templateEdit}
             sectionOn={storyOn}
             onEnableSection={() => {
               setSections((prev) => ({ ...(!isEmptyObj(prev) ? prev : (wedding?.sections || {})), lovestory: true }))

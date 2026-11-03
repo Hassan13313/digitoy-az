@@ -224,7 +224,7 @@ export default function CircusShowTemplate(props) {
               <h1 style={{ margin: '4px 0 0', fontFamily: disp, fontWeight: 400, fontSize: nameSize(heroName), lineHeight: 1.04, color: C.RED, textShadow: `3px 3px 0 ${C.NAVY}, 5px 6px 0 ${alpha(C.NAVY, 0.2)}`, textWrap: 'balance', overflowWrap: 'anywhere' }}>
                 {heroName}
               </h1>
-              {age && <div style={{ marginTop: 10, fontWeight: 700, fontSize: 17, letterSpacing: '.04em', color: C.NAVY }}>{ageSentence(age, lang)}</div>}
+              {age && <div style={{ marginTop: 10, fontWeight: 700, fontSize: 17, letterSpacing: '.04em', color: C.NAVY }}>{ageSentence(age, lang, inv.strings)}</div>}
             </div>
 
             <div style={{ position: 'relative', width: 'min(84vw, 340px)', margin: '22px auto 0' }}>
@@ -233,7 +233,7 @@ export default function CircusShowTemplate(props) {
                 {age ? (
                   <>
                     <span style={{ fontFamily: disp, fontSize: age > 9 ? 30 : 38, lineHeight: 0.9, color: C.CREAM }}>{age}</span>
-                    <span style={{ fontWeight: 800, fontSize: 11, letterSpacing: '.12em', color: C.MUSTARD, marginTop: 3 }}>{up(ageWord(age, lang), lang)}</span>
+                    <span style={{ fontWeight: 800, fontSize: 11, letterSpacing: '.12em', color: C.MUSTARD, marginTop: 3 }}>{up(ageWord(age, lang, inv.strings), lang)}</span>
                   </>
                 ) : <Star size={34} color={C.MUSTARD} />}
               </Starburst>
@@ -292,9 +292,9 @@ export default function CircusShowTemplate(props) {
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontSize: 15.5, color: C.MUTED }}>{weddingData.venueNote}</div>}
               <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
                 {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(true)}>{tr.inv_directions_btn}</a>}
-                {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(!inv.dirUrl)}>Maps</a>}
-                {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>Waze</a>}
-                {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>Apple</a>}
+                {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(!inv.dirUrl)}>{tr.inv_btn_maps}</a>}
+                {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>{tr.inv_btn_waze}</a>}
+                {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>{tr.inv_btn_apple}</a>}
               </div>
             </Act>
           )}

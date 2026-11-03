@@ -27,13 +27,15 @@ const PLURAL = {
 }
 
 /** @returns {{ days, hours, minutes, seconds }} cari saya uyğun etiketlər */
-export function countdownLabels(lang, { days, hours }) {
+export function countdownLabels(lang, { days, hours }, adminStrings = null) {
   const tr = t[lang] || t.az
   const p = PLURAL[lang] || {}
+  /* Adminin yazdığı etiket saya görə dəyişmir */
+  const own = (key) => adminStrings?.[key]?.[lang] || adminStrings?.[key]?.az
   return {
-    days:    p.days  ? p.days(days)   : tr.inv_days,
-    hours:   p.hours ? p.hours(hours) : tr.inv_hours,
-    minutes: tr.inv_minutes,
-    seconds: tr.inv_seconds,
+    days:    own('inv_days')    || (p.days  ? p.days(days)   : tr.inv_days),
+    hours:   own('inv_hours')   || (p.hours ? p.hours(hours) : tr.inv_hours),
+    minutes: own('inv_minutes') || tr.inv_minutes,
+    seconds: own('inv_seconds') || tr.inv_seconds,
   }
 }

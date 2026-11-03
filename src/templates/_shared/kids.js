@@ -21,8 +21,16 @@ function ruYears(n) {
   return 'лет'
 }
 
+/* Adminin mətni («Mətnlər › Hero»): {n} yerinə rəqəm yazılır */
+function ownText(strings, key, n, lang) {
+  const v = strings?.[key]?.[lang] || strings?.[key]?.az
+  return v ? String(v).replace(/\{n\}/g, n) : ''
+}
+
 /** Rəqəmin yanındakı söz: «yaş» · «years» · «лет» */
-export function ageWord(n, lang = 'az') {
+export function ageWord(n, lang = 'az', strings = null) {
+  const own = ownText(strings, 'age_word', n, lang)
+  if (own) return own
   if (lang === 'ru') return ruYears(n)
   if (lang === 'en') return n === 1 ? 'year' : 'years'
   return 'yaş'
@@ -33,8 +41,10 @@ export function ageWord(n, lang = 'az') {
  * qurmur (azərbaycanca yiyəlik şəkilçisi adın son hərfindən asılıdır və
  * səhv düşə bilər: «Ayanın», «Nərminin», «Aysunun»…).
  */
-export function ageSentence(n, lang = 'az') {
+export function ageSentence(n, lang = 'az', strings = null) {
   if (!n) return ''
+  const own = ownText(strings, 'age_sentence', n, lang)
+  if (own) return own
   if (lang === 'ru') return `исполняется ${n} ${ruYears(n)}`
   if (lang === 'en') return `is turning ${n}`
   return `${n} yaşı tamam olur`
@@ -82,8 +92,10 @@ export function galleryDesc(adminOverrides, tr, lang = 'az', kind = 'celebration
 }
 
 /** «25 il birlikdə» — ildönümü şablonları üçün (yaş sahəsi = il sayı) */
-export function yearsSentence(n, lang = 'az') {
+export function yearsSentence(n, lang = 'az', strings = null) {
   if (!n) return ''
+  const own = ownText(strings, 'years_sentence', n, lang)
+  if (own) return own
   if (lang === 'ru') return `${n} ${ruYears(n)} вместе`
   if (lang === 'en') return `${n} ${n === 1 ? 'year' : 'years'} together`
   return `${n} il birlikdə`

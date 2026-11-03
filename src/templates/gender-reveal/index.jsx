@@ -10,7 +10,7 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C as PAL, SPLIT, QUESTION, SIDES, RELEASE, CONFETTI, nameSize } from './palette'
+import { C as PAL, SPLIT, RELEASE, CONFETTI, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Balloon, GiftBox, Question } from './art'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
@@ -56,7 +56,7 @@ const KEYFRAMES = (C) => (`
 `)
 
 /* ═══ 01 — AÇILIŞ: qutu açılır, şarlar uçur ═══ */
-function RevealOpening({ inv, theme, lang }) {
+function RevealOpening({ inv, theme }) {
   const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
@@ -81,9 +81,9 @@ function RevealOpening({ inv, theme, lang }) {
             </div>
           )}
           <div style={{ marginTop: 10, fontFamily: head, fontWeight: 700, fontSize: 20 }}>
-            <span style={{ color: C.BLUE_D }}>{(SIDES[lang] || SIDES.az)[0]}</span>
+            <span style={{ color: C.BLUE_D }}>{inv.copy(TXT).boy}</span>
             <span style={{ color: C.MUTED }}> · </span>
-            <span style={{ color: C.PINK_D }}>{(SIDES[lang] || SIDES.az)[1]}</span>
+            <span style={{ color: C.PINK_D }}>{inv.copy(TXT).girl}</span>
           </div>
         </div>
         <div style={{ position: 'relative', marginTop: 22, animation: go ? 'none' : 'gr-wiggle 1.8s ease-in-out infinite' }}>
@@ -152,7 +152,7 @@ export default function GenderRevealTemplate(props) {
   const body = theme.fonts.body
   const T = inv.copy(TXT)
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
-  const [boy, girl] = SIDES[lang] || SIDES.az
+  const { boy, girl } = T
 
   return (
     <PaletteContext.Provider value={C}><div data-gr lang={lang} data-enter={enterDirection(ID)} style={{
@@ -160,7 +160,7 @@ export default function GenderRevealTemplate(props) {
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.GOLD, 0.35),
     }}>
       <style>{KEYFRAMES(C)}</style>
-      {!inv.opened && <RevealOpening inv={inv} theme={theme} lang={lang} />}
+      {!inv.opened && <RevealOpening inv={inv} theme={theme} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: `linear-gradient(115deg, ${C.BLUE} 50%, ${C.PINK} 50%)`, border: '3px solid #FFFFFF', boxShadow: '0 8px 18px rgba(51,54,92,.3)' }}>
         {({ playing }) => <EqBars playing={playing} color="#FFFFFF" idle={alpha('#FFFFFF', 0.55)} />}
@@ -194,7 +194,7 @@ export default function GenderRevealTemplate(props) {
                 <div style={{ marginTop: 4, fontFamily: head, fontWeight: 800, fontSize: 18, color: C.PINK_D }}>{girl}</div>
               </div>
             </div>
-            <div style={{ marginTop: 18, fontFamily: head, fontWeight: 700, fontSize: 'clamp(22px, 6.4vw, 28px)', color: C.INK }}>{QUESTION[lang] || QUESTION.az}</div>
+            <div style={{ marginTop: 18, fontFamily: head, fontWeight: 700, fontSize: 'clamp(22px, 6.4vw, 28px)', color: C.INK }}>{T.question}</div>
             <div style={{ marginTop: 18, fontWeight: 600, fontSize: 15, color: C.MUTED }}>{L('hero', 'kicker', inv.eventLabel)}</div>
             <h1 style={{ margin: '4px 0 0', fontFamily: head, fontWeight: 800, fontSize: nameSize(heroName), lineHeight: 1.1, color: C.INK, overflowWrap: 'anywhere', animation: 'gr-rise 1s ease-out .2s both' }}>{heroName}</h1>
             <div style={{ display: 'inline-block', marginTop: 18, padding: '14px 22px', borderRadius: 20, background: '#FFFFFF', boxShadow: `0 0 0 3px ${C.GOLD}, 0 14px 24px -14px rgba(51,54,92,.5)` }}>

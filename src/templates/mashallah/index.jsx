@@ -10,7 +10,7 @@ import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvit
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, ageWord } from '../_shared/kids'
-import { C as PAL, TILE, SASH_WORD, nameSize } from './palette'
+import { C as PAL, TILE, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Nazar, Bead, BeadRule, Sash } from './art'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
@@ -57,7 +57,7 @@ const COBALT_BG = (C) => (`radial-gradient(90% 60% at 50% 0%, #1A55B8, transpare
 const RING = Array.from({ length: 18 }, (_, i) => i)
 
 /* ═══ 01 — AÇILIŞ: göz muncuğu və lent ═══ */
-function NazarOpening({ inv, theme, lang }) {
+function NazarOpening({ inv, theme }) {
   const C = usePalette(PAL)
   const { ot } = inv
   const gate = useGate({ inv, ms: 2100 })
@@ -86,7 +86,7 @@ function NazarOpening({ inv, theme, lang }) {
           </div>
           {go && (
             <div aria-hidden="true" style={{ position: 'absolute', left: '-12%', right: '-12%', bottom: '4%', display: 'flex', justifyContent: 'center', transformOrigin: '50% 50%', animation: 'mh-sash .6s cubic-bezier(.3,.8,.4,1) .35s both' }}>
-              <Sash font={head} rotate={0} size={26}>{SASH_WORD[lang] || SASH_WORD.az}</Sash>
+              <Sash font={head} rotate={0} size={26}>{inv.copy(TXT).sash}</Sash>
             </div>
           )}
         </div>
@@ -165,7 +165,7 @@ export default function MashallahTemplate(props) {
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.TURQ, 0.3),
     }}>
       <style>{KEYFRAMES(C)}</style>
-      {!inv.opened && <NazarOpening inv={inv} theme={theme} lang={lang} />}
+      {!inv.opened && <NazarOpening inv={inv} theme={theme} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: C.COBALT, border: `2px solid ${C.WHITE}`, boxShadow: `0 0 0 2px ${C.TURQ}, 0 8px 18px rgba(8,38,88,.4)` }}>
         {({ playing }) => <EqBars playing={playing} color={C.WHITE} idle={alpha(C.WHITE, 0.45)} />}
@@ -197,10 +197,10 @@ export default function MashallahTemplate(props) {
               </div>
               <div style={{ animation: 'mh-float 4.5s ease-in-out infinite' }}><Nazar size={170} /></div>
             </div>
-            <div style={{ marginTop: 22, display: 'flex', justifyContent: 'center' }}><Sash font={head} size={24}>{SASH_WORD[lang] || SASH_WORD.az}</Sash></div>
+            <div style={{ marginTop: 22, display: 'flex', justifyContent: 'center' }}><Sash font={head} size={24}>{T.sash}</Sash></div>
             <div style={{ marginTop: 26, fontSize: 14, fontWeight: 700, letterSpacing: '.2em', textTransform: 'uppercase', color: C.TURQ }}>{L('hero', 'kicker', inv.eventLabel)}</div>
             <h1 style={{ margin: '6px 0 0', fontFamily: head, fontWeight: 500, fontSize: nameSize(heroName), lineHeight: 1.04, color: C.COBALT, overflowWrap: 'anywhere', animation: 'mh-rise 1s ease-out .3s both' }}>{heroName}</h1>
-            {age && <div style={{ marginTop: 8, fontFamily: head, fontStyle: 'italic', fontSize: 20, color: C.GOLD }}>{age} {ageWord(age, lang)}</div>}
+            {age && <div style={{ marginTop: 8, fontFamily: head, fontStyle: 'italic', fontSize: 20, color: C.GOLD }}>{age} {ageWord(age, lang, inv.strings)}</div>}
             <BeadRule width={230} style={{ marginTop: 18 }} />
             <div style={{ marginTop: 16, fontFamily: head, fontSize: 'clamp(20px, 5.8vw, 25px)', color: C.INK }}>{inv.fullDate}</div>
             <div style={{ marginTop: 6, fontSize: 16, color: C.MUTED }}>{[inv.time, weddingData.venueName].filter(Boolean).join(' · ')}</div>

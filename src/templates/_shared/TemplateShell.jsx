@@ -223,7 +223,7 @@ export default function TemplateShell({
   const invMusic  = S.music ? (weddingData?.music || DEFAULT_MUSIC) : null
 
   /* ── 7 HOOK — biznes məntiqinin YEGANƏ mənbəyi ── */
-  const cd       = useCountdown({ date: weddingData.date, time: weddingData.time, lang, eventType: weddingData.eventType, eventName: weddingData.eventName })
+  const cd       = useCountdown({ date: weddingData.date, time: weddingData.time, lang, eventType: weddingData.eventType, eventName: weddingData.eventName, adminStrings })
   const timeline = useTimeline({ lang, eventType: weddingData.eventType, programSteps: weddingData.programSteps })
   const { inputRef: seatInputRef, ...seating } = useSeating({ seatingPlan: weddingData.seatingPlan, lang })
   const { inputRef: rsvpInputRef, ...rsvp }    = useRsvp({ lang, weddingData })

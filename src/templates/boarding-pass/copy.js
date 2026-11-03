@@ -16,6 +16,7 @@ export const LABELS = {
 
 export const TXT = {
   az: {
+    flightPrefix: 'DT',
     airline: 'DIGITOY AIR',
     cls: 'Birinci sinif',
     pax: 'Sərnişinlər',
@@ -33,6 +34,7 @@ export const TXT = {
     parAvion: 'PAR AVION',
   },
   en: {
+    flightPrefix: 'DT',
     airline: 'DIGITOY AIR',
     cls: 'First class',
     pax: 'Passengers',
@@ -50,6 +52,7 @@ export const TXT = {
     parAvion: 'PAR AVION',
   },
   ru: {
+    flightPrefix: 'DT',
     airline: 'DIGITOY AIR',
     cls: 'Первый класс',
     pax: 'Пассажиры',
@@ -70,6 +73,7 @@ export const TXT = {
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
+  ['flightPrefix', 'hero', 'Reys nömrəsinin başlanğıcı'],
   ['airline', 'hero', 'Aviaşirkət (bilet başlığı)'],
   ['cls', 'hero', 'Bilet — sinif'],
   ['pax', 'hero', 'Bilet — «Sərnişinlər» (cütlük)'],
@@ -86,3 +90,12 @@ export const FIELDS = [
   ['table', 'seating', 'Masa nömrəsinin yazısı'],
   ['parAvion', 'guestbook', 'Məktub möhürü'],
 ]
+
+/* Ad günü versiyası — tək nəfər üçün (cütlük mətnlərinin əvəzi) */
+export const VARIANTS = {
+  birthday: {
+    az: { cls: 'Ad günü reysi' },
+    en: { cls: 'Birthday flight' },
+    ru: { cls: 'Рейс ко дню рождения' },
+  },
+}

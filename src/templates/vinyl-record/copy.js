@@ -16,6 +16,9 @@ export const LABELS = {
 
 export const TXT = {
   az: {
+    arc: 'DIGITOY RECORDS · STEREO · 33⅓ RPM',
+    catNo: 'DTR-',
+    rpm: '33⅓',
     label: 'Digitoy Records',
     stereo: 'STEREO',
     vu: 'VU',
@@ -24,6 +27,9 @@ export const TXT = {
     table: 'Masa',
   },
   en: {
+    arc: 'DIGITOY RECORDS · STEREO · 33⅓ RPM',
+    catNo: 'DTR-',
+    rpm: '33⅓',
     label: 'Digitoy Records',
     stereo: 'STEREO',
     vu: 'VU',
@@ -32,6 +38,9 @@ export const TXT = {
     table: 'Table',
   },
   ru: {
+    arc: 'DIGITOY RECORDS · STEREO · 33⅓ RPM',
+    catNo: 'DTR-',
+    rpm: '33⅓',
     label: 'Digitoy Records',
     stereo: 'STEREO',
     vu: 'VU',
@@ -43,6 +52,9 @@ export const TXT = {
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
+  ['arc', 'hero', 'Plastinkanın dairəvi yazısı'],
+  ['catNo', 'hero', 'Kataloq nömrəsinin başlanğıcı'],
+  ['rpm', 'program', 'Tərəfdəki RPM yazısı'],
   ['label', 'hero', 'Səsyazma studiyası (yuxarı panel və alt imza)'],
   ['stereo', 'hero', '«STEREO» nişanı'],
   ['vu', 'countdown', 'VU göstəricisinin yazısı'],
@@ -50,3 +62,12 @@ export const FIELDS = [
   ['side', 'seating', '«Tərəf» sözü'],
   ['table', 'seating', 'Masa nömrəsinin yazısı'],
 ]
+
+/* Ad günü versiyası — tək nəfər üçün (cütlük mətnlərinin əvəzi) */
+export const VARIANTS = {
+  birthday: {
+    az: { label: 'Ad Günü Records', arc: 'AD GÜNÜ RECORDS · STEREO · 33⅓ RPM' },
+    en: { label: 'Birthday Records', arc: 'BIRTHDAY RECORDS · STEREO · 33⅓ RPM' },
+    ru: { label: 'Birthday Records', arc: 'BIRTHDAY RECORDS · STEREO · 33⅓ RPM' },
+  },
+}

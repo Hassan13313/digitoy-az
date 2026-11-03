@@ -62,3 +62,12 @@ export const FIELDS = [
   ['admit', 'seating', 'Bilet — «Bir nəfərlik»'],
   ['table', 'seating', 'Masa nömrəsinin yazısı'],
 ]
+
+/* Ad günü versiyası — tək nəfər üçün (cütlük mətnlərinin əvəzi) */
+export const VARIANTS = {
+  birthday: {
+    az: { star: 'Baş rolda {names}', rest1: 'Ssenari: Həyat', rest2: 'Rejissor: Arzular', rest3: 'Musiqi: Dostların gülüşü' },
+    en: { star: 'Starring {names}', rest1: 'Written by Life', rest2: 'Directed by Dreams', rest3: 'Music by Friends’ Laughter' },
+    ru: { star: 'В главной роли {names}', rest1: 'Сценарий: Жизнь', rest2: 'Режиссёр: Мечты', rest3: 'Музыка: Смех друзей' },
+  },
+}

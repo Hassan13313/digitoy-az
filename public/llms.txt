@@ -1,7 +1,7 @@
 # DigiToy
 
 > Azərbaycanda rəqəmsal (elektron/online) toy dəvətnaməsi platforması.
-> Toy, nişan və digər tədbirlər üçün premium dəvətnamə səhifəsi hazırlanır:
+> Toy, nişan, xına gecəsi, ad günü, ildönümü, uşaq tədbirləri, korporativ və digər tədbirlər üçün premium dəvətnamə səhifəsi hazırlanır:
 > İştirak Təsdiqi (RSVP), oturma planı, QR kod ilə qonaq foto/video paylaşımı.
 
 DigiToy dəvətnaməni bir linkə çevirir. Cütlük şablon seçir, məlumatları
@@ -19,6 +19,21 @@ açır — heç bir tətbiq quraşdırmadan.
 - [Ana səhifə](https://digitoy.az/): xidmətin təsviri, paketlər, tez-tez verilən suallar
 - [Şablonlar](https://digitoy.az/templates): bütün dəvətnamə dizaynları və canlı önbaxış
 - [Nümunə dəvətnamə](https://digitoy.az/demo): hazır dəvətnamənin canlı nümunəsi
+
+## Tədbirə görə şablonlar
+
+- [Toy və Nişan Dəvətnaməsi](https://digitoy.az/sablonlar/toy-nisan): Toy və nişan üçün online dəvətnamə şablonları. Hər dizaynın öz açılışı, şrifti və rəng dili var. Canlı önbaxışa baxın, bəyəndiyinizi seçin, linki qonaqlarınıza WhatsApp ilə göndərin.
+- [Xına Gecəsi Dəvətnaməsi](https://digitoy.az/sablonlar/xina-gecesi): Xına gecəsi üçün milli motivli online dəvətnamə şablonları: qırmızı duvaq, xonça, kəlağayı, buta və şam işığı. Gəlinin adı, tarix və məkan bir linkdə.
+- [Ad Günü Dəvətnaməsi](https://digitoy.az/sablonlar/ad-gunu): Böyüklər üçün ad günü dəvətnaməsi şablonları: minik talonu, kino premyerası, vinil plastinka, qəzet və modern afişa. Hər biri tək nəfərin adı və yaşı üçün hazırlanıb.
+- [İldönümü Dəvətnaməsi](https://digitoy.az/sablonlar/ildonumu): Toy ildönümü üçün online dəvətnamə şablonları: gümüş və qızıl toy, birinci il, retro polaroid və sevgi məktubları. Birlikdə keçirdiyiniz illər səhifənin mərkəzindədir.
+- [Uşaq Ad Günü Dəvətnaməsi](https://digitoy.az/sablonlar/usaq-ad-gunu): Uşaq ad günü üçün online dəvətnamə şablonları: nağıl kitabı, kosmos səfəri, sirk, dinozavr macərası və rəngli şarlar. Uşağın adı və yaşı ilə, açılışı oyun kimi.
+- [Sünnət Toyu Dəvətnaməsi](https://digitoy.az/sablonlar/sunnet-toyu): Sünnət toyu üçün online dəvətnamə şablonları: balaca şahzadə, komiks qəhrəmanı, maşallah, balaca pilot və futbol ulduzu. Oğlanın adı və yaşı ilə hazır dizaynlar.
+- [Baby Shower Dəvətnaməsi](https://digitoy.az/sablonlar/baby-shower): Baby shower və cins açıqlama (gender reveal) üçün online dəvətnamə şablonları: pastel çiçəklər, ayıcıq, leylək məktubu və beşik oyuncağı. Qonaqlar iştirakını bir toxunuşla bildirir.
+- [Korporativ Dəvətnamə](https://digitoy.az/sablonlar/korporativ): Korporativ tədbirlər üçün online dəvətnamə şablonları: qala gecəsi, konfrans, mükafat mərasimi, vizit kart və neon parti. Təşkilatçının adı, proqram və qonaq təsdiqi bir səhifədə.
+- [Məzuniyyət Dəvətnaməsi](https://digitoy.az/sablonlar/mezuniyyet): Məzuniyyət və son zəng gecəsi üçün online dəvətnamə şablonları: papaq atma, xatirə albomu, son zəng, məktəb lövhəsi və kağız təyyarə. Sinif yoldaşlarınıza bir linklə göndərin.
+- [Açılış Dəvətnaməsi](https://digitoy.az/sablonlar/acilis): Mağaza, kafe, salon və qalereya açılışı üçün online dəvətnamə şablonları: lentin kəsilməsi, bistro lövhəsi, qalxan jalüzi, qutu açılışı və qalereya. Ünvan və xəritə bir linkdə.
+- [Bayram Gecəsi Dəvətnaməsi](https://digitoy.az/sablonlar/bayram-gecesi): Novruz, Yeni il və bayram gecələri üçün online dəvətnamə şablonları: tonqal, səməni, gecə yarısı saatı, qar kürəsi və maskarad balı. Ailəniz və dostlarınız üçün bir link.
+- [Qız Gecəsi Dəvətnaməsi](https://digitoy.az/sablonlar/qiz-gecesi): Qız gecəsi üçün online dəvətnamə şablonları: çəhrayı şampan, disko kürəsi, pijama və spa, Paris gecəsi və boho gün batımı. Rəfiqələrinizə bir linklə göndərin.
 
 ## Bələdçilər və dəvətnamə mətnləri
 

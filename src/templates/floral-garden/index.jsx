@@ -453,7 +453,7 @@ export default function FloralGardenTemplate({
   const autoPlay  = shouldAutoPlay(invMusic)
 
   /* ── Hook-lar: bütün biznes məntiqi ── */
-  const cd       = useCountdown({ date: weddingData.date, time: weddingData.time, lang, eventType: weddingData.eventType, eventName: weddingData.eventName })
+  const cd       = useCountdown({ date: weddingData.date, time: weddingData.time, lang, eventType: weddingData.eventType, eventName: weddingData.eventName, adminStrings })
   const timeline = useTimeline({ lang, eventType: weddingData.eventType, programSteps: weddingData.programSteps })
   const { inputRef: seatInputRef, ...seating } = useSeating({ seatingPlan: weddingData.seatingPlan, lang })
   const { inputRef: rsvpInputRef, ...rsvp } = useRsvp({ lang, weddingData })
@@ -686,10 +686,10 @@ export default function FloralGardenTemplate({
                   )}
                   <div style={{ display: 'flex', gap: 8, marginTop: 18, flexWrap: 'wrap' }}>
                     {dirUrl && <a data-press href={dirUrl} target="_blank" rel="noopener noreferrer" style={pill(TH, true)}>{tr.inv_directions_btn}</a>}
-                    {mapUrl && <a data-press href={mapUrl} target="_blank" rel="noopener noreferrer" style={pill(TH, !dirUrl)}>Maps</a>}
-                    {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={pill(TH, false)}>Waze</a>}
+                    {mapUrl && <a data-press href={mapUrl} target="_blank" rel="noopener noreferrer" style={pill(TH, !dirUrl)}>{tr.inv_btn_maps}</a>}
+                    {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={pill(TH, false)}>{tr.inv_btn_waze}</a>}
                     {weddingData.appleMapsUrl && (
-                      <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={pill(TH, false)}>Apple</a>
+                      <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={pill(TH, false)}>{tr.inv_btn_apple}</a>
                     )}
                   </div>
                 </Bed>

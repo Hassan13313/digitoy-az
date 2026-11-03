@@ -17,7 +17,7 @@ import { applyThemeOverrides, mergeSectionLabels, withStringOverrides, makeLabel
 import { directionsUrl, openMapUrl } from './geo'
 import { makeOpeningText, phrase } from './openingSpec'
 import { copyPrefix } from './copyText'
-import { parseAge } from './kids'
+import { parseAge, ageSentence, galleryDesc } from './kids'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    useInvitation — premium redizayn şablonlarının ORTAQ MƏNTİQ QATI (UI yox)
@@ -48,11 +48,15 @@ export function useInvitation({
 }) {
   const theme = applyThemeOverrides(baseTheme, adminOverrides)
   const adminStrings = adminOverrides?.strings || null
-  const tr = withStringOverrides(t[lang] || t.az, adminStrings, lang)
+  /* Cütlük olmayan tədbirdə «…bəy və gəlinlə paylaşın» yazılmır — admin bu sətri
+     dəyişibsə onun mətni qalır (bax kids.js › galleryDesc) */
+  const isWedding = ['toy', 'nishan'].includes(weddingData.eventType)
+  const dict = t[lang] || t.az
+  const tr = withStringOverrides(isWedding ? dict : { ...dict, inv_gallery_desc: galleryDesc(null, dict, lang) }, adminStrings, lang)
   const L = makeLabelResolver(mergeSectionLabels(sectionLabels, adminOverrides), lang)
   const [opened, setOpened] = useState(startOpened)
 
-  const isCouple = ['toy', 'nishan'].includes(weddingData.eventType)
+  const isCouple = isWedding
   const isCorp   = ['corporate', 'other'].includes(weddingData.eventType)
   const eventLabels = {
     toy: tr.event_toy, nishan: tr.event_nishan,
@@ -72,7 +76,7 @@ export function useInvitation({
   const autoPlay = shouldAutoPlay(invMusic)
 
   /* ── 7 HOOK — biznes məntiqinin yeganə mənbəyi ── */
-  const cd       = useCountdown({ date: weddingData.date, time: weddingData.time, lang, eventType: weddingData.eventType, eventName: weddingData.eventName })
+  const cd       = useCountdown({ date: weddingData.date, time: weddingData.time, lang, eventType: weddingData.eventType, eventName: weddingData.eventName, adminStrings })
   const timeline = useTimeline({ lang, eventType: weddingData.eventType, programSteps: weddingData.programSteps })
   const { inputRef: seatInputRef, ...seating } = useSeating({ seatingPlan: weddingData.seatingPlan, lang })
   const { inputRef: rsvpInputRef, ...rsvp }    = useRsvp({ lang, weddingData })
@@ -107,7 +111,7 @@ export function useInvitation({
   const single = weddingData.eventName || weddingData.brideName || ''
 
   return {
-    theme, tr, L, K: (key) => L(key, 'kicker', null), lang,
+    theme, tr, L, K: (key) => L(key, 'kicker', null), lang, eventType: weddingData.eventType,
     opened, setOpened,
     isCouple, isCorp, eventLabel, ot, S, showStory,
     cd, timeline, seating, seatInputRef, rsvp, rsvpInputRef, gbook, gallery,
@@ -119,6 +123,9 @@ export function useInvitation({
     /* Ad günü: istəyə bağlı yaş (1–120), yoxdursa null — bax _shared/kids.js */
     /* ad günü / sünnət → yaş; ildönümü → neçənci il */
     age: ['birthday', 'sunnet', 'anniversary'].includes(weddingData.eventType) ? parseAge(weddingData.age) : null,
+    /* Ad günü versiyasında adın altındakı sətir: «30 yaşı tamam olur» */
+    ageLine: weddingData.eventType === 'birthday' ? ageSentence(parseAge(weddingData.age), lang, adminStrings) : '',
+    strings: adminStrings,
     groom: weddingData.groomName || '', bride: weddingData.brideName || '',
     /* Adlar arasındakı bağlayıcı: premium dizaynlar «&» işlədir; admin
        «Mətnlər › Hero › «və» bağlayıcısı»-nı yazıbsa onun mətni (TemplateShell

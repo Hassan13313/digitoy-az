@@ -11,7 +11,7 @@
    yükləyir) — reyestr şablon chunk-larına düşmür.
    ⚠ React YOXDUR, uzantılar qəsdən yazılıb — node testləri birbaşa yükləyir.
    ───────────────────────────────────────────────────────────────────────── */
-import { copyPrefix } from './_shared/copyText.js'
+import { copyPrefix, variantCopy } from './_shared/copyText.js'
 import * as orientalLuxe from './oriental-luxe/copy.js'
 import * as whiteElegance from './white-elegance/copy.js'
 import * as vinylRecord from './vinyl-record/copy.js'
@@ -151,17 +151,19 @@ export function templateLabels(templateId) {
 /**
  * Şablonun admin sahələri, FIELDS sırası ilə:
  * `[{ key: 'tpl_boarding_pass.pax', section: 'hero', label, hint, defaults: {az,en,ru} }]`
+ * `eventType` — placeholder-lar həmin tədbirin versiyasından gəlir (ad günü ≠ toy).
  */
-export function templateCopyFields(templateId) {
+export function templateCopyFields(templateId, eventType = null) {
   const mod = REGISTRY[templateId]
   if (!mod) return []
   const prefix = copyPrefix(templateId)
+  const txt = variantCopy(mod.TXT, mod.VARIANTS, eventType)
   return mod.FIELDS.map(([k, section, label, hint]) => ({
     key: prefix + k,
     section,
     label,
     hint: hint || null,
-    defaults: { az: mod.TXT.az[k], en: mod.TXT.en[k], ru: mod.TXT.ru[k] },
+    defaults: { az: txt.az[k], en: txt.en[k], ru: txt.ru[k] },
   }))
 }
 

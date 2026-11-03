@@ -1,4 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTemplate } from '../TemplateProvider'
+import { withStringOverrides } from '../../data/adminOverrides'
 import { Music } from 'lucide-react'
 import { buildWhatsAppUrl } from '../../utils/whatsappOrder'
 import { WHATSAPP_NUMBER } from '../../data/constants'
@@ -18,7 +20,7 @@ import OrderLegalNote from '../../components/legal/OrderLegalNote'
    brend yaşılıdır (tanınma üçün bütün şablonlarda eyni qalır).
    ───────────────────────────────────────────────────────────────────────── */
 
-const UI = {
+export const UI = {
   az: {
     orderKicker: 'Digitoy.az · Premium',
     orderTitle:  'Dəvətnaməniz Hazırdır!',
@@ -48,7 +50,11 @@ const UI = {
   },
 }
 
-const tr = (lang) => UI[lang] || UI.az
+/* Admin override-ları (`ui.<açar>`) — sifariş kartı və musiqi balonu */
+const useTr = (lang) => {
+  const { strings } = useTemplate()
+  return withStringOverrides(UI[lang] || UI.az, strings, lang, 'ui.')
+}
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SİFARİŞ CTA — yalnız builder önbaxışında görünür.
@@ -61,7 +67,7 @@ const tr = (lang) => UI[lang] || UI.az
 export function OrderCta({ theme, weddingData, lang = 'az', pageSlug, isDemoMode, effectiveSlug, serif }) {
   if (pageSlug || isDemoMode) return null
 
-  const t = tr(lang)
+  const t = useTr(lang)
   const waUrl = buildWhatsAppUrl(weddingData, lang, WHATSAPP_NUMBER, effectiveSlug, '')
 
   /* Bölmə fonu şablondan asılıdır → kiçik mətnlərin rəngini ona görə seç.
@@ -169,7 +175,7 @@ export function OrderCta({ theme, weddingData, lang = 'az', pageSlug, isDemoMode
    başlayır. Audio engine `useMusicPlayer` hook-udur, burada yeni engine yoxdur.
    ═══════════════════════════════════════════════════════════════════════════ */
 export function MusicStartBubble({ theme, lang = 'az', visible, onStart }) {
-  const t = tr(lang)
+  const t = useTr(lang)
 
   /* ⚠ Phase 27.1: bubble YALNIZ "başlat" köməkçisidir. Musiqi artıq çalırsa
      klik səsi DAYANDIRMIR/susdurmur — çağıran `playing` yoxlaması ilə

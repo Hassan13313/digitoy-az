@@ -196,3 +196,172 @@ function acrStory($raw): ?array {
 
     return $out ?: null;
 }
+
+/* ── Ağ siyahılar — müştəri tərəfdəki `adminOverrides.js` ilə UYĞUN olmalıdır ──
+   tests/admin_whitelists_test.mjs siyahıları müqayisə edir. */
+const THEME_KEYS = ['primary', 'secondary', 'accent', 'background', 'text'];
+
+/* `src/templates/templateConfig.js` › FONT_STACKS açarları.
+   ⚠ 2026-11: yeni şablonların şriftləri siyahıda yox idi — admin onları seçəndə
+   saxlama səssizcə atırdı. */
+const FONT_KEYS = [
+    'cormorant', 'newsreader', 'baskerville', 'instrument', 'marcellus', 'italiana', 'amiri', 'cinzel',
+    'archivo', 'dmsans', 'inter', 'spacegrotesk', 'jetbrains', 'jost', 'bebas', 'notoDisplay',
+    'hanken', 'ballet', 'fraunces', 'mulish', 'unbounded', 'interTight', 'spectral', 'sourceSerif',
+    'commissioner', 'reemKufi', 'alegreya', 'vollkorn', 'geologica', 'josefin', 'onest', 'oswald',
+    'plexSans', 'plexMono', 'bigShoulders', 'playfair', 'youngSerif', 'montserrat', 'cormorantSC', 'ebGaramond',
+    'imperial', 'libreBodoni', 'literata', 'oldStandard', 'libreCaslon', 'raleway', 'cormorantUnicase', 'bonaNova',
+    'tektur', 'exo2', 'oi', 'podkova', 'shantell', 'andika', 'mplusRounded', 'pacifico',
+    'lora', 'greatVibes', 'alegreyaSans', 'badScript', 'playfairSC', 'merriweather', 'spectralSC', 'balsamiq',
+    'nunitoSans', 'montserratAlt', 'nunito', 'cormorantInfant', 'caveat', 'comfortaa', 'playpen', 'ysabeauInfant',
+    'interTightBold', 'lobster', 'jura', 'vollkornSC', 'brygada', 'piazzolla', 'didact', 'marmelad',
+    'pangolin', 'bellotaText', 'alegreyaSC', 'firaXC', 'firaC', 'comforterBrush', 'robotoSerif', 'notoSans',
+    'comforter', 'amatic', 'ysabeauOffice', 'ysabeau', 'martianMono', 'bonaNovaSC', 'robotoCondensed', 'ibmPlexMono',
+    'alumniSans', 'notoSansDisplay', 'ibmPlexSerif', 'ibmPlexSans', 'robotoSlab', 'bellota', 'cormorantFull', 'exo2Heavy',
+    'alumniPin', 'notoSerifL',
+];
+
+/* `src/data/adminOverrides.js` › CONTENT_SECTIONS açarları (+ hekayə başlığı) */
+const LABEL_KEYS = [
+    'hero', 'countdown', 'venue', 'program', 'dresscode',
+    'seating', 'gallery', 'rsvp', 'guestbook', 'footer', 'lovestory',
+];
+
+/* `src/data/sections.js` ilə eyni açarlar (Phase 35).
+   ⚠ Phase 45: 'lovestory' əlavə edildi. Əvvəl siyahıda YOX idi və admin
+   paneldə «Bölmələr» saxlananda `sections` obyekti bu siyahı ilə yenidən
+   qurulurdu — müştərinin açdığı «Bizim Hekayəmiz» (`lovestory: true`)
+   SƏSSİZCƏ silinir, hekayə dəvətnamədən itirdi; admin onu aça da bilmirdi. */
+const SECTION_KEYS = [
+    'venue', 'countdown', 'program', 'dresscode',
+    'seating', 'gallery', 'rsvp', 'guestbook', 'music', 'lovestory',
+];
+
+const SCALE_MIN = 0.85;
+const SCALE_MAX = 1.25;
+const MAX_TEXT  = 160;
+
+/** Nəzarət simvollarını at, boşluqları yığ, kəs. Boş qalsa null. */
+function cleanText($v, int $max = MAX_TEXT): ?string {
+    if (!is_string($v)) return null;
+    $v = preg_replace('/[\x00-\x1F\x7F]+/u', ' ', $v);
+    $v = preg_replace('/\s+/u', ' ', (string)$v);
+    $v = trim((string)$v);
+    return $v === '' ? null : mb_substr($v, 0, $max);
+}
+
+function cleanColor($v): ?string {
+    if (!is_string($v)) return null;
+    $v = trim($v);
+    return preg_match('/^#[0-9A-Fa-f]{6}$/', $v) ? strtoupper($v) : null;
+}
+
+function cleanScale($v): ?float {
+    if (!is_numeric($v)) return null;
+    $n = round((float)$v, 2);
+    if ($n < SCALE_MIN) $n = SCALE_MIN;
+    if ($n > SCALE_MAX) $n = SCALE_MAX;
+    return $n;
+}
+
+/**
+ * Admin override-larının TAM süzgəci: rənglər, şriftlər, bölmə mətnləri, sətirlər,
+ * açılış və hekayə. Etibarsız/naməlum hər şey atılır.
+ * Həm dəvətnamə (admin_invitation_content.php), həm şablon səviyyəsi
+ * (admin_template_content.php) bunu işlədir.
+ */
+function acrCleanOverrides(array $inAdmin): array {
+    $clean = [];
+
+    /* ── rənglər ── */
+    if (is_array($inAdmin['theme'] ?? null)) {
+        $t = [];
+        foreach (THEME_KEYS as $k) {
+            $c = cleanColor($inAdmin['theme'][$k] ?? null);
+            if ($c !== null) $t[$k] = $c;
+        }
+        if ($t) $clean['theme'] = $t;
+    }
+
+    /* ── şriftlər ── */
+    if (is_array($inAdmin['fonts'] ?? null)) {
+        $f = [];
+        foreach (['heading', 'body'] as $k) {
+            $v = $inAdmin['fonts'][$k] ?? null;
+            if (is_string($v) && in_array($v, FONT_KEYS, true)) $f[$k] = $v;
+        }
+        foreach (['headingScale', 'bodyScale'] as $k) {
+            $n = cleanScale($inAdmin['fonts'][$k] ?? null);
+            /* 1.0 = dəyişiklik yoxdur → saxlamırıq (JSON şişməsin) */
+            if ($n !== null && abs($n - 1.0) > 0.001) $f[$k] = $n;
+        }
+        if ($f) $clean['fonts'] = $f;
+    }
+
+    /* ── bölmə mətnləri (AZ/EN/RU) ── */
+    if (is_array($inAdmin['labels'] ?? null)) {
+        $L = [];
+        foreach ($inAdmin['labels'] as $key => $entry) {
+            if (!in_array($key, LABEL_KEYS, true) || !is_array($entry)) continue;
+            $e = [];
+
+            $kick = cleanText($entry['kicker'] ?? null, 40);
+            /* ⚠ BÖYÜK HƏRF: səhifə lang="az"-dır, CSS `text-transform: uppercase`
+               ingilis «i»-ni «İ»-yə çevirir (EDITION → EDİTİON). Mənbədə böyük
+               saxlayanda problem yaranmır — eyni qayda şablonlarda da var. */
+            if ($kick !== null) $e['kicker'] = mb_strtoupper($kick, 'UTF-8');
+
+            if (is_array($entry['title'] ?? null)) {
+                $title = [];
+                foreach (['az', 'en', 'ru'] as $lg) {
+                    $t = cleanText($entry['title'][$lg] ?? null);
+                    if ($t !== null) $title[$lg] = $t;
+                }
+                if ($title) $e['title'] = $title;
+            }
+
+            if ($e) $L[$key] = $e;
+        }
+        if ($L) $clean['labels'] = $L;
+    }
+
+    /* ── sətirlər (Phase 42.1 · #7) ──
+       ⚠ Açar ağ siyahısı BURADA saxlanılmır: kataloq müştəri tərəfdədir
+       (`src/data/adminOverrides.js` › STRING_CATALOG) və orada da yoxlanılır.
+       Server tərəfdə format yoxlanılır — açar adı təhlükəsiz simvollardan
+       ibarət olmalı, dəyər sətir və məhdud uzunluqda. Beləliklə kataloq
+       genişlənəndə PHP-ni hər dəfə yeniləmək lazım gəlmir, amma zibil də keçmir. */
+    if (is_array($inAdmin['strings'] ?? null)) {
+        $S = [];
+        foreach ($inAdmin['strings'] as $key => $val) {
+            /* nöqtəli prefiks (rsvp.yes) və adi açar (inv_location) */
+            if (!preg_match('/^[a-z][a-z0-9_]*(\.[a-z][a-zA-Z0-9_]*)?$/i', (string)$key)) continue;
+            if (!is_array($val)) continue;
+            $bucket = [];
+            foreach (['az', 'en', 'ru'] as $lg) {
+                $t = cleanText($val[$lg] ?? null, 400);
+                if ($t !== null) $bucket[$lg] = $t;
+            }
+            if ($bucket) $S[$key] = $bucket;
+        }
+        if ($S) $clean['strings'] = $S;
+    }
+
+    /* ── açılış ekranı və «Bizim Hekayəmiz» (Phase 45) ── */
+    $opening = acrOpening($inAdmin['opening'] ?? null);
+    if ($opening !== null) $clean['opening'] = $opening;
+    $story = acrStory($inAdmin['story'] ?? null);
+    if ($story !== null) $clean['story'] = $story;
+
+    return $clean;
+}
+
+/** Bölmə görünürlüyü (Phase 35 açarı): yalnız məlum açarlar, boşdursa null. */
+function acrCleanSections($inSections): ?array {
+    if (!is_array($inSections)) return null;
+    $s = [];
+    foreach (SECTION_KEYS as $k) {
+        if (array_key_exists($k, $inSections)) $s[$k] = (bool)$inSections[$k];
+    }
+    return $s ?: null;
+}

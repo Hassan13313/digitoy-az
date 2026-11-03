@@ -16,12 +16,6 @@ export const varsity = (C) => ((size) => ({
   textShadow: `0 0 0 ${C.BLUE_DD}, ${size * 0.05}px ${size * 0.05}px 0 ${C.BLUE_DD}`,
 }))
 
-/* İmzalar (açılışda bir-bir görünür) */
-export const SIGNS = {
-  az: ['Uğurlar!', 'Unutma bizi!', 'Sən bacarırsan!', 'Ən yaxşı sinif!'],
-  en: ['Good luck!', "Don’t forget us!", 'You got this!', 'Best class ever!'],
-  ru: ['Удачи!', 'Не забывай нас!', 'У тебя всё получится!', 'Лучший класс!'],
-}
 
 /* Ad uzunluğuna görə ölçü */
 export function nameSize(text) {

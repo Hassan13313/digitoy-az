@@ -70,3 +70,21 @@ export const FIELDS = [
   ['table', 'seating', 'Masa nömrəsinin yazısı'],
   ['mates', 'seating', '«Masa yoldaşları»'],
 ]
+
+/* Ad günü versiyası — tək nəfər üçün (cütlük mətnlərinin əvəzi) */
+export const VARIANTS = {
+  birthday: {
+    az: {
+      lead: '{venue} — {date}. Redaksiyamıza daxil olan xəbərə görə, {names} üçün ad günü məclisi{at} başlayacaq. Qonaqları musiqi, tort və unudulmaz bir axşam gözləyir. Ətraflı məlumat növbəti səhifələrdə.',
+      forecast: 'Günəşli. Tort ehtimalı — 100%.',
+    },
+    en: {
+      lead: '{venue} — {date}. Word has reached our newsroom that the birthday party for {names} will begin{at}. Guests can expect music, cake and an unforgettable evening. Full details on the following pages.',
+      forecast: 'Sunny. 100% chance of cake.',
+    },
+    ru: {
+      lead: '{venue} — {date}. Как стало известно редакции, день рождения {names} начнётся{at}. Гостей ждут музыка, торт и незабываемый вечер. Подробности на следующих страницах.',
+      forecast: 'Солнечно. Вероятность торта — 100%.',
+    },
+  },
+}

@@ -486,7 +486,7 @@ export default function RoyalGoldTemplate({
   const autoPlay  = shouldAutoPlay(invMusic)
 
   /* ── Hook-lar: bütün biznes məntiqi ── */
-  const cd       = useCountdown({ date: weddingData.date, time: weddingData.time, lang, eventType: weddingData.eventType, eventName: weddingData.eventName })
+  const cd       = useCountdown({ date: weddingData.date, time: weddingData.time, lang, eventType: weddingData.eventType, eventName: weddingData.eventName, adminStrings })
   const timeline = useTimeline({ lang, eventType: weddingData.eventType, programSteps: weddingData.programSteps })
   const { inputRef: seatInputRef, ...seating } = useSeating({ seatingPlan: weddingData.seatingPlan, lang })
   const { inputRef: rsvpInputRef, ...rsvp }    = useRsvp({ lang, weddingData })
@@ -764,10 +764,10 @@ export default function RoyalGoldTemplate({
                 )}
                 <div style={{ display: 'flex', gap: 8, marginTop: 22, flexWrap: 'wrap', justifyContent: 'center' }}>
                   {dirUrl && <a data-press href={dirUrl} target="_blank" rel="noopener noreferrer" style={btn(TH, true)}>{tr.inv_directions_btn}</a>}
-                  {mapUrl && <a data-press href={mapUrl} target="_blank" rel="noopener noreferrer" style={btn(TH, !dirUrl)}>Maps</a>}
-                  {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(TH, false)}>Waze</a>}
+                  {mapUrl && <a data-press href={mapUrl} target="_blank" rel="noopener noreferrer" style={btn(TH, !dirUrl)}>{tr.inv_btn_maps}</a>}
+                  {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(TH, false)}>{tr.inv_btn_waze}</a>}
                   {weddingData.appleMapsUrl && (
-                    <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(TH, false)}>Apple</a>
+                    <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(TH, false)}>{tr.inv_btn_apple}</a>
                   )}
                 </div>
               </Plate>

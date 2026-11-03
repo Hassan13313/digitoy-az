@@ -3,6 +3,8 @@ import { Check, Copy } from 'lucide-react'
 import SubpageHeader, { SubpageFooter } from '../public/SubpageHeader'
 import { LegalRelated } from '../public/legal'
 import { TemplatesCta } from '../public/templates'
+import { conceptPageFor } from '../../data/conceptPages'
+import { CONCEPT_META } from '../../templates/templateConfig'
 import { FOCUS } from '../public/shared'
 import { GUIDES, findGuide } from '../../data/guides'
 import { spaClick } from '../../utils/siteRoutes'
@@ -116,7 +118,18 @@ function Body({ blocks = [] }) {
   })
 }
 
+/* Bələdçi → həmin tədbirin şablon səhifəsi (daxili link, /sablonlar/<slug>) */
+const GUIDE_CONCEPT = {
+  'toy-devetnamesi-metnleri': 'toy',
+  'nisan-devetnamesi-metnleri': 'toy',
+  'xina-devetnamesi-metnleri': 'xina',
+  'ad-gunu-devetnamesi-metnleri': 'birthday',
+  'korporativ-devetname-metnleri': 'corporate',
+}
+
 export default function GuidePage({ slug, onBack, onCreate }) {
+  const conceptPage = conceptPageFor(GUIDE_CONCEPT[slug])
+  const conceptLink = conceptPage ? { href: `/sablonlar/${CONCEPT_META[GUIDE_CONCEPT[slug]].slug}`, label: conceptPage.h1.az } : null
   const meta = findGuide(slug)
   const [loaded, setLoaded] = useState(() => {
     const d = readInline(slug)
@@ -235,6 +248,12 @@ export default function GuidePage({ slug, onBack, onCreate }) {
 
             <div className="mt-16 space-y-10">
               {data.cta && <TemplatesCta lang="az" title={data.cta.title} text={data.cta.text} buttonLabel="Dəvətnaməni hazırla" onCreate={onCreate} />}
+              {conceptLink && (
+                <p className="text-[16px] text-brown-dark">
+                  Bu mətnlərə uyğun dizaynlar:{' '}
+                  <a href={conceptLink.href} onClick={(e) => spaClick(e, conceptLink.href)} className="underline decoration-beige-dark underline-offset-4 hover:text-ink">{conceptLink.label}</a>
+                </p>
+              )}
               {related.length > 0 && <LegalRelated lang="az" title="Digər bələdçilər" items={related} onNavigate={nav} />}
             </div>
           </article>

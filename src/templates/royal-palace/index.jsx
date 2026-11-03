@@ -344,9 +344,9 @@ export default function RoyalPalaceTemplate(props) {
                 {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontStyle: 'italic', fontSize: 16.5, color: C.MUTED }}>{weddingData.venueNote}</div>}
                 <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
                   {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(C, true, capsF)}>{tr.inv_directions_btn}</a>}
-                  {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C, !inv.dirUrl, capsF)}>Maps</a>}
-                  {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C, false, capsF)}>Waze</a>}
-                  {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C, false, capsF)}>Apple</a>}
+                  {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C, !inv.dirUrl, capsF)}>{tr.inv_btn_maps}</a>}
+                  {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C, false, capsF)}>{tr.inv_btn_waze}</a>}
+                  {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C, false, capsF)}>{tr.inv_btn_apple}</a>}
                 </div>
               </Hall>
             )}

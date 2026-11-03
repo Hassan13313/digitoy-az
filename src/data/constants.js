@@ -45,16 +45,17 @@ export const DRESS_CODE_PALETTES = [
    (ad günü kimi `brideName`) qrupundadır, ona görə cütlük/korporativ
    siyahılarına (client + server) toxunmaq lazım olmadı. */
 export const EVENT_TYPES = [
+  /* Sıra şablon bölmələri ilə eynidir (templateConfig › CONCEPT_META) */
   { id: 'toy', icon: 'Heart' },
   { id: 'nishan', icon: 'Diamond' },
   { id: 'xina', icon: 'Flame' },
   { id: 'birthday', icon: 'Cake' },
+  { id: 'anniversary', icon: 'HeartHandshake' },
   { id: 'sunnet', icon: 'Crown' },
   { id: 'baby', icon: 'Baby' },
-  { id: 'anniversary', icon: 'HeartHandshake' },
+  { id: 'corporate', icon: 'Briefcase' },
   { id: 'graduation', icon: 'GraduationCap' },
   { id: 'bachelorette', icon: 'PartyPopper' },
-  { id: 'corporate', icon: 'Briefcase' },
   { id: 'other', icon: 'Sparkles' },
 ]
 

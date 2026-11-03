@@ -23,7 +23,8 @@ const GuidePage        = lazy(() => import('./components/guides/GuidePage'))
 import TemplateRenderer from './templates/TemplateRenderer'
 import { defaultWedding } from './data/defaultWedding'
 import { demoInvitation, demoGuestbook, demoForConcept } from './data/demoInvitation'
-import { DEFAULT_TEMPLATE_ID, resolveTemplateId, isTemplateSelectable, getTemplateConfig } from './templates/templateConfig'
+import { conceptPageFor } from './data/conceptPages'
+import { DEFAULT_TEMPLATE_ID, resolveTemplateId, isTemplateSelectable, getTemplateConfig, conceptEventType, conceptAcceptsEvent, isMultiConcept, previewConceptOf, templatePreviewPath, conceptBySlug, CONCEPT_META } from './templates/templateConfig'
 import { getInvitation, adminLogin, getDraftByCode } from './utils/api'
 import { unlockAudio } from './utils/audioUnlock'
 import ScrollProgress from './components/ui/ScrollProgress'
@@ -56,11 +57,11 @@ const HOME_TITLE = 'Online Dəvətnamə — Rəqəmsal və Elektron Toy Dəvətn
 const HOME_DESC  = 'Online dəvətnamə hazırlayın: toy, nişan və ad günü üçün rəqəmsal (elektron) dəvətnamə — İştirak Təsdiqi, oturma planı, QR foto paylaşımı. 59 ₼-dan.'
 const DEMO_TITLE = 'Online Dəvətnamə Nümunəsi — Rəqəmsal Toy Dəvətnaməsi | DigiToy'
 const DEMO_DESC  = 'Online dəvətnamə necə görünür? DigiToy rəqəmsal toy dəvətnaməsinin canlı nümunəsi: İştirak Təsdiqi, oturma planı, QR foto paylaşımı və premium dizayn bir arada.'
-const TEMPLATES_TITLE = 'Online Dəvətnamə Şablonları — Toy, Nişan, Ad Günü | DigiToy'
-const TEMPLATES_DESC  = 'Online dəvətnamə şablonları: klassik qızıl, botanik bağ, modern qara, gecə səması və daha çoxu. Toy, nişan və ad günü üçün hər birinin canlı önbaxışına baxın.'
+const TEMPLATES_TITLE = 'Online Dəvətnamə Şablonları — Toy, Nişan, Xına, Ad Günü | DigiToy'
+const TEMPLATES_DESC  = 'Onlarla online dəvətnamə dizaynı: toy, nişan, xına gecəsi, ad günü, ildönümü, uşaq ad günü, sünnət toyu, korporativ tədbir və daha çoxu. Hər birinin canlı önbaxışı var.'
 
 /* ── view → SEO konfiqurasiyası (title/description/canonical/OG/Twitter) ── */
-function getSEOConfig(view, { weddingData, slug, legalDoc, guideSlug } = {}) {
+function getSEOConfig(view, { weddingData, slug, legalDoc, guideSlug, templatesConcept } = {}) {
   switch (view) {
     /* Phase 52 — bələdçilər (seo.php eyni mətni public/guides/<slug>.json-dan oxuyur) */
     case 'guide': {
@@ -89,7 +90,11 @@ function getSEOConfig(view, { weddingData, slug, legalDoc, guideSlug } = {}) {
 
     /* Şablonlar vitrini — müştəriyə göndərilə bilən ictimai səhifə */
     case 'templates':
-      return { title: TEMPLATES_TITLE, description: TEMPLATES_DESC, path: '/templates', type: 'website' }
+      {
+        const page = conceptPageFor(templatesConcept)
+        if (page) return { title: page.title, description: page.description, path: `/sablonlar/${CONCEPT_META[templatesConcept].slug}`, type: 'website' }
+        return { title: TEMPLATES_TITLE, description: TEMPLATES_DESC, path: '/templates', type: 'website' }
+      }
 
     /* Şablon önbaxışı — yalnız daxili test marşrutu, indekslənmir */
     case 'template-preview':
@@ -193,6 +198,17 @@ const DEMO_TEMPLATE_ID = 'oriental-luxe'
 function parseTemplatePreviewId() {
   const match = window.location.pathname.match(/^\/demo\/template\/([^/?#]+)\/?$/)
   return match ? decodeURIComponent(match[1]) : null
+}
+
+/** ?tedbir=birthday — bir neçə bölməli şablonun versiyası (yoxdursa/etibarsızdırsa null) */
+function parsePreviewConcept(templateId) {
+  return previewConceptOf(templateId, new URLSearchParams(window.location.search).get('tedbir'))
+}
+
+/* ── /sablonlar/<slug> — tədbir üzrə şablon səhifəsi (SEO) ── */
+function parseConceptPage() {
+  const match = window.location.pathname.match(/^\/sablonlar\/([a-z0-9-]+)\/?$/)
+  return match ? conceptBySlug(match[1]) : null
 }
 
 function parseInviteSlug() {
@@ -333,6 +349,11 @@ export default function App() {
   const [entering,    setEntering]    = useState(false)
   /* Şablon önbaxışı (/demo/template/:id) — yalnız daxili test */
   const [previewTemplateId, setPreviewTemplateId] = useState(DEFAULT_TEMPLATE_ID)
+  /* Bir neçə bölməli dizaynın hansı versiyası (?tedbir=birthday) — null: əsas */
+  const [previewConcept, setPreviewConcept] = useState(null)
+  /* /sablonlar/<slug> — vitrinin tədbiri URL-dən oxunur; çip dəyişəndə URL
+     replaceState ilə yenilənir, bu sayğac yalnız yenidən render üçündür (SEO meta) */
+  const [, bumpTemplatesUrl] = useState(0)
   /* Önbaxışdan builder-ə qayıdanda bərpa olunan paket (Phase 27.1) */
   const [resumePackage, setResumePackage] = useState(null)
   /* «Paketlərə keç» — landing paket kartları ilə açılsın (Phase 27.4) */
@@ -345,7 +366,8 @@ export default function App() {
   const go = useCallback((path, state) => pushView(path, state, { view: viewRef.current }), [])
 
   /* Hər view dəyişəndə <head> meta-larını yenilə (title, description, OG, Twitter, canonical) */
-  useSEO(getSEOConfig(view, { weddingData, slug: adminSlug || parseInviteSlug().slug, legalDoc, guideSlug }))
+  const templatesConcept = view === 'templates' ? parseConceptPage() : null
+  useSEO(getSEOConfig(view, { weddingData, slug: adminSlug || parseInviteSlug().slug, legalDoc, guideSlug, templatesConcept }))
 
   /* ⚠ KRİTİK LOCALE DÜZƏLİŞİ (Phase 27): `<html lang>` statik olaraq "az" idi və
      dil dəyişəndə yenilənmirdi. CSS `text-transform: uppercase` element dilinə
@@ -457,14 +479,20 @@ export default function App() {
     const id = previewTemplateId
     if (!id || !isTemplateSelectable(id)) return
     const snap = readBuilderSnapshot()
-    saveBuilderSnapshot({ data: { ...(snap?.data || {}), templateId: id }, step: 1 })
+    /* Müştəri bu dizaynı hansı bölmədən seçibsə, tədbir növü də ona uyğun gəlir */
+    const prev = snap?.data || {}
+    const ev = conceptEventType(id, previewConcept)
+    const fresh = ![prev.brideName, prev.groomName, prev.eventName].some((v) => String(v || '').trim())
+    const eventPatch = ev && prev.eventType !== ev && !conceptAcceptsEvent(previewConcept || getTemplateConfig(id)?.concept, prev.eventType)
+      && (fresh || (previewConcept && isMultiConcept(id))) ? { eventType: ev } : {}
+    saveBuilderSnapshot({ data: { ...prev, templateId: id, ...eventPatch }, step: 1 })
     trackTemplateSelected(id, { source: 'preview_bar' })
     let ctx = null
     try { ctx = JSON.parse(sessionStorage.getItem('digitoy_preview_return') || 'null') } catch { /* private mode */ }
     if (ctx?.origin === 'builder' && ctx.pkg) { goBackFromPreview(); return }
     try { sessionStorage.removeItem('digitoy_preview_return') } catch { /* private mode */ }
     window.dispatchEvent(new CustomEvent('digitoy:packages'))
-  }, [previewTemplateId, goBackFromPreview])
+  }, [previewTemplateId, previewConcept, goBackFromPreview])
 
   /* Ana səhifəyə qayıdış (hüquqi səhifə, 404, deaktiv dəvətnamə) */
   const goHome = useCallback(() => {
@@ -491,8 +519,10 @@ export default function App() {
       const id = e?.detail?.id
       if (!id) return
       setPackagesIntent(false)
-      go(`/demo/template/${id}`)
-      setPreviewTemplateId(resolveTemplateId(id, { allowDisabled: true }))
+      const resolved = resolveTemplateId(id, { allowDisabled: true })
+      go(templatePreviewPath(id, e.detail.concept))
+      setPreviewTemplateId(resolved)
+      setPreviewConcept(previewConceptOf(resolved, e.detail.concept))
       setView('template-preview')
       window.scrollTo(0, 0)
     }
@@ -530,11 +560,13 @@ export default function App() {
       const path = window.location.pathname
       const previewId = parseTemplatePreviewId()
       if (previewId) {
-        setPreviewTemplateId(resolveTemplateId(previewId, { allowDisabled: true }))
+        const resolved = resolveTemplateId(previewId, { allowDisabled: true })
+        setPreviewTemplateId(resolved)
+        setPreviewConcept(parsePreviewConcept(resolved))
         setView('template-preview')
         return true
       }
-      if (/^\/templates\/?$/.test(path)) { setView('templates'); return true }
+      if (/^\/templates\/?$/.test(path) || parseConceptPage()) { setView('templates'); return true }
       if (path === '/preview/live') { setView('live-preview'); return true }
       if (path === '/demo') { setView('demo'); return true }
       if (path === '/') {
@@ -604,7 +636,9 @@ export default function App() {
        ⚠ /demo-dan ƏVVƏL yoxlanılır ki, alt-marşrut tutulsun. */
     const previewId = parseTemplatePreviewId()
     if (previewId) {
-      setPreviewTemplateId(resolveTemplateId(previewId, { allowDisabled: true }))
+      const resolved = resolveTemplateId(previewId, { allowDisabled: true })
+      setPreviewTemplateId(resolved)
+      setPreviewConcept(parsePreviewConcept(resolved))
       setView('template-preview')
       return
     }
@@ -616,6 +650,12 @@ export default function App() {
 
     /* Şablonlar vitrini — /templates (müştəriyə göndərilən ictimai link) */
     if (/^\/templates\/?$/.test(window.location.pathname)) {
+      setView('templates')
+      return
+    }
+
+    /* Tədbir üzrə şablon səhifəsi — /sablonlar/ad-gunu və s. */
+    if (parseConceptPage()) {
       setView('templates')
       return
     }
@@ -687,7 +727,7 @@ export default function App() {
      isPreview={true} → hazırlanmaqda olan (enabled=false) şablonlar da açılır. */
   if (view === 'template-preview') {
     /* 2026-10: demo şablonun konseptinə uyğundur (uşaq şablonu → uşaq ad günü) */
-    const demo = demoForConcept(getTemplateConfig(previewTemplateId)?.concept, previewTemplateId)
+    const demo = demoForConcept(previewConcept || getTemplateConfig(previewTemplateId)?.concept, previewTemplateId)
     return (
       <div className="min-h-screen bg-cream">
         <TemplateRenderer
@@ -716,11 +756,14 @@ export default function App() {
     return (
       <Suspense fallback={<RouteLoader />}>
         <TemplatesPage
+          initialConcept={templatesConcept}
+          onConceptChange={() => bumpTemplatesUrl((n) => n + 1)}
           lang={lang} setLang={setLang}
           onBack={goHome}
-          onPreview={(tpl) => {
-            go(`/demo/template/${tpl.id}`)
+          onPreview={(tpl, tplConcept) => {
+            go(templatePreviewPath(tpl.id, tplConcept))
             setPreviewTemplateId(tpl.id)
+            setPreviewConcept(previewConceptOf(tpl.id, tplConcept))
             setView('template-preview')
             window.scrollTo(0, 0)
           }}

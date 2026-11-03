@@ -73,6 +73,10 @@ const WITH_IMAGE = new Set([
 
 export const TEMPLATE_IMAGE_SIZE = { width: 780, height: 1688 }
 
-export function templateImage(id) {
+/* Ad günü bölməsindəki versiyanın öz şəkli var — tək nəfərin adı ilə */
+const BIRTHDAY_IMAGE = new Set(['modern-black', 'boarding-pass', 'cinema-premiere', 'vinyl-record', 'gazette'])
+
+export function templateImage(id, concept = null) {
+  if (concept === 'birthday' && BIRTHDAY_IMAGE.has(id)) return `/img/templates/${id}--birthday.webp`
   return WITH_IMAGE.has(id) ? `/img/templates/${id}.webp` : null
 }

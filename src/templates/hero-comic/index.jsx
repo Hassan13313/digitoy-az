@@ -201,7 +201,7 @@ export default function HeroComicTemplate(props) {
             {age && (
               <Burst size={112} style={{ margin: '18px auto 0', transform: 'rotate(8deg)' }}>
                 <span style={{ fontFamily: head, fontWeight: 800, fontSize: 36, lineHeight: 0.9, color: C.RED, ...OUTLINE(C)(2, 2) }}>{age}</span>
-                <span style={{ fontFamily: head, fontWeight: 800, fontSize: 12, color: C.INK, textTransform: 'uppercase' }}>{ageWord(age, lang)}</span>
+                <span style={{ fontFamily: head, fontWeight: 800, fontSize: 12, color: C.INK, textTransform: 'uppercase' }}>{ageWord(age, lang, inv.strings)}</span>
               </Burst>
             )}
             <div style={{ display: 'inline-block', marginTop: age ? 12 : 26, padding: '12px 18px', background: C.WHITE, border: `3px solid ${C.INK}`, boxShadow: `5px 5px 0 ${C.INK}`, transform: 'rotate(1.5deg)' }}>

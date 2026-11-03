@@ -97,13 +97,37 @@ export const STRING_CATALOG = {
     ['event_birthday',    'Tədbir adı — ad günü'],
     ['event_corporate',   'Tədbir adı — korporativ'],
     ['event_other',       'Tədbir adı — digər'],
+    ['event_xina',        'Tədbir adı — xına'],
+    ['event_sunnet',      'Tədbir adı — sünnət'],
+    ['event_baby',        'Tədbir adı — baby shower'],
+    ['event_anniversary', 'Tədbir adı — ildönümü'],
+    ['event_graduation',  'Tədbir adı — məzuniyyət'],
+    ['event_bachelorette','Tədbir adı — qız gecəsi'],
+    ['age_sentence',      'Yaş sətri ({n} — rəqəm)'],
+    ['age_word',          'Rəqəmin yanında «yaş»'],
+    ['years_sentence',    'İl sətri ({n} — rəqəm)'],
+  ],
+  countdown: [
+    ['inv_days',    'Gün'],
+    ['inv_hours',   'Saat'],
+    ['inv_minutes', 'Dəqiqə'],
+    ['inv_seconds', 'Saniyə'],
   ],
   venue: [
     ['inv_location',        'Bölmə adı'],
     ['inv_directions_btn',  'Düymə — yol göstər'],
+    ['inv_btn_maps',        'Düymə — Maps'],
+    ['inv_btn_waze',        'Düymə — Waze'],
+    ['inv_btn_apple',       'Düymə — Apple'],
+    ['inv_maps_btn',        'Düymə — Google Maps'],
   ],
   dresscode: [
     ['inv_dresscode', 'Bölmə adı'],
+    ['dresscode_male_label',   '«Kişilər»'],
+    ['dresscode_female_label', '«Xanımlar»'],
+    ['dress.style', 'Geyim tərzinin adı'],
+    ['dress.men',   'Kişilər üçün tərz'],
+    ['dress.women', 'Xanımlar üçün tərz'],
   ],
   seating: [
     ['seating.title',     'Başlıq'],
@@ -111,6 +135,7 @@ export const STRING_CATALOG = {
     ['seating.hint',      'İpucu'],
     ['seating.again',     '«Yenidən axtar» düyməsi'],
     ['inv_seat_fullname', 'Ad sahəsi'],
+    ['inv_seat_helper',   'Ad sahəsinin izahı'],
   ],
   gallery: [
     ['inv_gallery',       'Bölmə adı'],
@@ -135,6 +160,7 @@ export const STRING_CATALOG = {
   ],
   guestbook: [
     ['gbook.title',   'Başlıq'],
+    ['gbook.sub',     'Alt mətn'],
     ['gbook.namePh',  'Ad sahəsi'],
     ['gbook.msgPh',   'Mesaj sahəsi'],
     ['gbook.btn',     'Göndər düyməsi'],
@@ -142,6 +168,12 @@ export const STRING_CATALOG = {
   ],
   footer: [
     ['btn_back', 'Geri düyməsi'],
+    ['footer_made', 'Ən alt imza'],
+    ['ui.music',   'Musiqi balonu'],
+    ['cta.badge',  'Nümunə sonu — üst yazı'],
+    ['cta.title',  'Nümunə sonu — başlıq'],
+    ['cta.desc',   'Nümunə sonu — mətn'],
+    ['cta.btn',    'Nümunə sonu — düymə'],
   ],
 }
 
@@ -657,6 +689,62 @@ export function makeLabelResolver(sectionLabels, lang) {
     komponent öz mətnini göstərir (TemplateOutro `footer`, simple-luxury bölmələri). */
 export function sectionHead(L, key) {
   return { kicker: L(key, 'kicker', null), title: L(key, 'title', null) }
+}
+
+/**
+ * Şablon səviyyəli məzmun + dəvətnamənin öz düzəlişləri. Dəvətnamə üstündür.
+ * Sahə-sahə birləşir: admin şablonda yalnız «Birinci sinif»-i, dəvətnamədə yalnız
+ * rəngi dəyişibsə ikisi də işləyir. Hekayə fəsilləri şablonda olmur.
+ * Şablon qatı boşdursa EYNİ obyekt qayıdır.
+ */
+export function mergeTemplateDefaults(tpl, inv) {
+  if (!tpl || typeof tpl !== 'object' || Object.keys(tpl).length === 0) return inv
+  const own = inv && typeof inv === 'object' ? inv : {}
+  const out = { ...own }
+  if (tpl.theme) out.theme = { ...tpl.theme, ...own.theme }
+  if (tpl.fonts) out.fonts = { ...tpl.fonts, ...own.fonts }
+  if (tpl.strings) {
+    out.strings = { ...tpl.strings }
+    for (const [k, v] of Object.entries(own.strings || {})) out.strings[k] = { ...tpl.strings[k], ...v }
+  }
+  if (tpl.labels) {
+    out.labels = { ...tpl.labels }
+    for (const [k, v] of Object.entries(own.labels || {})) {
+      const base = tpl.labels[k] || {}
+      out.labels[k] = { ...base, ...v, ...(base.title || v.title ? { title: { ...base.title, ...v.title } } : {}) }
+    }
+  }
+  if (tpl.opening) {
+    const o = own.opening || {}
+    out.opening = { ...tpl.opening, ...o }
+    if (tpl.opening.text || o.text) {
+      const text = { ...tpl.opening.text }
+      for (const [k, v] of Object.entries(o.text || {})) text[k] = { ...text[k], ...v }
+      out.opening.text = text
+    }
+  }
+  if (tpl.story?.text) {
+    const st = own.story || {}
+    const text = { ...tpl.story.text }
+    for (const [k, v] of Object.entries(st.text || {})) text[k] = { ...text[k], ...v }
+    out.story = { ...st, text }
+  }
+  return out
+}
+
+/**
+ * Şablon səviyyəli məzmunu dəvətnamə datasına əlavə et.
+ * Bölmələr: müştərinin (və ya adminin dəvətnamədəki) seçimi üstündür.
+ */
+export function withTemplateDefaults(wd, defaults) {
+  if (!wd || !defaults) return wd
+  const hasAdmin = defaults.admin && Object.keys(defaults.admin).length > 0
+  const hasSections = defaults.sections && Object.keys(defaults.sections).length > 0
+  if (!hasAdmin && !hasSections) return wd
+  const out = { ...wd }
+  if (hasAdmin) out.admin = mergeTemplateDefaults(defaults.admin, wd.admin)
+  if (hasSections) out.sections = { ...defaults.sections, ...wd.sections }
+  return out
 }
 
 /** `form_data`-dan təmizlənmiş override obyektini oxu (yoxdursa null) */

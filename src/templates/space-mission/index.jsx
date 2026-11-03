@@ -254,7 +254,7 @@ export default function SpaceMissionTemplate(props) {
               <h1 style={{ margin: '10px 0 0', fontFamily: disp, fontWeight: 800, fontSize: 'clamp(38px, 12vw, 58px)', lineHeight: 1, color: C.WHITE, textShadow: `0 0 30px ${alpha(C.SUN, 0.35)}`, textWrap: 'balance', overflowWrap: 'anywhere' }}>
                 {inv.heroTitle ? inv.heroTitle : inv.isCouple ? <>{inv.groom} <span style={{ color: C.SUN }}>{inv.and}</span> {inv.bride}</> : inv.single}
               </h1>
-              {age && <div style={{ marginTop: 10, fontSize: 17, color: C.MUTED }}>{ageSentence(age, lang)}</div>}
+              {age && <div style={{ marginTop: 10, fontSize: 17, color: C.MUTED }}>{ageSentence(age, lang, inv.strings)}</div>}
             </div>
 
             {/* planet + orbitdə raket */}
@@ -269,7 +269,7 @@ export default function SpaceMissionTemplate(props) {
                 {age ? (
                   <>
                     <span style={{ fontFamily: LED, fontWeight: 800, fontSize: age > 9 ? 'clamp(64px, 20vw, 96px)' : 'clamp(80px, 26vw, 120px)', lineHeight: 0.9, color: C.WHITE, textShadow: '0 6px 18px rgba(120,20,60,.45)' }}>{age}</span>
-                    <span style={{ fontFamily: body, fontWeight: 700, fontSize: 14, letterSpacing: '.3em', color: C.WHITE, marginTop: 6 }}>{upAz(ageWord(age, lang), lang)}</span>
+                    <span style={{ fontFamily: body, fontWeight: 700, fontSize: 14, letterSpacing: '.3em', color: C.WHITE, marginTop: 6 }}>{upAz(ageWord(age, lang, inv.strings), lang)}</span>
                   </>
                 ) : null}
               </Planet>
@@ -351,9 +351,9 @@ export default function SpaceMissionTemplate(props) {
               {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 4, fontSize: 15, color: C.MUTED }}>{weddingData.venueNote}</div>}
               <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
                 {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(true)}>{tr.inv_directions_btn}</a>}
-                {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(!inv.dirUrl)}>Maps</a>}
-                {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>Waze</a>}
-                {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>Apple</a>}
+                {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(!inv.dirUrl)}>{tr.inv_btn_maps}</a>}
+                {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>{tr.inv_btn_waze}</a>}
+                {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C)(false)}>{tr.inv_btn_apple}</a>}
               </div>
             </Deck>
           )}

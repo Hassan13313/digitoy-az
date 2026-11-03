@@ -11,7 +11,7 @@ import { DEFAULT_TEMPLATE_ID, getTemplateConfig, resolveTemplateId } from './tem
 
 const TemplateContext = createContext(null)
 
-export function TemplateProvider({ templateId, isPreview = false, children }) {
+export function TemplateProvider({ templateId, isPreview = false, strings = null, children }) {
   const value = useMemo(() => {
     const id = resolveTemplateId(templateId, { allowDisabled: isPreview })
     return {
@@ -20,8 +20,10 @@ export function TemplateProvider({ templateId, isPreview = false, children }) {
       isPreview,
       /* İstənilən id reyestrdən kənar idisə (köhnə/xarab data) — fallback işə düşüb */
       isFallback: id !== templateId,
+      /* Adminin mətn override-ları — ortaq komponentlər üçün (geyim kodu, son hissə) */
+      strings,
     }
-  }, [templateId, isPreview])
+  }, [templateId, isPreview, strings])
 
   return <TemplateContext.Provider value={value}>{children}</TemplateContext.Provider>
 }
@@ -39,5 +41,6 @@ export function useTemplate() {
     config: getTemplateConfig(DEFAULT_TEMPLATE_ID),
     isPreview: false,
     isFallback: false,
+    strings: null,
   }
 }

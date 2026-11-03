@@ -16,18 +16,21 @@ export const LABELS = {
 
 export const TXT = {
   az: {
+    postmark: 'PARIS',
     brand: 'Digitoy',
     table: 'Masa',
     ooh: 'Ooh là là!',
     menu: 'Menyu',
   },
   en: {
+    postmark: 'PARIS',
     brand: 'Digitoy',
     table: 'Table',
     ooh: 'Ooh là là!',
     menu: 'Menu',
   },
   ru: {
+    postmark: 'PARIS',
     brand: 'Digitoy',
     table: 'Стол',
     ooh: 'Ooh là là!',
@@ -37,6 +40,7 @@ export const TXT = {
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
+  ['postmark', 'guestbook', 'Məktub möhürü'],
   ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
   ['table', 'seating', 'Dizayn mətni: «Masa»'],
   ['ooh', 'hero', 'Dizayn mətni: «Ooh là là!»'],

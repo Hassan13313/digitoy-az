@@ -16,17 +16,29 @@ export const LABELS = {
 
 export const TXT = {
   az: {
+    question: 'Oğlan, yoxsa qız?',
+    boy: 'Oğlan',
+    girl: 'Qız',
     table: 'Masa',
   },
   en: {
+    question: 'Boy or girl?',
+    boy: 'Boy',
+    girl: 'Girl',
     table: 'Table',
   },
   ru: {
+    question: 'Мальчик или девочка?',
+    boy: 'Мальчик',
+    girl: 'Девочка',
     table: 'Стол',
   },
 }
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
+  ['question', 'hero', 'Sual'],
+  ['boy', 'hero', '«Oğlan» tərəfi'],
+  ['girl', 'hero', '«Qız» tərəfi'],
   ['table', 'seating', 'Dizayn mətni: «Masa»'],
 ]

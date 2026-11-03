@@ -57,7 +57,7 @@ function SheetInside({ inv, lang, head, big = 'clamp(64px, 20vw, 92px)' }) {
   return (
     <>
       <span style={{ fontFamily: head, fontWeight: 600, fontSize: big, lineHeight: 0.9, color: C.BLUE }}>{inv.age}</span>
-      <span style={{ marginTop: 4, fontFamily: head, fontStyle: 'italic', fontSize: 16, color: C.INK }}>{yearsSentence(inv.age, lang).replace(String(inv.age), '').trim()}</span>
+      <span style={{ marginTop: 4, fontFamily: head, fontStyle: 'italic', fontSize: 16, color: C.INK }}>{yearsSentence(inv.age, lang, inv.strings).replace(String(inv.age), '').trim()}</span>
     </>
   )
 }
