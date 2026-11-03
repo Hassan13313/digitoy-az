@@ -50,6 +50,9 @@ $stored = ['templateVersion' => 1, 'i18n' => ['en' => ['brideName' => 'Aysel']]]
 $merged = tvForSave(mergeInvitationI18n($stored, $fd), $stored);
 ok('save axını: tərcümə + versiya birlikdə qorunur', $merged['templateVersion'] === 1 && isset($merged['i18n']));
 
+/* ── şablon məzmunu dəvətnaməyə yazılmır ── */
+ok('tvForSave: templateDefaults atılır', !array_key_exists('templateDefaults', tvForSave(['templateDefaults' => ['admin' => []], 'a' => 1], null)));
+
 /* ── normallaşdırma ── */
 ok('tvNormalize: 1.0 → 1', tvNormalize(1.0) === 1);
 ok('tvNormalize: null / "" / true → null', tvNormalize(null) === null && tvNormalize('') === null && tvNormalize(true) === null);

@@ -7,6 +7,13 @@
    ⚠ React YOXDUR — node testləri bu faylı birbaşa yükləyə bilsin.
    ───────────────────────────────────────────────────────────────────────── */
 
+/* Böyüyün ad günü versiyası: dəvət edən tək nəfərdir («mənimlə», «bizimlə» yox) */
+export const SOLO_JOIN = {
+  az: 'Bu özəl günü mənimlə paylaşmağınız mənim üçün böyük ehtiramdır',
+  en: 'I would be deeply honored by your presence on my special day',
+  ru: 'Для меня будет огромной честью разделить этот особенный день с вами',
+}
+
 /** İstənilən girişi 1–120 arası tam yaşa çevirir (yoxdursa null) */
 export function parseAge(v) {
   const n = parseInt(String(v ?? '').replace(/\D/g, ''), 10)

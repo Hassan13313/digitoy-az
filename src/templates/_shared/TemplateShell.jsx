@@ -606,13 +606,13 @@ export default function TemplateShell({
                         <a data-press href={dirUrl} target="_blank" rel="noopener noreferrer" style={btn(true)}>{tr.inv_directions_btn}</a>
                       )}
                       {mapUrl && (
-                        <a data-press href={mapUrl} target="_blank" rel="noopener noreferrer" style={btn(!dirUrl)}>Maps</a>
+                        <a data-press href={mapUrl} target="_blank" rel="noopener noreferrer" style={btn(!dirUrl)}>{tr.inv_btn_maps}</a>
                       )}
                       {weddingData.wazeUrl && (
-                        <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Waze</a>
+                        <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>{tr.inv_btn_waze}</a>
                       )}
                       {weddingData.appleMapsUrl && (
-                        <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>Apple</a>
+                        <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(false)}>{tr.inv_btn_apple}</a>
                       )}
                     </Stagger>
                   </div>

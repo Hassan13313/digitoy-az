@@ -25,8 +25,8 @@ function TimeBox({ value, label, pop = false }) {
 }
 
 /* Phase 45 — `kicker`/`title`: admin «Mətnlər». Verilməyəndə əvvəlki mətn. */
-export default function CountdownTimer({ date, time, lang, eventType = 'toy', eventName = '', kicker = null, title = null }) {
-  const timeLeft = useCountdown({ date, time, lang, eventType, eventName })
+export default function CountdownTimer({ date, time, lang, eventType = 'toy', eventName = '', adminStrings = null, kicker = null, title = null }) {
+  const timeLeft = useCountdown({ date, time, lang, eventType, eventName, adminStrings })
   const { labels: tl } = timeLeft
   return (
     <section className="py-24 px-6 bg-beige">

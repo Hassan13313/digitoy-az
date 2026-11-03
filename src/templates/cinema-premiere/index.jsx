@@ -343,8 +343,8 @@ export default function CinemaPremiereTemplate(props) {
                 {weddingData.venueNote && <div style={{ textAlign: 'center', marginTop: 6, fontStyle: 'italic', fontSize: 16, color: C.MUTED }}>{weddingData.venueNote}</div>}
                 <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
                   {inv.dirUrl && <a data-press href={inv.dirUrl} target="_blank" rel="noopener noreferrer" style={btn(C, true, head)}>{upper(tr.inv_directions_btn, lang)}</a>}
-                  {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C, !inv.dirUrl, head)}>MAPS</a>}
-                  {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C, false, head)}>WAZE</a>}
+                  {inv.mapUrl && <a data-press href={inv.mapUrl} target="_blank" rel="noopener noreferrer" style={btn(C, !inv.dirUrl, head)}>{upper(tr.inv_btn_maps, lang)}</a>}
+                  {weddingData.wazeUrl && <a data-press href={weddingData.wazeUrl} target="_blank" rel="noopener noreferrer" style={btn(C, false, head)}>{upper(tr.inv_btn_waze, lang)}</a>}
                   {weddingData.appleMapsUrl && <a data-press href={weddingData.appleMapsUrl} target="_blank" rel="noopener noreferrer" style={btn(C, false, head)}>APPLE</a>}
                 </div>
               </Reel>

@@ -200,7 +200,7 @@ export function listTemplateFacets(lang = 'az') {
     list.forEach((tpl) => {
       const v = tpl[key]
       if (!v) return
-      map.set(v, (map.get(v) || 0) + 1)
+      map.set(v, (map.get(v) || 0) + Math.max(1, templateConcepts(tpl).length))
     })
     return map
   }

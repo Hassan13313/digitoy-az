@@ -34,6 +34,9 @@ function tvNormalize($v): ?int {
  * @param array|null $stored   mövcud sətrin form_data-sı (null = yeni sətir)
  */
 function tvForSave(array $incoming, ?array $stored): array {
+    /* Şablon məzmunu oxunanda əlavə olunur (get_invitation.php), dəvətnaməyə yazılmır:
+       admin builder-də yenidən saxlayanda köhnə surət burada qalmasın */
+    unset($incoming['templateDefaults']);
     $in = tvNormalize($incoming['templateVersion'] ?? null);
     unset($incoming['templateVersion']);
     if ($in !== null) {

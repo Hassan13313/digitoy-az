@@ -257,7 +257,7 @@ export default function SimpleLuxuryTemplate({
             </header>
 
             {/* ── HERO ── */}
-            <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-20 pb-20 text-center">
+            <section data-section="hero" className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-20 pb-20 text-center">
               <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(197,160,89,0.5), transparent)' }} />
 
               <div className="animate-fade-in w-full">
@@ -340,14 +340,15 @@ export default function SimpleLuxuryTemplate({
             </section>
 
             {/* ── COUNTDOWN ── */}
-            {SECTIONS.countdown && <CountdownTimer
+            {SECTIONS.countdown && <div data-section="countdown"><CountdownTimer
               date={weddingData.date}
               time={weddingData.time}
               lang={lang}
               eventType={weddingData.eventType || 'toy'}
               eventName={weddingData.eventName || ''}
+              adminStrings={adminStrings}
               {...sectionHead(L, 'countdown')}
-            />}
+            /></div>}
 
             {/* ── BİZİM HEKAYƏMİZ (Phase 43) ─────────────────────────────
                 Mətnlər `resolveWeddingContent` tərəfindən artıq seçilmiş
@@ -371,7 +372,7 @@ export default function SimpleLuxuryTemplate({
             )}
 
             {/* ── LOCATION ── */}
-            {SECTIONS.venue && <section className="py-28 px-6 bg-cream">
+            {SECTIONS.venue && <section data-section="venue" className="py-28 px-6 bg-cream">
               <Reveal className="max-w-lg mx-auto text-center">
                 <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">{L('venue', 'kicker', 'LOCATION')}</p>
                 <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-4">{L('venue', 'title', tr.inv_location)}</h2>
@@ -430,7 +431,7 @@ export default function SimpleLuxuryTemplate({
                     >
                       <MapPin size={13} strokeWidth={1.5} />
                       <span className="hidden sm:inline">{tr.inv_maps_btn}</span>
-                      <span className="sm:hidden">Maps</span>
+                      <span className="sm:hidden">{tr.inv_btn_maps}</span>
                     </a>
                   )}
                   {weddingData.wazeUrl && (
@@ -443,7 +444,7 @@ export default function SimpleLuxuryTemplate({
                       style={{ flex: '1 1 128px', minWidth: 0 }}
                     >
                       <Navigation size={13} strokeWidth={1.5} />
-                      Waze
+                      {tr.inv_btn_waze}
                     </a>
                   )}
                   {weddingData.appleMapsUrl && (
@@ -456,7 +457,7 @@ export default function SimpleLuxuryTemplate({
                       style={{ flex: '1 1 128px', minWidth: 0 }}
                     >
                       <ExternalLink size={13} strokeWidth={1.5} />
-                      Apple Maps
+                      {tr.inv_btn_apple}
                     </a>
                   )}
                 </Stagger>
@@ -464,10 +465,10 @@ export default function SimpleLuxuryTemplate({
             </section>}
 
             {/* ── EVENT TIMELINE (Program) ── */}
-            {SECTIONS.program && <EventTimeline lang={lang} eventType={weddingData.eventType} programSteps={weddingData.programSteps} {...sectionHead(L, 'program')} />}
+            {SECTIONS.program && <div data-section="program"><EventTimeline lang={lang} eventType={weddingData.eventType} programSteps={weddingData.programSteps} {...sectionHead(L, 'program')} /></div>}
 
             {/* ── DRESS CODE ── */}
-            {SECTIONS.dresscode && <section className="py-28 px-6 bg-beige">
+            {SECTIONS.dresscode && <section data-section="dresscode" className="py-28 px-6 bg-beige">
               <Reveal className="max-w-lg mx-auto text-center">
                 <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">{L('dresscode', 'kicker', 'Style')}</p>
                 <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-10">{L('dresscode', 'title', tr.inv_dresscode)}</h2>
@@ -491,11 +492,11 @@ export default function SimpleLuxuryTemplate({
 
             {/* ── SEATING — lüks axtarış UI ── */}
             {weddingData.seatingPlan && canShowSeating && (
-              <SeatingSearch seatingPlan={weddingData.seatingPlan} lang={lang} adminStrings={adminStrings} {...sectionHead(L, 'seating')} />
+              <div data-section="seating"><SeatingSearch seatingPlan={weddingData.seatingPlan} lang={lang} adminStrings={adminStrings} {...sectionHead(L, 'seating')} /></div>
             )}
 
             {/* ── GALLERY ── */}
-            {canShowGallery && <section id="gallery-section" className="py-28 px-6 bg-cream">
+            {canShowGallery && <section id="gallery-section" data-section="gallery" className="py-28 px-6 bg-cream">
               <Reveal className="max-w-lg mx-auto text-center">
                 <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-4 font-medium">{L('gallery', 'kicker', tr.f_gallery)}</p>
                 <h2 className="font-serif text-2xl text-ink font-light tracking-tight mb-5">{L('gallery', 'title', tr.inv_gallery)}</h2>
@@ -558,10 +559,10 @@ export default function SimpleLuxuryTemplate({
             </section>}
 
             {/* ── RSVP — yalnız VIP/PREMIUM paketlərdə ── */}
-            {canShowRsvp && <RSVPSection lang={lang} weddingData={weddingData} adminStrings={adminStrings} {...sectionHead(L, 'rsvp')} />}
+            {canShowRsvp && <div data-section="rsvp"><RSVPSection lang={lang} weddingData={weddingData} adminStrings={adminStrings} {...sectionHead(L, 'rsvp')} /></div>}
 
             {/* ── GUESTBOOK ── */}
-            {SECTIONS.guestbook && <Guestbook lang={lang} initialMessages={initialGuestbook} adminStrings={adminStrings} {...sectionHead(L, 'guestbook')} />}
+            {SECTIONS.guestbook && <div data-section="guestbook"><Guestbook lang={lang} initialMessages={initialGuestbook} adminStrings={adminStrings} {...sectionHead(L, 'guestbook')} /></div>}
 
             {/* ── SİFARİŞ CTA — Phase 27: 9 şablonun ortaq komponenti.
                 Görünmə şərti (!pageSlug && !isDemoMode) komponentin içindədir. ── */}

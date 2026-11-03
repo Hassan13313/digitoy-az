@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Play } from 'lucide-react'
 import { getInvitationContent, saveInvitationContent, getInvitation, setInvitationTemplateVersion, getTemplateContent, saveTemplateContent } from '../../utils/api'
 import { demoForConcept } from '../../data/demoInvitation'
-import { getTemplateTheme, getTemplateName, FONT_STACKS } from '../../templates/templateConfig'
+import { getTemplateTheme, getTemplateName, FONT_STACKS, isMultiConcept } from '../../templates/templateConfig'
+import { SOLO_JOIN } from '../../templates/_shared/kids'
 import {
   CONTENT_SECTIONS, THEME_KEYS, THEME_LABELS, FONT_CHOICES,
   FONT_SCALE_MIN, FONT_SCALE_MAX, safeColor, STRING_CATALOG,
@@ -254,6 +255,7 @@ export default function AdminContentManager({ slug: slugProp, templateEdit = nul
   /* Placeholder-da dəvətnamədə HAZIRDA görünən sistem mətni (Phase 45) */
   const systemText = useCallback((key, lg) => {
     const dot = key.indexOf('.')
+    if (key === 'inv_join' && wedding?.eventType === 'birthday' && isMultiConcept(templateId)) return SOLO_JOIN[lg] || SOLO_JOIN.az
     if (dot < 0) return (translations[lg] || translations.az)[key] || ''
     const [prefix, sub] = [key.slice(0, dot), key.slice(dot + 1)]
     if (prefix === 'rsvp')    return buildRsvpLabels(lg, wedding)[sub] || ''
@@ -263,7 +265,7 @@ export default function AdminContentManager({ slug: slugProp, templateEdit = nul
     if (prefix === 'ui')      return (ACTIONS_UI[lg] || ACTIONS_UI.az)[sub] || ''
     if (prefix === 'dress')   return 'Müştərinin seçdiyi tərz'
     return ''
-  }, [wedding])
+  }, [wedding, templateId])
 
   /* ── Köhnə model → yeni görünüşün dəyərləri ── */
   const toView = useCallback((s) => {
@@ -419,6 +421,8 @@ export default function AdminContentManager({ slug: slugProp, templateEdit = nul
   const resetAll = () => {
     setSaveState('idle')
     setTheme({}); setFonts({}); setLabels({}); setStrings({}); setOpening({}); setStory({})
+    /* Şablon səviyyəsində «sıfırla» = şablon tam öz halına qayıdır */
+    if (templateEdit) setSections({})
   }
 
   /* ── Phase 45: açılış ekranı və «Bizim Hekayəmiz» ── */

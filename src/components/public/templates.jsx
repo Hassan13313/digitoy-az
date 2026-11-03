@@ -3,7 +3,7 @@
 //   TemplatesIntro · FilterBar · TemplatesGrid · TemplateCard · TemplatesEmpty · TemplatesCta
 // Filtrləmə məntiqi sizdədir: komponentlər yalnız props göstərir və callback çağırır.
 // ════════════════════════════════════════════════════════════════
-import { useCallback, useId, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 import { ArrowRight, Eye, Lock, RotateCcw, Sparkles } from 'lucide-react';
 import { FOCUS, FOCUS_DARK, Kicker, Rule, StatusChip } from './shared';
@@ -139,13 +139,21 @@ export function FilterBar({
 
 export function ChipRow({ legend, options, value, onChange, bleedClassName }) {
   const id = useId();
+  const rowRef = useRef(null);
+  useEffect(() => {
+    const row = rowRef.current;
+    const chip = row?.querySelector('[aria-pressed="true"]');
+    if (!row || !chip || row.scrollWidth <= row.clientWidth) return;
+    row.scrollLeft = chip.offsetLeft - (row.clientWidth - chip.offsetWidth) / 2;
+  }, [value]);
   return (
     <div role="group" aria-labelledby={id}>
       <p id={id} className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-brown-dark/90">
         {legend}
       </p>
       <div
-        className={`overflow-x-auto [scrollbar-width:none] sm:overflow-visible [&::-webkit-scrollbar]:hidden ${bleedClassName}`}
+        ref={rowRef}
+        className={`relative overflow-x-auto [scrollbar-width:none] sm:overflow-visible [&::-webkit-scrollbar]:hidden ${bleedClassName}`}
       >
         <ul className="flex w-max gap-2 py-1 sm:w-auto sm:flex-wrap">
           {options.map((o) => {

@@ -499,7 +499,7 @@ export default function BoardingPassTemplate(props) {
                     {gallery.demoPhotos.map((url, i) => (
                       <div key={i} style={{ position: 'relative', aspectRatio: '4 / 5', borderRadius: 4, overflow: 'hidden', background: '#16263C' }}>
                         <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                        <span aria-hidden="true" style={{ position: 'absolute', right: 4, bottom: 4, width: 38, height: 38, borderRadius: '50%', border: `1.5px solid ${alpha(C.RED, 0.8)}`, display: 'flex', alignItems: 'center', justifyContent: 'center', transform: `rotate(${-14 + i * 9}deg)`, fontFamily: mono, fontSize: 7.5, color: alpha(C.RED, 0.9), letterSpacing: '.06em', textAlign: 'center', lineHeight: 1.1 }}>GYD<br />{d}.{m}</span>
+                        <span aria-hidden="true" style={{ position: 'absolute', right: 4, bottom: 4, width: 38, height: 38, borderRadius: '50%', border: `1.5px solid ${alpha(C.RED, 0.8)}`, display: 'flex', alignItems: 'center', justifyContent: 'center', transform: `rotate(${-14 + i * 9}deg)`, fontFamily: mono, fontSize: 7.5, color: alpha(C.RED, 0.9), letterSpacing: '.06em', textAlign: 'center', lineHeight: 1.1 }}>{T.code}<br />{d}.{m}</span>
                       </div>
                     ))}
                   </div>

@@ -220,7 +220,7 @@ export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCrea
         <div className="mt-8">
           <FilterBar
             lang={lang}
-            statuses={[{ id: 'all', label: ui.all, count: totalCards }, ...facets.statuses]}
+            statuses={facets.statuses.length > 1 ? [{ id: 'all', label: ui.all, count: totalCards }, ...facets.statuses] : []}
             categories={[{ id: 'all', label: ui.all, count: totalCards }, ...facets.categories]}
             concepts={[{ id: 'all', label: ui.all, count: totalCards }, ...facets.concepts]}
             status={status}
