@@ -24,7 +24,7 @@ import TemplateRenderer from './templates/TemplateRenderer'
 import { defaultWedding } from './data/defaultWedding'
 import { demoInvitation, demoGuestbook, demoForConcept } from './data/demoInvitation'
 import { conceptPageFor } from './data/conceptPages'
-import { DEFAULT_TEMPLATE_ID, resolveTemplateId, isTemplateSelectable, getTemplateConfig, conceptEventType, conceptAcceptsEvent, isMultiConcept, previewConceptOf, templatePreviewPath, conceptBySlug, CONCEPT_META } from './templates/templateConfig'
+import { DEFAULT_TEMPLATE_ID, resolveTemplateId, isTemplateSelectable, getTemplateConfig, eventTypeOnSelect, previewConceptOf, templatePreviewPath, conceptBySlug, CONCEPT_META } from './templates/templateConfig'
 import { getInvitation, adminLogin, getDraftByCode } from './utils/api'
 import { unlockAudio } from './utils/audioUnlock'
 import ScrollProgress from './components/ui/ScrollProgress'
@@ -481,11 +481,8 @@ export default function App() {
     const snap = readBuilderSnapshot()
     /* Müştəri bu dizaynı hansı bölmədən seçibsə, tədbir növü də ona uyğun gəlir */
     const prev = snap?.data || {}
-    const ev = conceptEventType(id, previewConcept)
-    const fresh = ![prev.brideName, prev.groomName, prev.eventName].some((v) => String(v || '').trim())
-    const eventPatch = ev && prev.eventType !== ev && !conceptAcceptsEvent(previewConcept || getTemplateConfig(id)?.concept, prev.eventType)
-      && (fresh || (previewConcept && isMultiConcept(id))) ? { eventType: ev } : {}
-    saveBuilderSnapshot({ data: { ...prev, templateId: id, ...eventPatch }, step: 1 })
+    const ev = eventTypeOnSelect(id, previewConcept, prev)
+    saveBuilderSnapshot({ data: { ...prev, templateId: id, ...(ev ? { eventType: ev } : {}) }, step: 1 })
     trackTemplateSelected(id, { source: 'preview_bar' })
     let ctx = null
     try { ctx = JSON.parse(sessionStorage.getItem('digitoy_preview_return') || 'null') } catch { /* private mode */ }

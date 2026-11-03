@@ -34,6 +34,7 @@ async function getInvitationsList(search = '', limit = 50, offset = 0) {
 
 const EVENT_LABELS = {
   toy: 'Toy', nishan: 'Nişan', birthday: 'Ad günü', corporate: 'Korporativ', other: 'Digər',
+  xina: 'Xına gecəsi', sunnet: 'Sünnət toyu', baby: 'Baby shower', anniversary: 'İldönümü', graduation: 'Məzuniyyət', bachelorette: 'Qız gecəsi',
 }
 
 export default function AdminInvitationsList() {

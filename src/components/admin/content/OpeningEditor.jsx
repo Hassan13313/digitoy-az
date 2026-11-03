@@ -89,8 +89,11 @@ const EMBLEM_NAMES = {
   'boho-sunset': 'gün batımı tağı',
 }
 
+/* Şablon səviyyəsində adlar, tarix və məkan yoxdur — hər müştərinin özününküdür */
+const TEMPLATE_DATA_SLOTS = new Set(['title', 'meta', 'venue'])
+
 export default function OpeningEditor({
-  templateId, wedding, lang, opening, setOpening, slug, narrow, onFocusPreview, legacy = false,
+  templateId, wedding, lang, opening, setOpening, slug, narrow, onFocusPreview, legacy = false, templateMode = false,
 }) {
   const { getOpeningSpec, openingDefaults, autoMonogram, OPENING_SLOT_LABELS } = legacy ? legacySpec : currentSpec
   const spec = getOpeningSpec(templateId)
@@ -104,6 +107,8 @@ export default function OpeningEditor({
     const eventLabel = ({
       toy: tr.event_toy, nishan: tr.event_nishan, birthday: tr.event_birthday,
       corporate: tr.event_corporate, other: wd.eventName || tr.event_other,
+      xina: tr.event_xina, sunnet: tr.event_sunnet, baby: tr.event_baby,
+      anniversary: tr.event_anniversary, graduation: tr.event_graduation, bachelorette: tr.event_bachelorette,
     })[wd.eventType] || tr.event_toy
     return { weddingData: wd, lang, isCouple, isCorp, eventLabel }
   }, [wedding, lang])
@@ -231,7 +236,7 @@ export default function OpeningEditor({
         hint="Placeholder-da dəvətnamədə indi görünən mətn var."
       >
         <div style={{ display: 'grid', gap: narrow ? 12 : 9 }}>
-          {spec.slots.map((slot) => (
+          {spec.slots.filter((slot) => !templateMode || !TEMPLATE_DATA_SLOTS.has(slot)).map((slot) => (
             <FieldRow
               key={slot}
               narrow={narrow}

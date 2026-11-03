@@ -1,3 +1,5 @@
+import { isMultiConcept } from '../templates/templateConfig.js'
+
 /* ─────────────────────────────────────────────────────────────────────────────
    Şablon kartlarının REAL ekran şəkilləri (UI redesign 2026-10).
    Fayllar: public/img/templates/<id>.webp — 780×1688 (390×844 telefon, DPR 2),
@@ -73,10 +75,8 @@ const WITH_IMAGE = new Set([
 
 export const TEMPLATE_IMAGE_SIZE = { width: 780, height: 1688 }
 
-/* Ad günü bölməsindəki versiyanın öz şəkli var — tək nəfərin adı ilə */
-const BIRTHDAY_IMAGE = new Set(['modern-black', 'boarding-pass', 'cinema-premiere', 'vinyl-record', 'gazette'])
-
 export function templateImage(id, concept = null) {
-  if (concept === 'birthday' && BIRTHDAY_IMAGE.has(id)) return `/img/templates/${id}--birthday.webp`
+  /* Ad günü bölməsindəki versiyanın öz şəkli var — tək nəfərin adı ilə */
+  if (concept === 'birthday' && isMultiConcept(id)) return `/img/templates/${id}--birthday.webp`
   return WITH_IMAGE.has(id) ? `/img/templates/${id}.webp` : null
 }

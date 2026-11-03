@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react'
+import { eventDict } from '../_shared/kids'
 import { motion, AnimatePresence } from 'framer-motion'
 import { QRCodeSVG } from 'qrcode.react'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
@@ -452,7 +453,7 @@ export default function RoyalGoldTemplate({
   const foil = foilOf(TH)
   const lineInput = lineInputOf(TH)
   const adminStrings = adminOverrides?.strings || null
-  const tr = withStringOverrides(t[lang] || t.az, adminStrings, lang)
+  const tr = withStringOverrides(eventDict(t[lang] || t.az, weddingData.eventType, 'royal-gold', lang), adminStrings, lang)
   const L = makeLabelResolver(mergeSectionLabels(null, adminOverrides), lang)
   const [opened, setOpened] = useState(startOpened)
   /* Dəvətnamə açıldı — demo/önbaxışda gözləyən kuki banneri indi çıxa bilər (utils/consent.js) */

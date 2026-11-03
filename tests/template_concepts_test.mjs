@@ -16,7 +16,7 @@ import { existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import {
   listTemplates, groupTemplatesByConcept, CONCEPT_META, conceptEventType, templateConcepts,
-  conceptAcceptsEvent, isMultiConcept, countTemplateCards, listTemplateFacets, templateContentKey,
+  conceptAcceptsEvent, isMultiConcept, countTemplateCards, listTemplateFacets, templateContentKey, eventTypeOnSelect, selectedConceptOf,
 } from '../src/templates/templateConfig.js'
 import { EVENT_TYPES } from '../src/data/constants.js'
 import { demoForConcept } from '../src/data/demoInvitation.js'
@@ -82,6 +82,17 @@ for (const [id, meta] of Object.entries(CONCEPT_META)) ok(`${id}: tədbir növü
 for (const tpl of all) ok(`${tpl.id}: conceptEventType`, conceptEventType(tpl.id) === CONCEPT_META[tpl.concept].eventType)
 ok('Nişan seçimi «Toy / Nişan»a uyğundur', conceptAcceptsEvent('toy', 'nishan') && conceptAcceptsEvent('toy', 'toy'))
 ok('Ad günü «Toy / Nişan»a uyğun deyil', !conceptAcceptsEvent('toy', 'birthday'))
+
+/* seçim → tədbir növü */
+ok('boş forma: kart tədbiri təyin edir', eventTypeOnSelect('red-veil', 'xina', { eventType: 'toy' }) === 'xina')
+ok('ad yazılıb: tək bölməli şablonda dəyişmir', eventTypeOnSelect('red-veil', 'xina', { eventType: 'toy', brideName: 'A' }) === null)
+ok('ad yazılıb: bir neçə bölməli dizaynda bölmə qərar verir', eventTypeOnSelect('gazette', 'birthday', { eventType: 'toy', brideName: 'A', groomName: 'B' }) === 'birthday')
+ok('Nişan seçimi qalır', eventTypeOnSelect('royal-gold', 'toy', { eventType: 'nishan' }) === null)
+ok('eyni tədbir: dəyişiklik yox', eventTypeOnSelect('gazette', 'toy', { eventType: 'toy' }) === null)
+ok('bölmə verilməyib: əsas konsept', eventTypeOnSelect('fairy-tale', null, { eventType: 'toy' }) === 'birthday')
+ok('seçili kart: ad günü', selectedConceptOf('gazette', 'birthday') === 'birthday')
+ok('seçili kart: nişan → toy', selectedConceptOf('gazette', 'nishan') === 'toy')
+ok('seçili kart: uyğunsuz tədbir → əsas', selectedConceptOf('gazette', 'corporate') === 'toy')
 
 /* ad günü versiyası */
 for (const id of BIRTHDAY_5) {

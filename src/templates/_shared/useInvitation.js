@@ -17,8 +17,7 @@ import { applyThemeOverrides, mergeSectionLabels, withStringOverrides, makeLabel
 import { directionsUrl, openMapUrl } from './geo'
 import { makeOpeningText, phrase } from './openingSpec'
 import { copyPrefix } from './copyText'
-import { parseAge, ageSentence, galleryDesc, SOLO_JOIN } from './kids'
-import { isMultiConcept } from '../templateConfig'
+import { parseAge, ageSentence, eventDict } from './kids'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    useInvitation — premium redizayn şablonlarının ORTAQ MƏNTİQ QATI (UI yox)
@@ -49,21 +48,11 @@ export function useInvitation({
 }) {
   const theme = applyThemeOverrides(baseTheme, adminOverrides)
   const adminStrings = adminOverrides?.strings || null
-  /* Cütlük olmayan tədbirdə «…bəy və gəlinlə paylaşın» yazılmır — admin bu sətri
-     dəyişibsə onun mətni qalır (bax kids.js › galleryDesc) */
-  const isWedding = ['toy', 'nishan'].includes(weddingData.eventType)
-  const dict = t[lang] || t.az
-  /* Böyüyün ad günü versiyası: dəvət edən tək nəfərdir («mənimlə», «bizimlə» yox) */
-  const solo = weddingData.eventType === 'birthday' && isMultiConcept(templateId)
-  const tr = withStringOverrides(isWedding ? dict : {
-    ...dict,
-    inv_gallery_desc: galleryDesc(null, dict, lang),
-    ...(solo ? { inv_join: SOLO_JOIN[lang] || SOLO_JOIN.az } : {}),
-  }, adminStrings, lang)
+  const tr = withStringOverrides(eventDict(t[lang] || t.az, weddingData.eventType, templateId, lang), adminStrings, lang)
   const L = makeLabelResolver(mergeSectionLabels(sectionLabels, adminOverrides), lang)
   const [opened, setOpened] = useState(startOpened)
 
-  const isCouple = isWedding
+  const isCouple = ['toy', 'nishan'].includes(weddingData.eventType)
   const isCorp   = ['corporate', 'other'].includes(weddingData.eventType)
   const eventLabels = {
     toy: tr.event_toy, nishan: tr.event_nishan,

@@ -3,7 +3,7 @@ import { Eye, PencilLine } from 'lucide-react'
 import AdminContentManager from './AdminContentManager'
 import { Button, EmptyState, Notice, PageHeader, Panel, SearchInput, Skeleton, StatusBadge, Toast } from './v2/adminUi'
 import { listTemplateContent } from '../../utils/api'
-import { listTemplates, groupTemplatesByConcept, getTemplateName, templateContentKey, templatePreviewPath, getTemplateTheme, CONCEPT_META } from '../../templates/templateConfig'
+import { listTemplates, groupTemplatesByConcept, getTemplateName, templateContentKey, templatePreviewPath, getTemplateTheme, conceptEventType } from '../../templates/templateConfig'
 import { templateImage } from '../../data/templateImages'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -16,8 +16,6 @@ import { templateImage } from '../../data/templateImages'
    Dəyişiklik şablonu işlədən BÜTÜN yeni dizaynlı dəvətnamələrə və vitrinə keçir.
    Bir dəvətnaməyə xüsusi düzəliş «Dəvətnamələr › Məzmun»-dadır və bunun üstündədir.
    ───────────────────────────────────────────────────────────────────────── */
-
-const eventOfConcept = (concept) => CONCEPT_META[concept]?.eventType
 
 export default function AdminTemplatesList() {
   const [changed, setChanged] = useState(null)
@@ -61,8 +59,7 @@ export default function AdminTemplatesList() {
         <Panel key={g.id} title={g.label} actions={<span className="text-[13px] text-[#6B5E54]">{g.items.length}</span>} flush>
           <ul className="divide-y divide-[#EEE8DF]">
             {g.items.map((tpl) => {
-              const eventType = eventOfConcept(g.id)
-              const key = templateContentKey(tpl.id, eventType)
+              const key = templateContentKey(tpl.id, conceptEventType(tpl.id, g.id))
               const img = templateImage(tpl.id, g.id)
               return (
                 <li key={key} className="flex items-center gap-3 px-4 py-3 sm:px-5">

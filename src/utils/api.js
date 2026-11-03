@@ -244,6 +244,8 @@ export async function saveInvitationContent(slug, admin, sections = null) {
 }
 
 /* ── 2026-11: şablon səviyyəli məzmun (admin «Şablonlar») ── */
+const templateDefaultsCache = new Map()
+
 export async function listTemplateContent() {
   const res = await fetch(`${BASE}/admin_template_content.php`, { headers: adminHeaders() })
   if (!res.ok) throw await toApiError(res, 'Siyahı yüklənmədi')
@@ -269,7 +271,6 @@ export async function saveTemplateContent(key, admin, sections = null) {
 
 /* Şablon önbaxışı/builder üçün ictimai oxuma. Səhv və ya gecikmə önbaxışı dayandırmır:
    1.2 saniyəyə cavab yoxdursa şablon öz mətni ilə açılır. */
-const templateDefaultsCache = new Map()
 export function fetchTemplateDefaults(key) {
   if (!templateDefaultsCache.has(key)) {
     const ctl = new AbortController()

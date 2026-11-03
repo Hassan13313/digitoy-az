@@ -35,7 +35,7 @@ import LoveStoryStep from './LoveStoryStep'
 import { ACTIVE_PARTNERS } from '../../data/partners'
 import MusicStep from './MusicStep'
 import TemplateSelect from './TemplateSelect'
-import { resolveBuilderTemplateId, conceptEventType, conceptAcceptsEvent, isMultiConcept } from '../../templates/templateConfig'
+import { resolveBuilderTemplateId, eventTypeOnSelect } from '../../templates/templateConfig'
 import { computeInviteSlug } from '../../utils/inviteSlug'
 import { defaultWedding } from '../../data/defaultWedding'
 import { buildShortLiveLink } from '../../utils/whatsappOrder'
@@ -1503,13 +1503,8 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
      müştəri 1-ci addımı doldurubsa onun seçiminə toxunulmur. */
   const setSelectedTemplate = (id, concept = null) => {
     set('templateId', id)
-    const ev = conceptEventType(id, concept)
-    /* «Toy / Nişan» bölməsi: «Nişan» seçən müştərinin seçimi «Toy»a dəyişmir */
-    if (!ev || data.eventType === ev || conceptAcceptsEvent(concept, data.eventType)) return
-    const fresh = ![data.brideName, data.groomName, data.eventName].some((v) => String(v || '').trim())
-    /* Bir neçə bölməli dizaynda bölmə məzmunu təyin edir (cütlük ↔ ad günü) —
-       müştəri onu açıq seçdi, ona görə adlar yazılıbsa da keçid olur */
-    if (fresh || (concept && isMultiConcept(id))) set('eventType', ev)
+    const ev = eventTypeOnSelect(id, concept, data)
+    if (ev) set('eventType', ev)
   }
   /* Phase 45.1 — builder-dən çıxan data (autosave draft, önbaxış → sifariş)
      `templateId: selectedTemplate` daşıyır: boş dəyər server-də simple-luxury

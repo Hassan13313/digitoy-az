@@ -19,7 +19,7 @@ function tcKey(string $templateId, string $eventType): string {
 }
 
 function tcValidKey($key): bool {
-    return is_string($key) && (bool) preg_match('/^[a-z0-9-]{1,60}(@birthday)?$/', $key);
+    return is_string($key) && (bool) preg_match('/^[a-z0-9-]{1,60}(@birthday)?\z/', $key);
 }
 
 /** { admin: {...}, sections: {...} } — yoxdursa boş obyektlər */
@@ -39,4 +39,25 @@ function tcRead(PDO $db, string $key): array {
         'admin'    => (isset($c['admin']) && is_array($c['admin']) && $c['admin']) ? $c['admin'] : new stdClass(),
         'sections' => (isset($c['sections']) && is_array($c['sections']) && $c['sections']) ? $c['sections'] : new stdClass(),
     ];
+}
+
+/**
+ * Şablon səviyyəsində saxlanılmayanlar: adlar, tarix, məkan və hekayə fəsilləri —
+ * bunlar hər müştərinin özününküdür. Boş qalan qruplar da atılır.
+ */
+function tcForTemplate(array $clean): array {
+    unset($clean['labels']['hero']['title'], $clean['labels']['footer']['title']);
+    foreach (['title', 'meta', 'venue'] as $slot) unset($clean['opening']['text'][$slot]);
+    if (isset($clean['story'])) {
+        $text = $clean['story']['text'] ?? null;
+        unset($clean['story']);
+        if ($text) $clean['story'] = ['text' => $text];
+    }
+    foreach (['hero', 'footer'] as $sec) {
+        if (isset($clean['labels'][$sec]) && !$clean['labels'][$sec]) unset($clean['labels'][$sec]);
+    }
+    if (isset($clean['labels']) && !$clean['labels']) unset($clean['labels']);
+    if (isset($clean['opening']['text']) && !$clean['opening']['text']) unset($clean['opening']['text']);
+    if (isset($clean['opening']) && !$clean['opening']) unset($clean['opening']);
+    return $clean;
 }

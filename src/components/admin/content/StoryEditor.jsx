@@ -237,7 +237,7 @@ export default function StoryEditor({
           : 'Hekayənin bütün yazılarını, tarixləri, stikerləri və şəkilləri dəyişə, fəsil gizlədə və ya yeni fəsil əlavə edə bilərsiniz. Boş sahə müştərinin öz mətnini saxlayır.'}
       </p>
 
-      {!sectionOn && (
+      {!sectionOn && !textOnly && (
         <div style={{
           border: `1px solid ${C.warn}`, background: 'oklch(97% 0.03 85)', borderRadius: 8,
           padding: '10px 12px', fontSize: narrow ? 13 : 11.5, color: C.text, lineHeight: 1.6,

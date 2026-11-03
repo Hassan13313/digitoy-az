@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Check, Lock } from 'lucide-react'
-import { listTemplates, listTemplateFacets, isTemplateSelectable, getTemplateTheme, groupTemplatesByConcept, templateConcepts, isMultiConcept, conceptAcceptsEvent, countTemplateCards } from '../../templates/templateConfig'
+import { listTemplates, listTemplateFacets, isTemplateSelectable, getTemplateTheme, groupTemplatesByConcept, templateConcepts, selectedConceptOf, countTemplateCards } from '../../templates/templateConfig'
 import { ChipRow } from '../public/templates'
 import { DEMO_DATE } from '../../data/demoInvitation'
 import { trackTemplateSelected, trackTemplatePreviewed } from '../../templates/templateAnalytics'
@@ -274,8 +274,7 @@ export default function TemplateSelect({ value, onChange, lang = 'az', hideHeadi
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
               {g.items.map((tpl) => {
                 /* Bir neçə bölməli dizayn: seçilmiş kart tədbir növünə uyğun bölmədədir */
-                const selected  = value === tpl.id
-                  && (!isMultiConcept(tpl.id) || conceptAcceptsEvent(g.id, eventType) || (!templateConcepts(tpl).some((c) => conceptAcceptsEvent(c, eventType)) && g.id === tpl.concept))
+                const selected  = value === tpl.id && g.id === selectedConceptOf(tpl.id, eventType)
                 /* Seçilə bilmə YALNIZ statusdan gəlir — hardcode yoxdur */
                 const available = isTemplateSelectable(tpl.id)
 

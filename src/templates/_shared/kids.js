@@ -7,6 +7,8 @@
    ⚠ React YOXDUR — node testləri bu faylı birbaşa yükləyə bilsin.
    ───────────────────────────────────────────────────────────────────────── */
 
+import { isMultiConcept } from '../templateConfig.js'
+
 /* Böyüyün ad günü versiyası: dəvət edən tək nəfərdir («mənimlə», «bizimlə» yox) */
 export const SOLO_JOIN = {
   az: 'Bu özəl günü mənimlə paylaşmağınız mənim üçün böyük ehtiramdır',
@@ -96,6 +98,20 @@ export function galleryDesc(adminOverrides, tr, lang = 'az', kind = 'celebration
   if (own && (own[lang] || own.az)) return tr.inv_gallery_desc
   const set = GALLERY_BY_KIND[kind] || GALLERY_DESC
   return set[lang] || set.az
+}
+
+/**
+ * Tədbirə uyğun tərcümə lüğəti: «…bəy və gəlinlə paylaşın» yalnız toy və nişanda,
+ * böyüyün ad günü versiyasında dəvət edən tək nəfərdir («mənimlə»).
+ * Admin override-ları bunun üstünə qoyulur. Toy/nişanda EYNİ obyekt qayıdır.
+ */
+export function eventDict(dict, eventType, templateId, lang = 'az') {
+  if (eventType === 'toy' || eventType === 'nishan') return dict
+  return {
+    ...dict,
+    inv_gallery_desc: galleryDesc(null, dict, lang),
+    ...(eventType === 'birthday' && isMultiConcept(templateId) ? { inv_join: SOLO_JOIN[lang] || SOLO_JOIN.az } : {}),
+  }
 }
 
 /** «25 il birlikdə» — ildönümü şablonları üçün (yaş sahəsi = il sayı) */

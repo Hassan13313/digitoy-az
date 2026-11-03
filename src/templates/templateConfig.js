@@ -152,6 +152,27 @@ export function isMultiConcept(templateId) {
   return templateConcepts(BY_ID[templateId]).length > 1
 }
 
+/** Bu tədbir növündə dizaynın hansı bölmənin kartı seçili görünür */
+export function selectedConceptOf(templateId, eventType) {
+  const tpl = BY_ID[templateId]
+  return templateConcepts(tpl).find((c) => conceptAcceptsEvent(c, eventType)) || tpl?.concept || null
+}
+
+/**
+ * Şablon seçiləndə formanın yeni tədbir növü (dəyişmirsə null).
+ * Müştəri yazmağa başlayıbsa seçiminə toxunulmur; bir neçə bölməli dizaynda isə bölmə
+ * məzmunu təyin edir (cütlük ↔ ad günü) və müştəri onu açıq seçib, ona görə keçid olur.
+ * «Toy / Nişan»: «Nişan» seçən müştərinin seçimi «Toy»a dəyişmir.
+ * @param {{eventType?: string, brideName?: string, groomName?: string, eventName?: string}} data
+ */
+export function eventTypeOnSelect(templateId, concept, data) {
+  const next = conceptEventType(templateId, concept)
+  const current = concept && templateConcepts(BY_ID[templateId]).includes(concept) ? concept : BY_ID[templateId]?.concept
+  if (!next || data.eventType === next || conceptAcceptsEvent(current, data.eventType)) return null
+  const fresh = ![data.brideName, data.groomName, data.eventName].some((v) => String(v || '').trim())
+  return fresh || (concept && isMultiConcept(templateId)) ? next : null
+}
+
 /**
  * Şablon səviyyəli məzmunun açarı (admin «Şablonlar», api/template_content_lib.php › tcKey).
  * Ad günü versiyasının məzmunu ayrıdır: `boarding-pass@birthday`.

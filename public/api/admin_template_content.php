@@ -67,14 +67,13 @@ if (!tcValidKey($key)) {
     exit;
 }
 
-$clean = acrCleanOverrides(is_array($body['admin'] ?? null) ? $body['admin'] : []);
-/* Hekayə fəsilləri müştərinindir — şablonda yalnız bölmənin mətnləri qalır */
-if (isset($clean['story'])) {
-    $storyText = $clean['story']['text'] ?? null;
-    if ($storyText) $clean['story'] = ['text' => $storyText];
-    else unset($clean['story']);
-}
+$clean = tcForTemplate(acrCleanOverrides(is_array($body['admin'] ?? null) ? $body['admin'] : []));
 $sections = acrCleanSections($body['sections'] ?? null);
+if ($sections !== null) {
+    /* Hekayəni müştəri özü açır */
+    unset($sections['lovestory']);
+    if (!$sections) $sections = null;
+}
 
 try {
     if (!$clean && !$sections) {

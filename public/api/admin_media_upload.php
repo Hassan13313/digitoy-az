@@ -42,7 +42,7 @@ if (!isValidSlug($slug)) {
 
 /* Yalnız MÖVCUD dəvətnamə üçün qovluq yaradılır.
    `tpl-<şablon>` — şablon səviyyəli məzmun («Şablonlar» bölməsi), dəvətnaməsi yoxdur. */
-if (!preg_match('/^tpl-[a-z0-9-]{1,70}$/', $slug)) {
+if (!preg_match('/^tpl-[a-z0-9-]{1,70}\z/', $slug)) {
     $st = getDB()->prepare('SELECT 1 FROM invitations WHERE slug = :s LIMIT 1');
     $st->execute([':s' => $slug]);
     if (!$st->fetchColumn()) {

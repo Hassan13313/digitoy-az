@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, lazy, Suspense } from 'react'
+import { eventDict } from '../_shared/kids'
 import { ArrowLeft, MapPin, Navigation, ExternalLink, ChevronDown, Camera } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { hidePhoto } from '../../utils/photoGallery'
@@ -88,7 +89,7 @@ export default function SimpleLuxuryTemplate({
      EYNİ obyekt), bölmə adları `L()` ilə — TemplateShell-in eyni qaydası.
      Bölmə komponentlərinə `kicker`/`title`/`adminStrings` kimi ötürülür. */
   const adminStrings = adminOverrides?.strings || null
-  const tr = withStringOverrides(t[lang], adminStrings, lang)
+  const tr = withStringOverrides(eventDict(t[lang], weddingData.eventType, 'simple-luxury', lang), adminStrings, lang)
   const L = makeLabelResolver(mergeSectionLabels(null, adminOverrides), lang)
   const heroTitle = L('hero', 'title', null)
 

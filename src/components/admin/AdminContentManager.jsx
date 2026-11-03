@@ -56,6 +56,21 @@ const LANG_IDS = ['az', 'en', 'ru']
 const isEmptyObj = (o) => !o || Object.keys(o).length === 0
 const sameJson = (a, b) => JSON.stringify(a ?? {}) === JSON.stringify(b ?? {})
 
+/* Şablon rejimində adlar sahəsi olmayan bölmələrin izahı */
+const TEMPLATE_MODE_HINTS = {
+  hero: 'Üst etiket — tədbir adının (məs. «TOY») yerinə.',
+  footer: 'Üst etiket — ən alt imza sətri.',
+}
+
+/* Şablon rejiminin nümunəsi. Şablon qatının özünü redaktə edirik, üstünə ikinci dəfə
+   qoyulmasın. Nümunədə hekayə yoxdursa (xına, korporativ…) hekayə yazıları önbaxışda
+   görünsün deyə ad günü nümunəsinin fəsilləri götürülür. */
+function templateEditDemo({ concept, id }) {
+  const demo = demoForConcept(concept, id).weddingData
+  const story = demo.loveStory?.length ? demo.loveStory : demoForConcept('birthday', id).weddingData.loveStory
+  return { ...demo, loveStory: story, sections: { ...demo.sections, lovestory: true }, templateDefaults: {} }
+}
+
 /* `templateEdit` ({ key, id, concept, label }) — «Şablonlar» bölməsi: dəvətnamə yoxdur,
    önbaxış həmin bölmənin nümunəsini göstərir, saxlama şablon səviyyəsinə gedir. */
 export default function AdminContentManager({ slug: slugProp, templateEdit = null, onClose, onSaved }) {
@@ -97,7 +112,7 @@ export default function AdminContentManager({ slug: slugProp, templateEdit = nul
           ? getTemplateContent(templateEdit.key).then((c) => [
             { ...c, template_id: templateEdit.id },
             /* Şablon qatının özünü redaktə edirik — üstünə ikinci dəfə qoyulmasın */
-            { data: { ...demoForConcept(templateEdit.concept, templateEdit.id).weddingData, templateDefaults: {} } },
+            { data: templateEditDemo(templateEdit) },
           ])
           : Promise.all([
             getInvitationContent(slug),
@@ -330,15 +345,29 @@ export default function AdminContentManager({ slug: slugProp, templateEdit = nul
       { value: '', label: 'Şablonun öz şrifti', family: 'inherit' },
       ...FONT_CHOICES.map((f) => ({ value: f, label: f, family: FONT_STACKS[f] })),
     ]
+    /* Bu tədbirdə görünməyən sətirlər formanı doldurmasın */
+    const eventType = wedding?.eventType
+    const relevant = ([key]) => {
+      if (key.startsWith('event_')) return key === `event_${eventType}`
+      if (key === 'age_sentence' || key === 'age_word') return eventType === 'birthday' || eventType === 'sunnet'
+      if (key === 'years_sentence') return eventType === 'anniversary'
+      if (key === 'inv_maps_btn') return templateId === 'simple-luxury'
+      /* Nümunənin sonu yalnız vitrində görünür */
+      if (key.startsWith('cta.')) return !!templateEdit
+      return true
+    }
+    /* Şablon səviyyəsində adlar sahəsi yoxdur: hər müştərinin adı özününküdür */
+    const namesField = (key) => !!templateEdit && (key === 'hero' || key === 'footer')
     return {
       textSections: CONTENT_SECTIONS.map((sec) => ({
         id: sec.key,
         title: sec.az,
-        hint: sec.hint,
+        hint: (templateEdit && TEMPLATE_MODE_HINTS[sec.key]) || sec.hint,
         fields: [
           { key: `k:${sec.key}`, label: 'Üst etiket', short: true },
-          { key: `t:${sec.key}`, label: 'Başlıq', localized: true, short: true },
+          ...(namesField(sec.key) ? [] : [{ key: `t:${sec.key}`, label: 'Başlıq', localized: true, short: true }]),
           ...(STRING_CATALOG[sec.key] || [])
+            .filter(relevant)
             /* Şablonun öz başlığı varsa köhnə «bölmə adı» sətri dəvətnamədə görünmür
                (yalnız `L(…, fallback)`-dır) — sahə göstərilmir, «Başlıq» işləyir */
             .filter(([key]) => !(tplLabels?.[sec.key]?.title && SHADOWED_TITLE[sec.key] === key))
@@ -356,12 +385,13 @@ export default function AdminContentManager({ slug: slugProp, templateEdit = nul
         { key: 'headingScale', label: 'Başlıq ölçüsü' },
         { key: 'bodyScale', label: 'Mətn ölçüsü', hint: 'Ölçü sabit piksel deyil, əmsaldır — şablonun responsiv tipoqrafiyası (mobil/desktop) toxunulmaz qalır.' },
       ],
-      sections: SECTION_DEFS.map((def) => ({ id: def.id, label: def.labels?.az || def.id, hint: def.hints?.az })),
+      /* Hekayəni müştəri özü açır — şablon səviyyəsində bu seçim yoxdur */
+      sections: SECTION_DEFS.filter((def) => !(templateEdit && def.id === 'lovestory')).map((def) => ({ id: def.id, label: def.labels?.az || def.id, hint: def.hints?.az })),
       lockedNote: bespoke
         ? `«${getTemplateName(templateId)}» şablonunda rəng və şrift dəyişikliyi işləmir — bu şablon öz markup-ını yazır və rənglər/şriftlər kodun içindədir. Mətn düzəlişləri və bölmə görünürlüyü isə normal işləyir.`
         : undefined,
     }
-  }, [bespoke, templateId, copyFields, tplLabels])
+  }, [bespoke, templateId, copyFields, tplLabels, templateEdit, wedding?.eventType])
 
   /* ── Yeni görünüşdən gələn dəyişiklik → köhnə model ── */
   const handleChange = (next, path) => {
@@ -484,7 +514,7 @@ export default function AdminContentManager({ slug: slugProp, templateEdit = nul
             <OpeningEditor
               templateId={templateId} wedding={wedding} lang={lang} legacy={legacy}
               opening={opening} setOpening={(fn) => { setSaveState('idle'); setOpening(fn) }}
-              slug={slug} narrow={isNarrow}
+              slug={slug} narrow={isNarrow} templateMode={!!templateEdit}
             />
           </>
         ),

@@ -2,6 +2,8 @@
    Hekayə bölməsinin mətnləri — şablon üzrə (loveStoryTheme.js-dən ayrıldı, 2026-11).
    ⚠ React və şəbəkə YOXDUR: admin paneli və node testləri bu faylı birbaşa yükləyir.
    ───────────────────────────────────────────────────────────────────────── */
+import { getTemplateConfig } from '../templateConfig.js'
+
 /* ── Mətnlər (AZ/EN/RU) ── dizayndakı şablon adlandırmaları */
 const COPY_BASE = {
   kicker:  { az: 'Hekayə', en: 'Story', ru: 'История' },
@@ -414,15 +416,9 @@ const BIRTHDAY_COPY = {
   'gazette':         { title: { az: 'Bir ömrün hekayəsi', en: 'The story of a life', ru: 'История одной жизни' } },
   'royal-palace':    { title: { az: 'Mənim tarixim', en: 'My chronicle', ru: 'Моя летопись' } },
 }
-/* Cütlük mətni olan köhnə dizaynlar — yeni konseptlərin COPY-si toxunulmur */
-const COUPLE_STORY = new Set([
-  'royal-gold', 'floral-garden', 'modern-black', 'white-elegance', 'night-sky', 'oriental-luxe', 'nature-touch',
-  'crystal-glass', 'boarding-pass', 'cinema-premiere', 'vinyl-record', 'royal-palace', 'mediterranean', 'gazette',
-  'luxury-jewelry', 'simple-luxury',
-])
-
 export function getStoryCopy(templateId, lang = 'az', eventType = null) {
-  const own = eventType === 'birthday' && COUPLE_STORY.has(templateId)
+  /* «Toy / Nişan» dizaynları — hekayə mətni cütlük üçündür */
+  const own = eventType === 'birthday' && getTemplateConfig(templateId)?.concept === 'toy'
     ? { ...(COPY[templateId] || {}), ...BIRTHDAY_BASE, ...(BIRTHDAY_COPY[templateId] || {}) }
     : (COPY[templateId] || {})
   const out = {}
