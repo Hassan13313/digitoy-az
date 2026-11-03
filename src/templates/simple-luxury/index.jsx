@@ -273,19 +273,19 @@ export default function SimpleLuxuryTemplate({
                 {/* Names */}
                 <h1 className="font-serif leading-none mb-3">
                   {heroTitle ? (
-                    <span className="block text-5xl sm:text-6xl md:text-7xl text-ink font-light tracking-tight">{heroTitle}</span>
+                    <span data-fit className="block text-5xl sm:text-6xl md:text-7xl text-ink font-light tracking-tight">{heroTitle}</span>
                   ) : isCouple ? (
                     <>
-                      <span className="block text-5xl sm:text-6xl md:text-7xl text-ink font-light tracking-tight">{weddingData.groomName}</span>
+                      <span data-fit className="block text-5xl sm:text-6xl md:text-7xl text-ink font-light tracking-tight">{weddingData.groomName}</span>
                       <span className="block text-3xl sm:text-4xl text-gold font-light italic my-3">{tr.inv_and}</span>
-                      <span className="block text-5xl sm:text-6xl md:text-7xl text-ink font-light tracking-tight">{weddingData.brideName}</span>
+                      <span data-fit className="block text-5xl sm:text-6xl md:text-7xl text-ink font-light tracking-tight">{weddingData.brideName}</span>
                     </>
                   ) : isCorp ? (
-                    <span className="block text-4xl sm:text-5xl md:text-6xl text-ink font-light tracking-widest uppercase text-center">
+                    <span data-fit className="block text-4xl sm:text-5xl md:text-6xl text-ink font-light tracking-widest uppercase text-center">
                       {weddingData.eventName || eventLabels[weddingData.eventType]}
                     </span>
                   ) : (
-                    <span className="block text-5xl sm:text-6xl md:text-7xl text-ink font-light tracking-tight">{weddingData.brideName}</span>
+                    <span data-fit className="block text-5xl sm:text-6xl md:text-7xl text-ink font-light tracking-tight">{weddingData.brideName}</span>
                   )}
                 </h1>
 
@@ -581,7 +581,7 @@ export default function SimpleLuxuryTemplate({
               theme={TH} weddingData={weddingData} lang={lang}
               isDemoMode={isDemoMode} isCouple={isCouple} isCorp={isCorp}
               eventLabel={eventLabels[weddingData.eventType]} serif={TH.fonts?.heading}
-              footer={sectionHead(L, 'footer')}
+              footer={sectionHead(L, 'footer')} wrapNames
             />
           </motion.div>
         )}

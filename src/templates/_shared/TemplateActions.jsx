@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTemplate } from '../TemplateProvider'
+import { ACTIONS_UI } from './sharedCopy'
 import { withStringOverrides } from '../../data/adminOverrides'
 import { Music } from 'lucide-react'
 import { buildWhatsAppUrl } from '../../utils/whatsappOrder'
@@ -20,40 +21,11 @@ import OrderLegalNote from '../../components/legal/OrderLegalNote'
    brend yaşılıdır (tanınma üçün bütün şablonlarda eyni qalır).
    ───────────────────────────────────────────────────────────────────────── */
 
-export const UI = {
-  az: {
-    orderKicker: 'Digitoy.az · Premium',
-    orderTitle:  'Dəvətnaməniz Hazırdır!',
-    orderText:   'Dizaynı tamamladınız. İndi tək bir toxunuşla dəvətnamənizi sifariş verib canlıya ala bilərsiniz.',
-    orderBtn:    'Dəvətnaməni sifariş et',
-    orderNote:   'WhatsApp vasitəsilə birbaşa əlaqə',
-    music:       'Musiqini Başlat',
-    musicAria:   'Musiqini başlat',
-  },
-  en: {
-    orderKicker: 'Digitoy.az · Premium',
-    orderTitle:  'Your Invitation Is Ready!',
-    orderText:   'The design is complete. One tap and your invitation goes live.',
-    orderBtn:    'Order your invitation',
-    orderNote:   'Direct contact via WhatsApp',
-    music:       'Play music',
-    musicAria:   'Play music',
-  },
-  ru: {
-    orderKicker: 'Digitoy.az · Premium',
-    orderTitle:  'Ваше приглашение готово!',
-    orderText:   'Дизайн завершён. Одно нажатие — и приглашение станет активным.',
-    orderBtn:    'Заказать приглашение',
-    orderNote:   'Прямая связь через WhatsApp',
-    music:       'Включить музыку',
-    musicAria:   'Включить музыку',
-  },
-}
 
 /* Admin override-ları (`ui.<açar>`) — sifariş kartı və musiqi balonu */
 const useTr = (lang) => {
   const { strings } = useTemplate()
-  return withStringOverrides(UI[lang] || UI.az, strings, lang, 'ui.')
+  return withStringOverrides(ACTIONS_UI[lang] || ACTIONS_UI.az, strings, lang, 'ui.')
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -65,9 +37,9 @@ const useTr = (lang) => {
    yaranmasın.
    ═══════════════════════════════════════════════════════════════════════════ */
 export function OrderCta({ theme, weddingData, lang = 'az', pageSlug, isDemoMode, effectiveSlug, serif }) {
+  const t = useTr(lang)
   if (pageSlug || isDemoMode) return null
 
-  const t = useTr(lang)
   const waUrl = buildWhatsAppUrl(weddingData, lang, WHATSAPP_NUMBER, effectiveSlug, '')
 
   /* Bölmə fonu şablondan asılıdır → kiçik mətnlərin rəngini ona görə seç.

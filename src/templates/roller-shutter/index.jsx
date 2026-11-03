@@ -76,7 +76,7 @@ function ShutterOpening({ inv, theme, mono }) {
         {ot.show('kicker') && <div style={{ marginBottom: 10, fontFamily: mono, fontSize: 12, letterSpacing: '.22em', textTransform: 'uppercase', color: C.MUTED, animation: 'rs-rise .8s ease-out .2s both' }}>{ot.text('kicker')}</div>}
         {titleOv !== '' && (
           <SignBox head={head} style={{ maxWidth: 'min(86vw, 340px)', animation: 'rs-rise .9s ease-out .25s both' }}>
-            <span style={{ fontSize: 'clamp(30px, 9vw, 42px)', lineHeight: 1 }}>{first}{second && <> {ot.text('and')} {second}</>}</span>
+            <span data-fit style={{ display: 'block', fontSize: 'clamp(30px, 9vw, 42px)', lineHeight: 1 }}>{first}{second && <> {ot.text('and')} {second}</>}</span>
           </SignBox>
         )}
         <div style={{ width: 'min(76vw, 300px)', marginTop: 18 }}>
@@ -115,7 +115,7 @@ function Panel({ id, section, title, kicker, sub, children, head, mono, dark = f
         {(title || kicker) && (
           <div style={{ textAlign: 'center', marginBottom: 30 }}>
             {kicker && <div style={{ marginBottom: 6, fontFamily: mono, fontSize: 12, letterSpacing: '.22em', textTransform: 'uppercase', color: dark ? C.YELLOW : C.MUTED }}>{kicker}</div>}
-            {title && <h2 style={{ margin: 0, fontFamily: head, fontWeight: 800, fontSize: scaleFont('clamp(40px, 12vw, 56px)', C.hs), lineHeight: 0.95, letterSpacing: '.02em', textTransform: 'uppercase', textWrap: 'balance', color: dark ? C.WHITE : C.CHAR }}>{title}</h2>}
+            {title && <h2 data-fit style={{ margin: 0, fontFamily: head, fontWeight: 800, fontSize: scaleFont('clamp(40px, 12vw, 56px)', C.hs), lineHeight: 0.95, letterSpacing: '.02em', textTransform: 'uppercase', textWrap: 'balance', color: dark ? C.WHITE : C.CHAR }}>{title}</h2>}
             <span aria-hidden="true" style={{ display: 'block', width: 84, height: 8, margin: '14px auto 0', background: HAZARD(C), borderRadius: 2 }} />
             {sub && <p style={{ margin: '12px auto 0', maxWidth: 340, fontSize: 16.5, color: dark ? alpha(C.WHITE, 0.7) : C.MUTED, lineHeight: 1.5 }}>{sub}</p>}
           </div>

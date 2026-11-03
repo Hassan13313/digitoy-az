@@ -1,5 +1,6 @@
 import { SOCIAL_LINKS } from '../../data/constants'
 import { useTemplate } from '../TemplateProvider'
+import { OUTRO_CTA } from './sharedCopy'
 import { withStringOverrides } from '../../data/adminOverrides'
 import { formatFullDateByLang } from '../../utils/dateFormat'
 import { alpha, readableOn } from './geo'
@@ -22,26 +23,6 @@ import t from '../../data/translations'
    Beləliklə builder state-i (sessionStorage snapshot) toxunulmaz qalır.
    ───────────────────────────────────────────────────────────────────────── */
 
-export const CTA = {
-  az: {
-    badge: 'Öz dəvətnamənizi hazırlayın',
-    title: 'Sizə xüsusi hazırlansın',
-    desc:  'Bu nümunəni bəyəndinizsə, paketinizi seçib öz dəvətnamənizi dəqiqələr ərzində hazırlaya bilərsiniz.',
-    btn:   'Paketlərə keç',
-  },
-  en: {
-    badge: 'Create your invitation',
-    title: 'Make it yours',
-    desc:  'If you liked this example, choose your package and create your invitation in minutes.',
-    btn:   'Choose Package',
-  },
-  ru: {
-    badge: 'Создайте своё приглашение',
-    title: 'Сделайте своё',
-    desc:  'Если вам понравился этот пример, выберите пакет и создайте своё приглашение за несколько минут.',
-    btn:   'Выбрать пакет',
-  },
-}
 
 /* ⚠ Burada `transition` YOXDUR: ortaq `[data-press]` qaydası (index.css)
    transform/box-shadow/filter keçidlərini özü verir, inline transition isə
@@ -101,7 +82,7 @@ export default function TemplateOutro({
   const tr  = t[lang] || t.az
   /* Admin: «Mətnlər › Alt hissə» */
   const { strings } = useTemplate()
-  const cta = withStringOverrides(CTA[lang] || CTA.az, strings, lang, 'cta.')
+  const cta = withStringOverrides(OUTRO_CTA[lang] || OUTRO_CTA.az, strings, lang, 'cta.')
 
   /* CTA fonu şablonun səthidir → mətn rəngləri ona görə seçilir */
   const ctaBg    = theme.surface || theme.background

@@ -158,6 +158,8 @@ function getAnalyticsPath(view, slug) {
     case 'invitation': return '/'
     case 'demo':       return '/demo'
     case 'guide':      return window.location.pathname
+    /* Vitrin və tədbir səhifələri (/sablonlar/ad-gunu) — hansı tədbirə baxılır */
+    case 'templates':  return window.location.pathname
     case 'invite':     return slug ? `/invite/${slug}` : null
     case 'photo':      return slug ? `/invite/${slug}/foto` : null
     case 'gallery-page': return slug ? `/invite/${slug}/qalereya-idare` : null
@@ -387,7 +389,7 @@ export default function App() {
   useEffect(() => {
     const path = getAnalyticsPath(view, adminSlug || parseInviteSlug().slug)
     if (path) trackPageView(path)
-  }, [view, adminSlug])
+  }, [view, adminSlug, templatesConcept])
 
   /* Cream fade overlay before route switch — gives a luxury page-transition feel */
   const navigateTo = useCallback((fn) => {

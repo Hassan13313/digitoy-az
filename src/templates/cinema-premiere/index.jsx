@@ -166,7 +166,7 @@ function PremiereOpening({ inv, theme }) {
           }}>
             {titleOv !== '' && (
               <div style={{ fontFamily: head, fontWeight: 800, fontSize: fs, lineHeight: 1.18, color: '#141010', letterSpacing: '.04em' }}>
-                <div>{l1}</div>{l2 && <div>{l2}</div>}
+                <div data-fit>{l1}</div>{l2 && <div data-fit>{l2}</div>}
               </div>
             )}
             {ot.show('sub') && <div style={{ marginTop: 6, fontFamily: theme.fonts.body, fontStyle: 'italic', fontSize: 14, color: C.VELVET }}>{ot.text('sub')}</div>}

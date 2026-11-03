@@ -306,7 +306,7 @@ export default function TemplateSelect({ value, onChange, lang = 'az', hideHeadi
                 return (
                   <TemplateCard
                     key={tpl.id}
-                    name={`template-${g.id}`}
+                    name="template"
                     value={tpl.id}
                     title={tpl.name}
                     description={tpl.shortDescription?.[lang] || tpl.shortDescription?.az || tpl.tagline}
