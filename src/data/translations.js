@@ -677,7 +677,7 @@ const t = {
     inv_location: 'Место проведения',
     inv_rsvp: 'Подтверждение участия',
     inv_maps_btn: 'Google Maps',
-    inv_btn_maps: 'Карты',
+    inv_btn_maps: 'Maps',
     inv_btn_waze: 'Waze',
     inv_btn_apple: 'Apple',
     age_sentence: 'исполняется {n}',

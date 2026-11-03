@@ -458,7 +458,7 @@ export default function SimpleLuxuryTemplate({
                       style={{ flex: '1 1 128px', minWidth: 0 }}
                     >
                       <ExternalLink size={13} strokeWidth={1.5} />
-                      {tr.inv_btn_apple}
+                      {adminStrings?.inv_btn_apple ? tr.inv_btn_apple : 'Apple Maps'}
                     </a>
                   )}
                 </Stagger>
@@ -581,7 +581,8 @@ export default function SimpleLuxuryTemplate({
               theme={TH} weddingData={weddingData} lang={lang}
               isDemoMode={isDemoMode} isCouple={isCouple} isCorp={isCorp}
               eventLabel={eventLabels[weddingData.eventType]} serif={TH.fonts?.heading}
-              footer={sectionHead(L, 'footer')} wrapNames
+              footer={sectionHead(L, 'footer')}
+              wrapNames={`${weddingData.groomName || ''}${weddingData.brideName || ''}`.length > 24}
             />
           </motion.div>
         )}
