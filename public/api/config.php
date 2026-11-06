@@ -310,7 +310,7 @@ function rateGate(string $key, int $limit, int $window): bool {
 /* ── Sxem versiyası (Phase 39) ──
    Sütun və ya cədvəl əlavə edəndə BU RƏQƏMİ ARTIR — əks halda miqrasiya
    canlıda işləməz. */
-const SCHEMA_VERSION = 48;
+const SCHEMA_VERSION = 49;
 
 /* ── Cədvəlləri avtomatik yarat ──
    Phase 39 OPTİMİZASİYASI: əvvəl bu funksiya HƏR sorğuda 6 `CREATE TABLE
@@ -673,6 +673,20 @@ function runMigrations(PDO $db): void {
     if (empty($db->query("SHOW COLUMNS FROM invitations LIKE 'owner_key'")->fetchAll())) {
         try {
             $db->exec("ALTER TABLE invitations ADD COLUMN owner_key CHAR(64) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL");
+        } catch (PDOException $e) {
+            if ((int) ($e->errorInfo[1] ?? 0) !== 1060) throw $e;   /* paralel sorğu artıq əlavə edib */
+        }
+    }
+
+    /* ── 2026-11: qonaq albomunun saxlanma müddəti (album_retention.php) ──
+       gallery_notice_at — sifarişçiyə silinmə xəbərdarlığı göndərildi (UTC);
+       gallery_purged_at — albomun mediası silindi, yükləmə bağlıdır (UTC).
+       ADDITIVE: NULL qəbul edir, köhnə kod sütunları görmür. */
+    /* gallery_keep_until — ödənişli uzadılma (DATE; 9999-12-31 = müddətsiz). */
+    foreach (['gallery_notice_at' => 'DATETIME', 'gallery_purged_at' => 'DATETIME', 'gallery_keep_until' => 'DATE'] as $col => $type) {
+        if (!empty($db->query("SHOW COLUMNS FROM invitations LIKE '$col'")->fetchAll())) continue;
+        try {
+            $db->exec("ALTER TABLE invitations ADD COLUMN $col $type DEFAULT NULL");
         } catch (PDOException $e) {
             if ((int) ($e->errorInfo[1] ?? 0) !== 1060) throw $e;   /* paralel sorğu artıq əlavə edib */
         }

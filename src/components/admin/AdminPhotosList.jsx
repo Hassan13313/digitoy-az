@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import GalleriesList from './v2/GalleriesList'
+import AlbumRetention from './AlbumRetention'
 import { Notice } from './v2/adminUi'
 import { azDate } from './adminFormat'
 import { getAdminToken } from '../../utils/api'
@@ -97,6 +98,7 @@ export default function AdminPhotosList() {
   return (
     <>
       {error && <Notice tone="danger" title={error} className="mb-4" />}
+      <AlbumRetention />
       <GalleriesList
         albums={rows}
         totals={{ albums: total, photos: totalPhotos, size: `${totalMb} MB` }}

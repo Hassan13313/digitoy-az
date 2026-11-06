@@ -136,7 +136,7 @@ export default function Header({
             <span className="text-gold-sheen font-serif text-[25px] font-medium leading-none tracking-[0.04em] sm:text-[27px]">
               Digitoy
             </span>
-            <span className="font-serif text-[18px] italic leading-none text-brown-dark/70 sm:text-[19px]">.az</span>
+            <span className="font-serif text-[18px] italic leading-none text-brown-dark sm:text-[19px]">.az</span>
           </a>
 
           {/* Desktop naviqasiya */}
@@ -156,14 +156,13 @@ export default function Header({
                     >
                       {n.label}
                       {isActive && (
-                        <motion.span
-                          layoutId="nav-underline"
-                          transition={reduce ? { duration: 0 } : { type: 'spring', stiffness: 380, damping: 34 }}
+                        /* 2026-11 sürət: layoutId (paylaşılan layout animasiyası) hər render-də bütün səhifənin ölçüsünü yenidən hesablayırdı (measureScroll) — sadə element */
+                        <span
                           className="absolute inset-x-3.5 -bottom-0.5 h-px bg-gold-line xl:inset-x-4"
                           aria-hidden="true"
                         >
                           <span className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-gold" />
-                        </motion.span>
+                        </span>
                       )}
                     </a>
                   </li>
@@ -235,8 +234,6 @@ export default function Header({
 // Dil seçimi — sürüşən espresso göstərici
 // ════════════════════════════════════════════════════════════════
 function LangSwitch({ lang, onChange, label, size = 'sm' }) {
-  const reduce = useReducedMotion();
-  const uid = useId();
   const btn = size === 'lg' ? 'h-10 w-12 text-xs' : 'h-8 w-[34px] text-[10.5px]';
   return (
     <div
@@ -259,9 +256,8 @@ function LangSwitch({ lang, onChange, label, size = 'sm' }) {
             }`}
           >
             {sel && (
-              <motion.span
-                layoutId={`${uid}-lang`}
-                transition={reduce ? { duration: 0 } : { type: 'spring', stiffness: 450, damping: 36 }}
+              /* layoutId yoxdur — bax yuxarıdakı qeyd (nav-underline) */
+              <span
                 className="absolute inset-0 rounded-full bg-espresso shadow-inner-gold"
                 aria-hidden="true"
               />

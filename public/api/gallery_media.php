@@ -37,6 +37,11 @@ function galleryBaseUrl(): string {
     return (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
 }
 
+/** VPS video çeviricisinin törəmə faylı (<ad>_web.mp4) — ayrıca media deyil */
+function isGalleryWebCopy(string $file): bool {
+    return substr($file, -8) === '_web.mp4';
+}
+
 /** Fayl adı təhlükəsizdirmi? (delete_photo.php ilə eyni qayda) */
 function isSafeMediaName($name): bool {
     return is_string($name)
@@ -82,6 +87,7 @@ function scanGalleryMedia(string $slug): array {
            _poster: videonun ilk kadrı) */
         if (substr($file, -10) === '_thumb.jpg')  continue;
         if (substr($file, -11) === '_poster.jpg') continue;
+        if (isGalleryWebCopy($file))              continue;   /* VPS-in yüngül video nüsxəsi */
 
         $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
         if (!in_array($ext, array_merge(GALLERY_IMAGE_EXT, GALLERY_VIDEO_EXT))) continue;
@@ -99,6 +105,8 @@ function scanGalleryMedia(string $slug): array {
         $posterFile = $base . '_poster.jpg';
         $hasThumb   = isset($fileSet[$thumbFile]);
         $hasPoster  = isset($fileSet[$posterFile]);
+        $webFile    = $base . '_web.mp4';
+        $hasWeb     = $isVideo && isset($fileSet[$webFile]);
 
         /* ── Oxunmayan posteri özü düzəlt (2026-09-28) ──
            28.09-dək hissəli yükləmədə poster 0600 ilə qalırdı (bax
@@ -120,6 +128,8 @@ function scanGalleryMedia(string $slug): array {
             'url'        => $baseUrl . '/uploads/' . $slug . '/' . $file,
             'thumbUrl'   => $baseUrl . '/uploads/' . $slug . '/' . $preview,
             'posterUrl'  => $hasPoster ? ($baseUrl . '/uploads/' . $slug . '/' . $posterFile) : null,
+            /* 2026-11: baxış üçün yüngül nüsxə (H.264 ≤1080p, faststart) — orijinal endirmə üçün qalır */
+            'webUrl'     => $hasWeb ? ($baseUrl . '/uploads/' . $slug . '/' . $webFile) : null,
             'name'       => $file,
             'type'       => $mime,
             'size'       => $stat ? (int) $stat['size'] : 0,
@@ -152,6 +162,7 @@ function countGalleryMedia(string $slug): array {
             if ($file === '.' || $file === '..') continue;
             if (substr($file, -10) === '_thumb.jpg')  continue;
             if (substr($file, -11) === '_poster.jpg') continue;
+            if (isGalleryWebCopy($file))              continue;
             $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
             if (in_array($ext, GALLERY_VIDEO_EXT, true))      $videos++;
             elseif (in_array($ext, GALLERY_IMAGE_EXT, true))  $photos++;

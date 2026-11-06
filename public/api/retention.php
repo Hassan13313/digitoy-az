@@ -19,6 +19,7 @@
 
 require_once __DIR__ . '/purge_lib.php';
 require_once __DIR__ . '/story_media.php';
+require_once __DIR__ . '/album_retention.php';
 
 const RET_AUDIT_IP_DAYS   = 90;    /* admin_audit.ip → NULL */
 const RET_GALLERY_IP_DAYS = 7;     /* gallery_events.ip_hash → NULL (təkrar yoxlaması yalnız bu günə baxır) */
@@ -204,6 +205,8 @@ function runRetention(PDO $db, array $opt = []): array {
         'temp_files' => fn () => retentionSweepTemp($tmp, $now, $dry),
         'media_logs' => fn () => retentionSweepMediaLogs($logs, $now, $dry),
         'drafts'     => fn () => retentionPurgeDrafts($db, $uploads, $dbNow, $now, $dry, $deadline),
+        /* 2026-11: qonaq albomu — YALNIZ xəbərdarlığı qeydə alınmış və vaxtı keçmiş */
+        'albums'     => fn () => albumPurgeDue($db, $uploads, albumToday($now), $dry, $deadline, $now),
     ];
     /* Sahibsiz bucket hesabatı yalnız önizləmədə göstərilir — gündəlik işdə hesablanmır */
     if ($dry) $steps['orphans'] = fn () => retentionOrphanReport($db, $uploads, $now);
@@ -282,6 +285,9 @@ function retentionStatus(PDO $db): array {
             'temp_hours'      => RET_TEMP_HOURS,
             'media_log_days'  => RET_MEDIA_LOG_DAYS,
             'draft_days'      => RET_DRAFT_DAYS,
+            'album_keep_days'       => ALBUM_KEEP_DAYS,
+            'album_notice_days'     => ALBUM_NOTICE_DAYS,
+            'album_min_notice_days' => ALBUM_MIN_NOTICE_DAYS,
         ],
     ];
 }

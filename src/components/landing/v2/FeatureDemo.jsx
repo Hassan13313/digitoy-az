@@ -228,9 +228,8 @@ export default function FeatureDemo({ lang = 'az', autoPlay = false, initialId =
                   }`}
                 >
                   {selected && (
-                    <motion.span
-                      layoutId={`${uid}-pill`}
-                      transition={reduce ? { duration: 0 } : { type: 'spring', stiffness: 420, damping: 36 }}
+                    /* 2026-11 sürət: layoutId (paylaşılan layout animasiyası) hər render-də bütün səhifənin ölçüsünü yenidən hesablayırdı (measureScroll) — sadə element */
+                    <span
                       className="absolute inset-0 rounded-[inherit] bg-white shadow-soft ring-1 ring-gold/35"
                     />
                   )}

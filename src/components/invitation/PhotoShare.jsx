@@ -90,6 +90,8 @@ export default function PhotoShare() {
   const meta = useGalleryMeta(slug, { interval: 30000 })
   /* Server «belə dəvətnamə yoxdur» deyirsə yükləmə formu göstərilmir (gallery_meta.php › exists) */
   const notReady = meta.meta?.exists === false
+  /* 2026-11: albomun saxlanma müddəti bitib və mediası silinib — yükləmə bağlıdır */
+  const closed = meta.album?.closed === true
 
   /* QR skan — bu səhifəyə gəliş praktikada QR kodun skan edilməsidir.
      Server GÜNDƏ BİR DƏFƏ sayır (ip_hash + tarix), ona görə səhifəni
@@ -292,7 +294,7 @@ export default function PhotoShare() {
   }
 
   /* Fayl bütün pəncərəyə sürüklənəndə (desktop) — köhnə «drop» sahəsinin yerinə */
-  const dropActive = useWindowFileDrop({ onFiles: addFiles, disabled: done || notReady })
+  const dropActive = useWindowFileDrop({ onFiles: addFiles, disabled: done || notReady || closed })
 
   /* Qapaq: cütlüyün qalereya qapağı (data URI / tam ünvan). Qalereyadan seçilmiş
      fayl adı bu səhifədə həll olunmur (media siyahısı yüklənmir) — o halda
@@ -346,6 +348,10 @@ export default function PhotoShare() {
             <UploadNotice tone="info" title="Bu dəvətnamə hələ aktiv deyil">
               Foto və video paylaşımı dəvətnamə təsdiqləndikdən sonra açılır. Önbaxışdakı QR kod
               və link yalnız nümunədir — təsdiqdən sonra göndərilən linkdə şəkillər qəbul olunacaq.
+            </UploadNotice>
+          ) : closed ? (
+            <UploadNotice tone="info" title="Albom bağlanıb">
+              Bu albomun saxlanma müddəti bitib — artıq şəkil və video qəbul edilmir.
             </UploadNotice>
           ) : done ? (
             <UploadDone

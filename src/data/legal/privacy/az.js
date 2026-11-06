@@ -82,8 +82,10 @@ export default {
         { list: [
           'qonaq siyahısındakı ad və masa nömrələrini (masanı tapmaq üçün) — telefon və qeydlər görünmür;',
           'xatirə kitabındakı mesajları və onları yazanların adlarını;',
-          'foto paylaşım qalereyasındakı şəkil və videoları (Premium paket).',
-        ] },
+          ] },
+        'Qonaq foto albomu (Premium paket) dəvətnamə linki ilə açılmır. Qonaqlar foto paylaşım səhifəsində yalnız şəkil və video göndərir — albomdakı şəkil və videoları görmürlər.',
+        'Albomu yalnız sifarişçi («Müştəri paneli» və ya idarəetmə linki ilə) və sifarişçinin özünün «baxış linki» göndərdiyi şəxslər görür. Baxış linki ilə şəkil və videolara baxmaq və onları endirmək olar, silmək və dəyişmək olmaz.',
+        'DigiToy albomu yalnız ümumi formada — albomun adı, fayl sayı, həcmi və tarixləri kimi görür. Albomdakı şəkil və videolara baxmırıq, onlar üzərində düzəliş etmirik və onları heç bir üçüncü tərəflə paylaşmırıq (yalnız sifarişçi texniki problemin həlli üçün özü xahiş etdikdə istisna olmaqla). Fayllar yalnız saxlanma üçün hostinq serverində durur (bölmə 6).',
         'Dəvətnamə səhifələri axtarış sistemlərində göstərilmir (noindex), lakin linkin özü paylaşıla bilər və ünvanında adlar ola bilər. Linki yalnız dəvət etdiyiniz şəxslərlə paylaşmağı tövsiyə edirik.',
         'Sifarişçiyə ayrıca şəxsi «Müştəri paneli» linki verilir. Bu linklə iştirak təsdiqi cavablarına, qonaq hesabatına (qonaqların telefonu olmadan), xatirə kitabına və qalereyanın idarəsinə baxmaq olur. Linki başqası ilə paylaşmayın — istəyinizlə onu dərhal ləğv edib yenisini veririk.',
         'Dəvətnamə deaktiv edildikdə onun əsas məzmunu göstərilmir. Qonaq siyahısı, mesajlar və şəkillər daxil olmaqla bütün məlumatların tam silinməsi üçün bizə müraciət edin (bölmə 9).',
@@ -94,7 +96,7 @@ export default {
       title: '6. Məlumatların ötürüldüyü üçüncü tərəflər',
       body: [
         { list: [
-          'Hostinq provayderi — sayt və məlumat bazası onun serverlərində saxlanılır.',
+          'Hostinq provayderi — sayt, məlumat bazası və qonaq albomlarının faylları onun serverlərində saxlanılır. Provayder bu fayllara yalnız texniki saxlama üçün ev sahibliyi edir.',
           'Google Analytics (Google LLC, ABŞ) — yalnız razılığınızla: ziyarət olunan səhifələr, cihaz və brauzer məlumatı, təxmini yer.',
           'PostHog (PostHog Inc., ABŞ serverləri) — yalnız razılığınızla: səhifə baxışları və əsas addımlar (məsələn, konstruktorun başlanması, sifariş düyməsi). Formaya yazdığınız mətnlər göndərilmir.',
           'Google Fonts (Google) — şriftlər yüklənərkən IP ünvanınız Google-a görünür. Bu, saytın düzgün görünməsi üçündür və razılıqdan asılı deyil.',
@@ -111,7 +113,12 @@ export default {
       title: '7. Nə qədər saxlayırıq',
       body: [
         { list: [
-          'Dəvətnamə və ona aid məlumatlar (qonaq siyahısı, cavablar, mesajlar, şəkillər) tədbirdən sonra da xatirə olaraq saxlanılır və sifarişçinin müraciəti ilə tam silinir.',
+          'Dəvətnamə və ona aid məlumatlar (qonaq siyahısı, cavablar, mesajlar) tədbirdən sonra da xatirə olaraq saxlanılır və sifarişçinin müraciəti ilə tam silinir.',
+          `Qonaq foto albomundakı şəkil və videolar tədbir tarixindən ${R.albumKeepDays} gün (1 ay) saxlanılır, sonra silinir.`,
+          `Silinmədən ${R.albumNoticeDays} gün əvvəl sifarişçiyə WhatsApp ilə xəbər verilir ki, şəkil və videoları endirə bilsin.`,
+          `Xəbərdarlıq gec göndərilərsə (silinməyə ${R.albumNoticeDays} gündən az qalmış), albom xəbərdarlıq tarixindən ən azı ${R.albumMinNoticeDays} gün sonra silinir — gecikən vaxt sifarişçinin hesabına yazılmır. Xəbərdarlıq göndərilməmiş albom silinmir.`,
+          'Sifarişçi əlavə ödənişlə albomun saxlanma müddətini uzada və ya albomu müddətsiz saxlada bilər; müddət və qiymət fərdi razılaşdırılır.',
+          'Albom silindikdən sonra foto paylaşım səhifəsi yeni şəkil qəbul etmir; dəvətnamənin özü qalır.',
           'Sifariş qeydləri xidmətin tarixçəsi kimi saxlanılır və müraciətlə silinə bilər (qanunla saxlanması tələb olunan hallar istisna olmaqla).',
           `Göndərilməmiş (yarımçıq qalmış) konstruktor qaralamaları son dəyişiklikdən ${R.draftDays} gün sonra hekayə şəkilləri, musiqi və əlaqə nömrəsi ilə birlikdə avtomatik silinir.`,
           `İdarəetmə jurnalındakı IP ünvanları ${R.auditIpDays} gündən sonra silinir.`,
@@ -133,7 +140,7 @@ export default {
           'digitoy_session_id, digitoy_builder_state, digitoy_story_sid, digitoy_customer_phone — yarımçıq dəvətnamənizi və yazdığınız əlaqə nömrəsini itirməmək üçün;',
           'selected_package — seçdiyiniz paket;',
           'digitoyVisitorId — emoji reaksiyalarının təkrarlanmaması üçün təsadüfi identifikator;',
-          'digitoyGalleryKey:*, digitoyUpload:* — cütlüyün qalereya idarəetmə açarı və yarımçıq qalan yükləmənin davam etdirilməsi;',
+          'digitoyGalleryKey:*, digitoyGalleryView:*, digitoyUpload:* — albomun idarəetmə və baxış açarları və yarımçıq qalan yükləmənin davam etdirilməsi;',
           'digitoyOwnerKey:* — «Müştəri paneli» açarı (yalnız paneli açdığınız cihazda);',
           'adminToken — yalnız idarəçi üçün.',
         ] },
@@ -158,7 +165,7 @@ export default {
           'emala etiraz etmək və səlahiyyətli dövlət orqanına şikayət etmək.',
         ] },
         `Müraciət üçün ${C.email} ünvanına və ya WhatsApp ilə ${C.phone} nömrəsinə yazın. Sifariş kodunu (DT-…) və ya dəvətnamə linkini qeyd etsəniz, sorğunu daha tez icra edərik. Müraciətlərə mümkün qədər tez, qanunla müəyyən edilmiş müddətdən gec olmayaraq cavab veririk.`,
-        'Qonaqlar öz mesajının və ya yüklədiyi şəklin silinməsi üçün tədbirin təşkilatçısına və ya birbaşa bizə müraciət edə bilər.',
+        'Qonaqlar yüklədiyi şəklin və ya videonun silinməsi üçün sifarişçiyə (albomu o idarə edir), öz mesajının silinməsi üçün sifarişçiyə və ya birbaşa bizə müraciət edə bilər.',
       ],
     },
     {

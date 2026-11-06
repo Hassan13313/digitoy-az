@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import LandingPage from './components/landing/LandingPage'
-import InvitationPage from './components/invitation/InvitationPage'
 /* Route-level code splitting — isolated, non-landing routes load on demand,
    shrinking the initial bundle for the home/invite paths. SEO unaffected
    (these routes are all noindex). */
@@ -20,7 +19,6 @@ const LegalPage        = lazy(() => import('./components/legal/LegalPage'))
 const GuidePage        = lazy(() => import('./components/guides/GuidePage'))
 /* Template Engine — InvitationPage onsuz da statik import edir,
    preview marşrutu üçün ayrıca chunk yaratmağa ehtiyac yoxdur. */
-import TemplateRenderer from './templates/TemplateRenderer'
 import { defaultWedding } from './data/defaultWedding'
 import { demoInvitation, demoGuestbook, demoForConcept } from './data/demoInvitation'
 import { conceptPageFor } from './data/conceptPages'
@@ -306,6 +304,18 @@ function routeAfterAuth(
   }
 
   setView('landing')
+}
+
+/* 2026-11 sürət: dəvətnamə göstəricisi və şablonlar ana səhifənin ilk yükünə
+   daxil deyil — yalnız dəvətnamə/demo/önbaxış açılanda yüklənir. Adlar eyni
+   qalır, Suspense özləri ilə gəlir (çağıran yerlər dəyişmir). */
+const InvitationPageChunk   = lazy(() => import('./components/invitation/InvitationPage'))
+const TemplateRendererChunk = lazy(() => import('./templates/TemplateRenderer'))
+function InvitationPage(props) {
+  return <Suspense fallback={<RouteLoader />}><InvitationPageChunk {...props} /></Suspense>
+}
+function TemplateRenderer(props) {
+  return <Suspense fallback={<RouteLoader />}><TemplateRendererChunk {...props} /></Suspense>
 }
 
 /* Shared cream loading spinner — initial route + lazy-route Suspense fallback */

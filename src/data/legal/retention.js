@@ -8,4 +8,8 @@ export const RETENTION = {
   tempHours:     24,   /* RET_TEMP_HOURS */
   mediaLogDays:  30,   /* RET_MEDIA_LOG_DAYS */
   draftDays:     30,   /* RET_DRAFT_DAYS */
+  /* 2026-11 — qonaq albomu (album_retention.php) */
+  albumKeepDays:      30,   /* ALBUM_KEEP_DAYS — tədbir tarixindən */
+  albumNoticeDays:    10,   /* ALBUM_NOTICE_DAYS — silinmədən əvvəl xəbərdarlıq */
+  albumMinNoticeDays: 7,    /* ALBUM_MIN_NOTICE_DAYS — gec xəbərdarlıqda ən az müddət */
 }

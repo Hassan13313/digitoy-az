@@ -308,6 +308,12 @@ function seoHomeFaq(): array {
     Yalnız indekslənən marketinq səhifələri; qalan marşrutlar üçün ''.
     Mətnlər səhifədəkilərlə eynidir: hero — src/data/landingCopy.js,
     şablonlar — TemplatesPage.jsx UI.az (tests/seo_keywords_test.mjs). */
+/** Şablon adı → img/templates/<id>.webp (məs. «Mirror & Candle» → mirror-candle, «Kəlağayı» → kelagayi) */
+function seoTemplateSlug(string $name): string {
+    $t = strtr(mb_strtolower($name, 'UTF-8'), ['ə' => 'e', 'ğ' => 'g', 'ı' => 'i', 'ç' => 'c', 'ş' => 's', 'ö' => 'o', 'ü' => 'u', 'i̇' => 'i']);
+    return trim(preg_replace('/[^a-z0-9]+/', '-', $t), '-');
+}
+
 function seoNoscript(string $path, callable $e, ?array $guide = null): string {
     $nav = '<p><a href="/">Ana səhifə</a> · <a href="/templates">Dəvətnamə şablonları</a> · '
          . '<a href="/demo">Nümunə dəvətnamə</a> · <a href="https://wa.me/994992133696">WhatsApp: +994 99 213 36 96</a> · '
@@ -339,8 +345,15 @@ function seoNoscript(string $path, callable $e, ?array $guide = null): string {
               . '<h2>Paketinizi Seçin</h2><ul><li>SADƏ — 59 ₼</li><li>VİP — 89 ₼</li><li>PREMIUM — 129 ₼</li></ul>'
               . '<h2>Tez-tez verilən suallar</h2>' . $faq;
     } elseif (str_starts_with($path, '/sablonlar/') && ($cp = seoConceptPages()[substr($path, 11)] ?? null)) {
+        /* 2026-11 SEO: şablonun real ekran şəkli + alt mətn (Google Şəkillər, JS-siz botlar) */
         $items = '';
-        foreach ($cp['names'] as $n) $items .= '<li>' . $e($n) . '</li>';
+        foreach ($cp['names'] as $n) {
+            $id  = seoTemplateSlug($n);
+            $img = is_file(__DIR__ . '/img/templates/' . $id . '.webp')
+                ? '<img src="/img/templates/' . $e($id) . '.webp" alt="' . $e($n . ' — ' . $cp['h1'] . ' şablonu') . '" width="390" height="844" loading="lazy"> '
+                : '';
+            $items .= '<li>' . $img . $e($n) . '</li>';
+        }
         $others = [];
         foreach (seoConceptPages() as $slug => $p) $others[] = '<a href="/sablonlar/' . $e($slug) . '">' . $e($p['h1']) . '</a>';
         $body = '<h1>' . $e($cp['h1']) . '</h1><p>' . $e($cp['intro']) . '</p>'

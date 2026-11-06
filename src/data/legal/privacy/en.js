@@ -82,8 +82,10 @@ export default {
         { list: [
           'the names and table numbers on the guest list (to find their table) — phone numbers and notes are not shown;',
           'the guestbook messages and the names of their authors;',
-          'the photos and videos in the photo sharing gallery (Premium package).',
-        ] },
+          ] },
+        'The guest photo album (Premium package) does not open with the invitation link. On the photo sharing page guests only send photos and videos — they do not see the photos and videos in the album.',
+        'Only the customer (with the «Customer panel» or the management link) and the people to whom the customer personally sends a «view link» can see the album. With the view link one can look at and download the photos and videos, but not delete or change them.',
+        'DigiToy sees an album only in summary form — its name, number of files, size and dates. We do not look at the photos and videos in the album, do not edit them and do not share them with any third party (except when the customer personally asks us to fix a technical problem). The files are kept on the hosting server for storage only (section 6).',
         'Invitation pages are not shown in search engines (noindex), but the link itself can be shared and its address may contain names. We recommend sharing the link only with the people you invite.',
         'The person who ordered the invitation gets a separate private «Customer panel» link. It shows the RSVP answers, the guest report (without guests’ phone numbers), the guestbook and gallery management. Do not share this link — on request we revoke it immediately and issue a new one.',
         'When an invitation is deactivated, its main content is no longer shown. To have all data deleted completely, including the guest list, messages and photos, please contact us (section 9).',
@@ -94,7 +96,7 @@ export default {
       title: '6. Third parties that receive data',
       body: [
         { list: [
-          'Hosting provider — the site and database are stored on its servers.',
+          'Hosting provider — the site, the database and the files of guest albums are stored on its servers. The provider hosts these files for technical storage only.',
           'Google Analytics (Google LLC, USA) — only with your consent: pages visited, device and browser details, approximate location.',
           'PostHog (PostHog Inc., US servers) — only with your consent: page views and key steps (for example, starting the builder, the order button). Text you type into forms is not sent.',
           'Google Fonts (Google) — your IP address is visible to Google when fonts load. This is needed for the site to display correctly and does not depend on consent.',
@@ -111,7 +113,12 @@ export default {
       title: '7. How long we keep data',
       body: [
         { list: [
-          'The invitation and its data (guest list, answers, messages, photos) are kept as a keepsake after the event and are deleted completely at the customer’s request.',
+          'The invitation and its data (guest list, answers, messages) are kept as a keepsake after the event and are deleted completely at the customer’s request.',
+          `Photos and videos in the guest photo album are kept for ${R.albumKeepDays} days (1 month) from the event date and are then deleted.`,
+          `${R.albumNoticeDays} days before deletion the customer is notified via WhatsApp so they can download the photos and videos.`,
+          `If the notice is sent late (less than ${R.albumNoticeDays} days before deletion), the album is deleted no earlier than ${R.albumMinNoticeDays} days after the notice — the delay is not taken from the customer’s time. An album without a sent notice is not deleted.`,
+          'For an additional fee the customer can extend the album’s storage period or keep it without a time limit; the period and price are agreed individually.',
+          'After the album is deleted, the photo sharing page no longer accepts photos; the invitation itself remains.',
           'Order records are kept as the service history and can be deleted on request (except where the law requires us to keep them).',
           `Unsent (unfinished) builder drafts are deleted automatically ${R.draftDays} days after the last change, together with their story photos, music and contact number.`,
           `IP addresses in the admin log are deleted after ${R.auditIpDays} days.`,
@@ -133,7 +140,7 @@ export default {
           'digitoy_session_id, digitoy_builder_state, digitoy_story_sid, digitoy_customer_phone — so you don’t lose an unfinished invitation or the contact number you entered;',
           'selected_package — the package you selected;',
           'digitoyVisitorId — a random identifier so emoji reactions are not repeated;',
-          'digitoyGalleryKey:*, digitoyUpload:* — the couple’s gallery management key and resuming an interrupted upload;',
+          'digitoyGalleryKey:*, digitoyGalleryView:*, digitoyUpload:* — the album’s management and view keys and resuming an interrupted upload;',
           'digitoyOwnerKey:* — the «Customer panel» key (only on the device where you opened the panel);',
           'adminToken — administrators only.',
         ] },
@@ -158,7 +165,7 @@ export default {
           'object to processing and complain to the competent public authority.',
         ] },
         `To make a request, write to ${C.email} or via WhatsApp to ${C.phone}. Mentioning the order code (DT-…) or the invitation link helps us handle it faster. We reply as soon as possible and no later than the period set by law.`,
-        'Guests can ask the event organizer or us directly to delete their message or an uploaded photo.',
+        'Guests can ask the customer (who manages the album) to delete a photo or video they uploaded, and the customer or us directly to delete their message.',
       ],
     },
     {

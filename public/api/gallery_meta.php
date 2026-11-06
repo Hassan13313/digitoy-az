@@ -22,6 +22,7 @@
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/gallery_media.php';
+require_once __DIR__ . '/album_retention.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
@@ -51,8 +52,15 @@ try {
     /* cədvəl hələ yoxdur → default ayarlar */
 }
 
+/* ── 2026-11: albomun saxlanma cədvəli (tədbir + 30 gün, xəbərdarlıq) ──
+   ETag-ə daxildir: xəbərdarlıq / silinmə və gün dəyişəndə cavab yenilənir. */
+$albumToday = albumToday();
+$albumRow   = albumRow(getDB(), $slug);
+$album      = $albumRow ? albumScheduleOf($albumRow, $albumToday) : null;
+
 $etag = '"' . md5($slug . '|' . $counts['dirMtime'] . '|' . $counts['total']
-               . '|' . ($configRow['updated_at'] ?? '0')) . '"';
+               . '|' . ($configRow['updated_at'] ?? '0') . '|' . $albumToday
+               . '|' . ($albumRow['gallery_notice_at'] ?? '') . '|' . ($albumRow['gallery_purged_at'] ?? '')) . '"';
 header('ETag: ' . $etag);
 header('Cache-Control: no-store');
 if (trim($_SERVER['HTTP_IF_NONE_MATCH'] ?? '') === $etag) {
@@ -133,4 +141,11 @@ echo json_encode([
         'total'  => $counts['total'],
     ],
     'config'  => $config,
+    /* Albom nə vaxta qədər saxlanılır; closed → media silinib, yükləmə bağlıdır */
+    'album'   => $album ? [
+        'keepUntil' => $album['keepUntil'],
+        'deleteAt'  => $album['deleteAt'],
+        'closed'    => $album['state'] === 'purged',
+        'forever'   => $album['state'] === 'forever',
+    ] : null,
 ], JSON_UNESCAPED_UNICODE);

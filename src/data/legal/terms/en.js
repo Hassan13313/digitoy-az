@@ -54,6 +54,7 @@ export default {
       title: '5. How long the invitation stays online',
       body: [
         'The invitation stays fully active until the day of the event. After the event it is not deleted and remains available as a keepsake. If the service is discontinued or keeping the invitation becomes technically impossible, the customer will be notified in advance.',
+        'The guest photo album, however, is kept for 1 month (30 days) from the event date. The customer is notified 10 days before deletion; if the notice is sent late, the album is deleted no earlier than 7 days after the notice. For an additional fee the customer can extend the storage period or keep the album without a time limit. Details: “Privacy Policy”, sections 5 and 7.',
       ],
     },
     {
@@ -72,8 +73,8 @@ export default {
       id: 'qonaqlar',
       title: '7. Rules for guests',
       body: [
-        'When using the RSVP, guestbook and photo sharing features, a guest understands that their messages and uploaded photos are visible to people who have the invitation link. Guests should upload only photos that are their own or that they are allowed to share.',
-        'The organizer (customer) and DigiToy may delete messages and photos that break these rules.',
+        'A guest understands that a guestbook message is visible to people who have the invitation link, while photos and videos sent via photo sharing go to the customer’s album — the album is seen by the customer and the people to whom the customer gives a view link. Guests should upload only photos and videos that are their own or that they are allowed to share.',
+        'The customer may delete photos and videos in the album. DigiToy may delete messages that break these rules; albums are deleted only when the period in section 5 ends or at the customer’s request.',
       ],
     },
     {
@@ -107,7 +108,7 @@ export default {
       id: 'eqli',
       title: '11. Intellectual property',
       body: [
-        'Templates, design, animations and software belong to DigiToy and may not be used outside the invitation. The customer’s texts and photos remain theirs; the customer allows us to display them in the invitation. We do not use a customer’s invitation in advertising without their consent.',
+        'Templates, design, animations and software belong to DigiToy and may not be used outside the invitation. The customer’s texts and photos remain theirs; the customer allows us to display them in the invitation. We do not use a customer’s invitation in advertising without their consent. We do not use the photos and videos in a guest album for any purpose and do not give them to third parties.',
       ],
     },
     {

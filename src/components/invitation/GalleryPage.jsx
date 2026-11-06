@@ -15,7 +15,7 @@ import {
 import MasonryGrid from '../guest-photos/MasonryGrid'
 import MediaTile from '../guest-photos/MediaTile'
 import { ConfirmDialog } from '../guest-photos/Sheet'
-import { GalleryLocked, ViewLinkPanel } from '../guest-photos/access'
+import { GalleryLocked, ViewLinkPanel, AlbumKeepNote } from '../guest-photos/access'
 import GalleryStatsPanel from './GalleryStatsPanel'
 import GalleryCoverSettings from './GalleryCoverSettings'
 import GalleryLightbox from './GalleryLightbox'
@@ -382,6 +382,7 @@ export default function GalleryPage() {
         {canManage && viewToken && (
           <div className="mb-4"><ViewLinkPanel url={galleryViewUrl(slug, viewToken)} /></div>
         )}
+        {meta.album && <div className="mb-4"><AlbumKeepNote album={meta.album} /></div>}
 
         <GalleryToolbar
           fileCount={items.length}

@@ -89,6 +89,8 @@ export function useGalleryMeta(slug, { interval = DEFAULT_INTERVAL, enabled = tr
     venue:  meta?.venue  || '',
     /* Dəvətnamə admin tərəfindən bağlanıbsa adlar verilmir (bax gallery_meta.php) */
     active: meta ? meta.active !== false : true,
+    /* 2026-11: { keepUntil, deleteAt, closed } — albomun saxlanma cədvəli */
+    album:  meta?.album || null,
   }
 }
 

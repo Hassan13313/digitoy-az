@@ -71,7 +71,7 @@ if ($realDir === false) {
 }
 
 $base       = pathinfo($filename, PATHINFO_FILENAME);
-$derivatives = [$base . '_thumb.jpg', $base . '_poster.jpg'];
+$derivatives = [$base . '_thumb.jpg', $base . '_poster.jpg', $base . '_web.mp4', $base . '_web.skip'];
 
 $existed = file_exists($filePath);
 

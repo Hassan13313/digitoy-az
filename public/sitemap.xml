@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://digitoy.az/</loc>
     <lastmod>2026-11-03</lastmod>
@@ -8,6 +8,66 @@
   </url>
   <url>
     <loc>https://digitoy.az/templates</loc>
+    <image:image><image:loc>https://digitoy.az/img/templates/royal-gold.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/floral-garden.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/modern-black.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/white-elegance.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/night-sky.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/oriental-luxe.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/nature-touch.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/crystal-glass.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/boarding-pass.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/cinema-premiere.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/vinyl-record.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/royal-palace.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/mediterranean.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/gazette.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/luxury-jewelry.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/simple-luxury.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/red-veil.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/xonca.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/henna-buta.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/mirror-candle.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/kelagayi.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/silver-locket.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/golden-jubilee.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/first-paper.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/retro-polaroid.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/love-letters.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/fairy-tale.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/space-mission.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/circus-show.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/dino-adventure.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/balloon-party.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/little-prince.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/hero-comic.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/little-pilot.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/football-star.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/pastel-bloom.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/teddy-bear.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/gender-reveal.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/stork-letter.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/baby-mobile.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/gala-night.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/keynote.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/award-night.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/business-card.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/neon-party.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/caps-toss.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/yearbook.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/last-bell.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/chalkboard.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/paper-plane.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/ribbon-cut.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/bistro-sign.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/roller-shutter.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/unboxing.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/gallery-unveil.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/novruz-bonfire.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/novruz-semeni.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/midnight-clock.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/snow-globe.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/masquerade-ball.webp</image:loc></image:image>
     <lastmod>2026-11-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -71,72 +131,142 @@
   </url>
   <url>
     <loc>https://digitoy.az/sablonlar/toy-nisan</loc>
+    <image:image><image:loc>https://digitoy.az/img/templates/royal-gold.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/floral-garden.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/modern-black.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/white-elegance.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/night-sky.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/oriental-luxe.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/nature-touch.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/crystal-glass.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/boarding-pass.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/cinema-premiere.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/vinyl-record.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/royal-palace.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/mediterranean.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/gazette.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/luxury-jewelry.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/simple-luxury.webp</image:loc></image:image>
     <lastmod>2026-11-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://digitoy.az/sablonlar/xina-gecesi</loc>
+    <image:image><image:loc>https://digitoy.az/img/templates/red-veil.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/xonca.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/henna-buta.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/mirror-candle.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/kelagayi.webp</image:loc></image:image>
     <lastmod>2026-11-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://digitoy.az/sablonlar/ad-gunu</loc>
+    <image:image><image:loc>https://digitoy.az/img/templates/modern-black.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/boarding-pass.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/cinema-premiere.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/vinyl-record.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/gazette.webp</image:loc></image:image>
     <lastmod>2026-11-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://digitoy.az/sablonlar/ildonumu</loc>
+    <image:image><image:loc>https://digitoy.az/img/templates/silver-locket.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/golden-jubilee.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/first-paper.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/retro-polaroid.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/love-letters.webp</image:loc></image:image>
     <lastmod>2026-11-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://digitoy.az/sablonlar/usaq-ad-gunu</loc>
+    <image:image><image:loc>https://digitoy.az/img/templates/fairy-tale.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/space-mission.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/circus-show.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/dino-adventure.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/balloon-party.webp</image:loc></image:image>
     <lastmod>2026-11-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://digitoy.az/sablonlar/sunnet-toyu</loc>
+    <image:image><image:loc>https://digitoy.az/img/templates/little-prince.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/hero-comic.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/little-pilot.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/football-star.webp</image:loc></image:image>
     <lastmod>2026-11-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://digitoy.az/sablonlar/baby-shower</loc>
+    <image:image><image:loc>https://digitoy.az/img/templates/pastel-bloom.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/teddy-bear.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/gender-reveal.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/stork-letter.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/baby-mobile.webp</image:loc></image:image>
     <lastmod>2026-11-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://digitoy.az/sablonlar/korporativ</loc>
+    <image:image><image:loc>https://digitoy.az/img/templates/gala-night.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/keynote.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/award-night.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/business-card.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/neon-party.webp</image:loc></image:image>
     <lastmod>2026-11-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://digitoy.az/sablonlar/mezuniyyet</loc>
+    <image:image><image:loc>https://digitoy.az/img/templates/caps-toss.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/yearbook.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/last-bell.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/chalkboard.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/paper-plane.webp</image:loc></image:image>
     <lastmod>2026-11-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://digitoy.az/sablonlar/acilis</loc>
+    <image:image><image:loc>https://digitoy.az/img/templates/ribbon-cut.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/bistro-sign.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/roller-shutter.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/unboxing.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/gallery-unveil.webp</image:loc></image:image>
     <lastmod>2026-11-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://digitoy.az/sablonlar/bayram-gecesi</loc>
+    <image:image><image:loc>https://digitoy.az/img/templates/novruz-bonfire.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/novruz-semeni.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/midnight-clock.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/snow-globe.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/masquerade-ball.webp</image:loc></image:image>
     <lastmod>2026-11-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://digitoy.az/sablonlar/qiz-gecesi</loc>
+    <image:image><image:loc>https://digitoy.az/img/templates/pink-champagne.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/disco-ball.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/pajama-spa.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/paris-night.webp</image:loc></image:image>
+    <image:image><image:loc>https://digitoy.az/img/templates/boho-sunset.webp</image:loc></image:image>
     <lastmod>2026-11-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>

@@ -6,7 +6,7 @@ import LanguageSwitcher from '../LanguageSwitcher'
 import SubpageHeader, { SubpageFooter } from '../public/SubpageHeader'
 import { TemplatesIntro, FilterBar, TemplatesGrid, TemplateCard, TemplatesEmpty, TemplatesCta } from '../public/templates'
 import { templateImage, TEMPLATE_IMAGE_SIZE } from '../../data/templateImages'
-import { conceptPageFor } from '../../data/conceptPages'
+import { conceptPageFor, conceptAbout } from '../../data/conceptPages'
 import { LEGAL_DOCS } from '../../data/legal/docs'
 import { legalUi } from '../../data/legal/ui'
 import { spaClick } from '../../utils/siteRoutes'
@@ -285,6 +285,8 @@ export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCrea
           </ul>
         </nav>
 
+        {page && <ConceptAbout about={conceptAbout(page, lang)} lang={lang} />}
+
         <div className="mt-14 sm:mt-20">
           <TemplatesCta lang={lang} title={ui.ctaTitle} text={ui.ctaText} buttonLabel={ui.cta} onCreate={onCreate} />
         </div>
@@ -299,5 +301,34 @@ export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCrea
         copyright={`© ${new Date().getFullYear()} Digitoy.az. ${ui.rights}`}
       />
     </div>
+  )
+}
+
+/* 2026-11 SEO — tədbir səhifəsinin «Necə işləyir» və sualları (bax conceptPages.js › conceptAbout) */
+function ConceptAbout({ about, lang }) {
+  if (!about) return null
+  const faqTitle = { az: 'Tez-tez verilən suallar', en: 'Frequently asked questions', ru: 'Частые вопросы' }[lang] || 'Tez-tez verilən suallar'
+  return (
+    <section lang={lang} className="mx-auto mt-14 max-w-3xl sm:mt-20">
+      <h2 className="font-serif text-[28px] leading-tight text-ink sm:text-[34px]">{about.title}</h2>
+      <ol className="mt-5 space-y-3 text-[15px] leading-relaxed text-brown-dark">
+        {about.steps.map((t, i) => (
+          <li key={i} className="flex gap-3">
+            <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-espresso text-[12px] font-semibold text-cream">{i + 1}</span>
+            <span>{t}</span>
+          </li>
+        ))}
+      </ol>
+      <p className="mt-5 text-[15px] leading-relaxed text-brown-dark">{about.features}</p>
+      <h2 className="mt-10 font-serif text-[24px] leading-tight text-ink sm:text-[28px]">{faqTitle}</h2>
+      <dl className="mt-4 space-y-4">
+        {about.faq.map(([q, a]) => (
+          <div key={q}>
+            <dt className="text-[15px] font-semibold text-ink">{q}</dt>
+            <dd className="mt-1 text-[15px] leading-relaxed text-brown-dark">{a}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
   )
 }

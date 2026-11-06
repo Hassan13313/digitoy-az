@@ -1,7 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import BuilderForm from './BuilderForm'
-import Preview from './Preview'
 import Header from './v2/Header'
 import Hero from './v2/Hero'
 import HowItWorks from './v2/HowItWorks'
@@ -25,6 +23,18 @@ import { readBuilderSnapshot, clearBuilderSnapshot } from '../../utils/builderSe
 import { pushView, patchState, currentUrl } from '../../utils/navHistory'
 
 /* Navbar yüksəkliyi 72px — scroll hesablamada çıxılır */
+/* 2026-11 sürət: sifariş formu və önbaxış ana səhifənin ilk yükünə daxil deyil —
+   paket seçiləndə yüklənir (ana səhifənin JS-i ~1 MB-dan xeyli kiçilir) */
+const BuilderForm = lazy(() => import('./BuilderForm'))
+const Preview     = lazy(() => import('./Preview'))
+function StepLoader() {
+  return (
+    <div className="flex min-h-[50vh] items-center justify-center" role="status" aria-label="Yüklənir">
+      <span className="h-9 w-9 animate-spin rounded-full border border-gold/25 border-t-gold/80" />
+    </div>
+  )
+}
+
 function scrollToSection(id) {
   const el = document.getElementById(id)
   if (!el) return
@@ -342,12 +352,14 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
         <AnimatePresence mode="wait">
           {showPreview ? (
             <motion.div key="preview" className="mx-auto max-w-6xl px-4 sm:px-6" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={motionStep}>
-              <Preview
-                lang={lang}
-                data={formData}
-                onEdit={handleEditFromPreview}
-                onView={onViewInvitation}
-              />
+              <Suspense fallback={<StepLoader />}>
+                <Preview
+                  lang={lang}
+                  data={formData}
+                  onEdit={handleEditFromPreview}
+                  onView={onViewInvitation}
+                />
+              </Suspense>
             </motion.div>
           ) : !selectedPackage ? (
             <motion.div key="packages" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={motionStep}>
@@ -369,13 +381,15 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
             </motion.div>
           ) : (
             <motion.div key="builder" className="mx-auto max-w-6xl px-5 sm:px-6" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.4, ease: [0.32, 0, 0.68, 1] }}>
-              <BuilderForm
-                lang={lang}
-                initialData={formData}
-                initialStep={returnToStep}
-                onSubmit={handleFormSubmit}
-                isAdmin={isAdmin}
-              />
+              <Suspense fallback={<StepLoader />}>
+                <BuilderForm
+                  lang={lang}
+                  initialData={formData}
+                  initialStep={returnToStep}
+                  onSubmit={handleFormSubmit}
+                  isAdmin={isAdmin}
+                />
+              </Suspense>
             </motion.div>
           )}
         </AnimatePresence>

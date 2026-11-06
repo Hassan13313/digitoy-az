@@ -92,6 +92,11 @@ if (!$slug || !isValidSlug($slug)) {
 if (!invitationExists(getDB(), $slug)) {
     fail(404, 'INVITATION_NOT_FOUND', 'Bu dəvətnamə tapılmadı. Zəhmət olmasa QR kodu yenidən skan edin.');
 }
+/* 2026-11 — albomun saxlanma müddəti bitib (bax album_retention.php) */
+require_once __DIR__ . '/album_retention.php';
+if (albumIsClosed(getDB(), $slug)) {
+    fail(410, 'ALBUM_CLOSED', 'Bu albomun saxlanma müddəti bitib, şəkil qəbul edilmir.');
+}
 if (!preg_match('/^[a-z0-9]{16,64}$/', $uploadId)) {
     fail(400, 'BAD_UPLOAD_ID', 'Yükləmə identifikatoru yanlışdır.');
 }

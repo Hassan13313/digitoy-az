@@ -5,6 +5,7 @@ import { Button, CopyField, Panel } from '../admin/v2/adminUi'
 import { useGalleryMeta } from '../../hooks/useGalleryMeta'
 import { triggerDownload } from '../../utils/qrStandPdf'
 import { galleryViewUrl } from '../../utils/api'
+import { albumKeepText } from '../../utils/albumKeep'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Müştəri paneli — şəkillər (Phase 50).
@@ -60,7 +61,8 @@ const UploadQr = memo(function UploadQr({ url, slug }) {
 })
 
 export default function OwnerPhotos({ slug, viewToken }) {
-  const { meta, counts } = useGalleryMeta(slug, { interval: 0 })
+  const { meta, counts, album } = useGalleryMeta(slug, { interval: 0 })
+  const keepText = albumKeepText(album)
 
   const base = `${window.location.origin}/invite/${encodeURIComponent(slug)}`
   /* Albom məxfidir (2026-11-06): qalereya və slayd şou yalnız baxış linki
@@ -74,6 +76,11 @@ export default function OwnerPhotos({ slug, viewToken }) {
       description={meta ? `${counts.photos} şəkil, ${counts.videos} video` : undefined}
       icon={Images}
     >
+      {keepText && (
+        <p className="mb-4 rounded-[10px] bg-[#FBF1DC] px-4 py-3 text-[13px] leading-relaxed text-[#5C4A3A] ring-1 ring-inset ring-[#EBDDBE]">
+          {keepText}
+        </p>
+      )}
       <div className="grid gap-4 lg:grid-cols-2">
         <Block
           icon={Images}

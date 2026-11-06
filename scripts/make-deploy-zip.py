@@ -29,7 +29,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DIST = os.path.join(ROOT, 'dist')
 
 # Serverdəki nüsxə həqiqət mənbəyidir — üstündən yazma
-SECRET_FILES = {'config.local.php', 'config.production.php'}
+SECRET_FILES = {'config.local.php', 'config.production.php', 'config.worker.php'}
 
 # Repo zibili / yalnız-lokal artefaktlar
 #   _maps   — /api/venue_map.php-in yaratdığı xəritə keşi (Phase 41).

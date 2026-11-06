@@ -136,3 +136,60 @@ export const CONCEPT_PAGES = {
 export function conceptPageFor(concept) {
   return (concept && CONCEPT_PAGES[concept]) || null
 }
+
+/* ── 2026-11 SEO: hər tədbir səhifəsində «Necə işləyir» + suallar ──
+   Tədbirin adı başlıqdan götürülür, ona görə mətn səhifəyə uyğunlaşır.
+   ⚠ Albom müddətləri məxfilik siyasəti ilə eynidir (legal/retention.js). */
+const ABOUT = {
+  az: (ev) => ({
+    title: `${ev} dəvətnaməsi necə hazırlanır`,
+    steps: [
+      `Şablonu seçin: canlı önbaxışda ${ev.toLowerCase()} dəvətnaməsinin açılışına, rənglərinə və şriftinə baxın.`,
+      'Məlumatları doldurun: adlar, tarix, saat, məkan, proqram və geyim qaydası — konstruktor hər addımı izah edir.',
+      'Linki alın: təsdiqdən sonra dəvətnamə linkini və QR kodu qonaqlarınıza WhatsApp ilə göndərin.',
+    ],
+    features: 'Hər dəvətnamədə geri sayım, xəritə ilə məkan, İştirak Təsdiqi (RSVP), xatirə kitabı, musiqi və paketdən asılı olaraq oturma planı və QR kodla foto paylaşımı var. Mətnlər Azərbaycan, rus və ingilis dillərində göstərilir.',
+    faq: [
+      [`${ev} dəvətnaməsi neçə günə hazır olur?`, 'Adətən 24 saat ərzində; VİP və Premium paketlərdə xüsusi dizayn elementləri olduqda 48 saata qədər.'],
+      ['Qonaqlar iştirakı necə təsdiqləyir?', 'Dəvətnamədəki İştirak Təsdiqi forması ilə — cavablar və qonaq sayı Müştəri panelinizdə dərhal görünür.'],
+      ['Qonaqların göndərdiyi şəkillər harada saxlanılır?', 'Premium paketdə qonaqlar QR kodla şəkil və video göndərir. Albomu yalnız siz və baxış linki verdiyiniz şəxslər görür; albom tədbirdən sonra 1 ay saxlanılır, əlavə ödənişlə uzadıla bilər.'],
+    ],
+  }),
+  en: (ev) => ({
+    title: `How to create ${ev.toLowerCase()} invitations`,
+    steps: [
+      'Choose a template: open the live preview to see its opening, colours and typeface.',
+      'Fill in the details: names, date, time, venue, programme and dress code — the builder explains every step.',
+      'Get your link: after approval, send the invitation link and QR code to your guests on WhatsApp.',
+    ],
+    features: 'Every invitation has a countdown, a venue map, RSVP, a guestbook and music; depending on the package also a seating plan and photo sharing by QR code. Texts are shown in Azerbaijani, Russian and English.',
+    faq: [
+      ['How long does it take?', 'Usually within 24 hours; up to 48 hours for VIP and Premium packages with custom design elements.'],
+      ['How do guests confirm attendance?', 'With the RSVP form in the invitation — answers and guest numbers appear in your Customer panel right away.'],
+      ['Where are the photos guests send kept?', 'In the Premium package guests send photos and videos by QR code. Only you and the people you give a view link to can see the album; it is kept for 1 month after the event and can be extended for an additional fee.'],
+    ],
+  }),
+  ru: (ev) => ({
+    title: `Как создать: ${ev.toLowerCase()}`,
+    steps: [
+      'Выберите шаблон: в живом просмотре видно открытие, цвета и шрифт.',
+      'Заполните данные: имена, дата, время, место, программа и дресс-код — конструктор объясняет каждый шаг.',
+      'Получите ссылку: после согласования отправьте ссылку и QR-код гостям в WhatsApp.',
+    ],
+    features: 'В каждом приглашении есть обратный отсчёт, карта места, подтверждение участия (RSVP), книга пожеланий и музыка; в зависимости от пакета — план рассадки и обмен фото по QR-коду. Тексты на азербайджанском, русском и английском.',
+    faq: [
+      ['Сколько времени занимает подготовка?', 'Обычно до 24 часов; до 48 часов в пакетах VIP и Premium с индивидуальными элементами дизайна.'],
+      ['Как гости подтверждают участие?', 'Через форму подтверждения в приглашении — ответы и число гостей сразу видны в вашей Панели клиента.'],
+      ['Где хранятся фото, которые присылают гости?', 'В пакете Premium гости отправляют фото и видео по QR-коду. Альбом видите только вы и те, кому вы дали ссылку для просмотра; он хранится 1 месяц после мероприятия, срок можно продлить за дополнительную плату.'],
+    ],
+  }),
+}
+
+/** Səhifənin «Necə işləyir» bloku (tədbir səhifəsi deyilsə null) */
+export function conceptAbout(page, lang = 'az') {
+  if (!page) return null
+  const l = ABOUT[lang] ? lang : 'az'
+  const h1 = page.h1[l] || page.h1.az
+  const ev = l === 'az' ? h1.replace(/ Dəvətnaməsi$/, '') : l === 'en' ? h1.replace(/ Invitations$/, '') : h1
+  return ABOUT[l](ev)
+}

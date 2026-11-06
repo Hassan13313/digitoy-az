@@ -5,8 +5,25 @@
 //   görür (bax api/gallery_auth.php › galleryViewToken).
 // ════════════════════════════════════════════════════════════════
 import { useState } from 'react';
-import { Check, Copy, ImagePlus, Link2, Lock } from 'lucide-react';
+import { CalendarClock, Check, Copy, ImagePlus, Link2, Lock } from 'lucide-react';
 import { Btn } from './shared';
+import { albumKeepText } from '../../utils/albumKeep';
+
+/**
+ * Albomun nə vaxta qədər saxlanıldığı (qalereya səhifəsi).
+ * @param {object} p
+ * @param {{keepUntil?:string, deleteAt?:string, closed?:boolean}|null} p.album
+ */
+export function AlbumKeepNote({ album, lang = 'az' }) {
+  const text = albumKeepText(album);
+  if (!text) return null;
+  return (
+    <p lang={lang} className="flex items-start gap-2.5 rounded-2xl bg-white/80 px-4 py-3 text-[13.5px] leading-relaxed text-brown-dark ring-1 ring-inset ring-gold/30">
+      <CalendarClock className="mt-0.5 h-[18px] w-[18px] shrink-0 text-gold-deep" strokeWidth={1.6} aria-hidden="true" />
+      {text}
+    </p>
+  );
+}
 
 /**
  * Baxış linki olmayan ziyarətçi üçün: albom bağlıdır, şəkil göndərmək açıqdır.

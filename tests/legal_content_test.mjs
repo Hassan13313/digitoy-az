@@ -76,6 +76,19 @@ eq('galleryIpDays = RET_GALLERY_IP_DAYS', RETENTION.galleryIpDays, phpConst('RET
 eq('tempHours = RET_TEMP_HOURS', RETENTION.tempHours, phpConst('RET_TEMP_HOURS'))
 eq('mediaLogDays = RET_MEDIA_LOG_DAYS', RETENTION.mediaLogDays, phpConst('RET_MEDIA_LOG_DAYS'))
 eq('draftDays = RET_DRAFT_DAYS', RETENTION.draftDays, phpConst('RET_DRAFT_DAYS'))
+/* 2026-11 — qonaq albomu: siyasətdəki rəqəmlər = album_retention.php */
+const albumPhp = readFileSync(fileURLToPath(new URL('../public/api/album_retention.php', import.meta.url)), 'utf8')
+const albumConst = (n) => Number((albumPhp.match(new RegExp(`const ${n}\\s*=\\s*(\\d+)`)) || [])[1])
+eq('albumKeepDays = ALBUM_KEEP_DAYS', RETENTION.albumKeepDays, albumConst('ALBUM_KEEP_DAYS'))
+eq('albumNoticeDays = ALBUM_NOTICE_DAYS', RETENTION.albumNoticeDays, albumConst('ALBUM_NOTICE_DAYS'))
+eq('albumMinNoticeDays = ALBUM_MIN_NOTICE_DAYS', RETENTION.albumMinNoticeDays, albumConst('ALBUM_MIN_NOTICE_DAYS'))
+for (const l of LANGS) {
+  const p = flatten(texts.privacy[l]).join(' ')
+  const t = flatten(texts.terms[l]).join(' ')
+  ok(`privacy/${l}: albom müddətləri yazılıb`, [RETENTION.albumKeepDays, RETENTION.albumNoticeDays, RETENTION.albumMinNoticeDays].every((d) => p.includes(String(d))))
+  ok(`terms/${l}: albom müddətləri yazılıb`, ['30', '10', '7'].every((d) => t.includes(d)))
+  ok(`privacy/${l}: baxış açarı sadalanır`, p.includes('digitoyGalleryView:*'))
+}
 for (const l of LANGS) {
   const all = flatten(texts.privacy[l]).join(' ')
   ok(`privacy/${l}: ${RETENTION.draftDays} günlük draft müddəti yazılıb`, all.includes(String(RETENTION.draftDays)))

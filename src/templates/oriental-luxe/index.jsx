@@ -224,7 +224,7 @@ function ShebekeOpening({ inv, theme }) {
 
       {/* günəş parıltısı — şüşədən keçən işıq */}
       <span aria-hidden="true"
-        style={{ position: 'absolute', inset: '-10%', pointerEvents: 'none', mixBlendMode: 'soft-light', background: 'radial-gradient(40% 30% at 50% 42%, rgba(255,240,200,.75), transparent 70%)', animation: on ? 'ol-out .3s ease both' : 'ol-sun 14s ease-in-out infinite' }} />
+        style={{ position: 'absolute', inset: '-10%', pointerEvents: 'none', mixBlendMode: 'soft-light', background: 'radial-gradient(40% 30% at 50% 42%, rgba(255,240,200,.75), transparent 70%)', willChange: 'transform', animation: on ? 'ol-out .3s ease both' : 'ol-sun 14s ease-in-out 3' }} />
       {/* aşağı kölgə — yazılar oxunsun */}
       <span aria-hidden="true"
         style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '44%', pointerEvents: 'none', background: `linear-gradient(transparent, ${alpha(C.DEEP, 0.86)} 45%, ${alpha(C.DEEP, 0.96)})`, animation: on ? 'ol-out .3s ease both' : 'ol-fade 1.2s ease-out 1.6s both' }} />
@@ -267,7 +267,7 @@ function ShebekeOpening({ inv, theme }) {
             {ot.text('cta')}
           </div>
         )}
-        {ot.show('hint') && <div style={{ marginTop: 12, fontSize: 13, fontStyle: 'italic', color: C.MUTED, animation: 'ol-fade .8s ease-out 3.4s both, ol-hint 3s ease-in-out 4.2s infinite' }}>{ot.text('hint')}</div>}
+        {ot.show('hint') && <div style={{ marginTop: 12, fontSize: 13, fontStyle: 'italic', color: C.MUTED, willChange: 'opacity', animation: 'ol-fade .8s ease-out 3.4s both, ol-hint 3s ease-in-out 4.2s 10' }}>{ot.text('hint')}</div>}
       </div>
     </div>
   )

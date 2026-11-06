@@ -53,6 +53,7 @@ export default {
       title: '5. Dəvətnamənin müddəti',
       body: [
         'Dəvətnamə tədbir gününə qədər tam aktiv qalır. Tədbirdən sonra o silinmir və xatirə olaraq açıq qalır. Xidmətin dayandırılması və ya dəvətnamənin saxlanmasının texniki cəhətdən mümkün olmaması halında sifarişçiyə əvvəlcədən xəbər verilir.',
+        'Qonaq foto albomu isə tədbir tarixindən 1 ay (30 gün) saxlanılır. Silinmədən 10 gün əvvəl sifarişçiyə xəbər verilir; xəbərdarlıq gec göndərilərsə, albom xəbərdarlıq tarixindən ən azı 7 gün sonra silinir. Sifarişçi əlavə ödənişlə saxlanma müddətini uzada və ya albomu müddətsiz saxlada bilər. Ətraflı: «Məxfilik siyasəti», bölmə 5 və 7.',
       ],
     },
     {
@@ -71,8 +72,8 @@ export default {
       id: 'qonaqlar',
       title: '7. Qonaqlar üçün qaydalar',
       body: [
-        'Qonaq iştirak təsdiqi, xatirə kitabı və foto paylaşımı funksiyalarından istifadə edərkən bilir ki, yazdığı mesaj və yüklədiyi şəkillər dəvətnamə linki olan şəxslərə görünür. Qonaq yalnız özünə məxsus və ya paylaşmağa icazəsi olan şəkilləri yükləməlidir.',
-        'Təşkilatçı (sifarişçi) və DigiToy qaydalara uyğun olmayan mesajları və şəkilləri silə bilər.',
+        'Qonaq bilir ki, xatirə kitabına yazdığı mesaj dəvətnamə linki olan şəxslərə görünür, foto paylaşımı ilə göndərdiyi şəkil və videolar isə sifarişçinin albomuna düşür — albomu sifarişçi və onun baxış linki verdiyi şəxslər görür. Qonaq yalnız özünə məxsus və ya paylaşmağa icazəsi olan şəkil və videoları yükləməlidir.',
+        'Sifarişçi albomdakı şəkil və videoları silə bilər. DigiToy qaydalara uyğun olmayan mesajları silə bilər; albomları isə yalnız bölmə 5-də göstərilən müddət bitdikdə və ya sifarişçinin müraciəti ilə silir.',
       ],
     },
     {
@@ -106,7 +107,7 @@ export default {
       id: 'eqli',
       title: '11. Əqli mülkiyyət',
       body: [
-        'Şablonlar, dizayn, animasiyalar və proqram təminatı DigiToy-a məxsusdur və dəvətnamədən kənarda istifadə edilə bilməz. Sifarişçinin mətnləri və şəkilləri ona məxsus qalır; sifarişçi onları dəvətnamədə göstərmək üçün bizə icazə verir. Sifarişçinin razılığı olmadan onun dəvətnaməsini reklamda istifadə etmirik.',
+        'Şablonlar, dizayn, animasiyalar və proqram təminatı DigiToy-a məxsusdur və dəvətnamədən kənarda istifadə edilə bilməz. Sifarişçinin mətnləri və şəkilləri ona məxsus qalır; sifarişçi onları dəvətnamədə göstərmək üçün bizə icazə verir. Sifarişçinin razılığı olmadan onun dəvətnaməsini reklamda istifadə etmirik. Qonaq albomundakı şəkil və videolardan heç bir məqsədlə istifadə etmirik və onları üçüncü tərəflərə vermirik.',
       ],
     },
     {

@@ -76,6 +76,19 @@ if (!invitationExists(getDB(), $slug)) {
     exit;
 }
 
+/* 2026-11 — albomun saxlanma müddəti bitib və mediası silinib: yükləmə bağlıdır */
+require_once __DIR__ . '/album_retention.php';
+if (albumIsClosed(getDB(), $slug)) {
+    http_response_code(410);
+    echo json_encode([
+        'error'     => 'ALBUM_CLOSED',
+        'code'      => 'ALBUM_CLOSED',
+        'permanent' => true,
+        'message'   => 'Bu albomun saxlanma müddəti bitib, şəkil qəbul edilmir.',
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 /* ── Sorğu başına bir media (+ videolar üçün könüllü poster kadrı) ── */
 $extraFiles = array_diff(array_keys($_FILES), ['photo', 'poster']);
 if (!empty($extraFiles) || (isset($_FILES['photo']) && is_array($_FILES['photo']['name']))) {
