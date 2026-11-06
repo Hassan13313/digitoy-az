@@ -41,7 +41,7 @@ ok('ayrıca «Nişan» bölməsi yoxdur', !CONCEPT_META.nishan)
 
 const OLD_16 = ['royal-gold', 'floral-garden', 'modern-black', 'white-elegance', 'night-sky', 'oriental-luxe', 'nature-touch', 'crystal-glass',
   'boarding-pass', 'cinema-premiere', 'vinyl-record', 'royal-palace', 'mediterranean', 'gazette', 'luxury-jewelry', 'simple-luxury']
-const BIRTHDAY_5 = ['modern-black', 'boarding-pass', 'cinema-premiere', 'vinyl-record', 'gazette']
+const BIRTHDAY_5 = ['gazette', 'vinyl-record', 'cinema-premiere', 'boarding-pass', 'modern-black']
 const toy = listTemplates({ concept: 'toy' }).map((t) => t.id)
 ok('Toy / Nişan-da köhnə 16-nın hamısı', OLD_16.every((id) => toy.includes(id)) && toy.length === 16, toy.join())
 const bd = listTemplates({ concept: 'birthday' }).map((t) => t.id)
