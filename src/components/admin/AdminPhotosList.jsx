@@ -35,7 +35,9 @@ async function getPhotosSummary(search = '', limit = 50, offset = 0) {
   return res.json()
 }
 
-const open = (url) => window.open(url, '_blank', 'noopener')
+/* Öz saytımızın səhifəsi — `noopener` YOXDUR ki, yeni tab admin sessiyasını
+   (sessionStorage) götürsün: albom məxfidir, sessiyasız tab bağlı açılır */
+const open = (url) => window.open(url, '_blank')
 
 export default function AdminPhotosList() {
   const [albums,    setAlbums]    = useState([])

@@ -353,7 +353,8 @@ export default function PhotoShare() {
               formatText={(n) => `${n} fayl cütlüyün qalereyasına əlavə olundu.`
                 + (counts.total > 0 ? ` Qalereyada ${counts.total} media var.` : '')}
               onMore={resetAll}
-              onGallery={slugMatch ? () => window.location.assign(`/invite/${slug}/qalereya-idare`) : undefined}
+              /* «Qalereyaya bax» YOXDUR (2026-11-06): albom məxfidir, qonaq onu
+                 yalnız müştərinin paylaşdığı baxış linki ilə görür */
             />
           ) : (
             <>

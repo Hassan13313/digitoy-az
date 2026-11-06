@@ -52,6 +52,34 @@ function galleryHeaders(slug) {
   return { ...(token ? { 'X-Gallery-Token': token } : {}), ...ownerHeaders(slug) }
 }
 
+/* ── Albomun baxış linki (?v=…, 2026-11-06) ──
+   Albom məxfidir: siyahını yalnız idarəçi və müştərinin paylaşdığı baxış
+   linkinin sahibi alır (bax api/gallery_auth.php › galleryViewToken).
+   Token slug üzrə yadda saxlanılır ki, qalereya ↔ slayd şou keçidində
+   itməsin. Yalnız OXUMA verir. */
+const GALLERY_VIEW_PREFIX = 'digitoyGalleryView:'
+const GALLERY_VIEW_RE = /^[a-f0-9]{32}$/
+
+/** URL-dəki ?v= tokenini bu slug üçün yadda saxla (format səhvdirsə heç nə etmir) */
+export function rememberGalleryView(slug) {
+  try {
+    const token = new URLSearchParams(window.location.search).get('v')
+    if (GALLERY_VIEW_RE.test(token || '')) localStorage.setItem(GALLERY_VIEW_PREFIX + slug, token)
+  } catch { /* private rejim */ }
+}
+
+function galleryViewHeaders(slug) {
+  try {
+    const token = localStorage.getItem(GALLERY_VIEW_PREFIX + slug)
+    return GALLERY_VIEW_RE.test(token || '') ? { 'X-Gallery-View': token } : {}
+  } catch { return {} }
+}
+
+/** Müştərinin paylaşacağı baxış linki (sub: 'qalereya-idare' | 'slayd') */
+export function galleryViewUrl(slug, token, sub = 'qalereya-idare') {
+  return `${window.location.origin}/invite/${encodeURIComponent(slug)}/${sub}?v=${token}`
+}
+
 /* Phase 50 — bir dəvətnaməyə aid OXU sorğuları: admin VƏ YA «Müştəri paneli» açarı */
 function inviteHeaders(slug) {
   return { ...adminHeaders(), ...ownerHeaders(slug) }
@@ -736,7 +764,8 @@ export async function getPhotos(slug, opts = {}) {
 
   const key     = `${slug}|${sort}|${visitor || ''}`
   const cached  = _photoCache.get(key)
-  const headers = {}
+  /* Albom məxfidir: admin / idarəetmə / panel açarı VƏ YA baxış linki */
+  const headers = { ...adminHeaders(), ...galleryHeaders(slug), ...galleryViewHeaders(slug) }
   if (cached?.etag)         headers['If-None-Match']     = cached.etag
   if (cached?.lastModified) headers['If-Modified-Since'] = cached.lastModified
 
@@ -750,15 +779,23 @@ export async function getPhotos(slug, opts = {}) {
   })
 
   if (res.status === 304 && cached) return cached.photos
-  if (!res.ok) throw new Error(`get_photos: ${res.status}`)
+  if (!res.ok) {
+    /* 401 = albom bu ziyarətçi üçün bağlıdır — çağıran fərqləndirə bilsin */
+    const err = new Error(`get_photos: ${res.status}`)
+    err.status = res.status
+    throw err
+  }
 
   const json   = await res.json()
   const photos = json.photos ?? []
-  /* Sayğaclar manifestin ÖZÜ ilə gəlir — ayrıca sorğu lazım deyil.
-     Massivə yazılır ki, `getPhotos` imzası (array qaytarır) dəyişməsin:
+  /* Sayğaclar və (yalnız idarəçiyə) baxış linkinin tokeni manifestin ÖZÜ ilə
+     gəlir. Massivə yazılır ki, `getPhotos` imzası (array qaytarır) dəyişməsin:
      mövcud bütün çağıranlar olduğu kimi işləyir. */
   Object.defineProperty(photos, 'counts', {
     value: json.counts || null, enumerable: false, configurable: true,
+  })
+  Object.defineProperty(photos, 'viewToken', {
+    value: json.viewToken || null, enumerable: false, configurable: true,
   })
   _photoCache.set(key, {
     etag:         res.headers.get('ETag') || null,

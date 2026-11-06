@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import {
   getPhotos, deletePhoto, storeGalleryKey, canManageGallery,
   getVisitorId, setMediaFeatured, trackGalleryEvent,
+  rememberGalleryView, galleryViewUrl,
 } from '../../utils/api'
 import { downloadItemsHD, downloadItem } from '../../utils/photoGallery'
 import { trackEvent } from '../../utils/analytics'
@@ -14,6 +15,7 @@ import {
 import MasonryGrid from '../guest-photos/MasonryGrid'
 import MediaTile from '../guest-photos/MediaTile'
 import { ConfirmDialog } from '../guest-photos/Sheet'
+import { GalleryLocked, ViewLinkPanel } from '../guest-photos/access'
 import GalleryStatsPanel from './GalleryStatsPanel'
 import GalleryCoverSettings from './GalleryCoverSettings'
 import GalleryLightbox from './GalleryLightbox'
@@ -80,6 +82,9 @@ export default function GalleryPage() {
   const [canManage] = useState(() => Boolean(urlKey) || canManageGallery(slug))
 
   useEffect(() => {
+    /* Baxış linki (?v=…) — URL-də QALIR (yalnız oxuma verir, paylaşılan
+       link olduğu kimi işləsin). Bu effekt yükləmədən ƏVVƏL elan olunub. */
+    rememberGalleryView(slug)
     if (!urlKey) return
     storeGalleryKey(slug, urlKey)
     try {
@@ -104,6 +109,9 @@ export default function GalleryPage() {
   const [hdAsk,    setHdAsk]    = useState(null)   /* çox fayl HD endirmə təsdiqi */
   const [notice,   setNotice]   = useState(null)   /* { kind:'error'|'ok', text } */
   const [loadedOnce, setLoadedOnce] = useState(false)
+  /* Albom məxfidir: server 401 verirsə bu ziyarətçidə baxış linki yoxdur */
+  const [locked,    setLocked]    = useState(false)
+  const [viewToken, setViewToken] = useState(null)   /* yalnız idarəçiyə gəlir */
 
   /* ── Phase 43 vəziyyəti ── */
   const [sort,        setSort]        = useState('featured')
@@ -124,19 +132,27 @@ export default function GalleryPage() {
     try {
       const photos = await getPhotos(slug, { sort, visitor })
       setItems(photos)
-    } catch { /* server əlçatmaz */ }
+      setViewToken(photos.viewToken || null)
+      setLocked(false)
+    } catch (e) {
+      if (e?.status === 401) setLocked(true)
+      /* başqa xəta: server əlçatmaz — cari siyahı qalır */
+    }
     finally { setLoading(false); setLoadedOnce(true) }
   }, [slug, sort, visitor])
 
   useEffect(() => { fetchItems() }, [fetchItems])
 
-  /* Qalereya idarəetmə səhifəsi açıldı — bir dəfə */
+  /* Qalereya açıldı — bir dəfə, YALNIZ albom açılandan sonra (bağlı
+     səhifəyə düşən qonaq statistikanı şişirtməsin) */
+  const opened = loadedOnce && !locked
   useEffect(() => {
+    if (!opened) return
     trackEvent('gallery_opened')
     /* Phase 43 — server tərəfi analitika. Gündə bir dəfə sayılır
        (bax gallery_track.php), ona görə açıq tab statistikanı şişirtmir. */
     trackGalleryEvent(slug, 'visit')
-  }, [slug])
+  }, [slug, opened])
 
   /* ── 30 saniyəlik avtomatik yeniləmə — YALNIZ tab görünəndə (Phase 39) ──
      ƏVVƏL: interval tab arxa planda olsa da işləyirdi. Cavab ETag/304
@@ -146,8 +162,10 @@ export default function GalleryPage() {
 
      İNDİ: tab gizlənəndə interval tam dayanır; geri qayıdanda DƏRHAL bir
      dəfə yenilənir (qonaq gözləmir) və interval yenidən qurulur.
-     ⚠ Davranış istifadəçi üçün eynidir — görünən tabda heç nə dəyişmir. */
+     ⚠ Davranış istifadəçi üçün eynidir — görünən tabda heç nə dəyişmir.
+     Albom bağlıdırsa sorğu ümumiyyətlə getmir. */
   useEffect(() => {
+    if (locked) return undefined
     let timer = null
 
     const start = () => {
@@ -171,7 +189,7 @@ export default function GalleryPage() {
       document.removeEventListener('visibilitychange', onVisibility)
       stop()
     }
-  }, [fetchItems])
+  }, [fetchItems, locked])
 
   const visibleItems = items.slice(0, page * PAGE_SIZE)
   const hasMore      = visibleItems.length < items.length
@@ -318,6 +336,18 @@ export default function GalleryPage() {
     [meta.date],
   )
 
+  /* Baxış linki olmayan ziyarətçi: albom bağlıdır, şəkil göndərmək açıqdır */
+  if (locked) {
+    return (
+      <div className="dt-site dt-page min-h-screen bg-cream text-brown-dark">
+        <GalleryTopBar onBack={goBack} title="Qonaq Şəkilləri" subtitle={`#${slug}`} />
+        <main className="mx-auto w-full max-w-[1200px] px-4 pb-24 pt-10 sm:px-6 sm:pt-16">
+          <GalleryLocked onUpload={goUpload} />
+        </main>
+      </div>
+    )
+  }
+
   return (
     <div className="dt-site dt-page min-h-screen bg-cream text-brown-dark">
       <GalleryTopBar
@@ -348,6 +378,10 @@ export default function GalleryPage() {
         {/* İdarəetmə səlahiyyəti yoxdursa açıq izah — qonaq işləməyəcək
             düymələrə baxmasın, cütlük isə nə etməli olduğunu bilsin */}
         {!canManage && <div className="mb-4"><ViewOnlyNote /></div>}
+        {/* İdarəçi: albomu kimlə istəsə paylaşsın deyə baxış linki */}
+        {canManage && viewToken && (
+          <div className="mb-4"><ViewLinkPanel url={galleryViewUrl(slug, viewToken)} /></div>
+        )}
 
         <GalleryToolbar
           fileCount={items.length}

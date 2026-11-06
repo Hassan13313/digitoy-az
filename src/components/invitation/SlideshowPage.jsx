@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import SlideshowStage from '../guest-photos/slideshow'
-import { getPhotos, getGalleryMeta, trackGalleryEvent } from '../../utils/api'
+import { getPhotos, getGalleryMeta, trackGalleryEvent, rememberGalleryView } from '../../utils/api'
+import { GalleryLocked } from '../guest-photos/access'
 import { formatAzDate } from '../../utils/dateFormat'
 
 /* ══════════════════════════════════════════════════
@@ -46,6 +47,8 @@ export default function SlideshowPage() {
   const [ready,   setReady]   = useState(false)
   const [fs,      setFs]      = useState(false)
   const [newBadge,  setNewBadge]  = useState(0)
+  /* Albom məxfidir: baxış linki (?v=…) və ya idarəçi açarı olmadan 401 */
+  const [locked,  setLocked]  = useState(false)
 
   /* Aktual dəyərləri interval-ın içindən oxumaq üçün (kapan problemi) */
   const itemsRef = useRef([])
@@ -108,17 +111,24 @@ export default function SlideshowPage() {
       /* Reaksiya və seçim vəziyyəti hər dövrədə yenilənir, ona görə
          siyahı uzunluğu dəyişməsə də state yenilənir. */
       setItems(fresh.length ? [...kept, ...fresh] : kept)
-    } catch { /* şəbəkə qırılsa cari siyahı ilə davam edir */ }
+    } catch (e) {
+      if (e?.status === 401) setLocked(true)
+      /* başqa xəta: şəbəkə qırılsa cari siyahı ilə davam edir */
+    }
     finally { if (isFirst) setReady(true) }
   }, [slug])
 
+  /* Baxış linkindəki ?v= — ilk yükləmədən ƏVVƏL yadda saxlanılır */
+  useEffect(() => { rememberGalleryView(slug) }, [slug])
   useEffect(() => { load(true) }, [load])
 
-  /* Açılış hadisəsi — analitikada «slayd şou» sayğacı */
-  useEffect(() => { trackGalleryEvent(slug, 'slideshow') }, [slug])
+  /* Açılış hadisəsi — analitikada «slayd şou» sayğacı (yalnız albom açılanda) */
+  const opened = ready && !locked
+  useEffect(() => { if (opened) trackGalleryEvent(slug, 'slideshow') }, [slug, opened])
 
   /* ── Yeni media yoxlaması — yalnız tab görünəndə (batareya/şəbəkə) ── */
   useEffect(() => {
+    if (locked) return undefined
     let timer = null
     const start = () => { if (timer === null) timer = setInterval(() => load(false), REFRESH_MS) }
     const stop  = () => { if (timer !== null) { clearInterval(timer); timer = null } }
@@ -128,7 +138,7 @@ export default function SlideshowPage() {
     if (document.visibilityState === 'visible') start()
     document.addEventListener('visibilitychange', onVis)
     return () => { document.removeEventListener('visibilitychange', onVis); stop() }
-  }, [load])
+  }, [load, locked])
 
   /* ── Avtomatik keçid ──
      Video öz müddətini alır (maksimum VIDEO_MAX_MS), foto isə `seconds`. */
@@ -202,6 +212,14 @@ export default function SlideshowPage() {
       featured: !!i.featured,
     }
   }), [visible])
+
+  if (locked) {
+    return (
+      <div className="dt-site dt-page grid min-h-screen place-items-center bg-cream px-4 text-brown-dark">
+        <GalleryLocked onUpload={() => window.location.assign(`/invite/${slug}/foto`)} />
+      </div>
+    )
+  }
 
   return (
     <SlideshowStage

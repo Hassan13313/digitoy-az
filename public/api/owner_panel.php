@@ -14,6 +14,7 @@
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/owner_auth.php';
+require_once __DIR__ . '/gallery_auth.php';
 
 header('Cache-Control: no-store');
 
@@ -67,6 +68,8 @@ echo json_encode([
     'active'   => (int) $row['is_active'] === 1,
     'package'  => in_array($pkg, ['SADE', 'VIP', 'PREMIUM'], true) ? $pkg : 'SADE',
     'sections' => (object) $sections,
+    /* Albomun baxış linki üçün token (bax gallery_auth.php › galleryViewToken) */
+    'galleryView' => galleryViewToken($slug),
     'event'    => [
         'type'  => $type,
         'names' => $names,

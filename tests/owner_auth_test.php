@@ -109,8 +109,14 @@ ok('get_guests: rejim invitationRole ilə (admin | owner | ictimai)',
 ok('requireInvitationAccess vahid invitationRole-dan keçir',
     strpos($src('owner_auth.php'), 'if (invitationRole($slug) === null) ownerAccessDenied();') !== false);
 ok('requireGalleryAccess: admin (auth.php), qalereya tokeni, sonra müştəri açarı',
-    strpos($src('gallery_auth.php'), 'if (isAdminRequest()) return;') !== false
-    && strpos($src('gallery_auth.php'), 'if (isOwnerRequest($slug)) return;') !== false);
+    strpos($src('gallery_auth.php'), 'if (isAdminRequest()) return true;') !== false
+    && strpos($src('gallery_auth.php'), 'return isOwnerRequest($slug);') !== false
+    && strpos($src('gallery_auth.php'), 'if (isGalleryManagerRequest($slug)) return;') !== false);
+ok('get_photos: albom yalnız idarəçiyə və ya baxış linkinə (ETag-dən əvvəl)',
+    ($gp = $src('get_photos.php')) !== ''
+    && strpos($gp, '!$isManager && !isGalleryViewRequest($slug)') !== false
+    && strpos($gp, '!$isManager && !isGalleryViewRequest($slug)') < strpos($gp, 'HTTP_IF_NONE_MATCH')
+    && strpos($gp, "'viewToken' => \$isManager ? galleryViewToken(\$slug) : null") !== false);
 ok('owner_panel YALNIZ müştəri açarı (admin tokeni yox), bir sorğuda hash_equals',
     strpos($src('owner_panel.php'), "hash_equals(\$row['owner_key'], \$token)") !== false
     && strpos($src('owner_panel.php'), 'isAdminRequest') === false

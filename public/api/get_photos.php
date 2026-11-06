@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/gallery_media.php';
+require_once __DIR__ . '/gallery_auth.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
@@ -13,6 +14,21 @@ $slug = trim($_GET['slug'] ?? '');
 if (!$slug || !isValidSlug($slug)) {
     http_response_code(400);
     echo json_encode(['error' => 'Valid slug required']);
+    exit;
+}
+
+/* ── Albom məxfidir (2026-11-06) ──
+   Siyahını yalnız idarəçi (admin / idarəetmə linki / müştəri paneli) VƏ YA
+   müştərinin paylaşdığı baxış linkinin sahibi alır. Qonaq slug-u bilir
+   (QR-da yazılıb), ona görə slug tək başına kifayət deyil. Yoxlama ETag-dən
+   ƏVVƏLDİR: icazəsiz sorğu 304 ilə keşdən də heç nə almır. */
+$isManager = isGalleryManagerRequest($slug);
+if (!$isManager && !isGalleryViewRequest($slug)) {
+    http_response_code(401);
+    echo json_encode([
+        'error'   => 'GALLERY_VIEW_REQUIRED',
+        'message' => 'Bu albom yalnız dəvət sahibinin paylaşdığı link ilə açılır.',
+    ], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -55,8 +71,9 @@ $etagOffset = isset($_GET['offset']) ? (int) $_GET['offset'] : 0;
    qaytarır, yəni ETag sabit qalır və davranış əvvəlki kimi olur. */
 $metaVer = galleryMetaVersion($slug);
 
+/* İdarəçi cavabında baxış linki də var — ETag rola görə fərqlənməlidir */
 $etag = '"' . md5($slug . '|' . $dirMtime . '|' . $etagLimit . '|' . $etagOffset
-               . '|' . $sort . '|' . $visitor . '|' . $metaVer) . '"';
+               . '|' . $sort . '|' . $visitor . '|' . $metaVer . '|' . ($isManager ? 'm' : 'v')) . '"';
 $lastMod = gmdate('D, d M Y H:i:s', $dirMtime) . ' GMT';
 
 header('ETag: ' . $etag);
@@ -118,4 +135,6 @@ echo json_encode([
         'total'  => $scan['photos'] + $scan['videos'],
     ],
     'sort'   => $sort,
+    /* Müştərinin paylaşacağı baxış linkinin tokeni — YALNIZ idarəçiyə */
+    'viewToken' => $isManager ? galleryViewToken($slug) : null,
 ]);

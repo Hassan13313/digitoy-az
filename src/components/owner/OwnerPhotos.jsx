@@ -1,9 +1,10 @@
 import { memo, useRef } from 'react'
 import { QRCodeCanvas } from 'qrcode.react'
-import { Download, Images, MonitorPlay, QrCode } from 'lucide-react'
+import { Download, Images, Link2, MonitorPlay, QrCode } from 'lucide-react'
 import { Button, CopyField, Panel } from '../admin/v2/adminUi'
 import { useGalleryMeta } from '../../hooks/useGalleryMeta'
 import { triggerDownload } from '../../utils/qrStandPdf'
+import { galleryViewUrl } from '../../utils/api'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Müştəri paneli — şəkillər (Phase 50).
@@ -58,11 +59,14 @@ const UploadQr = memo(function UploadQr({ url, slug }) {
   )
 })
 
-export default function OwnerPhotos({ slug }) {
+export default function OwnerPhotos({ slug, viewToken }) {
   const { meta, counts } = useGalleryMeta(slug, { interval: 0 })
 
   const base = `${window.location.origin}/invite/${encodeURIComponent(slug)}`
-  const slideUrl = `${base}/slayd`
+  /* Albom məxfidir (2026-11-06): qalereya və slayd şou yalnız baxış linki
+     (?v=…) ilə açılır. Köhnə server token verməsə link əvvəlki kimidir. */
+  const viewUrl  = viewToken ? galleryViewUrl(slug, viewToken) : null
+  const slideUrl = viewToken ? galleryViewUrl(slug, viewToken, 'slayd') : `${base}/slayd`
 
   return (
     <Panel
@@ -88,6 +92,18 @@ export default function OwnerPhotos({ slug }) {
         >
           <CopyField label="Slayd şou linki" value={slideUrl} onCopy={copy} openHref={slideUrl} />
         </Block>
+
+        {viewUrl && (
+          <div className="lg:col-span-2">
+            <Block
+              icon={Link2}
+              title="Albomun baxış linki"
+              text="Qonaqlar şəkil göndərir, amma albomu yalnız bu linki göndərdiyiniz şəxslər görür. Linklə baxmaq və endirmək olar, silmək olmaz."
+            >
+              <CopyField label="Baxış linki" value={viewUrl} onCopy={copy} openHref={viewUrl} />
+            </Block>
+          </div>
+        )}
 
         <div className="lg:col-span-2">
           <Block

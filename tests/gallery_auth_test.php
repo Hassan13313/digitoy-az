@@ -39,5 +39,24 @@ check('slug prefiksi ilə keçid yoxdur',        !validateGalleryToken($a['token
 /* Qalereya açarı admin açarından fərqlidir (sızma admin olmur) */
 check('qalereya açarı ≠ admin açarı',          gallerySigningKey() !== ADMIN_KEY);
 
+echo "\ngallery VIEW token (albomun baxış linki)\n";
+
+$va = galleryViewToken('aytekin-ve-ferid');
+check('baxış tokeni sabitdir (link dəyişmir)',          $va === galleryViewToken('aytekin-ve-ferid'));
+check('baxış tokeni 32 hex',                            (bool) preg_match('/^[a-f0-9]{32}$/', $va));
+check('başqa toyun baxış tokeni fərqlidir',             $va !== galleryViewToken('leyla-ve-murad'));
+check('slug prefiksi ilə eyni token alınmır',          $va !== galleryViewToken('aytekin-ve-ferid-2'));
+check('baxış tokeni idarəetmə tokeni kimi KEÇMİR',      !validateGalleryToken($va, 'aytekin-ve-ferid'));
+
+$_SERVER['HTTP_X_GALLERY_VIEW'] = $va;
+check('düzgün X-Gallery-View qəbul edilir',             isGalleryViewRequest('aytekin-ve-ferid'));
+check('başqa toyun albomuna keçmir',                    !isGalleryViewRequest('leyla-ve-murad'));
+$_SERVER['HTTP_X_GALLERY_VIEW'] = $a['token'];
+check('idarəetmə tokeni baxış başlığında işləmir',      !isGalleryViewRequest('aytekin-ve-ferid'));
+$_SERVER['HTTP_X_GALLERY_VIEW'] = substr($va, 0, 31) . 'x';
+check('pozulmuş baxış tokeni rədd edilir',              !isGalleryViewRequest('aytekin-ve-ferid'));
+unset($_SERVER['HTTP_X_GALLERY_VIEW']);
+check('başlıq yoxdursa albom bağlıdır',                 !isGalleryViewRequest('aytekin-ve-ferid'));
+
 echo "\n$pass keçdi, $fail uğursuz\n";
 exit($fail === 0 ? 0 : 1);

@@ -89,7 +89,8 @@ export default function AdminDashboard({ onNavigate }) {
         packages={packages}
         last7={last7}
         gallery={gallery}
-        onOpenGallery={(t) => window.open(`/invite/${t.id}/qalereya-idare`, '_blank', 'noopener')}
+        /* noopener yoxdur: yeni tab admin sessiyasını götürsün (albom məxfidir) */
+        onOpenGallery={(t) => window.open(`/invite/${t.id}/qalereya-idare`, '_blank')}
         onRefresh={load}
         refreshing={loading && !!stats}
         onGalleryRefresh={loadGallery}

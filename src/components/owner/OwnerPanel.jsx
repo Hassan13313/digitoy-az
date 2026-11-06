@@ -162,7 +162,7 @@ export default function OwnerPanel() {
               {activeTab === 'rsvp' && <AdminRSVPBlock slug={slug} names={names} refreshSignal={tick} />}
               {activeTab === 'guests' && <AdminGuestReports slug={slug} names={names} dateStr={dateStr} refreshSignal={tick} />}
               {activeTab === 'guestbook' && <OwnerGuestbook slug={slug} refreshSignal={tick} />}
-              {activeTab === 'photos' && <OwnerPhotos slug={slug} />}
+              {activeTab === 'photos' && <OwnerPhotos slug={slug} viewToken={data.galleryView} />}
             </TabPanel>
           </>
         )}

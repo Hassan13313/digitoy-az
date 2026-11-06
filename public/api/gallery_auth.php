@@ -76,21 +76,43 @@ function readGalleryToken(): string {
 }
 
 /**
+ * Sorğu bu slug-un idarəçisindəndirmi? Admin tokeni, həmin slug üçün
+ * qalereya tokeni (cütlüyün idarəetmə linki) VƏ YA Phase 50 «Müştəri
+ * paneli» açarı (DB-dədir, panel linki yenilənəndə dərhal bağlanır).
+ */
+function isGalleryManagerRequest(string $slug): bool {
+    if (isAdminRequest()) return true;
+
+    $galleryToken = readGalleryToken();
+    if ($galleryToken !== '' && validateGalleryToken($galleryToken, $slug)) return true;
+
+    return isOwnerRequest($slug);
+}
+
+/* ── Albomun baxış linki (2026-11-06) ──
+   Albom məxfidir: qonaq /foto səhifəsində şəkil GÖNDƏRİR, amma albomu
+   yalnız müştərinin paylaşdığı link ilə görür:
+     /invite/<slug>/qalereya-idare?v=<token>  (slayd şou: /slayd?v=<token>)
+   Token slug-a bağlıdır və SABİTDİR — müştəri linki bir dəfə paylaşır.
+   Yalnız OXUMA verir: idarəetmə tokeni «payload.imza» formatındadır və
+   imzası base64 payload üzərindədir, bu isə «v:<slug>» üzərində — biri
+   digərinin yerinə keçə bilmir. */
+function galleryViewToken(string $slug): string {
+    return substr(hash_hmac('sha256', "v:{$slug}", gallerySigningKey()), 0, 32);
+}
+
+function isGalleryViewRequest(string $slug): bool {
+    $token = $_SERVER['HTTP_X_GALLERY_VIEW'] ?? '';
+    return is_string($token) && $token !== ''
+        && hash_equals(galleryViewToken($slug), trim($token));
+}
+
+/**
  * Bu slug üzərində idarəetmə səlahiyyətini tələb et.
- * Admin tokeni VƏ YA həmin slug üçün qalereya tokeni kifayətdir.
- * Uğursuzluqda 401/403 ilə dayandırır.
+ * Uğursuzluqda 401 ilə dayandırır.
  */
 function requireGalleryAccess(string $slug): void {
-    /* 1) Admin tokeni (admin panel) — auth.php ilə eyni oxunuş */
-    if (isAdminRequest()) return;
-
-    /* 2) Bu slug üçün qalereya tokeni (cütlüyün idarəetmə linki) — DB-siz */
-    $galleryToken = readGalleryToken();
-    if ($galleryToken !== '' && validateGalleryToken($galleryToken, $slug)) return;
-
-    /* 3) Phase 50 — bu slug-un «Müştəri paneli» açarı. Panel linki
-       yenilənəndə bu icazə də dərhal bağlanır (açar DB-dədir). */
-    if (isOwnerRequest($slug)) return;
+    if (isGalleryManagerRequest($slug)) return;
 
     http_response_code(401);
     echo json_encode([

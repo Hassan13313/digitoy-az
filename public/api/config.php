@@ -80,7 +80,7 @@ if ($_origin !== '') {
         /* ⚠ `If-None-Match` və `If-Modified-Since` CORS safelist-də DEYİL:
            preflight tələb edirlər. Onlarsız qalereyanın şərti GET (ETag/304)
            optimallaşdırması cross-origin rejimdə tamamilə sınırdı. */
-        header('Access-Control-Allow-Headers: Content-Type, X-Admin-Token, X-Gallery-Token, X-Owner-Token, Authorization, If-None-Match, If-Modified-Since');
+        header('Access-Control-Allow-Headers: Content-Type, X-Admin-Token, X-Gallery-Token, X-Gallery-View, X-Owner-Token, Authorization, If-None-Match, If-Modified-Since');
         /* Cavab başlıqları cross-origin JS-ə default olaraq GÖRÜNMÜR —
            `res.headers.get('ETag')` null qaytarır və keş heç vaxt qurulmur. */
         header('Access-Control-Expose-Headers: ETag, Last-Modified');
