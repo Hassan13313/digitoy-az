@@ -84,8 +84,13 @@ const WITH_IMAGE = new Set([
 
 export const TEMPLATE_IMAGE_SIZE = { width: 780, height: 1688 }
 
+/* Şəkli EYNİ adla yenilənən şablonlar: şəkillər 1 il keşlənir (.htaccess), sorğu
+   parametri olmasa əvvəl baxan brauzer köhnə şəkli göstərərdi. Şəkli dəyişəndə rəqəmi artırın. */
+const IMAGE_REV = { 'candle-rings': 2, 'bridal-veil': 2, 'first-dance': 2 }
+
 export function templateImage(id, concept = null) {
   /* Ad günü bölməsindəki versiyanın öz şəkli var — tək nəfərin adı ilə */
   if (concept === 'birthday' && isMultiConcept(id)) return `/img/templates/${id}--birthday.webp`
-  return WITH_IMAGE.has(id) ? `/img/templates/${id}.webp` : null
+  if (!WITH_IMAGE.has(id)) return null
+  return `/img/templates/${id}.webp${IMAGE_REV[id] ? `?v=${IMAGE_REV[id]}` : ''}`
 }

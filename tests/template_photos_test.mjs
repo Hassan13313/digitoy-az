@@ -65,7 +65,7 @@ for (const id of TEMPLATES) {
   ok(`${id}: vimg( qalmayıb (hamısı admin yerindən)`, !src.includes('vimg('))
   for (const p of list) {
     ok(`${id}.${p.key}: ad və izah var`, !!p.label && !!p.hint)
-    ok(`${id}.${p.key}: standart foto diskdə`, existsSync(new URL(`../public${p.src}`, import.meta.url)), p.src)
+    ok(`${id}.${p.key}: standart foto diskdə`, existsSync(new URL(`../public${p.src.split("?")[0]}`, import.meta.url)), p.src)
     ok(`${id}.${p.key}: şablonda işlənir`, src.includes(`P.${p.key}`))
   }
 }
