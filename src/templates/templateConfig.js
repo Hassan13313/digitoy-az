@@ -440,15 +440,47 @@ export const FONTS_MISSING_AZ = {
 
 
 export const TEMPLATES = [
+  /* İlk kart və builder-in ilkin seçimi (2026-11-12, istifadəçi): Ivory Silk */
+  {
+    id: 'ivory-silk',
+    name: 'Ivory Silk',
+    tagline: 'Fil sümüyü ipək · Qızıl üzüklər · Mirvari',
+    description: 'Gündüz toyu, «köhnə pul» sakitliyi: fil sümüyü ipək üzərində tünd yaşıl məxmər qutuda qızıl üzüklər. Toxunanda atlasın üzərindən işıq sürüşür, tarix kağız zolağında görünür. Daxildə menyu kartı kimi proqram və qalxan yer kartı.',
+    shortDescription: { az: 'İpək, mirvari və qızıl üzüklərlə lüks toy dəvəti', en: 'Luxury wedding invite with silk, pearls and gold rings' },
+    status: TEMPLATE_STATUS.LIVE,
+    category: 'classic',
+    concept: 'toy',
+    version: 1,
+    previewRoute: '/demo/template/ivory-silk',
+    theme: {
+      primary: '#1F3327',
+      accent: '#A6844A',
+      secondary: '#F8F4EC',
+      background: '#EFE7DB',
+      surface: '#F8F4EC',
+      text: '#1F3327',
+      muted: '#6F6A5F',
+      mapTint: '#A6844A',
+      footerBg: '#1F3327',
+      footerText: '#F8F4EC',
+      footerAccent: '#A6844A',
+      fonts: { heading: FONT_STACKS.trirong, body: FONT_STACKS.trirong, script: FONT_STACKS.petitFormal },
+    },
+    preview: {
+      accent: '#A6844A',
+      background: 'radial-gradient(120% 80% at 50% 0%, #F8F4EC, #EFE7DB 55%, #D8CBB6)',
+      swatches: ['#EFE7DB', '#1F3327', '#A6844A'],
+    },
+  },
   /* ── «VİRAL VIDEO» TOY SERİYASI (2026-11) — 3 şablon ──
      Ekran yazısı özü Reels/TikTok videosudur: real fotolar (public/img/wedding/viral),
      kinematik açılış, daxildə hər şey hərəkətdədir (_shared/viral.jsx). */
   {
     id: 'candle-rings',
     name: 'Şam və Üzük',
-    tagline: 'Şam işığı · Nişan üzükləri · Məxmər',
+    tagline: 'Şam işığı · Toy üzükləri · Məxmər',
     description: 'Qaranlıqda «Şamları yandır» — işıq ortadan yayılır, alov titrəyir, kadr iki üzüyə keçir və üzərindən qızılı parıltı sürüşür. Daxildə böyük fırlanan gün sayı, alovlu proqram xətti, şamlı pilləkən və şam işığında son kadr.',
-    shortDescription: { az: 'Şam işığı və nişan üzükləri ilə toy dəvəti', en: 'Wedding invite with candlelight and rings' },
+    shortDescription: { az: 'Şam işığı və toy üzükləri ilə toy dəvəti', en: 'Wedding invite with candlelight and rings' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'luxury',
     concept: 'toy',
@@ -539,37 +571,6 @@ export const TEMPLATES = [
   /* ── LÜKS TOY SERİYASI (2026-11) — 4 şablon ──
      Fotolar GPT Image ilə bu şablonlar üçün yaradılıb; açılış örtüyün özüdür (Frame). */
   {
-    id: 'ivory-silk',
-    name: 'Ivory Silk',
-    tagline: 'Fil sümüyü ipək · Qızıl üzüklər · Mirvari',
-    description: 'Gündüz toyu, «köhnə pul» sakitliyi: fil sümüyü ipək üzərində tünd yaşıl məxmər qutuda qızıl üzüklər. Toxunanda atlasın üzərindən işıq sürüşür, tarix kağız zolağında görünür. Daxildə menyu kartı kimi proqram və qalxan yer kartı.',
-    shortDescription: { az: 'İpək, mirvari və qızıl üzüklərlə lüks toy dəvəti', en: 'Luxury wedding invite with silk, pearls and gold rings' },
-    status: TEMPLATE_STATUS.LIVE,
-    category: 'classic',
-    concept: 'toy',
-    version: 1,
-    previewRoute: '/demo/template/ivory-silk',
-    theme: {
-      primary: '#1F3327',
-      accent: '#A6844A',
-      secondary: '#F8F4EC',
-      background: '#EFE7DB',
-      surface: '#F8F4EC',
-      text: '#1F3327',
-      muted: '#6F6A5F',
-      mapTint: '#A6844A',
-      footerBg: '#1F3327',
-      footerText: '#F8F4EC',
-      footerAccent: '#A6844A',
-      fonts: { heading: FONT_STACKS.trirong, body: FONT_STACKS.trirong, script: FONT_STACKS.petitFormal },
-    },
-    preview: {
-      accent: '#A6844A',
-      background: 'radial-gradient(120% 80% at 50% 0%, #F8F4EC, #EFE7DB 55%, #D8CBB6)',
-      swatches: ['#EFE7DB', '#1F3327', '#A6844A'],
-    },
-  },
-  {
     id: 'baku-night',
     name: 'Bakı Gecəsi',
     tagline: 'Black tie · Alov Qüllələri · İçərişəhər',
@@ -603,9 +604,9 @@ export const TEMPLATES = [
   {
     id: 'golden-hour',
     name: 'Golden Hour',
-    tagline: 'Gün batımı · Nikah tağı · Mərdəkan bağı',
-    description: 'Abşeronda, köhnə bağda gün batanda nikah: ağ-şaftalı güllü tağ, zeytun ağacları. Toxunanda tağın arxasında günəş parlayır və kadr isinir. Daxildə batan günəş sayğacı, tağ formalı xəritə və masa kartı.',
-    shortDescription: { az: 'Gün batımında bağda nikah — lüks toy dəvəti', en: 'Luxury sunset garden wedding invite' },
+    tagline: 'Gün batımı · Toy tağı · Mərdəkan bağı',
+    description: 'Abşeronda, köhnə bağda gün batanda toy: ağ-şaftalı güllü tağ, zeytun ağacları. Toxunanda tağın arxasında günəş parlayır və kadr isinir. Daxildə batan günəş sayğacı, tağ formalı xəritə və masa kartı.',
+    shortDescription: { az: 'Gün batımında bağda toy — lüks toy dəvəti', en: 'Luxury sunset garden wedding invite' },
     status: TEMPLATE_STATUS.LIVE,
     category: 'elegant',
     concept: 'toy',
@@ -2793,7 +2794,7 @@ export function getTemplatePreviewRoute(id) {
 
 /**
  * Builder-də İLK OLARAQ seçili gələn şablon — reyestrin BİRİNCİ seçilə bilən
- * şablonu (indi Royal Gold).
+ * şablonu (indi Ivory Silk).
  *
  * ⚠ Bu, `DEFAULT_TEMPLATE_ID`-dən FƏRQLİDİR və qəsdən belədir:
  *   • DEFAULT_TEMPLATE_ID = simple-luxury → RENDER fallback-ıdır. `templateId`
@@ -2803,8 +2804,9 @@ export function getTemplatePreviewRoute(id) {
  *     ona görə builder-də də ilk o çıxmamalıdır.
  */
 /* 2026-11-06: vitrin sırası dəyişdi (Royal Palace birinci), builder-in ilkin
-   seçimi isə əvvəlki kimi Royal Gold qalır. */
-const BUILDER_DEFAULT_TEMPLATE_ID = 'royal-gold'
+   seçimi isə əvvəlki kimi Royal Gold qalır.
+   2026-11-12 (istifadəçi): dizayn seçilməyəndə Ivory Silk — həm də siyahıda birincidir. */
+const BUILDER_DEFAULT_TEMPLATE_ID = 'ivory-silk'
 export function builderDefaultTemplateId() {
   const list = listTemplates({ onlySelectable: true })
   return (list.find((t) => t.id === BUILDER_DEFAULT_TEMPLATE_ID) || list[0])?.id || DEFAULT_TEMPLATE_ID

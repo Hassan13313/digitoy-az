@@ -21,9 +21,9 @@ import { PaletteContext, resolvePalette, scaleFont } from '../_shared/palette'
 /* ─────────────────────────────────────────────────────────────────────────────
    GOLDEN HOUR — lüks toy seriyası (2026-11)
 
-   Konsept: Abşeronda, Mərdəkan bağında gün batanda açıq havada nikah.
+   Konsept: Abşeronda, Mərdəkan bağında gün batanda açıq havada toy.
    Köhnə əhəng daşı divarlar, zeytun və əncir ağacları, ağ-şaftalı güllü
-   nikah tağı, süfrədə nar və əncir.
+   toy tağı, süfrədə nar və əncir.
    Açılış örtüyün ÖZÜDÜR (Frame — açılışda və örtükdə eyni kadr):
      1. kadr axşamüstü kimi solğun, adlar səmada, «Dəvəti açın»
      2. toxunanda tağın arxasındakı günəş parlayır, işıq kadrı isidir,
@@ -297,7 +297,7 @@ export default function GoldenHourTemplate(props) {
                 <SeatFinder inv={inv} tr={tr} listId="gh-seat-list" field={field(C)} suggest={suggest(C)} font={body} muted={C.MUTE} accent={C.SUN}
                   nameStyle={{ fontFamily: fonts.script, fontSize: 34, lineHeight: 1.1 }}
                   card={(num) => (
-                    /* tağ formalı masa kartı — nikah tağı kimi */
+                    /* tağ formalı masa kartı — toy tağı kimi */
                     <div style={{ display: 'inline-block', minWidth: 200, padding: '40px 22px 22px', borderRadius: '120px 120px 6px 6px', background: `linear-gradient(180deg, ${C.PEACH}, #FFFFFF)`, border: `1px solid ${alpha(C.SUN, 0.35)}`, animation: 'gh-rise .9s cubic-bezier(.2,.8,.2,1) both' }}>
                       <div style={{ fontFamily: head, fontWeight: 200, fontSize: tableSize(num, 72), lineHeight: 1, color: C.SUN }}>{num}</div>
                       <div style={{ marginTop: 6, fontSize: 14, color: C.MUTE }}>{T.table}</div>

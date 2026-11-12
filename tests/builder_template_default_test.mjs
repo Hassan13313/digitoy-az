@@ -26,10 +26,10 @@ const resolve = cfg.resolveBuilderTemplateId
 ok('resolveBuilderTemplateId export olunur', typeof resolve === 'function')
 
 if (typeof resolve === 'function') {
-  eq('builder-in ilk dizaynı Royal Gold-dur', cfg.builderDefaultTemplateId(), 'royal-gold')
+  eq('builder-in ilk dizaynı Ivory Silk-dir', cfg.builderDefaultTemplateId(), 'ivory-silk')
 
   for (const empty of ['', null, undefined]) {
-    eq(`müştəri, seçim yoxdur (${JSON.stringify(empty)}) → royal-gold`, resolve(empty), 'royal-gold')
+    eq(`müştəri, seçim yoxdur (${JSON.stringify(empty)}) → ivory-silk`, resolve(empty), 'ivory-silk')
     eq(`admin, seçim yoxdur (${JSON.stringify(empty)}) → DEFAULT_TEMPLATE_ID`,
       resolve(empty, { isAdmin: true }), cfg.DEFAULT_TEMPLATE_ID)
   }

@@ -117,9 +117,9 @@ export const OPENING_PHRASES = {
   firstDance: { az: 'İlk rəqsimizə dəvət', en: 'Join us for our first dance', ru: 'Приглашаем на наш первый танец' },
   lightSparklers: { az: 'Fişəngləri yandır', en: 'Light the sparklers', ru: 'Зажечь бенгальские огни' },
   /* 2026-11 — lüks toy seriyası */
-  ivoryKick: { az: 'Nikah mərasiminə dəvət', en: 'Invitation to our wedding', ru: 'Приглашение на свадьбу' },
+  ivoryKick: { az: 'Toy mərasiminə dəvət', en: 'Invitation to our wedding', ru: 'Приглашение на свадьбу' },
   bakuKick: { az: 'Bakı, toy gecəsi', en: 'Baku, a wedding night', ru: 'Баку, свадебный вечер' },
-  sunsetKick: { az: 'Gün batanda nikah', en: 'A sunset wedding', ru: 'Свадьба на закате' },
+  sunsetKick: { az: 'Gün batanda toy', en: 'A sunset wedding', ru: 'Свадьба на закате' },
   winterKick: { az: 'Dağda qış toyu', en: 'A winter wedding in the mountains', ru: 'Зимняя свадьба в горах' },
 }
 

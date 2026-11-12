@@ -21,7 +21,7 @@ import { PaletteContext, resolvePalette, scaleFont } from '../_shared/palette'
 /* ─────────────────────────────────────────────────────────────────────────────
    ŞAM VƏ ÜZÜK — «viral video» toy seriyası (2026-11)
 
-   Konsept: qaranlıq zalda şamlar və iki nişan üzüyü. Açılış Reels kadrıdır:
+   Konsept: qaranlıq zalda şamlar və iki toy üzüyü. Açılış Reels kadrıdır:
      1. tam qaranlıq, bir qığılcım və «Şamları yandır»
      2. toxunanda işıq ortadan dairə kimi yayılır — real şam fotosu görünür,
         alov titrəyir, adlar hərf-hərf yazılır
