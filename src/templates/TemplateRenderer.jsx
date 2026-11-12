@@ -5,7 +5,7 @@ import { getTemplateComponent } from './registry'
 import { DEFAULT_TEMPLATE_ID, resolveTemplateId, templateContentKey } from './templateConfig'
 import { ensureTemplateFonts } from './fonts'
 import { ensureTemplateFonts as ensureLegacyFonts } from './legacy/fonts'
-import { isLegacyInvitation, getLegacyComponent } from './legacy/registry'
+import { isLegacyInvitation, isV1Invitation, getLegacyComponent } from './legacy/registry'
 import { useAutoFit } from './_shared/fitText'
 import { trackTemplateView, trackTemplateFallback } from './templateAnalytics'
 import { resolveWeddingContent } from '../data/contentI18n'
@@ -96,7 +96,9 @@ export default function TemplateRenderer({ template, isPreview = false, weddingD
      ⚠ Açar yoxdursa `null` → bütün şablonlar əvvəlki kimi işləyir. */
   /* Şablon qatı + dəvətnamənin öz düzəlişləri (bax mergeTemplateDefaults) */
   const legacy = isLegacyInvitation(weddingData, templateId)
-  const templateDefaults = useTemplateDefaults(templateId, weddingData, legacy)
+  /* Şablon səviyyəli məzmun v1-ə tətbiq olunmur; dondurulmuş v2 isə əvvəlki kimi alır
+     (admin «Şablonlar» düzəlişləri o dizayn üçün edilmişdi — itməsin) */
+  const templateDefaults = useTemplateDefaults(templateId, weddingData, isV1Invitation(weddingData, templateId))
   const withDefaults = useMemo(
     () => withTemplateDefaults(localizedWedding, templateDefaults),
     [localizedWedding, templateDefaults],
@@ -118,7 +120,9 @@ export default function TemplateRenderer({ template, isPreview = false, weddingD
   useAutoFit()
 
   if (templateId !== DEFAULT_TEMPLATE_ID) {
-    if (legacy) ensureLegacyFonts()
+    /* v1 dondurmasının öz şrift dəsti var; v2 dondurması (fotolu seriyaya keçmiş şablonun
+       köhnə surəti) indiki şrift reyestrindən oxuyur — v3 həmin şriftləri dəyişmir */
+    if (isV1Invitation(weddingData, templateId)) ensureLegacyFonts()
     else ensureTemplateFonts(adminOverrides?.fonts ? undefined : templateId)
   }
 
@@ -140,7 +144,7 @@ export default function TemplateRenderer({ template, isPreview = false, weddingD
   /* createElement — komponent registry-dən (modul səviyyəsində sabit obyekt)
      gəlir, render zamanı yaradılmır; JSX yazılışı linter-i yanlış xəbərdarlığa
      salır, ona görə birbaşa createElement istifadə olunur. */
-  const content = createElement(legacy ? getLegacyComponent(templateId) : getTemplateComponent(templateId), {
+  const content = createElement(legacy ? getLegacyComponent(templateId, weddingData?.templateVersion) : getTemplateComponent(templateId), {
     ...localizedProps,
     isPreview,
   })

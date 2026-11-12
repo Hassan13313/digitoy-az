@@ -10,7 +10,7 @@ import {
 } from '../../data/adminOverrides'
 import { SECTION_DEFS, isSectionOn } from '../../data/sections'
 import { templateCopyFields, templateLabels } from '../../templates/templateCopy'
-import { hasLegacyVersion, TEMPLATE_VERSION_LEGACY } from '../../templates/legacy/registry'
+import { hasLegacyVersion, isFrozenVersion, currentVersionOf, previousVersionOf, TEMPLATE_VERSION_LEGACY } from '../../templates/legacy/registry'
 import OpeningEditor from './content/OpeningEditor'
 import StoryEditor from './content/StoryEditor'
 import PhotosEditor from './content/PhotosEditor'
@@ -144,10 +144,12 @@ export default function AdminContentManager({ slug: slugProp, templateEdit = nul
     return () => { alive = false }
   }, [slug, templateEdit])
 
-  /* Redizayndan əvvəl təsdiqlənmiş dəvətnamə köhnə kodla göstərilir (v1) —
-     onda yeni dizaynın sahələri (copy.js, Royal Gold/Floral rəngləri) işləmir */
-  const legacy = Number(wedding?.templateVersion) === TEMPLATE_VERSION_LEGACY && !!templateId && hasLegacyVersion(templateId)
-  const bespoke = templateId && (BESPOKE_TEMPLATES.has(templateId) || (legacy && LEGACY_BESPOKE.has(templateId)))
+  /* Dizayn yenilənməzdən əvvəl təsdiqlənmiş dəvətnamə dondurulmuş kodla göstərilir
+     (v1, və ya fotolu seriyaya keçmiş şablonun v2-si) — onda yeni dizaynın sahələri
+     (copy.js, «Şəkillər») işləmir */
+  const legacy = !!templateId && isFrozenVersion(templateId, wedding?.templateVersion)
+  const legacyV1 = legacy && Number(wedding?.templateVersion) === TEMPLATE_VERSION_LEGACY
+  const bespoke = templateId && (BESPOKE_TEMPLATES.has(templateId) || (legacyV1 && LEGACY_BESPOKE.has(templateId)))
   /* Şablonun öz sətirləri və bölmə başlıqları (copy.js) — yalnız yeni versiyada */
   const copyFields = useMemo(() => (legacy ? [] : templateCopyFields(templateId, wedding?.eventType)), [templateId, legacy, wedding?.eventType])
   const tplLabels = useMemo(() => (legacy ? null : templateLabels(templateId)), [templateId, legacy])
@@ -505,7 +507,7 @@ export default function AdminContentManager({ slug: slugProp, templateEdit = nul
           Bir dəvətnaməyə xüsusi düzəliş üçün «Dəvətnamələr › Məzmun»-dan istifadə edin. Köhnə dizaynda qalan dəvətnamələrə təsir etmir.
         </Notice>
       ) : templateId && hasLegacyVersion(templateId) ? (
-        <VersionNotice legacy={legacy} state={versionState} setState={setVersionState} onSwitch={switchVersion} />
+        <VersionNotice legacy={legacy} target={legacy ? currentVersionOf(templateId) : previousVersionOf(templateId)} state={versionState} setState={setVersionState} onSwitch={switchVersion} />
       ) : null}
       extraDirty={{
         opening: sameJson(opening, saved.opening) ? 0 : 1,

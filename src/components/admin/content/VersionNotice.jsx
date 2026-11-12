@@ -1,10 +1,9 @@
 import { Button, Notice } from '../v2/adminUi'
-import { TEMPLATE_VERSION_LEGACY, TEMPLATE_VERSION_CURRENT } from '../../../templates/legacy/registry'
 
 /* Şablon versiyası: köhnə dizayndakı dəvətnaməni müştərinin razılığı ilə yeniyə
    keçirmək (və lazım olsa geri qaytarmaq) — iki addımlı təsdiq */
-export default function VersionNotice({ legacy, state, setState, onSwitch }) {
-  const target = legacy ? TEMPLATE_VERSION_CURRENT : TEMPLATE_VERSION_LEGACY
+/* `target` — keçiləcək versiya (legacy/registry.js › currentVersionOf / previousVersionOf) */
+export default function VersionNotice({ legacy, target, state, setState, onSwitch }) {
   const action = legacy ? 'Yeni dizayna keçir' : 'Köhnə dizayna qaytar'
   return (
     <Notice
@@ -13,7 +12,7 @@ export default function VersionNotice({ legacy, state, setState, onSwitch }) {
     >
       <p className="text-[13px] leading-snug">
         {legacy
-          ? 'Müştəri dəvətnaməni premium redizayndan əvvəl təsdiqləyib, ona görə köhnə görünüşdə saxlanılır. Yeni dizayna yalnız müştərinin razılığı ilə keçirin — qonaqlar dəyişikliyi dərhal görəcək.'
+          ? 'Müştəri dəvətnaməni dizayn yenilənməzdən əvvəl təsdiqləyib, ona görə köhnə görünüşdə saxlanılır. Yeni dizayna yalnız müştərinin razılığı ilə keçirin — qonaqlar dəyişikliyi dərhal görəcək.'
           : 'Dəvətnamə yeni dizayndadır. Müştəri köhnə görünüşü istəsə geri qaytarmaq olar.'}
       </p>
       <div className="mt-2 flex flex-wrap items-center gap-2">
