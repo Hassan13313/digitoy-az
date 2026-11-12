@@ -163,7 +163,7 @@ function seoConceptPages(): array {
             'desc' => 'Toy və nişan üçün online dəvətnamə şablonları: lüks, klassik, minimalist və vintage dizaynlar. İştirak Təsdiqi, oturma planı və QR foto paylaşımı ilə. 59 ₼-dan.',
             'h1' => 'Toy və Nişan Dəvətnaməsi',
             'intro' => 'Toy və nişan üçün online dəvətnamə şablonları. Hər dizaynın öz açılışı, şrifti və rəng dili var. Canlı önbaxışa baxın, bəyəndiyinizi seçin, linki qonaqlarınıza WhatsApp ilə göndərin.',
-            'names' => ['Ivory Silk', 'Gəlin', 'İlk Rəqs', 'Bakı Gecəsi', 'Golden Hour', 'Şahdağ', 'Şam və Üzük', 'Royal Palace', 'Oriental Luxe', 'Night Sky', 'Mediterranean', 'Crystal Glass', 'Gazette', 'Simple Luxury', 'Royal Gold', 'Luxury Jewelry', 'Floral Garden', 'White Elegance', 'Nature Touch', 'Vinyl Record', 'Cinema Premiere', 'Boarding Pass', 'Modern Black'],
+            'names' => ['Ivory Silk', 'Bridal Couture', 'İlk Rəqs', 'Şam və Üzük', 'Bakı Gecəsi', 'Golden Hour', 'Alpine Luxe', 'Royal Palace', 'Oriental Luxe', 'Night Sky', 'Mediterranean', 'Crystal Glass', 'Gazette', 'Simple Luxury', 'Royal Gold', 'Luxury Jewelry', 'Floral Garden', 'White Elegance', 'Nature Touch', 'Vinyl Record', 'Cinema Premiere', 'Boarding Pass', 'Modern Black'],
         ],
         'xina-gecesi' => [
             'concept' => 'xina',
@@ -311,7 +311,7 @@ function seoHomeFaq(): array {
 /** Şablon adı → img/templates/<id>.webp (məs. «Mirror & Candle» → mirror-candle, «Kəlağayı» → kelagayi) */
 function seoTemplateSlug(string $name): string {
     /* adı id-dən fərqli yazılan şablonlar (2026-11 toy seriyaları) */
-    $own = ['Şam və Üzük' => 'candle-rings', 'Gəlin' => 'bridal-veil', 'İlk Rəqs' => 'first-dance', 'Bakı Gecəsi' => 'baku-night', 'Şahdağ' => 'shahdag'];
+    $own = ['Şam və Üzük' => 'candle-rings', 'Bridal Couture' => 'bridal-veil', 'İlk Rəqs' => 'first-dance', 'Bakı Gecəsi' => 'baku-night', 'Alpine Luxe' => 'shahdag'];
     if (isset($own[$name])) return $own[$name];
     $t = strtr(mb_strtolower($name, 'UTF-8'), ['ə' => 'e', 'ğ' => 'g', 'ı' => 'i', 'ç' => 'c', 'ş' => 's', 'ö' => 'o', 'ü' => 'u', 'i̇' => 'i']);
     return trim(preg_replace('/[^a-z0-9]+/', '-', $t), '-');

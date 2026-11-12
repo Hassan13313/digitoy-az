@@ -46,7 +46,7 @@ export const FIELDS = [
   ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
   ['scroll', 'hero', 'Örtükdə: «Aşağı sürüşdürün»'],
   ['left', 'countdown', 'Sayğacda: «gün qalıb»'],
-  ['gown', 'countdown', 'Gəlinlik fotosunun üstündəki sətir'],
+  ['gown', 'countdown', 'Gəlin ayaqqabıları və buket fotosunun üstündəki sətir'],
   ['table', 'seating', 'Yer kartında: «nömrəli masa»'],
   ['end', 'guestbook', 'Son kadrdakı sətir'],
 ]

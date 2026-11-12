@@ -245,9 +245,9 @@ export default function IvorySilkTemplate(props) {
             </Panel>
           )}
 
-          {/* Gəlinlik */}
+          {/* Gəlin ayaqqabıları və buket */}
           {P.gown && (<div data-section="photo" style={{ position: 'relative', height: '88svh', minHeight: 520 }}>
-            <Photo src={P.gown} alt="" focus="50% 30%" style={{ position: 'absolute', inset: 0 }}>
+            <Photo src={P.gown} alt="" focus="50% 42%" style={{ position: 'absolute', inset: 0 }}>
               <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,51,39,.4), transparent 40%)' }} />
               <Words text={T.gown} step={0.08} style={{ position: 'absolute', left: 24, right: 24, bottom: 30, textAlign: 'center', fontStyle: 'italic', fontWeight: 200, fontSize: 21, lineHeight: 1.4, color: C.PAPER }} />
             </Photo>
