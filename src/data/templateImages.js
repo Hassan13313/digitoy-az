@@ -86,8 +86,9 @@ export const TEMPLATE_IMAGE_SIZE = { width: 780, height: 1688 }
 
 /* Şəkli EYNİ adla yenilənən şablonlar: şəkillər 1 il keşlənir (.htaccess), sorğu
    parametri olmasa əvvəl baxan brauzer köhnə şəkli göstərərdi. Şəkli dəyişəndə rəqəmi artırın. */
-/* 2026-11-12: Ivory Silk, Bakı Gecəsi, Golden Hour, Şahdağ — yeni üz qabığı (Gəlin üslubu: yuxarıda foto, adlar aşağıda) */
-const IMAGE_REV = { 'candle-rings': 2, 'bridal-veil': 2, 'first-dance': 2, 'ivory-silk': 2, 'baku-night': 2, 'golden-hour': 2, shahdag: 2 }
+/* 2026-11-12: Bakı Gecəsi, Golden Hour, Şahdağ, Şam və Üzük — yeni üz qabığı (Gəlin üslubu: yuxarıda foto, adlar aşağıda).
+   Ivory Silk patch-dəki orijinal kompozisiyadadır (istifadəçi qaytardı), yalnız yazı «Toy mərasiminə dəvət». */
+const IMAGE_REV = { 'ivory-silk': 3, 'candle-rings': 3, 'bridal-veil': 2, 'first-dance': 2, 'baku-night': 2, 'golden-hour': 2, shahdag: 2 }
 
 export function templateImage(id, concept = null) {
   /* Ad günü bölməsindəki versiyanın öz şəkli var — tək nəfərin adı ilə */
