@@ -11,7 +11,9 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { Rise, Stagger, Roll } from '../_shared/viral'
-import { VIRAL_CSS, useInView, coverSpot, vimg } from '../_shared/viralHooks'
+import { VIRAL_CSS, useInView, coverSpot } from '../_shared/viralHooks'
+import { resolvePhotos, isCustomPhoto } from '../templatePhotos'
+import { PHOTOS } from './photos'
 import { C as PAL, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { PaletteContext, resolvePalette, scaleFont } from '../_shared/palette'
@@ -117,18 +119,20 @@ function Twinkles({ imgRef, on }) {
 /* ═══ ÇƏRÇİVƏ: açılış və örtük eyni kadrdır ═══ */
 function Frame({ inv, weddingData, T, C, fonts, kicker, first, second, single, go, gate = false, instant = false }) {
   const { ot } = inv
+  const P = resolvePhotos(PHOTOS, inv.images)
   const img = useRef(null)
   const t = (v) => (instant ? 'none' : v)
   const longest = single || [first, second].sort((a, b) => String(b || '').length - String(a || '').length)[0] || ''
   return (
     <>
-      <img ref={img} src={vimg('baku-1')} alt="" style={{
+      {P.hero && <img ref={img} src={P.hero} alt="" style={{
         position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 50%',
         filter: go ? 'brightness(1) saturate(1)' : 'brightness(.16) saturate(.7)', scale: go ? '1' : '1.12',
         transition: t('filter 3.2s cubic-bezier(.3,0,.2,1), scale 7s cubic-bezier(.2,.6,.2,1)'),
         animation: gate && !go ? 'bn-hold 8s ease-in-out infinite alternate' : undefined,
-      }} />
-      <Twinkles imgRef={img} on={go} />
+      }} />}
+      {/* parıltılar şablonun öz fotosundakı işıqlara bağlıdır — admin şəklində yoxdur */}
+      {P.hero && !isCustomPhoto(inv.images, 'hero') && <Twinkles imgRef={img} on={go} />}
       <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(12,19,34,.55) 0%, rgba(12,19,34,0) 34%, rgba(12,19,34,0) 70%, rgba(12,19,34,.8) 100%)' }} />
 
       <div style={{ position: 'absolute', left: 0, right: 0, top: 'max(10svh, 60px)', padding: '0 26px' }}>
@@ -216,6 +220,7 @@ export default function BakuNightTemplate(props) {
   const body = theme.fonts.body
   const fonts = { head, body }
   const T = inv.copy(TXT)
+  const P = resolvePhotos(PHOTOS, inv.images)
   const [veil] = useState(() => !inv.opened)
   const single = inv.heroTitle || (inv.isCouple ? '' : inv.single)
 
@@ -272,16 +277,16 @@ export default function BakuNightTemplate(props) {
             </Panel>
           )}
 
-          <Dark src={vimg('baku-2')} focus="50% 60%" height="90svh" style={{ minHeight: 540 }}>
+          {P.city && (<Dark src={P.city} focus="50% 60%" height="90svh" style={{ minHeight: 540 }}>
             <Fx style={{ position: 'absolute', left: 26, right: 26, bottom: 30, zIndex: 2, fontFamily: head, fontWeight: 200, fontStyle: 'italic', fontSize: 26, lineHeight: 1.25, textShadow: '0 2px 20px rgba(0,0,0,.5)' }}>{T.city}</Fx>
-          </Dark>
+          </Dark>)}
 
           <StoryBlock inv={inv} templateId={ID} weddingData={weddingData} lang={lang} />
 
           {S.program && (
             <section data-section="program" style={{ background: C.NIGHT, color: C.CHAM }}>
-              <Dark src={vimg('baku-3')} focus="50% 50%" height="78svh" style={{ minHeight: 480 }} />
-              <div style={{ padding: '10px 26px 84px' }}><div style={{ maxWidth: 440, margin: '0 auto' }}>
+              {P.program && <Dark src={P.program} focus="50% 50%" height="78svh" style={{ minHeight: 480 }} />}
+              <div style={{ padding: P.program ? '10px 26px 84px' : '84px 26px' }}><div style={{ maxWidth: 440, margin: '0 auto' }}>
                 {K('program') && <Fx style={{ fontSize: 12, fontWeight: 400, letterSpacing: '.24em', textTransform: 'uppercase', color: C.GOLD }}>{K('program')}</Fx>}
                 <Title head={head} C={C}>{L('program', 'title', timeline.sectionLabel)}</Title>
                 <Stagger step={0.12} style={{ marginTop: 20 }}>
@@ -355,8 +360,8 @@ export default function BakuNightTemplate(props) {
 
           {S.rsvp && (
             <section data-section="rsvp" style={{ background: C.NIGHT, color: C.CHAM }}>
-              <Dark src={vimg('baku-4')} focus="50% 40%" height="70svh" style={{ minHeight: 440 }} />
-              <div style={{ padding: '10px 26px 84px' }}><div style={{ maxWidth: 440, margin: '0 auto' }}>
+              {P.rsvp && <Dark src={P.rsvp} focus="50% 40%" height="70svh" style={{ minHeight: 440 }} />}
+              <div style={{ padding: P.rsvp ? '10px 26px 84px' : '84px 26px' }}><div style={{ maxWidth: 440, margin: '0 auto' }}>
                 <Fx style={{ fontSize: 12, fontWeight: 400, letterSpacing: '.24em', textTransform: 'uppercase', color: C.GOLD }}>{L('rsvp', 'kicker', tr.inv_rsvp)}</Fx>
                 <Title head={head} C={C}>{L('rsvp', 'title', rsvpL.title)}</Title>
                 {rsvpL.subtitle && <Fx as="p" delay={0.18} style={{ margin: '12px 0 22px', maxWidth: '30ch', color: C.MUTE }}>{rsvpL.subtitle}</Fx>}
@@ -401,9 +406,10 @@ export default function BakuNightTemplate(props) {
 function End({ inv, T, C, head }) {
   const [ref, seen] = useInView(0.3)
   const name = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
+  const P = resolvePhotos(PHOTOS, inv.images)
   return (
     <section ref={ref} data-section="finale" style={{ position: 'relative', height: '100svh', minHeight: 620, overflow: 'hidden', background: '#000' }}>
-      <img src={vimg('baku-1')} alt="" loading="lazy" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '62% 52%', transformOrigin: '62% 52%', scale: seen ? '1.25' : '1.5', transition: 'scale 10s cubic-bezier(.2,.6,.2,1)' }} />
+      {P.finale && <img src={P.finale} alt="" loading="lazy" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '62% 52%', transformOrigin: '62% 52%', scale: seen ? '1.25' : '1.5', transition: 'scale 10s cubic-bezier(.2,.6,.2,1)' }} />}
       <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(12,19,34,.7), rgba(12,19,34,.15) 50%, rgba(12,19,34,.85))' }} />
       <div style={{ position: 'absolute', left: 26, right: 26, bottom: '12svh', color: C.CHAM }}>
         <Fx style={{ fontSize: 12.5, fontWeight: 400, letterSpacing: '.24em', textTransform: 'uppercase', color: C.GOLD }}>{T.end}</Fx>

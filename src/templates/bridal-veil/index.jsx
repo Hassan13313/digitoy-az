@@ -11,7 +11,9 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { Words, Letters, Rise, Stagger, Photo, Roll, Burst, Confetti } from '../_shared/viral'
-import { VIRAL_CSS, useInView, vimg } from '../_shared/viralHooks'
+import { VIRAL_CSS, useInView } from '../_shared/viralHooks'
+import { resolvePhotos } from '../templatePhotos'
+import { PHOTOS } from './photos'
 import { C as PAL, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { PaletteContext, resolvePalette, scaleFont } from '../_shared/palette'
@@ -51,6 +53,7 @@ const ph = { position: 'absolute', inset: 0, width: '100%', height: '100%', obje
 
 /* ═══ AÇILIŞ: duvaq qalxır ═══ */
 function VeilOpening({ inv, theme, C, scriptFont, weddingData, T }) {
+  const P = resolvePhotos(PHOTOS, inv.images)
   const { ot } = inv
   const gate = useGate({ inv, ms: OPEN_MS, revealAt: REVEAL_MS })
   if (gate.gone) return null
@@ -62,13 +65,13 @@ function VeilOpening({ inv, theme, C, scriptFont, weddingData, T }) {
       position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: C.AG, color: C.KOMUR,
       fontFamily: theme.fonts.body, animation: go ? `bv-out .9s ease ${(REVEAL_MS + 100) / 1000}s forwards` : undefined,
     }}>
-      <img src={vimg('gelin-2')} alt="" style={{ ...ph, objectPosition: '63% 22%', transformOrigin: '63% 22%', transform: go ? 'scale(1)' : 'scale(1.12)', transition: 'transform 7s cubic-bezier(.2,.6,.2,1)' }} />
-      <img src={vimg('gelin-1')} alt="" style={{ ...ph, objectPosition: '58% 25%', opacity: go ? 1 : 0, transform: go ? 'scale(1)' : 'scale(1.1)', transition: 'opacity 1.4s ease 3.4s, transform 7s cubic-bezier(.2,.6,.2,1) 3.4s' }} />
+      {P.opening && (<img src={P.opening} alt="" style={{ ...ph, objectPosition: '63% 22%', transformOrigin: '63% 22%', transform: go ? 'scale(1)' : 'scale(1.12)', transition: 'transform 7s cubic-bezier(.2,.6,.2,1)' }} />)}
+      {P.hero && (<img src={P.hero} alt="" style={{ ...ph, objectPosition: '58% 25%', opacity: go ? 1 : 0, transform: go ? 'scale(1)' : 'scale(1.1)', transition: 'opacity 1.4s ease 3.4s, transform 7s cubic-bezier(.2,.6,.2,1) 3.4s' }} />)}
       <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(255,255,255,.88))', opacity: go ? 1 : 0, transition: 'opacity 1.6s 1.4s' }} />
 
       {/* duvaq: bulanıq tül + ağ örtük */}
       <div aria-hidden="true" style={{ position: 'absolute', inset: '-8% -4% 0', zIndex: 3, overflow: 'hidden', transform: go ? 'translateY(-108%) scaleY(1.06)' : 'none', opacity: go ? 0 : 1, transition: 'transform 2.6s cubic-bezier(.6,.02,.25,1), opacity 2.4s ease .4s' }}>
-        <img src={vimg('gelin-2')} alt="" style={{ ...ph, objectPosition: '63% 22%', filter: 'blur(18px) brightness(1.25) saturate(.6)', transform: 'scale(1.1)', animation: 'bv-sway 6s ease-in-out infinite' }} />
+        {P.opening && (<img src={P.opening} alt="" style={{ ...ph, objectPosition: '63% 22%', filter: 'blur(18px) brightness(1.25) saturate(.6)', transform: 'scale(1.1)', animation: 'bv-sway 6s ease-in-out infinite' }} />)}
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.5) 60%, rgba(255,255,255,.7))' }} />
       </div>
 
@@ -138,22 +141,27 @@ function BigDay({ date, C, head, fullDate }) {
   )
 }
 
-/* İki kadr, fərqli sürətlə */
-function Pair() {
+/* İki kadr, fərqli sürətlə. Admin birini gizlədəndə digəri tək (enli) göstərilir. */
+function Pair({ P }) {
+  const shots = [[P.pair1, '62% 40%', 0.08], [P.pair2, '58% 38%', 0.2]].filter(([src]) => src)
+  if (!shots.length) return null
+  const two = shots.length > 1
   return (
-    <div data-section="photo" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: '0 10px', background: '#fff' }}>
-      <Photo src={vimg('gelin-4')} focus="62% 40%" par={0.08} style={{ aspectRatio: '3 / 4.6' }} />
-      <Photo src={vimg('gelin-3')} focus="58% 38%" par={0.2} style={{ aspectRatio: '3 / 4.6', marginTop: 60 }} />
+    <div data-section="photo" style={{ display: 'grid', gridTemplateColumns: two ? '1fr 1fr' : '1fr', gap: 10, padding: '0 10px', background: '#fff' }}>
+      {shots.map(([src, focus, par], i) => (
+        <Photo key={i} src={src} focus={focus} par={par} style={{ aspectRatio: two ? '3 / 4.6' : '4 / 5', marginTop: two && i === 1 ? 60 : 0 }} />
+      ))}
     </div>
   )
 }
 
 function End({ inv, C, T, scriptFont }) {
+  const P = resolvePhotos(PHOTOS, inv.images)
   const [ref, seen] = useInView(0.3)
   const names = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   return (
     <section ref={ref} data-section="finale" style={{ position: 'relative', height: '88svh', minHeight: 520, overflow: 'hidden', textAlign: 'center', color: C.KOMUR }}>
-      <Photo src={vimg('gelin-5')} par={0} wipe={false} focus="50% 50%" style={{ position: 'absolute', inset: 0 }} />
+      {P.finale && (<Photo src={P.finale} par={0} wipe={false} focus="50% 50%" style={{ position: 'absolute', inset: 0 }} />)}
       <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'radial-gradient(80% 60% at 50% 50%, rgba(255,255,255,.88), rgba(255,255,255,.35))' }} />
       {seen && <Confetti count={26} loop colors={['#FFFFFF', '#F3F2F0', '#E9DFDA']} alpha={0.85} />}
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '0 20px' }}>
@@ -188,6 +196,7 @@ export default function BridalVeilTemplate(props) {
   const T = inv.copy(TXT)
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const [veil] = useState(() => !inv.opened)
+  const P = resolvePhotos(PHOTOS, inv.images)
 
   return (
     <PaletteContext.Provider value={C}><div data-bv data-vr lang={lang} data-enter={enterDirection(ID)} style={{
@@ -217,7 +226,7 @@ export default function BridalVeilTemplate(props) {
 
           {/* HERO — pəncərə önündə gəlin */}
           <section data-section="hero" style={{ position: 'relative', marginTop: -52, height: '100svh', minHeight: 560, overflow: 'hidden' }}>
-            <Photo src={vimg('gelin-1')} alt="" par={0} wipe={false} focus="58% 25%" style={{ position: 'absolute', inset: 0 }} />
+            {P.hero && (<Photo src={P.hero} alt="" par={0} wipe={false} focus="58% 25%" style={{ position: 'absolute', inset: 0 }} />)}
             <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(255,255,255,.9))' }} />
             <HeroText inv={inv} weddingData={weddingData} T={T} scriptFont={scriptFont} C={C} name={heroName} kicker={L('hero', 'kicker', inv.eventLabel)} instant={veil} />
           </section>
@@ -244,12 +253,12 @@ export default function BridalVeilTemplate(props) {
           )}
 
           {/* Buket */}
-          <div data-section="photo" style={{ position: 'relative', height: '68svh', minHeight: 400 }}>
-            <Photo src={vimg('gelin-3')} alt="" focus="58% 38%" style={{ position: 'absolute', inset: 0 }}>
+          {P.bouquet && (<div data-section="photo" style={{ position: 'relative', height: '68svh', minHeight: 400 }}>
+            <Photo src={P.bouquet} alt="" focus="58% 38%" style={{ position: 'absolute', inset: 0 }}>
               <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(255,255,255,.9), transparent 45%)' }} />
               <Words text={T.bouquet} step={0.08} style={{ position: 'absolute', left: 24, right: 24, bottom: 26, maxWidth: '22ch', fontFamily: head, fontStyle: 'italic', fontSize: 23, lineHeight: 1.35, color: C.KOMUR }} />
             </Photo>
-          </div>
+          </div>)}
 
           <StoryBlock inv={inv} templateId={ID} weddingData={weddingData} lang={lang} />
 
@@ -266,7 +275,7 @@ export default function BridalVeilTemplate(props) {
             </Panel>
           )}
 
-          <Pair />
+          <Pair P={P} />
 
           {S.venue && (
             <Panel section="venue" head={head} C={C} title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
@@ -333,7 +342,7 @@ export default function BridalVeilTemplate(props) {
                   <ReplyForm inv={inv} t={{
                     ink: C.KOMUR, muted: C.BOZ, line: alpha(C.KOMUR, 0.3), hair: alpha(C.KOMUR, 0.1), accent: C.GUL,
                     font: body, display: head, displayItalic: false, btnFont: body, radius: 999,
-                    doneMark: <img src={vimg('gelin-5')} alt="" style={{ width: 92, height: 92, borderRadius: '50%', objectFit: 'cover', margin: '0 auto 14px', display: 'block' }} />,
+                    doneMark: P.rsvpDone ? <img src={P.rsvpDone} alt="" style={{ width: 92, height: 92, borderRadius: '50%', objectFit: 'cover', margin: '0 auto 14px', display: 'block' }} /> : null,
                     marker: (a) => <span style={{ display: 'block', width: 12, height: 12, borderRadius: '50%', background: a ? C.GUL : 'transparent', border: a ? 'none' : `1px solid ${alpha(C.KOMUR, 0.4)}`, transition: 'background .3s' }} />,
                     suggest: { ...suggest(C), font: body },
                   }} />

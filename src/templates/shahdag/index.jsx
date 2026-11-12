@@ -11,7 +11,9 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { Words, Rise, Stagger, Photo, Roll } from '../_shared/viral'
-import { VIRAL_CSS, useInView, coverSpot, reduced, vimg } from '../_shared/viralHooks'
+import { VIRAL_CSS, useInView, coverSpot, reduced } from '../_shared/viralHooks'
+import { resolvePhotos, isCustomPhoto } from '../templatePhotos'
+import { PHOTOS } from './photos'
 import { C as PAL, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { PaletteContext, resolvePalette, scaleFont } from '../_shared/palette'
@@ -112,16 +114,18 @@ function WindowGlow({ imgRef, on, instant }) {
 /* ═══ ÇƏRÇİVƏ: açılış və örtük eyni kadrdır ═══ */
 function Frame({ inv, weddingData, T, C, fonts, kicker, name, go, gate = false, instant = false }) {
   const { ot } = inv
+  const P = resolvePhotos(PHOTOS, inv.images)
   const img = useRef(null)
   const t = (v) => (instant ? 'none' : v)
   return (
     <>
-      <img ref={img} src={vimg('sd-1')} alt="" style={{
+      {P.hero && <img ref={img} src={P.hero} alt="" style={{
         position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 50%',
         filter: go ? 'none' : 'brightness(.62) saturate(.6) hue-rotate(12deg)', scale: go ? '1' : '1.06',
         transition: t('filter 3s cubic-bezier(.3,0,.2,1), scale 7s cubic-bezier(.2,.6,.2,1)'),
-      }} />
-      <WindowGlow imgRef={img} on={go} instant={instant} />
+      }} />}
+      {/* pəncərə işıqları şablonun öz fotosuna bağlıdır — admin şəklində yoxdur */}
+      {P.hero && !isCustomPhoto(inv.images, 'hero') && <WindowGlow imgRef={img} on={go} instant={instant} />}
       <Snow />
       <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(15,23,32,.45) 0%, rgba(15,23,32,0) 30%, rgba(15,23,32,0) 64%, rgba(15,23,32,.75) 100%)' }} />
 
@@ -196,6 +200,7 @@ export default function ShahdagTemplate(props) {
   const body = theme.fonts.body
   const fonts = { head, body }
   const T = inv.copy(TXT)
+  const P = resolvePhotos(PHOTOS, inv.images)
   const [veil] = useState(() => !inv.opened)
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
@@ -250,20 +255,20 @@ export default function ShahdagTemplate(props) {
           )}
 
           {/* Qış buketi */}
-          <div data-section="photo" style={{ position: 'relative', height: '84svh', minHeight: 500 }}>
-            <Photo src={vimg('sd-3')} alt="" focus="50% 35%" style={{ position: 'absolute', inset: 0 }}>
+          {P.bouquet && (<div data-section="photo" style={{ position: 'relative', height: '84svh', minHeight: 500 }}>
+            <Photo src={P.bouquet} alt="" focus="50% 35%" style={{ position: 'absolute', inset: 0 }}>
               <Snow count={36} />
               <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(15,23,32,.6), transparent 45%)' }} />
               <Words text={T.bouquet} step={0.1} style={{ position: 'absolute', left: 24, right: 24, bottom: 30, fontFamily: head, fontSize: 'clamp(24px, 7vw, 30px)', lineHeight: 1.25, letterSpacing: '.03em', color: C.SNOW }} />
             </Photo>
-          </div>
+          </div>)}
 
           <StoryBlock inv={inv} templateId={ID} weddingData={weddingData} lang={lang} />
 
           {S.program && (
             <section data-section="program" style={{ position: 'relative', background: C.NIGHT, color: C.SNOW }}>
-              <Photo src={vimg('sd-2')} alt="" focus="50% 50%" style={{ height: '74svh', minHeight: 440 }} />
-              <div style={{ padding: '12px 26px 80px' }}><div style={{ maxWidth: 440, margin: '0 auto' }}>
+              {P.program && <Photo src={P.program} alt="" focus="50% 50%" style={{ height: '74svh', minHeight: 440 }} />}
+              <div style={{ padding: P.program ? '12px 26px 80px' : '60px 26px 80px' }}><div style={{ maxWidth: 440, margin: '0 auto' }}>
                 <Words as="h2" text={L('program', 'title', timeline.sectionLabel)} style={{ margin: '30px 0 0', fontFamily: head, fontWeight: 400, fontSize: scaleFont('clamp(28px, 8vw, 36px)', C.hs), lineHeight: 1.12, letterSpacing: '.02em' }} />
                 <Rise delay={0.15} aria-hidden="true" style={{ width: 40, height: 2, margin: '18px 0 0', background: C.AMBER }} />
                 <Stagger step={0.12} style={{ marginTop: 20 }}>
@@ -374,9 +379,10 @@ export default function ShahdagTemplate(props) {
 
 function End({ inv, T, C, head, name }) {
   const [ref, seen] = useInView(0.3)
+  const P = resolvePhotos(PHOTOS, inv.images)
   return (
     <section ref={ref} data-section="finale" style={{ position: 'relative', height: '100svh', minHeight: 600, overflow: 'hidden', textAlign: 'center', color: C.SNOW, background: C.NIGHT }}>
-      <Photo src={vimg('sd-4')} par={0} wipe={false} focus="50% 60%" style={{ position: 'absolute', inset: 0 }} />
+      {P.finale && <Photo src={P.finale} par={0} wipe={false} focus="50% 60%" style={{ position: 'absolute', inset: 0 }} />}
       <Snow count={80} />
       <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(15,23,32,.55), rgba(15,23,32,0) 40%)' }} />
       <div style={{ position: 'absolute', left: 0, right: 0, top: '11svh', padding: '0 20px' }}>

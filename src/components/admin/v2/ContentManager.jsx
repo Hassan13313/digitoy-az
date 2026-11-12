@@ -87,6 +87,8 @@ export function diffCount(a, b) {
 export const CONTENT_TABS = [
   { id: 'texts', label: 'Mətnlər', icon: FileText, localized: true },
   { id: 'opening', label: 'Açılış', icon: Sparkles, localized: true },
+  /* Digitoy 2026-11: yalnız şəkil yerləri olan şablonlarda (customTabs.photos verilibsə) */
+  { id: 'photos', label: 'Şəkillər', icon: ImageIcon, optional: true },
   { id: 'story', label: 'Love Story', icon: BookHeart, localized: true },
   { id: 'colors', label: 'Rənglər', icon: Palette },
   { id: 'typography', label: 'Tipoqrafiya', icon: Type },
@@ -140,7 +142,7 @@ const EMBLEM_MODES = [
  * @param {'az'|'en'|'ru'} [p.lang]  @param {(l:string)=>void} [p.onLang]
  * @param {(file:File)=>void} [p.onUploadEmblem]  Açılış nişanı şəkli  @param {number|null} [p.emblemProgress]  0–100
  * @param {(chapterId:string, files:File[])=>void} [p.onUploadStoryImages]  @param {string|null} [p.storyUploadingId]
- * @param {{opening?:import('react').ReactNode,story?:import('react').ReactNode}} [p.customTabs]  Digitoy: tab məzmununu əvəz edir
+ * @param {{opening?:import('react').ReactNode,story?:import('react').ReactNode,photos?:import('react').ReactNode}} [p.customTabs]  Digitoy: tab məzmununu əvəz edir
  * @param {Partial<Record<string,number>>} [p.extraDirty]  Digitoy: customTabs-dakı saxlanmamış dəyişikliklər
  * @param {(sectionId:string)=>void} [p.onFocusSection]  Digitoy: önbaxışı bölməyə sürüşdür
  */
@@ -213,7 +215,8 @@ export default function ContentManager({
   const changed = (path) => !same(get(values, path), get(savedValues, path));
   const set = (path, v) => onChange?.(setIn(values, path, v), path);
   const requestClose = () => (dirty > 0 ? setConfirm('close') : onClose?.());
-  const activeTab = CONTENT_TABS.find((t) => t.id === tab) ?? CONTENT_TABS[0];
+  const tabsShown = CONTENT_TABS.filter((t) => !t.optional || customTabs[t.id]);
+  const activeTab = tabsShown.find((t) => t.id === tab) ?? tabsShown[0];
 
   const ctx = { values, defaults, schema, lang, set, changed, onFocusSection };
 
@@ -300,7 +303,7 @@ export default function ContentManager({
                   value={tab}
                   onChange={setTab}
                   className="border-b-0"
-                  tabs={CONTENT_TABS.map((t) => {
+                  tabs={tabsShown.map((t) => {
                     const n = tabDirty(t.id);
                     return {
                       ...t,
@@ -347,6 +350,7 @@ export default function ContentManager({
                 {topNotice}
                 {tab === 'texts' && <TextsTab {...ctx} />}
                 {tab === 'opening' && customTabs.opening}
+                {tab === 'photos' && customTabs.photos}
                 {tab === 'opening' && !customTabs.opening && (
                   <OpeningTab {...ctx} onUploadEmblem={onUploadEmblem} emblemProgress={emblemProgress} />
                 )}

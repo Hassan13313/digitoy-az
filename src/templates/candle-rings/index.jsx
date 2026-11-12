@@ -11,7 +11,9 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { Words, Letters, Rise, Stagger, Photo, Roll, Dust, Burst, Flicker, Reel } from '../_shared/viral'
-import { VIRAL_CSS, useInView, vimg } from '../_shared/viralHooks'
+import { VIRAL_CSS, useInView } from '../_shared/viralHooks'
+import { resolvePhotos } from '../templatePhotos'
+import { PHOTOS } from './photos'
 import { C as PAL, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { PaletteContext, resolvePalette, scaleFont } from '../_shared/palette'
@@ -56,6 +58,7 @@ const glint = { position: 'absolute', inset: 0, mixBlendMode: 'screen', backgrou
 
 /* ═══ AÇILIŞ: qaranlıq → şamlar alışır → üzüklər ═══ */
 function CandleOpening({ inv, theme, C, scriptFont, weddingData, T }) {
+  const P = resolvePhotos(PHOTOS, inv.images)
   const { ot } = inv
   const gate = useGate({ inv, ms: OPEN_MS, revealAt: REVEAL_MS })
   if (gate.gone) return null
@@ -69,17 +72,17 @@ function CandleOpening({ inv, theme, C, scriptFont, weddingData, T }) {
       fontFamily: theme.fonts.body, animation: go ? `cr-out .9s ease ${(REVEAL_MS + 100) / 1000}s forwards` : undefined,
     }}>
       {/* şamlar: işıq ortadan dairə kimi yayılır */}
-      <img src={vimg('sam-1')} alt="" style={{
+      {P.opening && (<img src={P.opening} alt="" style={{
         ...ph, objectPosition: '50% 40%',
         WebkitMaskImage: 'radial-gradient(circle, #000 35%, transparent 70%)', maskImage: 'radial-gradient(circle, #000 35%, transparent 70%)',
         WebkitMaskRepeat: 'no-repeat', maskRepeat: 'no-repeat', WebkitMaskPosition: '50% 36%', maskPosition: '50% 36%',
         WebkitMaskSize: mask, maskSize: mask,
         filter: go ? 'brightness(1)' : 'brightness(.25)', transform: go ? 'scale(1.08)' : 'scale(1)',
         transition: 'filter 3s cubic-bezier(.3,0,.2,1), -webkit-mask-size 3.4s cubic-bezier(.4,0,.2,1), mask-size 3.4s cubic-bezier(.4,0,.2,1), transform 9s cubic-bezier(.2,.6,.2,1)',
-      }} />
+      }} />)}
       {go && <Flicker at="50% 34%" color="255,180,100" strength={0.42} style={{ opacity: 0, animation: 'vr-up 2s ease 1.2s forwards' }} />}
       {/* üzüklər */}
-      <img src={vimg('sam-2')} alt="" style={{ ...ph, objectPosition: '50% 40%', opacity: go ? 1 : 0, transform: go ? 'scale(1)' : 'scale(1.14)', transition: 'opacity 1.3s ease 3.3s, transform 6s cubic-bezier(.2,.6,.2,1) 3.3s' }} />
+      {P.hero && (<img src={P.hero} alt="" style={{ ...ph, objectPosition: '50% 40%', opacity: go ? 1 : 0, transform: go ? 'scale(1)' : 'scale(1.14)', transition: 'opacity 1.3s ease 3.3s, transform 6s cubic-bezier(.2,.6,.2,1) 3.3s' }} />)}
       <div aria-hidden="true" style={{ ...glint, opacity: go ? 1 : 0, transition: 'opacity 1s 3.8s', animation: go ? 'cr-glint 3.2s ease-in-out 3.9s infinite' : undefined }} />
       <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(8,12,9,.55), rgba(8,12,9,0) 26%, rgba(8,12,9,0) 46%, rgba(8,12,9,.9))', opacity: go ? 1 : 0, transition: 'opacity 2s' }} />
       {go && <Dust count={26} color="255,214,160" alpha={0.55} style={{ opacity: 0, animation: 'vr-up 2s ease 1.8s forwards' }} />}
@@ -157,11 +160,12 @@ function Flame({ events, C, head }) {
 }
 
 function End({ inv, C, T, scriptFont }) {
+  const P = resolvePhotos(PHOTOS, inv.images)
   const [ref, seen] = useInView(0.3)
   const names = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   return (
     <section ref={ref} data-section="finale" style={{ position: 'relative', height: '90svh', minHeight: 540, overflow: 'hidden', textAlign: 'center', color: C.FIL, background: '#000' }}>
-      <Photo src={vimg('sam-1')} par={0} wipe={false} focus="50% 40%" style={{ position: 'absolute', inset: 0 }} />
+      {P.finale && (<Photo src={P.finale} par={0} wipe={false} focus="50% 40%" style={{ position: 'absolute', inset: 0 }} />)}
       <Flicker at="50% 34%" color="255,180,100" strength={0.38} />
       <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(8,12,9,.2), rgba(8,12,9,.75))' }} />
       <Dust count={30} color="255,214,160" alpha={0.55} />
@@ -197,6 +201,7 @@ export default function CandleRingsTemplate(props) {
   const T = inv.copy(TXT)
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const [veil] = useState(() => !inv.opened)
+  const P = resolvePhotos(PHOTOS, inv.images)
 
   return (
     <PaletteContext.Provider value={C}><div data-cr data-vr lang={lang} data-enter={enterDirection(ID)} style={{
@@ -226,7 +231,7 @@ export default function CandleRingsTemplate(props) {
 
           {/* HERO — üzüklər, açılışın son kadrı */}
           <section data-section="hero" style={{ position: 'relative', marginTop: -52, height: '100svh', minHeight: 560, overflow: 'hidden', background: '#000' }}>
-            <Photo src={vimg('sam-2')} alt="" par={0} wipe={false} focus="50% 40%" style={{ position: 'absolute', inset: 0 }} />
+            {P.hero && (<Photo src={P.hero} alt="" par={0} wipe={false} focus="50% 40%" style={{ position: 'absolute', inset: 0 }} />)}
             <div aria-hidden="true" style={{ ...glint, animation: 'cr-glint 5s ease-in-out 1.5s infinite' }} />
             <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(8,12,9,.5), rgba(8,12,9,0) 26%, rgba(8,12,9,0) 46%, rgba(8,12,9,.9))' }} />
             <Dust count={22} color="255,214,160" alpha={0.5} />
@@ -238,11 +243,11 @@ export default function CandleRingsTemplate(props) {
             <div style={{ maxWidth: 480, margin: '0 auto' }}>
               <Words as="p" text={tr.inv_join} step={0.04} style={{ margin: 0, maxWidth: '25ch', fontFamily: head, fontWeight: 300, fontSize: 'clamp(20px, 6vw, 23px)', lineHeight: 1.6 }} />
               {inv.isCorp && weddingData.organizer?.trim() && <Rise style={{ marginTop: 12, fontSize: 15, color: C.KUL }}>{tr.organizer_display}: {weddingData.organizer}</Rise>}
-              <div style={{ position: 'relative', marginTop: 34, height: '58svh', minHeight: 340 }}>
-                <Photo src={vimg('sam-4')} alt="" focus="50% 50%" style={{ position: 'absolute', inset: 0 }}>
+              {P.invite && (<div style={{ position: 'relative', marginTop: 34, height: '58svh', minHeight: 340 }}>
+                <Photo src={P.invite} alt="" focus="50% 50%" style={{ position: 'absolute', inset: 0 }}>
                   <Flicker at="45% 45%" color="255,170,90" strength={0.35} />
                 </Photo>
-              </div>
+              </div>)}
             </div>
           </section>
 
@@ -265,13 +270,13 @@ export default function CandleRingsTemplate(props) {
           )}
 
           {/* Üzüklər — yaşıl zərfin üstündə */}
-          <div data-section="photo" style={{ position: 'relative', height: '66svh', minHeight: 400 }}>
-            <Photo src={vimg('sam-3')} alt="" focus="55% 35%" style={{ position: 'absolute', inset: 0 }}>
+          {P.rings && (<div data-section="photo" style={{ position: 'relative', height: '66svh', minHeight: 400 }}>
+            <Photo src={P.rings} alt="" focus="55% 35%" style={{ position: 'absolute', inset: 0 }}>
               <div aria-hidden="true" style={{ ...glint, animation: 'cr-glint 6s ease-in-out 1s infinite' }} />
               <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(8,12,9,.8), transparent 50%)' }} />
               <Words text={T.rings} step={0.1} style={{ position: 'absolute', left: 24, right: 24, bottom: 26, fontFamily: scriptFont, fontSize: 'clamp(40px, 12vw, 56px)', lineHeight: 1.05, color: C.FIL }} />
             </Photo>
-          </div>
+          </div>)}
 
           <StoryBlock inv={inv} templateId={ID} weddingData={weddingData} lang={lang} />
 
@@ -307,11 +312,11 @@ export default function CandleRingsTemplate(props) {
           )}
 
           {/* Şamlı pilləkən */}
-          <div data-section="photo" style={{ position: 'relative', height: '60svh', minHeight: 360 }}>
-            <Photo src={vimg('sam-5')} alt="" focus="50% 55%" style={{ position: 'absolute', inset: 0 }}>
+          {P.stairs && (<div data-section="photo" style={{ position: 'relative', height: '60svh', minHeight: 360 }}>
+            <Photo src={P.stairs} alt="" focus="50% 55%" style={{ position: 'absolute', inset: 0 }}>
               <Dust count={20} color="255,214,160" alpha={0.5} />
             </Photo>
-          </div>
+          </div>)}
 
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} C={C} title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>

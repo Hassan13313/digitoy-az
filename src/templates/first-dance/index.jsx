@@ -11,7 +11,9 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { Words, Letters, Rise, Stagger, Photo, Roll, Dust, Burst, Sparks, Confetti } from '../_shared/viral'
-import { VIRAL_CSS, coverSpot, useInView, vimg } from '../_shared/viralHooks'
+import { VIRAL_CSS, coverSpot, useInView } from '../_shared/viralHooks'
+import { resolvePhotos, isCustomPhoto } from '../templatePhotos'
+import { PHOTOS } from './photos'
 import { C as PAL, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { PaletteContext, resolvePalette, scaleFont } from '../_shared/palette'
@@ -56,6 +58,7 @@ const CONF = ['#F5C66B', '#EAD7B7', '#FFFFFF', '#C98B8B']
 
 /* ═══ AÇILIŞ: fişənglər yanır → konfetili rəqs ═══ */
 function SparklerOpening({ inv, theme, C, scriptFont, weddingData, T, head }) {
+  const P = resolvePhotos(PHOTOS, inv.images)
   const { ot } = inv
   const gate = useGate({ inv, ms: OPEN_MS, revealAt: REVEAL_MS })
   const img = useRef(null)
@@ -74,9 +77,9 @@ function SparklerOpening({ inv, theme, C, scriptFont, weddingData, T, head }) {
       position: 'fixed', inset: 0, zIndex: 120, cursor: 'pointer', overflow: 'hidden', background: '#000', color: C.SAMPAN,
       fontFamily: theme.fonts.body, animation: go ? `fd-out .9s ease ${(REVEAL_MS + 100) / 1000}s forwards` : undefined,
     }}>
-      <img ref={img} src={vimg('reqs-1')} alt="" style={{ ...ph, objectPosition: '50% 45%', filter: go ? 'brightness(1.15)' : 'brightness(.18)', transform: go ? 'scale(1)' : 'scale(1.06)', transition: 'filter 2.4s cubic-bezier(.3,0,.2,1), transform 6s cubic-bezier(.2,.6,.2,1)' }} />
-      {go && !cut && <Sparks at={() => [coverSpot(img.current, SPARK[0], SPARK[1])]} rate={7} speed={4.2} />}
-      <img src={vimg('reqs-3')} alt="" style={{ ...ph, objectPosition: '50% 40%', opacity: cut ? 1 : 0, transform: cut ? 'scale(1)' : 'scale(1.12)', transition: 'opacity .25s ease, transform 6s cubic-bezier(.2,.6,.2,1)' }} />
+      {P.opening && (<img ref={img} src={P.opening} alt="" style={{ ...ph, objectPosition: '50% 45%', filter: go ? 'brightness(1.15)' : 'brightness(.18)', transform: go ? 'scale(1)' : 'scale(1.06)', transition: 'filter 2.4s cubic-bezier(.3,0,.2,1), transform 6s cubic-bezier(.2,.6,.2,1)' }} />)}
+      {go && !cut && !isCustomPhoto(inv.images, 'opening') && <Sparks at={() => [coverSpot(img.current, SPARK[0], SPARK[1])]} rate={7} speed={4.2} />}
+      {P.hero && (<img src={P.hero} alt="" style={{ ...ph, objectPosition: '50% 40%', opacity: cut ? 1 : 0, transform: cut ? 'scale(1)' : 'scale(1.12)', transition: 'opacity .25s ease, transform 6s cubic-bezier(.2,.6,.2,1)' }} />)}
       {cut && <Confetti count={70} loop colors={CONF} />}
       <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: '#fff3d6', opacity: 0, animation: cut ? 'vr-flash 1s ease' : undefined }} />
       <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(18,14,22,.5), rgba(18,14,22,0) 28%, rgba(18,14,22,0) 50%, rgba(18,14,22,.9))', opacity: go ? 1 : 0, transition: 'opacity 2s' }} />
@@ -143,13 +146,14 @@ function Band({ src, focus, height = '64svh', children, confetti = false }) {
 }
 
 function End({ inv, C, T, scriptFont }) {
+  const P = resolvePhotos(PHOTOS, inv.images)
   const [ref, seen] = useInView(0.3)
   const img = useRef(null)
   const names = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   return (
     <section ref={ref} data-section="finale" style={{ position: 'relative', height: '90svh', minHeight: 540, overflow: 'hidden', textAlign: 'center', color: C.SAMPAN, background: '#000' }}>
-      <img ref={img} src={vimg('reqs-1')} alt="" loading="lazy" style={{ ...ph, objectPosition: '50% 45%', filter: 'brightness(.9)' }} />
-      {seen && <Sparks at={() => [coverSpot(img.current, SPARK[0], SPARK[1])]} rate={4} speed={3.2} />}
+      {P.finale && (<img ref={img} src={P.finale} alt="" loading="lazy" style={{ ...ph, objectPosition: '50% 45%', filter: 'brightness(.9)' }} />)}
+      {seen && !isCustomPhoto(inv.images, 'finale') && <Sparks at={() => [coverSpot(img.current, SPARK[0], SPARK[1])]} rate={4} speed={3.2} />}
       <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(18,14,22,.1) 40%, rgba(18,14,22,.88))' }} />
       <div style={{ position: 'absolute', left: 0, right: 0, bottom: '12%', padding: '0 20px' }}>
         <Words text={T.end} style={{ fontSize: 16, letterSpacing: '.06em', color: C.FISHENG }} />
@@ -183,6 +187,7 @@ export default function FirstDanceTemplate(props) {
   const T = inv.copy(TXT)
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
   const [veil] = useState(() => !inv.opened)
+  const P = resolvePhotos(PHOTOS, inv.images)
 
   return (
     <PaletteContext.Provider value={C}><div data-fd data-vr lang={lang} data-enter={enterDirection(ID)} style={{
@@ -212,7 +217,7 @@ export default function FirstDanceTemplate(props) {
 
           {/* HERO — konfetili rəqs, açılışın son kadrı */}
           <section data-section="hero" style={{ position: 'relative', marginTop: -52, height: '100svh', minHeight: 560, overflow: 'hidden', background: '#000' }}>
-            <Photo src={vimg('reqs-3')} alt="" par={0} wipe={false} focus="50% 40%" style={{ position: 'absolute', inset: 0 }} />
+            {P.hero && (<Photo src={P.hero} alt="" par={0} wipe={false} focus="50% 40%" style={{ position: 'absolute', inset: 0 }} />)}
             <Confetti count={46} loop colors={CONF} alpha={0.85} />
             <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(18,14,22,.45), rgba(18,14,22,0) 28%, rgba(18,14,22,0) 50%, rgba(18,14,22,.9))' }} />
             <HeroText inv={inv} weddingData={weddingData} T={T} scriptFont={scriptFont} C={C} head={head} name={heroName} kicker={L('hero', 'kicker', inv.eventLabel)} instant={veil} />
@@ -243,10 +248,10 @@ export default function FirstDanceTemplate(props) {
           )}
 
           {/* Ağ-qara fişəngli rəqs */}
-          <Band src={vimg('reqs-2')} focus="50% 45%" height="70svh">
+          {P.dance && (<Band src={P.dance} focus="50% 45%" height="70svh">
             <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(18,14,22,.85), transparent 50%)' }} />
             <Words text={T.dance} step={0.1} style={{ position: 'absolute', left: 24, right: 24, bottom: 28, maxWidth: '18ch', fontFamily: scriptFont, fontSize: 'clamp(40px, 11.5vw, 54px)', lineHeight: 1.1, color: '#FFF6E6' }} />
-          </Band>
+          </Band>)}
 
           <StoryBlock inv={inv} templateId={ID} weddingData={weddingData} lang={lang} />
 
@@ -267,9 +272,9 @@ export default function FirstDanceTemplate(props) {
           )}
 
           {/* Çilçıraq altında yavaş rəqs */}
-          <Band src={vimg('reqs-5')} focus="50% 30%" height="66svh">
+          {P.chandelier && (<Band src={P.chandelier} focus="50% 30%" height="66svh">
             <Dust count={22} color="255,240,210" alpha={0.5} />
-          </Band>
+          </Band>)}
 
           {S.venue && (
             <Panel section="venue" head={head} C={C} alt title={L('venue', 'title', tr.inv_location)} kicker={K('venue')}>
@@ -296,7 +301,7 @@ export default function FirstDanceTemplate(props) {
             </Panel>
           )}
 
-          <Band src={vimg('reqs-4')} focus="50% 30%" height="64svh" confetti />
+          {P.party && (<Band src={P.party} focus="50% 30%" height="64svh" confetti />)}
 
           {S.seating && !seating.isEmpty && (
             <Panel section="seating" head={head} C={C} alt center title={L('seating', 'title', seatingL.title)} kicker={K('seating')} sub={seatingL.sub}>

@@ -100,6 +100,7 @@ adminAuditLog('template_content_update', $key, json_encode([
     'strings'  => isset($clean['strings']) ? count($clean['strings']) : 0,
     'opening'  => isset($clean['opening']),
     'story'    => isset($clean['story']),
+    'images'   => isset($clean['images']),
     'sections' => $sections !== null,
 ], JSON_UNESCAPED_UNICODE));
 

@@ -115,5 +115,25 @@ check('etibarsız id əvəzlənir', ($s['add'][1]['id'] ?? null) === 'adm_1');
 $many = array_fill(0, 30, ['title' => ['az' => 'x']]);
 check('ən çox 12 yeni fəsil', count(acrStory(['add' => $many])['add']) === 12);
 
+echo "\nşəkil yerləri (2026-11)\n";
+$img = '/uploads/_admin/tpl-candle-rings/0123456789abcdef0123.jpg';
+check('null → null', acrImages(null) === null);
+check('boş → null', acrImages([]) === null);
+check('gizlət saxlanılır', acrImages(['hero' => ['hide' => true]]) === ['hero' => ['hide' => true]]);
+check('«orijinal foto» (hide:false) saxlanılır', acrImages(['hero' => ['hide' => false]]) === ['hero' => ['hide' => false]]);
+check('admin şəkli saxlanılır', acrImages(['finale' => ['src' => $img]]) === ['finale' => ['src' => $img]]);
+check('başqa host rədd', acrImages(['hero' => ['src' => 'https://evil.example/x.jpg']]) === null);
+check('../ rədd', acrImages(['hero' => ['src' => '/uploads/_admin/../config.php']]) === null);
+check('data: rədd', acrImages(['hero' => ['src' => 'data:image/png;base64,AAAA']]) === null);
+check('şablonun öz fotosu (img/) yazılmır', acrImages(['hero' => ['src' => '/img/wedding/viral/sam-1.webp']]) === null);
+check('"true" sətri gizlətmə deyil', acrImages(['hero' => ['hide' => 'true']]) === null);
+check('etibarsız açar atılır', acrImages(['<x>' => ['hide' => true], 'Hero' => ['hide' => true], 'ok' => ['hide' => true]]) === ['ok' => ['hide' => true]]);
+check('massiv olmayan dəyər atılır', acrImages(['hero' => 'gizlət']) === null);
+$many = []; for ($i = 0; $i < 60; $i++) $many["s$i"] = ['hide' => true];
+check('ən çox 40 yer', count(acrImages($many)) === 40);
+$all = acrCleanOverrides(['images' => ['hero' => ['hide' => true], 'bad key' => ['hide' => true]]]);
+check('acrCleanOverrides images-i saxlayır', ($all['images'] ?? null) === ['hero' => ['hide' => true]], json_encode($all));
+check('acrCleanOverrides boş images yazmır', !isset(acrCleanOverrides(['images' => ['x' => []]])['images']));
+
 echo "\n$pass keçdi, $fail uğursuz\n";
 exit($fail ? 1 : 0);

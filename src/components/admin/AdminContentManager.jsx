@@ -13,6 +13,8 @@ import { templateCopyFields, templateLabels } from '../../templates/templateCopy
 import { hasLegacyVersion, TEMPLATE_VERSION_LEGACY } from '../../templates/legacy/registry'
 import OpeningEditor from './content/OpeningEditor'
 import StoryEditor from './content/StoryEditor'
+import PhotosEditor from './content/PhotosEditor'
+import { templatePhotoSlots } from '../../templates/templatePhotos'
 import VersionNotice from './content/VersionNotice'
 import { SHADOWED_TITLE, sectionTitleDefault, sectionKickerDefault } from './content/textDefaults'
 import translations from '../../data/translations'
@@ -97,8 +99,10 @@ export default function AdminContentManager({ slug: slugProp, templateEdit = nul
   const [sections, setSections] = useState({})
   const [opening, setOpening]   = useState({})
   const [story, setStory]       = useState({})
+  /* Şəkil yerləri (2026-11) — yalnız foto ilə qurulmuş şablonlarda, bax templates/templatePhotos.js */
+  const [images, setImages]     = useState({})
   /* Son saxlanmış vəziyyət — «dəyişib» nişanları üçün */
-  const [saved, setSaved] = useState({ theme: {}, fonts: {}, labels: {}, strings: {}, sections: {}, opening: {}, story: {} })
+  const [saved, setSaved] = useState({ theme: {}, fonts: {}, labels: {}, strings: {}, sections: {}, opening: {}, story: {}, images: {} })
 
   const [wedding, setWedding]     = useState(null)
   const [templateId, setTemplate] = useState(null)
@@ -122,10 +126,10 @@ export default function AdminContentManager({ slug: slugProp, templateEdit = nul
         const a = content.admin || {}
         const snap = {
           theme: a.theme || {}, fonts: a.fonts || {}, labels: a.labels || {}, strings: a.strings || {},
-          opening: a.opening || {}, story: a.story || {}, sections: content.sections || {},
+          opening: a.opening || {}, story: a.story || {}, images: a.images || {}, sections: content.sections || {},
         }
         setTheme(snap.theme); setFonts(snap.fonts); setLabels(snap.labels); setStrings(snap.strings)
-        setOpening(snap.opening); setStory(snap.story); setSections(snap.sections)
+        setOpening(snap.opening); setStory(snap.story); setImages(snap.images); setSections(snap.sections)
         setSaved(snap)
         /* ⚠ `getInvitation` `{ data, active }` qaytarır; şablon id-si content endpoint-indən */
         const invData = inv?.data || null
@@ -172,8 +176,9 @@ export default function AdminContentManager({ slug: slugProp, templateEdit = nul
     if (!isEmptyObj(strings)) admin.strings = strings
     if (!isEmptyObj(opening)) admin.opening = opening
     if (!isEmptyObj(story))   admin.story   = story
+    if (!isEmptyObj(images))  admin.images  = images
     return admin
-  }, [theme, fonts, labels, strings, opening, story])
+  }, [theme, fonts, labels, strings, opening, story, images])
 
   const previewData = useMemo(() => {
     if (!wedding) return null
@@ -437,7 +442,7 @@ export default function AdminContentManager({ slug: slugProp, templateEdit = nul
       const res = templateEdit
         ? await saveTemplateContent(templateEdit.key, admin, sections)
         : await saveInvitationContent(slug, admin, sections)
-      setSaved({ theme, fonts, labels, strings, sections, opening, story })
+      setSaved({ theme, fonts, labels, strings, sections, opening, story, images })
       setSaveState('saved')
       onSaved?.(res)
     } catch (e) {
@@ -449,7 +454,7 @@ export default function AdminContentManager({ slug: slugProp, templateEdit = nul
   /* Bölmə görünürlüyü sıfırlanmır (köhnə davranış) */
   const resetAll = () => {
     setSaveState('idle')
-    setTheme({}); setFonts({}); setLabels({}); setStrings({}); setOpening({}); setStory({})
+    setTheme({}); setFonts({}); setLabels({}); setStrings({}); setOpening({}); setStory({}); setImages({})
     /* Şablon səviyyəsində «sıfırla» = şablon tam öz halına qayıdır */
     if (templateEdit) setSections({})
   }
@@ -457,6 +462,8 @@ export default function AdminContentManager({ slug: slugProp, templateEdit = nul
   /* ── Phase 45: açılış ekranı və «Bizim Hekayəmiz» ── */
   const effectiveSections = !isEmptyObj(sections) ? sections : (wedding?.sections || {})
   const storyOn = isSectionOn({ sections: effectiveSections }, 'lovestory')
+  /* Köhnə versiyada (v1) şəkil yerləri yoxdur */
+  const hasPhotos = !legacy && templatePhotoSlots(templateId).length > 0
 
   if (loading || loadError) {
     return (
@@ -503,8 +510,20 @@ export default function AdminContentManager({ slug: slugProp, templateEdit = nul
       extraDirty={{
         opening: sameJson(opening, saved.opening) ? 0 : 1,
         story: sameJson(story, saved.story) ? 0 : 1,
+        photos: sameJson(images, saved.images) ? 0 : 1,
       }}
       customTabs={{
+        ...(hasPhotos ? {
+          photos: (
+            <PhotosEditor
+              templateId={templateId} images={images}
+              setImages={(fn) => { setSaveState('idle'); setImages(fn) }}
+              inherited={wedding?.templateDefaults?.admin?.images || null}
+              slug={slug} narrow={isNarrow} templateMode={!!templateEdit}
+              onFocusPreview={focusSection}
+            />
+          ),
+        } : {}),
         opening: (
           <>
             <div className="flex justify-end">

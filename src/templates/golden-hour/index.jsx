@@ -11,7 +11,9 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { Words, Rise, Stagger, Photo, Roll, Dust } from '../_shared/viral'
-import { VIRAL_CSS, useInView, coverSpot, vimg } from '../_shared/viralHooks'
+import { VIRAL_CSS, useInView, coverSpot } from '../_shared/viralHooks'
+import { resolvePhotos, isCustomPhoto } from '../templatePhotos'
+import { PHOTOS } from './photos'
 import { C as PAL, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { PaletteContext, resolvePalette, scaleFont } from '../_shared/palette'
@@ -72,20 +74,23 @@ const REVEAL_MS = 3500
 /* ═══ ÇƏRÇİVƏ: açılış və örtük eyni kadrdır ═══ */
 function Frame({ inv, weddingData, T, C, fonts, kicker, name, go, gate = false, instant = false }) {
   const { ot } = inv
+  const P = resolvePhotos(PHOTOS, inv.images)
+  /* günəş şablonun öz fotosundakı tağa bağlıdır — admin şəklində yoxdur */
+  const sun = !!P.hero && !isCustomPhoto(inv.images, 'hero')
   const img = useRef(null)
   const [sx, sy] = useSpot(img, SUN[0], SUN[1])
   const t = (v) => (instant ? 'none' : v)
   return (
     <>
-      <img ref={img} src={vimg('gh-1')} alt="" style={{
+      {P.hero && <img ref={img} src={P.hero} alt="" style={{
         position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 50%',
         filter: go ? 'none' : 'saturate(.55) brightness(.82) contrast(.95)', scale: go ? '1' : '1.07',
         transition: t('filter 3s cubic-bezier(.3,0,.2,1), scale 7s cubic-bezier(.2,.6,.2,1)'),
-      }} />
+      }} />}
       {/* günəş: tağın arxasında parlayır */}
-      <div aria-hidden="true" style={{ position: 'absolute', left: `${sx * 100}%`, top: `${sy * 100}%`, width: '150vmax', height: '150vmax', margin: '-75vmax 0 0 -75vmax', mixBlendMode: 'screen',
+      {sun && <div aria-hidden="true" style={{ position: 'absolute', left: `${sx * 100}%`, top: `${sy * 100}%`, width: '150vmax', height: '150vmax', margin: '-75vmax 0 0 -75vmax', mixBlendMode: 'screen',
         background: 'radial-gradient(circle, rgba(255,236,200,.95) 0, rgba(255,190,120,.55) 6%, rgba(255,160,90,.18) 22%, rgba(255,140,80,0) 45%)',
-        opacity: go ? 1 : 0, animation: go && !instant ? 'gh-bloom 2.6s cubic-bezier(.2,.7,.2,1) .2s both, gh-breathe 6s ease-in-out 3s infinite' : (go ? 'gh-breathe 6s ease-in-out infinite' : undefined) }} />
+        opacity: go ? 1 : 0, animation: go && !instant ? 'gh-bloom 2.6s cubic-bezier(.2,.7,.2,1) .2s both, gh-breathe 6s ease-in-out 3s infinite' : (go ? 'gh-breathe 6s ease-in-out infinite' : undefined) }} />}
       {go && <Dust count={28} color="255,214,160" alpha={0.55} rise={0.15} />}
       <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${alpha(C.CREAM, 0.82)} 0%, ${alpha(C.CREAM, 0.5)} 22%, ${alpha(C.CREAM, 0)} 40%, ${alpha(C.CREAM, 0)} 68%, ${alpha(C.INK, 0.6)} 100%)` }} />
 
@@ -179,6 +184,7 @@ export default function GoldenHourTemplate(props) {
   const body = theme.fonts.body
   const fonts = { head, body, script: theme.fonts.script || BASE.fonts.script }
   const T = inv.copy(TXT)
+  const P = resolvePhotos(PHOTOS, inv.images)
   const [veil] = useState(() => !inv.opened)
   const heroName = inv.heroTitle || (inv.isCouple ? `${inv.groom} ${inv.and} ${inv.bride}` : inv.single)
 
@@ -229,12 +235,12 @@ export default function GoldenHourTemplate(props) {
           )}
 
           {/* Buket */}
-          <div data-section="photo" style={{ position: 'relative', height: '84svh', minHeight: 500 }}>
-            <Photo src={vimg('gh-3')} alt="" focus="55% 35%" style={{ position: 'absolute', inset: 0 }}>
+          {P.bouquet && (<div data-section="photo" style={{ position: 'relative', height: '84svh', minHeight: 500 }}>
+            <Photo src={P.bouquet} alt="" focus="55% 35%" style={{ position: 'absolute', inset: 0 }}>
               <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(58,42,34,.6), transparent 45%)' }} />
               <Words text={T.bouquet} step={0.1} style={{ position: 'absolute', left: 24, right: 24, bottom: 34, textAlign: 'center', fontFamily: fonts.script, fontSize: 'clamp(40px, 12vw, 56px)', lineHeight: 1.1, color: '#FFF6EC' }} />
             </Photo>
-          </div>
+          </div>)}
 
           <StoryBlock inv={inv} templateId={ID} weddingData={weddingData} lang={lang} />
 
@@ -256,9 +262,9 @@ export default function GoldenHourTemplate(props) {
           )}
 
           {/* Zeytun ağacları altında süfrə */}
-          <div data-section="photo" style={{ position: 'relative', height: '78svh', minHeight: 460 }}>
-            <Photo src={vimg('gh-2')} alt="" focus="50% 55%" style={{ position: 'absolute', inset: 0 }} />
-          </div>
+          {P.table && (<div data-section="photo" style={{ position: 'relative', height: '78svh', minHeight: 460 }}>
+            <Photo src={P.table} alt="" focus="50% 55%" style={{ position: 'absolute', inset: 0 }} />
+          </div>)}
 
           {S.venue && (
             <Panel section="venue" head={head} C={C} title={L('venue', 'title', tr.inv_location)}>
@@ -358,9 +364,10 @@ export default function GoldenHourTemplate(props) {
 
 function End({ inv, T, C, fonts, name }) {
   const [ref, seen] = useInView(0.3)
+  const P = resolvePhotos(PHOTOS, inv.images)
   return (
     <section ref={ref} data-section="finale" style={{ position: 'relative', height: '100svh', minHeight: 600, overflow: 'hidden', textAlign: 'center', color: C.INK }}>
-      <Photo src={vimg('gh-4')} par={0} wipe={false} focus="45% 50%" style={{ position: 'absolute', inset: 0 }} />
+      {P.finale && <Photo src={P.finale} par={0} wipe={false} focus="45% 50%" style={{ position: 'absolute', inset: 0 }} />}
       <Dust count={24} color="255,220,170" alpha={0.5} rise={0.15} />
       <div style={{ position: 'absolute', left: 0, right: 0, top: '11svh', padding: '0 20px' }}>
         <div style={{ fontSize: 16, opacity: seen ? 1 : 0, transition: 'opacity 1.2s .2s' }}>{T.end}</div>

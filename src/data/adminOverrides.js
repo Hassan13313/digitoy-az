@@ -29,6 +29,7 @@
 import { FONT_STACKS } from '../templates/templateConfig.js'
 import { OPENING_SLOT_LABELS } from '../templates/_shared/openingSpec.js'
 import { TEMPLATE_COPY_KEYS } from '../templates/templateCopy.js'
+import { TEMPLATE_PHOTO_KEYS } from '../templates/templatePhotos.js'
 
 /* Admin-in dəyişə bildiyi theme token-ləri (PART 4).
    ⚠ Bu siyahı QƏSDƏN dardır: `surface`, `muted`, `footerBg` kimi törəmə
@@ -336,6 +337,28 @@ export function normalizeOpening(raw) {
    saxlamırıq, Phase 43-ün data URI şəkilləri də belə qorunur), sətir = yeni
    yüklənmiş şəklin ünvanı.
    ⚠ `date`/`icon` üçün `false` = «müştərininkini gizlət». */
+/* ── Şablonun şəkil yerləri (2026-11, bax templates/templatePhotos.js) ──
+   { <açar>: { hide: true } | { src } | { hide: false } } — açar yalnız şablonların PHOTOS siyahısından,
+   şəkil yalnız serverin öz admin yükləməsi. Server tərəfi: admin_content_rules.php › acrImages. */
+export const IMAGES_MAX = 40
+
+export function normalizeImages(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null
+  const out = {}
+  for (const [key, val] of Object.entries(raw)) {
+    if (Object.keys(out).length >= IMAGES_MAX) break
+    if (!TEMPLATE_PHOTO_KEYS.has(key) || !val || typeof val !== 'object') continue
+    if (val.hide === true) out[key] = { hide: true }
+    /* dəvətnamədə «şablonun öz fotosu» — şablon səviyyəsindəki gizlətməni/şəkli ləğv edir */
+    else if (val.hide === false && !val.src) out[key] = { hide: false }
+    else {
+      const src = safeAdminImage(val.src)
+      if (src) out[key] = { src }
+    }
+  }
+  return Object.keys(out).length ? out : null
+}
+
 export const STORY_TEXT_KEYS = ['kicker', 'title', 'sub', 'next', 'end', 'endSub', 'kpre', 'photo']
 export const STORY_MAX_CHAPTERS = 12
 export const STORY_MAX_PHOTOS = 6
@@ -498,6 +521,8 @@ export function normalizeOverrides(raw) {
   if (opening) out.opening = opening
   const story = normalizeStory(raw.story)
   if (story) out.story = story
+  const images = normalizeImages(raw.images)
+  if (images) out.images = images
 
   return Object.keys(out).length ? out : null
 }
@@ -707,6 +732,8 @@ export function mergeTemplateDefaults(tpl, inv) {
   const out = { ...own }
   if (tpl.theme) out.theme = { ...tpl.theme, ...own.theme }
   if (tpl.fonts) out.fonts = { ...tpl.fonts, ...own.fonts }
+  /* Şəkil yeri bütövlükdə əvəz olunur: dəvətnamədəki seçim şablonunkundan üstündür */
+  if (tpl.images) out.images = { ...tpl.images, ...own.images }
   if (tpl.strings) {
     out.strings = { ...tpl.strings }
     for (const [k, v] of Object.entries(own.strings || {})) out.strings[k] = { ...tpl.strings[k], ...v }

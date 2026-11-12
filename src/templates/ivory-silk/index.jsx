@@ -11,7 +11,9 @@ import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shar
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
 import { Words, Rise, Stagger, Photo, Roll } from '../_shared/viral'
-import { VIRAL_CSS, useInView, vimg } from '../_shared/viralHooks'
+import { VIRAL_CSS, useInView } from '../_shared/viralHooks'
+import { resolvePhotos } from '../templatePhotos'
+import { PHOTOS } from './photos'
 import { C as PAL, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { PaletteContext, resolvePalette, scaleFont } from '../_shared/palette'
@@ -89,11 +91,12 @@ function Names({ first, second, and, single, C, script, size }) {
 /* ═══ ÇƏRÇİVƏ: açılış və örtük eyni kadrdır ═══ */
 function Frame({ inv, weddingData, T, C, fonts, kicker, first, second, single, go, gate = false, instant = false }) {
   const { ot } = inv
+  const P = resolvePhotos(PHOTOS, inv.images)
   const t = (v) => (instant ? 'none' : v)
   const longest = single || [first, second].sort((a, b) => String(b || '').length - String(a || '').length)[0] || ''
   return (
     <>
-      <img src={vimg('ivory-1')} alt="" style={{ ...ph, scale: go ? '1' : '1.08', transition: t('scale 6s cubic-bezier(.2,.6,.2,1)'), animation: gate && !go ? 'iv-breathe 9s ease-in-out infinite alternate' : undefined }} />
+      {P.hero && <img src={P.hero} alt="" style={{ ...ph, scale: go ? '1' : '1.08', transition: t('scale 6s cubic-bezier(.2,.6,.2,1)'), animation: gate && !go ? 'iv-breathe 9s ease-in-out infinite alternate' : undefined }} />}
       <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${alpha(C.SILK, 0.8)} 0%, ${alpha(C.SILK, 0.35)} 30%, ${alpha(C.SILK, 0)} 46%)` }} />
       {go && !instant && <div aria-hidden="true" style={{ position: 'absolute', inset: '-20% -60%', mixBlendMode: 'soft-light', background: 'linear-gradient(105deg, transparent 42%, rgba(255,250,238,.6) 50%, transparent 58%)', translate: '-70% 0', animation: 'iv-sweep 3.2s cubic-bezier(.45,0,.2,1) .15s both' }} />}
 
@@ -184,6 +187,7 @@ export default function IvorySilkTemplate(props) {
   const [veil] = useState(() => !inv.opened)
   const single = inv.heroTitle || (inv.isCouple ? '' : inv.single)
   const kicker = L('hero', 'kicker', inv.ot.text('kicker'))
+  const P = resolvePhotos(PHOTOS, inv.images)
 
   return (
     <PaletteContext.Provider value={C}><div data-iv data-vr lang={lang} data-enter={enterDirection(ID)} style={{
@@ -242,20 +246,20 @@ export default function IvorySilkTemplate(props) {
           )}
 
           {/* Gəlinlik */}
-          <div data-section="photo" style={{ position: 'relative', height: '88svh', minHeight: 520 }}>
-            <Photo src={vimg('ivory-2')} alt="" focus="50% 30%" style={{ position: 'absolute', inset: 0 }}>
+          {P.gown && (<div data-section="photo" style={{ position: 'relative', height: '88svh', minHeight: 520 }}>
+            <Photo src={P.gown} alt="" focus="50% 30%" style={{ position: 'absolute', inset: 0 }}>
               <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,51,39,.4), transparent 40%)' }} />
               <Words text={T.gown} step={0.08} style={{ position: 'absolute', left: 24, right: 24, bottom: 30, textAlign: 'center', fontStyle: 'italic', fontWeight: 200, fontSize: 21, lineHeight: 1.4, color: C.PAPER }} />
             </Photo>
-          </div>
+          </div>)}
 
           <StoryBlock inv={inv} templateId={ID} weddingData={weddingData} lang={lang} />
 
           {/* PROQRAM — masa fotosunun üstündə menyu kartı */}
           {S.program && (
             <section data-section="program" style={{ position: 'relative', paddingBottom: 76, background: C.SILK }}>
-              <Photo src={vimg('ivory-3')} alt="" focus="50% 50%" style={{ height: '62svh', minHeight: 380 }} />
-              <div style={{ position: 'relative', zIndex: 2, maxWidth: 420, margin: '-90px 22px 0', marginInline: 'max(22px, calc(50% - 210px))', padding: '46px 26px 40px', background: C.PAPER, textAlign: 'center', boxShadow: `0 30px 60px -40px ${alpha(C.INK, 0.5)}` }}>
+              {P.program && <Photo src={P.program} alt="" focus="50% 50%" style={{ height: '62svh', minHeight: 380 }} />}
+              <div style={{ position: 'relative', zIndex: 2, maxWidth: 420, margin: P.program ? '-90px 22px 0' : '76px 22px 0', marginInline: 'max(22px, calc(50% - 210px))', padding: '46px 26px 40px', background: C.PAPER, textAlign: 'center', boxShadow: `0 30px 60px -40px ${alpha(C.INK, 0.5)}` }}>
                 <div aria-hidden="true" style={{ position: 'absolute', inset: 8, border: `1px solid ${alpha(C.GOLD, 0.45)}` }} />
                 <Fx as="h2" style={{ margin: 0, fontFamily: head, fontWeight: 200, fontSize: scaleFont('clamp(28px, 8vw, 36px)', C.hs), lineHeight: 1.12 }}>{L('program', 'title', timeline.sectionLabel)}</Fx>
                 <Stagger step={0.12} style={{ marginTop: 22 }}>
@@ -368,9 +372,10 @@ export default function IvorySilkTemplate(props) {
 function End({ inv, T, C, fonts }) {
   const single = inv.heroTitle || (inv.isCouple ? '' : inv.single)
   const longest = single || [inv.groom, inv.bride].sort((a, b) => String(b || '').length - String(a || '').length)[0] || ''
+  const P = resolvePhotos(PHOTOS, inv.images)
   return (
     <section data-section="finale" style={{ position: 'relative', height: '100svh', minHeight: 600, overflow: 'hidden' }}>
-      <Photo src={vimg('ivory-4')} par={0} wipe={false} focus="50% 70%" style={{ position: 'absolute', inset: 0 }} />
+      {P.finale && <Photo src={P.finale} par={0} wipe={false} focus="50% 70%" style={{ position: 'absolute', inset: 0 }} />}
       <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${alpha(C.SILK, 0.88)}, ${alpha(C.SILK, 0.4)} 40%, ${alpha(C.SILK, 0)} 60%)` }} />
       <div style={{ position: 'absolute', left: 0, right: 0, top: '12svh', textAlign: 'center', padding: '0 24px' }}>
         <Fx style={{ fontStyle: 'italic', fontWeight: 200, fontSize: 17, color: C.MUTE }}>{T.end}</Fx>

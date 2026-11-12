@@ -160,6 +160,7 @@ try {
         'strings'  => isset($clean['strings']) ? count($clean['strings']) : 0,
         'opening'  => isset($clean['opening']),
         'story'    => isset($clean['story']),
+        'images'   => isset($clean['images']),
         'sections' => $cleanSections !== null,
     ], JSON_UNESCAPED_UNICODE));
 

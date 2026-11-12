@@ -133,6 +133,8 @@ export function useInvitation({
     copy: (dict) => withStringOverrides(dict[lang] || dict.az, adminStrings, lang, copyPrefix(templateId)),
     storyAdminTheme: adminOverrides?.theme || null,
     storyCopy: adminOverrides?.story?.text || null,
+    /* Şəkil yerlərinin admin seçimi (gizlət / əvəz et) — bax templates/templatePhotos.js */
+    images: adminOverrides?.images || null,
   }
 }
 

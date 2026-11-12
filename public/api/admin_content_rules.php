@@ -57,6 +57,30 @@ function acrAdminImage($v): ?string {
     return (is_string($v) && preg_match(ACR_ADMIN_IMG_RE, $v)) ? $v : null;
 }
 
+/**
+ * Şablonun şəkil yerləri (2026-11): { açar: {hide:true} | {hide:false} | {src} }.
+ * Açar adı formatla yoxlanılır (kataloq `src/templates/templatePhotos.js`-dədir və
+ * orada ağ siyahı ilə süzülür), şəkil yalnız serverin öz admin yükləməsi.
+ */
+const ACR_IMAGES_MAX = 40;
+function acrImages($raw): ?array {
+    if (!is_array($raw)) return null;
+    $out = [];
+    foreach ($raw as $key => $val) {
+        if (count($out) >= ACR_IMAGES_MAX) break;
+        if (!is_string($key) || !preg_match('/^[a-z][a-zA-Z0-9]{0,31}\z/', $key) || !is_array($val)) continue;
+        if (($val['hide'] ?? null) === true) {
+            $out[$key] = ['hide' => true];
+        } elseif (($val['hide'] ?? null) === false && !isset($val['src'])) {
+            $out[$key] = ['hide' => false];
+        } else {
+            $src = acrAdminImage($val['src'] ?? null);
+            if ($src !== null) $out[$key] = ['src' => $src];
+        }
+    }
+    return $out ?: null;
+}
+
 function acrStoryImage($v): ?string {
     return (is_string($v) && (preg_match(ACR_ADMIN_IMG_RE, $v) || preg_match(ACR_STORY_IMG_RE, $v))) ? $v : null;
 }
@@ -355,6 +379,10 @@ function acrCleanOverrides(array $inAdmin): array {
     if ($opening !== null) $clean['opening'] = $opening;
     $story = acrStory($inAdmin['story'] ?? null);
     if ($story !== null) $clean['story'] = $story;
+
+    /* ── şablonun şəkil yerləri (2026-11) ── */
+    $images = acrImages($inAdmin['images'] ?? null);
+    if ($images !== null) $clean['images'] = $images;
 
     return $clean;
 }
