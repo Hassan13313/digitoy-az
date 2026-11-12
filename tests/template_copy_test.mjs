@@ -67,11 +67,11 @@ for (const id of REDESIGNED) {
 
 /* override qatı */
 const ov = normalizeOverrides({ strings: {
-  'tpl_boarding_pass.pax': { az: 'Qonaqlarımız', ru: 'Гости' },
+  'tpl_boarding_pass.line': { az: 'Qonaqlarımız', ru: 'Гости' },
   'tpl_boarding_pass.nope': { az: 'x' },
   'tpl_unknown.pax': { az: 'x' },
 } })
-ok('normalizeOverrides: şablon açarı saxlanılır', ov?.strings?.['tpl_boarding_pass.pax']?.az === 'Qonaqlarımız')
+ok('normalizeOverrides: şablon açarı saxlanılır', ov?.strings?.['tpl_boarding_pass.line']?.az === 'Qonaqlarımız')
 ok('normalizeOverrides: naməlum açar atılır', !ov?.strings?.['tpl_boarding_pass.nope'] && !ov?.strings?.['tpl_unknown.pax'])
 
 /* fill */

@@ -19,16 +19,25 @@ export const TXT = {
     brand: 'Digitoy',
     honour: 'sizi şərəfli qonağımız olmağa dəvət edir',
     table: 'Masa',
+    tiara: 'Bir gecəlik saray nağılı',
+    end: 'Sarayda görüşənədək',
+    scroll: 'Aşağı sürüşdürün',
   },
   en: {
     brand: 'Digitoy',
     honour: 'request the honour of your presence',
     table: 'Table',
+    tiara: 'A palace fairy tale for one night',
+    end: 'Until we meet at the palace',
+    scroll: 'Scroll down',
   },
   ru: {
     brand: 'Digitoy',
     honour: 'имеют честь пригласить вас',
     table: 'Стол',
+    tiara: 'Дворцовая сказка на одну ночь',
+    end: 'До встречи во дворце',
+    scroll: 'Листайте вниз',
   },
 }
 
@@ -36,5 +45,8 @@ export const TXT = {
 export const FIELDS = [
   ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
   ['honour', 'hero', 'Dəvət cümləsi (adların altında)'],
+  ['scroll', 'hero', 'Örtükdə «Aşağı sürüşdürün»'],
+  ['tiara', 'countdown', 'Tac fotosunun üstündəki sətir'],
   ['table', 'seating', 'Masa nömrəsinin yazısı'],
+  ['end', 'guestbook', 'Son kadrdakı sətir'],
 ]

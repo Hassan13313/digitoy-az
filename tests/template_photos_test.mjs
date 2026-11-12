@@ -19,7 +19,8 @@ const ok = (name, cond, extra = '') => {
 }
 const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b)
 const IMG = '/uploads/_admin/tpl-candle-rings/0123456789abcdef0123.jpg'
-const TEMPLATES = ['candle-rings', 'bridal-veil', 'first-dance', 'ivory-silk', 'baku-night', 'golden-hour', 'shahdag']
+const TEMPLATES = ['candle-rings', 'bridal-veil', 'first-dance', 'ivory-silk', 'baku-night', 'golden-hour', 'shahdag', 'royal-palace', 'oriental-luxe',
+  'night-sky', 'mediterranean', 'crystal-glass', 'gazette', 'royal-gold', 'luxury-jewelry', 'floral-garden', 'white-elegance', 'nature-touch', 'vinyl-record', 'cinema-premiere', 'boarding-pass', 'modern-black']
 
 /* 1. normalizeImages */
 ok('null → null', normalizeImages(null) === null)
@@ -54,12 +55,14 @@ ok('gizlədilən → null', r.hero === null)
 ok('admin şəkli → src', r.finale === IMG)
 ok('hide:false → standart', r.invite === def.invite)
 ok('isCustomPhoto', isCustomPhoto({ finale: { src: IMG } }, 'finale') && !isCustomPhoto({ hero: { hide: true } }, 'hero') && !isCustomPhoto(null, 'x'))
-ok('şəkil yeri olmayan şablon → []', templatePhotoSlots('royal-gold').length === 0)
+ok('şəkil yeri olmayan şablon → []', templatePhotoSlots('red-veil').length === 0)
 
 /* 3. Hər şablonda: açarlar təkrarsız, standart foto diskdə, hər yer P.<açar> ilə işlənir */
 for (const id of TEMPLATES) {
   const list = templatePhotoSlots(id)
-  const src = readFileSync(new URL(`../src/templates/${id}/index.jsx`, import.meta.url), 'utf8')
+  let src = readFileSync(new URL(`../src/templates/${id}/index.jsx`, import.meta.url), 'utf8')
+  /* ümumi lüks mühərriklə qurulan şablonlar şəkilləri mühərrikdə oxuyur */
+  if (src.includes("from '../_shared/luxe/LuxeTemplate'")) src += readFileSync(new URL('../src/templates/_shared/luxe/LuxeTemplate.jsx', import.meta.url), 'utf8')
   ok(`${id}: şəkil yerləri var`, list.length >= 4, String(list.length))
   ok(`${id}: açarlar təkrarsız`, new Set(list.map((p) => p.key)).size === list.length)
   ok(`${id}: vimg( qalmayıb (hamısı admin yerindən)`, !src.includes('vimg('))

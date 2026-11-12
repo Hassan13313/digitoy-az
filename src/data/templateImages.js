@@ -86,13 +86,15 @@ export const TEMPLATE_IMAGE_SIZE = { width: 780, height: 1688 }
 
 /* Şəkli EYNİ adla yenilənən şablonlar: şəkillər 1 il keşlənir (.htaccess), sorğu
    parametri olmasa əvvəl baxan brauzer köhnə şəkli göstərərdi. Şəkli dəyişəndə rəqəmi artırın. */
-/* 2026-11-12: Bakı Gecəsi, Golden Hour, Alpine Luxe, Şam və Üzük, İlk Rəqs (fişənglər altında, reqs-2) — yeni üz qabığı (Gəlin üslubu: yuxarıda foto, adlar aşağıda).
+/* 2026-11-12 (axşam): köhnə 16 toy dizaynından 15-i foto redizayn (Simple Luxury istisna) — yeni üz qabıqları;
+   toy + ad günü dizaynlarının «--birthday» şəkilləri də yeniləndi (eyni rəqəm).
+   2026-11-12: Bakı Gecəsi, Golden Hour, Alpine Luxe, Şam və Üzük, İlk Rəqs (fişənglər altında, reqs-2) — yeni üz qabığı (Gəlin üslubu: yuxarıda foto, adlar aşağıda).
    Ivory Silk patch-dəki orijinal kompozisiyadadır (istifadəçi qaytardı), yalnız yazı «Toy mərasiminə dəvət». */
-const IMAGE_REV = { 'ivory-silk': 3, 'candle-rings': 3, 'bridal-veil': 2, 'first-dance': 3, 'baku-night': 2, 'golden-hour': 2, shahdag: 2 }
+const IMAGE_REV = { 'royal-palace': 2, 'oriental-luxe': 2, 'night-sky': 2, 'mediterranean': 2, 'crystal-glass': 2, 'gazette': 2, 'royal-gold': 2, 'luxury-jewelry': 2, 'floral-garden': 2, 'white-elegance': 2, 'nature-touch': 2, 'vinyl-record': 2, 'cinema-premiere': 2, 'boarding-pass': 2, 'modern-black': 2, 'ivory-silk': 3, 'candle-rings': 3, 'bridal-veil': 2, 'first-dance': 3, 'baku-night': 2, 'golden-hour': 2, shahdag: 2 }
 
 export function templateImage(id, concept = null) {
   /* Ad günü bölməsindəki versiyanın öz şəkli var — tək nəfərin adı ilə */
-  if (concept === 'birthday' && isMultiConcept(id)) return `/img/templates/${id}--birthday.webp`
+  if (concept === 'birthday' && isMultiConcept(id)) return `/img/templates/${id}--birthday.webp${IMAGE_REV[id] ? `?v=${IMAGE_REV[id]}` : ''}`
   if (!WITH_IMAGE.has(id)) return null
   return `/img/templates/${id}.webp${IMAGE_REV[id] ? `?v=${IMAGE_REV[id]}` : ''}`
 }

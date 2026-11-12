@@ -17,16 +17,32 @@ export const LABELS = {
 export const TXT = {
   az: {
     brand: 'Digitoy',
+    nar: 'Nar kimi bərəkətli, ipək kimi incə',
+    table: 'nömrəli süfrə',
+    end: 'Məclisimizi sizinlə bəzəyək',
+    scroll: 'Aşağı sürüşdürün',
   },
   en: {
     brand: 'Digitoy',
+    nar: 'Abundant as a pomegranate, fine as silk',
+    table: 'table',
+    end: 'Grace our feast with your presence',
+    scroll: 'Scroll down',
   },
   ru: {
     brand: 'Digitoy',
+    nar: 'Щедро, как гранат, нежно, как шёлк',
+    table: 'стол',
+    end: 'Украсьте наше торжество своим присутствием',
+    scroll: 'Листайте вниз',
   },
 }
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
   ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
+  ['scroll', 'hero', 'Örtükdə «Aşağı sürüşdürün»'],
+  ['nar', 'countdown', 'Nar fotosunun altındakı sətir'],
+  ['table', 'seating', 'Süfrə nömrəsinin yazısı'],
+  ['end', 'guestbook', 'Son kadrdakı sətir'],
 ]

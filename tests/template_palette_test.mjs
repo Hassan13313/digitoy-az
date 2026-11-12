@@ -17,7 +17,7 @@
         palitranın öz açarları), Provider, 9 bölmə lövbəri, başlıq əmsalı
         və bağlayıcı; modul səviyyəsində sabit hex rəng qalmayıb
    ───────────────────────────────────────────────────────────────────────── */
-import { readFileSync } from 'node:fs'
+import { readFileSync, existsSync } from 'node:fs'
 import { resolvePalette, scaleFont } from '../src/templates/_shared/palette.js'
 import { THEME_KEYS } from '../src/data/adminOverrides.js'
 
@@ -66,11 +66,18 @@ const REDESIGNED = [
 const ANCHORS = ['hero', 'countdown', 'venue', 'program', 'dresscode', 'seating', 'gallery', 'rsvp', 'guestbook']
 
 for (const id of REDESIGNED) {
-  const src = readFileSync(`src/templates/${id}/index.jsx`, 'utf8').replace(/\r\n/g, '\n')
+  const own = readFileSync(`src/templates/${id}/index.jsx`, 'utf8').replace(/\r\n/g, '\n')
+  /* ümumi lüks mühərrik (2026-11): bölmələr və başlıq ölçüsü mühərrikdədir */
+  const luxe = own.includes("from '../_shared/luxe/LuxeTemplate'")
+  const src = luxe ? own + readFileSync('src/templates/_shared/luxe/LuxeTemplate.jsx', 'utf8') : own
 
+  /* PAL ya şablonun içindədir, ya da (foto redizayn, 2026-11) palette.js › `export const C = { … }` */
   const pal = src.match(/\nconst PAL = \{\n([\s\S]*?)\n\}/)
-  ok(`${id}: PAL var`, !!pal)
-  const palKeys = pal ? [...pal[1].matchAll(/^\s+([A-Z][A-Z0-9_]*):/gm)].map((m) => m[1]) : []
+  const palFile = !pal && src.includes("import { C as PAL") && existsSync(`src/templates/${id}/palette.js`)
+    ? readFileSync(`src/templates/${id}/palette.js`, 'utf8').match(/export const C = \{([^}]*)\}/) : null
+  ok(`${id}: PAL var`, !!(pal || palFile))
+  const palKeys = pal ? [...pal[1].matchAll(/^\s+([A-Z][A-Z0-9_]*):/gm)].map((m) => m[1])
+    : palFile ? [...palFile[1].matchAll(/([A-Z][A-Z0-9_]*):/g)].map((m) => m[1]) : []
 
   const links = src.match(/\nconst LINKS = (\{[^\n]*\})/)
   ok(`${id}: LINKS var`, !!links)
@@ -89,7 +96,7 @@ for (const id of REDESIGNED) {
   for (const a of ANCHORS) {
     ok(`${id}: data-section «${a}»`, src.includes(`data-section="${a}"`) || src.includes(`section="${a}"`))
   }
-  ok(`${id}: bölmə başlığı admin əmsalı ilə`, /fontSize: scaleFont\('clamp\([^']*\)', C\.hs\)/.test(src))
+  ok(`${id}: bölmə başlığı admin əmsalı ilə`, /fontSize: scaleFont\('clamp\([^']*\)', C\.hs\)/.test(src) || (luxe && /fontSize: scaleFont\(cfg\.headSize \|\| 'clamp\([^']*\)', C\.hs\)/.test(src)))
   ok(`${id}: «və» bağlayıcısı inv.and`, /\{inv\.and\}|\$\{inv\.and\}/.test(src))
 }
 

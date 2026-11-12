@@ -1,6 +1,8 @@
 /* luxury-jewelry — şablonun öz mətnləri (bax _shared/copyText.js).
    LABELS — bölmə başlıqları (admin «Mətnlər › Başlıq» boşdursa bunlar görünür).
    TXT    — dizayna məxsus sətirlər; FIELDS — admin formunda sıra, bölmə və ad.
+   2026-11 foto redizayn: köhnə dizaynın sətirləri (bilet sahələri, rubrikalar…)
+   yeni görünüşdə yoxdur — burada yalnız işlənən sətirlər qalıb.
    ⚠ React YOXDUR: admin paneli və node testləri bu faylı birbaşa yükləyir. */
 
 export const LABELS = {
@@ -16,29 +18,33 @@ export const LABELS = {
 
 export const TXT = {
   az: {
-    brand: 'DIGITOY',
-    collection: 'Kolleksiya',
-    lot: 'Lot',
+    brand: 'Digitoy',
+    line: 'Ən qiymətli daş — bu gün',
     table: 'Masa',
+    end: 'Parıltılı gecədə görüşək',
+    scroll: 'Aşağı sürüşdürün',
   },
   en: {
-    brand: 'DIGITOY',
-    collection: 'Collection',
-    lot: 'Lot',
+    brand: 'Digitoy',
+    line: 'The rarest stone is this day',
     table: 'Table',
+    end: 'See you on a sparkling night',
+    scroll: 'Scroll down',
   },
   ru: {
-    brand: 'DIGITOY',
-    collection: 'Коллекция',
-    lot: 'Лот',
+    brand: 'Digitoy',
+    line: 'Самый драгоценный камень — этот день',
     table: 'Стол',
+    end: 'До встречи в сверкающий вечер',
+    scroll: 'Листайте вниз',
   },
 }
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
   ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
-  ['collection', 'hero', '«Kolleksiya» sətri (ilin qarşısında)'],
-  ['lot', 'program', 'Proqram — «Lot» sözü'],
-  ['table', 'seating', 'Masa nömrəsinin yazısı'],
+  ['scroll', 'hero', 'Örtükdə «Aşağı sürüşdürün»'],
+  ['line', 'countdown', 'Foto blokundakı sətir (sayğacdan sonra)'],
+  ['table', 'seating', 'Masa kartındakı yazı'],
+  ['end', 'guestbook', 'Son kadrdakı sətir'],
 ]

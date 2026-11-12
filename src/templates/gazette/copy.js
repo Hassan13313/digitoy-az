@@ -1,6 +1,8 @@
 /* gazette — şablonun öz mətnləri (bax _shared/copyText.js).
    LABELS — bölmə başlıqları (admin «Mətnlər › Başlıq» boşdursa bunlar görünür).
    TXT    — dizayna məxsus sətirlər; FIELDS — admin formunda sıra, bölmə və ad.
+   2026-11 foto redizayn: köhnə dizaynın sətirləri (bilet sahələri, rubrikalar…)
+   yeni görünüşdə yoxdur — burada yalnız işlənən sətirlər qalıb.
    ⚠ React YOXDUR: admin paneli və node testləri bu faylı birbaşa yükləyir. */
 
 export const LABELS = {
@@ -16,75 +18,33 @@ export const LABELS = {
 
 export const TXT = {
   az: {
-    and: 'və',
-    city: 'Bakı',
-    lead: '{venue} — {date}. Redaksiyamıza daxil olan xəbərə görə, {names} məclisi{at} başlayacaq. Qonaqları musiqi, ziyafət və unudulmaz bir axşam gözləyir. Ətraflı məlumat növbəti səhifələrdə.',
-    leadAt: 'saat {time}-da',
-    price: 'Qiyməti: pulsuz',
-    page: 'Səhifə',
-    caption: 'Şəkil',
-    weather: 'Hava proqnozu',
-    forecast: 'Günəşli. Sevgi ehtimalı — 100%.',
+    brand: 'Digitoy',
+    line: 'Bu xəbəri ilk siz eşidirsiniz',
     table: 'Masa',
-    mates: 'Masa yoldaşları',
+    end: 'Növbəti buraxılışa qədər',
+    scroll: 'Aşağı sürüşdürün',
   },
   en: {
-    and: 'and',
-    city: 'Baku',
-    lead: '{venue} — {date}. Word has reached our newsroom that the celebration of {names} will begin{at}. Guests can expect music, a banquet and an unforgettable evening. Full details on the following pages.',
-    leadAt: 'at {time}',
-    price: 'Price: free',
-    page: 'Page',
-    caption: 'Pictured',
-    weather: 'Weather',
-    forecast: 'Sunny. 100% chance of love.',
+    brand: 'Digitoy',
+    line: 'You are the first to hear the news',
     table: 'Table',
-    mates: 'Table companions',
+    end: 'Until the next edition',
+    scroll: 'Scroll down',
   },
   ru: {
-    and: 'и',
-    city: 'Баку',
-    lead: '{venue} — {date}. Как стало известно редакции, торжество {names} начнётся{at}. Гостей ждут музыка, банкет и незабываемый вечер. Подробности — на следующих страницах.',
-    leadAt: 'в {time}',
-    price: 'Цена: бесплатно',
-    page: 'Стр.',
-    caption: 'На снимке',
-    weather: 'Прогноз погоды',
-    forecast: 'Солнечно. Вероятность любви — 100%.',
+    brand: 'Digitoy',
+    line: 'Вы первыми узнаёте эту новость',
     table: 'Стол',
-    mates: 'Соседи по столу',
+    end: 'До следующего выпуска',
+    scroll: 'Листайте вниз',
   },
 }
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
-  ['and', 'hero', 'Adlar arasında «və»'],
-  ['city', 'hero', 'Şəhər (məkan yazılmayanda)'],
-  ['lead', 'hero', 'Baş məqalə', 'Avtomatik doldurulur: {venue} məkan, {date} tarix, {names} adlar, {at} saat ifadəsi (aşağıdakı sahə)'],
-  ['leadAt', 'hero', 'Baş məqalə — saat ifadəsi', '{time} — tədbirin saatı; saat yazılmayıbsa bu ifadə görünmür'],
-  ['price', 'hero', 'Qiymət sətri'],
-  ['page', 'hero', '«Səhifə» sözü'],
-  ['caption', 'hero', 'Şəkil altı («Şəkil»)'],
-  ['weather', 'countdown', 'Hava proqnozu — başlıq'],
-  ['forecast', 'countdown', 'Hava proqnozu — mətn'],
-  ['table', 'seating', 'Masa nömrəsinin yazısı'],
-  ['mates', 'seating', '«Masa yoldaşları»'],
+  ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
+  ['scroll', 'hero', 'Örtükdə «Aşağı sürüşdürün»'],
+  ['line', 'countdown', 'Foto blokundakı sətir (sayğacdan sonra)'],
+  ['table', 'seating', 'Masa kartındakı yazı'],
+  ['end', 'guestbook', 'Son kadrdakı sətir'],
 ]
-
-/* Ad günü versiyası — tək nəfər üçün (cütlük mətnlərinin əvəzi) */
-export const VARIANTS = {
-  birthday: {
-    az: {
-      lead: '{venue} — {date}. Redaksiyamıza daxil olan xəbərə görə, {names} üçün ad günü məclisi{at} başlayacaq. Qonaqları musiqi, tort və unudulmaz bir axşam gözləyir. Ətraflı məlumat növbəti səhifələrdə.',
-      forecast: 'Günəşli. Tort ehtimalı — 100%.',
-    },
-    en: {
-      lead: '{venue} — {date}. Word has reached our newsroom that the birthday party for {names} will begin{at}. Guests can expect music, cake and an unforgettable evening. Full details on the following pages.',
-      forecast: 'Sunny. 100% chance of cake.',
-    },
-    ru: {
-      lead: '{venue} — {date}. Как стало известно редакции, день рождения {names} начнётся{at}. Гостей ждут музыка, торт и незабываемый вечер. Подробности на следующих страницах.',
-      forecast: 'Солнечно. Вероятность торта — 100%.',
-    },
-  },
-}

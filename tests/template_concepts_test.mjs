@@ -122,11 +122,12 @@ ok('demo: toyda köhnə kimi', demoForConcept('toy', 'boarding-pass').weddingDat
 
 /* cütlük mətni toyda qalır, ad günündə dəyişir */
 const f = (id, ev, k) => templateCopyFields(id, ev).find((x) => x.key.endsWith('.' + k))?.defaults.az
-ok('Cinema: toyda «Baş rollarda»', /rollarda/.test(f('cinema-premiere', 'toy', 'star')))
-ok('Cinema: ad günündə «Baş rolda»', /rolda/.test(f('cinema-premiere', 'birthday', 'star')) && !/rollarda/.test(f('cinema-premiere', 'birthday', 'star')))
-ok('Cinema: ad günündə «Sevgi» yoxdur', !/Sevgi/.test(f('cinema-premiere', 'birthday', 'rest1')))
-ok('Gazette: toyda sevgi proqnozu', /Sevgi/.test(f('gazette', 'toy', 'forecast')))
-ok('Gazette: ad günündə tort', /Tort/.test(f('gazette', 'birthday', 'forecast')))
+/* 2026-11 foto redizayn: toy + ad günü dizaynlarının mətnləri neytraldır —
+   ad günündə toy sözü görünməməlidir (cütlük mətni yoxdur) */
+for (const id of ['gazette', 'vinyl-record', 'cinema-premiere', 'boarding-pass', 'modern-black']) {
+  const all = templateCopyFields(id, 'birthday').map((x) => x.defaults.az).join(' | ').replace(/Digitoy/g, '')
+  ok(`${id}: ad günü mətnlərində toy sözü yoxdur`, !/toy|bəy|gəlin|nikah|sevgi/i.test(all), all.match(/toy|bəy|gəlin|nikah|sevgi/i)?.[0])
+}
 
 console.log(fail ? `\n${fail} / ${n} uğursuz` : `Şablon bölmələri: ${n} yoxlama, hamısı keçdi (${all.length} dizayn, ${cards} kart)`)
 process.exit(fail ? 1 : 0)

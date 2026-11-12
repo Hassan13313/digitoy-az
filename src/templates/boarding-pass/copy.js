@@ -1,6 +1,8 @@
 /* boarding-pass — şablonun öz mətnləri (bax _shared/copyText.js).
    LABELS — bölmə başlıqları (admin «Mətnlər › Başlıq» boşdursa bunlar görünür).
    TXT    — dizayna məxsus sətirlər; FIELDS — admin formunda sıra, bölmə və ad.
+   2026-11 foto redizayn: köhnə dizaynın sətirləri (bilet sahələri, rubrikalar…)
+   yeni görünüşdə yoxdur — burada yalnız işlənən sətirlər qalıb.
    ⚠ React YOXDUR: admin paneli və node testləri bu faylı birbaşa yükləyir. */
 
 export const LABELS = {
@@ -16,86 +18,33 @@ export const LABELS = {
 
 export const TXT = {
   az: {
-    flightPrefix: 'DT',
-    airline: 'DIGITOY AIR',
-    cls: 'Birinci sinif',
-    pax: 'Sərnişinlər',
-    paxOne: 'Sərnişin',
-    code: 'GYD',
-    from: 'Bakı',
-    flight: 'Uçuş',
-    date: 'Tarix',
-    boarding: 'Minmə',
-    gate: 'Qapı',
-    gateNo: 'VIP',
-    place: 'Məkan',
-    status: 'Vaxtında',
+    brand: 'Digitoy',
+    line: 'Bayram səfərinə xoş gəlmisiniz',
     table: 'Masa',
-    parAvion: 'PAR AVION',
+    end: 'Bortda görüşənədək',
+    scroll: 'Aşağı sürüşdürün',
   },
   en: {
-    flightPrefix: 'DT',
-    airline: 'DIGITOY AIR',
-    cls: 'First class',
-    pax: 'Passengers',
-    paxOne: 'Passenger',
-    code: 'GYD',
-    from: 'Baku',
-    flight: 'Flight',
-    date: 'Date',
-    boarding: 'Boarding',
-    gate: 'Gate',
-    gateNo: 'VIP',
-    place: 'Venue',
-    status: 'On time',
+    brand: 'Digitoy',
+    line: 'Welcome aboard the celebration',
     table: 'Table',
-    parAvion: 'PAR AVION',
+    end: 'See you on board',
+    scroll: 'Scroll down',
   },
   ru: {
-    flightPrefix: 'DT',
-    airline: 'DIGITOY AIR',
-    cls: 'Первый класс',
-    pax: 'Пассажиры',
-    paxOne: 'Пассажир',
-    code: 'GYD',
-    from: 'Баку',
-    flight: 'Рейс',
-    date: 'Дата',
-    boarding: 'Посадка',
-    gate: 'Выход',
-    gateNo: 'VIP',
-    place: 'Место',
-    status: 'По расписанию',
+    brand: 'Digitoy',
+    line: 'Добро пожаловать на борт праздника',
     table: 'Стол',
-    parAvion: 'PAR AVION',
+    end: 'До встречи на борту',
+    scroll: 'Листайте вниз',
   },
 }
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
-  ['flightPrefix', 'hero', 'Reys nömrəsinin başlanğıcı'],
-  ['airline', 'hero', 'Aviaşirkət (bilet başlığı)'],
-  ['cls', 'hero', 'Bilet — sinif'],
-  ['pax', 'hero', 'Bilet — «Sərnişinlər» (cütlük)'],
-  ['paxOne', 'hero', 'Bilet — «Sərnişin» (tək)'],
-  ['code', 'hero', 'Hava limanı kodu'],
-  ['from', 'hero', 'Uçuş şəhəri'],
-  ['flight', 'hero', 'Bilet — «Uçuş»'],
-  ['date', 'hero', 'Bilet — «Tarix»'],
-  ['boarding', 'hero', 'Bilet — «Minmə»'],
-  ['gate', 'hero', 'Bilet — «Qapı»'],
-  ['gateNo', 'hero', 'Qapının adı (açılışda və biletdə)'],
-  ['place', 'hero', 'Bilet — «Məkan»'],
-  ['status', 'program', 'Uçuş statusu'],
-  ['table', 'seating', 'Masa nömrəsinin yazısı'],
-  ['parAvion', 'guestbook', 'Məktub möhürü'],
+  ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
+  ['scroll', 'hero', 'Örtükdə «Aşağı sürüşdürün»'],
+  ['line', 'countdown', 'Foto blokundakı sətir (sayğacdan sonra)'],
+  ['table', 'seating', 'Masa kartındakı yazı'],
+  ['end', 'guestbook', 'Son kadrdakı sətir'],
 ]
-
-/* Ad günü versiyası — tək nəfər üçün (cütlük mətnlərinin əvəzi) */
-export const VARIANTS = {
-  birthday: {
-    az: { cls: 'Ad günü reysi' },
-    en: { cls: 'Birthday flight' },
-    ru: { cls: 'Рейс ко дню рождения' },
-  },
-}

@@ -1,6 +1,8 @@
 /* vinyl-record — şablonun öz mətnləri (bax _shared/copyText.js).
    LABELS — bölmə başlıqları (admin «Mətnlər › Başlıq» boşdursa bunlar görünür).
    TXT    — dizayna məxsus sətirlər; FIELDS — admin formunda sıra, bölmə və ad.
+   2026-11 foto redizayn: köhnə dizaynın sətirləri (bilet sahələri, rubrikalar…)
+   yeni görünüşdə yoxdur — burada yalnız işlənən sətirlər qalıb.
    ⚠ React YOXDUR: admin paneli və node testləri bu faylı birbaşa yükləyir. */
 
 export const LABELS = {
@@ -16,58 +18,33 @@ export const LABELS = {
 
 export const TXT = {
   az: {
-    arc: 'DIGITOY RECORDS · STEREO · 33⅓ RPM',
-    catNo: 'DTR-',
-    rpm: '33⅓',
-    label: 'Digitoy Records',
-    stereo: 'STEREO',
-    vu: 'VU',
-    track: 'Trek',
-    side: 'Tərəf',
+    brand: 'Digitoy',
+    line: 'Bu gecənin musiqisi bizimdir',
     table: 'Masa',
+    end: 'Rəqs meydançasında görüşək',
+    scroll: 'Aşağı sürüşdürün',
   },
   en: {
-    arc: 'DIGITOY RECORDS · STEREO · 33⅓ RPM',
-    catNo: 'DTR-',
-    rpm: '33⅓',
-    label: 'Digitoy Records',
-    stereo: 'STEREO',
-    vu: 'VU',
-    track: 'Track',
-    side: 'Side',
+    brand: 'Digitoy',
+    line: 'Tonight the music is ours',
     table: 'Table',
+    end: 'See you on the dance floor',
+    scroll: 'Scroll down',
   },
   ru: {
-    arc: 'DIGITOY RECORDS · STEREO · 33⅓ RPM',
-    catNo: 'DTR-',
-    rpm: '33⅓',
-    label: 'Digitoy Records',
-    stereo: 'STEREO',
-    vu: 'VU',
-    track: 'Трек',
-    side: 'Сторона',
+    brand: 'Digitoy',
+    line: 'Музыка этого вечера — наша',
     table: 'Стол',
+    end: 'Встретимся на танцполе',
+    scroll: 'Листайте вниз',
   },
 }
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
-  ['arc', 'hero', 'Plastinkanın dairəvi yazısı'],
-  ['catNo', 'hero', 'Kataloq nömrəsinin başlanğıcı'],
-  ['rpm', 'program', 'Tərəfdəki RPM yazısı'],
-  ['label', 'hero', 'Səsyazma studiyası (yuxarı panel və alt imza)'],
-  ['stereo', 'hero', '«STEREO» nişanı'],
-  ['vu', 'countdown', 'VU göstəricisinin yazısı'],
-  ['track', 'program', 'Proqram — «Trek» sözü'],
-  ['side', 'seating', '«Tərəf» sözü'],
-  ['table', 'seating', 'Masa nömrəsinin yazısı'],
+  ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
+  ['scroll', 'hero', 'Örtükdə «Aşağı sürüşdürün»'],
+  ['line', 'countdown', 'Foto blokundakı sətir (sayğacdan sonra)'],
+  ['table', 'seating', 'Masa kartındakı yazı'],
+  ['end', 'guestbook', 'Son kadrdakı sətir'],
 ]
-
-/* Ad günü versiyası — tək nəfər üçün (cütlük mətnlərinin əvəzi) */
-export const VARIANTS = {
-  birthday: {
-    az: { label: 'Ad Günü Records', arc: 'AD GÜNÜ RECORDS · STEREO · 33⅓ RPM' },
-    en: { label: 'Birthday Records', arc: 'BIRTHDAY RECORDS · STEREO · 33⅓ RPM' },
-    ru: { label: 'Birthday Records', arc: 'BIRTHDAY RECORDS · STEREO · 33⅓ RPM' },
-  },
-}

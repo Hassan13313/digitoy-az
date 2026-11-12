@@ -14,3 +14,20 @@ Bu qovluqdakı fotoların hamısı (bir istisna ilə) Digitoy şablonları üç�
 | baku-1…4 | Bakı Gecəsi (`baku-night`) | Bakı terrası və Alov Qüllələri, İçərişəhər, balo zalı, üzüklü əllər |
 | gh-1…4 | Golden Hour (`golden-hour`) | Mərdəkan bağında nikah tağı, zeytun ağacları altında masa, buket, gün batımı |
 | sd-1…4 | Alpine Luxe (`shahdag`) | qarlı dağ evi, şamlı şam yeməyi, qış buketi, fənərli cığır |
+| rp-1…4 | Royal Palace (`royal-palace`) | saray pilləkəni və çilçıraq, məxmər yastıqda tac, saray ziyafəti, saray qapıları |
+| ol-1…4 | Oriental Luxe (`oriental-luxe`) | şəbəkə pəncərəsi önündə gəlin, nar və mis sini, məclis süfrəsi, fənərli həyət |
+| ns-1…4 | Night Sky (`night-sky`) | Süd Yolu altında cütlük, teleskop və şampan, ulduzlar altında süfrə, işıqlı çadır |
+| md-1…4 | Mediterranean (`mediterranean`) | dəniz terrası, limon və mayolika, limon pergolası altında süfrə, axşam limanı |
+| cg-1…4 | Crystal Glass (`crystal-glass`) | çilçıraq altında gəlin, kristal şampan qülləsi, kristal süfrə, gümüş konfeti |
+| gz-1…4 | Gazette (`gazette`) | kafe masasında qəzetlər, yazı makinası, mətbəədə süfrə, gecə köşkü |
+| rg-1…4 | Royal Gold (`royal-gold`) | art-deko zalında cütlük, qara lak üstündə qızıl, qara-qızıl ziyafət, qızıl konfeti |
+| lj-1…4 | Luxury Jewelry (`luxury-jewelry`) | vitrində üzük, üzüklü əl, zümrüd süfrə, zümrüd salon |
+| fg-1…4 | Floral Garden (`floral-garden`) | pion tağı altında cütlük, pion buketi, bağda süfrə, ləçək yağışı |
+| we-1…4 | White Elegance (`white-elegance`) | ağ qalereyada gəlin, ağ dəftərxana, ağ süfrə, ağ pilləkən |
+| nt-1…4 | Nature Touch (`nature-touch`) | dağ çəmənliyində cütlük, herbari və ağac kəsiyi, çəmənlikdə süfrə, dumanlı dağlar |
+| vr-1…4 | Vinyl Record (`vinyl-record`) | patefonda val, mikrofon və badələr, caz səhnəsi, rəqs meydançası |
+| cp-1…4 | Cinema Premiere (`cinema-premiere`) | kinoteatr və qırmızı xalça, biletlər və popkorn, səhnə önündə süfrə, qırmızı xalça |
+| bp-1…4 | Boarding Pass (`boarding-pass`) | şəxsi təyyarə, çamadan və pasport, birinci sinif salon, buludların üstündə |
+| mb-1…4 | Modern Black (`modern-black`) | işıq şüasında qara kallalar, qara badələr, qara süfrə, gecə şəhəri |
+
+Toy + ad günü dizaynlarında (Gazette, Vinyl Record, Cinema Premiere, Boarding Pass, Modern Black) fotolarda insan yoxdur — eyni şəkillər hər iki tədbirə uyğundur.

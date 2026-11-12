@@ -1,6 +1,8 @@
 /* modern-black — şablonun öz mətnləri (bax _shared/copyText.js).
    LABELS — bölmə başlıqları (admin «Mətnlər › Başlıq» boşdursa bunlar görünür).
    TXT    — dizayna məxsus sətirlər; FIELDS — admin formunda sıra, bölmə və ad.
+   2026-11 foto redizayn: köhnə dizaynın sətirləri (bilet sahələri, rubrikalar…)
+   yeni görünüşdə yoxdur — burada yalnız işlənən sətirlər qalıb.
    ⚠ React YOXDUR: admin paneli və node testləri bu faylı birbaşa yükləyir. */
 
 export const LABELS = {
@@ -15,29 +17,33 @@ export const LABELS = {
 
 export const TXT = {
   az: {
-    brand: 'DIGITOY',
-    date: 'Tarix',
-    time: 'Saat',
-    place: 'Məkan',
+    brand: 'Digitoy',
+    line: 'Az sözlə, böyük hisslə',
+    table: 'Masa',
+    end: 'Görüşənədək',
+    scroll: 'Aşağı sürüşdürün',
   },
   en: {
-    brand: 'DIGITOY',
-    date: 'Date',
-    time: 'Time',
-    place: 'Venue',
+    brand: 'Digitoy',
+    line: 'Few words, great feeling',
+    table: 'Table',
+    end: 'See you there',
+    scroll: 'Scroll down',
   },
   ru: {
-    brand: 'DIGITOY',
-    date: 'Дата',
-    time: 'Время',
-    place: 'Место',
+    brand: 'Digitoy',
+    line: 'Мало слов — много чувств',
+    table: 'Стол',
+    end: 'До встречи',
+    scroll: 'Листайте вниз',
   },
 }
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
   ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
-  ['date', 'hero', 'Cədvəl — tarix'],
-  ['time', 'hero', 'Cədvəl — saat'],
-  ['place', 'hero', 'Cədvəl — məkan'],
+  ['scroll', 'hero', 'Örtükdə «Aşağı sürüşdürün»'],
+  ['line', 'countdown', 'Foto blokundakı sətir (sayğacdan sonra)'],
+  ['table', 'seating', 'Masa kartındakı yazı'],
+  ['end', 'guestbook', 'Son kadrdakı sətir'],
 ]

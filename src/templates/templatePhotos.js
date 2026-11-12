@@ -5,6 +5,21 @@ import { PHOTOS as ivorySilk } from './ivory-silk/photos.js'
 import { PHOTOS as bakuNight } from './baku-night/photos.js'
 import { PHOTOS as goldenHour } from './golden-hour/photos.js'
 import { PHOTOS as shahdag } from './shahdag/photos.js'
+import { PHOTOS as royalPalace } from './royal-palace/photos.js'
+import { PHOTOS as orientalLuxe } from './oriental-luxe/photos.js'
+import { PHOTOS as nightSky } from './night-sky/photos.js'
+import { PHOTOS as mediterranean } from './mediterranean/photos.js'
+import { PHOTOS as crystalGlass } from './crystal-glass/photos.js'
+import { PHOTOS as gazette } from './gazette/photos.js'
+import { PHOTOS as royalGold } from './royal-gold/photos.js'
+import { PHOTOS as luxuryJewelry } from './luxury-jewelry/photos.js'
+import { PHOTOS as floralGarden } from './floral-garden/photos.js'
+import { PHOTOS as whiteElegance } from './white-elegance/photos.js'
+import { PHOTOS as natureTouch } from './nature-touch/photos.js'
+import { PHOTOS as vinylRecord } from './vinyl-record/photos.js'
+import { PHOTOS as cinemaPremiere } from './cinema-premiere/photos.js'
+import { PHOTOS as boardingPass } from './boarding-pass/photos.js'
+import { PHOTOS as modernBlack } from './modern-black/photos.js'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    ŞABLONUN ŞƏKİL YERLƏRİ (2026-11) — admin «Şəkillər» tabı
@@ -24,6 +39,21 @@ const REGISTRY = {
   'baku-night': bakuNight,
   'golden-hour': goldenHour,
   shahdag,
+  'royal-palace': royalPalace,
+  'oriental-luxe': orientalLuxe,
+  'night-sky': nightSky,
+  'mediterranean': mediterranean,
+  'crystal-glass': crystalGlass,
+  'gazette': gazette,
+  'royal-gold': royalGold,
+  'luxury-jewelry': luxuryJewelry,
+  'floral-garden': floralGarden,
+  'white-elegance': whiteElegance,
+  'nature-touch': natureTouch,
+  'vinyl-record': vinylRecord,
+  'cinema-premiere': cinemaPremiere,
+  'boarding-pass': boardingPass,
+  'modern-black': modernBlack,
 }
 
 /** Bütün şablonların şəkil açarları — admin datasının ağ siyahısı */

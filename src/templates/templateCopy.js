@@ -83,8 +83,12 @@ import * as discoBall from './disco-ball/copy.js'
 import * as pajamaSpa from './pajama-spa/copy.js'
 import * as parisNight from './paris-night/copy.js'
 import * as bohoSunset from './boho-sunset/copy.js'
+import * as royalGold from './royal-gold/copy.js'
+import * as floralGarden from './floral-garden/copy.js'
 
 const REGISTRY = {
+  'royal-gold': royalGold,
+  'floral-garden': floralGarden,
   'oriental-luxe': orientalLuxe,
   'white-elegance': whiteElegance,
   'vinyl-record': vinylRecord,

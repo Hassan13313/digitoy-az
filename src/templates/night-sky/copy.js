@@ -1,6 +1,8 @@
 /* night-sky — şablonun öz mətnləri (bax _shared/copyText.js).
    LABELS — bölmə başlıqları (admin «Mətnlər › Başlıq» boşdursa bunlar görünür).
    TXT    — dizayna məxsus sətirlər; FIELDS — admin formunda sıra, bölmə və ad.
+   2026-11 foto redizayn: köhnə dizaynın sətirləri (bilet sahələri, rubrikalar…)
+   yeni görünüşdə yoxdur — burada yalnız işlənən sətirlər qalıb.
    ⚠ React YOXDUR: admin paneli və node testləri bu faylı birbaşa yükləyir. */
 
 export const LABELS = {
@@ -17,36 +19,32 @@ export const LABELS = {
 export const TXT = {
   az: {
     brand: 'Digitoy',
-    moon: 'O gecə Ay {pct}% işıqlı olacaq',
-    dirN: 'Şimal',
-    dirE: 'Şərq',
-    dirS: 'Cənub',
-    dirW: 'Qərb',
+    line: 'Ulduzlar bu gecə bizim üçün düzülüb',
+    table: 'Masa',
+    end: 'Ulduzların altında görüşək',
+    scroll: 'Aşağı sürüşdürün',
   },
   en: {
     brand: 'Digitoy',
-    moon: 'The moon will be {pct}% lit that night',
-    dirN: 'North',
-    dirE: 'East',
-    dirS: 'South',
-    dirW: 'West',
+    line: 'Tonight the stars line up for us',
+    table: 'Table',
+    end: 'Meet us under the stars',
+    scroll: 'Scroll down',
   },
   ru: {
     brand: 'Digitoy',
-    moon: 'В ту ночь Луна будет освещена на {pct}%',
-    dirN: 'Север',
-    dirE: 'Восток',
-    dirS: 'Юг',
-    dirW: 'Запад',
+    line: 'Сегодня звёзды сложились для нас',
+    table: 'Стол',
+    end: 'Встретимся под звёздами',
+    scroll: 'Листайте вниз',
   },
 }
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
   ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
-  ['moon', 'hero', 'Ay sətri', '{pct} — Ayın işıqlı faizi (avtomatik hesablanır)'],
-  ['dirN', 'hero', 'Ulduz xəritəsi — şimal'],
-  ['dirE', 'hero', 'Ulduz xəritəsi — şərq'],
-  ['dirS', 'hero', 'Ulduz xəritəsi — cənub'],
-  ['dirW', 'hero', 'Ulduz xəritəsi — qərb'],
+  ['scroll', 'hero', 'Örtükdə «Aşağı sürüşdürün»'],
+  ['line', 'countdown', 'Foto blokundakı sətir (sayğacdan sonra)'],
+  ['table', 'seating', 'Masa kartındakı yazı'],
+  ['end', 'guestbook', 'Son kadrdakı sətir'],
 ]

@@ -1,6 +1,8 @@
 /* cinema-premiere — şablonun öz mətnləri (bax _shared/copyText.js).
    LABELS — bölmə başlıqları (admin «Mətnlər › Başlıq» boşdursa bunlar görünür).
    TXT    — dizayna məxsus sətirlər; FIELDS — admin formunda sıra, bölmə və ad.
+   2026-11 foto redizayn: köhnə dizaynın sətirləri (bilet sahələri, rubrikalar…)
+   yeni görünüşdə yoxdur — burada yalnız işlənən sətirlər qalıb.
    ⚠ React YOXDUR: admin paneli və node testləri bu faylı birbaşa yükləyir. */
 
 export const LABELS = {
@@ -16,58 +18,33 @@ export const LABELS = {
 
 export const TXT = {
   az: {
-    studio: 'DIGITOY PICTURES',
-    presents: 'təqdim edir',
-    star: 'Baş rollarda {names}',
-    rest1: 'Ssenari: Sevgi',
-    rest2: 'Rejissor: Tale',
-    rest3: 'Musiqi: Ürək döyüntüsü',
-    premiere: 'Premyera',
-    admit: 'Bir nəfərlik',
+    brand: 'Digitoy',
+    line: 'Premyera yalnız bir gecəlikdir',
     table: 'Masa',
+    end: 'Qırmızı xalçada görüşək',
+    scroll: 'Aşağı sürüşdürün',
   },
   en: {
-    studio: 'DIGITOY PICTURES',
-    presents: 'presents',
-    star: 'Starring {names}',
-    rest1: 'Written by Love',
-    rest2: 'Directed by Fate',
-    rest3: 'Music by Heartbeat',
-    premiere: 'Premiere',
-    admit: 'Admit one',
+    brand: 'Digitoy',
+    line: 'The premiere is for one night only',
     table: 'Table',
+    end: 'See you on the red carpet',
+    scroll: 'Scroll down',
   },
   ru: {
-    studio: 'DIGITOY PICTURES',
-    presents: 'представляет',
-    star: 'В главных ролях {names}',
-    rest1: 'Сценарий: Любовь',
-    rest2: 'Режиссёр: Судьба',
-    rest3: 'Музыка: Сердцебиение',
-    premiere: 'Премьера',
-    admit: 'Входной билет',
+    brand: 'Digitoy',
+    line: 'Премьера — только один вечер',
     table: 'Стол',
+    end: 'До встречи на красной дорожке',
+    scroll: 'Листайте вниз',
   },
 }
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
-  ['studio', 'hero', 'Kinostudiya'],
-  ['presents', 'hero', '«təqdim edir»'],
-  ['star', 'hero', 'Titr — baş rollar', '{names} — adlar (avtomatik)'],
-  ['rest1', 'hero', 'Titr — ssenari'],
-  ['rest2', 'hero', 'Titr — rejissor'],
-  ['rest3', 'hero', 'Titr — musiqi'],
-  ['premiere', 'hero', 'Titr — «Premyera»'],
-  ['admit', 'seating', 'Bilet — «Bir nəfərlik»'],
-  ['table', 'seating', 'Masa nömrəsinin yazısı'],
+  ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
+  ['scroll', 'hero', 'Örtükdə «Aşağı sürüşdürün»'],
+  ['line', 'countdown', 'Foto blokundakı sətir (sayğacdan sonra)'],
+  ['table', 'seating', 'Masa kartındakı yazı'],
+  ['end', 'guestbook', 'Son kadrdakı sətir'],
 ]
-
-/* Ad günü versiyası — tək nəfər üçün (cütlük mətnlərinin əvəzi) */
-export const VARIANTS = {
-  birthday: {
-    az: { star: 'Baş rolda {names}', rest1: 'Ssenari: Həyat', rest2: 'Rejissor: Arzular', rest3: 'Musiqi: Dostların gülüşü' },
-    en: { star: 'Starring {names}', rest1: 'Written by Life', rest2: 'Directed by Dreams', rest3: 'Music by Friends’ Laughter' },
-    ru: { star: 'В главной роли {names}', rest1: 'Сценарий: Жизнь', rest2: 'Режиссёр: Мечты', rest3: 'Музыка: Смех друзей' },
-  },
-}
