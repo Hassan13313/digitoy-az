@@ -8,6 +8,7 @@ import { ArrowUpRight, Check, Copy, Eye, Lock, Pin, Sparkles } from 'lucide-reac
 import t from '../../data/translations';
 import { WhatsAppIcon } from '../landing/v2/ui';
 import { Switch } from './fields';
+import { TemplateScene } from '../public/templates';
 
 const tx = (lang) => t[lang] ?? t.az ?? {};
 
@@ -132,7 +133,10 @@ export function ToggleList({ children, className = '' }) {
  * @param {boolean} p.selected
  * @param {(value:string)=>void} p.onSelect
  * @param {React.ReactNode} [p.preview]   Kiçik önbaxış (sizin mövcud thumbnail komponentiniz)
- * @param {string} [p.imageSrc]           …və ya şəkil
+ * @param {string} [p.imageSrc]           …və ya şəkil (vitrindəki kimi telefon səhnəsində)
+ * @param {string} [p.accent]             Şablonun vurğu rəngi (səhnə parıltısı)
+ * @param {string} [p.background]         Şablonun fon rəngi (səhnə)
+ * @param {string} [p.categoryLabel]      «Lüks» — adın üstündə
  * @param {boolean} [p.live]              «Canlı» nişanı
  * @param {()=>void} [p.onPreview]        «Önbaxış» düyməsi
  * @param {boolean} [p.locked]
@@ -147,6 +151,9 @@ export function TemplateCard({
   onSelect,
   preview,
   imageSrc,
+  accent,
+  background,
+  categoryLabel,
   live,
   onPreview,
   locked,
@@ -166,27 +173,22 @@ export function TemplateCard({
           className="peer sr-only"
         />
         <span
-          className={`block overflow-hidden rounded-2xl transition-[box-shadow,transform] duration-300 ease-luxe peer-focus-visible:ring-2 peer-focus-visible:ring-gold-deep peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-cream ${
+          className={`block overflow-hidden rounded-[24px] bg-white p-1.5 shadow-soft transition-[box-shadow,transform] duration-300 ease-luxe peer-focus-visible:ring-2 peer-focus-visible:ring-gold-deep peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-cream ${
             selected
               ? 'shadow-lift ring-2 ring-espresso'
-              : 'ring-1 ring-beige-dark group-hover:-translate-y-1 group-hover:shadow-lift group-hover:ring-gold/60'
+              : 'ring-1 ring-beige-dark/80 group-hover:-translate-y-1 group-hover:shadow-lift group-hover:ring-gold/60'
           }`}
         >
-          <span className="relative block aspect-[3/4] w-full overflow-hidden bg-beige">
-            {imageSrc ? (
-              <img
-                src={imageSrc}
-                alt=""
-                loading="lazy"
-                className="h-full w-full object-cover transition-transform duration-700 ease-luxe group-hover:scale-[1.03]"
-                /* Digitoy: şəkil telefon ekranıdır (390×844) — adlar və tarix yuxarı üçdə birdədir */
-                style={{ objectPosition: '50% 16%' }}
-              />
-            ) : (
-              <span className="block h-full w-full transition-transform duration-700 ease-luxe group-hover:scale-[1.03]">
-                {preview}
-              </span>
-            )}
+          {/* Vitrin (/templates) kartı ilə eyni səhnə: şablonun fonunda telefon + ekran şəkli */}
+          <TemplateScene
+            name={title}
+            image={imageSrc}
+            imageAlt=""
+            accent={accent}
+            background={background}
+            compact
+            fallback={preview}
+          >
             {live && (
               <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.12em] text-olive shadow-soft backdrop-blur">
                 <span className="h-1.5 w-1.5 rounded-full bg-olive" aria-hidden="true" />
@@ -199,9 +201,14 @@ export function TemplateCard({
                 <LockedChip lang={lang} />
               </span>
             )}
-          </span>
-          <span className="block bg-white px-3.5 pb-3.5 pt-3">
-            <span className="flex items-center justify-between gap-2">
+          </TemplateScene>
+          <span className="block px-2 pb-2.5 pt-3">
+            {categoryLabel && (
+              <span className="block truncate text-[9.5px] font-semibold uppercase tracking-[0.18em] text-gold-deep">
+                {categoryLabel}
+              </span>
+            )}
+            <span className="mt-0.5 flex items-center justify-between gap-2">
               <span
                 className={`truncate font-serif text-[18px] leading-tight ${selected ? 'text-ink' : 'text-ink/90'}`}
               >

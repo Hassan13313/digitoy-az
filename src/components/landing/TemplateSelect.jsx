@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Check, Lock } from 'lucide-react'
-import { listTemplates, listTemplateFacets, isTemplateSelectable, getTemplateTheme, groupTemplatesByConcept, templateConcepts, selectedConceptOf, countTemplateCards } from '../../templates/templateConfig'
+import { listTemplates, listTemplateFacets, isTemplateSelectable, getTemplateTheme, getCategoryLabel, groupTemplatesByConcept, templateConcepts, selectedConceptOf, countTemplateCards } from '../../templates/templateConfig'
 import { ChipRow } from '../public/templates'
 import { DEMO_DATE } from '../../data/demoInvitation'
 import { trackTemplateSelected, trackTemplatePreviewed } from '../../templates/templateAnalytics'
@@ -313,6 +313,9 @@ export default function TemplateSelect({ value, onChange, lang = 'az', hideHeadi
                     selected={selected}
                     onSelect={handleSelect}
                     imageSrc={templateImage(tpl.id, g.id) || undefined}
+                    accent={getTemplateTheme(tpl.id)?.primary || '#C5A059'}
+                    background={getTemplateTheme(tpl.id)?.background || '#FDFBF7'}
+                    categoryLabel={getCategoryLabel(tpl.category, lang)}
                     preview={<TemplateThumbnail tpl={tpl} selected={false} locked={false} />}
                     live={tpl.status === 'live'}
                     locked={!available}

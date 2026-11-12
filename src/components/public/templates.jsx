@@ -277,12 +277,6 @@ export function TemplateCard({
   lang = 'az',
 }) {
   const descId = useId();
-  const [loaded, setLoaded] = useState(false);
-  const [failed, setFailed] = useState(false);
-  // keşdən dərhal gələn şəkil üçün
-  const imgRef = useCallback((node) => {
-    if (node && node.complete && node.naturalWidth > 0) setLoaded(true);
-  }, []);
 
   return (
     <button
@@ -293,78 +287,16 @@ export function TemplateCard({
       aria-describedby={descId}
       className={`group relative block w-full rounded-[26px] bg-white p-2 text-left shadow-soft ring-1 ring-beige-dark/80 transition-[transform,box-shadow] duration-500 ease-luxe hover:-translate-y-1 hover:shadow-lift motion-reduce:hover:translate-y-0 ${FOCUS}`}
     >
-      {/* ── Səhnə ─────────────────────────────────────────── */}
-      <span
-        className="relative block aspect-[10/11] overflow-hidden rounded-[20px]"
-        style={{ backgroundColor: background }}
+      <TemplateScene
+        name={name}
+        image={image}
+        imageAlt={imageAlt}
+        imageWidth={imageWidth}
+        imageHeight={imageHeight}
+        loading={loading}
+        accent={accent}
+        background={background}
       >
-        {/* vurğu rəngində işıq + incə çərçivə */}
-        <span
-          aria-hidden="true"
-          className="absolute inset-0 opacity-60 transition-opacity duration-500 group-hover:opacity-90"
-          style={{ background: `radial-gradient(60% 55% at 50% 62%, ${accent}40, transparent 70%)` }}
-        />
-        <span aria-hidden="true" className="absolute inset-0 rounded-[20px] ring-1 ring-inset ring-black/[0.06]" />
-
-        {/* telefon — aşağıdan kəsilir */}
-        <span className="absolute left-1/2 top-6 block w-[72%] -translate-x-1/2 transition-transform duration-700 ease-luxe group-hover:-translate-y-1.5 motion-reduce:group-hover:translate-y-0 sm:top-7 sm:w-[64%]">
-          <span className="block rounded-t-[30px] bg-[#171312] px-[5px] pt-[5px] shadow-[0_24px_50px_-18px_rgba(0,0,0,0.55)] ring-1 ring-white/10">
-            <span className="relative block overflow-hidden rounded-t-[25px]" style={{ backgroundColor: background }}>
-              {/* yer tutucu */}
-              <span
-                aria-hidden="true"
-                className={`absolute inset-x-0 top-0 flex aspect-[780/1688] flex-col items-center pt-[34%] transition-opacity duration-500 ${
-                  loaded ? 'opacity-0' : 'opacity-100'
-                }`}
-              >
-                <span
-                  className="h-1.5 w-[22%] rounded-full motion-safe:animate-pulse"
-                  style={{ backgroundColor: `${accent}55` }}
-                />
-                <span
-                  className="mt-4 h-4 w-[46%] rounded-full motion-safe:animate-pulse"
-                  style={{ backgroundColor: `${accent}40` }}
-                />
-                <span
-                  className="mt-2 h-4 w-[38%] rounded-full motion-safe:animate-pulse"
-                  style={{ backgroundColor: `${accent}40` }}
-                />
-                <span className="mt-5 h-px w-[24%]" style={{ backgroundColor: `${accent}80` }} />
-                <span
-                  className="mt-4 h-2 w-[30%] rounded-full motion-safe:animate-pulse"
-                  style={{ backgroundColor: `${accent}33` }}
-                />
-              </span>
-              {image && !failed ? (
-                <img
-                  key={image}
-                  ref={imgRef}
-                  src={image}
-                  alt={imageAlt ?? `${name} şablonunun önbaxışı`}
-                  width={imageWidth}
-                  height={imageHeight}
-                  loading={loading}
-                  decoding="async"
-                  onLoad={() => setLoaded(true)}
-                  onError={() => setFailed(true)}
-                  className={`relative block h-auto w-full transition-opacity duration-700 ease-luxe ${
-                    loaded ? 'opacity-100' : 'opacity-0'
-                  }`}
-                />
-              ) : (
-                <span aria-hidden="true" className="block aspect-[780/1688] w-full" />
-              )}
-            </span>
-          </span>
-        </span>
-
-        {/* aşağı kənarda yumşaq keçid */}
-        <span
-          aria-hidden="true"
-          className="absolute inset-x-0 bottom-0 h-16"
-          style={{ background: `linear-gradient(to top, ${background}, transparent)` }}
-        />
-
         {/* üst nişanlar */}
         <span className="absolute left-3 top-3 flex flex-wrap gap-1.5">
           {statusLabel && <StatusChip label={statusLabel} tone={statusTone} lang={lang} className="shadow-soft" />}
@@ -375,7 +307,7 @@ export function TemplateCard({
             {lockedLabel}
           </span>
         )}
-      </span>
+      </TemplateScene>
 
       {/* ── Mətn ──────────────────────────────────────────── */}
       <span className="block px-3 pb-3 pt-4">
@@ -409,6 +341,110 @@ export function TemplateCard({
         </span>
       </span>
     </button>
+  );
+}
+
+/**
+ * Kartın «səhnəsi»: şablonun fonunda telefon, içində ekran şəkli (aşağıdan kəsilir).
+ * Vitrin kartı və builder-in dizayn seçimi eyni səhnəni işlədir ki, ikisi həmişə eyni görünsün.
+ * `children` — səhnənin üstündəki nişanlar (status, qıfıl, seçildi).
+ * `fallback` — şəkli olmayan şablon üçün telefon ekranında göstərilən miniatür.
+ */
+export function TemplateScene({
+  name,
+  image,
+  imageAlt,
+  imageWidth = 780,
+  imageHeight = 1688,
+  loading = 'lazy',
+  accent = '#C5A059',
+  background = '#F4F1EA',
+  compact = false,
+  fallback = null,
+  children,
+}) {
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
+  // keşdən dərhal gələn şəkil üçün
+  const imgRef = useCallback((node) => {
+    if (node && node.complete && node.naturalWidth > 0) setLoaded(true);
+  }, []);
+  const showImage = image && !failed;
+
+  return (
+    <span
+      className="relative block aspect-[10/11] overflow-hidden rounded-[20px]"
+      style={{ backgroundColor: background }}
+    >
+      {/* vurğu rəngində işıq + incə çərçivə */}
+      <span
+        aria-hidden="true"
+        className="absolute inset-0 opacity-60 transition-opacity duration-500 group-hover:opacity-90"
+        style={{ background: `radial-gradient(60% 55% at 50% 62%, ${accent}40, transparent 70%)` }}
+      />
+      <span aria-hidden="true" className="absolute inset-0 rounded-[20px] ring-1 ring-inset ring-black/[0.06]" />
+
+      {/* telefon — aşağıdan kəsilir */}
+      <span className={`absolute left-1/2 block w-[72%] -translate-x-1/2 transition-transform duration-700 ease-luxe group-hover:-translate-y-1.5 motion-reduce:group-hover:translate-y-0 ${compact ? 'top-4 sm:top-5' : 'top-6 sm:top-7 sm:w-[64%]'}`}>
+        <span className={`block bg-[#171312] shadow-[0_24px_50px_-18px_rgba(0,0,0,0.55)] ring-1 ring-white/10 ${compact ? 'rounded-t-[20px] px-[3px] pt-[3px]' : 'rounded-t-[30px] px-[5px] pt-[5px]'}`}>
+          <span className={`relative block overflow-hidden ${compact ? 'rounded-t-[17px]' : 'rounded-t-[25px]'}`} style={{ backgroundColor: background }}>
+            {/* yer tutucu */}
+            <span
+              aria-hidden="true"
+              className={`absolute inset-x-0 top-0 flex aspect-[780/1688] flex-col items-center pt-[34%] transition-opacity duration-500 ${
+                loaded || (!showImage && fallback) ? 'opacity-0' : 'opacity-100'
+              }`}
+            >
+              <span
+                className="h-1.5 w-[22%] rounded-full motion-safe:animate-pulse"
+                style={{ backgroundColor: `${accent}55` }}
+              />
+              <span
+                className="mt-4 h-4 w-[46%] rounded-full motion-safe:animate-pulse"
+                style={{ backgroundColor: `${accent}40` }}
+              />
+              <span
+                className="mt-2 h-4 w-[38%] rounded-full motion-safe:animate-pulse"
+                style={{ backgroundColor: `${accent}40` }}
+              />
+              <span className="mt-5 h-px w-[24%]" style={{ backgroundColor: `${accent}80` }} />
+              <span
+                className="mt-4 h-2 w-[30%] rounded-full motion-safe:animate-pulse"
+                style={{ backgroundColor: `${accent}33` }}
+              />
+            </span>
+            {showImage ? (
+              <img
+                key={image}
+                ref={imgRef}
+                src={image}
+                alt={imageAlt ?? `${name} şablonunun önbaxışı`}
+                width={imageWidth}
+                height={imageHeight}
+                loading={loading}
+                decoding="async"
+                onLoad={() => setLoaded(true)}
+                onError={() => setFailed(true)}
+                className={`relative block h-auto w-full transition-opacity duration-700 ease-luxe ${
+                  loaded ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
+            ) : (
+              <span aria-hidden="true" className="relative block aspect-[780/1688] w-full">{fallback}</span>
+            )}
+          </span>
+        </span>
+      </span>
+
+      {/* aşağı kənarda yumşaq keçid */}
+      <span
+        aria-hidden="true"
+        className="absolute inset-x-0 bottom-0 h-16"
+        style={{ background: `linear-gradient(to top, ${background}, transparent)` }}
+      />
+
+      {children}
+    </span>
   );
 }
 
