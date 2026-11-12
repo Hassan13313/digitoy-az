@@ -4,7 +4,6 @@ import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { EmblemSlot } from '../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
@@ -14,6 +13,7 @@ import { C as PAL, BANDS, CREAM_BG, DUSK_BG, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { SunArch, Pampas, Rainbow, HalfSun } from './art'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    BOHO SUNSET — «Gün batımı» (Qız gecəsi konsepti, 2026-10)
@@ -279,16 +279,7 @@ export default function BohoSunsetTemplate(props) {
           {/* FOTOLAR — tağ çərçivələr */}
           {S.gallery && (
             <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 16, marginBottom: 32 }}>
-                  {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ position: 'relative', aspectRatio: '3 / 4', marginTop: i % 2 ? 24 : 0 }}>
-                      <span aria-hidden="true" style={{ position: 'absolute', inset: 0, transform: 'translate(7px, 7px)', borderRadius: '999px 999px 10px 10px', border: `1.5px solid ${BANDS(C)[i % 4]}` }} />
-                      <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ position: 'relative', width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: '999px 999px 10px 10px' }} />
-                    </div>
-                  ))}
-                </div>
-              )}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 32 }} />}
               <PhotoQr inv={inv} tr={tr} fg={C.INK} bg="#FFFDF9" frame={{ borderRadius: '90px 90px 12px 12px', border: `1.5px solid ${C.CLAY}` }}
                 btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
             </Panel>

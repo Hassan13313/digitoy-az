@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, lazy, Suspense } from 'react'
 import { eventDict } from '../_shared/kids'
 import { ArrowLeft, MapPin, Navigation, ExternalLink, ChevronDown, Camera } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
-import { hidePhoto } from '../../utils/photoGallery'
 import { motion, AnimatePresence } from 'framer-motion'
 import FloralBackground from '../../components/invitation/FloralBackground'
 import CountdownTimer from '../../components/invitation/CountdownTimer'
@@ -36,6 +35,7 @@ import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
 import t from '../../data/translations'
 import { mergeSectionLabels, withStringOverrides, makeLabelResolver, sectionHead } from '../../data/adminOverrides'
 import { makeOpeningText } from '../_shared/openingSpec'
+import FilmReel from '../_shared/FilmReel'
 
 /* Ortaq komponentlər (sifariş CTA / musiqi bubble) theme token-ləri ilə işləyir */
 const TH = getTemplateTheme('simple-luxury')
@@ -504,27 +504,7 @@ export default function SimpleLuxuryTemplate({
                 <GoldDividerOrnament />
 
                 {/* Demo sample photos grid */}
-                {weddingData.demoPhotos?.length > 0 && (
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(3,1fr)',
-                    gap: 6,
-                    marginBottom: 28,
-                    width: '100%',
-                  }}>
-                    {weddingData.demoPhotos.map((url, i) => (
-                      <div key={i} style={{ aspectRatio: '3/2', overflow: 'hidden', background: '#f0e8d8' }}>
-                        <img
-                          src={url}
-                          alt=""
-                          loading="lazy"
-                          onError={hidePhoto}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {weddingData.demoPhotos?.length > 0 && <FilmReel photos={weddingData.demoPhotos} style={{ marginBottom: 28, width: '100%' }} />}
 
                 <div className="inline-flex flex-col items-center mb-8">
                   <div className="relative mb-4" style={{ padding: 12, border: '1px solid rgba(197,160,89,0.25)', background: 'rgba(253,250,244,0.8)' }}>

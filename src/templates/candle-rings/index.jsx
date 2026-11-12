@@ -4,19 +4,19 @@ import LanguageSwitcher from '../../components/LanguageSwitcher'
 import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { Words, Letters, Rise, Stagger, Photo, Roll, Dust, Burst, Flicker, Reel } from '../_shared/viral'
+import { Words, Letters, Rise, Stagger, Photo, Roll, Dust, Burst, Flicker } from '../_shared/viral'
 import { VIRAL_CSS, useInView } from '../_shared/viralHooks'
 import { resolvePhotos } from '../templatePhotos'
 import { PHOTOS } from './photos'
 import { C as PAL, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { PaletteContext, resolvePalette, scaleFont } from '../_shared/palette'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    ŞAM VƏ ÜZÜK — «viral video» toy seriyası (2026-11)
@@ -336,11 +336,7 @@ export default function CandleRingsTemplate(props) {
 
           {S.gallery && (
             <Panel section="gallery" id="gallery-section" head={head} C={C} alt title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
-              {gallery.demoPhotos.length > 0 ? (
-                <div style={{ margin: '0 -26px 28px' }}>
-                  <Reel photos={gallery.demoPhotos} height={260} seconds={34} onError={hidePhoto} />
-                </div>
-              ) : null}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ margin: '0 -26px 28px' }} />}
               <PhotoQr inv={inv} tr={tr} fg={C.MEXMER} bg={C.FIL} frame={{ border: `1px solid ${alpha(C.QIZIL, 0.5)}` }}
                 btn={btn(C)} muted={C.KUL} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
             </Panel>

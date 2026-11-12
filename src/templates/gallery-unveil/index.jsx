@@ -4,7 +4,6 @@ import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { EmblemSlot } from '../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
@@ -14,6 +13,7 @@ import { C as PAL, GOLD_GRAD, WALL_BG, CHAR_BG, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Artwork, GildedFrame, VelvetCloth, MuseumLabel } from './art'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    GALLERY UNVEIL — «Pərdə açılır» (Açılış konsepti, 2026-10)
@@ -269,15 +269,7 @@ export default function GalleryUnveilTemplate(props) {
           {/* FOTOLAR — salon düzülüşü */}
           {S.gallery && (
             <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12, marginBottom: 34, alignItems: 'start' }}>
-                  {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ gridColumn: ['1 / 5', '5 / 7', '1 / 3', '3 / 7', '1 / 4', '4 / 7'][i % 6], aspectRatio: ['4 / 3', '3 / 4', '3 / 4', '4 / 3', '1', '1'][i % 6], padding: i % 2 ? 4 : 6, background: i % 2 ? C.INK : GOLD_GRAD(C), boxShadow: '0 12px 18px -12px rgba(0,0,0,.45)' }}>
-                      <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                    </div>
-                  ))}
-                </div>
-              )}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 34 }} />}
               <PhotoQr inv={inv} tr={tr} fg={C.INK} bg="#FFFFFF" frame={{ borderRadius: 0, padding: 10, boxShadow: '0 12px 18px -12px rgba(0,0,0,.4)' }}
                 btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'event')} />
             </Panel>

@@ -4,16 +4,16 @@ import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { EmblemSlot } from '../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../_shared/blocks'
 import { galleryDesc, tableSize } from '../_shared/kids'
-import { C as PAL, HAZARD, STEEL_GRAD, CONCRETE_BG, CHAR_BG, nameSize } from './palette'
+import { C as PAL, HAZARD, CONCRETE_BG, CHAR_BG, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Rivets, NeonOpen, Storefront, SteelPlate } from './art'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    ROLLER SHUTTER — «Jalüz qalxır» (Açılış konsepti, 2026-10)
@@ -272,16 +272,7 @@ export default function RollerShutterTemplate(props) {
           {/* FOTOLAR */}
           {S.gallery && (
             <Panel section="gallery" id="gallery-section" head={head} mono={mono} dark title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 14, marginBottom: 32 }}>
-                  {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ position: 'relative', aspectRatio: '4 / 5', padding: 6, borderRadius: 6, background: STEEL_GRAD }}>
-                      <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: 3, filter: 'contrast(1.05) saturate(.9)' }} />
-                      <Rivets inset={2} size={5} />
-                    </div>
-                  ))}
-                </div>
-              )}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 32 }} />}
               <PhotoQr inv={inv} tr={tr} fg={C.CHAR} bg="#FFFFFF" frame={{ borderRadius: 6, border: `3px solid ${C.YELLOW}` }}
                 btn={darkBtn(C)} muted={alpha(C.WHITE, 0.7)} desc={galleryDesc(props.adminOverrides, tr, lang, 'event')} />
             </Panel>

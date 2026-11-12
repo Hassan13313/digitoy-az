@@ -4,7 +4,6 @@ import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { EmblemSlot } from '../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
@@ -15,6 +14,7 @@ import { LABELS, TXT } from './copy'
 import { fill } from '../_shared/copyText'
 import { WoodFrame, ChalkTray, ChalkDoodle, ChalkLine } from './art'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    CHALKBOARD — «Təbaşir lövhə» (Məzuniyyət konsepti, 2026-10)
@@ -285,16 +285,7 @@ export default function ChalkboardTemplate(props) {
           {/* FOTOLAR — maqnitlər */}
           {S.gallery && (
             <Panel section="gallery" id="gallery-section" head={head} dark doodle="heart" title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 18, marginBottom: 34, paddingTop: 8 }}>
-                  {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ position: 'relative', aspectRatio: '4 / 5', padding: 6, background: '#FFFFFF', boxShadow: '0 12px 18px -10px rgba(0,0,0,.55)', transform: `rotate(${i % 2 ? 2 : -2}deg)` }}>
-                      <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                      <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: -8, width: 18, height: 18, marginLeft: -9, borderRadius: '50%', background: ['#E9573F', '#4A90D9', '#F5C33B', '#3BB273'][i % 4], boxShadow: 'inset -2px -3px 4px rgba(0,0,0,.25), 0 3px 4px rgba(0,0,0,.35)' }} />
-                    </div>
-                  ))}
-                </div>
-              )}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 34 }} />}
               <PhotoQr inv={inv} tr={tr} fg={C.BOARD_D} bg="#FFFFFF" frame={{ borderRadius: 6 }}
                 btn={darkBtn(C)} muted={C.CHALK_DIM} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
             </Panel>

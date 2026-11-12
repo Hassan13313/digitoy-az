@@ -5,7 +5,6 @@ import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { MonoContent } from '../_shared/MonoContent'
 import { enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
@@ -20,6 +19,7 @@ import { C as PAL, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { PaletteContext, resolvePalette, scaleFont } from '../_shared/palette'
 import Countdown, { COUNTDOWN_CSS } from '../_shared/luxe/Countdown'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    ORIENTAL LUXE — lüks toy seriyası (2026-11, foto redizayn)
@@ -364,16 +364,7 @@ export default function OrientalLuxeTemplate(props) {
 
           {S.gallery && (
             <Panel section="gallery" id="gallery-section" head={head} C={C} alt title={L('gallery', 'title', tr.inv_gallery)}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10, marginBottom: 28 }}>
-                  {gallery.demoPhotos.map((url, i) => (
-                    <Rise key={i} delay={(i % 2) * 0.12} style={{ position: 'relative', aspectRatio: '3 / 4', overflow: 'hidden', background: C.DEEP, borderRadius: archR }}>
-                      <img src={url} alt="" loading="lazy" onError={hidePhoto} className="vr-kb" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                      <span aria-hidden="true" style={{ position: 'absolute', inset: 0, borderRadius: 'inherit', border: `1px solid ${alpha(C.GOLD, 0.55)}` }} />
-                    </Rise>
-                  ))}
-                </div>
-              )}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 28 }} />}
               <PhotoQr inv={inv} tr={tr} fg={C.DEEP} bg={C.IVORY} frame={{ border: `1px solid ${alpha(C.GOLD, 0.45)}` }}
                 btn={btn(C)} muted={C.MUTE} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
             </Panel>

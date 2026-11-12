@@ -4,7 +4,6 @@ import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { EmblemSlot } from '../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
@@ -14,6 +13,7 @@ import { C as PAL, BRICKS, glow, boxGlow, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { NeonStar, NeonFrame, NeonRule } from './art'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    NEON PARTY — «Neon gecə» (Korporativ konsepti, 2026-10)
@@ -263,15 +263,7 @@ export default function NeonPartyTemplate(props) {
           {/* FOTOLAR */}
           {S.gallery && (
             <Panel section="gallery" id="gallery-section" head={head} tone={C.VIOLET} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 14, marginBottom: 32 }}>
-                  {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ aspectRatio: '3 / 4', overflow: 'hidden', borderRadius: 14, background: C.PANEL, boxShadow: boxGlow(RING(C)[i % 4]) }}>
-                      <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                    </div>
-                  ))}
-                </div>
-              )}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 32 }} />}
               <PhotoQr inv={inv} tr={tr} fg="#16051A" bg="#FFFFFF" frame={{ borderRadius: 16, boxShadow: boxGlow(C.CYAN) }}
                 btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
             </Panel>

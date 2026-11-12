@@ -4,7 +4,6 @@ import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { EmblemSlot } from '../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
@@ -14,6 +13,7 @@ import { C as PAL, GOLD_GRAD, LEATHER_BG, LEATHER_FLAT, PAGE_BG, goldText, nameS
 import { LABELS, TXT } from './copy'
 import { Album, GoldFrame, PhotoCorners, Flourish } from './art'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    GOLDEN JUBILEE — «Qızıl albom» (İldönümü konsepti, 2026-10)
@@ -297,16 +297,7 @@ export default function GoldenJubileeTemplate(props) {
           {/* FOTOLAR */}
           {S.gallery && (
             <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 22, marginBottom: 34, padding: '0 6px' }}>
-                  {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ position: 'relative', aspectRatio: '4 / 5', padding: 8, background: '#FFFDF7', boxShadow: '0 10px 18px -10px rgba(60,40,20,.5)', transform: `rotate(${i % 2 ? 1.6 : -1.6}deg)` }}>
-                      <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: 'sepia(.25)' }} />
-                      <PhotoCorners size={18} />
-                    </div>
-                  ))}
-                </div>
-              )}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 34 }} />}
               <PhotoQr inv={inv} tr={tr} fg={C.LEATHER_D} bg="#FFFDF7" frame={{ borderRadius: 4, border: `1px solid ${alpha(C.GOLD_D, 0.5)}`, boxShadow: '0 10px 18px -12px rgba(60,40,20,.5)' }}
                 btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
             </Panel>

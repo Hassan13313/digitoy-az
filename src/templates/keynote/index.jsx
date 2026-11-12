@@ -4,7 +4,6 @@ import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { EmblemSlot } from '../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
@@ -14,6 +13,7 @@ import { C as PAL, GLOW, GRID_BG, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Screen, LiveDot, Beams, Badge } from './art'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    KEYNOTE — «Konfrans səhnəsi» (Korporativ konsepti, 2026-10)
@@ -274,15 +274,7 @@ export default function KeynoteTemplate(props) {
           {/* FOTOLAR */}
           {S.gallery && (
             <Panel section="gallery" id="gallery-section" head={head} index={idx()} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8, marginBottom: 30 }}>
-                  {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ aspectRatio: i % 4 === 0 ? '1' : '3 / 4', overflow: 'hidden', borderRadius: 14, background: C.PANEL, border: `1px solid ${C.LINE}` }}>
-                      <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                    </div>
-                  ))}
-                </div>
-              )}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 30 }} />}
               <PhotoQr inv={inv} tr={tr} fg={C.VOID} bg={C.WHITE} frame={{ borderRadius: 16, boxShadow: '0 0 0 3px rgba(61,123,255,.6), 0 0 40px -10px rgba(34,211,238,.6)' }}
                 btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'event')} />
             </Panel>

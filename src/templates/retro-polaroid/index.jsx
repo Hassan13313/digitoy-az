@@ -4,7 +4,6 @@ import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { EmblemSlot } from '../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
@@ -14,6 +13,7 @@ import { C as PAL, RAINBOW, CREAM_BG, CHOC_BG, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Rainbow, SunsetScene, Polaroid, Camera } from './art'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    RETRO POLAROID — «Ani foto» (İldönümü konsepti, 2026-10)
@@ -297,15 +297,7 @@ export default function RetroPolaroidTemplate(props) {
           {/* FOTOLAR */}
           {S.gallery && (
             <Panel section="gallery" id="gallery-section" head={head} hand={hand} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 18, marginBottom: 34 }}>
-                  {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ padding: '7% 7% 26%', background: C.WHITE, boxShadow: '0 12px 18px -12px rgba(59,36,24,.5)', transform: `rotate(${[-3, 2.5, 2, -2.5][i % 4]}deg)` }}>
-                      <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', display: 'block', filter: 'saturate(1.1) sepia(.18) contrast(1.05)' }} />
-                    </div>
-                  ))}
-                </div>
-              )}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 34 }} />}
               <PhotoQr inv={inv} tr={tr} fg={C.CHOC} bg={C.WHITE} frame={{ borderRadius: 4, padding: 10, boxShadow: '0 12px 18px -12px rgba(59,36,24,.5)' }}
                 btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
             </Panel>

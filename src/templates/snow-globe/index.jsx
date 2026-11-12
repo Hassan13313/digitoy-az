@@ -4,7 +4,6 @@ import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { EmblemSlot } from '../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
@@ -14,6 +13,7 @@ import { C as PAL, NIGHT_BG, FROST_BG, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { SnowGlobe, SkySnow, Bauble, Flake, GiftTag } from './art'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    SNOW GLOBE — «Qar kürəsi» (Bayram gecələri konsepti, 2026-10)
@@ -266,15 +266,7 @@ export default function SnowGlobeTemplate(props) {
           {/* FOTOLAR — buzlu pəncərələr */}
           {S.gallery && (
             <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 14, marginBottom: 32 }}>
-                  {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ aspectRatio: '4 / 5', padding: 6, borderRadius: '50% 50% 14px 14px / 26% 26% 14px 14px', background: '#FFFFFF', boxShadow: `inset 0 0 0 2px ${C.ICE}, 0 12px 20px -12px rgba(27,43,64,.4)` }}>
-                      <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: '50% 50% 10px 10px / 25% 25% 10px 10px' }} />
-                    </div>
-                  ))}
-                </div>
-              )}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 32 }} />}
               <PhotoQr inv={inv} tr={tr} fg={C.NIGHT_D} bg="#FFFFFF" frame={{ borderRadius: 18, border: `2px solid ${C.ICE}` }}
                 btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
             </Panel>

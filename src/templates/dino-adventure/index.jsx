@@ -4,7 +4,6 @@ import LanguageSwitcher from '../../components/LanguageSwitcher'
 import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
@@ -13,6 +12,7 @@ import { C as PAL } from './palette'
 import { LABELS, TXT } from './copy'
 import { HatchEgg, DinoBadge, NumberEgg, Fern, Volcano, Brachio, Footprint, Bone, Nest } from './art'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    DINO ADVENTURE — «Dinozavr ekspedisiyası» (Uşaq ad günü konsepti, 2026-10)
@@ -348,15 +348,7 @@ export default function DinoAdventureTemplate(props) {
           {/* FOTOLAR — kəhrəba */}
           {S.gallery && (
             <Camp section="gallery" id="gallery-section" disp={disp} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 10, marginBottom: 30 }}>
-                  {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ margin: 6, aspectRatio: '4 / 5', overflow: 'hidden', borderRadius: ['48% 52% 44% 56% / 55% 45% 55% 45%', '56% 44% 52% 48% / 46% 54% 46% 54%', '44% 56% 50% 50% / 52% 48% 52% 48%'][i % 3], background: C.AMBER_L, boxShadow: `0 0 0 5px ${alpha(C.AMBER, 0.75)}, 0 0 0 7px ${alpha(C.AMBER_L, 0.6)}, 0 12px 24px -8px ${alpha(C.LAVA_D, 0.5)}` }}>
-                      <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: 'sepia(.12) saturate(1.05)' }} />
-                    </div>
-                  ))}
-                </div>
-              )}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 30 }} />}
               <div style={{ textAlign: 'center' }}>
                 <div style={{ display: 'inline-block', padding: 12, background: '#FFFFFF', borderRadius: 18, boxShadow: `0 0 0 3px ${C.LEAF}, 0 6px 0 3px ${C.JUNGLE}` }}>
                   <QRCodeSVG value={gallery.photoShareUrl} size={126} bgColor="#FFFFFF" fgColor={C.JUNGLE} level="M" />

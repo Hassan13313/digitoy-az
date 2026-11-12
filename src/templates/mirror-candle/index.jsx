@@ -4,7 +4,6 @@ import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { EmblemSlot } from '../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
@@ -14,6 +13,7 @@ import { C as PAL, GILT, GILT_BAR, GLOW_BG, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Glint, GiltRule, Mirror, Candlestick } from './art'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    MIRROR & CANDLE — «Güzgü və şam» (Xına gecəsi konsepti, 2026-10)
@@ -262,15 +262,7 @@ export default function MirrorCandleTemplate(props) {
           {/* FOTOLAR — oval çərçivələr */}
           {S.gallery && (
             <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, marginBottom: 32 }}>
-                  {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ aspectRatio: '3 / 4', overflow: 'hidden', borderRadius: '50%', background: C.NIGHT_L, border: '5px solid #C9A04C', boxShadow: `0 0 0 1px ${C.GOLD_L}, 0 16px 24px -12px rgba(0,0,0,.8)` }}>
-                      <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                    </div>
-                  ))}
-                </div>
-              )}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 32 }} />}
               <PhotoQr inv={inv} tr={tr} fg="#2A1E0C" bg="#FFF8EA" frame={{ borderRadius: 4, boxShadow: `0 0 0 5px #C9A04C, 0 0 0 6px ${C.GOLD_L}` }}
                 btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
             </Panel>

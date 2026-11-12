@@ -4,7 +4,6 @@ import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { EmblemSlot } from '../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
@@ -14,6 +13,7 @@ import { C as PAL, GOLD_GRAD, NAVY_BG, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Crown, Cushion, SHIELD, Dust, CrownRule } from './art'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    LITTLE PRINCE — «Kiçik şahzadə» (Sünnət toyu konsepti, 2026-10)
@@ -283,15 +283,7 @@ export default function LittlePrinceTemplate(props) {
           {/* FOTOLAR */}
           {S.gallery && (
             <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, marginBottom: 32 }}>
-                  {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ aspectRatio: '3 / 4', overflow: 'hidden', borderRadius: '50% 50% 6px 6px / 22% 22% 6px 6px', background: C.IVORY_D, border: `4px solid ${C.GOLD}`, boxShadow: `0 0 0 3px ${C.IVORY}, 0 0 0 4px ${C.ROYAL}, 0 14px 22px -12px rgba(15,28,63,.5)` }}>
-                      <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                    </div>
-                  ))}
-                </div>
-              )}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 32 }} />}
               <PhotoQr inv={inv} tr={tr} fg={C.NAVY} bg="#FFFDF7" frame={{ borderRadius: 14, border: `3px solid ${C.GOLD}`, boxShadow: `0 0 0 4px ${C.IVORY}, 0 0 0 5px ${C.ROYAL}` }}
                 btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
             </Panel>

@@ -4,7 +4,6 @@ import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { EmblemSlot } from '../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
@@ -14,6 +13,7 @@ import { C as PAL, VELVET_BG, VEIL_PATTERN, IVORY_PATTERN, nameSize } from './pa
 import { LABELS, TXT } from './copy'
 import { Buta, ButaRule, Tassel, EmbroideryBand, VeilDrape, Candle } from './art'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    RED VEIL — «Qırmızı örpək» (Xına gecəsi konsepti, 2026-10)
@@ -299,15 +299,7 @@ export default function RedVeilTemplate(props) {
           {/* FOTOLAR — mehrab tağları */}
           {S.gallery && (
             <Panel section="gallery" id="gallery-section" head={head} velvet title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 10, marginBottom: 30 }}>
-                  {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ aspectRatio: '3 / 4.4', overflow: 'hidden', borderRadius: '999px 999px 4px 4px', background: C.WINE, border: `2px solid ${C.GOLD}`, boxShadow: `0 0 0 4px ${alpha(C.WINE, 0.6)}, 0 0 0 5px ${alpha(C.GOLD_L, 0.45)}`, transform: i % 3 === 1 ? 'translateY(14px)' : 'none' }}>
-                      <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                    </div>
-                  ))}
-                </div>
-              )}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 30 }} />}
               <PhotoQr inv={inv} tr={tr} fg={C.WINE} bg="#FFF8EE" frame={{ borderRadius: 6, border: `1px solid ${C.GOLD}`, boxShadow: `0 0 0 6px ${alpha(C.WINE, 0.5)}, 0 0 0 7px ${alpha(C.GOLD_L, 0.5)}` }}
                 btn={(on) => ({ ...btn(C)(on), background: on ? C.GOLD : 'transparent', color: on ? C.WINE : C.GOLD_L, border: `1px solid ${C.GOLD}` })}
                 muted={alpha('#FFF3E0', 0.78)} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />

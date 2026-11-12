@@ -4,7 +4,6 @@ import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { EmblemSlot } from '../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
@@ -15,6 +14,7 @@ import { LABELS, TXT } from './copy'
 import { fill } from '../_shared/copyText'
 import { Bell, SoundRings, Bow, Sash } from './art'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    LAST BELL — «Son zəng» (Məzuniyyət konsepti, 2026-10)
@@ -297,16 +297,7 @@ export default function LastBellTemplate(props) {
           {/* FOTOLAR */}
           {S.gallery && (
             <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 18, marginBottom: 32, paddingTop: 14 }}>
-                  {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ position: 'relative', aspectRatio: '4 / 5', padding: 6, background: C.WHITE, borderRadius: 6, boxShadow: '0 12px 20px -12px rgba(28,42,74,.45)' }}>
-                      <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: 3 }} />
-                      <Bow size={46} style={{ position: 'absolute', left: '50%', top: -16, marginLeft: -23 }} />
-                    </div>
-                  ))}
-                </div>
-              )}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 32 }} />}
               <PhotoQr inv={inv} tr={tr} fg={C.NAVY} bg={C.WHITE} frame={{ borderRadius: 14, border: `1.5px solid ${C.LINE}` }}
                 btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
             </Panel>

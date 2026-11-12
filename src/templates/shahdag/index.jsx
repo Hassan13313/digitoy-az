@@ -4,7 +4,6 @@ import LanguageSwitcher from '../../components/LanguageSwitcher'
 import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
@@ -17,6 +16,7 @@ import { PHOTOS } from './photos'
 import { C as PAL, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { PaletteContext, resolvePalette, scaleFont } from '../_shared/palette'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    ŞAHDAĞ — lüks toy seriyası (2026-11)
@@ -324,15 +324,7 @@ export default function ShahdagTemplate(props) {
 
           {S.gallery && (
             <Panel section="gallery" id="gallery-section" head={head} C={C} title={L('gallery', 'title', tr.inv_gallery)}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8, marginBottom: 28 }}>
-                  {gallery.demoPhotos.map((url, i) => (
-                    <Rise key={i} delay={(i % 2) * 0.12} style={{ aspectRatio: '3 / 4', overflow: 'hidden', background: C.FROST }}>
-                      <img src={url} alt="" loading="lazy" onError={hidePhoto} className="vr-kb" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                    </Rise>
-                  ))}
-                </div>
-              )}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 28 }} />}
               <PhotoQr inv={inv} tr={tr} fg={C.SLATE} bg="#FFFFFF" frame={{ border: `1px solid ${alpha(C.SLATE, 0.15)}` }}
                 btn={btn(C)} muted={C.MUTE} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
             </Panel>

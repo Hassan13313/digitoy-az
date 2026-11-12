@@ -4,7 +4,6 @@ import LanguageSwitcher from '../../components/LanguageSwitcher'
 import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
@@ -13,6 +12,7 @@ import { C as PAL, CONFETTI, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Star, Bunting, StringLights, Tent, Drum, Starburst, TopHat, Hoop, Pedestal } from './art'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    CIRCUS SHOW — «Böyük sirk şousu» (Uşaq ad günü konsepti, 2026-10)
@@ -356,15 +356,7 @@ export default function CircusShowTemplate(props) {
           {/* FOTOLAR — afişa divarı */}
           {S.gallery && (
             <Act section="gallery" id="gallery-section" body={body} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 10, marginBottom: 30 }}>
-                  {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ margin: 7, aspectRatio: '3 / 4', overflow: 'hidden', background: C.PAPER_D, transform: `rotate(${[-3, 2, -1.5, 2.5, -2, 1][i % 6]}deg)`, boxShadow: `0 0 0 6px #FFFDF6, 0 0 0 8px ${[C.RED, C.NAVY, C.TEAL][i % 3]}, 0 14px 20px -8px rgba(0,0,0,.4)` }}>
-                      <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                    </div>
-                  ))}
-                </div>
-              )}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 30 }} />}
               <div style={{ textAlign: 'center' }}>
                 <div style={{ display: 'inline-block', padding: 12, background: '#FFFDF6', borderRadius: 8, border: `2px solid ${C.NAVY}`, boxShadow: `5px 5px 0 ${C.RED}` }}>
                   <QRCodeSVG value={gallery.photoShareUrl} size={126} bgColor="#FFFDF6" fgColor={C.NAVY} level="M" />

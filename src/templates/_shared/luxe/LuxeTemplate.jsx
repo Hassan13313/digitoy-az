@@ -5,7 +5,6 @@ import DressCodeSection from '../DressCodeSection'
 import MapSection from '../MapSection'
 import { MonoContent } from '../MonoContent'
 import { enterDirection } from '../motion'
-import { hidePhoto } from '../../../utils/photoGallery'
 import { useGate, openingNames, alpha } from '../useInvitation'
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../invitationKit'
 import { VenueLinks, SeatFinder, PhotoQr, GuestbookForm } from '../blocks'
@@ -15,6 +14,7 @@ import { VIRAL_CSS, useInView, coverSpot } from '../viralHooks'
 import { resolvePhotos, isCustomPhoto } from '../../templatePhotos'
 import { scaleFont } from '../palette'
 import Countdown, { COUNTDOWN_CSS } from './Countdown'
+import FilmReel from '../FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    LÜKS FOTO ŞABLON MÜHƏRRİKİ (2026-11)
@@ -357,7 +357,6 @@ export default function LuxeTemplate({ props, inv, C, T, cfg }) {
   const left = cfg.align === 'left'
   const head = cfg.fonts.head
   const body = cfg.fonts.body
-  const shape = radiusOf(cfg.gallery)
   const detail = cfg.detail || 'full'
 
   return (
@@ -510,16 +509,7 @@ export default function LuxeTemplate({ props, inv, C, T, cfg }) {
 
           {S.gallery && (
             <Panel section="gallery" id="gallery-section" cfg={cfg} C={C} title={L('gallery', 'title', tr.inv_gallery)}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10, marginBottom: 28 }}>
-                  {gallery.demoPhotos.map((url, i) => (
-                    <Rise key={i} delay={(i % 2) * 0.12} style={{ position: 'relative', aspectRatio: cfg.gallery === 'circle' ? '1' : '3 / 4', overflow: 'hidden', background: C.BG2, borderRadius: shape }}>
-                      <img src={url} alt="" loading="lazy" onError={hidePhoto} className="vr-kb" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                      <span aria-hidden="true" style={{ position: 'absolute', inset: 0, borderRadius: 'inherit', border: `1px solid ${alpha(C.ACCENT, 0.45)}` }} />
-                    </Rise>
-                  ))}
-                </div>
-              )}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 28 }} />}
               <PhotoQr inv={inv} tr={tr} fg={cfg.tone === 'light' ? C.INK : C.BG} bg={cfg.tone === 'light' ? '#FFFFFF' : C.INK} frame={{ border: `1px solid ${alpha(C.ACCENT, 0.45)}` }}
                 btn={btn(C, cfg)} muted={C.MUTE} desc={galleryDesc(props.adminOverrides, tr, lang, cfg.galleryKind || 'celebration')} />
             </Panel>

@@ -5,7 +5,6 @@ import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { EmblemSlot } from '../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
@@ -14,6 +13,7 @@ import { C as PAL, FOIL, ROSE_FOIL, BUNCH, letterSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Balloon, Confetti, Garland, CandyJar, GumballMachine, Candle } from './art'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    BALLOON PARTY — «Şar və şirniyyat bayramı» (Uşaq ad günü konsepti, 2026-10)
@@ -379,20 +379,7 @@ export default function BalloonPartyTemplate(props) {
           {/* FOTOLAR — ipdən asılan polaroidlər */}
           {S.gallery && (
             <Party section="gallery" id="gallery-section" disp={disp} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ position: 'relative', marginBottom: 30 }}>
-                  <svg aria-hidden="true" viewBox="0 0 400 40" preserveAspectRatio="none" style={{ position: 'absolute', left: -10, right: -10, top: -6, width: 'calc(100% + 20px)', height: 40 }}>
-                    <path d="M0 6Q200 46 400 6" fill="none" stroke={alpha(C.PLUM, 0.35)} strokeWidth="1.4" />
-                  </svg>
-                  <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, paddingTop: 10 }}>
-                    {gallery.demoPhotos.map((url, i) => (
-                      <div key={i} style={{ aspectRatio: '4 / 5.2', overflow: 'hidden', background: C.BLUSH, border: '7px solid #FFFFFF', borderBottomWidth: 24, transform: `rotate(${[-4, 2, -2, 3, -3, 1][i % 6]}deg) translateY(${i % 3 === 1 ? 14 : 0}px)`, boxShadow: '0 12px 20px -10px rgba(74,48,70,.4)' }}>
-                        <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 30 }} />}
               <div style={{ textAlign: 'center' }}>
                 <div style={{ display: 'inline-block', padding: 12, background: '#FFFFFF', borderRadius: 22, boxShadow: `0 0 0 3px ${C.BLUSH}, 0 12px 24px -12px rgba(201,87,124,.5)` }}>
                   <QRCodeSVG value={gallery.photoShareUrl} size={126} bgColor="#FFFFFF" fgColor={C.PLUM} level="M" />

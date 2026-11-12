@@ -5,7 +5,6 @@ import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { EmblemSlot } from '../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, seatInputProps, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, SeatSuggest, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
@@ -17,6 +16,7 @@ import {
   MirrorFrame, Compass, Vignette, CastleMark, AgeSeal, Cloud, Topiary,
 } from './art'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    FAIRY TALE — «Nağıl kitabı» (Uşaq ad günü konsepti, 2026-10)
@@ -419,19 +419,7 @@ export default function FairyTaleTemplate(props) {
           {/* FOTOLAR — portret zalı */}
           {S.gallery && (
             <Page section="gallery" id="gallery-section" serif={serif} tone="parch" title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, marginBottom: 30, alignItems: 'end' }}>
-                  {gallery.demoPhotos.map((url, i) => {
-                    const arch = i % 3 === 1
-                    /* Bir element: foto yüklənməsə hidePhoto bütün çərçivəni gizlədir */
-                    return (
-                      <div key={i} style={{ margin: 6, aspectRatio: arch ? '3 / 4.4' : '3 / 4', overflow: 'hidden', borderRadius: arch ? '999px 999px 4px 4px' : 4, background: alpha(C.LILAC, 0.3), boxShadow: `0 0 0 3px ${C.CREAM}, 0 0 0 5px ${C.GOLD}, 0 0 0 6px ${C.GOLD_D}, 0 12px 20px -8px rgba(45,42,74,.5)` }}>
-                        <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 30 }} />}
               <div style={{ textAlign: 'center' }}>
                 <div style={{ display: 'inline-block', padding: 12, background: '#FFFFFF', borderRadius: 10, boxShadow: `0 0 0 1.5px ${C.GOLD}, 0 0 0 5px #FFFFFF, 0 0 0 6px ${alpha(C.GOLD, 0.5)}` }}>
                   <QRCodeSVG value={gallery.photoShareUrl} size={128} bgColor="#FFFFFF" fgColor={C.NIGHT} level="M" />

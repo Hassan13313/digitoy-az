@@ -4,7 +4,6 @@ import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { EmblemSlot } from '../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
@@ -14,6 +13,7 @@ import { C as PAL, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Mandala, Leaf, DotRule, HennaHand } from './art'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    HENNA BUTA — «Xına naxışı» (Xına gecəsi konsepti, 2026-10)
@@ -269,15 +269,7 @@ export default function HennaButaTemplate(props) {
           {/* FOTOLAR — günbəz çərçivələr */}
           {S.gallery && (
             <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 14, marginBottom: 32 }}>
-                  {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ aspectRatio: '3 / 4', overflow: 'hidden', borderRadius: '50% 50% 14px 14px / 34% 34% 14px 14px', background: C.SAND, border: `5px solid #FFFCF7`, outline: `1.5px dotted ${C.HENNA}`, outlineOffset: 3, boxShadow: '0 14px 22px -14px rgba(90,35,12,.5)' }}>
-                      <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                    </div>
-                  ))}
-                </div>
-              )}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 32 }} />}
               <PhotoQr inv={inv} tr={tr} fg={C.HENNA_D} bg="#FFFCF7" frame={{ borderRadius: 22, border: `1px solid ${alpha(C.HENNA, 0.35)}`, outline: `2px dotted ${alpha(C.HENNA, 0.5)}`, outlineOffset: 5 }}
                 btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
             </Panel>

@@ -4,7 +4,6 @@ import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { EmblemSlot } from '../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
@@ -14,6 +13,7 @@ import { C as PAL, DOTS, SPEED, OUTLINE, SFX, BURST_SHARP, nameSize } from './pa
 import { LABELS, TXT } from './copy'
 import { Emblem, Burst, Bubble, Caption } from './art'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    HERO COMIC — «Qəhrəman» (Sünnət toyu konsepti, 2026-10)
@@ -291,15 +291,7 @@ export default function HeroComicTemplate(props) {
           {/* FOTOLAR — kadrlar */}
           {S.gallery && (
             <Page section="gallery" id="gallery-section" head={head} tint="#E9F4FB" title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8, marginBottom: 26 }}>
-                  {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ aspectRatio: i % 3 === 1 ? '3 / 4' : '1', alignSelf: 'center', overflow: 'hidden', background: C.SKY, border: `3px solid ${C.INK}`, boxShadow: `3px 3px 0 ${C.INK}` }}>
-                      <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                    </div>
-                  ))}
-                </div>
-              )}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 26 }} />}
               <PhotoQr inv={inv} tr={tr} fg={C.INK} bg={C.WHITE} frame={{ border: `3px solid ${C.INK}`, boxShadow: `5px 5px 0 ${C.INK}` }}
                 btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'celebration')} />
             </Page>

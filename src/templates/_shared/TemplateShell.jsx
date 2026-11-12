@@ -14,7 +14,6 @@ import { getSectionVisibility } from '../../data/sections'
 import { formatAzDate, formatTime24 } from '../../utils/dateFormat'
 import { trackEvent } from '../../utils/analytics'
 import { Reveal, Stagger, PopDigit, enterDirection, AmbientLayer } from './motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { useCountdown } from '../../hooks/useCountdown'
 import { useTimeline } from '../../hooks/useTimeline'
 import { useSeating } from '../../hooks/useSeating'
@@ -26,6 +25,7 @@ import { useMusicPrompt } from '../../hooks/useMusicPrompt'
 import t from '../../data/translations'
 import { applyThemeOverrides, mergeSectionLabels, withStringOverrides, makeLabelResolver, sectionHead } from '../../data/adminOverrides'
 import { makeOpeningText } from './openingSpec'
+import FilmReel from './FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    TEMPLATE SHELL — 13 bölməlik ortaq dəvətnamə skeleti.
@@ -811,16 +811,7 @@ export default function TemplateShell({
                   <Stagger base={0} style={{ background: card, border: `1px solid ${line}`, borderRadius: D.radius, padding: 'clamp(16px, 5vw, 22px)', textAlign: 'center' }}>
                     <SectionHead kicker={L('gallery', 'kicker', 'Gallery')} title={L('gallery', 'title', tr.inv_gallery)} theme={theme} design={D} serif={serif} headScale={theme.headingScale} />
 
-                    {gallery.demoPhotos.length > 0 && (
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 18 }}>
-                        {gallery.demoPhotos.map((url, i) => (
-                          <div key={i} style={{ aspectRatio: '3/2', overflow: 'hidden', background: theme.surface, borderRadius: D.radius === 0 ? 0 : 6 }}>
-                            {/* ⚠ Şəkil serverdən silinibsə sınıq ikon qalmasın — xana gizlədilir. */}
-                            <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 18 }} />}
 
                     <div style={{
                       width: 128, height: 128, margin: '4px auto 0', borderRadius: D.radius === 0 ? 0 : 12,

@@ -4,7 +4,6 @@ import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { EmblemSlot } from '../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
@@ -14,6 +13,7 @@ import { C as PAL, BAND, SHEEN, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { Buta, ButaTrio, KelagayiSquare, Diamond } from './art'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    KƏLAĞAYI — «İpək kəlağayı» (Xına gecəsi konsepti, 2026-10)
@@ -293,15 +293,7 @@ export default function KelagayiTemplate(props) {
           {/* FOTOLAR — romb pəncərələr */}
           {S.gallery && (
             <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
-              {gallery.demoPhotos.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '28px 10px', padding: '16px 6px 26px' }}>
-                  {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ width: '70%', aspectRatio: '1', margin: '0 auto', overflow: 'hidden', transform: 'rotate(45deg)', background: C.SILK_D, border: `3px solid ${C.CRIMSON}`, boxShadow: `0 0 0 3px ${C.SILK}, 0 0 0 4px ${C.SAFFRON_D}, 0 14px 22px -12px rgba(110,18,34,.5)` }}>
-                      <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transform: 'rotate(-45deg) scale(1.42)' }} />
-                    </div>
-                  ))}
-                </div>
-              )}
+              {gallery.demoPhotos.length > 0 && <FilmReel photos={gallery.demoPhotos} style={{ marginBottom: 26 }} />}
               <PhotoQr inv={inv} tr={tr} fg={C.INDIGO} bg="#FFFCF4" frame={{ border: `3px solid ${C.CRIMSON}`, outline: `1px solid ${C.SAFFRON_D}`, outlineOffset: -8 }}
                 btn={btn(C)} muted={C.MUTED} desc={galleryDesc(props.adminOverrides, tr, lang, 'night')} />
             </Panel>

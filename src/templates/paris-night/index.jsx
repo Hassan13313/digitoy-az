@@ -4,7 +4,6 @@ import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../_shared/MapSection'
 import { EmblemSlot } from '../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../_shared/motion'
-import { hidePhoto } from '../../utils/photoGallery'
 import { getTemplateTheme } from '../templateConfig'
 import { useInvitation, useGate, openingNames, alpha } from '../_shared/useInvitation'
 import { MusicFab, EqBars, StoryBlock, InvitationEnd, ReplyForm } from '../_shared/invitationKit'
@@ -14,6 +13,7 @@ import { C as PAL, NIGHT_BG, PAPER_BG, MACARONS, nameSize } from './palette'
 import { LABELS, TXT } from './copy'
 import { EiffelTower, Macaron, HatBox, Bow, Awning, Postmark, Rooftops } from './art'
 import { PaletteContext, usePalette, resolvePalette, scaleFont } from '../_shared/palette'
+import FilmReel from '../_shared/FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    PARIS NIGHT — «Paris gecəsi» (Qız gecəsi konsepti, 2026-10)
@@ -287,13 +287,10 @@ export default function ParisNightTemplate(props) {
           {S.gallery && (
             <Panel section="gallery" id="gallery-section" head={head} title={L('gallery', 'title', tr.inv_gallery)} kicker={K('gallery')}>
               {gallery.demoPhotos.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 18, marginBottom: 32 }}>
-                  {gallery.demoPhotos.map((url, i) => (
-                    <div key={i} style={{ position: 'relative', aspectRatio: '4 / 5', padding: 8, background: '#FFFFFF', transform: `rotate(${i % 2 ? 2.2 : -2}deg)`, boxShadow: '0 14px 20px -14px rgba(28,33,64,.5)' }}>
-                      <img src={url} alt="" loading="lazy" onError={hidePhoto} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                      {i % 2 === 0 && <Postmark size={34} label={T.postmark} style={{ position: 'absolute', right: -6, top: -8, opacity: 0.85 }} />}
-                    </div>
-                  ))}
+                <div style={{ position: 'relative', marginBottom: 32 }}>
+                  <FilmReel photos={gallery.demoPhotos} />
+                  {/* poçt möhürü lentin küncündə — Paris məktubu motivi */}
+                  <Postmark size={40} label={T.postmark} style={{ position: 'absolute', right: 4, top: -14, zIndex: 2, opacity: 0.9 }} />
                 </div>
               )}
               <PhotoQr inv={inv} tr={tr} fg={C.INK} bg="#FFFFFF" frame={{ borderRadius: 12, border: `1.5px solid ${C.ROSE}` }}
