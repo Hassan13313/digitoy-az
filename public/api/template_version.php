@@ -12,20 +12,34 @@
                               (builder/sifariş datasında açar yoxdur — o, köhnə
                               dəvətnaməni səssizcə yeni versiyaya keçirməməlidir)
      • OXUMA                → açar yoxdursa 1 (deploy-dan əvvəl yaradılıb)
-   Açıq gələn dəyər (1 və ya 2) həmişə qəbul olunur — admin seçimidir.
+   Açıq gələn dəyər (1, 2 və ya 3) həmişə qəbul olunur — admin seçimidir.
+
+   v3 — FOTOLU TOY SERİYASI (2026-11-12): köhnə toy şablonları cüt-cüt fotolu
+   dizayna keçir; keçən şablonun YENİ dəvətnaməsi 3 alır, artıq yaradılmışlar
+   (2) dondurulmuş surətlə açılır. Siyahı klientlə eynidir:
+   src/templates/legacy/registry.js › FROZEN_V2 (tests/template_versions_test.mjs).
    ⚠ DB-siz test olunur: tests/template_version_test.php
    ───────────────────────────────────────────────────────────────────────── */
 
 const TEMPLATE_VERSION_LEGACY  = 1;
 const TEMPLATE_VERSION_CURRENT = 2;
+const TEMPLATE_VERSION_PHOTO   = 3;
 
-/** 1 və ya 2 — başqa hər şey null */
+/* Fotolu dizayna (v3) keçmiş şablonlar */
+const TV_V3_TEMPLATES = ['royal-palace', 'oriental-luxe'];
+
+/** 1, 2 və ya 3 — başqa hər şey null */
 function tvNormalize($v): ?int {
     if (is_int($v) || (is_string($v) && ctype_digit($v)) || (is_float($v) && floor($v) == $v)) {
         $n = (int)$v;
-        return ($n === TEMPLATE_VERSION_LEGACY || $n === TEMPLATE_VERSION_CURRENT) ? $n : null;
+        return ($n >= TEMPLATE_VERSION_LEGACY && $n <= TEMPLATE_VERSION_PHOTO) ? $n : null;
     }
     return null;
+}
+
+/** Şablonun yeni dəvətnaməyə yazılan versiyası */
+function tvCurrentFor($templateId): int {
+    return (is_string($templateId) && in_array($templateId, TV_V3_TEMPLATES, true)) ? TEMPLATE_VERSION_PHOTO : TEMPLATE_VERSION_CURRENT;
 }
 
 /**
@@ -44,7 +58,7 @@ function tvForSave(array $incoming, ?array $stored): array {
         return $incoming;
     }
     if ($stored === null) {
-        $incoming['templateVersion'] = TEMPLATE_VERSION_CURRENT;
+        $incoming['templateVersion'] = tvCurrentFor($incoming['templateId'] ?? null);
         return $incoming;
     }
     $st = tvNormalize($stored['templateVersion'] ?? null);

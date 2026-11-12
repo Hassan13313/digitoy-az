@@ -40,6 +40,18 @@ ok('UPDATE: yanlış dəyər atılır, saxlanılan qalır', tvForSave($fd + ['te
 ok('UPDATE: yanlış saxlanılan dəyər köçürülmür', !array_key_exists('templateVersion', tvForSave($fd, ['templateVersion' => 'abc'])));
 ok('digər sahələrə toxunulmur', tvForSave($fd, null)['brideName'] === 'Aysel');
 
+/* ── v3: fotolu toy seriyası (2026-11-12) — versiya şablona görədir ── */
+$rp = ['templateId' => 'royal-palace', 'brideName' => 'Aysel'];
+ok('v3 INSERT: fotolu seriyaya keçmiş şablon → 3', tvForSave($rp, null)['templateVersion'] === 3);
+ok('v3 INSERT: oriental-luxe → 3', tvForSave(['templateId' => 'oriental-luxe'], null)['templateVersion'] === 3);
+ok('v3 INSERT: hələ keçməmiş şablon → 2', tvForSave(['templateId' => 'royal-gold'], null)['templateVersion'] === 2);
+ok('v3 INSERT: templateId yoxdursa → 2', tvForSave(['brideName' => 'x'], null)['templateVersion'] === 2);
+ok('v3 UPDATE: köhnə v2 dəvətnamə v2-də qalır (dondurulub)', tvForSave($rp, ['templateVersion' => 2])['templateVersion'] === 2);
+ok('v3 UPDATE: v1 dəvətnamə v1-də qalır', tvForSave($rp, ['templateVersion' => 1])['templateVersion'] === 1);
+ok('v3: admin açıq 3 seçə bilir', tvForSave($rp + ['templateVersion' => 3], ['templateVersion' => 2])['templateVersion'] === 3);
+ok('v3: 4 yanlışdır', tvNormalize(4) === null && tvNormalize('3') === 3);
+ok('v3 READ: 3 → 3', tvForRead(['templateVersion' => 3])['templateVersion'] === 3);
+
 /* ── oxuma ── */
 ok('READ: açarsız (redizayndan əvvəlki) → 1', tvForRead($fd)['templateVersion'] === 1);
 ok('READ: 2 → 2', tvForRead(['templateVersion' => 2])['templateVersion'] === 2);

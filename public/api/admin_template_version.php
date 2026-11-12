@@ -2,7 +2,7 @@
 /* ─────────────────────────────────────────────────────────────────────────────
    ADMİN: DƏVƏTNAMƏNİN ŞABLON VERSİYASI (2026-10-28)
 
-   POST { slug, version: 1|2 } → { ok, slug, templateVersion }
+   POST { slug, version: 1|2|3 } → { ok, slug, templateVersion }
 
    NƏ ÜÇÜN AYRICA ENDPOINT: premium redizayndan əvvəl təsdiqlənmiş dəvətnamələr
    köhnə görünüşdə (v1) qalır; müştəri razı olanda admin onu yeni dizayna (v2)
@@ -35,7 +35,7 @@ $slug    = trim((string)($body['slug'] ?? ''));
 $version = tvNormalize($body['version'] ?? null);
 if (!isValidSlug($slug) || $version === null) {
     http_response_code(400);
-    echo json_encode(['error' => 'Valid slug and version (1 or 2) required']);
+    echo json_encode(['error' => 'Valid slug and version (1, 2 or 3) required']);
     exit;
 }
 
