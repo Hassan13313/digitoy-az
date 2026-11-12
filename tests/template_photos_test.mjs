@@ -74,8 +74,8 @@ for (const id of TEMPLATES) {
 ok('Nar Möhür kataloqda yoxdur', !listTemplates().some((t) => t.id === 'nar-mohur'))
 ok('nar-mohur qovluğu yoxdur', !existsSync(new URL('../src/templates/nar-mohur', import.meta.url)))
 const toy = listTemplates().filter((t) => t.concept === 'toy').map((t) => t.id)
-const ORDER = ['ivory-silk', 'candle-rings', 'bridal-veil', 'first-dance', 'baku-night', 'golden-hour', 'shahdag', 'royal-palace']
-ok('Toy / Nişan: Ivory Silk birinci, sonra 6 yeni şablon, sonra Royal Palace', eq(toy.slice(0, 8), ORDER), toy.slice(0, 8).join(','))
+const ORDER = ['ivory-silk', 'bridal-veil', 'first-dance', 'baku-night', 'golden-hour', 'shahdag', 'candle-rings', 'royal-palace']
+ok('Toy / Nişan: Ivory Silk birinci, Şam və Üzük yenilərin sonunda, sonra Royal Palace', eq(toy.slice(0, 8), ORDER), toy.slice(0, 8).join(','))
 ok('hər şablonun şəkil yerləri var (Şəkillər tabı)', TEMPLATES.every((id) => templatePhotoSlots(id).length > 0))
 
 console.log(fail === 0
