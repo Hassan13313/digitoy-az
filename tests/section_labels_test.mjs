@@ -36,6 +36,7 @@ const REDESIGNED = [
   'henna-buta',
   'mirror-candle',
   'kelagayi',
+  'candle-rings', 'bridal-veil', 'first-dance', 'ivory-silk', 'baku-night', 'golden-hour', 'shahdag',
   /* 2026-10 — «Sünnət toyu» konsepti */
   'little-prince',
   'hero-comic',

@@ -36,6 +36,15 @@ const ENTER = {
   'henna-buta': 'left',
   'mirror-candle': 'down',
   'kelagayi': 'right',
+  /* 2026-11 — «Viral video» toy seriyası */
+  'candle-rings': 'up',
+  'bridal-veil': 'down',
+  'first-dance': 'zoom',
+  /* 2026-11 — lüks toy seriyası */
+  'ivory-silk': 'up',
+  'baku-night': 'zoom',
+  'golden-hour': 'up',
+  'shahdag': 'down',
   /* 2026-10 — «Sünnət toyu» konsepti */
   'little-prince': 'zoom',
   'hero-comic': 'up',

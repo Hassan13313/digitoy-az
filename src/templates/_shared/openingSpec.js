@@ -110,6 +110,17 @@ export const OPENING_PHRASES = {
   openHatbox: { az: 'Qutunu aç', en: 'Open the hatbox', ru: 'Открыть коробку' },
   sunsetParty: { az: 'Gün batımı gecəsi', en: 'Sunset soirée', ru: 'Вечер на закате' },
   watchSunset: { az: 'Gün batımına bax', en: 'Watch the sunset', ru: 'Смотреть закат' },
+  /* 2026-11 — «Viral video» toy seriyası */
+  lightTonight: { az: 'Bu gecənin işığını siz yandırın', en: 'Light up our night', ru: 'Зажгите наш вечер' },
+  inviteYou: { az: 'Sizi dəvət edirik', en: 'You are invited', ru: 'Приглашаем вас' },
+  liftBridalVeil: { az: 'Duvağı qaldırın', en: 'Lift the veil', ru: 'Поднять фату' },
+  firstDance: { az: 'İlk rəqsimizə dəvət', en: 'Join us for our first dance', ru: 'Приглашаем на наш первый танец' },
+  lightSparklers: { az: 'Fişəngləri yandır', en: 'Light the sparklers', ru: 'Зажечь бенгальские огни' },
+  /* 2026-11 — lüks toy seriyası */
+  ivoryKick: { az: 'Nikah mərasiminə dəvət', en: 'Invitation to our wedding', ru: 'Приглашение на свадьбу' },
+  bakuKick: { az: 'Bakı, toy gecəsi', en: 'Baku, a wedding night', ru: 'Баку, свадебный вечер' },
+  sunsetKick: { az: 'Gün batanda nikah', en: 'A sunset wedding', ru: 'Свадьба на закате' },
+  winterKick: { az: 'Dağda qış toyu', en: 'A winter wedding in the mountains', ru: 'Зимняя свадьба в горах' },
 }
 
 /* Gazette rubrikası — tədbir növünə görə (əvvəl hər tədbirdə «Toy elanı» idi) */
@@ -197,6 +208,15 @@ export const OPENING_SPEC = {
   'henna-buta': { mono: 'emblem', slots: ['kicker', 'title', 'and', 'meta', 'cta', 'hint'] },
   'mirror-candle': { mono: 'emblem', slots: ['kicker', 'title', 'and', 'meta', 'cta', 'hint'] },
   'kelagayi': { mono: 'emblem', slots: ['kicker', 'title', 'and', 'meta', 'cta', 'hint'] },
+  /* 2026-11 — «Viral video» toy seriyası (açılış real fotodur, nişan yeri yoxdur) */
+  'candle-rings': { mono: null, slots: ['kicker', 'title', 'and', 'meta', 'cta', 'hint'] },
+  'bridal-veil': { mono: null, slots: ['kicker', 'title', 'and', 'meta', 'cta', 'hint'] },
+  'first-dance': { mono: null, slots: ['kicker', 'title', 'and', 'meta', 'cta', 'hint'] },
+  /* 2026-11 — lüks toy seriyası: açılış örtüyün özüdür, tarix kadrda görünür */
+  'ivory-silk': { mono: null, slots: ['kicker', 'title', 'cta', 'hint'] },
+  'baku-night': { mono: null, slots: ['kicker', 'title', 'cta', 'hint'] },
+  'golden-hour': { mono: null, slots: ['kicker', 'title', 'and', 'cta', 'hint'] },
+  'shahdag': { mono: null, slots: ['kicker', 'title', 'and', 'cta', 'hint'] },
   /* 2026-10 — «Sünnət toyu» konsepti */
   'little-prince': { mono: 'emblem', slots: ['kicker', 'title', 'and', 'meta', 'cta', 'hint'] },
   'hero-comic': { mono: 'emblem', slots: ['kicker', 'title', 'and', 'meta', 'cta', 'hint'] },
@@ -376,6 +396,20 @@ export function openingDefaults(templateId, ctx) {
       return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('lightMirror') }
     case 'kelagayi':
       return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('unfoldScarf') }
+    case 'candle-rings':
+      return { ...base, kicker: P('lightTonight'), meta: fullDate, cta: P('lightCandles') }
+    case 'bridal-veil':
+      return { ...base, kicker: P('inviteYou'), meta: fullDate, cta: P('liftBridalVeil') }
+    case 'first-dance':
+      return { ...base, kicker: P('firstDance'), meta: fullDate, cta: P('lightSparklers') }
+    case 'ivory-silk':
+      return { ...base, kicker: P('ivoryKick'), cta: P('openShort') }
+    case 'baku-night':
+      return { ...base, kicker: P('bakuKick'), cta: P('openShort') }
+    case 'golden-hour':
+      return { ...base, kicker: P('sunsetKick'), cta: P('openShort') }
+    case 'shahdag':
+      return { ...base, kicker: P('winterKick'), cta: P('openShort') }
     case 'little-prince':
       return { ...base, kicker: ctx.eventLabel || '', meta: fullDate, cta: P('raiseCrown') }
     case 'hero-comic':

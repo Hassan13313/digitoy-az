@@ -27,7 +27,7 @@ const REDESIGNED = [
   'boarding-pass', 'cinema-premiere', 'vinyl-record', 'royal-palace', 'mediterranean', 'gazette', 'luxury-jewelry',
   /* 2026-10 — konsept şablonları */
   'fairy-tale', 'space-mission', 'circus-show', 'dino-adventure', 'balloon-party', 'red-veil',
-  'xonca', 'henna-buta', 'mirror-candle', 'kelagayi', 'little-prince', 'hero-comic',
+  'xonca', 'henna-buta', 'mirror-candle', 'kelagayi', 'candle-rings', 'bridal-veil', 'first-dance', 'ivory-silk', 'baku-night', 'golden-hour', 'shahdag', 'little-prince', 'hero-comic',
   'mashallah', 'little-pilot', 'football-star', 'pastel-bloom', 'teddy-bear', 'gender-reveal',
   'stork-letter', 'baby-mobile', 'gala-night', 'keynote', 'award-night', 'business-card',
   'neon-party', 'silver-locket', 'golden-jubilee', 'first-paper', 'retro-polaroid', 'love-letters',

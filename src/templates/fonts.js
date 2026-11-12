@@ -79,6 +79,22 @@ const FAMILY = {
   /* konseptlər II (2026-10) */
   lora: 'Lora:ital,wght@0,400;0,500;1,400',
   greatVibes: 'Great+Vibes',
+  /* 2026-11 — «Viral video» toy seriyası (hamısında Ə var) */
+  labrada: 'Labrada:ital,wght@0,300..600;1,300..500',
+  carattere: 'Carattere',
+  cormorantUpright: 'Cormorant+Upright:wght@300;400;500;600',
+  corinthia: 'Corinthia:wght@400;700',
+  gideonRoman: 'Gideon+Roman',
+  luxurious: 'Luxurious+Script',
+  /* 2026-11 — lüks toy seriyası (hamısında Ə var) */
+  petitFormal: 'Petit+Formal+Script',
+  trirong: 'Trirong:ital,wght@0,200;0,300;0,400;1,200;1,300',
+  aboreto: 'Aboreto',
+  notoDisplayThin: 'Noto+Serif+Display:ital,wght@0,100..400;1,100..400',
+  albertSans: 'Albert+Sans:wght@200;300;400',
+  meaCulpa: 'Mea+Culpa',
+  hahmlet: 'Hahmlet:wght@200;300;400',
+  plusJakarta: 'Plus+Jakarta+Sans:wght@300;400;500',
   alegreyaSans: 'Alegreya+Sans:ital,wght@0,300;0,400;0,500;1,400',
   badScript: 'Bad+Script',
   playfairSC: 'Playfair+Display+SC:wght@400;700',
@@ -157,6 +173,15 @@ const TEMPLATE_FONTS = {
   'henna-buta': ['spectral', 'commissioner', 'badScript'],
   'mirror-candle': ['notoDisplay', 'ebGaramond'],
   'kelagayi': ['playfairSC', 'merriweather'],
+  /* 2026-11 — «Viral video» toy seriyası */
+  'candle-rings': ['labrada', 'carattere'],
+  'bridal-veil': ['cormorantUpright', 'corinthia'],
+  'first-dance': ['gideonRoman', 'josefin', 'luxurious'],
+  /* 2026-11 — lüks toy seriyası */
+  'ivory-silk': ['petitFormal', 'trirong', 'aboreto'],
+  'baku-night': ['notoDisplayThin', 'albertSans'],
+  'golden-hour': ['meaCulpa', 'hahmlet'],
+  'shahdag': ['playfairSC', 'plusJakarta'],
   /* 2026-10 — «Sünnət toyu» konsepti */
   'little-prince': ['spectralSC', 'mulish'],
   'hero-comic': ['unbounded', 'balsamiq'],

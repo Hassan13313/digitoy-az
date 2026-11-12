@@ -23,6 +23,15 @@ const WITH_IMAGE = new Set([
   'henna-buta',
   'mirror-candle',
   'kelagayi',
+  /* 2026-11 — «Viral video» toy seriyası */
+  'candle-rings',
+  'bridal-veil',
+  'first-dance',
+  /* 2026-11 — lüks toy seriyası */
+  'ivory-silk',
+  'baku-night',
+  'golden-hour',
+  'shahdag',
   /* 2026-10 — «Sünnət toyu» konsepti */
   'little-prince',
   'hero-comic',

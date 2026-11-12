@@ -219,6 +219,9 @@ const FONT_KEYS = [
     'comforter', 'amatic', 'ysabeauOffice', 'ysabeau', 'martianMono', 'bonaNovaSC', 'robotoCondensed', 'ibmPlexMono',
     'alumniSans', 'notoSansDisplay', 'ibmPlexSerif', 'ibmPlexSans', 'robotoSlab', 'bellota', 'cormorantFull', 'exo2Heavy',
     'alumniPin', 'notoSerifL',
+    /* 2026-11 — «Viral video» toy seriyası */
+    'labrada', 'carattere', 'cormorantUpright', 'corinthia', 'gideonRoman', 'luxurious',
+    'petitFormal', 'trirong', 'aboreto', 'albertSans', 'meaCulpa', 'hahmlet', 'plusJakarta',
 ];
 
 /* `src/data/adminOverrides.js` › CONTENT_SECTIONS açarları (+ hekayə başlığı) */

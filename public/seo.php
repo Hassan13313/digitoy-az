@@ -163,7 +163,7 @@ function seoConceptPages(): array {
             'desc' => 'Toy və nişan üçün online dəvətnamə şablonları: lüks, klassik, minimalist və vintage dizaynlar. İştirak Təsdiqi, oturma planı və QR foto paylaşımı ilə. 59 ₼-dan.',
             'h1' => 'Toy və Nişan Dəvətnaməsi',
             'intro' => 'Toy və nişan üçün online dəvətnamə şablonları. Hər dizaynın öz açılışı, şrifti və rəng dili var. Canlı önbaxışa baxın, bəyəndiyinizi seçin, linki qonaqlarınıza WhatsApp ilə göndərin.',
-            'names' => ['Royal Gold', 'Floral Garden', 'Modern Black', 'White Elegance', 'Night Sky', 'Oriental Luxe', 'Nature Touch', 'Crystal Glass', 'Boarding Pass', 'Cinema Premiere', 'Vinyl Record', 'Royal Palace', 'Mediterranean', 'Gazette', 'Luxury Jewelry', 'Simple Luxury'],
+            'names' => ['Royal Palace', 'Oriental Luxe', 'Night Sky', 'Mediterranean', 'Crystal Glass', 'Gazette', 'Simple Luxury', 'Royal Gold', 'Luxury Jewelry', 'Floral Garden', 'White Elegance', 'Nature Touch', 'Vinyl Record', 'Cinema Premiere', 'Boarding Pass', 'Modern Black', 'Şam və Üzük', 'Gəlin', 'İlk Rəqs', 'Ivory Silk', 'Bakı Gecəsi', 'Golden Hour', 'Şahdağ'],
         ],
         'xina-gecesi' => [
             'concept' => 'xina',
@@ -179,7 +179,7 @@ function seoConceptPages(): array {
             'desc' => 'Ad günü üçün online dəvətnamə şablonları: minik talonu, kino premyerası, vinil, qəzet və modern afişa. Yaş, proqram, İştirak Təsdiqi və təbriklər bir linkdə.',
             'h1' => 'Ad Günü Dəvətnaməsi',
             'intro' => 'Böyüklər üçün ad günü dəvətnaməsi şablonları: minik talonu, kino premyerası, vinil plastinka, qəzet və modern afişa. Hər biri tək nəfərin adı və yaşı üçün hazırlanıb.',
-            'names' => ['Modern Black', 'Boarding Pass', 'Cinema Premiere', 'Vinyl Record', 'Gazette'],
+            'names' => ['Gazette', 'Vinyl Record', 'Cinema Premiere', 'Boarding Pass', 'Modern Black'],
         ],
         'ildonumu' => [
             'concept' => 'anniversary',
@@ -310,6 +310,9 @@ function seoHomeFaq(): array {
     şablonlar — TemplatesPage.jsx UI.az (tests/seo_keywords_test.mjs). */
 /** Şablon adı → img/templates/<id>.webp (məs. «Mirror & Candle» → mirror-candle, «Kəlağayı» → kelagayi) */
 function seoTemplateSlug(string $name): string {
+    /* adı id-dən fərqli yazılan şablonlar (2026-11 toy seriyaları) */
+    $own = ['Şam və Üzük' => 'candle-rings', 'Gəlin' => 'bridal-veil', 'İlk Rəqs' => 'first-dance', 'Bakı Gecəsi' => 'baku-night', 'Şahdağ' => 'shahdag'];
+    if (isset($own[$name])) return $own[$name];
     $t = strtr(mb_strtolower($name, 'UTF-8'), ['ə' => 'e', 'ğ' => 'g', 'ı' => 'i', 'ç' => 'c', 'ş' => 's', 'ö' => 'o', 'ü' => 'u', 'i̇' => 'i']);
     return trim(preg_replace('/[^a-z0-9]+/', '-', $t), '-');
 }

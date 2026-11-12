@@ -43,7 +43,7 @@ const OLD_16 = ['royal-gold', 'floral-garden', 'modern-black', 'white-elegance',
   'boarding-pass', 'cinema-premiere', 'vinyl-record', 'royal-palace', 'mediterranean', 'gazette', 'luxury-jewelry', 'simple-luxury']
 const BIRTHDAY_5 = ['gazette', 'vinyl-record', 'cinema-premiere', 'boarding-pass', 'modern-black']
 const toy = listTemplates({ concept: 'toy' }).map((t) => t.id)
-ok('Toy / Nişan-da köhnə 16-nın hamısı', OLD_16.every((id) => toy.includes(id)) && toy.length === 16, toy.join())
+ok('Toy / Nişan-da köhnə 16-nın hamısı + 7 yeni', OLD_16.every((id) => toy.includes(id)) && toy.length === 23, toy.join())
 const bd = listTemplates({ concept: 'birthday' }).map((t) => t.id)
 ok('Ad günündə 5 dizayn', bd.join() === BIRTHDAY_5.join(), bd.join())
 

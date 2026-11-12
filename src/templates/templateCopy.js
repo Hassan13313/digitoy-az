@@ -36,6 +36,13 @@ import * as xonca from './xonca/copy.js'
 import * as hennaButa from './henna-buta/copy.js'
 import * as mirrorCandle from './mirror-candle/copy.js'
 import * as kelagayi from './kelagayi/copy.js'
+import * as candleRings from './candle-rings/copy.js'
+import * as bridalVeil from './bridal-veil/copy.js'
+import * as firstDance from './first-dance/copy.js'
+import * as ivorySilk from './ivory-silk/copy.js'
+import * as bakuNight from './baku-night/copy.js'
+import * as goldenHour from './golden-hour/copy.js'
+import * as shahdag from './shahdag/copy.js'
 import * as littlePrince from './little-prince/copy.js'
 import * as heroComic from './hero-comic/copy.js'
 import * as mashallah from './mashallah/copy.js'
@@ -101,6 +108,13 @@ const REGISTRY = {
   'henna-buta': hennaButa,
   'mirror-candle': mirrorCandle,
   'kelagayi': kelagayi,
+  'candle-rings': candleRings,
+  'bridal-veil': bridalVeil,
+  'first-dance': firstDance,
+  'ivory-silk': ivorySilk,
+  'baku-night': bakuNight,
+  'golden-hour': goldenHour,
+  'shahdag': shahdag,
   'little-prince': littlePrince,
   'hero-comic': heroComic,
   'mashallah': mashallah,

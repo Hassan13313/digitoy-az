@@ -44,6 +44,15 @@ const COMPONENTS = {
   'henna-buta': lazy(() => import('./henna-buta')),
   'mirror-candle': lazy(() => import('./mirror-candle')),
   'kelagayi': lazy(() => import('./kelagayi')),
+  /* 2026-11 — «Viral video» toy seriyası */
+  'candle-rings': lazy(() => import('./candle-rings')),
+  'bridal-veil': lazy(() => import('./bridal-veil')),
+  'first-dance': lazy(() => import('./first-dance')),
+  /* 2026-11 — lüks toy seriyası */
+  'ivory-silk': lazy(() => import('./ivory-silk')),
+  'baku-night': lazy(() => import('./baku-night')),
+  'golden-hour': lazy(() => import('./golden-hour')),
+  'shahdag': lazy(() => import('./shahdag')),
   /* 2026-10 — «Sünnət toyu» konsepti */
   'little-prince': lazy(() => import('./little-prince')),
   'hero-comic': lazy(() => import('./hero-comic')),
