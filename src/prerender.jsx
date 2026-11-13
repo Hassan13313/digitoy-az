@@ -17,9 +17,10 @@ export const PRERENDER_ROUTES = [
 ]
 
 async function streamToString(stream) {
-  const chunks = []
-  for await (const c of stream) chunks.push(typeof c === 'string' ? Buffer.from(c) : Buffer.from(c))
-  return Buffer.concat(chunks).toString('utf8')
+  const dec = new TextDecoder()
+  let out = ''
+  for await (const c of stream) out += typeof c === 'string' ? c : dec.decode(c, { stream: true })
+  return out + dec.decode()
 }
 
 export async function renderPath(path) {
