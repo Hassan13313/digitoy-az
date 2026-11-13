@@ -74,7 +74,8 @@ function Chalk({ o, go, t, instant }) {
   const d = (k) => ({ strokeDasharray: 1, strokeDashoffset: 1, animation: instant ? undefined : `lxg-draw 1.2s ease ${k}s forwards` })
   return (
     <div aria-hidden="true" style={{ position: 'absolute', inset: 0 }}>
-      <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(120% 90% at 50% 40%, ${alpha('#FFFFFF', 0.06)}, transparent 60%), ${o.board}`, border: `2.4vmin solid ${o.wood}`, boxShadow: 'inset 0 0 40px rgba(0,0,0,.4)', clipPath: go ? 'inset(0 0 0 100%)' : 'inset(0 0 0 0)', transition: t('clip-path 1.6s cubic-bezier(.6,0,.3,1) .2s') }}>
+      {o.wall && <div style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '24svh', background: o.wall, opacity: go ? 0 : 1, transition: t('opacity 1.2s ease 1.2s') }} />}
+      <div style={{ position: 'absolute', inset: o.wall ? '24svh 0 0 0' : 0, background: `radial-gradient(120% 90% at 50% 40%, ${alpha('#FFFFFF', 0.06)}, transparent 60%), ${o.board}`, border: `2.4vmin solid ${o.wood}`, boxShadow: 'inset 0 0 40px rgba(0,0,0,.4)', clipPath: go ? 'inset(0 0 0 100%)' : 'inset(0 0 0 0)', transition: t('clip-path 1.6s cubic-bezier(.6,0,.3,1) .2s') }}>
         <svg viewBox="0 0 100 160" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} fill="none" stroke={o.chalk} strokeWidth=".7" strokeLinecap="round" opacity=".85">
           <path pathLength="1" style={d(0.3)} d="M14 40l4 -8 4 8 -9 -5h10z" />
           <path pathLength="1" style={d(0.6)} d="M70 32c6 -6 14 0 8 6 -6 6 -14 0 -8 -6z" />

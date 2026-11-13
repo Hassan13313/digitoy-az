@@ -21,7 +21,7 @@ const ID = 'roller-shutter'
 
 const LINKS = { primary: ['ACCENT'], secondary: ['MUTE'], accent: ['ACCENT'], background: ['BG'], text: ['INK'] }
 
-const OPENING = { kind: 'still', ms: 4600, overlay: { kind: 'shutter', steel: '#9EA3A8', warm: '#FFB347' } }
+const OPENING = { kind: 'still', ms: 4600, overlay: { kind: 'shutter', housing: '#1E2125', steel: '#9EA3A8', warm: '#FFB347' } }
 
 export default function RollerShutterTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })

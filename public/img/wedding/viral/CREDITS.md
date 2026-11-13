@@ -45,3 +45,59 @@ Toy + ad günü dizaynlarında (Gazette, Vinyl Record, Cinema Premiere, Boarding
 - ms-1…4 Maşallah: atlas lentli kiçik bəy, göz muncuqları və lent, kobalt süfrə, muncuqlu ağac
 - pl-1…4 Little Pilot: biplanın yanında kiçik pilot, eynək və kompas, anqarda süfrə, buludlar üstündə təyyarə
 - fs-1…4 Football Star: gecə stadionunda kiçik futbolçu, top və kubok, meydanda süfrə, konfetti altında stadion
+
+## Uşaq ad günü seriyası (2026-11-13) — GPT Image, bu şablonlar üçün yaradılıb
+- ft-1…4 Fairy Tale: kitabdan qalxan qəsr, güzgü və tac, nağıl süfrəsi, alaqaranlıqda qəsr
+- sp-1…4 Space Mission: buraxılışa hazır raket, astronavt dəbilqəsi, kosmik süfrə, kosmosdan Yer
+- cs-1…4 Circus Show: axşam sirk çadırı, nağara və silindr, çadırda süfrə, arena
+- da-1…4 Dino Adventure: dino yumurtası, qazıntı dəsti, cəngəllik süfrəsi, gün batımında vadi
+- bl-1…4 Balloon Party: pastel şar dəstəsi, qatlı tort, pastel süfrə, səmaya uçan şarlar
+
+## Baby shower seriyası (2026-11-13) — GPT Image, bu şablonlar üçün yaradılıb
+- pb-1…4 Pastel Bloom: çiçək tağı və beşik, toxunma başmaqlar, pastel süfrə, pəncərə önündə çiçəklər
+- tb-1…4 Teddy Bear: yorğanda ayıcıq, şərflı ayıcıq, ayıcıq süfrəsi, axşam pəncərəsində ayıcıq
+- gr-1…4 Gender Reveal: açılan hədiyyə qutusu, mavi və çəhrayı şirniyyat, iki rəngli süfrə, səmada şarlar
+- sl-1…4 Stork Letter: səhər səmasında leylək, möhürlü zərf, poçt süfrəsi, leylək yuvası
+- bm-1…4 Baby Mobile: beşik üstündə mobil, keçə ulduzlar, ay və ulduz süfrəsi, pəncərədə aypara
+
+## Korporativ seriyası (2026-11-13) — GPT Image, bu şablonlar üçün yaradılıb
+- gn-1…4 Gala Night: art-deko zalı, şampan qülləsi, gala süfrəsi, qırmızı xalçalı giriş
+- kn-1…4 Keynote: konfrans səhnəsi, səhnə mikrofonu, şəbəkə şam yeməyi, dam terrasından şəhər
+- an-1…4 Award Night: projektor altında kubok, medallar və dəfnə, mükafat şam yeməyi, qırmızı xalça
+- bc-1…4 Business Card: ofis lobbisi, vizit kartları, biznes şam yeməyi, axşam ofis binası
+- np-1…4 Neon Party: neon bar, neon kokteyllər, neon süfrə, rəqs meydançası
+
+## Ildönümü seriyası (2026-11-13) — GPT Image, bu şablonlar üçün yaradılıb
+- sv-1…4 Silver Locket: qızılgül bağında cütlük, açıq medalyon, gümüş süfrə, ləçəkdə iki üzük
+- gj-1…4 Golden Jubilee: dəri ailə albomu, məktub üstündə üzüklər, qızıl süfrə, gün batımında skamya
+- fp-1…4 First Paper: origami turnalar, origami ürək, kağız süfrə, fənərlər altında cütlük
+- rt-1…4 Retro Polaroid: kamera və ani fotolar, ipdə polaroidlər, retro süfrə, sahil yolu
+- ll-1…4 Love Letters: məktub bağlaması, qələm və möhür, romantik süfrə, pəncərə önündə məktublar
+
+## Məzuniyyət seriyası (2026-11-13) — GPT Image, bu şablonlar üçün yaradılıb
+- ct-1…4 Caps Toss: havaya atılan papaqlar, diplom və medal, məzun süfrəsi, universitet binası
+- yb-1…4 Yearbook: varsity gödəkcəsi, markerlər və yamaq, məktəb süfrəsi, məktəb dəhlizi
+- lb-1…4 Last Bell: sinifdə mis zəng, bantlar və lent, ağ-qırmızı süfrə, şarlı məktəb həyəti
+- cb-1…4 Chalkboard: yaşıl lövhə, təbaşir və alma, sinif süfrəsi, məktəb meydançası
+- pa-1…4 Paper Plane: səmada kağız təyyarə, vərəq və qlobus, səma rəngli süfrə, gün batımına uçan təyyarələr
+
+## Açılış və təqdimat seriyası (2026-11-13) — GPT Image, bu şablonlar üçün yaradılıb
+- rc-1…4 Ribbon Cut: lentli zümrüd qapılar, qayçı və lent, açılış masası, açıq qapılar
+- bs-1…4 Bistro Sign: bistro fasadı, espresso və kruasan, işıqlar altında masalar, gecə bistrosu
+- rs-1…4 Roller Shutter: jalüzlü vitrin, açarlar və lent, loft masası, işıqlı mağaza
+- ub-1…4 Unboxing: projektor altında qutu, açıq qutu, təqdimat masası, işıq şüalı səhnə
+- gu-1…4 Gallery Unveil: örtüklü zərli çərçivə, fırça və palitra, qalereya qəbulu, ağ qalereya
+
+## Bayram gecələri seriyası (2026-11-13) — GPT Image, bu şablonlar üçün yaradılıb
+- nb-1…4 Novruz Tonqalı: ulduzlu səma altında tonqal, mis çıraq, Novruz süfrəsi, gecə tonqalları
+- se-1…4 Səməni: lentli səməni, boyalı yumurtalar, bayram süfrəsi, bahar həyəti
+- mk-1…4 Midnight Clock: zər saat, şampan və saat, Yeni il süfrəsi, Bakı atəşfəşanlığı
+- sg-1…4 Snow Globe: qar kürəsi, yolka oyuncaqları, qış süfrəsi, qarlı kənd
+- mq-1…4 Masquerade Ball: Venesiya maskası, maskalar və şampan, maskarad ziyafəti, çilçıraqlar altında rəqs
+
+## Qız gecəsi seriyası (2026-11-13) — GPT Image, bu şablonlar üçün yaradılıb
+- pc-1…4 Pink Champagne: buzda çəhrayı şampan və güllər, şampan badələri, çəhrayı süfrə, terrasda badələr
+- db-1…4 Disco Ball: güzgü disko kürəsi, kürə və konki, disko süfrəsi, rəqs meydançası
+- ps-1…4 Pajama Spa: rahat yataq otağı, spa dəsti və şamlar, pijama süfrəsi, uçuşan lələklər
+- pn-1…4 Paris Night: eyvandan Eyfel qülləsi, makaronlar və papaq qutusu, Paris süfrəsi, gecə Eyfel
+- bh-1…4 Boho Sunset: səhrada boho tağ, pampas və rattan, səhrada süfrə, qum təpələrində gün batımı

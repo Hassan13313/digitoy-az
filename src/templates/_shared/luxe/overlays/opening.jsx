@@ -15,7 +15,7 @@ export const OPEN_CSS = `
 
 function Ribbon({ o, go, t }) {
   const door = (left) => ({
-    position: 'absolute', top: 0, bottom: 0, width: '50%', [left ? 'left' : 'right']: 0, transformOrigin: left ? '0 50%' : '100% 50%',
+    position: 'absolute', top: o.lintel ? '24svh' : 0, bottom: 0, width: '50%', [left ? 'left' : 'right']: 0, transformOrigin: left ? '0 50%' : '100% 50%',
     transform: go ? `perspective(1400px) rotateY(${left ? -95 : 95}deg)` : 'none', transition: t('transform 2.2s cubic-bezier(.7,0,.25,1) .8s'),
     background: [`linear-gradient(${left ? 90 : 270}deg, transparent 85%, ${alpha('#000000', 0.3)})`, `linear-gradient(180deg, ${o.emerald}, ${o.deep})`].join(', '),
   })
@@ -23,6 +23,7 @@ function Ribbon({ o, go, t }) {
   const half = (left) => ({ position: 'absolute', top: '52%', height: '5vmin', width: '50%', [left ? 'left' : 'right']: 0, background: `linear-gradient(180deg, ${o.red}, ${alpha(o.red, 0.85)})`, boxShadow: '0 4px 8px rgba(0,0,0,.25)', transformOrigin: left ? '0 50%' : '100% 50%', transform: go ? `rotate(${left ? 70 : -70}deg)` : 'none', opacity: go ? 0 : 1, transition: t('transform .9s cubic-bezier(.5,0,.6,1) .15s, opacity .5s .8s') })
   return (
     <div aria-hidden="true" style={{ position: 'absolute', inset: 0 }}>
+      {o.lintel && <div style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '24svh', background: `linear-gradient(180deg, ${o.lintel}, ${alpha(o.lintel, 0.96)})`, borderBottom: `3px solid ${o.gold}`, boxShadow: '0 6px 14px rgba(0,0,0,.18)', opacity: go ? 0 : 1, transition: t('opacity 1.2s ease 1.4s') }} />}
       <div style={door(true)}><div style={{ ...panel, top: '10%', height: '34%' }} /><div style={{ ...panel, bottom: '10%', height: '34%' }} /></div>
       <div style={door(false)}><div style={{ ...panel, top: '10%', height: '34%' }} /><div style={{ ...panel, bottom: '10%', height: '34%' }} /></div>
       <div style={half(true)} /><div style={half(false)} />
@@ -54,8 +55,9 @@ function Awning({ o, go, t, instant }) {
 function Shutter({ o, go, t }) {
   return (
     <div aria-hidden="true" style={{ position: 'absolute', inset: 0 }}>
+      {o.housing && <div style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '22svh', background: `linear-gradient(180deg, ${o.housing}, ${alpha(o.housing, 0.94)})`, borderBottom: `4px solid ${alpha('#000000', 0.45)}`, opacity: go ? 0 : 1, transition: t('opacity 1.2s ease 1.6s') }} />}
       <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(60% 40% at 50% 70%, ${alpha(o.warm, 0.35)}, transparent 70%)`, opacity: go ? 1 : 0, transition: t('opacity 1.6s .4s') }} />
-      <div style={{ position: 'absolute', inset: 0, transformOrigin: '50% 0', transform: go ? 'scaleY(0.02)' : 'none', transition: t('transform 2.2s cubic-bezier(.6,0,.3,1) .1s'),
+      <div style={{ position: 'absolute', inset: o.housing ? '22svh 0 0 0' : 0, transformOrigin: '50% 0', transform: go ? 'scaleY(0.02)' : 'none', transition: t('transform 2.2s cubic-bezier(.6,0,.3,1) .1s'),
         background: [`repeating-linear-gradient(180deg, ${alpha('#FFFFFF', 0.25)} 0 2px, ${alpha('#000000', 0.18)} 2px 4px, transparent 4px 22px, ${alpha('#000000', 0.25)} 22px 24px)`, `linear-gradient(90deg, ${o.steel}, #D9DCDF 50%, ${o.steel})`].join(', ') }}>
         <div style={{ position: 'absolute', left: '50%', bottom: '6%', width: '20vmin', height: '3vmin', translate: '-50% 0', borderRadius: 4, background: '#41464B' }} />
       </div>

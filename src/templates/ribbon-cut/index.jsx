@@ -21,7 +21,7 @@ const ID = 'ribbon-cut'
 
 const LINKS = { primary: ['EMERALD'], secondary: ['MUTE'], accent: ['ACCENT'], background: ['BG'], text: ['INK'] }
 
-const OPENING = { kind: 'still', ms: 5200, overlay: { kind: 'ribbon', emerald: '#145A45', deep: '#0B2E24', gold: '#D8B25A', red: '#C0172E' } }
+const OPENING = { kind: 'still', ms: 5200, overlay: { kind: 'ribbon', lintel: '#F7F1E3', emerald: '#145A45', deep: '#0B2E24', gold: '#D8B25A', red: '#C0172E' } }
 
 export default function RibbonCutTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })

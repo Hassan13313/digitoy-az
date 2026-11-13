@@ -21,7 +21,7 @@ const ID = 'snow-globe'
 
 const LINKS = { primary: ['ACCENT'], secondary: ['GREEN'], accent: ['GOLD'], background: ['BG'], text: ['INK'] }
 
-const OPENING = { kind: 'still', ms: 5200, overlay: { kind: 'globe', bg: '#1D3346', wood: '#6B4226' } }
+const OPENING = { kind: 'still', ms: 5200, overlay: { kind: 'globe', bg: '#E6EEF4', wood: '#6B4226' } }
 
 export default function SnowGlobeTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })

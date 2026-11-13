@@ -21,7 +21,7 @@ const ID = 'chalkboard'
 
 const LINKS = { primary: ['ACCENT', 'BOARD'], secondary: ['MUTE'], accent: ['YEL'], background: ['BG'], text: ['INK'] }
 
-const OPENING = { kind: 'still', ms: 4800, overlay: { kind: 'chalk', board: '#26453D', wood: '#8C5A2B', chalk: '#F4F1EA', yellow: '#F5DE7A' } }
+const OPENING = { kind: 'still', ms: 4800, overlay: { kind: 'chalk', wall: '#F3ECDD', board: '#26453D', wood: '#8C5A2B', chalk: '#F4F1EA', yellow: '#F5DE7A' } }
 
 export default function ChalkboardTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })
