@@ -28,8 +28,9 @@ export default {
         'birthday-light': '#FCE7F3',
       },
       fontFamily: {
-        serif: ['"Cormorant Garamond"', '"Playfair Display"', 'Georgia', 'serif'],
-        sans: ['"Inter"', 'system-ui', 'sans-serif'],
+        /* «… Fallback» — ölçüsü veb-şriftə uyğunlaşdırılmış yerli şrift (src/index.css, CLS) */
+        serif: ['"Cormorant Garamond"', '"Cormorant Fallback"', '"Playfair Display"', 'Georgia', 'serif'],
+        sans: ['"Inter"', '"Inter Fallback"', 'system-ui', 'sans-serif'],
       },
       /* ⚠ Köhnə komponentlər bu radiusları işlədir. Redesign komponentləri
          Tailwind-in standart radiusları ilə dizayn olunub — onlarda

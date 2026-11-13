@@ -1,5 +1,37 @@
 @import './styles/glass.css';
 @tailwind base;
+
+/* 2026-11-14 — ehtiyat şriftlər veb-şriftin ölçüsündə (CLS).
+   Ana səhifə indi hazır HTML ilə gəlir: mətn Google Fonts yüklənməmiş görünür,
+   sonra Cormorant/Inter-ə keçəndə sətirlər yenidən bükülüb aşağıdakıları itələyirdi
+   (zəif 4G-də CLS 0.13). Ölçülər brauzerdə real şriftlərlə götürülüb
+   (Azərbaycanca nümunə mətn; scratchpad fontmetrics.mjs): Cormorant 500 = Georgia-nın 90%-i,
+   italik 81.5%-i; Inter 400 = Arial-ın 103%-i. Android-də Noto Serif / Roboto yaxın ölçüdədir. */
+@font-face {
+  font-family: 'Cormorant Fallback';
+  src: local('Georgia'), local('Noto Serif'), local('Times New Roman');
+  size-adjust: 90%;
+  ascent-override: 102%;
+  descent-override: 32%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Cormorant Fallback';
+  font-style: italic;
+  src: local('Georgia Italic'), local('Georgia-Italic'), local('Noto Serif Italic'), local('Times New Roman Italic');
+  size-adjust: 81.5%;
+  ascent-override: 113%;
+  descent-override: 36%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Arial'), local('Helvetica'), local('Roboto'), local('Liberation Sans');
+  size-adjust: 103%;
+  ascent-override: 94%;
+  descent-override: 23%;
+  line-gap-override: 0%;
+}
 @tailwind components;
 @tailwind utilities;
 
