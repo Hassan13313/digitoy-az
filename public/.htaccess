@@ -2,6 +2,10 @@ Options -Indexes +FollowSymLinks
 
 AddDefaultCharset UTF-8
 
+# 2026-11-14 — öz şriftlərimiz (/fonts/*.woff2): server bu tipi tanımırdı — Content-Type yox idi,
+# ona görə aşağıdakı ExpiresByType font/woff2 işləmirdi (şrift keşlənmirdi)
+AddType font/woff2 .woff2
+
 RewriteEngine On
 
 # 2026-11-14 — prerender fraqmentlari (_prerender/*.html) yalniz seo.php-nin daxilinde
