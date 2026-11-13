@@ -145,7 +145,7 @@ export default function FAQ({ lang = 'az', items, whatsappUrl = 'https://wa.me/9
                       }`}
                     >
                       <div className="overflow-hidden" inert={!isOpen ? true : undefined}>
-                        <p className="max-w-[60ch] pb-7 pr-14 text-[15px] leading-[1.75] text-brown-dark sm:pl-12">
+                        <p className="max-w-[35.5rem] pb-7 pr-14 text-[15px] leading-[1.75] text-brown-dark sm:pl-12">
                           {item.a}
                         </p>
                       </div>

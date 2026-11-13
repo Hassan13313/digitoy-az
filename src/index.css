@@ -1,35 +1,63 @@
+/* Cormorant Garamond + Inter — öz serverimizdən (styles/fonts.css, 2026-11-14) */
+@import './styles/fonts.css';
 @import './styles/glass.css';
 @tailwind base;
 
 /* 2026-11-14 — ehtiyat şriftlər veb-şriftin ölçüsündə (CLS).
-   Ana səhifə indi hazır HTML ilə gəlir: mətn Google Fonts yüklənməmiş görünür,
+   Ana səhifə və kataloq indi hazır HTML ilə gəlir: mətn Google Fonts yüklənməmiş görünür,
    sonra Cormorant/Inter-ə keçəndə sətirlər yenidən bükülüb aşağıdakıları itələyirdi
-   (zəif 4G-də CLS 0.13). Ölçülər brauzerdə real şriftlərlə götürülüb
-   (Azərbaycanca nümunə mətn; scratchpad fontmetrics.mjs): Cormorant 500 = Georgia-nın 90%-i,
-   italik 81.5%-i; Inter 400 = Arial-ın 103%-i. Android-də Noto Serif / Roboto yaxın ölçüdədir. */
+   (zəif 4G-də CLS 0.13–0.36). Ölçülər brauzerdə real şriftlərlə, Azərbaycanca mətnlə
+   götürülüb (scratchpad fontmetrics3.mjs) — hər çəki aralığının öz yerli faylı var
+   (çəkisiz qayda 600-ü süni qalınla çəkirdi).
+   ⚠ Serif üçün Times New Roman: Georgia-da «ə/Ə» YOXDUR — o hərf ölçülməmiş başqa
+   şriftlə çəkilirdi. Times New Roman / Noto Serif / Arial / Roboto Azərbaycan hərflərini tam əhatə edir.
+     Cormorant 300–500 = Times-ın 97.3%-i · 600–800 = Times Bold-un 92.5%-i · italik 91%
+     Inter 100–500 = Arial-ın 102.5%-i · 600–900 = Arial Bold-un 99.5%-i
+   ascent/descent = veb-şriftin ölçüsü (Cormorant 92/29, Inter 97/24) / size-adjust. */
 @font-face {
   font-family: 'Cormorant Fallback';
-  src: local('Georgia'), local('Noto Serif'), local('Times New Roman');
-  size-adjust: 90%;
-  ascent-override: 102%;
-  descent-override: 32%;
+  font-weight: 100 500;
+  src: local('Times New Roman'), local('TimesNewRomanPSMT'), local('Noto Serif'), local('Liberation Serif');
+  size-adjust: 97.3%;
+  ascent-override: 94.6%;
+  descent-override: 29.8%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Cormorant Fallback';
+  font-weight: 600 900;
+  src: local('Times New Roman Bold'), local('TimesNewRomanPS-BoldMT'), local('Noto Serif Bold'), local('Liberation Serif Bold');
+  size-adjust: 92.5%;
+  ascent-override: 99.5%;
+  descent-override: 31.4%;
   line-gap-override: 0%;
 }
 @font-face {
   font-family: 'Cormorant Fallback';
   font-style: italic;
-  src: local('Georgia Italic'), local('Georgia-Italic'), local('Noto Serif Italic'), local('Times New Roman Italic');
-  size-adjust: 81.5%;
-  ascent-override: 113%;
-  descent-override: 36%;
+  font-weight: 100 900;
+  src: local('Times New Roman Italic'), local('TimesNewRomanPS-ItalicMT'), local('Noto Serif Italic'), local('Liberation Serif Italic');
+  size-adjust: 91%;
+  ascent-override: 101.1%;
+  descent-override: 31.9%;
   line-gap-override: 0%;
 }
 @font-face {
   font-family: 'Inter Fallback';
-  src: local('Arial'), local('Helvetica'), local('Roboto'), local('Liberation Sans');
-  size-adjust: 103%;
-  ascent-override: 94%;
-  descent-override: 23%;
+  font-weight: 100 500;
+  src: local('Arial'), local('ArialMT'), local('Helvetica'), local('Roboto'), local('Liberation Sans');
+  size-adjust: 102.5%;
+  ascent-override: 94.6%;
+  descent-override: 23.4%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Inter Fallback';
+  font-weight: 600 900;
+  src: local('Arial Bold'), local('Arial-BoldMT'), local('Helvetica Bold'), local('Roboto Bold'), local('Liberation Sans Bold');
+  size-adjust: 99.5%;
+  ascent-override: 97.5%;
+  descent-override: 24.1%;
   line-gap-override: 0%;
 }
 @tailwind components;

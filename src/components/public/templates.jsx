@@ -33,7 +33,9 @@ export function TemplatesIntro({
         {title}
       </h1>
       <Rule className="mt-6" />
-      <p className="mt-6 max-w-[56ch] text-[15.5px] leading-[1.75] text-brown-dark sm:text-[17px]">{text}</p>
+      {/* en rem ilə (əvvəl 56ch): «ch» cari şriftin «0» eninə bağlıdır — hazır HTML ehtiyat şriftlə
+          çəkiləndə blok 543px, Inter-ə keçəndə 601px olur, sətirlər yenidən bükülürdü (CLS). 1ch(Inter)≈0.631em */}
+      <p className="mt-6 max-w-[37.6rem] text-[15.5px] leading-[1.75] text-brown-dark sm:text-[17px]">{text}</p>
     </div>
   );
 }
@@ -480,7 +482,7 @@ export function TemplatesEmpty({
         <path d="M60 4v8M44 8l4 6M76 8l-4 6" stroke="#C5A059" strokeWidth="1.2" strokeLinecap="round" opacity="0.7" />
       </svg>
       <p className="mt-5 font-serif text-[24px] leading-tight text-ink">{title}</p>
-      {text && <p className="mt-2 max-w-[40ch] text-[14.5px] leading-relaxed text-brown-dark">{text}</p>}
+      {text && <p className="mt-2 max-w-[22.9rem] text-[14.5px] leading-relaxed text-brown-dark">{text}</p>}
       <button
         type="button"
         onClick={onReset}

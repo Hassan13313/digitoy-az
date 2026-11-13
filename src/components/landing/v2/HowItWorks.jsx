@@ -140,7 +140,7 @@ export default function HowItWorks({ lang = 'az', onCta }) {
                     <h3 className="mt-2 font-serif text-[1.75rem] font-medium leading-tight text-ink lg:text-[1.55rem]">
                       {s.title}
                     </h3>
-                    <p className="mt-3 max-w-[34ch] text-[15px] leading-[1.7] text-brown-dark">{s.text}</p>
+                    <p className="mt-3 max-w-[20.1rem] text-[15px] leading-[1.7] text-brown-dark">{s.text}</p>
                     <p
                       className={`mt-5 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] ${
                         s.final ? 'bg-espresso text-gold-light' : 'bg-gold-mist text-gold-deep'

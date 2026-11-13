@@ -29,7 +29,7 @@ export default {
       },
       fontFamily: {
         /* «… Fallback» — ölçüsü veb-şriftə uyğunlaşdırılmış yerli şrift (src/index.css, CLS) */
-        serif: ['"Cormorant Garamond"', '"Cormorant Fallback"', '"Playfair Display"', 'Georgia', 'serif'],
+        serif: ['"Cormorant Garamond"', '"Cormorant Fallback"', '"Playfair Display"', '"Times New Roman"', 'serif'],
         sans: ['"Inter"', '"Inter Fallback"', 'system-ui', 'sans-serif'],
       },
       /* ⚠ Köhnə komponentlər bu radiusları işlədir. Redesign komponentləri
