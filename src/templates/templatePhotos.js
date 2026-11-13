@@ -25,6 +25,11 @@ import { PHOTOS as xonca } from './xonca/photos.js'
 import { PHOTOS as hennaButa } from './henna-buta/photos.js'
 import { PHOTOS as mirrorCandle } from './mirror-candle/photos.js'
 import { PHOTOS as kelagayi } from './kelagayi/photos.js'
+import { PHOTOS as littlePrince } from './little-prince/photos.js'
+import { PHOTOS as heroComic } from './hero-comic/photos.js'
+import { PHOTOS as mashallah } from './mashallah/photos.js'
+import { PHOTOS as littlePilot } from './little-pilot/photos.js'
+import { PHOTOS as footballStar } from './football-star/photos.js'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    ŞABLONUN ŞƏKİL YERLƏRİ (2026-11) — admin «Şəkillər» tabı
@@ -65,6 +70,12 @@ const REGISTRY = {
   'henna-buta': hennaButa,
   'mirror-candle': mirrorCandle,
   kelagayi,
+  /* 2026-11-13 — sünnət toyu seriyası */
+  'little-prince': littlePrince,
+  'hero-comic': heroComic,
+  mashallah,
+  'little-pilot': littlePilot,
+  'football-star': footballStar,
 }
 
 /** Bütün şablonların şəkil açarları — admin datasının ağ siyahısı */

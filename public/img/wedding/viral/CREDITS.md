@@ -38,3 +38,10 @@ Toy + ad günü dizaynlarında (Gazette, Vinyl Record, Cinema Premiere, Boarding
 - hb-1…4 Henna Buta: xınalı ovuclar, xına qabı və buta, həyətdə süfrə, xınalı əllərdə şam
 - mc-1…4 Mirror & Candle: zər güzgü və iki şam, əl güzgüsü və üzük, güzgülü süfrə, güzgüdə iki alov
 - kl-1…4 Kəlağayı: kəlağayılı gəlin, kəlağayı və qəliblər, şəbəkəli otaqda süfrə, həyətdə kəlağayılar
+
+## Sünnət toyu seriyası (2026-11-13) — GPT Image, bu şablonlar üçün yaradılıb
+- lp-1…4 Little Prince: saray zalında kiçik şahzadə, məxmər yastıqda tac, saray süfrəsi, eyvanda atəşfəşanlıq
+- hc-1…4 Hero Comic: təpədə plaşlı qəhrəman, plaş və maska, qəhrəman süfrəsi, gecə şəhəri və işıq şüası
+- ms-1…4 Maşallah: atlas lentli kiçik bəy, göz muncuqları və lent, kobalt süfrə, muncuqlu ağac
+- pl-1…4 Little Pilot: biplanın yanında kiçik pilot, eynək və kompas, anqarda süfrə, buludlar üstündə təyyarə
+- fs-1…4 Football Star: gecə stadionunda kiçik futbolçu, top və kubok, meydanda süfrə, konfetti altında stadion

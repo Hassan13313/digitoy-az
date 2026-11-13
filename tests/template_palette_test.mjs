@@ -62,6 +62,8 @@ ok('əmsal → calc', scaleFont('clamp(30px, 9vw, 40px)', 1.2) === 'calc(clamp(3
 const REDESIGNED = [
   'modern-black', 'white-elegance', 'night-sky', 'oriental-luxe', 'nature-touch', 'crystal-glass',
   'boarding-pass', 'cinema-premiere', 'vinyl-record', 'royal-palace', 'mediterranean', 'gazette', 'luxury-jewelry',
+  'red-veil', 'xonca', 'henna-buta', 'mirror-candle', 'kelagayi',
+  'little-prince', 'hero-comic', 'mashallah', 'little-pilot', 'football-star',
 ]
 const ANCHORS = ['hero', 'countdown', 'venue', 'program', 'dresscode', 'seating', 'gallery', 'rsvp', 'guestbook']
 

@@ -26,6 +26,11 @@ import { alpha } from '../useInvitation'
      mandala  Henna Buta      — yavaş fırlanan xına mandalası
      mirror   Mirror & Candle — oval zər güzgü, üzərindən parıltı keçir
      rhomb    Kəlağayı        — romb lövhə, üç rəngli haşiyə
+     shield   Little Prince   — zər haşiyəli qalxan, üstündə tac
+     comic    Hero Comic      — çəp komiks panelləri, rastr nöqtə, qalın kontur
+     nazar    Maşallah        — göz muncuğu halqaları, ortada rəqəm
+     gauge    Little Pilot    — kokpit cihazları, əqrəb vaxtla dönür
+     led      Football Star   — stadion LED tablosu, nöqtəli işıq rəqəmlər
    `cd` — useCountdown nəticəsi (days, hours, minutes, seconds, labels).
    ───────────────────────────────────────────────────────────────────────── */
 
@@ -359,6 +364,95 @@ export default function Countdown({ kind, cd, C, fonts, light = false }) {
         </div>
       )
     }
+    case 'shield':
+      return (
+        <div ref={ref} className="cdx" style={row(10)}>
+          {units.map((u, i) => (
+            <div key={u.k} style={pop(i)}>
+              <div style={{ position: 'relative', paddingTop: 12 }}>
+                <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: 0, translate: '-50% 0', zIndex: 1, color: C.ACCENT, fontSize: 15, lineHeight: 1, textShadow: `0 0 8px ${alpha(C.ACCENT, 0.6)}` }}>♛</span>
+                <div style={{ padding: 2, background: `linear-gradient(160deg, ${C.ACCENT}, ${alpha(C.ACCENT, 0.45)} 50%, ${C.ACCENT})`, clipPath: 'polygon(0 0, 100% 0, 100% 62%, 50% 100%, 0 62%)' }}>
+                  <div style={{ padding: '18px 2px 30px', clipPath: 'polygon(0 0, 100% 0, 100% 62%, 50% 100%, 0 62%)', background: `linear-gradient(180deg, ${C.BG2}, ${C.BG})` }}>
+                    {R(u.v, { fontFamily: num, fontSize: 'clamp(24px, 7vw, 30px)', color: C.INK })}
+                  </div>
+                </div>
+              </div>
+              <div style={lab({ color: C.ACCENT })}>{u.label}</div>
+            </div>
+          ))}
+        </div>
+      )
+    case 'comic': {
+      const fills = [C.RED || C.ACCENT, C.YEL || C.ACCENT, C.BLUE || C.INK, C.SKY || C.BG2]
+      return (
+        <div ref={ref} className="cdx" style={row(10)}>
+          {units.map((u, i) => (
+            <div key={u.k} style={pop(i)}>
+              <div style={{
+                position: 'relative', padding: '16px 2px 12px', border: `2.5px solid ${C.INK}`, boxShadow: `4px 4px 0 ${C.INK}`, rotate: `${i % 2 ? 2.5 : -2.5}deg`,
+                background: `radial-gradient(${alpha(C.INK, 0.18)} 1.2px, transparent 1.6px) 0 0 / 7px 7px, ${fills[i]}`,
+              }}>
+                {R(u.v, { fontFamily: num, fontWeight: 800, fontSize: 'clamp(24px, 7vw, 30px)', color: i === 1 || i === 3 ? C.INK : '#fff', textShadow: i === 1 || i === 3 ? 'none' : `2px 2px 0 ${C.INK}` })}
+              </div>
+              <div style={lab({ marginTop: 12, color: C.INK, fontWeight: 700 })}>{u.label}</div>
+            </div>
+          ))}
+        </div>
+      )
+    }
+    case 'nazar':
+      return (
+        <div ref={ref} className="cdx" style={row(8)}>
+          {units.map((u, i) => (
+            <div key={u.k} style={pop(i)}>
+              <div style={{
+                position: 'relative', width: '100%', aspectRatio: '1', borderRadius: '50%', display: 'grid', placeItems: 'center', overflow: 'hidden',
+                background: `radial-gradient(circle, ${C.BG2} 0 34%, ${C.TURQ || C.ACCENT} 35% 49%, #fff 50% 60%, ${C.COB || C.INK} 61%)`,
+                boxShadow: `0 6px 16px ${alpha(C.COB || C.INK, 0.3)}, inset 0 -4px 10px rgba(0,0,0,.2)`,
+              }}>
+                <span aria-hidden="true" style={{ position: 'absolute', left: '18%', top: '12%', width: '30%', height: '20%', borderRadius: '50%', background: 'rgba(255,255,255,.55)', filter: 'blur(2px)', rotate: '-25deg' }} />
+                <span style={{ position: 'relative' }}>{R(u.v, { fontFamily: num, fontSize: 'clamp(16px, 4.6vw, 20px)', fontWeight: 600, color: C.COB || C.INK })}</span>
+              </div>
+              <div style={lab({ color: C.COB || C.ACCENT })}>{u.label}</div>
+            </div>
+          ))}
+        </div>
+      )
+    case 'gauge': {
+      const frac = { days: Math.min(cd.days / 365, 1), hours: cd.hours / 24, minutes: cd.minutes / 60, seconds: cd.seconds / 60 }
+      return (
+        <div ref={ref} className="cdx" style={row(8)}>
+          {units.map((u, i) => (
+            <div key={u.k} style={pop(i)}>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '1', borderRadius: '50%', display: 'grid', placeItems: 'center', background: `radial-gradient(circle at 50% 40%, ${C.DIAL || '#22384F'}, ${alpha('#000', 0.85)})`, border: `3px solid ${alpha(C.INK, 0.25)}`, boxShadow: `inset 0 0 0 2px ${alpha('#fff', 0.15)}, 0 6px 14px ${alpha('#000', 0.25)}` }}>
+                <svg aria-hidden="true" viewBox="0 0 100 100" style={{ position: 'absolute', inset: 0 }}>
+                  {Array.from({ length: 12 }, (_, k) => <line key={k} x1="50" y1="8" x2="50" y2={k % 3 ? 14 : 18} stroke="#fff" strokeOpacity=".75" strokeWidth={k % 3 ? 1.2 : 2.2} transform={`rotate(${k * 30} 50 50)`} />)}
+                </svg>
+                <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 2.5, height: '40%', marginLeft: -1.25, transformOrigin: '50% 0', translate: '0 0', rotate: `${180 + (seen ? frac[u.k] : 0) * 360}deg`, background: C.ACCENT, borderRadius: 2, transition: 'rotate 1s cubic-bezier(.3,1.4,.5,1)' }} />
+                <span style={{ position: 'relative', marginTop: '42%' }}>{R(u.v, { fontFamily: num, fontWeight: 700, fontSize: 'clamp(13px, 3.8vw, 16px)', color: '#fff' })}</span>
+                <span aria-hidden="true" style={{ position: 'absolute', width: 8, height: 8, borderRadius: '50%', background: C.ACCENT }} />
+              </div>
+              <div style={lab({ color: C.INK })}>{u.label}</div>
+            </div>
+          ))}
+        </div>
+      )
+    }
+    case 'led':
+      return (
+        <div ref={ref} className="cdx" style={{ maxWidth: 380, margin: '0 auto', padding: '14px 10px 12px', borderRadius: 6, background: '#050a10', border: `2px solid ${alpha(C.ACCENT, 0.5)}`, boxShadow: `0 0 0 4px #0b1520, 0 14px 30px ${alpha('#000', 0.5)}` }}>
+          <div style={row(4)}>
+            {units.map((u, i) => (
+              <div key={u.k} style={pop(i)}>
+                <div style={{ padding: '6px 0', backgroundImage: 'radial-gradient(rgba(255,255,255,.06) 1px, transparent 1.4px)', backgroundSize: '5px 5px' }}>
+                  {R(u.v, { fontFamily: num, fontWeight: 600, fontSize: 'clamp(28px, 8.4vw, 36px)', letterSpacing: '.04em', color: C.ACCENT, textShadow: `0 0 10px ${alpha(C.ACCENT, 0.75)}, 0 0 2px ${C.ACCENT}` })}
+                </div>
+                <div style={lab({ marginTop: 4, color: alpha('#fff', 0.7) })}>{u.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )
     default:
       return (
         <div ref={ref} className="cdx" style={row(8)}>

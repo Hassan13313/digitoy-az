@@ -1,6 +1,8 @@
 /* mashallah — şablonun öz mətnləri (bax _shared/copyText.js).
    LABELS — bölmə başlıqları (admin «Mətnlər › Başlıq» boşdursa bunlar görünür).
    TXT    — dizayna məxsus sətirlər; FIELDS — admin formunda sıra, bölmə və ad.
+   2026-11 foto redizayn (sünnət seriyası): bölmə başlıqları əvvəlki kimidir,
+   TXT yalnız yeni görünüşdə işlənən sətirlərdir.
    ⚠ React YOXDUR: admin paneli və node testləri bu faylı birbaşa yükləyir. */
 
 export const LABELS = {
@@ -16,25 +18,33 @@ export const LABELS = {
 
 export const TXT = {
   az: {
-    sash: 'Maşallah',
     brand: 'Digitoy',
+    line: 'Maşallah! Göz dəyməsin, ömrü uzun olsun',
     table: 'Masa',
+    end: 'Görüşənədək',
+    scroll: 'Aşağı sürüşdürün',
   },
   en: {
-    sash: 'Mashallah',
     brand: 'Digitoy',
+    line: 'Mashallah! May he be blessed with a long life',
     table: 'Table',
+    end: 'See you there',
+    scroll: 'Scroll down',
   },
   ru: {
-    sash: 'Машаллах',
     brand: 'Digitoy',
+    line: 'Машаллах! Пусть его жизнь будет долгой',
     table: 'Стол',
+    end: 'До встречи',
+    scroll: 'Листайте вниз',
   },
 }
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
-  ['sash', 'hero', 'Lentin yazısı'],
   ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
-  ['table', 'seating', 'Dizayn mətni: «Masa»'],
+  ['scroll', 'hero', 'Örtükdə «Aşağı sürüşdürün»'],
+  ['line', 'countdown', 'Foto blokundakı sətir (sayğacdan sonra)'],
+  ['table', 'seating', 'Masa kartındakı yazı'],
+  ['end', 'guestbook', 'Son kadrdakı sətir'],
 ]

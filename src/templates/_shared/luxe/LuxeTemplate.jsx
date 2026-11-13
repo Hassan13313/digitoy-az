@@ -88,6 +88,7 @@ function openingStyles(kind, origin) {
     case 'split': return { clip0: 'inset(0% 47% 0% 47%)', clip1: 'inset(0% 0% 0% 0%)', s0: 1.15 }
     case 'letterbox': return { clip0: 'inset(41% 0% 41% 0%)', clip1: 'inset(0% 0% 0% 0%)', s0: 1.15 }
     case 'zoom': return { clip0: null, s0: 1.38, dim: 0.4 }
+    case 'still': return { clip0: null, s0: 1.08 } /* örtük (overlay) açılışı özü edir */
     case 'blur': return { clip0: null, s0: 1.14, blur: 16, dim: 0.75 }
     default: return { clip0: null, s0: 1.12, dim: 0.18 } /* bright */
   }

@@ -21,7 +21,8 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b)
 const IMG = '/uploads/_admin/tpl-candle-rings/0123456789abcdef0123.jpg'
 const TEMPLATES = ['candle-rings', 'bridal-veil', 'first-dance', 'ivory-silk', 'baku-night', 'golden-hour', 'shahdag', 'royal-palace', 'oriental-luxe',
   'night-sky', 'mediterranean', 'crystal-glass', 'gazette', 'royal-gold', 'luxury-jewelry', 'floral-garden', 'white-elegance', 'nature-touch', 'vinyl-record', 'cinema-premiere', 'boarding-pass', 'modern-black',
-  'red-veil', 'xonca', 'henna-buta', 'mirror-candle', 'kelagayi']
+  'red-veil', 'xonca', 'henna-buta', 'mirror-candle', 'kelagayi',
+  'little-prince', 'hero-comic', 'mashallah', 'little-pilot', 'football-star']
 
 /* 1. normalizeImages */
 ok('null → null', normalizeImages(null) === null)
