@@ -72,6 +72,12 @@ const FROZEN_V2 = {
   'cinema-premiere': lazy(() => import('./v2/cinema-premiere')),
   'boarding-pass':   lazy(() => import('./v2/boarding-pass')),
   'modern-black':    lazy(() => import('./v2/modern-black')),
+  /* 2026-11-13: xına gecəsi 5-liyi fotolu dizayna keçdi */
+  'red-veil':        lazy(() => import('./v2/red-veil')),
+  'xonca':           lazy(() => import('./v2/xonca')),
+  'henna-buta':      lazy(() => import('./v2/henna-buta')),
+  'mirror-candle':   lazy(() => import('./v2/mirror-candle')),
+  'kelagayi':        lazy(() => import('./v2/kelagayi')),
 }
 /** v3-ə keçmiş şablonlar (server: api/template_version.php › TV_V3_TEMPLATES) */
 export const V3_TEMPLATES = Object.freeze(Object.keys(FROZEN_V2))

@@ -30,6 +30,7 @@ const TV_V3_TEMPLATES = [
     'royal-palace', 'oriental-luxe', 'night-sky', 'mediterranean', 'crystal-glass',
     'gazette', 'royal-gold', 'luxury-jewelry', 'floral-garden', 'white-elegance',
     'nature-touch', 'vinyl-record', 'cinema-premiere', 'boarding-pass', 'modern-black',
+    'red-veil', 'xonca', 'henna-buta', 'mirror-candle', 'kelagayi',
 ];
 
 /** 1, 2 və ya 3 — başqa hər şey null */
