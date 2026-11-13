@@ -1,6 +1,8 @@
 /* pink-champagne — şablonun öz mətnləri (bax _shared/copyText.js).
    LABELS — bölmə başlıqları (admin «Mətnlər › Başlıq» boşdursa bunlar görünür).
    TXT    — dizayna məxsus sətirlər; FIELDS — admin formunda sıra, bölmə və ad.
+   2026-11 foto redizayn (qız gecəsi seriyası): bölmə başlıqları əvvəlki kimidir,
+   TXT yalnız yeni görünüşdə işlənən sətirlərdir.
    ⚠ React YOXDUR: admin paneli və node testləri bu faylı birbaşa yükləyir. */
 
 export const LABELS = {
@@ -17,28 +19,32 @@ export const LABELS = {
 export const TXT = {
   az: {
     brand: 'Digitoy',
+    line: 'Bir badə gülüş, bir badə xatirə — qızlar gecəsinə xoş gəldin!',
     table: 'Masa',
-    bride: 'Gəlin olacaq',
-    cheers: 'Sağlığına!',
+    end: 'Görüşənədək',
+    scroll: 'Aşağı sürüşdürün',
   },
   en: {
     brand: 'Digitoy',
+    line: 'A glass of laughter, a glass of memories — welcome to girls’ night!',
     table: 'Table',
-    bride: 'Bride to be',
-    cheers: 'Cheers!',
+    end: 'See you there',
+    scroll: 'Scroll down',
   },
   ru: {
     brand: 'Digitoy',
+    line: 'Бокал смеха, бокал воспоминаний — добро пожаловать на девичник!',
     table: 'Стол',
-    bride: 'Скоро невеста',
-    cheers: 'За невесту!',
+    end: 'До встречи',
+    scroll: 'Листайте вниз',
   },
 }
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
   ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
-  ['table', 'seating', 'Dizayn mətni: «Masa»'],
-  ['bride', 'hero', 'Dizayn mətni: «Gəlin olacaq»'],
-  ['cheers', 'hero', 'Dizayn mətni: «Sağlığına!»'],
+  ['scroll', 'hero', 'Örtükdə «Aşağı sürüşdürün»'],
+  ['line', 'countdown', 'Foto blokundakı sətir (sayğacdan sonra)'],
+  ['table', 'seating', 'Masa kartındakı yazı'],
+  ['end', 'guestbook', 'Son kadrdakı sətir'],
 ]

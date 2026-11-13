@@ -30,6 +30,46 @@ import { PHOTOS as heroComic } from './hero-comic/photos.js'
 import { PHOTOS as mashallah } from './mashallah/photos.js'
 import { PHOTOS as littlePilot } from './little-pilot/photos.js'
 import { PHOTOS as footballStar } from './football-star/photos.js'
+import { PHOTOS as fairyTale } from './fairy-tale/photos.js'
+import { PHOTOS as spaceMission } from './space-mission/photos.js'
+import { PHOTOS as circusShow } from './circus-show/photos.js'
+import { PHOTOS as dinoAdventure } from './dino-adventure/photos.js'
+import { PHOTOS as balloonParty } from './balloon-party/photos.js'
+import { PHOTOS as pastelBloom } from './pastel-bloom/photos.js'
+import { PHOTOS as teddyBear } from './teddy-bear/photos.js'
+import { PHOTOS as genderReveal } from './gender-reveal/photos.js'
+import { PHOTOS as storkLetter } from './stork-letter/photos.js'
+import { PHOTOS as babyMobile } from './baby-mobile/photos.js'
+import { PHOTOS as galaNight } from './gala-night/photos.js'
+import { PHOTOS as keynote } from './keynote/photos.js'
+import { PHOTOS as awardNight } from './award-night/photos.js'
+import { PHOTOS as businessCard } from './business-card/photos.js'
+import { PHOTOS as neonParty } from './neon-party/photos.js'
+import { PHOTOS as silverLocket } from './silver-locket/photos.js'
+import { PHOTOS as goldenJubilee } from './golden-jubilee/photos.js'
+import { PHOTOS as firstPaper } from './first-paper/photos.js'
+import { PHOTOS as retroPolaroid } from './retro-polaroid/photos.js'
+import { PHOTOS as loveLetters } from './love-letters/photos.js'
+import { PHOTOS as capsToss } from './caps-toss/photos.js'
+import { PHOTOS as yearbook } from './yearbook/photos.js'
+import { PHOTOS as lastBell } from './last-bell/photos.js'
+import { PHOTOS as chalkboard } from './chalkboard/photos.js'
+import { PHOTOS as paperPlane } from './paper-plane/photos.js'
+import { PHOTOS as ribbonCut } from './ribbon-cut/photos.js'
+import { PHOTOS as bistroSign } from './bistro-sign/photos.js'
+import { PHOTOS as rollerShutter } from './roller-shutter/photos.js'
+import { PHOTOS as unboxing } from './unboxing/photos.js'
+import { PHOTOS as galleryUnveil } from './gallery-unveil/photos.js'
+import { PHOTOS as novruzBonfire } from './novruz-bonfire/photos.js'
+import { PHOTOS as novruzSemeni } from './novruz-semeni/photos.js'
+import { PHOTOS as midnightClock } from './midnight-clock/photos.js'
+import { PHOTOS as snowGlobe } from './snow-globe/photos.js'
+import { PHOTOS as masqueradeBall } from './masquerade-ball/photos.js'
+import { PHOTOS as pinkChampagne } from './pink-champagne/photos.js'
+import { PHOTOS as discoBall } from './disco-ball/photos.js'
+import { PHOTOS as pajamaSpa } from './pajama-spa/photos.js'
+import { PHOTOS as parisNight } from './paris-night/photos.js'
+import { PHOTOS as bohoSunset } from './boho-sunset/photos.js'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    ŞABLONUN ŞƏKİL YERLƏRİ (2026-11) — admin «Şəkillər» tabı
@@ -76,6 +116,54 @@ const REGISTRY = {
   mashallah,
   'little-pilot': littlePilot,
   'football-star': footballStar,
+  /* 2026-11-13 — uşaq ad günü seriyası */
+  'fairy-tale': fairyTale,
+  'space-mission': spaceMission,
+  'circus-show': circusShow,
+  'dino-adventure': dinoAdventure,
+  'balloon-party': balloonParty,
+  /* 2026-11-13 — baby shower seriyası */
+  'pastel-bloom': pastelBloom,
+  'teddy-bear': teddyBear,
+  'gender-reveal': genderReveal,
+  'stork-letter': storkLetter,
+  'baby-mobile': babyMobile,
+  /* 2026-11-13 — korporativ seriyası */
+  'gala-night': galaNight,
+  keynote,
+  'award-night': awardNight,
+  'business-card': businessCard,
+  'neon-party': neonParty,
+  /* 2026-11-13 — ildönümü seriyası */
+  'silver-locket': silverLocket,
+  'golden-jubilee': goldenJubilee,
+  'first-paper': firstPaper,
+  'retro-polaroid': retroPolaroid,
+  'love-letters': loveLetters,
+  /* 2026-11-13 — məzuniyyət seriyası */
+  'caps-toss': capsToss,
+  yearbook,
+  'last-bell': lastBell,
+  chalkboard,
+  'paper-plane': paperPlane,
+  /* 2026-11-13 — açılış və təqdimat seriyası */
+  'ribbon-cut': ribbonCut,
+  'bistro-sign': bistroSign,
+  'roller-shutter': rollerShutter,
+  unboxing,
+  'gallery-unveil': galleryUnveil,
+  /* 2026-11-13 — bayram gecələri seriyası */
+  'novruz-bonfire': novruzBonfire,
+  'novruz-semeni': novruzSemeni,
+  'midnight-clock': midnightClock,
+  'snow-globe': snowGlobe,
+  'masquerade-ball': masqueradeBall,
+  /* 2026-11-13 — qız gecəsi seriyası */
+  'pink-champagne': pinkChampagne,
+  'disco-ball': discoBall,
+  'pajama-spa': pajamaSpa,
+  'paris-night': parisNight,
+  'boho-sunset': bohoSunset,
 }
 
 /** Bütün şablonların şəkil açarları — admin datasının ağ siyahısı */

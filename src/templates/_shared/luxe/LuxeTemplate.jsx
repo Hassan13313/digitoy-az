@@ -342,7 +342,7 @@ function SeatCard({ cfg, num, T, C }) {
     )
   }
   return (
-    <div style={{ position: 'relative', overflow: 'hidden', display: 'inline-block', width: 240, padding: '30px 20px 28px', background: C.BG2, boxShadow: `0 26px 40px -26px ${alpha('#000', 0.55)}`, transformOrigin: '50% 100%', animation: 'lx-card 1.1s cubic-bezier(.2,.8,.2,1) both' }}>
+    <div style={{ position: 'relative', overflow: 'hidden', display: 'inline-block', width: 240, padding: '30px 20px 28px', background: C.BG2, boxShadow: `0 26px 40px -26px ${alpha('#000000', 0.55)}`, transformOrigin: '50% 100%', animation: 'lx-card 1.1s cubic-bezier(.2,.8,.2,1) both' }}>
       <span aria-hidden="true" style={{ position: 'absolute', inset: 7, border: `1px solid ${alpha(C.ACCENT, 0.5)}` }} />
       <span aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(105deg, transparent 40%, rgba(255,240,210,.16) 50%, transparent 60%)', translate: '-120% 0', animation: 'lx-shine 2.2s .9s ease-in-out both' }} />
       {cfg.ornament && <div aria-hidden="true" style={{ fontSize: 18, color: C.ACCENT }}>{cfg.ornament}</div>}
@@ -462,7 +462,7 @@ export default function LuxeTemplate({ props, inv, C, T, cfg }) {
           ) : (
             <section data-section="program" style={{ position: 'relative', paddingBottom: 80, background: C.BG }}>
               {P.program && <Photo src={P.program} alt="" focus="50% 50%" style={{ height: '64svh', minHeight: 400 }} />}
-              <div style={{ position: 'relative', zIndex: 2, maxWidth: 420, margin: P.program ? '-96px auto 0' : '80px auto 0', marginInline: 'max(22px, calc(50% - 210px))', padding: '48px 26px 40px', background: C.BG2, textAlign: 'center', boxShadow: `0 30px 60px -32px ${alpha('#000', 0.6)}`, borderRadius: cfg.cardRadius || 0 }}>
+              <div style={{ position: 'relative', zIndex: 2, maxWidth: 420, margin: P.program ? '-96px auto 0' : '80px auto 0', marginInline: 'max(22px, calc(50% - 210px))', padding: '48px 26px 40px', background: C.BG2, textAlign: 'center', boxShadow: `0 30px 60px -32px ${alpha('#000000', 0.6)}`, borderRadius: cfg.cardRadius || 0 }}>
                 <span aria-hidden="true" style={{ position: 'absolute', inset: 8, border: `1px solid ${alpha(C.ACCENT, 0.45)}`, borderRadius: cfg.cardRadius ? cfg.cardRadius - 6 : 0 }} />
                 <Title cfg={{ ...cfg, align: 'center' }} C={C}>{L('program', 'title', timeline.sectionLabel)}</Title>
                 <Divider cfg={{ ...cfg, align: 'center' }} C={C} style={{ margin: '16px auto 6px' }} />
@@ -584,7 +584,7 @@ function End({ cfg, inv, T, C }) {
 function MapPin({ C }) {
   return (
     <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
-      <span style={{ position: 'absolute', left: -10, top: -10, width: 20, height: 20, borderRadius: '50%', background: C.BG, border: `5px solid ${C.ACCENT}`, boxShadow: `0 6px 16px ${alpha('#000', 0.45)}` }} />
+      <span style={{ position: 'absolute', left: -10, top: -10, width: 20, height: 20, borderRadius: '50%', background: C.BG, border: `5px solid ${C.ACCENT}`, boxShadow: `0 6px 16px ${alpha('#000000', 0.45)}` }} />
     </span>
   )
 }

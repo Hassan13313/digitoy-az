@@ -1,6 +1,8 @@
 /* gender-reveal — şablonun öz mətnləri (bax _shared/copyText.js).
    LABELS — bölmə başlıqları (admin «Mətnlər › Başlıq» boşdursa bunlar görünür).
    TXT    — dizayna məxsus sətirlər; FIELDS — admin formunda sıra, bölmə və ad.
+   2026-11 foto redizayn (baby shower seriyası): bölmə başlıqları əvvəlki kimidir,
+   TXT yalnız yeni görünüşdə işlənən sətirlərdir.
    ⚠ React YOXDUR: admin paneli və node testləri bu faylı birbaşa yükləyir. */
 
 export const LABELS = {
@@ -16,29 +18,33 @@ export const LABELS = {
 
 export const TXT = {
   az: {
-    question: 'Oğlan, yoxsa qız?',
-    boy: 'Oğlan',
-    girl: 'Qız',
+    brand: 'Digitoy',
+    line: 'Mavi, yoxsa çəhrayı? Cavabı birlikdə öyrənək!',
     table: 'Masa',
+    end: 'Görüşənədək',
+    scroll: 'Aşağı sürüşdürün',
   },
   en: {
-    question: 'Boy or girl?',
-    boy: 'Boy',
-    girl: 'Girl',
+    brand: 'Digitoy',
+    line: 'Blue or pink? Let’s find out together!',
     table: 'Table',
+    end: 'See you there',
+    scroll: 'Scroll down',
   },
   ru: {
-    question: 'Мальчик или девочка?',
-    boy: 'Мальчик',
-    girl: 'Девочка',
+    brand: 'Digitoy',
+    line: 'Голубой или розовый? Узнаем вместе!',
     table: 'Стол',
+    end: 'До встречи',
+    scroll: 'Листайте вниз',
   },
 }
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
-  ['question', 'hero', 'Sual'],
-  ['boy', 'hero', '«Oğlan» tərəfi'],
-  ['girl', 'hero', '«Qız» tərəfi'],
-  ['table', 'seating', 'Dizayn mətni: «Masa»'],
+  ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
+  ['scroll', 'hero', 'Örtükdə «Aşağı sürüşdürün»'],
+  ['line', 'countdown', 'Foto blokundakı sətir (sayğacdan sonra)'],
+  ['table', 'seating', 'Masa kartındakı yazı'],
+  ['end', 'guestbook', 'Son kadrdakı sətir'],
 ]

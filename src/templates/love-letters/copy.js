@@ -1,6 +1,8 @@
 /* love-letters — şablonun öz mətnləri (bax _shared/copyText.js).
    LABELS — bölmə başlıqları (admin «Mətnlər › Başlıq» boşdursa bunlar görünür).
    TXT    — dizayna məxsus sətirlər; FIELDS — admin formunda sıra, bölmə və ad.
+   2026-11 foto redizayn (ildönümü seriyası): bölmə başlıqları əvvəlki kimidir,
+   TXT yalnız yeni görünüşdə işlənən sətirlərdir.
    ⚠ React YOXDUR: admin paneli və node testləri bu faylı birbaşa yükləyir. */
 
 export const LABELS = {
@@ -17,24 +19,32 @@ export const LABELS = {
 export const TXT = {
   az: {
     brand: 'Digitoy',
+    line: 'Hər məktub bir il, hər il bir sevgi hekayəsi',
     table: 'Masa',
-    to: 'Kimə:',
+    end: 'Görüşənədək',
+    scroll: 'Aşağı sürüşdürün',
   },
   en: {
     brand: 'Digitoy',
+    line: 'Every letter a year, every year a love story',
     table: 'Table',
-    to: 'To:',
+    end: 'See you there',
+    scroll: 'Scroll down',
   },
   ru: {
     brand: 'Digitoy',
+    line: 'Каждое письмо — год, каждый год — история любви',
     table: 'Стол',
-    to: 'Кому:',
+    end: 'До встречи',
+    scroll: 'Листайте вниз',
   },
 }
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
   ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
-  ['table', 'seating', 'Dizayn mətni: «Masa»'],
-  ['to', 'seating', 'Dizayn mətni: «Kimə:»'],
+  ['scroll', 'hero', 'Örtükdə «Aşağı sürüşdürün»'],
+  ['line', 'countdown', 'Foto blokundakı sətir (sayğacdan sonra)'],
+  ['table', 'seating', 'Masa kartındakı yazı'],
+  ['end', 'guestbook', 'Son kadrdakı sətir'],
 ]

@@ -1,15 +1,11 @@
-/* BUSINESS CARD — rənglər və köməkçilər (komponent faylından ayrı: fast refresh qaydası) */
+/* BUSINESS CARD — rənglər (komponent faylından ayrı: fast refresh qaydası) */
 
-export const C = {
-  DESK: '#E9E7E1', PAPER: '#F4F3EF', WHITE: '#FFFFFF', INK: '#121212', GRAPHITE: '#3A3A3A',
-  MUTED: '#76756F', HAIR: '#D6D4CC', KLEIN: '#2438E8', KLEIN_D: '#1A28B0',
-}
+export const C = { BG: '#F4F3EF', BG2: '#FFFFFF', INK: '#121212', ACCENT: '#2438E8', MUTE: '#5A5A5A' }
 
-/* Ad uzunluğuna görə ölçü (Inter Tight) */
-export function nameSize(text) {
+/* Ad uzunluğuna görə ölçü */
+export function nameSize(text, big = false) {
   const n = Array.from(String(text || '')).length
-  if (n <= 8) return 'clamp(52px, 16vw, 76px)'
-  if (n <= 14) return 'clamp(42px, 12.4vw, 60px)'
-  if (n <= 22) return 'clamp(34px, 9.6vw, 46px)'
-  return 'clamp(26px, 7.4vw, 36px)'
+  if (n <= 12) return big ? 'clamp(40px, 12vw, 56px)' : 'clamp(34px, 10vw, 46px)'
+  if (n <= 18) return big ? 'clamp(32px, 9.4vw, 44px)' : 'clamp(28px, 8vw, 38px)'
+  return big ? 'clamp(26px, 7.6vw, 36px)' : 'clamp(22px, 6.4vw, 30px)'
 }

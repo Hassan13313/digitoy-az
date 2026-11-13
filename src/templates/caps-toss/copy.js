@@ -1,6 +1,8 @@
 /* caps-toss — şablonun öz mətnləri (bax _shared/copyText.js).
    LABELS — bölmə başlıqları (admin «Mətnlər › Başlıq» boşdursa bunlar görünür).
    TXT    — dizayna məxsus sətirlər; FIELDS — admin formunda sıra, bölmə və ad.
+   2026-11 foto redizayn (məzuniyyət seriyası): bölmə başlıqları əvvəlki kimidir,
+   TXT yalnız yeni görünüşdə işlənən sətirlərdir.
    ⚠ React YOXDUR: admin paneli və node testləri bu faylı birbaşa yükləyir. */
 
 export const LABELS = {
@@ -17,24 +19,32 @@ export const LABELS = {
 export const TXT = {
   az: {
     brand: 'Digitoy',
+    line: 'İllərin zəhməti bu gecə papaqla birlikdə göyə uçur',
     table: 'Masa',
-    classOf: 'Məzun {y}',
+    end: 'Görüşənədək',
+    scroll: 'Aşağı sürüşdürün',
   },
   en: {
     brand: 'Digitoy',
+    line: 'Years of hard work fly up with the caps tonight',
     table: 'Table',
-    classOf: 'Class of {y}',
+    end: 'See you there',
+    scroll: 'Scroll down',
   },
   ru: {
     brand: 'Digitoy',
+    line: 'Годы труда взлетают сегодня вместе с шапками',
     table: 'Стол',
-    classOf: 'Выпуск {y}',
+    end: 'До встречи',
+    scroll: 'Листайте вниз',
   },
 }
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
   ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
-  ['table', 'seating', 'Dizayn mətni: «Masa»'],
-  ['classOf', 'hero', 'Dizayn mətni: «Məzun {y}»', '{y} — avtomatik dəyər (il), silməyin'],
+  ['scroll', 'hero', 'Örtükdə «Aşağı sürüşdürün»'],
+  ['line', 'countdown', 'Foto blokundakı sətir (sayğacdan sonra)'],
+  ['table', 'seating', 'Masa kartındakı yazı'],
+  ['end', 'guestbook', 'Son kadrdakı sətir'],
 ]

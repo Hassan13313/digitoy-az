@@ -64,6 +64,14 @@ const REDESIGNED = [
   'boarding-pass', 'cinema-premiere', 'vinyl-record', 'royal-palace', 'mediterranean', 'gazette', 'luxury-jewelry',
   'red-veil', 'xonca', 'henna-buta', 'mirror-candle', 'kelagayi',
   'little-prince', 'hero-comic', 'mashallah', 'little-pilot', 'football-star',
+  'pink-champagne', 'disco-ball', 'pajama-spa', 'paris-night', 'boho-sunset',
+  'novruz-bonfire', 'novruz-semeni', 'midnight-clock', 'snow-globe', 'masquerade-ball',
+  'ribbon-cut', 'bistro-sign', 'roller-shutter', 'unboxing', 'gallery-unveil',
+  'caps-toss', 'yearbook', 'last-bell', 'chalkboard', 'paper-plane',
+  'silver-locket', 'golden-jubilee', 'first-paper', 'retro-polaroid', 'love-letters',
+  'gala-night', 'keynote', 'award-night', 'business-card', 'neon-party',
+  'pastel-bloom', 'teddy-bear', 'gender-reveal', 'stork-letter', 'baby-mobile',
+  'fairy-tale', 'space-mission', 'circus-show', 'dino-adventure', 'balloon-party',
 ]
 const ANCHORS = ['hero', 'countdown', 'venue', 'program', 'dresscode', 'seating', 'gallery', 'rsvp', 'guestbook']
 

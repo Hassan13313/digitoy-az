@@ -1,6 +1,8 @@
 /* fairy-tale — şablonun öz mətnləri (bax _shared/copyText.js).
    LABELS — bölmə başlıqları (admin «Mətnlər › Başlıq» boşdursa bunlar görünür).
    TXT    — dizayna məxsus sətirlər; FIELDS — admin formunda sıra, bölmə və ad.
+   2026-11 foto redizayn (uşaq ad günü seriyası): bölmə başlıqları əvvəlki kimidir,
+   TXT yalnız yeni görünüşdə işlənən sətirlərdir.
    ⚠ React YOXDUR: admin paneli və node testləri bu faylı birbaşa yükləyir. */
 
 export const LABELS = {
@@ -17,36 +19,32 @@ export const LABELS = {
 export const TXT = {
   az: {
     brand: 'Digitoy',
-    once: 'Biri var idi, biri yox idi…',
-    chapter: 'Fəsil',
+    line: 'Biri var idi, biri yox idi — bu gün nağılın qəhrəmanı odur',
     table: 'Masa',
-    mirror: 'Güzgü, güzgü, de görüm…',
-    end: '…və nağıl başlayır',
+    end: 'Görüşənədək',
+    scroll: 'Aşağı sürüşdürün',
   },
   en: {
     brand: 'Digitoy',
-    once: 'Once upon a time…',
-    chapter: 'Chapter',
+    line: 'Once upon a time — today the story is all about them',
     table: 'Table',
-    mirror: 'Mirror, mirror, show me…',
-    end: '…and the tale begins',
+    end: 'See you there',
+    scroll: 'Scroll down',
   },
   ru: {
     brand: 'Digitoy',
-    once: 'Жили-были…',
-    chapter: 'Глава',
+    line: 'Жили-были… и сегодня сказка о нём',
     table: 'Стол',
-    mirror: 'Свет мой, зеркальце, скажи…',
-    end: '…и сказка начинается',
+    end: 'До встречи',
+    scroll: 'Листайте вниз',
   },
 }
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
   ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
-  ['once', 'hero', 'Dizayn mətni: «Biri var idi, biri yox idi…»'],
-  ['chapter', 'program', 'Dizayn mətni: «Fəsil»'],
-  ['table', 'seating', 'Dizayn mətni: «Masa»'],
-  ['mirror', 'seating', 'Dizayn mətni: «Güzgü, güzgü, de görüm…»'],
-  ['end', 'program', 'Dizayn mətni: «…və nağıl başlayır»'],
+  ['scroll', 'hero', 'Örtükdə «Aşağı sürüşdürün»'],
+  ['line', 'countdown', 'Foto blokundakı sətir (sayğacdan sonra)'],
+  ['table', 'seating', 'Masa kartındakı yazı'],
+  ['end', 'guestbook', 'Son kadrdakı sətir'],
 ]

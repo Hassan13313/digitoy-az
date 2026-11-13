@@ -1,6 +1,8 @@
 /* space-mission — şablonun öz mətnləri (bax _shared/copyText.js).
    LABELS — bölmə başlıqları (admin «Mətnlər › Başlıq» boşdursa bunlar görünür).
    TXT    — dizayna məxsus sətirlər; FIELDS — admin formunda sıra, bölmə və ad.
+   2026-11 foto redizayn (uşaq ad günü seriyası): bölmə başlıqları əvvəlki kimidir,
+   TXT yalnız yeni görünüşdə işlənən sətirlərdir.
    ⚠ React YOXDUR: admin paneli və node testləri bu faylı birbaşa yükləyir. */
 
 export const LABELS = {
@@ -16,49 +18,33 @@ export const LABELS = {
 
 export const TXT = {
   az: {
-    brand: 'DIGITOY',
+    brand: 'Digitoy',
+    line: 'Missiya başlayır — kiçik kosmonavt ulduzlara uçur!',
     table: 'Masa',
-    crew: 'EKİPAJ ÜZVÜ',
-    mission: 'MİSSİYA',
-    signal: 'SİQNAL',
-    date: 'Tarix',
-    time: 'Saat',
-    place: 'Məkan',
-    status: 'Bütün sistemlər hazırdır',
+    end: 'Görüşənədək',
+    scroll: 'Aşağı sürüşdürün',
   },
   en: {
-    brand: 'DIGITOY',
+    brand: 'Digitoy',
+    line: 'The mission begins — our little astronaut is off to the stars!',
     table: 'Table',
-    crew: 'CREW MEMBER',
-    mission: 'MISSION',
-    signal: 'SIGNAL',
-    date: 'Date',
-    time: 'Time',
-    place: 'Venue',
-    status: 'All systems go',
+    end: 'See you there',
+    scroll: 'Scroll down',
   },
   ru: {
-    brand: 'DIGITOY',
+    brand: 'Digitoy',
+    line: 'Миссия начинается — маленький космонавт летит к звёздам!',
     table: 'Стол',
-    crew: 'ЧЛЕН ЭКИПАЖА',
-    mission: 'МИССИЯ',
-    signal: 'СИГНАЛ',
-    date: 'Дата',
-    time: 'Время',
-    place: 'Место',
-    status: 'Все системы готовы',
+    end: 'До встречи',
+    scroll: 'Листайте вниз',
   },
 }
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
   ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
-  ['table', 'seating', 'Dizayn mətni: «Masa»'],
-  ['crew', 'seating', 'Dizayn mətni: «EKİPAJ ÜZVÜ»'],
-  ['mission', 'hero', 'Dizayn mətni: «MİSSİYA»'],
-  ['signal', 'guestbook', 'Dizayn mətni: «SİQNAL»'],
-  ['date', 'hero', 'Dizayn mətni: «Tarix»'],
-  ['time', 'hero', 'Dizayn mətni: «Saat»'],
-  ['place', 'hero', 'Dizayn mətni: «Məkan»'],
-  ['status', 'countdown', 'Dizayn mətni: «Bütün sistemlər hazırdır»'],
+  ['scroll', 'hero', 'Örtükdə «Aşağı sürüşdürün»'],
+  ['line', 'countdown', 'Foto blokundakı sətir (sayğacdan sonra)'],
+  ['table', 'seating', 'Masa kartındakı yazı'],
+  ['end', 'guestbook', 'Son kadrdakı sətir'],
 ]

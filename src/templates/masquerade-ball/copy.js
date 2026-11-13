@@ -1,6 +1,8 @@
 /* masquerade-ball — şablonun öz mətnləri (bax _shared/copyText.js).
    LABELS — bölmə başlıqları (admin «Mətnlər › Başlıq» boşdursa bunlar görünür).
    TXT    — dizayna məxsus sətirlər; FIELDS — admin formunda sıra, bölmə və ad.
+   2026-11 foto redizayn (bayram gecələri seriyası): bölmə başlıqları əvvəlki kimidir,
+   TXT yalnız yeni görünüşdə işlənən sətirlərdir.
    ⚠ React YOXDUR: admin paneli və node testləri bu faylı birbaşa yükləyir. */
 
 export const LABELS = {
@@ -17,28 +19,32 @@ export const LABELS = {
 export const TXT = {
   az: {
     brand: 'Digitoy',
+    line: 'Maskanızı taxın — gecənin sirri sizi gözləyir',
     table: 'Masa',
-    ball: 'Maskarad balı',
-    guest: 'Hörmətli qonaq',
+    end: 'Görüşənədək',
+    scroll: 'Aşağı sürüşdürün',
   },
   en: {
     brand: 'Digitoy',
+    line: 'Put on your mask — the night’s secret awaits',
     table: 'Table',
-    ball: 'Masquerade ball',
-    guest: 'Honoured guest',
+    end: 'See you there',
+    scroll: 'Scroll down',
   },
   ru: {
     brand: 'Digitoy',
+    line: 'Наденьте маску — тайна вечера ждёт вас',
     table: 'Стол',
-    ball: 'Бал-маскарад',
-    guest: 'Уважаемый гость',
+    end: 'До встречи',
+    scroll: 'Листайте вниз',
   },
 }
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
   ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
-  ['table', 'seating', 'Dizayn mətni: «Masa»'],
-  ['ball', 'hero', 'Dizayn mətni: «Maskarad balı»'],
-  ['guest', 'seating', 'Dizayn mətni: «Hörmətli qonaq»'],
+  ['scroll', 'hero', 'Örtükdə «Aşağı sürüşdürün»'],
+  ['line', 'countdown', 'Foto blokundakı sətir (sayğacdan sonra)'],
+  ['table', 'seating', 'Masa kartındakı yazı'],
+  ['end', 'guestbook', 'Son kadrdakı sətir'],
 ]

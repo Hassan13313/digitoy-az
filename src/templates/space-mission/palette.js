@@ -1,19 +1,11 @@
-/* SPACE MISSION — rənglər və köməkçilər (komponent faylından ayrı: fast refresh qaydası) */
+/* SPACE MISSION — rənglər (komponent faylından ayrı: fast refresh qaydası) */
 
-export const C = {
-  SPACE: '#141A3C', DEEP: '#0C1029', VIOLET: '#3B2F7A', PURPLE: '#5B46B0',
-  TANGERINE: '#FF8A3D', SUN: '#FFC94D', MINT: '#5FE0B7', PINK: '#F48FB1', SKY: '#7FB5FF',
-  WHITE: '#F5F3FF', MUTED: '#AEB4D8', PANEL: '#1C2350', PANEL_L: '#283070', RED: '#FF5A4E',
+export const C = { BG: '#0B1030', BG2: '#141A3C', INK: '#F5F3FF', ACCENT: '#FF8A3D', MUTE: '#AFB3D6' }
+
+/* Ad uzunluğuna görə ölçü */
+export function nameSize(text, big = false) {
+  const n = Array.from(String(text || '')).length
+  if (n <= 12) return big ? 'clamp(40px, 12vw, 56px)' : 'clamp(34px, 10vw, 46px)'
+  if (n <= 18) return big ? 'clamp(32px, 9.4vw, 44px)' : 'clamp(28px, 8vw, 38px)'
+  return big ? 'clamp(26px, 7.6vw, 36px)' : 'clamp(22px, 6.4vw, 30px)'
 }
-
-/* Toxumlu təsadüf — hər render eyni nəticə */
-export function seeded(seed) {
-  let s = seed >>> 0
-  return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 }
-}
-
-/* Ulduz mövqeləri (səmalar üçün) */
-export const STARS = (() => {
-  const r = seeded(19)
-  return Array.from({ length: 60 }, () => ({ x: r() * 100, y: r() * 100, s: 0.8 + r() * 2.2, d: (r() * 4).toFixed(2), c: r() > 0.85 }))
-})()

@@ -1,6 +1,7 @@
 import { useInView } from '../viralHooks'
 import { Roll } from '../viral'
 import { alpha } from '../useInvitation'
+import { EXTRA_COUNTDOWNS, EXTRA_COUNTDOWN_CSS } from './countdowns'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    GERİ SAYIM — lüks foto şablonları üçün (2026-11)
@@ -42,7 +43,7 @@ export const COUNTDOWN_CSS = `
 @keyframes cdx-glint { 0%, 55% { translate: -160% 0 } 100% { translate: 160% 0 } }
 @keyframes cdx-pop { from { opacity: 0; scale: .6 } to { opacity: 1; scale: 1 } }
 @media (prefers-reduced-motion: reduce) { .cdx * { animation: none !important; transition: none !important; } }
-`
+` + EXTRA_COUNTDOWN_CSS
 
 const pad = (n) => String(n).padStart(2, '0')
 
@@ -57,6 +58,7 @@ export default function Countdown({ kind, cd, C, fonts, light = false }) {
   const pop = (i) => ({ opacity: seen ? 1 : 0, translate: seen ? '0 0' : '0 14px', transition: `opacity 1s ${0.1 + i * 0.12}s, translate 1s cubic-bezier(.2,.7,.2,1) ${0.1 + i * 0.12}s` })
   const R = (v, style) => <Roll value={v} style={style} />
 
+  if (EXTRA_COUNTDOWNS[kind]) return <div ref={ref}>{EXTRA_COUNTDOWNS[kind]({ seen, units, R, lab, row, pop, C, num, caps, cd, alpha })}</div>
   switch (kind) {
     case 'orbit': {
       const frac = { days: 1, hours: cd.hours / 24, minutes: cd.minutes / 60, seconds: cd.seconds / 60 }
@@ -280,7 +282,7 @@ export default function Countdown({ kind, cd, C, fonts, light = false }) {
         <div ref={ref} className="cdx" style={row(8)}>
           {units.map((u, i) => (
             <div key={u.k} style={pop(i)}>
-              <div style={{ position: 'relative', width: '100%', aspectRatio: '1', borderRadius: '50%', display: 'grid', placeItems: 'center', background: `radial-gradient(circle at 40% 30%, ${C.VEL || C.ACCENT}, ${C.BG} 92%)`, boxShadow: `inset 0 0 0 3px ${alpha(C.BG, 0.6)}, 0 8px 22px ${alpha('#000', 0.35)}` }}>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '1', borderRadius: '50%', display: 'grid', placeItems: 'center', background: `radial-gradient(circle at 40% 30%, ${C.VEL || C.ACCENT}, ${C.BG} 92%)`, boxShadow: `inset 0 0 0 3px ${alpha(C.BG, 0.6)}, 0 8px 22px ${alpha('#000000', 0.35)}` }}>
                 <svg aria-hidden="true" viewBox="0 0 100 100" style={{ position: 'absolute', inset: 0, overflow: 'visible', rotate: seen ? '0deg' : '-60deg', transition: `rotate 1.8s cubic-bezier(.2,.7,.2,1) ${0.2 + i * 0.12}s` }}>
                   <circle cx="50" cy="50" r="44" fill="none" stroke={C.GOLD || C.ACCENT} strokeWidth="1.1" strokeDasharray="3 2.4" />
                   <circle cx="50" cy="50" r="48" fill="none" stroke={alpha(C.GOLD || C.ACCENT, 0.5)} strokeWidth=".6" />
@@ -424,7 +426,7 @@ export default function Countdown({ kind, cd, C, fonts, light = false }) {
         <div ref={ref} className="cdx" style={row(8)}>
           {units.map((u, i) => (
             <div key={u.k} style={pop(i)}>
-              <div style={{ position: 'relative', width: '100%', aspectRatio: '1', borderRadius: '50%', display: 'grid', placeItems: 'center', background: `radial-gradient(circle at 50% 40%, ${C.DIAL || '#22384F'}, ${alpha('#000', 0.85)})`, border: `3px solid ${alpha(C.INK, 0.25)}`, boxShadow: `inset 0 0 0 2px ${alpha('#fff', 0.15)}, 0 6px 14px ${alpha('#000', 0.25)}` }}>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '1', borderRadius: '50%', display: 'grid', placeItems: 'center', background: `radial-gradient(circle at 50% 40%, ${C.DIAL || '#22384F'}, ${alpha('#000000', 0.85)})`, border: `3px solid ${alpha(C.INK, 0.25)}`, boxShadow: `inset 0 0 0 2px ${alpha('#FFFFFF', 0.15)}, 0 6px 14px ${alpha('#000000', 0.25)}` }}>
                 <svg aria-hidden="true" viewBox="0 0 100 100" style={{ position: 'absolute', inset: 0 }}>
                   {Array.from({ length: 12 }, (_, k) => <line key={k} x1="50" y1="8" x2="50" y2={k % 3 ? 14 : 18} stroke="#fff" strokeOpacity=".75" strokeWidth={k % 3 ? 1.2 : 2.2} transform={`rotate(${k * 30} 50 50)`} />)}
                 </svg>
@@ -440,14 +442,14 @@ export default function Countdown({ kind, cd, C, fonts, light = false }) {
     }
     case 'led':
       return (
-        <div ref={ref} className="cdx" style={{ maxWidth: 380, margin: '0 auto', padding: '14px 10px 12px', borderRadius: 6, background: '#050a10', border: `2px solid ${alpha(C.ACCENT, 0.5)}`, boxShadow: `0 0 0 4px #0b1520, 0 14px 30px ${alpha('#000', 0.5)}` }}>
+        <div ref={ref} className="cdx" style={{ maxWidth: 380, margin: '0 auto', padding: '14px 10px 12px', borderRadius: 6, background: '#050a10', border: `2px solid ${alpha(C.ACCENT, 0.5)}`, boxShadow: `0 0 0 4px #0b1520, 0 14px 30px ${alpha('#000000', 0.5)}` }}>
           <div style={row(4)}>
             {units.map((u, i) => (
               <div key={u.k} style={pop(i)}>
                 <div style={{ padding: '6px 0', backgroundImage: 'radial-gradient(rgba(255,255,255,.06) 1px, transparent 1.4px)', backgroundSize: '5px 5px' }}>
                   {R(u.v, { fontFamily: num, fontWeight: 600, fontSize: 'clamp(28px, 8.4vw, 36px)', letterSpacing: '.04em', color: C.ACCENT, textShadow: `0 0 10px ${alpha(C.ACCENT, 0.75)}, 0 0 2px ${C.ACCENT}` })}
                 </div>
-                <div style={lab({ marginTop: 4, color: alpha('#fff', 0.7) })}>{u.label}</div>
+                <div style={lab({ marginTop: 4, color: alpha('#FFFFFF', 0.7) })}>{u.label}</div>
               </div>
             ))}
           </div>

@@ -22,7 +22,15 @@ const IMG = '/uploads/_admin/tpl-candle-rings/0123456789abcdef0123.jpg'
 const TEMPLATES = ['candle-rings', 'bridal-veil', 'first-dance', 'ivory-silk', 'baku-night', 'golden-hour', 'shahdag', 'royal-palace', 'oriental-luxe',
   'night-sky', 'mediterranean', 'crystal-glass', 'gazette', 'royal-gold', 'luxury-jewelry', 'floral-garden', 'white-elegance', 'nature-touch', 'vinyl-record', 'cinema-premiere', 'boarding-pass', 'modern-black',
   'red-veil', 'xonca', 'henna-buta', 'mirror-candle', 'kelagayi',
-  'little-prince', 'hero-comic', 'mashallah', 'little-pilot', 'football-star']
+  'little-prince', 'hero-comic', 'mashallah', 'little-pilot', 'football-star',
+  'pink-champagne', 'disco-ball', 'pajama-spa', 'paris-night', 'boho-sunset',
+  'novruz-bonfire', 'novruz-semeni', 'midnight-clock', 'snow-globe', 'masquerade-ball',
+  'ribbon-cut', 'bistro-sign', 'roller-shutter', 'unboxing', 'gallery-unveil',
+  'caps-toss', 'yearbook', 'last-bell', 'chalkboard', 'paper-plane',
+  'silver-locket', 'golden-jubilee', 'first-paper', 'retro-polaroid', 'love-letters',
+  'gala-night', 'keynote', 'award-night', 'business-card', 'neon-party',
+  'pastel-bloom', 'teddy-bear', 'gender-reveal', 'stork-letter', 'baby-mobile',
+  'fairy-tale', 'space-mission', 'circus-show', 'dino-adventure', 'balloon-party']
 
 /* 1. normalizeImages */
 ok('null → null', normalizeImages(null) === null)
@@ -57,7 +65,7 @@ ok('gizlədilən → null', r.hero === null)
 ok('admin şəkli → src', r.finale === IMG)
 ok('hide:false → standart', r.invite === def.invite)
 ok('isCustomPhoto', isCustomPhoto({ finale: { src: IMG } }, 'finale') && !isCustomPhoto({ hero: { hide: true } }, 'hero') && !isCustomPhoto(null, 'x'))
-ok('şəkil yeri olmayan şablon → []', templatePhotoSlots('fairy-tale').length === 0)
+ok('şəkil yeri olmayan şablon → []', templatePhotoSlots('simple-luxury').length === 0)
 
 /* 3. Hər şablonda: açarlar təkrarsız, standart foto diskdə, hər yer P.<açar> ilə işlənir */
 for (const id of TEMPLATES) {

@@ -1,6 +1,8 @@
 /* paper-plane — şablonun öz mətnləri (bax _shared/copyText.js).
    LABELS — bölmə başlıqları (admin «Mətnlər › Başlıq» boşdursa bunlar görünür).
    TXT    — dizayna məxsus sətirlər; FIELDS — admin formunda sıra, bölmə və ad.
+   2026-11 foto redizayn (məzuniyyət seriyası): bölmə başlıqları əvvəlki kimidir,
+   TXT yalnız yeni görünüşdə işlənən sətirlərdir.
    ⚠ React YOXDUR: admin paneli və node testləri bu faylı birbaşa yükləyir. */
 
 export const LABELS = {
@@ -17,32 +19,32 @@ export const LABELS = {
 export const TXT = {
   az: {
     brand: 'Digitoy',
+    line: 'Arzularımızı kağız təyyarə ilə gələcəyə göndəririk',
     table: 'Masa',
-    classOf: 'Məzun {y}',
-    letter: 'Gələcəyə məktub',
-    air: 'Hava poçtu',
+    end: 'Görüşənədək',
+    scroll: 'Aşağı sürüşdürün',
   },
   en: {
     brand: 'Digitoy',
+    line: 'We send our dreams to the future on a paper plane',
     table: 'Table',
-    classOf: 'Class of {y}',
-    letter: 'A letter to the future',
-    air: 'Par avion',
+    end: 'See you there',
+    scroll: 'Scroll down',
   },
   ru: {
     brand: 'Digitoy',
+    line: 'Отправляем мечты в будущее бумажным самолётиком',
     table: 'Стол',
-    classOf: 'Выпуск {y}',
-    letter: 'Письмо в будущее',
-    air: 'Авиа',
+    end: 'До встречи',
+    scroll: 'Листайте вниз',
   },
 }
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
   ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
-  ['table', 'seating', 'Dizayn mətni: «Masa»'],
-  ['classOf', 'hero', 'Dizayn mətni: «Məzun {y}»', '{y} — avtomatik dəyər (il), silməyin'],
-  ['letter', 'hero', 'Dizayn mətni: «Gələcəyə məktub»'],
-  ['air', 'seating', 'Dizayn mətni: «Hava poçtu»'],
+  ['scroll', 'hero', 'Örtükdə «Aşağı sürüşdürün»'],
+  ['line', 'countdown', 'Foto blokundakı sətir (sayğacdan sonra)'],
+  ['table', 'seating', 'Masa kartındakı yazı'],
+  ['end', 'guestbook', 'Son kadrdakı sətir'],
 ]

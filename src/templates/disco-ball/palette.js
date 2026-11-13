@@ -1,29 +1,11 @@
-/* DISCO BALL — rənglər və köməkçilər (komponent faylından ayrı: fast refresh qaydası) */
+/* DISCO BALL — rənglər (komponent faylından ayrı: fast refresh qaydası) */
 
-export const C = {
-  NIGHT: '#140B2E', NIGHT_L: '#24154D', NIGHT_D: '#0B0619', MAGENTA: '#FF3EA5', MAGENTA_D: '#C21F7A', GOLD: '#FFC94A', LILAC: '#B69CFF',
-  SILVER: '#D8DCE6', LIGHT: '#FBF1FF', INK: '#22123F', MUTED: '#7D6D99', LINE: '#EADDF7',
-}
-
-export const CHROME = 'linear-gradient(180deg, #FFFFFF 0%, #E6E9F2 38%, #8C93A8 50%, #F4F6FB 56%, #B8BED0 80%, #FFFFFF 100%)'
-export const HOT = (C) => (`linear-gradient(90deg, ${C.MAGENTA}, ${C.GOLD})`)
-export const NIGHT_BG = `radial-gradient(60% 40% at 50% 0%, rgba(182,156,255,.28), transparent 70%), radial-gradient(70% 40% at 50% 100%, rgba(255,62,165,.22), transparent 70%), linear-gradient(180deg, #24154D, #140B2E 55%, #0B0619)`
-export const LIGHT_BG = (C) => (`radial-gradient(60% 40% at 80% 0%, rgba(255,201,74,.18), transparent 70%), radial-gradient(60% 40% at 10% 100%, rgba(255,62,165,.12), transparent 70%), ${C.LIGHT}`)
-/* 70-ci illər gün şüası (pol) */
-export const SUNBURST = 'repeating-conic-gradient(from 0deg at 50% 0%, rgba(255,62,165,.28) 0 6deg, rgba(255,201,74,.18) 6deg 12deg, transparent 12deg 18deg)'
-
-/* İşıq ləkələri — sabit toxumlu LCG */
-let seed = 83
-const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646 }
-/* Mövqelər modul yüklənəndə BİR dəfə (rnd vəziyyətlidir); rəng admin palitrasından */
-const SPOTS_BASE = Array.from({ length: 42 }, () => ({ x: rnd() * 100, y: rnd() * 100, s: 4 + rnd() * 8, ci: Math.floor(rnd() * 4) }))
-export const SPOTS = (C) => (SPOTS_BASE.map(({ ci, ...p }) => ({ ...p, c: ['#FFFFFF', C.MAGENTA, C.GOLD, C.LILAC][ci] })))
+export const C = { BG: '#0E0A16', BG2: '#1A1326', INK: '#FBF2FF', ACCENT: '#FF5FB4', MUTE: '#BBA9CC' }
 
 /* Ad uzunluğuna görə ölçü */
-export function nameSize(text) {
+export function nameSize(text, big = false) {
   const n = Array.from(String(text || '')).length
-  if (n <= 8) return 'clamp(58px, 18vw, 84px)'
-  if (n <= 14) return 'clamp(44px, 13vw, 62px)'
-  if (n <= 22) return 'clamp(34px, 10vw, 46px)'
-  return 'clamp(27px, 7.6vw, 36px)'
+  if (n <= 12) return big ? 'clamp(40px, 12vw, 56px)' : 'clamp(34px, 10vw, 46px)'
+  if (n <= 18) return big ? 'clamp(32px, 9.4vw, 44px)' : 'clamp(28px, 8vw, 38px)'
+  return big ? 'clamp(26px, 7.6vw, 36px)' : 'clamp(22px, 6.4vw, 30px)'
 }

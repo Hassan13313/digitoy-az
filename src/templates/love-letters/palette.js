@@ -1,23 +1,11 @@
-/* LOVE LETTERS — rənglər və köməkçilər (komponent faylından ayrı: fast refresh qaydası) */
+/* LOVE LETTERS — rənglər (komponent faylından ayrı: fast refresh qaydası) */
 
-export const C = {
-  LINEN: '#EFE6D8', PAPER: '#FBF6EC', ENV1: '#F4ECDD', ENV2: '#E7D8C1', ENV3: '#E3CFCB', ENV4: '#CFD7DC',
-  TWINE: '#A9835A', TWINE_D: '#7E5F3C', INK: '#2F3550', INK_L: '#4A5274', ROSE: '#9C4A4A', ROSE_L: '#C98B8B',
-  MUTED: '#7D7468', NAVY: '#262B42',
-}
+export const C = { BG: '#EFE6D8', BG2: '#F7F1E7', INK: '#2F3550', ACCENT: '#A9666A', MUTE: '#5F6278' }
 
-export const ENVS = (C) => ([C.ENV1, C.ENV2, C.ENV3, C.ENV4])
-
-export const LINEN_BG = (C) => (`repeating-linear-gradient(0deg, rgba(120,100,70,.035) 0 1px, transparent 1px 3px), repeating-linear-gradient(90deg, rgba(120,100,70,.035) 0 1px, transparent 1px 3px), ${C.LINEN}`)
-export const NAVY_BG = `radial-gradient(80% 50% at 50% 0%, rgba(201,139,139,.18), transparent 70%), #262B42`
-/* Xətli məktub kağızı */
-export const RULED = `repeating-linear-gradient(180deg, transparent 0 31px, rgba(47,53,80,.12) 31px 32px), #FBF6EC`
-
-/* Ad uzunluğuna görə ölçü (Great Vibes) */
-export function nameSize(text) {
+/* Ad uzunluğuna görə ölçü */
+export function nameSize(text, big = false) {
   const n = Array.from(String(text || '')).length
-  if (n <= 10) return 'clamp(52px, 15.6vw, 74px)'
-  if (n <= 16) return 'clamp(44px, 13vw, 60px)'
-  if (n <= 24) return 'clamp(36px, 10.4vw, 48px)'
-  return 'clamp(28px, 8vw, 38px)'
+  if (n <= 12) return big ? 'clamp(54px, 16vw, 74px)' : 'clamp(44px, 13vw, 58px)'
+  if (n <= 18) return big ? 'clamp(44px, 13vw, 58px)' : 'clamp(36px, 10.5vw, 48px)'
+  return big ? 'clamp(36px, 10.5vw, 48px)' : 'clamp(30px, 8.6vw, 40px)'
 }

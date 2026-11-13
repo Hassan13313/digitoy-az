@@ -1,6 +1,8 @@
 /* unboxing — şablonun öz mətnləri (bax _shared/copyText.js).
    LABELS — bölmə başlıqları (admin «Mətnlər › Başlıq» boşdursa bunlar görünür).
    TXT    — dizayna məxsus sətirlər; FIELDS — admin formunda sıra, bölmə və ad.
+   2026-11 foto redizayn (açılış və təqdimat seriyası): bölmə başlıqları əvvəlki kimidir,
+   TXT yalnız yeni görünüşdə işlənən sətirlərdir.
    ⚠ React YOXDUR: admin paneli və node testləri bu faylı birbaşa yükləyir. */
 
 export const LABELS = {
@@ -17,32 +19,32 @@ export const LABELS = {
 export const TXT = {
   az: {
     brand: 'Digitoy',
+    line: 'Qutunu birlikdə açaq — yenilik sizi gözləyir',
     table: 'Masa',
-    fresh: 'Yeni',
-    launch: 'Təqdimat',
-    pass: 'Giriş kartı',
+    end: 'Görüşənədək',
+    scroll: 'Aşağı sürüşdürün',
   },
   en: {
     brand: 'Digitoy',
+    line: 'Let’s open the box together — something new awaits',
     table: 'Table',
-    fresh: 'New',
-    launch: 'Launch',
-    pass: 'Access pass',
+    end: 'See you there',
+    scroll: 'Scroll down',
   },
   ru: {
     brand: 'Digitoy',
+    line: 'Откроем коробку вместе — вас ждёт новинка',
     table: 'Стол',
-    fresh: 'Новинка',
-    launch: 'Презентация',
-    pass: 'Пропуск',
+    end: 'До встречи',
+    scroll: 'Листайте вниз',
   },
 }
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
   ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
-  ['table', 'seating', 'Dizayn mətni: «Masa»'],
-  ['fresh', 'hero', 'Dizayn mətni: «Yeni»'],
-  ['launch', 'hero', 'Dizayn mətni: «Təqdimat»'],
-  ['pass', 'seating', 'Dizayn mətni: «Giriş kartı»'],
+  ['scroll', 'hero', 'Örtükdə «Aşağı sürüşdürün»'],
+  ['line', 'countdown', 'Foto blokundakı sətir (sayğacdan sonra)'],
+  ['table', 'seating', 'Masa kartındakı yazı'],
+  ['end', 'guestbook', 'Son kadrdakı sətir'],
 ]

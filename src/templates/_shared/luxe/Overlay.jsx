@@ -1,4 +1,5 @@
 import { alpha } from '../useInvitation'
+import { EXTRA_OVERLAYS, EXTRA_OVERLAY_CSS } from './overlays'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    AÇILIŞ ÖRTÜKLƏRİ — fotonun ÜSTÜNDƏ, yalnız açılış ekranında (2026-11, xına seriyası)
@@ -26,7 +27,7 @@ export const OVERLAY_CSS = `
 @keyframes lxo-on { 0% { opacity: 0 } 30% { opacity: 1 } 40% { opacity: .5 } 55%, 100% { opacity: 1 } }
 @keyframes lxo-drift { 0%,100% { translate: 0 0 } 50% { translate: 1.5vw 0 } }
 @media (prefers-reduced-motion: reduce) { [data-lxo] * { animation: none !important; } }
-`
+` + EXTRA_OVERLAY_CSS
 
 const BUTA = 'M12 38c-7 0-11-6-11-12 0-9 8-15 13-19 2-2 4-3 6-2 2 2-1 4-2 5 4 4 6 10 6 15 0 8-5 13-12 13z'
 const butaTile = (color, op, w = 64, h = 80) => `url("data:image/svg+xml,${encodeURIComponent(
@@ -235,7 +236,7 @@ function Clouds({ o, go, t, instant }) {
 function Flood({ o, go, t, instant }) {
   const lamps = [[14, 7, 0.3], [86, 7, 0.9], [4, 22, 1.5], [96, 22, 2.1]]
   return (
-    <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${alpha('#000', 0.82)}, ${alpha('#000', 0.6)})`, opacity: go ? 0 : 1, transition: t('opacity 1.6s ease .5s') }}>
+    <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${alpha('#000000', 0.82)}, ${alpha('#000000', 0.6)})`, opacity: go ? 0 : 1, transition: t('opacity 1.6s ease .5s') }}>
       {lamps.map(([x, y, d], i) => (
         <div key={i} style={{ position: 'absolute', left: `${x}%`, top: `${y}%`, translate: '-50% -50%', opacity: instant ? 1 : 0, animation: instant ? undefined : `lxo-on .9s ease ${d}s forwards` }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 7px)', gap: 3, padding: 4, background: '#1b1f24', borderRadius: 3 }}>
@@ -262,6 +263,7 @@ export default function Overlay({ o, go, instant }) {
       {o.kind === 'nazar' && <Nazar {...props} />}
       {o.kind === 'clouds' && <Clouds {...props} />}
       {o.kind === 'flood' && <Flood {...props} />}
+      {o.kind in EXTRA_OVERLAYS && EXTRA_OVERLAYS[o.kind](props)}
     </div>
   )
 }

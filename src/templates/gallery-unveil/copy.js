@@ -1,6 +1,8 @@
 /* gallery-unveil — şablonun öz mətnləri (bax _shared/copyText.js).
    LABELS — bölmə başlıqları (admin «Mətnlər › Başlıq» boşdursa bunlar görünür).
    TXT    — dizayna məxsus sətirlər; FIELDS — admin formunda sıra, bölmə və ad.
+   2026-11 foto redizayn (açılış və təqdimat seriyası): bölmə başlıqları əvvəlki kimidir,
+   TXT yalnız yeni görünüşdə işlənən sətirlərdir.
    ⚠ React YOXDUR: admin paneli və node testləri bu faylı birbaşa yükləyir. */
 
 export const LABELS = {
@@ -17,36 +19,32 @@ export const LABELS = {
 export const TXT = {
   az: {
     brand: 'Digitoy',
+    line: 'Pərdə qalxır — əsər sizə təqdim olunur',
     table: 'Masa',
-    opening: 'Sərginin açılışı',
-    medium: 'Dəvətnamə, rəqəmsal',
-    guest: 'Qonaq',
-    no: 'No.',
+    end: 'Görüşənədək',
+    scroll: 'Aşağı sürüşdürün',
   },
   en: {
     brand: 'Digitoy',
+    line: 'The veil lifts — the work is yours to see',
     table: 'Table',
-    opening: 'Exhibition opening',
-    medium: 'Invitation, digital',
-    guest: 'Guest',
-    no: 'No.',
+    end: 'See you there',
+    scroll: 'Scroll down',
   },
   ru: {
     brand: 'Digitoy',
+    line: 'Покров снят — работа представлена вам',
     table: 'Стол',
-    opening: 'Открытие выставки',
-    medium: 'Приглашение, цифровое',
-    guest: 'Гость',
-    no: '№',
+    end: 'До встречи',
+    scroll: 'Листайте вниз',
   },
 }
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
   ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
-  ['table', 'seating', 'Dizayn mətni: «Masa»'],
-  ['opening', 'hero', 'Dizayn mətni: «Sərginin açılışı»'],
-  ['medium', 'hero', 'Dizayn mətni: «Dəvətnamə, rəqəmsal»'],
-  ['guest', 'seating', 'Dizayn mətni: «Qonaq»'],
-  ['no', 'program', 'Dizayn mətni: «No.»'],
+  ['scroll', 'hero', 'Örtükdə «Aşağı sürüşdürün»'],
+  ['line', 'countdown', 'Foto blokundakı sətir (sayğacdan sonra)'],
+  ['table', 'seating', 'Masa kartındakı yazı'],
+  ['end', 'guestbook', 'Son kadrdakı sətir'],
 ]

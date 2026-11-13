@@ -1,18 +1,11 @@
-/* KEYNOTE — rənglər və köməkçilər (komponent faylından ayrı: fast refresh qaydası) */
+/* KEYNOTE — rənglər (komponent faylından ayrı: fast refresh qaydası) */
 
-export const C = {
-  VOID: '#060A14', NAVY: '#0C1324', PANEL: '#111A30', PANEL_L: '#18233F', LINE: '#22304F',
-  BLUE: '#3D7BFF', CYAN: '#22D3EE', VIOLET: '#8B7BFF', WHITE: '#F3F6FC', MUTED: '#8A97B4', FAINT: '#56637F',
-}
+export const C = { BG: '#060A14', BG2: '#0D1426', INK: '#F3F6FC', ACCENT: '#3D7BFF', MUTE: '#9AA6C0', ACC2: '#22D3EE' }
 
-export const GLOW = (C) => (`linear-gradient(120deg, ${C.BLUE}, ${C.CYAN} 50%, ${C.VIOLET})`)
-export const GRID_BG = (C) => (`radial-gradient(circle, rgba(138,151,180,.16) 1px, transparent 1.4px) 0 0 / 22px 22px, radial-gradient(80% 50% at 50% 0%, rgba(61,123,255,.18), transparent 70%), ${C.VOID}`)
-
-/* Ad uzunluğuna görə ölçü (Geologica) */
-export function nameSize(text) {
+/* Ad uzunluğuna görə ölçü */
+export function nameSize(text, big = false) {
   const n = Array.from(String(text || '')).length
-  if (n <= 8) return 'clamp(44px, 13vw, 62px)'
-  if (n <= 14) return 'clamp(36px, 10.4vw, 50px)'
-  if (n <= 22) return 'clamp(29px, 8.2vw, 40px)'
-  return 'clamp(23px, 6.4vw, 30px)'
+  if (n <= 12) return big ? 'clamp(40px, 12vw, 56px)' : 'clamp(34px, 10vw, 46px)'
+  if (n <= 18) return big ? 'clamp(32px, 9.4vw, 44px)' : 'clamp(28px, 8vw, 38px)'
+  return big ? 'clamp(26px, 7.6vw, 36px)' : 'clamp(22px, 6.4vw, 30px)'
 }

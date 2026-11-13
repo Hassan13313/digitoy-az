@@ -1,6 +1,8 @@
 /* paris-night — şablonun öz mətnləri (bax _shared/copyText.js).
    LABELS — bölmə başlıqları (admin «Mətnlər › Başlıq» boşdursa bunlar görünür).
    TXT    — dizayna məxsus sətirlər; FIELDS — admin formunda sıra, bölmə və ad.
+   2026-11 foto redizayn (qız gecəsi seriyası): bölmə başlıqları əvvəlki kimidir,
+   TXT yalnız yeni görünüşdə işlənən sətirlərdir.
    ⚠ React YOXDUR: admin paneli və node testləri bu faylı birbaşa yükləyir. */
 
 export const LABELS = {
@@ -16,33 +18,33 @@ export const LABELS = {
 
 export const TXT = {
   az: {
-    postmark: 'PARIS',
     brand: 'Digitoy',
+    line: 'Bonsoir! Bir gecəlik Paris — sənin şərəfinə',
     table: 'Masa',
-    ooh: 'Ooh là là!',
-    menu: 'Menyu',
+    end: 'Görüşənədək',
+    scroll: 'Aşağı sürüşdürün',
   },
   en: {
-    postmark: 'PARIS',
     brand: 'Digitoy',
+    line: 'Bonsoir! Paris for one night — in your honour',
     table: 'Table',
-    ooh: 'Ooh là là!',
-    menu: 'Menu',
+    end: 'See you there',
+    scroll: 'Scroll down',
   },
   ru: {
-    postmark: 'PARIS',
     brand: 'Digitoy',
+    line: 'Bonsoir! Один вечер в Париже — в твою честь',
     table: 'Стол',
-    ooh: 'Ooh là là!',
-    menu: 'Меню',
+    end: 'До встречи',
+    scroll: 'Листайте вниз',
   },
 }
 
 /* [açar, admin bölməsi, sahənin adı, izah?] */
 export const FIELDS = [
-  ['postmark', 'guestbook', 'Məktub möhürü'],
   ['brand', 'hero', 'Yuxarı panel — brend yazısı'],
-  ['table', 'seating', 'Dizayn mətni: «Masa»'],
-  ['ooh', 'hero', 'Dizayn mətni: «Ooh là là!»'],
-  ['menu', 'program', 'Dizayn mətni: «Menyu»'],
+  ['scroll', 'hero', 'Örtükdə «Aşağı sürüşdürün»'],
+  ['line', 'countdown', 'Foto blokundakı sətir (sayğacdan sonra)'],
+  ['table', 'seating', 'Masa kartındakı yazı'],
+  ['end', 'guestbook', 'Son kadrdakı sətir'],
 ]
