@@ -150,7 +150,10 @@ export function previousVersionOf(templateId) {
 /** Bu versiya dondurulmuş surətlə göstərilirmi */
 export function isFrozenVersion(templateId, version) {
   const v = Number(version)
-  if (v === TEMPLATE_VERSION_LEGACY) return has(LEGACY, templateId)
+  /* v1 = «versiyasız, köhnə» (server oxuyanda açar yoxdursa 1 yazır). Öz v1 surəti olmayan
+     şablonda (2026-10-28-dən sonra yaranmış konseptlər) o dəvətnamə v2 dizaynında yaranıb —
+     fotolu seriyaya keçəndə də dondurulmuş v2 surəti ilə açılır, yeni dizayna keçmir. */
+  if (v === TEMPLATE_VERSION_LEGACY) return has(LEGACY, templateId) || has(FROZEN_V2, templateId)
   if (v === TEMPLATE_VERSION_V2) return has(FROZEN_V2, templateId)
   return false
 }
@@ -166,5 +169,6 @@ export function isV1Invitation(weddingData, templateId) {
 }
 
 export function getLegacyComponent(templateId, version = TEMPLATE_VERSION_LEGACY) {
-  return Number(version) === TEMPLATE_VERSION_V2 ? FROZEN_V2[templateId] : LEGACY[templateId]
+  if (Number(version) === TEMPLATE_VERSION_V2) return FROZEN_V2[templateId]
+  return LEGACY[templateId] || FROZEN_V2[templateId] /* v1 surəti yoxdursa ən köhnə dondurulmuş surət */
 }

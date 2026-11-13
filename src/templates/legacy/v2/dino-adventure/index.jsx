@@ -2,7 +2,7 @@
 import { motion } from 'framer-motion'
 import { QRCodeSVG } from 'qrcode.react'
 import LanguageSwitcher from '../../../../components/LanguageSwitcher'
-import DressCodeSection from '../_shared/DressCodeSection'
+import DressCodeSection from '../_shared/DressCodeSectionLux'
 import MapSection from '../../../_shared/MapSection'
 import { Reveal, PopDigit, enterDirection } from '../../../_shared/motion'
 import { getTemplateTheme } from '../../../templateConfig'

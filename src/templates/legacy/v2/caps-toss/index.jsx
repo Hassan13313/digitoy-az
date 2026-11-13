@@ -1,7 +1,7 @@
 /* DONDURULMUŞ v2 SURƏTİ (2026-11-13) — redaktə etməyin, bax legacy/registry.js */
 import { motion } from 'framer-motion'
 import LanguageSwitcher from '../../../../components/LanguageSwitcher'
-import DressCodeSection from '../_shared/DressCodeSection'
+import DressCodeSection from '../_shared/DressCodeSectionLux'
 import MapSection from '../../../_shared/MapSection'
 import { EmblemSlot } from '../../../_shared/MonoContent'
 import { Reveal, PopDigit, enterDirection } from '../../../_shared/motion'

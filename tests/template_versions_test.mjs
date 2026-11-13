@@ -16,7 +16,7 @@
         UPDATE_SNAPSHOT=1 node tests/template_versions_test.mjs
    ───────────────────────────────────────────────────────────────────────── */
 import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs'
-import { V3_TEMPLATES, currentVersionOf, previousVersionOf, isFrozenVersion, hasLegacyVersion } from '../src/templates/legacy/registry.js'
+import { V3_TEMPLATES, currentVersionOf, previousVersionOf, isFrozenVersion, hasLegacyVersion, getLegacyComponent, isV1Invitation } from '../src/templates/legacy/registry.js'
 import { getTemplateTheme } from '../src/templates/templateConfig.js'
 import { OPENING_SPEC, openingDefaults } from '../src/templates/_shared/openingSpec.js'
 
@@ -47,14 +47,24 @@ for (const id of V3_TEMPLATES) {
   }
 }
 
-/* 2b. Geyim bölməsi (2026-11-13 lüks ikonlar): dondurulmuş surətlər köhnə ikonları
-   saxlayan legacy/v2/_shared/DressCodeSection-u işlədir, indikini yox */
-ok('legacy/v2/_shared/DressCodeSection.jsx var', existsSync(new URL('src/templates/legacy/v2/_shared/DressCodeSection.jsx', root)))
+/* 2b. Geyim bölməsi — dondurulmuş surət dondurulduğu gün canlıda olan ikonları göstərir, indikini yox:
+   – 2026-11-13 səhər dondurulan 15 toy şablonu: köhnə ikonlar (legacy/v2/_shared/DressCodeSection)
+   – 2026-11-13 axşam dondurulan 50 şablon (xına, sünnət, qalan 40): o vaxt canlıda olan lüks ikonlar
+     (legacy/v2/_shared/DressCodeSectionLux) — onların dəvətnamələri səhərdən bu ikonlarla görünürdü */
+const FROZEN_OLD_DRESS = V3_TEMPLATES.slice(0, 15)
+ok('ilk 15 dondurulmuş şablon toy seriyasıdır', FROZEN_OLD_DRESS.includes('royal-palace') && FROZEN_OLD_DRESS.includes('modern-black') && !FROZEN_OLD_DRESS.includes('red-veil'))
+for (const f of ['DressCodeSection', 'DressCodeSectionLux']) ok(`legacy/v2/_shared/${f}.jsx var`, existsSync(new URL(`src/templates/legacy/v2/_shared/${f}.jsx`, root)))
 for (const id of V3_TEMPLATES) {
   const src = read(`src/templates/legacy/v2/${id}/index.jsx`)
   if (!src.includes('DressCodeSection')) continue
-  ok(`${id}: v2 surəti dondurulmuş geyim bölməsini işlədir`, src.includes("from '../_shared/DressCodeSection'") && !src.includes("from '../../../_shared/DressCodeSection'"))
+  const want = FROZEN_OLD_DRESS.includes(id) ? 'DressCodeSection' : 'DressCodeSectionLux'
+  ok(`${id}: v2 surəti dondurulmuş geyim bölməsini (${want}) işlədir`, src.includes(`from '../_shared/${want}'`) && !src.includes("from '../../../_shared/DressCodeSection'"))
 }
+/* Lux surəti dondurulduğu andakı canlı bölmə ilə eynidir (yalnız import yolları fərqlidir) */
+const body = (s) => s.replace(/\r/g, '').split('\n').filter((l) => !l.startsWith('import ')).join('\n')
+const lux = read('src/templates/legacy/v2/_shared/DressCodeSectionLux.jsx').replace(/^\/\*[\s\S]*?\*\/\r?\n/, '')
+ok('DressCodeSectionLux import-ları mövcuddur', [...lux.matchAll(/from '(\.{1,2}\/[^']+)'/g)].every((m) => ['.js', '.jsx'].some((e) => existsSync(new URL(m[1] + e, new URL('src/templates/legacy/v2/_shared/', root))))))
+if (body(lux) !== body(read('src/templates/_shared/DressCodeSection.jsx'))) console.log('  qeyd: canlı _shared/DressCodeSection.jsx dondurulmuş Lux surətindən fərqlənir (gözlənilən — canlı versiya dəyişib)')
 
 /* 3. Versiya qaydaları */
 for (const id of V3_TEMPLATES) {
@@ -67,6 +77,14 @@ ok('simple-luxury: yeni dəvətnamə 2, köhnə versiyası yoxdur', currentVersi
 ok('yeni şablon (ivory-silk): 2, dondurma yoxdur', currentVersionOf('ivory-silk') === 2 && !isFrozenVersion('ivory-silk', 2))
 ok('v1 dondurması dəyişməyib (royal-gold v1)', isFrozenVersion('royal-gold', 1))
 ok('versiyasız data (builder/demo) dondurulmur', !isFrozenVersion('royal-gold', undefined))
+/* Versiyası 1 olan (server oxuyanda açar yoxdursa 1 yazır) dəvətnamə: öz v1 surəti olan toy
+   şablonunda v1 surəti, olmayan şablonda (konseptlər) dondurulmuş v2 — heç vaxt yeni fotolu dizayn */
+for (const id of V3_TEMPLATES) {
+  ok(`${id}: v1 dəvətnamə dondurulmuş surətlə açılır`, isFrozenVersion(id, 1) && !!getLegacyComponent(id, 1))
+}
+ok('royal-gold: v1 öz surəti (v2 deyil)', getLegacyComponent('royal-gold', 1) !== getLegacyComponent('royal-gold', 2) && isV1Invitation({ templateVersion: 1 }, 'royal-gold'))
+ok('red-veil: v1 → v2 surəti, v1 şriftləri yox', getLegacyComponent('red-veil', 1) === getLegacyComponent('red-veil', 2) && !isV1Invitation({ templateVersion: 1 }, 'red-veil'))
+ok('ivory-silk: v1 dondurulmur (köhnə versiyası yoxdur)', !isFrozenVersion('ivory-silk', 1))
 
 /* 4. Ortaq reyestrlərin snapshot-u */
 const fonts = read('src/templates/fonts.js')
