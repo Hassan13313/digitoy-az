@@ -686,14 +686,20 @@ if ($guide) {
     $data = json_encode($guide, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP);
     if ($data !== false) $noscript .= "\n    <script id=\"dt-guide-data\" type=\"application/json\">" . $data . '</script>';
 }
-/* 2026-11-14 — PRERENDER: ana səhifənin hazır HTML-i (scripts/prerender.mjs → _prerender/home.html).
+/* 2026-11-14 — PRERENDER: marşrutun hazır HTML-i (scripts/prerender.mjs → _prerender/<ad>.html):
+   / → home, /templates → templates, /sablonlar/<slug> → sablonlar--<slug>.
    Səhifə JS gəlməmiş görünür (mobil LCP ~4.7 s idi), Google mətni xam HTML-də oxuyur.
-   data-pre — React-a «hazır məzmun var, giriş animasiyasını oynatma» deyir (src/utils/prerender.js).
-   Məzmun HTML-də olduğu üçün eyni mətnli <noscript> lazım deyil. Fayl yoxdursa — köhnə qayda. */
-$preFile = $path === '/' ? __DIR__ . '/_prerender/home.html' : '';
+   data-pre — React-a «hazır məzmun var, hydrate et» deyir (src/utils/prerender.js).
+   Məzmun HTML-də olduğu üçün eyni mətnli <noscript> lazım deyil. Fayl yoxdursa — köhnə qayda.
+   Fayl adı yalnız məlum marşrutlardan qurulur (seoConceptPages-in açarı) — istifadəçi
+   girişi fayl yoluna düşmür. */
+$preName = $path === '/' ? 'home'
+         : ($path === '/templates' ? 'templates'
+         : ($conceptPage ? 'sablonlar--' . $cm[1] : ''));
+$preFile = $preName !== '' ? __DIR__ . '/_prerender/' . $preName . '.html' : '';
 $pre = ($preFile !== '' && is_file($preFile)) ? (string) @file_get_contents($preFile) : '';
 if ($pre !== '' && str_contains($out, '<div id="root"></div>')) {
-    $out = str_replace('<div id="root"></div>', '<div id="root" data-pre="/">' . $pre . '</div>', $out);
+    $out = str_replace('<div id="root"></div>', '<div id="root" data-pre="' . $e($path) . '">' . $pre . '</div>', $out);
     $noscript = '';
 }
 if ($noscript !== '') {

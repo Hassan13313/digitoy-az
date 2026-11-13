@@ -7,6 +7,7 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 import { ArrowRight, Eye, Lock, RotateCcw, Sparkles } from 'lucide-react';
 import { FOCUS, FOCUS_DARK, Kicker, Rule, StatusChip } from './shared';
+import { STATIC_INTRO } from '../../utils/prerender';
 
 const EASE = [0.22, 1, 0.36, 1];
 
@@ -363,7 +364,9 @@ export function TemplateScene({
   fallback = null,
   children,
 }) {
-  const [loaded, setLoaded] = useState(false);
+  /* Prerender: hazır HTML-də şəkil JS-i gözləmədən görünür (fade yox) — server və brauzerin ilk
+     render-i eyni, LCP şəklin özü ilə gəlir */
+  const [loaded, setLoaded] = useState(STATIC_INTRO);
   const [failed, setFailed] = useState(false);
   // keşdən dərhal gələn şəkil üçün
   const imgRef = useCallback((node) => {

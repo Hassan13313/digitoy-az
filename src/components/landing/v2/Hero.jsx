@@ -62,18 +62,19 @@ export default function Hero({ lang = 'az', onStart, onDemo, demoHref = '/demo' 
         <div className="grid grid-cols-[minmax(0,1fr)] items-center gap-14 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-12 xl:gap-16">
           {/* ── Sol: mətn ───────────────────────────────────────── */}
           <div className="text-left">
-            <motion.p
-              {...fade(0)}
-              className="inline-flex items-center gap-2.5 rounded-full border border-gold/35 bg-white/55 px-4 py-2 text-[10.5px] font-semibold uppercase tracking-[0.2em] text-gold-deep shadow-soft backdrop-blur-sm sm:px-5 sm:text-[11px] sm:tracking-[0.26em]"
-            >
-              <Sparkles className="h-3.5 w-3.5 shrink-0 text-gold" strokeWidth={1.6} aria-hidden="true" />
-              {x.heroEyebrow ?? 'Bir dəvətnamədən daha artığı'}
-            </motion.p>
-
+            {/* 2026-11-14 SEO: nişan («Online dəvətnamə») H1-in bir hissəsidir — görünüş əvvəlki kimi
+                (ayrıca blok, öz şrifti/ölçüsü), axtarışın əsas ifadəsi isə başlıqdadır */}
             <h1
               id="hero-title"
-              className="mt-7 font-serif text-[44px] font-medium leading-[1.02] tracking-[-0.015em] text-ink min-[400px]:text-[48px] sm:text-[64px] lg:text-[54px] xl:text-[80px]"
+              className="font-serif text-[44px] font-medium leading-[1.02] tracking-[-0.015em] text-ink min-[400px]:text-[48px] sm:text-[64px] lg:text-[54px] xl:text-[80px]"
             >
+              <motion.span
+                {...fade(0)}
+                className="mb-7 flex w-fit items-center gap-2.5 rounded-full border border-gold/35 bg-white/55 px-4 py-2 font-sans text-[10.5px] font-semibold uppercase leading-normal tracking-[0.2em] text-gold-deep shadow-soft backdrop-blur-sm sm:px-5 sm:text-[11px] sm:tracking-[0.26em]"
+              >
+                <Sparkles className="h-3.5 w-3.5 shrink-0 text-gold" strokeWidth={1.6} aria-hidden="true" />
+                {x.heroEyebrow ?? 'Online dəvətnamə'}
+              </motion.span>
               {[x.heroTitle1 ?? 'Rəqəmsal Toy', x.heroTitle2 ?? 'Dəvətnamənizi'].map((txt, i) => (
                 <span key={i} className="-mb-[0.14em] block overflow-hidden pb-[0.14em] pt-[0.08em]">
                   <motion.span {...line(i)} className="block">
@@ -84,7 +85,8 @@ export default function Hero({ lang = 'az', onStart, onDemo, demoHref = '/demo' 
               <span className="-mb-[0.14em] block overflow-hidden pb-[0.14em] pr-[0.1em] pt-[0.08em]">
                 <motion.span
                   {...line(2)}
-                  className="text-gold-sheen block animate-sheen bg-[length:200%_100%] font-normal italic"
+                  /* parıltı (sheen) hazır HTML ilə açılışda keçmir: son vəziyyəti ilə eyni görünür, Speed Index uzanmır */
+                  className={`text-gold-sheen block ${STATIC_INTRO ? '' : 'animate-sheen'} bg-[length:200%_100%] font-normal italic`}
                 >
                   {x.heroTitleAccent ?? 'Özünüz Yaradın'}
                 </motion.span>

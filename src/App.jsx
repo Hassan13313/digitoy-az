@@ -214,8 +214,13 @@ function parsePreviewConcept(templateId) {
 }
 
 /* ── /sablonlar/<slug> — tədbir üzrə şablon səhifəsi (SEO) ── */
+/* Cari yol: brauzerdə window.location, prerender-də (Node) scripts/prerender.mjs-in verdiyi yol */
+function currentPath() {
+  return typeof window !== 'undefined' ? window.location.pathname : (globalThis.__DT_SSR_PATH__ || '/')
+}
+
 function parseConceptPage() {
-  const match = window.location.pathname.match(/^\/sablonlar\/([a-z0-9-]+)\/?$/)
+  const match = currentPath().match(/^\/sablonlar\/([a-z0-9-]+)\/?$/)
   return match ? conceptBySlug(match[1]) : null
 }
 
@@ -353,13 +358,18 @@ export default function App({ ssrPath = null }) {
      pəncərə postMessage ilə verir. */
   /* Phase 47: hüquqi səhifə də URL-dən asılı SAF qərardır → ilkin state-də */
   const [view,        setView]        = useState(() => {
-    if (typeof window === 'undefined') return ssrPath === '/' ? 'landing' : 'loading'
+    if (typeof window === 'undefined') {
+      if (ssrPath === '/') return 'landing'
+      return /^\/templates\/?$/.test(ssrPath || '') || parseConceptPage() ? 'templates' : 'loading'
+    }
     if (window.location.pathname === '/preview/live') return 'live-preview'
     if (matchLegalRoute(window.location.pathname)) return 'legal'
     /* 2026-11-14 prerender: adi ziyarətçi üçün kök URL birbaşa landing-dir (routeAfterAuth-un
        nəticəsi ilə eyni) — seo.php-nin hazır HTML-inə React «loading» ekranı keçirmədən qoşulur.
        Admin tokeni / ?admin / ?draft / ?data olanda qərar əvvəlki kimi effektdə verilir. */
     if (isPlainRoot()) return 'landing'
+    /* /templates və /sablonlar/<tədbir> — effektdəki qərarla eyni, saf URL qərarı (prerender + hydrate) */
+    if (/^\/templates\/?$/.test(window.location.pathname) || parseConceptPage()) return 'templates'
     return matchGuideRoute(window.location.pathname) ? 'guide' : 'loading'
   })
   const [legalDoc,    setLegalDoc]    = useState(

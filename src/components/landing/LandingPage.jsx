@@ -22,6 +22,7 @@ import { trackEvent } from '../../utils/analytics'
 import { readBuilderSnapshot, clearBuilderSnapshot } from '../../utils/builderSession'
 import { pushView, patchState, currentUrl } from '../../utils/navHistory'
 import { STATIC_INTRO } from '../../utils/prerender'
+import OnlineInvitationInfo from './v2/OnlineInvitationInfo'
 
 /* Navbar yüksəkliyi 72px — scroll hesablamada çıxılır */
 /* 2026-11 sürət: sifariş formu və önbaxış ana səhifənin ilk yükünə daxil deyil —
@@ -435,7 +436,10 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
         </AnimatePresence>
       </section>
 
-      {/* ── 5. FAQ ── */}
+      {/* ── 5. «Online dəvətnamə nədir?» — izah + tədbir səhifələrinə linklər (2026-11-14 SEO) ── */}
+      <OnlineInvitationInfo lang={lang} />
+
+      {/* ── 6. FAQ ── */}
       <FAQ lang={lang} items={getFaqItems(lang)} whatsappUrl={SOCIAL_LINKS.whatsapp} />
 
       </main>

@@ -4,11 +4,13 @@
 
    1. src/prerender.jsx Vite SSR rejimində müvəqqəti qovluğa yığılır
       (node_modules/.prerender — deploy ZIP-ə düşmür)
-   2. Node-da render olunur → dist/_prerender/home.html
-   3. seo.php bu fraqmenti ana səhifənin `<div id="root">`-una qoyur.
+   2. Node-da hər marşrut render olunur → dist/_prerender/<ad>.html
+      (/ → home, /templates → templates, /sablonlar/<slug> → sablonlar--<slug>)
+   3. seo.php fraqmenti həmin marşrutun `<div id="root">`-una qoyur.
 
-   Xəta olsa build DAYANMIR: fraqment yazılmır, seo.php köhnə qaydada (boş
-   root + noscript) işləyir — sayt heç vaxt bu addıma görə sınmır.
+   Xəta olsa həmin fraqment yazılmır, seo.php o marşrutu köhnə qaydada (boş root +
+   noscript) verir — sayt bu addıma görə sınmır. Build isə xəta kodu ilə bitir ki,
+   problem diqqətdən qaçmasın (dist/ hazır qalır).
    ───────────────────────────────────────────────────────────────────────── */
 import { build } from 'vite'
 import { mkdirSync, writeFileSync, existsSync, rmSync } from 'node:fs'
@@ -19,8 +21,9 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const TMP = path.join(ROOT, 'node_modules', '.prerender')
 const OUT_DIR = path.join(ROOT, 'dist', '_prerender')
 
-/* Minimum həcm: fraqment bundan qısadırsa nəsə səhv render olunub — yazılmır */
-const MIN_BYTES = 20000
+/* Hər fraqmentin olmalı olduğu işarə — yoxdursa nəsə səhv render olunub (məs. yükləyici) */
+const MUST = (route) => (route === '/' ? 'id="hero-title"' : '/img/templates/')
+const MIN_BYTES = 15000
 
 async function main() {
   if (!existsSync(path.join(ROOT, 'dist', 'index.html'))) {
@@ -41,17 +44,24 @@ async function main() {
 
   globalThis.__DT_SSR__ = true
   const mod = await import(pathToFileURL(path.join(TMP, 'prerender.mjs')).href)
-  const html = mod.renderHome()
-
-  if (typeof html !== 'string' || html.length < MIN_BYTES || !html.includes('id="hero-title"')) {
-    console.error(`prerender: gözlənilməz nəticə (${html?.length} bayt) — fraqment YAZILMADI`)
-    return 1
-  }
   mkdirSync(OUT_DIR, { recursive: true })
-  writeFileSync(path.join(OUT_DIR, 'home.html'), html)
+  let ok = 0
+  for (const [route, name] of mod.PRERENDER_ROUTES) {
+    try {
+      const html = await mod.renderPath(route)
+      if (typeof html !== 'string' || html.length < MIN_BYTES || !html.includes(MUST(route))) {
+        console.error(`prerender: ${route} — gözlənilməz nəticə (${html?.length} bayt), YAZILMADI`)
+        continue
+      }
+      writeFileSync(path.join(OUT_DIR, `${name}.html`), html)
+      ok++
+    } catch (e) {
+      console.error(`prerender: ${route} — XƏTA, yazılmadı:`, e?.message || e)
+    }
+  }
   rmSync(TMP, { recursive: true, force: true })
-  console.log(`prerender: dist/_prerender/home.html (${Math.round(html.length / 1024)} KB)`)
-  return 0
+  console.log(`prerender: ${ok}/${mod.PRERENDER_ROUTES.length} marşrut → dist/_prerender/`)
+  return ok === mod.PRERENDER_ROUTES.length ? 0 : 1
 }
 
 main().then((code) => { process.exitCode = code }, (e) => {
