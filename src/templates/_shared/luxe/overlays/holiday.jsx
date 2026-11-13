@@ -78,7 +78,7 @@ function Mask({ o, go, t }) {
   const holes = 'radial-gradient(ellipse 13vmin 8vmin at 34% 46%, transparent 98%, #000 100%), radial-gradient(ellipse 13vmin 8vmin at 66% 46%, transparent 98%, #000 100%)'
   return (
     <div aria-hidden="true" style={{ position: 'absolute', inset: 0, transform: go ? 'translateY(-110%) scale(1.3)' : 'none', opacity: go ? 0 : 1, transition: t('transform 2s cubic-bezier(.7,0,.3,1) .2s, opacity 1.2s ease .9s') }}>
-      <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(70% 50% at 50% 46%, ${o.gold}, ${alpha(o.gold, 0.85)} 40%, ${o.plum} 75%)`, WebkitMaskImage: holes, maskImage: holes, WebkitMaskComposite: 'source-in', maskComposite: 'intersect' }} />
+      <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(46% 20% at 50% 46%, ${alpha(o.gold, 0.9)}, ${alpha(o.gold, 0.55)} 55%, transparent 100%), radial-gradient(120% 80% at 50% 40%, ${alpha(o.plum, 0.9)}, ${o.plum} 70%)`, WebkitMaskImage: holes, maskImage: holes, WebkitMaskComposite: 'source-in', maskComposite: 'intersect' }} />
       <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} fill="none" stroke={o.plum} strokeWidth=".35" opacity=".55">
         <path d="M10 46C20 30 40 30 50 40 60 30 80 30 90 46" />
         <path d="M14 52C24 64 42 62 50 54 58 62 76 64 86 52" />

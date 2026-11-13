@@ -84,7 +84,7 @@ function Cloth({ o, go, t }) {
   return (
     <div aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
       <div style={{ position: 'absolute', inset: 0, background: go ? 'transparent' : alpha(o.wall, 0.92), transition: t('background 1.2s 1.2s') }} />
-      <div style={{ position: 'absolute', inset: '14% 10% 16%', border: `2.4vmin solid ${o.gold}`, boxShadow: `inset 0 0 0 1vmin ${alpha('#000000', 0.15)}, 0 20px 40px rgba(0,0,0,.25)`, opacity: go ? 0 : 1, transition: t('opacity 1s 1.3s') }}>
+      <div style={{ position: 'absolute', inset: '26svh 12% 16%', border: `2.4vmin solid ${o.gold}`, boxShadow: `inset 0 0 0 1vmin ${alpha('#000000', 0.15)}, 0 20px 40px rgba(0,0,0,.25)`, opacity: go ? 0 : 1, transition: t('opacity 1s 1.3s') }}>
         <div style={{ position: 'absolute', inset: -2, transformOrigin: '50% 100%', transform: go ? 'translateY(110%) scaleY(.6)' : 'none', transition: t('transform 1.6s cubic-bezier(.6,0,.4,1)'),
           background: [`repeating-linear-gradient(90deg, ${alpha('#000000', 0.22)} 0, ${alpha('#FFFFFF', 0.06)} 4%, ${alpha('#000000', 0.16)} 8%, ${alpha('#000000', 0.3)} 12%)`, `linear-gradient(180deg, ${o.velvet}, ${alpha(o.velvet, 0.9)})`].join(', '), borderRadius: '0 0 50% 50% / 0 0 6% 6%' }} />
       </div>
