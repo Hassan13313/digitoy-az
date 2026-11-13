@@ -132,6 +132,15 @@ foreach (['/templates', '/sablonlar/xina-gecesi', '/invite/aytac-ve-niyaz-51eedb
     $h = $run($p)['html'];
     ok("prerender: $p → root boş, data-pre yoxdur", str_contains($h, '<div id="root"></div>') && !str_contains($h, 'data-pre'));
 }
+/* kataloq səhifələri: öz faylı varsa öz root-u, data-pre = yol; naməlum tədbir/fayl adı yolu — heç nə */
+file_put_contents($tmp . '/_prerender/templates.html', '<main>T</main>');
+file_put_contents($tmp . '/_prerender/sablonlar--xina-gecesi.html', '<main>X</main>');
+ok('prerender: /templates → öz fraqmenti', str_contains($run('/templates')['html'], '<div id="root" data-pre="/templates"><main>T</main></div>'));
+ok('prerender: /sablonlar/xina-gecesi → öz fraqmenti', str_contains($run('/sablonlar/xina-gecesi')['html'], '<div id="root" data-pre="/sablonlar/xina-gecesi"><main>X</main></div>'));
+ok('prerender: /sablonlar/ad-gunu (fayl yoxdur) → boş root', str_contains($run('/sablonlar/ad-gunu')['html'], '<div id="root"></div>'));
+ok('prerender: /sablonlar/bilinmeyen → 404, fraqment yoxdur', ($r = $run('/sablonlar/bilinmeyen'))['status'] === 404 && !str_contains($r['html'], 'data-pre'));
+ok('prerender: /sablonlar/..%2Fhome → fraqment yoxdur', !str_contains($run('/sablonlar/..%2Fhome')['html'], 'data-pre'));
+@unlink($tmp . '/_prerender/templates.html'); @unlink($tmp . '/_prerender/sablonlar--xina-gecesi.html');
 @unlink($tmp . '/_prerender/home.html'); @rmdir($tmp . '/_prerender');
 
 /* müvəqqəti qovluğu təmizlə — yalnız yuxarıda özümüzün köçürdüyü fayllar */
