@@ -1,4 +1,5 @@
 import { resolveDressCode, resolveDressGenders } from '../../data/dressCode'
+import { DRESS_CODE_PALETTES } from '../../data/constants'
 import { alpha, readableOn, contrast } from './geo'
 import t from '../../data/translations'
 import { useTemplate } from '../TemplateProvider'
@@ -251,7 +252,8 @@ export default function DressCodeSection({
   const nameCol = readableOn(bg, theme.muted, theme.text)
   const noteCol = readableOn(bg, theme.muted, theme.text)
   const [iconsRef, seen] = useInView(0.35)
-  const pair = PAIRS[paletteId] || PAIRS.blacktie
+  /* Naməlum/boş id-də resolveDressCode ilk palitranı (pastel) göstərir — ikonlar da ona uyğun olsun */
+  const pair = PAIRS[paletteId] || PAIRS[DRESS_CODE_PALETTES[0]?.id] || PAIRS.blacktie
 
   return (
     /* `data-stagger`: ad → ikonlar → qeyd 55ms addımla gəlir.

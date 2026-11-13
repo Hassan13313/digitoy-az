@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { QRCodeSVG } from 'qrcode.react'
 import LanguageSwitcher from '../../../../components/LanguageSwitcher'
-import DressCodeSection from '../../../_shared/DressCodeSection'
+import DressCodeSection from '../_shared/DressCodeSection'
 import MapSection from '../../../_shared/MapSection'
 import { EmblemSlot } from '../../../_shared/MonoContent'
 import { parseLatLon } from '../../../_shared/geo'

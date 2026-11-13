@@ -47,6 +47,15 @@ for (const id of V3_TEMPLATES) {
   }
 }
 
+/* 2b. Geyim bölməsi (2026-11-13 lüks ikonlar): dondurulmuş surətlər köhnə ikonları
+   saxlayan legacy/v2/_shared/DressCodeSection-u işlədir, indikini yox */
+ok('legacy/v2/_shared/DressCodeSection.jsx var', existsSync(new URL('src/templates/legacy/v2/_shared/DressCodeSection.jsx', root)))
+for (const id of V3_TEMPLATES) {
+  const src = read(`src/templates/legacy/v2/${id}/index.jsx`)
+  if (!src.includes('DressCodeSection')) continue
+  ok(`${id}: v2 surəti dondurulmuş geyim bölməsini işlədir`, src.includes("from '../_shared/DressCodeSection'") && !src.includes("from '../../../_shared/DressCodeSection'"))
+}
+
 /* 3. Versiya qaydaları */
 for (const id of V3_TEMPLATES) {
   ok(`${id}: yeni dəvətnamə 3`, currentVersionOf(id) === 3)
