@@ -20,6 +20,11 @@ import { PHOTOS as vinylRecord } from './vinyl-record/photos.js'
 import { PHOTOS as cinemaPremiere } from './cinema-premiere/photos.js'
 import { PHOTOS as boardingPass } from './boarding-pass/photos.js'
 import { PHOTOS as modernBlack } from './modern-black/photos.js'
+import { PHOTOS as redVeil } from './red-veil/photos.js'
+import { PHOTOS as xonca } from './xonca/photos.js'
+import { PHOTOS as hennaButa } from './henna-buta/photos.js'
+import { PHOTOS as mirrorCandle } from './mirror-candle/photos.js'
+import { PHOTOS as kelagayi } from './kelagayi/photos.js'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    ŞABLONUN ŞƏKİL YERLƏRİ (2026-11) — admin «Şəkillər» tabı
@@ -54,6 +59,12 @@ const REGISTRY = {
   'cinema-premiere': cinemaPremiere,
   'boarding-pass': boardingPass,
   'modern-black': modernBlack,
+  /* 2026-11-13 — xına gecəsi seriyası */
+  'red-veil': redVeil,
+  xonca,
+  'henna-buta': hennaButa,
+  'mirror-candle': mirrorCandle,
+  kelagayi,
 }
 
 /** Bütün şablonların şəkil açarları — admin datasının ağ siyahısı */

@@ -1,21 +1,11 @@
-/* KƏLAĞAYI — rənglər və köməkçilər (komponent faylından ayrı: fast refresh qaydası) */
+/* KƏLAĞAYI — rənglər (komponent faylından ayrı: fast refresh qaydası) */
 
-export const C = {
-  SILK: '#F7EED9', SILK_D: '#EADCC0', SAFFRON: '#E0A526', SAFFRON_D: '#A8720E',
-  CRIMSON: '#9E1F32', CRIMSON_D: '#6E1222', INDIGO: '#24305E', INK: '#1E1A17', MUTED: '#6E5F4E',
-}
+export const C = { BG: '#F7EED9', BG2: '#EFE2C6', INK: '#1E1A17', ACCENT: '#9E1F32', MUTE: '#6E5F4E', CRIMSON: '#9E1F32', SAFFRON: '#E0A526', INDIGO: '#24305E' }
 
-/* Kəlağayı haşiyəsi — üç rəngli zolaq (çərçivələr və ayırıcılar üçün) */
-export const BAND = (C) => (`linear-gradient(90deg, ${C.CRIMSON} 0 33.3%, ${C.SAFFRON} 33.3% 66.6%, ${C.INDIGO} 66.6% 100%)`)
-
-/* İpək parıltısı — üzərindən keçən işıq */
-export const SHEEN = 'linear-gradient(115deg, transparent 30%, rgba(255,255,255,.38) 45%, transparent 60%)'
-
-/* Ad uzunluğuna görə ölçü (Playfair Display SC) */
-export function nameSize(text) {
+/* Ad uzunluğuna görə ölçü */
+export function nameSize(text, big = false) {
   const n = Array.from(String(text || '')).length
-  if (n <= 6) return 'clamp(50px, 15vw, 70px)'
-  if (n <= 10) return 'clamp(40px, 11.6vw, 54px)'
-  if (n <= 16) return 'clamp(30px, 8.6vw, 42px)'
-  return 'clamp(24px, 6.8vw, 32px)'
+  if (n <= 12) return big ? 'clamp(40px, 12vw, 56px)' : 'clamp(34px, 10vw, 46px)'
+  if (n <= 18) return big ? 'clamp(32px, 9.4vw, 44px)' : 'clamp(28px, 8vw, 38px)'
+  return big ? 'clamp(26px, 7.6vw, 36px)' : 'clamp(22px, 6.4vw, 30px)'
 }

@@ -31,3 +31,10 @@ Bu qovluqdakı fotoların hamısı (bir istisna ilə) Digitoy şablonları üç�
 | mb-1…4 | Modern Black (`modern-black`) | işıq şüasında qara kallalar, qara badələr, qara süfrə, gecə şəhəri |
 
 Toy + ad günü dizaynlarında (Gazette, Vinyl Record, Cinema Premiere, Boarding Pass, Modern Black) fotolarda insan yoxdur — eyni şəkillər hər iki tədbirə uyğundur.
+
+## Xına gecəsi seriyası (2026-11-13) — GPT Image, bu şablonlar üçün yaradılıb
+- rv-1…4 Red Veil: qırmızı örpəkli gəlin, məxmər örpək və xına, şamlı süfrə, şamlı dəhliz
+- xn-1…4 Xonça: şamlı mis xonça, xonça aparan əllər, xonçalı süfrə, sönməkdə olan şamlar
+- hb-1…4 Henna Buta: xınalı ovuclar, xına qabı və buta, həyətdə süfrə, xınalı əllərdə şam
+- mc-1…4 Mirror & Candle: zər güzgü və iki şam, əl güzgüsü və üzük, güzgülü süfrə, güzgüdə iki alov
+- kl-1…4 Kəlağayı: kəlağayılı gəlin, kəlağayı və qəliblər, şəbəkəli otaqda süfrə, həyətdə kəlağayılar

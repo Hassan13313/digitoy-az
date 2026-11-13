@@ -1,29 +1,11 @@
-/* MIRROR & CANDLE — rənglər və köməkçilər (komponent faylından ayrı: fast refresh qaydası) */
+/* MIRROR & CANDLE — rənglər (komponent faylından ayrı: fast refresh qaydası) */
 
-export const C = {
-  NIGHT: '#14100D', NIGHT_L: '#211A15', PANEL: '#1B1511',
-  GOLD: '#E0B864', GOLD_L: '#F6DFA0', GOLD_D: '#A88438',
-  SILVER: '#C9CED6', IVORY: '#F4ECDD', MUTED: '#B8AA94', FAINT: '#7E7262',
-}
-
-/* Qızılı çərçivə — konik parıltı */
-export const GILT = (C) => (`conic-gradient(from 210deg, #8C6A2A, ${C.GOLD_L}, #B8913F, #FFF1C4, #9C7A34, ${C.GOLD}, #8C6A2A)`)
-
-/* Düymələr üçün — konik parıltı enli düymədə «konus» kimi görünür */
-export const GILT_BAR = (C) => (`linear-gradient(160deg, #B8913F 0%, ${C.GOLD_L} 42%, #D9B565 62%, #9C7A34 100%)`)
-
-/* Güzgü səthi: sönük (açılışdan əvvəl) və işıqlı */
-export const MIRROR_DIM = 'radial-gradient(80% 70% at 40% 30%, #4A4846 0%, #2A2826 45%, #171513 100%)'
-export const MIRROR_LIT = 'radial-gradient(80% 70% at 40% 30%, #FFF6E2 0%, #D9C7A6 32%, #8F826E 70%, #4A4034 100%)'
-
-/* Şam işığı ləkələri (fon) */
-export const GLOW_BG = (C) => (`radial-gradient(45% 30% at 12% 20%, rgba(255,190,100,.10), transparent 70%), radial-gradient(45% 30% at 88% 60%, rgba(255,190,100,.08), transparent 70%), linear-gradient(180deg, ${C.NIGHT_L}, ${C.NIGHT})`)
+export const C = { BG: '#120E0B', BG2: '#1E1712', INK: '#F4ECDD', ACCENT: '#E0B864', MUTE: '#B8AA94' }
 
 /* Ad uzunluğuna görə ölçü */
-export function nameSize(text) {
+export function nameSize(text, big = false) {
   const n = Array.from(String(text || '')).length
-  if (n <= 6) return 'clamp(46px, 14vw, 64px)'
-  if (n <= 10) return 'clamp(38px, 11vw, 52px)'
-  if (n <= 16) return 'clamp(30px, 8.4vw, 40px)'
-  return 'clamp(24px, 6.6vw, 32px)'
+  if (n <= 12) return big ? 'clamp(48px, 14vw, 66px)' : 'clamp(40px, 11.5vw, 54px)'
+  if (n <= 18) return big ? 'clamp(40px, 11.5vw, 54px)' : 'clamp(33px, 9.4vw, 44px)'
+  return big ? 'clamp(33px, 9.4vw, 44px)' : 'clamp(27px, 7.8vw, 36px)'
 }

@@ -21,6 +21,11 @@ import { alpha } from '../useInvitation'
      stack    Modern Black    — alt-alta iri rəqəmlər
      crest    Royal Palace    — ikiqat zər çərçivələr, tac
      star8    Oriental Luxe   — səkkizguşəli ulduzlar
+     velvet   Red Veil        — məxmər medalyon, qızılı tikiş, buta
+     candle   Xonça           — hər rəqəmin üstündə yanan şam alovu
+     mandala  Henna Buta      — yavaş fırlanan xına mandalası
+     mirror   Mirror & Candle — oval zər güzgü, üzərindən parıltı keçir
+     rhomb    Kəlağayı        — romb lövhə, üç rəngli haşiyə
    `cd` — useCountdown nəticəsi (days, hours, minutes, seconds, labels).
    ───────────────────────────────────────────────────────────────────────── */
 
@@ -28,6 +33,8 @@ export const COUNTDOWN_CSS = `
 @keyframes cdx-spin { to { rotate: 360deg } }
 @keyframes cdx-flap { from { transform: perspective(300px) rotateX(-90deg); opacity: .3 } to { transform: none; opacity: 1 } }
 @keyframes cdx-bulb { 0%,100% { opacity: .55 } 50% { opacity: 1 } }
+@keyframes cdx-flame { 0%,100% { transform: scale(1, 1) rotate(-2deg) } 35% { transform: scale(.92, 1.08) rotate(2deg) } 70% { transform: scale(1.04, .95) rotate(-1deg) } }
+@keyframes cdx-glint { 0%, 55% { translate: -160% 0 } 100% { translate: 160% 0 } }
 @keyframes cdx-pop { from { opacity: 0; scale: .6 } to { opacity: 1; scale: 1 } }
 @media (prefers-reduced-motion: reduce) { .cdx * { animation: none !important; transition: none !important; } }
 `
@@ -263,6 +270,95 @@ export default function Countdown({ kind, cd, C, fonts, light = false }) {
           ))}
         </div>
       )
+    case 'velvet':
+      return (
+        <div ref={ref} className="cdx" style={row(8)}>
+          {units.map((u, i) => (
+            <div key={u.k} style={pop(i)}>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '1', borderRadius: '50%', display: 'grid', placeItems: 'center', background: `radial-gradient(circle at 40% 30%, ${C.VEL || C.ACCENT}, ${C.BG} 92%)`, boxShadow: `inset 0 0 0 3px ${alpha(C.BG, 0.6)}, 0 8px 22px ${alpha('#000', 0.35)}` }}>
+                <svg aria-hidden="true" viewBox="0 0 100 100" style={{ position: 'absolute', inset: 0, overflow: 'visible', rotate: seen ? '0deg' : '-60deg', transition: `rotate 1.8s cubic-bezier(.2,.7,.2,1) ${0.2 + i * 0.12}s` }}>
+                  <circle cx="50" cy="50" r="44" fill="none" stroke={C.GOLD || C.ACCENT} strokeWidth="1.1" strokeDasharray="3 2.4" />
+                  <circle cx="50" cy="50" r="48" fill="none" stroke={alpha(C.GOLD || C.ACCENT, 0.5)} strokeWidth=".6" />
+                  <path d="M50 3c-2.4 0-4 1.8-4 4 0 2.6 2.6 3.6 4 6 1.4-2.4 4-3.4 4-6 0-2.2-1.6-4-4-4z" fill={C.GOLD || C.ACCENT} />
+                </svg>
+                <span style={{ position: 'relative' }}>{R(u.v, { fontFamily: num, fontSize: 'clamp(22px, 6.6vw, 28px)', color: C.GOLD_L || C.INK })}</span>
+              </div>
+              <div style={lab({ color: C.GOLD || C.ACCENT })}>{u.label}</div>
+            </div>
+          ))}
+        </div>
+      )
+    case 'candle':
+      return (
+        <div ref={ref} className="cdx" style={row(10)}>
+          {units.map((u, i) => (
+            <div key={u.k} style={pop(i)}>
+              <div style={{ position: 'relative', height: 34 }}>
+                <span aria-hidden="true" style={{ position: 'absolute', left: '50%', bottom: 2, width: 13, height: 24, marginLeft: -6.5, borderRadius: '50% 50% 50% 50% / 62% 62% 38% 38%', background: 'radial-gradient(circle at 50% 72%, #FFF6D8 0 22%, #FFD27A 40%, #F08A2A 74%, transparent 76%)', boxShadow: '0 0 18px 6px rgba(255,190,90,.35)', transformOrigin: '50% 100%', opacity: seen ? 1 : 0, transition: `opacity .8s ${0.5 + i * 0.25}s`, animation: `cdx-flame ${1.6 + i * 0.2}s ease-in-out infinite` }} />
+                <span aria-hidden="true" style={{ position: 'absolute', left: '50%', bottom: 0, width: 1.5, height: 6, marginLeft: -0.75, background: alpha(C.INK, 0.7) }} />
+              </div>
+              <div style={{ padding: '12px 2px 10px', borderRadius: '6px 6px 2px 2px', background: `linear-gradient(180deg, ${alpha(C.INK, 0.12)}, ${alpha(C.INK, 0.04)})`, border: `1px solid ${alpha(C.ACCENT, 0.45)}`, boxShadow: `inset 0 10px 18px -12px rgba(255,200,120,.6)` }}>
+                {R(u.v, { fontFamily: num, fontSize: 'clamp(24px, 7vw, 30px)', color: C.INK })}
+              </div>
+              <div aria-hidden="true" style={{ height: 6, margin: '0 -4px', borderRadius: '0 0 50% 50%', background: `linear-gradient(90deg, ${C.ACCENT}, ${alpha(C.ACCENT, 0.5)}, ${C.ACCENT})` }} />
+              <div style={lab({ color: C.ACCENT })}>{u.label}</div>
+            </div>
+          ))}
+        </div>
+      )
+    case 'mandala':
+      return (
+        <div ref={ref} className="cdx" style={row(6)}>
+          {units.map((u, i) => (
+            <div key={u.k} style={pop(i)}>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '1', display: 'grid', placeItems: 'center' }}>
+                <svg aria-hidden="true" viewBox="0 0 100 100" style={{ position: 'absolute', inset: 0, overflow: 'visible', animation: `cdx-spin ${60 + i * 12}s linear infinite` }}>
+                  {Array.from({ length: 12 }, (_, k) => (
+                    <path key={k} d="M50 2c5 6 6 12 0 18-6-6-5-12 0-18z" fill="none" stroke={C.ACCENT} strokeWidth="1" transform={`rotate(${k * 30} 50 50)`} pathLength="1" strokeDasharray="1" strokeDashoffset={seen ? 0 : 1} style={{ transition: `stroke-dashoffset 1.4s ease ${0.2 + i * 0.12 + k * 0.05}s` }} />
+                  ))}
+                  <circle cx="50" cy="50" r="27" fill="none" stroke={alpha(C.ACCENT, 0.7)} strokeWidth=".8" strokeDasharray="1 3" />
+                </svg>
+                <span style={{ position: 'relative' }}>{R(u.v, { fontFamily: num, fontSize: 'clamp(20px, 5.8vw, 25px)', color: C.INK })}</span>
+              </div>
+              <div style={lab({ marginTop: 6 })}>{u.label}</div>
+            </div>
+          ))}
+        </div>
+      )
+    case 'mirror':
+      return (
+        <div ref={ref} className="cdx" style={row(10)}>
+          {units.map((u, i) => (
+            <div key={u.k} style={pop(i)}>
+              <div style={{ position: 'relative', aspectRatio: '3 / 4', borderRadius: '50%', padding: 4, background: `conic-gradient(from 210deg, #8C6A2A, ${C.ACCENT}, #B8913F, #FFF1C4, #9C7A34, ${C.ACCENT}, #8C6A2A)` }}>
+                <div style={{ position: 'relative', height: '100%', borderRadius: '50%', overflow: 'hidden', display: 'grid', placeItems: 'center', background: `radial-gradient(80% 70% at 40% 30%, ${alpha('#FFF6E2', 0.22)}, ${C.BG2} 60%, ${C.BG})` }}>
+                  <span aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(110deg, transparent 35%, rgba(255,246,220,.35) 50%, transparent 65%)', animation: `cdx-glint 5s ease-in-out ${i * 0.6}s infinite` }} />
+                  <span style={{ position: 'relative' }}>{R(u.v, { fontFamily: num, fontSize: 'clamp(22px, 6.4vw, 28px)', color: C.INK })}</span>
+                </div>
+              </div>
+              <div style={lab({ color: C.ACCENT })}>{u.label}</div>
+            </div>
+          ))}
+        </div>
+      )
+    case 'rhomb': {
+      const band = `linear-gradient(90deg, ${C.CRIMSON || C.ACCENT} 0 33.3%, ${C.SAFFRON || C.ACCENT} 33.3% 66.6%, ${C.INDIGO || C.INK} 66.6% 100%)`
+      return (
+        <div ref={ref} className="cdx" style={row(6)}>
+          {units.map((u, i) => (
+            <div key={u.k} style={pop(i)}>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '1', display: 'grid', placeItems: 'center' }}>
+                <span aria-hidden="true" style={{ position: 'absolute', inset: '14%', rotate: seen ? '45deg' : '0deg', padding: 3, background: band, transition: `rotate 1.4s cubic-bezier(.2,.7,.2,1) ${0.2 + i * 0.12}s` }}>
+                  <span style={{ display: 'block', height: '100%', background: C.BG2, boxShadow: `inset 0 0 0 2px ${C.BG2}, inset 0 0 0 3px ${alpha(C.SAFFRON || C.ACCENT, 0.6)}` }} />
+                </span>
+                <span style={{ position: 'relative' }}>{R(u.v, { fontFamily: num, fontSize: 'clamp(20px, 5.8vw, 25px)', color: C.INK })}</span>
+              </div>
+              <div style={lab({ marginTop: 4, color: C.CRIMSON || C.ACCENT })}>{u.label}</div>
+            </div>
+          ))}
+        </div>
+      )
+    }
     default:
       return (
         <div ref={ref} className="cdx" style={row(8)}>

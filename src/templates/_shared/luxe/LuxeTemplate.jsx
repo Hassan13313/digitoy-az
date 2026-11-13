@@ -14,6 +14,7 @@ import { VIRAL_CSS, useInView, coverSpot } from '../viralHooks'
 import { resolvePhotos, isCustomPhoto } from '../../templatePhotos'
 import { scaleFont } from '../palette'
 import Countdown, { COUNTDOWN_CSS } from './Countdown'
+import Overlay, { OVERLAY_CSS } from './Overlay'
 import FilmReel from '../FilmReel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -80,6 +81,7 @@ const KEYFRAMES = (C) => (`
 const pct = (o) => `${o[0] * 100}% ${o[1] * 100}%`
 function openingStyles(kind, origin) {
   switch (kind) {
+    case 'oval': return { clip0: `ellipse(21vmin 29vmin at ${pct(origin)})`, clip1: `ellipse(150vmax 150vmax at ${pct(origin)})`, s0: 1.1 }
     case 'iris': return { clip0: `circle(27vmin at ${pct(origin)})`, clip1: `circle(150vmax at ${pct(origin)})`, s0: 1.12 }
     case 'frame': return { clip0: 'inset(24% 12% 17% 12%)', clip1: 'inset(0% 0% 0% 0%)', s0: 1.1 }
     case 'arch': return { clip0: 'inset(25% 13% 16% 13% round 37vw 37vw 0 0 / 40vw 40vw 0 0)', clip1: 'inset(0% 0% 0% 0% round 0vw 0vw 0 0 / 0vw 0vw 0 0)', s0: 1.12 }
@@ -216,12 +218,14 @@ function Frame({ cfg, inv, weddingData, T, C, kicker, first, second, single, go,
         </div>
       )}
 
+      {gate && o.overlay && <Overlay o={o.overlay} go={go} instant={instant} />}
+
       {/* bağlı pəncərənin çərçivəsi */}
-      {(o.kind === 'frame' || o.kind === 'arch' || o.kind === 'iris') && (
+      {(o.kind === 'frame' || o.kind === 'arch' || o.kind === 'iris' || o.kind === 'oval') && (
         <div aria-hidden="true" style={{
           position: 'absolute', border: `1px solid ${alpha(C.ACCENT, 0.85)}`, boxShadow: `0 0 0 6px ${alpha(C.BG, 0)}, 0 0 0 7px ${alpha(C.ACCENT, 0.35)}`,
-          ...(o.kind === 'iris'
-            ? { left: `${origin[0] * 100}%`, top: `${origin[1] * 100}%`, width: '54vmin', height: '54vmin', translate: '-50% -50%', borderRadius: '50%' }
+          ...(o.kind === 'iris' || o.kind === 'oval'
+            ? { left: `${origin[0] * 100}%`, top: `${origin[1] * 100}%`, width: o.kind === 'oval' ? '42vmin' : '54vmin', height: o.kind === 'oval' ? '58vmin' : '54vmin', translate: '-50% -50%', borderRadius: '50%', ...(o.kind === 'oval' ? { border: `2px solid ${alpha(C.ACCENT, 0.95)}`, boxShadow: `0 0 0 5px ${alpha(C.BG, 0.5)}, 0 0 0 7px ${alpha(C.ACCENT, 0.55)}, 0 0 40px ${alpha(C.ACCENT, 0.35)}` } : null) }
             : o.kind === 'arch'
               ? { top: '25%', left: '13%', right: '13%', bottom: '16%', borderRadius: '50% 50% 0 0 / 40vw 40vw 0 0' }
               : { top: '24%', left: '12%', right: '12%', bottom: '17%' }),
@@ -364,7 +368,7 @@ export default function LuxeTemplate({ props, inv, C, T, cfg }) {
       backgroundColor: C.BG, minHeight: '100vh', fontFamily: body, fontWeight: cfg.bodyWeight || 400, color: C.INK, overflowX: 'hidden', position: 'relative', isolation: 'isolate',
       fontSize: theme.bodyScale ? `${theme.bodyScale}em` : undefined, '--tpl-glow': alpha(C.ACCENT, 0.3),
     }}>
-      <style>{VIRAL_CSS + KEYFRAMES(C) + COUNTDOWN_CSS}</style>
+      <style>{VIRAL_CSS + KEYFRAMES(C) + COUNTDOWN_CSS + OVERLAY_CSS}</style>
       {veil && <Opening cfg={cfg} inv={inv} weddingData={weddingData} T={T} C={C} />}
 
       <MusicFab inv={inv} theme={theme} lang={lang} style={{ borderRadius: '50%', background: alpha(C.BG, 0.6), border: `1px solid ${alpha(C.ACCENT, 0.45)}`, backdropFilter: 'blur(8px)' }}>
