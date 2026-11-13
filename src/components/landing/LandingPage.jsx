@@ -49,6 +49,44 @@ function scrollToSection(id) {
   }
 }
 
+/* Paket seçiləndən sonra builder-in başına sürüşdür və yerləşənə qədər orada saxla.
+   ⚠ 2026-11-13 xətası: BuilderForm lazy yüklənir — sürüşmə əvvəlcə StepLoader-ə
+   çatırdı, ~1 s sonra şablon siyahısı (≈15 000 px) gələndə brauzerin «scroll
+   anchoring»-i loader-in altındakı elementi izləyib səhifəni ~5 000 px aşağı —
+   «Xına»/«Ad günü» bölmələrinə — aparırdı. Builder (#builder-top) gəlib səhifə
+   hündürlüyü sabitləşənə qədər anchoring söndürülür, sonra geri açılır.
+   Yeni müştəri birinci addımı — şablon siyahısının başını görür; qaralaması olan
+   müştəri BuilderForm-un bərpa etdiyi öz addımının başına düşür. İstifadəçi özü
+   sürüşdürməyə başlasa, onu bir daha hərəkət etdirmirik. */
+const USER_SCROLL_EVENTS = ['wheel', 'touchstart', 'pointerdown', 'keydown']
+function settleOnBuilder() {
+  const root = document.documentElement
+  const prevAnchor = root.style.overflowAnchor
+  root.style.overflowAnchor = 'none'
+  let userMoved = false
+  const onUser = () => { userMoved = true }
+  USER_SCROLL_EVENTS.forEach((e) => window.addEventListener(e, onUser, { passive: true }))
+  let tries = 0
+  let stable = 0
+  let lastH = -1
+  let aligned = false
+  const tick = () => {
+    tries += 1
+    const mounted = !!document.getElementById('builder-top')
+    if (mounted && !aligned && !userMoved) { scrollToSection('builder-content'); aligned = true }
+    const h = root.scrollHeight
+    stable = mounted && h === lastH ? stable + 1 : 0
+    lastH = h
+    if (stable < 6 && tries < 150) { setTimeout(tick, 100); return }   // zəif şəbəkədə chunk 15 s-ə qədər
+    root.style.overflowAnchor = prevAnchor
+    USER_SCROLL_EVENTS.forEach((e) => window.removeEventListener(e, onUser))
+  }
+  setTimeout(() => {
+    if (!userMoved) scrollToSection('builder-content')   // loader görünərkən də istiqamət düzgün olsun
+    tick()
+  }, 80)
+}
+
 /* Paketlər bölməsi altındakı şablon vitrini CTA-sı (Phase 27.1) */
 const TEMPLATES_CTA = {
   az: 'Bütün şablonlara bax',
@@ -279,7 +317,7 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
     setReturnToStep(null)
     setShowPreview(false)
     trackEvent('builder_started', { lang, package: pkgId })
-    setTimeout(() => scrollToSection('builder-content'), 80)
+    settleOnBuilder()
   }
 
   const nav = navItems(tr)
