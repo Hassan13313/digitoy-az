@@ -78,6 +78,12 @@ const FROZEN_V2 = {
   'henna-buta':      lazy(() => import('./v2/henna-buta')),
   'mirror-candle':   lazy(() => import('./v2/mirror-candle')),
   'kelagayi':        lazy(() => import('./v2/kelagayi')),
+  /* 2026-11-13: sünnət toyu 5-liyi fotolu dizayna keçdi */
+  'little-prince':   lazy(() => import('./v2/little-prince')),
+  'hero-comic':      lazy(() => import('./v2/hero-comic')),
+  'mashallah':       lazy(() => import('./v2/mashallah')),
+  'little-pilot':    lazy(() => import('./v2/little-pilot')),
+  'football-star':   lazy(() => import('./v2/football-star')),
 }
 /** v3-ə keçmiş şablonlar (server: api/template_version.php › TV_V3_TEMPLATES) */
 export const V3_TEMPLATES = Object.freeze(Object.keys(FROZEN_V2))

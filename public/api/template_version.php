@@ -31,6 +31,7 @@ const TV_V3_TEMPLATES = [
     'gazette', 'royal-gold', 'luxury-jewelry', 'floral-garden', 'white-elegance',
     'nature-touch', 'vinyl-record', 'cinema-premiere', 'boarding-pass', 'modern-black',
     'red-veil', 'xonca', 'henna-buta', 'mirror-candle', 'kelagayi',
+    'little-prince', 'hero-comic', 'mashallah', 'little-pilot', 'football-star',
 ];
 
 /** 1, 2 və ya 3 — başqa hər şey null */
