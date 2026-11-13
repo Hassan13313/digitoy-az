@@ -348,7 +348,7 @@ function MenuSheet({ id, open, onClose, nav, active, go, x, lang, onLangChange, 
             <div className="flex h-16 shrink-0 items-center justify-between border-b border-gold/15 px-6 lg:h-[76px] lg:px-8">
               <span className="font-serif text-[25px] font-medium leading-none tracking-[0.04em]">
                 <span className="text-gold-sheen">Digitoy</span>
-                <span className="text-[18px] italic text-brown-dark/70">.az</span>
+                <span className="text-[18px] italic text-brown-dark/85">.az</span>
               </span>
               <button
                 type="button"

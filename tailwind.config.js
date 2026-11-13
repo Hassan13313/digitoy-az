@@ -18,7 +18,7 @@ export default {
           rich: '#A9822F',  /* krem fonda 3.4:1 — yalnız böyük başlıq (≥24px) */
           mist: '#F3EAD3',  /* çox açıq qızılı fon (chip, hover) */
         },
-        brown: { muted: '#8C7B6B', dark: '#5C4A3A' },
+        brown: { muted: '#77685A', dark: '#5C4A3A' }, /* muted: krem fonda 5.2:1, bej fonda 4.8:1 (WCAG AA; əvvəl #8C7B6B — 3.9:1) */
         ink: '#1A1A1A',
         espresso: { DEFAULT: '#2C2523', soft: '#3A312D' },
         sand: '#CBBFAE',                              /* espresso fonda ikinci mətn */

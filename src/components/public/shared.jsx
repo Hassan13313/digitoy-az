@@ -36,7 +36,7 @@ export function Wordmark({ className = '', tone = 'light' }) {
       >
         Digitoy
       </span>
-      <span className={`italic ${tone === 'dark' ? 'text-sand/80' : 'text-brown-dark/70'}`}>.az</span>
+      <span className={`italic ${tone === 'dark' ? 'text-sand/80' : 'text-brown-dark/85'}`}>.az</span>
     </span>
   );
 }

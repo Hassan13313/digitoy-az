@@ -97,7 +97,7 @@ export default function LanguageSwitcher({ lang, setLang, theme, accent, radius 
             aria-pressed={lang === l}
             className={`px-3 py-1.5 text-xs font-medium tracking-widest uppercase transition-all duration-200 ${
               lang === l
-                ? 'bg-gold text-white'
+                ? 'bg-gold-deep text-white' /* ağ yazı qızılda 2.5:1 idi → gold-deep 5.4:1 */
                 : 'text-brown-muted hover:text-gold bg-transparent'
             } ${i < LANGS.length - 1 ? 'border-r border-gold/30' : ''}`}
           >

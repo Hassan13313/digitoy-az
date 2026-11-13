@@ -283,8 +283,8 @@ export function TemplateCard({
       type="button"
       lang={lang}
       onClick={onPreview}
-      aria-label={`${previewLabel}: ${name}`}
-      aria-describedby={descId}
+      /* Ad məzmundan götürülür (əvvəl aria-label «Önbaxış: X» görünən mətni əhatə etmirdi — Lighthouse
+         label-content-name-mismatch): «Önbaxış: Ad. Kateqoriya, status. Təsvir» */
       className={`group relative block w-full rounded-[26px] bg-white p-2 text-left shadow-soft ring-1 ring-beige-dark/80 transition-[transform,box-shadow] duration-500 ease-luxe hover:-translate-y-1 hover:shadow-lift motion-reduce:hover:translate-y-0 ${FOCUS}`}
     >
       <TemplateScene
@@ -298,11 +298,11 @@ export function TemplateCard({
         background={background}
       >
         {/* üst nişanlar */}
-        <span className="absolute left-3 top-3 flex flex-wrap gap-1.5">
+        <span aria-hidden="true" className="absolute left-3 top-3 flex flex-wrap gap-1.5">
           {statusLabel && <StatusChip label={statusLabel} tone={statusTone} lang={lang} className="shadow-soft" />}
         </span>
         {locked && (
-          <span className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-espresso/85 px-2.5 py-1 text-[10px] font-semibold uppercase leading-none tracking-[0.14em] text-cream backdrop-blur">
+          <span aria-hidden="true" className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-espresso/85 px-2.5 py-1 text-[10px] font-semibold uppercase leading-none tracking-[0.14em] text-cream backdrop-blur">
             <Lock className="h-3 w-3" strokeWidth={2} aria-hidden="true" />
             {lockedLabel}
           </span>
@@ -312,12 +312,12 @@ export function TemplateCard({
       {/* ── Mətn ──────────────────────────────────────────── */}
       <span className="block px-3 pb-3 pt-4">
         {categoryLabel && (
-          <span className="block text-[10.5px] font-semibold uppercase tracking-[0.2em] text-gold-deep">
+          <span aria-hidden="true" className="block text-[10.5px] font-semibold uppercase tracking-[0.2em] text-gold-deep">
             {categoryLabel}
           </span>
         )}
         <span className="mt-1 block font-serif text-[24px] font-medium leading-tight text-ink">
-          <span lang={nameLang}>{name}</span>
+          <span className="sr-only">{previewLabel}: </span><span lang={nameLang}>{name}</span><span className="sr-only">. </span>
         </span>
         <span id={descId} className="mt-1 block text-[13.5px] leading-snug text-brown-dark">
           {[categoryLabel, statusLabel, locked ? lockedLabel : null].filter(Boolean).length > 0 && (
