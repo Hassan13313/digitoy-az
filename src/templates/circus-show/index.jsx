@@ -21,7 +21,7 @@ const ID = 'circus-show'
 
 const LINKS = { primary: ['ACCENT', 'RED'], secondary: ['MUTE'], accent: ['ACCENT'], background: ['BG'], text: ['INK'] }
 
-const OPENING = { kind: 'still', ms: 4800, overlay: { kind: 'tent', red: '#C62537', cream: '#F7ECD6', gold: '#F2B23A' } }
+const OPENING = { kind: 'still', ms: 4800, overlay: { kind: 'tent', band: true, red: '#C62537', cream: '#F7ECD6', gold: '#F2B23A' } }
 
 export default function CircusShowTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })

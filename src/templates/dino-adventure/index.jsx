@@ -21,7 +21,7 @@ const ID = 'dino-adventure'
 
 const LINKS = { primary: ['ACCENT'], secondary: ['MUTE'], accent: ['ACCENT'], background: ['BG'], text: ['INK'] }
 
-const OPENING = { kind: 'still', ms: 4800, overlay: { kind: 'egg', shell: '#EFE3C2', spot: '#3E7A3A', jungle: '#23402A' } }
+const OPENING = { kind: 'still', ms: 4800, overlay: { kind: 'egg', shell: '#EFE3C2', spot: '#3E7A3A', jungle: '#23402A', ink: '#F5EBD3', accent: '#B9D98A' } }
 
 export default function DinoAdventureTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })

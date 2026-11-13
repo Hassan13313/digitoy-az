@@ -21,7 +21,7 @@ const ID = 'golden-jubilee'
 
 const LINKS = { primary: ['LEATHER'], secondary: ['MUTE'], accent: ['ACCENT'], background: ['BG'], text: ['INK'] }
 
-const OPENING = { kind: 'still', ms: 5000, overlay: { kind: 'album', leather: '#6A2622', deep: '#3A100E', gold: '#D4AF5A' } }
+const OPENING = { kind: 'still', ms: 5000, overlay: { kind: 'album', leather: '#6A2622', deep: '#3A100E', gold: '#D4AF5A', ink: '#F3E3B8', accent: '#E2C27A' } }
 
 export default function GoldenJubileeTemplate(props) {
   const inv = useInvitation({ ...props, templateId: ID, baseTheme: BASE, sectionLabels: LABELS })

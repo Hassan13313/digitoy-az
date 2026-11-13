@@ -49,7 +49,7 @@ function Album({ o, go, t }) {
         background: [`radial-gradient(rgba(0,0,0,.08) 1px, transparent 1.4px) 0 0 / 4px 4px`, `radial-gradient(120% 80% at 30% 20%, ${alpha('#FFFFFF', 0.08)}, transparent 50%)`, `linear-gradient(160deg, ${o.leather}, ${o.deep})`].join(', '),
         boxShadow: 'inset -14px 0 30px rgba(0,0,0,.45)',
       }}>
-        <div style={{ position: 'absolute', inset: '7% 9%', border: `2px solid ${alpha(o.gold, 0.85)}`, boxShadow: `inset 0 0 0 6px ${alpha(o.deep, 0.5)}, inset 0 0 0 7px ${alpha(o.gold, 0.5)}` }} />
+        <div style={{ position: 'absolute', inset: '4% 7%', border: `2px solid ${alpha(o.gold, 0.85)}`, boxShadow: `inset 0 0 0 6px ${alpha(o.deep, 0.5)}, inset 0 0 0 7px ${alpha(o.gold, 0.5)}` }} />
         <div style={{ position: 'absolute', left: '50%', top: '50%', translate: '-50% -50%', width: '30vmin', height: '30vmin', border: `2px solid ${o.gold}`, rotate: '45deg', boxShadow: `inset 0 0 0 5px ${alpha(o.deep, 0.6)}, inset 0 0 0 6px ${alpha(o.gold, 0.6)}` }} />
         <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 18, background: `linear-gradient(90deg, ${alpha('#000000', 0.45)}, transparent)` }} />
       </div>

@@ -20,7 +20,7 @@ const BUB = Array.from({ length: 28 }, (_, i) => [(i * 29) % 100, (i % 9) * 0.3,
 function Pop({ o, go, t, instant }) {
   return (
     <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${alpha(o.pink, 0.92)}, ${alpha(o.deep, 0.95)})`, clipPath: go ? 'inset(0 0 100% 0)' : 'inset(0 0 0 0)', transition: t('clip-path 1.8s cubic-bezier(.6,0,.3,1) .2s') }}>
-      <div style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '18%', background: `radial-gradient(circle at 10% 100%, #FFFFFF 0 18%, transparent 19%) 0 0 / 12vw 100%, linear-gradient(180deg, #FFF6F8, ${alpha('#FFF6F8', 0.6)})`, filter: 'blur(1px)' }} />
+      <div style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '30%', background: `radial-gradient(circle at 10% 100%, #FFFFFF 0 18%, transparent 19%) 0 0 / 12vw 100%, linear-gradient(180deg, #FFF6F8, ${alpha('#FFF6F8', 0.6)})`, filter: 'blur(1px)' }} />
       {!instant && BUB.map(([x, d, dx, s], i) => <span key={i} style={{ position: 'absolute', left: `${x}%`, bottom: '-4%', width: s, height: s, borderRadius: '50%', border: `1px solid ${alpha('#FFFFFF', 0.8)}`, background: alpha('#FFFFFF', 0.25), '--dx': `${dx}vw`, opacity: 0, animation: `lxq-bub ${3 + (i % 4) * 0.6}s ease-in ${d}s infinite` }} />)}
     </div>
   )

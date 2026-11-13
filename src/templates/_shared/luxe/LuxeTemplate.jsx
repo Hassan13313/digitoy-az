@@ -198,6 +198,11 @@ function Frame({ cfg, inv, weddingData, T, C, kicker, first, second, single, go,
   const custom = isCustomPhoto(inv.images, 'hero')
   const shade = cfg.shade || (light ? 0.85 : 0.72)
   const mono = cfg.mono ? ot.mono : null
+  /* Açıq şablonun tünd örtüyü (dəri albom, cəngəllik…): örtük üstündəki yazılar örtüyün öz rəngindədir
+     (overlay.ink/accent/mute), örtük çəkiləndə yumşaq keçidlə şablonun rənginə qayıdır */
+  const ov = gate && o.overlay && o.overlay.ink ? o.overlay : null
+  const TC = ov && !go ? { ...C, INK: ov.ink, ACCENT: ov.accent || C.ACCENT, MUTE: ov.mute || alpha(ov.ink, 0.78) } : C
+  const tx = ov ? t('color 1.2s ease .6s, text-shadow 1.2s ease .6s') : undefined
   return (
     <>
       <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: cfg.gateBg || `radial-gradient(120% 70% at 50% 45%, ${C.BG2}, ${C.BG} 75%)` }} />
@@ -234,19 +239,19 @@ function Frame({ cfg, inv, weddingData, T, C, kicker, first, second, single, go,
         }} />
       )}
 
-      <div style={{ position: 'absolute', left: 0, right: 0, top: cfg.namesTop || 'max(7svh, 44px)', textAlign: left ? 'left' : 'center', padding: '0 24px', color: C.INK }}>
+      <div style={{ position: 'absolute', left: 0, right: 0, top: cfg.namesTop || 'max(7svh, 44px)', textAlign: left ? 'left' : 'center', padding: '0 24px', color: TC.INK, transition: tx }}>
         {mono && mono.kind !== 'none' && (
           <div style={{ display: 'grid', placeItems: 'center', width: 52, height: 52, margin: left ? '0 0 12px' : '0 auto 12px', borderRadius: '50%', overflow: 'hidden', border: `1px solid ${alpha(C.ACCENT, 0.8)}`, boxShadow: `inset 0 0 0 3px ${alpha(C.BG, 0.4)}, inset 0 0 0 4px ${alpha(C.ACCENT, 0.4)}`, background: alpha(C.BG, 0.35), backdropFilter: 'blur(3px)', WebkitBackdropFilter: 'blur(3px)', fontFamily: cfg.fonts.caps || cfg.fonts.head, fontSize: 15, letterSpacing: '.08em', color: C.ACCENT }}>
             <MonoContent mono={mono} ornament={<span style={{ fontSize: 18 }}>{cfg.ornament || '✦'}</span>} imgStyle={{ borderRadius: '50%' }} />
           </div>
         )}
-        {kicker && <div style={{ fontFamily: cfg.fonts.caps || cfg.fonts.head, fontSize: 12.5, letterSpacing: '.3em', textTransform: 'uppercase', color: C.ACCENT }}>{kicker}</div>}
-        {gate && cfg.subSlot && ot.show(cfg.subSlot) && <div style={{ marginTop: 6, fontStyle: 'italic', fontSize: 14.5, color: C.MUTE }}>{ot.text(cfg.subSlot)}</div>}
-        <h1 style={{ margin: '8px 0 0', fontWeight: 400, color: C.INK, textShadow: light ? `0 1px 18px ${alpha(C.BG, 0.9)}` : `0 2px 24px ${alpha(C.BG, 0.75)}` }}>
-          <Names cfg={cfg} C={C} inv={inv} first={first} second={second} single={single} size={cfg.nameSize(longest, true)} big />
+        {kicker && <div style={{ fontFamily: cfg.fonts.caps || cfg.fonts.head, fontSize: 12.5, letterSpacing: '.3em', textTransform: 'uppercase', color: TC.ACCENT, transition: tx }}>{kicker}</div>}
+        {gate && cfg.subSlot && ot.show(cfg.subSlot) && <div style={{ marginTop: 6, fontStyle: 'italic', fontSize: 14.5, color: TC.MUTE, transition: tx }}>{ot.text(cfg.subSlot)}</div>}
+        <h1 style={{ margin: '8px 0 0', fontWeight: 400, color: TC.INK, transition: tx, textShadow: ov && !go ? `0 2px 18px ${alpha('#000000', 0.55)}` : light ? `0 1px 18px ${alpha(C.BG, 0.9)}` : `0 2px 24px ${alpha(C.BG, 0.75)}` }}>
+          <Names cfg={cfg} C={TC} inv={inv} first={first} second={second} single={single} size={cfg.nameSize(longest, true)} big />
         </h1>
         <div style={{ position: 'relative', marginTop: 10, minHeight: 22 }}>
-          {gate && ot.show('meta') && <div style={{ position: 'absolute', left: 0, right: 0, fontStyle: 'italic', fontSize: 15, color: alpha(C.INK, 0.85), opacity: go ? 0 : 1, transition: 'opacity .8s' }}>{ot.text('meta')}</div>}
+          {gate && ot.show('meta') && <div style={{ position: 'absolute', left: 0, right: 0, fontStyle: 'italic', fontSize: 15, color: alpha(TC.INK, 0.85), opacity: go ? 0 : 1, transition: 'opacity .8s' }}>{ot.text('meta')}</div>}
           {T.honour && <div style={{ fontStyle: 'italic', fontSize: 16.5, color: alpha(C.INK, 0.9), opacity: go ? 1 : 0, transition: t('opacity 1.6s 2.4s') }}>{T.honour}</div>}
         </div>
       </div>
@@ -268,7 +273,7 @@ function Frame({ cfg, inv, weddingData, T, C, kicker, first, second, single, go,
       {gate && (
         <div style={{ position: 'absolute', left: 0, right: 0, bottom: st.clip0 && o.kind !== 'split' && o.kind !== 'letterbox' ? 'max(3.5svh, 20px)' : 'max(7svh, 40px)', textAlign: 'center', opacity: go ? 0 : 1, transition: 'opacity .7s', pointerEvents: go ? 'none' : undefined }}>
           {ot.show('cta') && <span style={{ display: 'inline-flex', alignItems: 'center', minHeight: 50, padding: '0 32px', borderRadius: cfg.btnRadius ?? 999, border: `1px solid ${alpha(C.ACCENT, 0.75)}`, background: alpha(C.BG, 0.55), backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', fontFamily: cfg.fonts.caps || cfg.fonts.head, fontSize: 14.5, letterSpacing: '.12em', color: C.INK, animation: 'lx-pulse 2.8s ease-in-out infinite' }}>{ot.text('cta')}</span>}
-          {ot.show('hint') && <div style={{ marginTop: 8, fontStyle: 'italic', fontSize: 13.5, color: C.MUTE }}>{ot.text('hint')}</div>}
+          {ot.show('hint') && <div style={{ marginTop: 8, fontStyle: 'italic', fontSize: 13.5, color: TC.MUTE }}>{ot.text('hint')}</div>}
         </div>
       )}
     </>

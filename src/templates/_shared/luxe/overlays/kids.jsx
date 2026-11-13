@@ -60,7 +60,7 @@ function Launch({ o, go, t, instant }) {
 
 function Tent({ o, go, t, instant }) {
   const flap = (left) => ({
-    position: 'absolute', top: 0, bottom: 0, width: '51%', [left ? 'left' : 'right']: 0,
+    position: 'absolute', top: o.band ? '24svh' : 0, bottom: 0, width: '51%', [left ? 'left' : 'right']: 0,
     clipPath: left ? 'polygon(0 0, 100% 0, 100% 100%, 0 100%)' : undefined,
     transform: go ? `translateX(${left ? -100 : 100}%) skewX(${left ? 8 : -8}deg)` : 'none', transformOrigin: left ? '0 0' : '100% 0',
     transition: t('transform 2.3s cubic-bezier(.7,0,.25,1) .1s'),
@@ -70,14 +70,16 @@ function Tent({ o, go, t, instant }) {
   const bulbs = Array.from({ length: 11 }, (_, i) => i)
   return (
     <div aria-hidden="true" style={{ position: 'absolute', inset: 0 }}>
+      {/* afişa lövhəsi: ad zolaqlar üstündə itməsin (qırmızı yazı qırmızı zolaqda oxunmurdu) */}
+      {o.band && <div style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '24svh', background: `linear-gradient(180deg, ${o.cream}, ${alpha(o.cream, 0.96)})`, borderBottom: `3px solid ${o.gold}`, boxShadow: '0 6px 14px rgba(0,0,0,.2)', opacity: go ? 0 : 1, transition: t('opacity 1.1s ease 1.2s') }} />}
       <div style={flap(true)} />
       <div style={flap(false)} />
-      <svg viewBox="0 0 100 30" preserveAspectRatio="none" style={{ position: 'absolute', left: 0, right: 0, top: 0, width: '100%', height: '14svh', transform: go ? 'translateY(-110%)' : 'none', transition: t('transform 1.4s ease 1s') }}>
+      <svg viewBox="0 0 100 30" preserveAspectRatio="none" style={{ position: 'absolute', left: 0, right: 0, top: 0, width: '100%', height: '9svh', transform: go ? 'translateY(-110%)' : 'none', transition: t('transform 1.4s ease 1s') }}>
         <path d="M0 0H100V12Q75 30 50 14Q25 30 0 12Z" fill={o.red} />
         <path d="M0 12Q25 30 50 14Q75 30 100 12" fill="none" stroke={o.gold} strokeWidth=".8" />
       </svg>
       {bulbs.map((i) => (
-        <span key={i} style={{ position: 'absolute', top: `calc(${i % 2 ? 9.5 : 11.5}svh)`, left: `${4 + i * 9.2}%`, width: 9, height: 9, borderRadius: '50%', background: '#FFE8A3', boxShadow: '0 0 10px 3px rgba(255,214,120,.8)', opacity: go ? 0 : 1, animation: instant ? undefined : `lxk-blink 1.2s ease-in-out ${i * 0.12}s infinite`, transition: t('opacity .6s') }} />
+        <span key={i} style={{ position: 'absolute', top: `calc(${i % 2 ? 5.2 : 6.6}svh)`, left: `${4 + i * 9.2}%`, width: 9, height: 9, borderRadius: '50%', background: '#FFE8A3', boxShadow: '0 0 10px 3px rgba(255,214,120,.8)', opacity: go ? 0 : 1, animation: instant ? undefined : `lxk-blink 1.2s ease-in-out ${i * 0.12}s infinite`, transition: t('opacity .6s') }} />
       ))}
     </div>
   )

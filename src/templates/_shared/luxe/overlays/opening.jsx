@@ -38,7 +38,8 @@ function Ribbon({ o, go, t }) {
 function Awning({ o, go, t, instant }) {
   return (
     <div aria-hidden="true" style={{ position: 'absolute', inset: 0, transform: go ? 'translateY(-105%)' : 'none', transition: t('transform 1.8s cubic-bezier(.7,0,.25,1) .7s'), background: alpha(o.wall, 0.94) }}>
-      <svg viewBox="0 0 100 26" preserveAspectRatio="none" style={{ position: 'absolute', left: 0, right: 0, top: 0, width: '100%', height: '16svh' }}>
+      {/* tente yazının üstündə bitir (16svh «TƏNTƏNƏLİ AÇILIŞ»-ı örtürdü) */}
+      <svg viewBox="0 0 100 26" preserveAspectRatio="none" style={{ position: 'absolute', left: 0, right: 0, top: 0, width: '100%', height: '6svh' }}>
         <defs><pattern id="lxo2-aw" width="12.5" height="26" patternUnits="userSpaceOnUse"><rect width="6.25" height="26" fill={o.green} /><rect x="6.25" width="6.25" height="26" fill={o.cream} /></pattern></defs>
         <path d="M0 0H100V18Q93.75 26 87.5 18 81.25 26 75 18 68.75 26 62.5 18 56.25 26 50 18 43.75 26 37.5 18 31.25 26 25 18 18.75 26 12.5 18 6.25 26 0 18Z" fill="url(#lxo2-aw)" />
       </svg>
