@@ -1064,5 +1064,1653 @@
    "meta": "13 Mart 2027, Şənbə"
   },
   "story": "'football-star': { bg: 'linear-gradient(180deg,#EEF5EC,#DCEBD9)', surf: '#FFFFFF', ink: '#0C1B2C', mute: '#586878', hi: '#145A2B', line: '#0E2A47', paper: '#FFFFFF', paperInk: '#586878', head: F.oswald, body: F.interTight, cap: F.interTight, capItalic: false, titleFont: F.oswald, titleUpper: true, titleSize: 36, frame: 'polaroid', hero: 'circle', labels: 'num2', kpre: true, textItalic: false, dash: '0' },"
+ },
+ "fairy-tale": {
+  "theme": {
+   "primary": "#5E4A9C",
+   "accent": "#C8A15A",
+   "secondary": "#1F2A52",
+   "background": "#FBF5EA",
+   "surface": "#F3E7D1",
+   "text": "#2D2A4A",
+   "muted": "#625C7C",
+   "mapTint": "#5E4A9C",
+   "footerBg": "#1F2A52",
+   "footerText": "#F3E7D1",
+   "footerAccent": "#E2C27E",
+   "fonts": {
+    "heading": "'Cormorant Unicase', 'Cormorant Garamond', Georgia, serif",
+    "body": "'Bona Nova', 'Cormorant Garamond', Georgia, serif"
+   }
+  },
+  "fonts": "'fairy-tale':      ['cormorantUnicase', 'bonaNova'],",
+  "motion": "'fairy-tale':     'zoom',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ],
+   "hints": {
+    "kicker": "Kitabın üstündəki nağıl başlanğıcı"
+   }
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Nağılı aç",
+   "hint": "toxunun",
+   "kicker": "Biri var idi, biri yox idi…",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'fairy-tale':      { bg: 'linear-gradient(180deg,#FBF5EA,#F3E7D1)', surf: '#FFFFFF', ink: '#2D2A4A', mute: '#625C7C', hi: '#5E4A9C', line: '#C8A15A', paper: '#FFFFFF', paperInk: '#625C7C', head: F.bonaNova, body: F.bonaNova, cap: F.bonaNova, titleFont: F.cormorantUnicase, titleSize: 40, frame: 'mat', hero: 'arch' },"
+ },
+ "space-mission": {
+  "theme": {
+   "primary": "#FF8A3D",
+   "accent": "#FFC94D",
+   "secondary": "#5FE0B7",
+   "background": "#141A3C",
+   "surface": "#1C2350",
+   "text": "#F5F3FF",
+   "muted": "#AEB4D8",
+   "mapTint": "#3B2F7A",
+   "footerBg": "#0C1029",
+   "footerText": "#F5F3FF",
+   "footerAccent": "#FFC94D",
+   "fonts": {
+    "heading": "'Unbounded', 'Inter', system-ui, sans-serif",
+    "body": "'Exo 2', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'space-mission':   ['unbounded', 'tektur', 'exo2'],",
+  "motion": "'space-mission':  'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Raketi burax",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 · 03 · 2027"
+  },
+  "story": "'space-mission':   { bg: 'radial-gradient(130% 70% at 50% 0%,#2A2466,#141A3C 60%)', surf: '#1C2350', ink: '#F5F3FF', mute: '#AEB4D8', hi: '#FFC94D', line: '#5FE0B7', head: F.unbounded, body: F.exo2, cap: F.exo2, capItalic: false, titleFont: F.unbounded, titleUpper: false, titleSize: 30, frame: 'glow', hero: 'circle', labels: 'num2', kpre: true, textItalic: false, dash: '2 7' },"
+ },
+ "circus-show": {
+  "theme": {
+   "primary": "#C62537",
+   "accent": "#F2B23A",
+   "secondary": "#1E2A57",
+   "background": "#F7ECD6",
+   "surface": "#FFF8EA",
+   "text": "#2A1E1A",
+   "muted": "#6A5546",
+   "mapTint": "#1E2A57",
+   "footerBg": "#1E2A57",
+   "footerText": "#F7ECD6",
+   "footerAccent": "#F2B23A",
+   "fonts": {
+    "heading": "'Oi', 'Playfair Display', Georgia, serif",
+    "body": "'Podkova', 'Playfair Display', Georgia, serif"
+   }
+  },
+  "fonts": "'circus-show':     ['oi', 'podkova'],",
+  "motion": "'circus-show':    'zoom',",
+  "opening": {
+   "mono": null,
+   "slots": [
+    "kicker",
+    "sub",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ],
+   "hints": {
+    "sub": "Adın üstündəki lent"
+   }
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Şou başlasın!",
+   "hint": "toxunun",
+   "kicker": "Diqqət, diqqət!",
+   "sub": "Toy",
+   "meta": "13 Mart 2027, Şənbə · 19:00"
+  },
+  "story": "'circus-show':     { bg: '#F7ECD6', surf: '#FFF8EA', ink: '#2A1E1A', mute: '#6A5546', hi: '#C62537', line: '#1E2A57', paper: '#FFFFFF', paperInk: '#6A5546', head: F.podkova, body: F.podkova, cap: F.podkova, capItalic: false, titleFont: F.oi, titleSize: 34, frame: 'polaroid', hero: 'rect', labels: 'num', kpre: true, dash: '0', textItalic: false, tilt: true },"
+ },
+ "dino-adventure": {
+  "theme": {
+   "primary": "#3E7A3A",
+   "accent": "#E4683A",
+   "secondary": "#24452F",
+   "background": "#F5EBD3",
+   "surface": "#FBF4E2",
+   "text": "#2B2A20",
+   "muted": "#615C47",
+   "mapTint": "#3E7A3A",
+   "footerBg": "#24452F",
+   "footerText": "#F5EBD3",
+   "footerAccent": "#F2A65A",
+   "fonts": {
+    "heading": "'Shantell Sans', 'Inter', system-ui, sans-serif",
+    "body": "'Andika', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'dino-adventure':  ['shantell', 'andika'],",
+  "motion": "'dino-adventure': 'up',",
+  "opening": {
+   "mono": null,
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Yumurtanı çatlat",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 · 03 · 2027"
+  },
+  "story": "'dino-adventure':  { bg: '#F5EBD3', surf: '#FBF4E2', ink: '#2B2A20', mute: '#615C47', hi: '#3E7A3A', line: '#E4683A', paper: '#FFFFFF', paperInk: '#615C47', head: F.shantell, body: F.andika, cap: F.shantell, capItalic: false, titleFont: F.shantell, titleSize: 38, frame: 'polaroid', hero: 'arch', tilt: true, labels: 'num', textItalic: false },"
+ },
+ "balloon-party": {
+  "theme": {
+   "primary": "#C9577C",
+   "accent": "#D8A64A",
+   "secondary": "#7FC8B0",
+   "background": "#FFF8F3",
+   "surface": "#FFFFFF",
+   "text": "#4A3046",
+   "muted": "#7D6479",
+   "mapTint": "#C9577C",
+   "footerBg": "#4A3046",
+   "footerText": "#FFF1F4",
+   "footerAccent": "#F6C3CF",
+   "fonts": {
+    "heading": "'M PLUS Rounded 1c', 'Inter', system-ui, sans-serif",
+    "body": "'M PLUS Rounded 1c', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'balloon-party':   ['mplusRounded', 'pacifico'],",
+  "motion": "'balloon-party':  'down',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Şarları burax",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'balloon-party':   { bg: 'linear-gradient(170deg,#FFF8F3,#FBEAF0)', surf: '#FFFFFF', ink: '#4A3046', mute: '#7D6479', hi: '#C9577C', line: '#EF8FA8', paper: '#FFFFFF', paperInk: '#7D6479', head: F.mplusRounded, body: F.mplusRounded, cap: F.pacifico, capItalic: false, titleFont: F.pacifico, titleSize: 42, frame: 'polaroid', hero: 'circle', tilt: true, labels: 'num', textItalic: false },"
+ },
+ "pastel-bloom": {
+  "theme": {
+   "primary": "#D98E93",
+   "accent": "#A9C2A2",
+   "secondary": "#CDBFE6",
+   "background": "#FCF8F2",
+   "surface": "#FFFFFF",
+   "text": "#4E3F45",
+   "muted": "#85737A",
+   "mapTint": "#EFB8B8",
+   "footerBg": "#4E3F45",
+   "footerText": "#FCF8F2",
+   "footerAccent": "#EFB8B8",
+   "fonts": {
+    "heading": "'Cormorant Infant', 'Cormorant Garamond', Georgia, serif",
+    "body": "'Nunito Sans', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'pastel-bloom': ['cormorantInfant', 'nunitoSans', 'caveat'],",
+  "motion": "'pastel-bloom': 'zoom',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Çiçəkləri aç",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'pastel-bloom': { bg: 'linear-gradient(180deg,#FCF8F2,#F4EDE2)', surf: '#FFFFFF', ink: '#4E3F45', mute: '#85737A', hi: '#D98E93', line: '#A9C2A2', paper: '#FFFFFF', paperInk: '#85737A', head: F.cormorantInfant, body: F.nunitoSans, cap: F.caveat, capItalic: false, titleFont: F.cormorantInfant, titleSize: 44, frame: 'polaroid', hero: 'oval', tilt: true },"
+ },
+ "teddy-bear": {
+  "theme": {
+   "primary": "#8E6440",
+   "accent": "#BFD9EA",
+   "secondary": "#F2CFCF",
+   "background": "#FBF5EC",
+   "surface": "#FFFFFF",
+   "text": "#5B4332",
+   "muted": "#8F7765",
+   "mapTint": "#C99A6B",
+   "footerBg": "#5B4332",
+   "footerText": "#FBF5EC",
+   "footerAccent": "#E6C49E",
+   "fonts": {
+    "heading": "'Comfortaa', 'Nunito', 'Inter', system-ui, sans-serif",
+    "body": "'Nunito', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'teddy-bear': ['comfortaa', 'nunito'],",
+  "motion": "'teddy-bear': 'down',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Ayıcığı oyat",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'teddy-bear': { bg: 'linear-gradient(180deg,#FBF5EC,#F2E8DA)', surf: '#FFFFFF', ink: '#5B4332', mute: '#8F7765', hi: '#8E6440', line: '#7FAAC8', paper: '#FFFFFF', paperInk: '#8F7765', head: F.comfortaa, body: F.nunito, cap: F.nunito, capItalic: false, titleFont: F.comfortaa, titleSize: 32, frame: 'polaroid', hero: 'circle', tilt: true, labels: 'num', textItalic: false },"
+ },
+ "gender-reveal": {
+  "theme": {
+   "primary": "#33365C",
+   "accent": "#E9C46A",
+   "secondary": "#F49AC1",
+   "background": "#FFFBF7",
+   "surface": "#FFFFFF",
+   "text": "#33365C",
+   "muted": "#6E7091",
+   "mapTint": "#7DB9F0",
+   "footerBg": "#33365C",
+   "footerText": "#FFFBF7",
+   "footerAccent": "#E9C46A",
+   "fonts": {
+    "heading": "'Playpen Sans', 'Nunito', 'Inter', system-ui, sans-serif",
+    "body": "'Onest', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'gender-reveal': ['playpen', 'onest'],",
+  "motion": "'gender-reveal': 'left',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Hədiyyəni aç",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'gender-reveal': { bg: 'linear-gradient(180deg,#FFFBF7,#F4F0FA)', surf: '#FFFFFF', ink: '#33365C', mute: '#6E7091', hi: '#E0659C', line: '#3F8CD8', paper: '#FFFFFF', paperInk: '#6E7091', head: F.playpen, body: F.onest, cap: F.playpen, capItalic: false, titleFont: F.playpen, titleSize: 32, frame: 'polaroid', hero: 'circle', tilt: true, labels: 'num', textItalic: false },"
+ },
+ "stork-letter": {
+  "theme": {
+   "primary": "#A9473A",
+   "accent": "#7C97AE",
+   "secondary": "#C98B6B",
+   "background": "#F3EBDD",
+   "surface": "#FBF6EC",
+   "text": "#3E3A36",
+   "muted": "#776C61",
+   "mapTint": "#9A7B57",
+   "footerBg": "#4E6A83",
+   "footerText": "#FBF6EC",
+   "footerAccent": "#E6D9C3",
+   "fonts": {
+    "heading": "'Old Standard TT', 'Playfair Display', Georgia, serif",
+    "body": "'Vollkorn', 'Playfair Display', Georgia, serif"
+   }
+  },
+  "fonts": "'stork-letter': ['oldStandard', 'vollkorn', 'greatVibes'],",
+  "motion": "'stork-letter': 'right',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Möhürü aç",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'stork-letter': { bg: 'linear-gradient(180deg,#F3EBDD,#E6D9C3)', surf: '#FBF6EC', ink: '#3E3A36', mute: '#776C61', hi: '#A9473A', line: '#7C97AE', paper: '#FBF6EC', paperInk: '#776C61', head: F.oldStandard, body: F.vollkorn, cap: F.vibes, script: true, titleFont: F.vibes, titleSize: 50, frame: 'mat', hero: 'rect', tilt: true },"
+ },
+ "baby-mobile": {
+  "theme": {
+   "primary": "#2E3A63",
+   "accent": "#E9B949",
+   "secondary": "#F2B5A7",
+   "background": "#F8F1E6",
+   "surface": "#FFFFFF",
+   "text": "#2A2F4A",
+   "muted": "#6B6F88",
+   "mapTint": "#41508A",
+   "footerBg": "#222B4D",
+   "footerText": "#FFF4DE",
+   "footerAccent": "#E9B949",
+   "fonts": {
+    "heading": "'Ysabeau Infant', 'Nunito', 'Inter', system-ui, sans-serif",
+    "body": "'Mulish', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'baby-mobile': ['ysabeauInfant', 'mulish'],",
+  "motion": "'baby-mobile': 'down',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Mobili fırlat",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'baby-mobile': { bg: 'linear-gradient(180deg,#F8F1E6,#EDE4D3)', surf: '#FFFFFF', ink: '#2A2F4A', mute: '#6B6F88', hi: '#2E3A63', line: '#E9B949', paper: '#FFFFFF', paperInk: '#6B6F88', head: F.ysabeauInfant, body: F.mulish, cap: F.ysabeauInfant, titleFont: F.ysabeauInfant, titleSize: 38, frame: 'polaroid', hero: 'circle', tilt: true, textItalic: false },"
+ },
+ "gala-night": {
+  "theme": {
+   "primary": "#D4AF61",
+   "accent": "#F1DCA4",
+   "secondary": "#9C7C34",
+   "background": "#0B0A09",
+   "surface": "#151311",
+   "text": "#F5EFE3",
+   "muted": "#A99F8E",
+   "mapTint": "#9C7C34",
+   "footerBg": "#060505",
+   "footerText": "#F5EFE3",
+   "footerAccent": "#D4AF61",
+   "fonts": {
+    "heading": "'Playfair Display', Georgia, serif",
+    "body": "'Montserrat', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'gala-night': ['playfair', 'montserrat'],",
+  "motion": "'gala-night': 'zoom',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Qədəhləri doldur",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'gala-night': { bg: 'linear-gradient(180deg,#151311,#0B0A09)', surf: '#1E1B18', ink: '#F5EFE3', mute: '#A99F8E', hi: '#F1DCA4', line: '#D4AF61', head: F.playfair, body: F.montserrat, cap: F.playfair, titleFont: F.playfair, titleItalic: true, titleSize: 40, frame: 'glow', hero: 'rect', labels: 'num2', kpre: true },"
+ },
+ "keynote": {
+  "theme": {
+   "primary": "#3D7BFF",
+   "accent": "#22D3EE",
+   "secondary": "#8B7BFF",
+   "background": "#060A14",
+   "surface": "#111A30",
+   "text": "#F3F6FC",
+   "muted": "#8A97B4",
+   "mapTint": "#3D7BFF",
+   "footerBg": "#04070F",
+   "footerText": "#F3F6FC",
+   "footerAccent": "#22D3EE",
+   "fonts": {
+    "heading": "'Geologica', 'Inter', system-ui, sans-serif",
+    "body": "'Onest', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'keynote': ['geologica', 'onest', 'jetbrains'],",
+  "motion": "'keynote': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Ekranı yandır",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'keynote': { bg: 'linear-gradient(180deg,#0C1324,#060A14)', surf: '#111A30', ink: '#F3F6FC', mute: '#8A97B4', hi: '#22D3EE', line: '#3D7BFF', head: F.geologica, body: F.onest, cap: F.mono, capItalic: false, titleFont: F.geologica, titleSize: 34, frame: 'glass', hero: 'rounded', labels: 'num2', kpre: true, textItalic: false, dash: '2 6' },"
+ },
+ "award-night": {
+  "theme": {
+   "primary": "#E1B54E",
+   "accent": "#F6DD95",
+   "secondary": "#8A1426",
+   "background": "#2A060E",
+   "surface": "#4E0D1A",
+   "text": "#F7EEDC",
+   "muted": "#CDB1A8",
+   "mapTint": "#8A1426",
+   "footerBg": "#1B0409",
+   "footerText": "#F7EEDC",
+   "footerAccent": "#E1B54E",
+   "fonts": {
+    "heading": "'Cormorant SC', 'Cormorant Garamond', Georgia, serif",
+    "body": "'Raleway', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'award-night': ['cormorantSC', 'raleway'],",
+  "motion": "'award-night': 'left',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Mükafatı aç",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'award-night': { bg: 'linear-gradient(180deg,#4E0D1A,#2A060E)', surf: '#3A0912', ink: '#F7EEDC', mute: '#CDB1A8', hi: '#F6DD95', line: '#E1B54E', head: F.cormorantSC, body: F.raleway, cap: F.cormorantSC, titleFont: F.cormorantSC, titleSize: 36, frame: 'heraldic', hero: 'arch', labels: 'roman' },"
+ },
+ "business-card": {
+  "theme": {
+   "primary": "#2438E8",
+   "accent": "#121212",
+   "secondary": "#76756F",
+   "background": "#F4F3EF",
+   "surface": "#FFFFFF",
+   "text": "#121212",
+   "muted": "#76756F",
+   "mapTint": "#2438E8",
+   "footerBg": "#121212",
+   "footerText": "#F4F3EF",
+   "footerAccent": "#2438E8",
+   "fonts": {
+    "heading": "'Inter Tight', 'Inter', system-ui, sans-serif",
+    "body": "'Inter Tight', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'business-card': ['interTightBold', 'jetbrains'],",
+  "motion": "'business-card': 'right',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Kartı çevir",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'business-card': { bg: '#F4F3EF', surf: '#FFFFFF', ink: '#121212', mute: '#76756F', hi: '#2438E8', line: '#121212', paper: '#FFFFFF', paperInk: '#76756F', head: F.interTightBold, body: F.interTight, cap: F.mono, capItalic: false, titleFont: F.interTightBold, titleSize: 36, frame: 'minimal', hero: 'rect', labels: 'num2', dash: '0', textItalic: false },"
+ },
+ "neon-party": {
+  "theme": {
+   "primary": "#FF4FD8",
+   "accent": "#3CF2FF",
+   "secondary": "#9B5CFF",
+   "background": "#0D0A15",
+   "surface": "#1B1428",
+   "text": "#F6F0FF",
+   "muted": "#A99CC4",
+   "mapTint": "#9B5CFF",
+   "footerBg": "#07050C",
+   "footerText": "#F6F0FF",
+   "footerAccent": "#3CF2FF",
+   "fonts": {
+    "heading": "'Jura', 'Inter', system-ui, sans-serif",
+    "body": "'Jura', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'neon-party': ['lobster', 'jura'],",
+  "motion": "'neon-party': 'down',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "İşıqları yandır",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'neon-party': { bg: 'linear-gradient(180deg,#1B1428,#0D0A15)', surf: '#1B1428', ink: '#F6F0FF', mute: '#A99CC4', hi: '#FF4FD8', line: '#3CF2FF', head: F.jura, body: F.jura, cap: F.lobster, capItalic: false, titleFont: F.lobster, titleSize: 44, frame: 'glow', hero: 'circle', textItalic: false },"
+ },
+ "silver-locket": {
+  "theme": {
+   "primary": "#B87B80",
+   "accent": "#C9CED6",
+   "secondary": "#D9A3A6",
+   "background": "#F4F1EC",
+   "surface": "#FFFFFF",
+   "text": "#232831",
+   "muted": "#7C8592",
+   "mapTint": "#D9A3A6",
+   "footerBg": "#141923",
+   "footerText": "#F4F1EC",
+   "footerAccent": "#C9CED6",
+   "fonts": {
+    "heading": "'Cormorant Garamond', Georgia, serif",
+    "body": "'Mulish', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'silver-locket': ['mulish'],",
+  "motion": "'silver-locket': 'down',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Medalyonu aç",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'silver-locket': { bg: 'linear-gradient(180deg,#1E2531,#141923)', surf: '#1E2531', ink: '#F4F1EC', mute: '#A9B0BA', hi: '#D9A3A6', line: '#C9CED6', head: F.cormorant, body: F.mulish, cap: F.cormorant, titleFont: F.cormorant, titleItalic: true, titleSize: 42, frame: 'glow', hero: 'oval', textItalic: false },"
+ },
+ "golden-jubilee": {
+  "theme": {
+   "primary": "#5A1E1B",
+   "accent": "#D4AF5A",
+   "secondary": "#9C7A2E",
+   "background": "#F7F0E1",
+   "surface": "#FFFDF7",
+   "text": "#3B2A1C",
+   "muted": "#86735A",
+   "mapTint": "#D4AF5A",
+   "footerBg": "#33100E",
+   "footerText": "#F6EAD0",
+   "footerAccent": "#D4AF5A",
+   "fonts": {
+    "heading": "'Vollkorn SC', 'Vollkorn', Georgia, serif",
+    "body": "'Brygada 1918', 'Vollkorn', Georgia, serif"
+   }
+  },
+  "fonts": "'golden-jubilee': ['vollkornSC', 'brygada'],",
+  "motion": "'golden-jubilee': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Albomu aç",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'golden-jubilee': { bg: 'linear-gradient(180deg,#5A1E1B,#33100E)', surf: '#4A1816', ink: '#F6EAD0', mute: '#CDB79A', hi: '#F3DE9C', line: '#D4AF5A', head: F.brygada, body: F.brygada, cap: F.brygada, titleFont: F.vollkornSC, titleSize: 34, frame: 'mat', hero: 'rect', labels: 'roman' },"
+ },
+ "first-paper": {
+  "theme": {
+   "primary": "#3561C9",
+   "accent": "#A9C0EE",
+   "secondary": "#24449A",
+   "background": "#F8F6F1",
+   "surface": "#FFFFFF",
+   "text": "#232B4A",
+   "muted": "#737A8A",
+   "mapTint": "#A9C0EE",
+   "footerBg": "#232B4A",
+   "footerText": "#FFFFFF",
+   "footerAccent": "#A9C0EE",
+   "fonts": {
+    "heading": "'Piazzolla', 'Literata', Georgia, serif",
+    "body": "'Didact Gothic', 'Nunito Sans', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'first-paper': ['piazzolla', 'didact'],",
+  "motion": "'first-paper': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Vərəqi aç",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'first-paper': { bg: '#F8F6F1', surf: '#FFFFFF', ink: '#232B4A', mute: '#737A8A', hi: '#3561C9', line: '#A9C0EE', paper: '#FFFFFF', paperInk: '#737A8A', head: F.piazzolla, body: F.didact, cap: F.piazzolla, titleFont: F.piazzolla, titleItalic: true, titleSize: 40, frame: 'clipping', hero: 'rect', labels: 'num', textItalic: false },"
+ },
+ "retro-polaroid": {
+  "theme": {
+   "primary": "#E07A2E",
+   "accent": "#E2B33C",
+   "secondary": "#3E7C74",
+   "background": "#F4EAD5",
+   "surface": "#FFFDF8",
+   "text": "#3B2418",
+   "muted": "#8A6E58",
+   "mapTint": "#E2B33C",
+   "footerBg": "#3B2418",
+   "footerText": "#F4EAD5",
+   "footerAccent": "#E2B33C",
+   "fonts": {
+    "heading": "'Marmelad', 'Comfortaa', system-ui, sans-serif",
+    "body": "'Bellota Text', 'Nunito', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'retro-polaroid': ['marmelad', 'pangolin', 'bellotaText'],",
+  "motion": "'retro-polaroid': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Şəkil çək",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'retro-polaroid': { bg: '#F4EAD5', surf: '#FFFDF8', ink: '#3B2418', mute: '#8A6E58', hi: '#E07A2E', line: '#E2B33C', paper: '#FFFDF8', paperInk: '#8A6E58', head: F.marmelad, body: F.bellotaText, cap: F.pangolin, capItalic: false, titleFont: F.marmelad, titleSize: 40, frame: 'polaroid', hero: 'rect', labels: 'num', tilt: true, textItalic: false },"
+ },
+ "love-letters": {
+  "theme": {
+   "primary": "#2F3550",
+   "accent": "#C98B8B",
+   "secondary": "#9C4A4A",
+   "background": "#EFE6D8",
+   "surface": "#FBF6EC",
+   "text": "#2F3550",
+   "muted": "#7D7468",
+   "mapTint": "#C98B8B",
+   "footerBg": "#262B42",
+   "footerText": "#EFE6D8",
+   "footerAccent": "#C98B8B",
+   "fonts": {
+    "heading": "'Great Vibes', 'Cormorant Garamond', Georgia, cursive",
+    "body": "'EB Garamond', 'Cormorant Garamond', Georgia, serif"
+   }
+  },
+  "fonts": "'love-letters': ['greatVibes', 'ebGaramond'],",
+  "motion": "'love-letters': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Məktubları aç",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'love-letters': { bg: '#EFE6D8', surf: '#FBF6EC', ink: '#2F3550', mute: '#7D7468', hi: '#9C4A4A', line: '#C98B8B', paper: '#FBF6EC', paperInk: '#7D7468', head: F.ebGaramond, body: F.ebGaramond, cap: F.ebGaramond, titleFont: F.greatVibes, titleSize: 54, frame: 'mat', hero: 'oval', labels: 'roman' },"
+ },
+ "caps-toss": {
+  "theme": {
+   "primary": "#14213D",
+   "accent": "#E5B94E",
+   "secondary": "#B38A2C",
+   "background": "#F7F4EC",
+   "surface": "#FFFFFF",
+   "text": "#14213D",
+   "muted": "#6B7590",
+   "mapTint": "#1F3160",
+   "footerBg": "#0C1529",
+   "footerText": "#F7F4EC",
+   "footerAccent": "#E5B94E",
+   "fonts": {
+    "heading": "'Alegreya SC', 'Alegreya', Georgia, serif",
+    "body": "'Source Serif 4', 'Cormorant Garamond', Georgia, serif"
+   }
+  },
+  "fonts": "'caps-toss': ['alegreyaSC', 'sourceSerif'],",
+  "motion": "'caps-toss': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Papaqları at",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'caps-toss': { bg: 'linear-gradient(180deg,#1F3160,#14213D)', surf: '#1F3160', ink: '#F7F4EC', mute: '#AEB6CC', hi: '#F6DC92', line: '#E5B94E', head: F.sourceSerif, body: F.sourceSerif, cap: F.alegreyaSC, capItalic: false, titleFont: F.alegreyaSC, titleSize: 36, frame: 'mat', hero: 'arch', labels: 'num' },"
+ },
+ "yearbook": {
+  "theme": {
+   "primary": "#1F4FD1",
+   "accent": "#FFC629",
+   "secondary": "#E63946",
+   "background": "#FFFFFF",
+   "surface": "#F7F8FB",
+   "text": "#14182B",
+   "muted": "#69708A",
+   "mapTint": "#1F4FD1",
+   "footerBg": "#0F2566",
+   "footerText": "#FFFFFF",
+   "footerAccent": "#FFC629",
+   "fonts": {
+    "heading": "'Fira Sans Extra Condensed', 'Oswald', system-ui, sans-serif",
+    "body": "'Fira Sans Condensed', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'yearbook': ['firaXC', 'firaC', 'comforterBrush'],",
+  "motion": "'yearbook': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Albomu imzala",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'yearbook': { bg: '#FFFFFF', surf: '#F7F8FB', ink: '#14182B', mute: '#69708A', hi: '#1F4FD1', line: '#FFC629', paper: '#FFFFFF', paperInk: '#69708A', head: F.firaXC, body: F.firaC, cap: F.comforterBrush, capItalic: false, titleFont: F.firaXC, titleUpper: true, titleSize: 44, frame: 'polaroid', hero: 'rect', labels: 'num2', tilt: true, textItalic: false },"
+ },
+ "last-bell": {
+  "theme": {
+   "primary": "#C8102E",
+   "accent": "#E2BD6A",
+   "secondary": "#1C2A4A",
+   "background": "#FFFFFF",
+   "surface": "#F5F6F9",
+   "text": "#1C2A4A",
+   "muted": "#6A7387",
+   "mapTint": "#C8102E",
+   "footerBg": "#1C2A4A",
+   "footerText": "#FFFFFF",
+   "footerAccent": "#E2BD6A",
+   "fonts": {
+    "heading": "'Roboto Serif', 'Georgia', serif",
+    "body": "'Noto Sans', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'last-bell': ['robotoSerif', 'notoSans', 'comforter'],",
+  "motion": "'last-bell': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Zəngi çal",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'last-bell': { bg: '#FFFFFF', surf: '#F5F6F9', ink: '#1C2A4A', mute: '#6A7387', hi: '#C8102E', line: '#E2BD6A', paper: '#FFFFFF', paperInk: '#6A7387', head: F.robotoSerif, body: F.notoSans, cap: F.comforter, capItalic: false, titleFont: F.robotoSerif, titleSize: 36, frame: 'clipping', hero: 'rounded', labels: 'num', textItalic: false },"
+ },
+ "chalkboard": {
+  "theme": {
+   "primary": "#26453D",
+   "accent": "#F5DE7A",
+   "secondary": "#9A6A42",
+   "background": "#F6F2E8",
+   "surface": "#FFFFFF",
+   "text": "#26453D",
+   "muted": "#6F7A72",
+   "mapTint": "#26453D",
+   "footerBg": "#1A322C",
+   "footerText": "#F3F0E6",
+   "footerAccent": "#F5DE7A",
+   "fonts": {
+    "heading": "'Amatic SC', 'Caveat', cursive",
+    "body": "'Ysabeau Office', 'Nunito Sans', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'chalkboard': ['amatic', 'ysabeauOffice'],",
+  "motion": "'chalkboard': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Lövhəyə yaz",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'chalkboard': { bg: 'linear-gradient(180deg,#2A4B42,#22403A)', surf: '#1A322C', ink: '#F3F0E6', mute: 'rgba(243,240,230,.65)', hi: '#F5DE7A', line: '#F3A9B9', head: F.ysabeauOffice, body: F.ysabeauOffice, cap: F.amatic, capItalic: false, titleFont: F.amatic, titleSize: 56, frame: 'minimal', hero: 'rect', labels: 'num', dash: '6 4', textItalic: false },"
+ },
+ "paper-plane": {
+  "theme": {
+   "primary": "#2F6FDB",
+   "accent": "#E0483E",
+   "secondary": "#FFC857",
+   "background": "#FFFFFF",
+   "surface": "#EAF6FD",
+   "text": "#1B2D4F",
+   "muted": "#5E7290",
+   "mapTint": "#BFE0F5",
+   "footerBg": "#111E36",
+   "footerText": "#FFFFFF",
+   "footerAccent": "#FFC857",
+   "fonts": {
+    "heading": "'Ysabeau', 'Nunito Sans', system-ui, sans-serif",
+    "body": "'Ysabeau Office', 'Nunito Sans', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'paper-plane': ['ysabeau', 'ysabeauOffice', 'martianMono'],",
+  "motion": "'paper-plane': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Təyyarəni burax",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'paper-plane': { bg: 'linear-gradient(180deg,#CFE8F8,#FFFFFF)', surf: '#FFFFFF', ink: '#1B2D4F', mute: '#5E7290', hi: '#2F6FDB', line: '#E0483E', paper: '#FFFFFF', paperInk: '#5E7290', head: F.ysabeau, body: F.ysabeauOffice, cap: F.martianMono, capItalic: false, titleFont: F.ysabeau, titleSize: 38, frame: 'ticket', hero: 'rounded', labels: 'num2', textItalic: false },"
+ },
+ "ribbon-cut": {
+  "theme": {
+   "primary": "#0F3D30",
+   "accent": "#D8B25A",
+   "secondary": "#C21F32",
+   "background": "#F7F2E6",
+   "surface": "#FFFFFF",
+   "text": "#13281F",
+   "muted": "#6E7C74",
+   "mapTint": "#175443",
+   "footerBg": "#09281F",
+   "footerText": "#F7F2E6",
+   "footerAccent": "#D8B25A",
+   "fonts": {
+    "heading": "'Bona Nova SC', 'Bona Nova', Georgia, serif",
+    "body": "'Roboto Condensed', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'ribbon-cut': ['bonaNovaSC', 'robotoCondensed'],",
+  "motion": "'ribbon-cut': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Lenti kəs",
+   "hint": "toxunun",
+   "kicker": "Təntənəli açılış",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'ribbon-cut': { bg: 'linear-gradient(180deg,#175443,#0F3D30)', surf: '#0B3127', ink: '#F7F2E6', mute: '#B9C6BE', hi: '#F5DE9C', line: '#D8B25A', head: F.robotoCondensed, body: F.robotoCondensed, cap: F.bonaNovaSC, capItalic: false, titleFont: F.bonaNovaSC, titleSize: 36, frame: 'mat', hero: 'arch', labels: 'roman', textItalic: false },"
+ },
+ "bistro-sign": {
+  "theme": {
+   "primary": "#1F4D3A",
+   "accent": "#C9A04A",
+   "secondary": "#7A1F2B",
+   "background": "#F4ECDC",
+   "surface": "#FBF6EC",
+   "text": "#1F2A24",
+   "muted": "#7A786C",
+   "mapTint": "#2C6650",
+   "footerBg": "#143628",
+   "footerText": "#F4ECDC",
+   "footerAccent": "#C9A04A",
+   "fonts": {
+    "heading": "'Playfair Display', Georgia, serif",
+    "body": "'Noto Sans', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'bistro-sign': ['playfair', 'notoSans', 'ibmPlexMono'],",
+  "motion": "'bistro-sign': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Lövhəni çevir",
+   "hint": "toxunun",
+   "kicker": "Təntənəli açılış",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'bistro-sign': { bg: '#F4ECDC', surf: '#FBF6EC', ink: '#1F2A24', mute: '#7A786C', hi: '#7A1F2B', line: '#C9A04A', paper: '#FBF6EC', paperInk: '#7A786C', head: F.playfair, body: F.notoSans, cap: F.playfair, capItalic: true, titleFont: F.playfair, titleItalic: true, titleSize: 40, frame: 'mat', hero: 'arch', labels: 'num', textItalic: false },"
+ },
+ "roller-shutter": {
+  "theme": {
+   "primary": "#1D2023",
+   "accent": "#FFD23F",
+   "secondary": "#A7AFB7",
+   "background": "#ECEDEE",
+   "surface": "#FFFFFF",
+   "text": "#1D2023",
+   "muted": "#6C737B",
+   "mapTint": "#A7AFB7",
+   "footerBg": "#141618",
+   "footerText": "#F7F8F9",
+   "footerAccent": "#FFD23F",
+   "fonts": {
+    "heading": "'Alumni Sans', 'Oswald', system-ui, sans-serif",
+    "body": "'Roboto Condensed', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'roller-shutter': ['alumniSans', 'robotoCondensed', 'ibmPlexMono'],",
+  "motion": "'roller-shutter': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Jalüzü qaldır",
+   "hint": "toxunun",
+   "kicker": "Təntənəli açılış",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'roller-shutter': { bg: 'linear-gradient(180deg,#2A2E33,#1D2023)', surf: '#141618', ink: '#F7F8F9', mute: '#A7AFB7', hi: '#FFD23F', line: '#FFD23F', head: F.robotoCondensed, body: F.robotoCondensed, cap: F.ibmPlexMono, capItalic: false, titleFont: F.alumniSans, titleUpper: true, titleSize: 52, frame: 'minimal', hero: 'rect', labels: 'num2', dash: '0', textItalic: false },"
+ },
+ "unboxing": {
+  "theme": {
+   "primary": "#7C5CFF",
+   "accent": "#B9A8FF",
+   "secondary": "#151530",
+   "background": "#F4F3FA",
+   "surface": "#FFFFFF",
+   "text": "#151530",
+   "muted": "#7E809A",
+   "mapTint": "#7C5CFF",
+   "footerBg": "#0A0A18",
+   "footerText": "#F4F3FA",
+   "footerAccent": "#B9A8FF",
+   "fonts": {
+    "heading": "'Noto Sans Display', 'Inter', system-ui, sans-serif",
+    "body": "'Noto Sans Display', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'unboxing': ['notoSansDisplay'],",
+  "motion": "'unboxing': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Qutunu aç",
+   "hint": "toxunun",
+   "kicker": "Təqdimat",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'unboxing': { bg: 'linear-gradient(180deg,#17163A,#101024)', surf: '#1B1A3A', ink: '#F4F3FA', mute: '#A9AAC4', hi: '#B9A8FF', line: '#7C5CFF', head: F.notoSansDisplay, body: F.notoSansDisplay, cap: F.notoSansDisplay, capItalic: false, titleFont: F.notoSansDisplay, titleSize: 38, frame: 'glass', hero: 'rounded', labels: 'num2', textItalic: false },"
+ },
+ "gallery-unveil": {
+  "theme": {
+   "primary": "#5A1F3A",
+   "accent": "#C8A55A",
+   "secondary": "#171717",
+   "background": "#EEEDEA",
+   "surface": "#FFFFFF",
+   "text": "#171717",
+   "muted": "#77746E",
+   "mapTint": "#5A1F3A",
+   "footerBg": "#1C1B1A",
+   "footerText": "#F7F6F3",
+   "footerAccent": "#C8A55A",
+   "fonts": {
+    "heading": "'IBM Plex Serif', Georgia, serif",
+    "body": "'IBM Plex Sans', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'gallery-unveil': ['ibmPlexSerif', 'ibmPlexSans'],",
+  "motion": "'gallery-unveil': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Örtüyü götür",
+   "hint": "toxunun",
+   "kicker": "Sərginin açılışı",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'gallery-unveil': { bg: '#EEEDEA', surf: '#FFFFFF', ink: '#171717', mute: '#77746E', hi: '#5A1F3A', line: '#C8A55A', paper: '#FFFFFF', paperInk: '#77746E', head: F.ibmPlexSerif, body: F.ibmPlexSans, cap: F.ibmPlexSans, capItalic: false, titleFont: F.ibmPlexSerif, titleSize: 38, frame: 'mat', hero: 'rect', labels: 'num', textItalic: true },"
+ },
+ "novruz-bonfire": {
+  "theme": {
+   "primary": "#D93B2B",
+   "accent": "#FFC23D",
+   "secondary": "#FF7A1A",
+   "background": "#F6ECDA",
+   "surface": "#FFFCF5",
+   "text": "#2A1A14",
+   "muted": "#85705F",
+   "mapTint": "#FF7A1A",
+   "footerBg": "#100A20",
+   "footerText": "#FBF3E4",
+   "footerAccent": "#FFC23D",
+   "fonts": {
+    "heading": "'Roboto Slab', 'Georgia', serif",
+    "body": "'Noto Sans', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'novruz-bonfire': ['robotoSlab', 'notoSans'],",
+  "motion": "'novruz-bonfire': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Tonqalı yandır",
+   "hint": "toxunun",
+   "kicker": "Novruz bayramı",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'novruz-bonfire': { bg: 'linear-gradient(180deg,#1A1230,#241838)', surf: '#2A1E4A', ink: '#FBF3E4', mute: '#C9B8A6', hi: '#FFC23D', line: '#FF7A1A', head: F.notoSans, body: F.notoSans, cap: F.robotoSlab, capItalic: false, titleFont: F.robotoSlab, titleSize: 36, frame: 'glow', hero: 'arch', labels: 'num', textItalic: false },"
+ },
+ "novruz-semeni": {
+  "theme": {
+   "primary": "#3F8F2F",
+   "accent": "#D7263D",
+   "secondary": "#B8743A",
+   "background": "#FFF8EA",
+   "surface": "#FFFFFF",
+   "text": "#24331C",
+   "muted": "#6F7A62",
+   "mapTint": "#8CCB4A",
+   "footerBg": "#2B6A1F",
+   "footerText": "#FFF8EA",
+   "footerAccent": "#C9EA8E",
+   "fonts": {
+    "heading": "'Bellota', 'Comfortaa', system-ui, sans-serif",
+    "body": "'Bellota Text', 'Nunito', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'novruz-semeni': ['bellota', 'bellotaText'],",
+  "motion": "'novruz-semeni': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Səmənini göyərt",
+   "hint": "toxunun",
+   "kicker": "Novruz bayramı",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'novruz-semeni': { bg: '#FFF8EA', surf: '#FFFFFF', ink: '#24331C', mute: '#6F7A62', hi: '#D7263D', line: '#8CCB4A', paper: '#FFFFFF', paperInk: '#6F7A62', head: F.bellota, body: F.bellotaText, cap: F.bellota, capItalic: false, titleFont: F.bellota, titleSize: 40, frame: 'polaroid', hero: 'oval', labels: 'num', textItalic: false },"
+ },
+ "midnight-clock": {
+  "theme": {
+   "primary": "#0E1430",
+   "accent": "#E8C46A",
+   "secondary": "#B08F3A",
+   "background": "#F7F4EC",
+   "surface": "#FFFFFF",
+   "text": "#151B38",
+   "muted": "#7A809A",
+   "mapTint": "#1A2350",
+   "footerBg": "#080C20",
+   "footerText": "#F6E7C1",
+   "footerAccent": "#E8C46A",
+   "fonts": {
+    "heading": "'Cormorant', 'Cormorant Garamond', Georgia, serif",
+    "body": "'Ysabeau Office', 'Nunito Sans', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'midnight-clock': ['cormorantFull', 'ysabeauOffice'],",
+  "motion": "'midnight-clock': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Saatı 12-yə çatdır",
+   "hint": "toxunun",
+   "kicker": "Yeni iliniz mübarək",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'midnight-clock': { bg: 'linear-gradient(180deg,#1A2350,#0E1430)', surf: '#1A2350', ink: '#F6E7C1', mute: '#B9BCCB', hi: '#F8E6B0', line: '#E8C46A', head: F.ysabeauOffice, body: F.ysabeauOffice, cap: F.cormorantFull, capItalic: true, titleFont: F.cormorantFull, titleSize: 42, frame: 'glow', hero: 'circle', labels: 'roman' },"
+ },
+ "snow-globe": {
+  "theme": {
+   "primary": "#C8303C",
+   "accent": "#E2B65C",
+   "secondary": "#2E6B4F",
+   "background": "#F2F7FB",
+   "surface": "#FFFFFF",
+   "text": "#1B2B40",
+   "muted": "#6B7A8E",
+   "mapTint": "#DCEBF7",
+   "footerBg": "#142842",
+   "footerText": "#FFFFFF",
+   "footerAccent": "#E2B65C",
+   "fonts": {
+    "heading": "'Pacifico', 'Great Vibes', 'Cormorant Garamond', cursive",
+    "body": "'Nunito', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'snow-globe': ['pacifico', 'nunito'],",
+  "motion": "'snow-globe': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Kürəni silkələ",
+   "hint": "toxunun",
+   "kicker": "Yeni iliniz mübarək",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'snow-globe': { bg: 'linear-gradient(180deg,#2C4F7C,#1E3A5F)', surf: '#1E3A5F', ink: '#FFFFFF', mute: '#C4D6EA', hi: '#E2B65C', line: '#DCEBF7', head: F.nunito, body: F.nunito, cap: F.pacifico, capItalic: false, titleFont: F.pacifico, titleSize: 38, frame: 'polaroid', hero: 'circle', labels: 'num', textItalic: false },"
+ },
+ "masquerade-ball": {
+  "theme": {
+   "primary": "#3A1030",
+   "accent": "#D9B25F",
+   "secondary": "#9E1B32",
+   "background": "#F5EEE3",
+   "surface": "#FFFDF8",
+   "text": "#1A1218",
+   "muted": "#7B6E76",
+   "mapTint": "#5A1C4A",
+   "footerBg": "#0D0A10",
+   "footerText": "#F5EEE3",
+   "footerAccent": "#D9B25F",
+   "fonts": {
+    "heading": "'Playfair Display SC', 'Playfair Display', Georgia, serif",
+    "body": "'Cormorant Garamond', Georgia, serif"
+   }
+  },
+  "fonts": "'masquerade-ball': ['playfairSC'],",
+  "motion": "'masquerade-ball': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Maskanı tax",
+   "hint": "toxunun",
+   "kicker": "Maskarad balı",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'masquerade-ball': { bg: 'linear-gradient(180deg,#1A0E18,#0D0A10)', surf: '#22091C', ink: '#F5EEE3', mute: '#C2B1BC', hi: '#F4DC9C', line: '#D9B25F', head: F.cormorant, body: F.cormorant, cap: F.playfairSC, capItalic: false, titleFont: F.playfairSC, titleSize: 34, frame: 'heraldic', hero: 'oval', labels: 'roman' },"
+ },
+ "pink-champagne": {
+  "theme": {
+   "primary": "#E3778F",
+   "accent": "#E2BE78",
+   "secondary": "#5C1A2B",
+   "background": "#F9E3E7",
+   "surface": "#FFFFFF",
+   "text": "#3A1622",
+   "muted": "#8E6B75",
+   "mapTint": "#E3778F",
+   "footerBg": "#3E0F1C",
+   "footerText": "#F9E3E7",
+   "footerAccent": "#E2BE78",
+   "fonts": {
+    "heading": "'Playfair Display', Georgia, serif",
+    "body": "'Montserrat', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'pink-champagne': ['playfair', 'montserrat'],",
+  "motion": "'pink-champagne': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Şampanı aç",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'pink-champagne': { bg: '#F9E3E7', surf: '#FFFFFF', ink: '#3A1622', mute: '#8E6B75', hi: '#C25470', line: '#E2BE78', paper: '#FFFFFF', paperInk: '#8E6B75', head: F.montserrat, body: F.montserrat, cap: F.playfair, capItalic: true, titleFont: F.playfair, titleItalic: true, titleSize: 42, frame: 'polaroid', hero: 'arch', labels: 'num', tilt: true, textItalic: false },"
+ },
+ "disco-ball": {
+  "theme": {
+   "primary": "#FF3EA5",
+   "accent": "#FFC94A",
+   "secondary": "#B69CFF",
+   "background": "#FBF1FF",
+   "surface": "#FFFFFF",
+   "text": "#22123F",
+   "muted": "#7D6D99",
+   "mapTint": "#B69CFF",
+   "footerBg": "#0B0619",
+   "footerText": "#D8DCE6",
+   "footerAccent": "#FFC94A",
+   "fonts": {
+    "heading": "'Exo 2', 'Inter', system-ui, sans-serif",
+    "body": "'Onest', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'disco-ball': ['exo2Heavy', 'onest'],",
+  "motion": "'disco-ball': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "İşıqları yandır!",
+   "hint": "toxunun",
+   "kicker": "Toy",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'disco-ball': { bg: 'linear-gradient(180deg,#24154D,#140B2E)', surf: '#24154D', ink: '#FFFFFF', mute: '#C2B6DE', hi: '#FFC94A', line: '#FF3EA5', head: F.onest, body: F.onest, cap: F.exo2Heavy, capItalic: true, titleFont: F.exo2Heavy, titleItalic: true, titleSize: 40, frame: 'glow', hero: 'circle', labels: 'num2', textItalic: false },"
+ },
+ "pajama-spa": {
+  "theme": {
+   "primary": "#8E72D6",
+   "accent": "#5FBF9C",
+   "secondary": "#FFD3BE",
+   "background": "#FFF9F4",
+   "surface": "#FFFFFF",
+   "text": "#3B2E5A",
+   "muted": "#7E7598",
+   "mapTint": "#C9B6F2",
+   "footerBg": "#2A2044",
+   "footerText": "#E9E0FB",
+   "footerAccent": "#BDEBD9",
+   "fonts": {
+    "heading": "'Pangolin', 'Marmelad', cursive",
+    "body": "'Nunito', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'pajama-spa': ['pangolin', 'nunito'],",
+  "motion": "'pajama-spa': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Yastıq davası!",
+   "hint": "toxunun",
+   "kicker": "Pijama gecəsi",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'pajama-spa': { bg: 'linear-gradient(180deg,#4A3A70,#2A2044)', surf: '#3B2E5A', ink: '#FFFFFF', mute: '#E9E0FB', hi: '#BDEBD9', line: '#C9B6F2', head: F.nunito, body: F.nunito, cap: F.pangolin, capItalic: false, titleFont: F.pangolin, titleItalic: false, titleSize: 42, frame: 'polaroid', hero: 'circle', tilt: true, labels: 'num2', textItalic: false },"
+ },
+ "paris-night": {
+  "theme": {
+   "primary": "#1C2140",
+   "accent": "#E58FA3",
+   "secondary": "#E1BC78",
+   "background": "#FFF7F7",
+   "surface": "#FFFFFF",
+   "text": "#1C2140",
+   "muted": "#776C84",
+   "mapTint": "#F7D6DC",
+   "footerBg": "#0F1229",
+   "footerText": "#F7D6DC",
+   "footerAccent": "#E1BC78",
+   "fonts": {
+    "heading": "'Alumni Sans Pinstripe', 'Ysabeau Office', system-ui, sans-serif",
+    "body": "'Ysabeau Office', 'Nunito Sans', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'paris-night': ['alumniPin', 'comforterBrush', 'ysabeauOffice'],",
+  "motion": "'paris-night': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Qutunu aç",
+   "hint": "toxunun",
+   "kicker": "Paris gecəsi",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'paris-night': { bg: 'linear-gradient(180deg,#0F1229,#1C2140)', surf: '#262C55', ink: '#FFFFFF', mute: '#F7D6DC', hi: '#E1BC78', line: '#E58FA3', head: F.ysabeauOffice, body: F.ysabeauOffice, cap: F.comforterBrush, script: true, titleFont: F.alumniPin, titleUpper: true, titleItalic: false, titleSize: 52, frame: 'mat', hero: 'arch', labels: 'num2', textItalic: false },"
+ },
+ "boho-sunset": {
+  "theme": {
+   "primary": "#C8754F",
+   "accent": "#D9A441",
+   "secondary": "#9AA68A",
+   "background": "#FBF4EA",
+   "surface": "#FFFDF9",
+   "text": "#4A2F24",
+   "muted": "#86695A",
+   "mapTint": "#D9A08E",
+   "footerBg": "#2B1B33",
+   "footerText": "#EAD9BF",
+   "footerAccent": "#D9A441",
+   "fonts": {
+    "heading": "'Noto Serif', 'Noto Serif Display', Georgia, serif",
+    "body": "'Alegreya Sans', 'Inter', system-ui, sans-serif"
+   }
+  },
+  "fonts": "'boho-sunset': ['notoSerifL', 'alegreyaSans'],",
+  "motion": "'boho-sunset': 'up',",
+  "opening": {
+   "mono": "emblem",
+   "slots": [
+    "kicker",
+    "title",
+    "and",
+    "meta",
+    "cta",
+    "hint"
+   ]
+  },
+  "openingDefaults": {
+   "title": "Nicat & Aysel",
+   "and": "&",
+   "cta": "Gün batımına bax",
+   "hint": "toxunun",
+   "kicker": "Gün batımı gecəsi",
+   "meta": "13 Mart 2027, Şənbə"
+  },
+  "story": "'boho-sunset': { bg: 'linear-gradient(180deg,#2B1B33,#4E2C3B)', surf: '#3A2433', ink: '#FBF4EA', mute: '#EAD9BF', hi: '#D9A441', line: '#C8754F', head: F.alegreyaSans, body: F.alegreyaSans, cap: F.notoSerifL, capItalic: true, titleFont: F.notoSerifL, titleItalic: true, titleSize: 44, frame: 'mat', hero: 'arch', labels: 'num2', textItalic: false },"
  }
 }

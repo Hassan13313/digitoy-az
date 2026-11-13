@@ -32,6 +32,14 @@ const TV_V3_TEMPLATES = [
     'nature-touch', 'vinyl-record', 'cinema-premiere', 'boarding-pass', 'modern-black',
     'red-veil', 'xonca', 'henna-buta', 'mirror-candle', 'kelagayi',
     'little-prince', 'hero-comic', 'mashallah', 'little-pilot', 'football-star',
+    'fairy-tale', 'space-mission', 'circus-show', 'dino-adventure', 'balloon-party',
+    'pastel-bloom', 'teddy-bear', 'gender-reveal', 'stork-letter', 'baby-mobile',
+    'gala-night', 'keynote', 'award-night', 'business-card', 'neon-party',
+    'silver-locket', 'golden-jubilee', 'first-paper', 'retro-polaroid', 'love-letters',
+    'caps-toss', 'yearbook', 'last-bell', 'chalkboard', 'paper-plane',
+    'ribbon-cut', 'bistro-sign', 'roller-shutter', 'unboxing', 'gallery-unveil',
+    'novruz-bonfire', 'novruz-semeni', 'midnight-clock', 'snow-globe', 'masquerade-ball',
+    'pink-champagne', 'disco-ball', 'pajama-spa', 'paris-night', 'boho-sunset',
 ];
 
 /** 1, 2 və ya 3 — başqa hər şey null */
