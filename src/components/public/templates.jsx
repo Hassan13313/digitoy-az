@@ -278,6 +278,7 @@ export function TemplateCard({
   onPreview,
   previewLabel = 'Önbaxış',
   lang = 'az',
+  priority = false,
 }) {
   const descId = useId();
 
@@ -297,6 +298,7 @@ export function TemplateCard({
         imageWidth={imageWidth}
         imageHeight={imageHeight}
         loading={loading}
+        priority={priority}
         accent={accent}
         background={background}
       >
@@ -360,6 +362,7 @@ export function TemplateScene({
   imageWidth = 780,
   imageHeight = 1688,
   loading = 'lazy',
+  priority = false,
   accent = '#C5A059',
   background = '#F4F1EA',
   compact = false,
@@ -427,6 +430,7 @@ export function TemplateScene({
                 width={imageWidth}
                 height={imageHeight}
                 loading={loading}
+                fetchPriority={priority ? 'high' : undefined}
                 decoding="async"
                 onLoad={() => setLoaded(true)}
                 onError={() => setFailed(true)}

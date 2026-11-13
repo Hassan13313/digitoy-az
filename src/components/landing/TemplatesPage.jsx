@@ -193,6 +193,8 @@ export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCrea
         imageWidth={TEMPLATE_IMAGE_SIZE.width}
         imageHeight={TEMPLATE_IMAGE_SIZE.height}
         loading={groupIndex === 0 && i < 3 ? 'eager' : 'lazy'}
+        /* ilk kartın şəkli mobildə LCP-dir — JS və şriftlərlə yarışmasın (fetchpriority=high) */
+        priority={groupIndex === 0 && i === 0}
         accent={theme.primary || '#C5A059'}
         background={theme.background || '#FDFBF7'}
         locked={!isTemplateSelectable(tpl.id)}
