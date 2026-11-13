@@ -111,7 +111,8 @@ export default function FAQ({ lang = 'az', items, whatsappUrl = 'https://wa.me/9
                         <span
                           aria-hidden="true"
                           className={`hidden w-7 shrink-0 font-serif text-lg italic lining-nums tabular-nums transition-colors duration-300 sm:block ${
-                            isOpen ? 'text-gold-deep' : 'text-gold/70'
+                            /* bağlı: sakit qızılı, amma krem fonda 4.6:1 (əvvəl gold/70 — 1.8:1, Lighthouse kontrast) */
+                            isOpen ? 'text-gold-deep' : 'text-[#8C6F3E]'
                           }`}
                         >
                           {String(i + 1).padStart(2, '0')}
