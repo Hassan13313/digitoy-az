@@ -311,7 +311,7 @@ function seoHomeFaq(): array {
 /** Şablon adı → img/templates/<id>.webp (məs. «Mirror & Candle» → mirror-candle, «Kəlağayı» → kelagayi) */
 function seoTemplateSlug(string $name): string {
     /* adı id-dən fərqli yazılan şablonlar (2026-11 toy seriyaları) */
-    $own = ['Şam və Üzük' => 'candle-rings', 'Bridal Couture' => 'bridal-veil', 'İlk Rəqs' => 'first-dance', 'Bakı Gecəsi' => 'baku-night', 'Alpine Luxe' => 'shahdag'];
+    $own = ['Şam və Üzük' => 'candle-rings', 'Bridal Couture' => 'bridal-veil', 'İlk Rəqs' => 'first-dance', 'Bakı Gecəsi' => 'baku-night', 'Alpine Luxe' => 'shahdag', 'Maşallah' => 'mashallah'];
     if (isset($own[$name])) return $own[$name];
     $t = strtr(mb_strtolower($name, 'UTF-8'), ['ə' => 'e', 'ğ' => 'g', 'ı' => 'i', 'ç' => 'c', 'ş' => 's', 'ö' => 'o', 'ü' => 'u', 'i̇' => 'i']);
     return trim(preg_replace('/[^a-z0-9]+/', '-', $t), '-');

@@ -124,5 +124,18 @@ foreach ($guideFiles as $f) @unlink($tmp . '/guides/' . basename($f));
 @rmdir($tmp . '/guides');
 @unlink($tmp . '/run.php'); @unlink($tmp . '/seo.php'); @unlink($tmp . '/index.html'); @rmdir($tmp);
 
+/* ── 4. /sablonlar/* bot HTML-i: hər şablon adının üz qabığı tapılır (2026-11-13: «Maşallah» →
+      masallah.webp axtarılırdı, fayl mashallah.webp-dir — sünnət səhifəsində şəkil düşmürdü) ── */
+foreach (['seoConceptPages', 'seoTemplateSlug'] as $fn) {
+    if (!function_exists($fn)) {
+        if (!preg_match('/\nfunction ' . $fn . '\(.*?\n\}/s', $src, $m)) { echo "FAIL: `$fn` seo.php-də tapılmadı\n"; exit(1); }
+        eval($m[0]);
+    }
+}
+foreach (seoConceptPages() as $slug => $cp) {
+    $missing = array_values(array_filter($cp['names'], fn($n) => !is_file($root . '/public/img/templates/' . seoTemplateSlug($n) . '.webp')));
+    ok("/sablonlar/$slug: bütün şablonların üz qabığı var" . ($missing ? ' — yoxdur: ' . implode(', ', $missing) : ''), !$missing);
+}
+
 echo "\n$passed ok, $failed FAIL\n";
 exit($failed ? 1 : 0);
