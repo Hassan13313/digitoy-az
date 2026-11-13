@@ -119,6 +119,21 @@ ok('/bu-beledci-yoxdur → 404, data yoxdur', ($r = $run('/bu-beledci-yoxdur'))[
 ok('/..%2Fapi → 404 (fayl yolundan çıxmaq olmur)', $run('/..%2Fapi')['status'] === 404);
 ok('/mexfilik → bələdçi datası yoxdur', !str_contains($run('/mexfilik')['html'], 'dt-guide-data'));
 
+/* 2026-11-14 — PRERENDER: _prerender/home.html varsa ana səhifənin root-una qoyulur (data-pre),
+   eyni mətnli <noscript> çıxır; başqa marşrutlar və fayl olmayanda — əvvəlki qayda */
+@mkdir($tmp . '/_prerender');
+$fake = '<div class="min-h-screen bg-cream"><main id="main"><h1 id="hero-title">Hazır başlıq</h1></main></div>';
+file_put_contents($tmp . '/_prerender/home.html', $fake);
+$h = $run('/')['html'];
+ok('prerender: / → <div id="root" data-pre="/"> + hazır HTML', str_contains($h, '<div id="root" data-pre="/">' . $fake . '</div>'));
+ok('prerender: / → <noscript><main> yoxdur (məzmun HTML-dədir)', !str_contains($h, '<noscript><main'));
+ok('prerender: / → meta/schema yerindədir', str_contains($h, '"@type":"FAQPage"') && str_contains($h, '<link rel="canonical" href="https://digitoy.az/" />'));
+foreach (['/templates', '/sablonlar/xina-gecesi', '/invite/aytac-ve-niyaz-51eedb', '/bu-yoxdur'] as $p) {
+    $h = $run($p)['html'];
+    ok("prerender: $p → root boş, data-pre yoxdur", str_contains($h, '<div id="root"></div>') && !str_contains($h, 'data-pre'));
+}
+@unlink($tmp . '/_prerender/home.html'); @rmdir($tmp . '/_prerender');
+
 /* müvəqqəti qovluğu təmizlə — yalnız yuxarıda özümüzün köçürdüyü fayllar */
 foreach ($guideFiles as $f) @unlink($tmp . '/guides/' . basename($f));
 @rmdir($tmp . '/guides');

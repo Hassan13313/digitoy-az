@@ -7,6 +7,7 @@ import { ArrowRight, Clock, Gem, Link2, PenLine } from 'lucide-react';
 import t from '../../../data/translations';
 import { Button, Container, Eyebrow, Ornament, WhatsAppIcon } from './ui';
 import { scrollToSection } from './scroll';
+import { STATIC_INTRO } from '../../../utils/prerender';
 
 const EASE = [0.22, 1, 0.36, 1];
 
@@ -87,7 +88,7 @@ export default function HowItWorks({ lang = 'az', onCta }) {
             <motion.span
               aria-hidden="true"
               className="absolute bottom-6 left-7 top-7 w-px origin-top bg-gradient-to-b from-gold/70 via-gold/45 to-gold/10 lg:hidden"
-              initial={{ scaleY: 0 }}
+              initial={STATIC_INTRO ? false : { scaleY: 0 }}
               whileInView={{ scaleY: 1 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 1.6, ease: EASE }}
@@ -95,7 +96,7 @@ export default function HowItWorks({ lang = 'az', onCta }) {
             <motion.span
               aria-hidden="true"
               className="absolute left-7 right-[12%] top-8 hidden h-px origin-left bg-gradient-to-r from-gold/70 via-gold/45 to-gold/15 lg:block"
-              initial={{ scaleX: 0 }}
+              initial={STATIC_INTRO ? false : { scaleX: 0 }}
               whileInView={{ scaleX: 1 }}
               viewport={{ once: true, amount: 0.4 }}
               transition={{ duration: 1.6, ease: EASE }}
@@ -107,7 +108,7 @@ export default function HowItWorks({ lang = 'az', onCta }) {
                 <motion.li
                   key={i}
                   className="relative grid grid-cols-[56px_minmax(0,1fr)] items-start gap-x-5 lg:block"
-                  initial={{ opacity: 0, y: 18 }}
+                  initial={STATIC_INTRO ? false : { opacity: 0, y: 18 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.4 }}
                   transition={{ duration: 0.8, delay: 0.15 + i * 0.12, ease: EASE }}

@@ -686,6 +686,16 @@ if ($guide) {
     $data = json_encode($guide, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP);
     if ($data !== false) $noscript .= "\n    <script id=\"dt-guide-data\" type=\"application/json\">" . $data . '</script>';
 }
+/* 2026-11-14 — PRERENDER: ana səhifənin hazır HTML-i (scripts/prerender.mjs → _prerender/home.html).
+   Səhifə JS gəlməmiş görünür (mobil LCP ~4.7 s idi), Google mətni xam HTML-də oxuyur.
+   data-pre — React-a «hazır məzmun var, giriş animasiyasını oynatma» deyir (src/utils/prerender.js).
+   Məzmun HTML-də olduğu üçün eyni mətnli <noscript> lazım deyil. Fayl yoxdursa — köhnə qayda. */
+$preFile = $path === '/' ? __DIR__ . '/_prerender/home.html' : '';
+$pre = ($preFile !== '' && is_file($preFile)) ? (string) @file_get_contents($preFile) : '';
+if ($pre !== '' && str_contains($out, '<div id="root"></div>')) {
+    $out = str_replace('<div id="root"></div>', '<div id="root" data-pre="/">' . $pre . '</div>', $out);
+    $noscript = '';
+}
 if ($noscript !== '') {
     $out = str_replace('<div id="root"></div>', '<div id="root"></div>' . "\n    " . $noscript, $out);
 }

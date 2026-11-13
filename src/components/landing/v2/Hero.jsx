@@ -10,13 +10,15 @@ import t from '../../../data/translations';
 import FeatureDemo from './FeatureDemo';
 import { Button, Container, Ornament } from './ui';
 import { scrollToSection } from './scroll';
+import { STATIC_INTRO } from '../../../utils/prerender';
 
 const EASE = [0.22, 1, 0.36, 1];
 
 /** onDemo — verilsə, demo linki səhifəni yeniləmir (SPA keçidi + analitika mövcud koddadır) */
 export default function Hero({ lang = 'az', onStart, onDemo, demoHref = '/demo' }) {
   const x = t[lang] ?? t.az ?? {};
-  const reduce = useReducedMotion();
+  /* Prerender: mətn hazır HTML-də görünən olmalıdır, JS gələndə yenidən gizlədilib «uçmamalıdır» */
+  const reduce = useReducedMotion() || STATIC_INTRO;
 
   const start = () => (onStart ? onStart() : scrollToSection('builder-section'));
 

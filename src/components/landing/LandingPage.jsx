@@ -21,6 +21,7 @@ import { consent } from '../../utils/consent'
 import { trackEvent } from '../../utils/analytics'
 import { readBuilderSnapshot, clearBuilderSnapshot } from '../../utils/builderSession'
 import { pushView, patchState, currentUrl } from '../../utils/navHistory'
+import { STATIC_INTRO } from '../../utils/prerender'
 
 /* Navbar yüksəkliyi 72px — scroll hesablamada çıxılır */
 /* 2026-11 sürət: sifariş formu və önbaxış ana səhifənin ilk yükünə daxil deyil —
@@ -107,7 +108,7 @@ const navItems = (tr) => [
 export default function LandingPage({ lang, setLang, weddingData, setWeddingData, onViewInvitation, onDemo, isAdmin = false, initialShowPreview = false, initialPackage = null, showPackages = false, historyView = 'landing' }) {
   const tr = t[lang] || t.az
   /* Tarixçə girişinin mərhələsi (bax aşağıda «Brauzer tarixçəsi») — remount-da da bərpa olunur */
-  const entryStage = () => (window.history.state?.view === historyView ? window.history.state?.stage : null)
+  const entryStage = () => (typeof window !== 'undefined' && window.history.state?.view === historyView ? window.history.state?.stage : null)
   const [showPreview,     setShowPreview]     = useState(() => initialShowPreview
     || (entryStage() === 'preview' && !!readBuilderSnapshot()?.data))
   /* Forma məlumatları: eyni tabda snapshot varsa ondan bərpa olunur
@@ -387,7 +388,8 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
         <div id="builder-content" />
 
         {/* Axış: Preview → paket seçimi → BuilderForm */}
-        <AnimatePresence mode="wait">
+        {/* Prerender: paket kartları hazır HTML-də görünür — ilk mount-da yenidən «fade» olunmur */}
+        <AnimatePresence mode="wait" initial={!STATIC_INTRO}>
           {showPreview ? (
             <motion.div key="preview" className="mx-auto max-w-6xl px-4 sm:px-6" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={motionStep}>
               <Suspense fallback={<StepLoader />}>

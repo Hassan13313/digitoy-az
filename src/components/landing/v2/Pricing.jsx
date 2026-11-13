@@ -9,6 +9,7 @@ import { MotionConfig, motion } from 'framer-motion';
 import { ArrowRight, Check, Crown, Gift, Minus, Sparkles } from 'lucide-react';
 import t from '../../../data/translations';
 import { Button, Container, SectionHeading } from './ui';
+import { STATIC_INTRO } from '../../../utils/prerender';
 
 const EASE = [0.22, 1, 0.36, 1];
 
@@ -120,7 +121,7 @@ export default function Pricing({
               <motion.li
                 key={p.id}
                 className={p.featured ? 'lg:-mt-8' : 'lg:mt-4'}
-                initial={{ opacity: 0, y: 24 }}
+                initial={STATIC_INTRO ? false : { opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.8, delay: i * 0.12, ease: EASE }}

@@ -28,6 +28,7 @@ import {
   Users,
 } from 'lucide-react';
 import t from '../../../data/translations';
+import { STATIC_INTRO } from '../../../utils/prerender';
 
 // ── Funksiyaların siyahısı ──────────────────────────────────────────────
 const FEATURES = [
@@ -407,11 +408,15 @@ function getRemaining() {
   };
 }
 
+/* Prerender: server və brauzerin ilk render-i eyni olmalıdır (hydrate) — «indi» fərqlidir,
+   ona görə rəqəmlər mount-dan dərhal sonra yazılır (o vaxta qədər «––») */
+const NO_TIME = { d: null, h: null, m: null, s: null };
 function CountdownScreen({ x }) {
-  const [r, setR] = useState(getRemaining);
+  const [r, setR] = useState(() => (STATIC_INTRO ? NO_TIME : getRemaining()));
   useEffect(() => {
+    const first = setTimeout(() => setR(getRemaining()), 0);
     const id = setInterval(() => setR(getRemaining()), 1000);
-    return () => clearInterval(id);
+    return () => { clearTimeout(first); clearInterval(id); };
   }, []);
   const cells = [
     [r.d, x.cdDays ?? 'Gün'],
@@ -426,7 +431,7 @@ function CountdownScreen({ x }) {
         {cells.map(([v, l]) => (
           <div key={l} className="flex flex-col items-center rounded-2xl bg-white py-3 shadow-soft ring-1 ring-gold/15">
             <span className="font-serif text-[26px] font-medium leading-none lining-nums tabular-nums text-ink">
-              {String(v).padStart(2, '0')}
+              {v === null ? '––' : String(v).padStart(2, '0')}
             </span>
             <span className="mt-1.5 text-[8.5px] font-medium uppercase tracking-[0.12em] text-brown-dark/80">{l}</span>
           </div>

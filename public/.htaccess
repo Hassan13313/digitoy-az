@@ -4,6 +4,10 @@ AddDefaultCharset UTF-8
 
 RewriteEngine On
 
+# 2026-11-14 — prerender fraqmentlari (_prerender/*.html) yalniz seo.php-nin daxilinde
+# oxunur; birbasa URL ile acilmasin (dublikat mezmun olmasin)
+RedirectMatch 404 ^/_prerender(/|$)
+
 # Phase 45.3 — www.<domen> -> <domen> (dublikat sayt olmasin; canonical ile eyni)
 # Umumi qayda: digitoy.az ve test.digitoy.az ucun eyni isleyir. Sorgu setri saxlanilir.
 RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]

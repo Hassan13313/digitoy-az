@@ -166,6 +166,14 @@ function getAnalyticsPath(view, slug) {
   }
 }
 
+/* Kök URL, admin/qaralama parametrləri və admin tokeni yoxdur → landing (bax App › view) */
+function isPlainRoot() {
+  if (window.location.pathname !== '/') return false
+  const q = new URLSearchParams(window.location.search)
+  if (q.has('admin') || q.has('draft') || q.has('data')) return false
+  return !getStoredAdminToken()
+}
+
 /* ── sessionStorage-dakı admin tokenini oxu, müddəti yoxla ── */
 function getStoredAdminToken() {
   try {
@@ -212,6 +220,7 @@ function parseConceptPage() {
 }
 
 function parseInviteSlug() {
+  if (typeof window === 'undefined') return { slug: null, sub: null }   /* prerender (Node) */
   const match = window.location.pathname.match(/^\/invite\/([^/?#]+)(?:\/([^/?#]*))?/)
   if (!match) return { slug: null, sub: null }
   return { slug: match[1], sub: match[2] || null }
@@ -334,7 +343,8 @@ function RouteLoader() {
   )
 }
 
-export default function App() {
+/* ssrPath — yalnız prerender (scripts/prerender.mjs, Node): hansı marşrut render olunur */
+export default function App({ ssrPath = null }) {
   /* ⚠ `/preview/live` İLKİN STATE-də həll olunur, effektdə yox:
      bu, yalnız URL-dən asılı SAF qərardır. Effektdə etsək əvvəlcə 'loading'
      render olunub sonra dəyişərdi (yanıp-sönmə) və `setState`-in effekt
@@ -343,9 +353,13 @@ export default function App() {
      pəncərə postMessage ilə verir. */
   /* Phase 47: hüquqi səhifə də URL-dən asılı SAF qərardır → ilkin state-də */
   const [view,        setView]        = useState(() => {
-    if (typeof window === 'undefined') return 'loading'
+    if (typeof window === 'undefined') return ssrPath === '/' ? 'landing' : 'loading'
     if (window.location.pathname === '/preview/live') return 'live-preview'
     if (matchLegalRoute(window.location.pathname)) return 'legal'
+    /* 2026-11-14 prerender: adi ziyarətçi üçün kök URL birbaşa landing-dir (routeAfterAuth-un
+       nəticəsi ilə eyni) — seo.php-nin hazır HTML-inə React «loading» ekranı keçirmədən qoşulur.
+       Admin tokeni / ?admin / ?draft / ?data olanda qərar əvvəlki kimi effektdə verilir. */
+    if (isPlainRoot()) return 'landing'
     return matchGuideRoute(window.location.pathname) ? 'guide' : 'loading'
   })
   const [legalDoc,    setLegalDoc]    = useState(
