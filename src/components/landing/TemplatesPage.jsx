@@ -5,7 +5,7 @@ import { trackTemplatePreviewed } from '../../templates/templateAnalytics'
 import LanguageSwitcher from '../LanguageSwitcher'
 import SubpageHeader, { SubpageFooter } from '../public/SubpageHeader'
 import { TemplatesIntro, FilterBar, TemplatesGrid, TemplateCard, TemplatesEmpty, TemplatesCta } from '../public/templates'
-import { templateImage, TEMPLATE_IMAGE_SIZE } from '../../data/templateImages'
+import { templateImage, templateImageSrcSet, TEMPLATE_IMAGE_SIZE } from '../../data/templateImages'
 import { conceptPageFor, conceptAbout } from '../../data/conceptPages'
 import { LEGAL_DOCS } from '../../data/legal/docs'
 import { legalUi } from '../../data/legal/ui'
@@ -181,6 +181,7 @@ export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCrea
   const renderCard = (tpl, i, groupIndex = 0, cardConcept = concept === 'all' ? tpl.concept : concept) => {
     const theme = getTemplateTheme(tpl.id) || {}
     const badge = getStatusMeta(tpl.status, lang)
+    const image = templateImage(tpl.id, cardConcept) || undefined
     return (
       <TemplateCard
         lang={lang}
@@ -189,11 +190,14 @@ export default function TemplatesPage({ lang, setLang, onBack, onPreview, onCrea
         statusTone={badge.tone}
         categoryLabel={getCategoryLabel(tpl.category, lang)}
         description={tpl.shortDescription?.[lang] || tpl.shortDescription?.az || tpl.tagline}
-        image={templateImage(tpl.id, cardConcept) || undefined}
+        image={image}
+        imageSrcSet={templateImageSrcSet(image)}
         imageWidth={TEMPLATE_IMAGE_SIZE.width}
         imageHeight={TEMPLATE_IMAGE_SIZE.height}
-        loading={groupIndex === 0 && i < 3 ? 'eager' : 'lazy'}
-        /* ilk kartın şəkli mobildə LCP-dir — JS və şriftlərlə yarışmasın (fetchpriority=high) */
+        /* Yalnız ilk kartın şəkli dərhal və yüksək prioritetlə (mobildə LCP-dir). 2-ci/3-cü kart mobildə
+           ekrandan 600–1200px aşağıdadır — «eager» olanda LCP şəkli ilə trafik bölüşürdü; lazy şəkil
+           ekrana yaxın olanda brauzer onsuz da CSS-dən dərhal sonra yükləyir. */
+        loading={groupIndex === 0 && i === 0 ? 'eager' : 'lazy'}
         priority={groupIndex === 0 && i === 0}
         accent={theme.primary || '#C5A059'}
         background={theme.background || '#FDFBF7'}

@@ -204,12 +204,18 @@ export function ChipRow({ legend, options, value, onChange, bleedClassName }) {
  * @param {string} [p.className]  Default: 1 → 2 → 3 sütun
  * @param {string} [p.label]      Siyahının aria-label-i
  */
+/* Vitrin şəbəkəsi və kart şəklinin ekrandakı eni (CSS px, ölçülüb 2026-11-14): telefon kadrı səhnənin
+   72%-i (sm: 64%) — <640: 1 sütun ≈ 72vw−45px; 640–1023: 2 sütun ≈ 32vw−43px; ≥1024: 3 sütun,
+   konteyner 1152px-də dayanır → 204px. Şəbəkə və ya kadr eni dəyişsə, bu `sizes`-i də yeniləyin. */
+const CARD_GRID = 'grid gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-7'
+export const CARD_IMAGE_SIZES = '(min-width: 1152px) 204px, (min-width: 1024px) calc(21.4vw - 42px), (min-width: 640px) calc(32vw - 43px), calc(72vw - 44px)'
+
 export function TemplatesGrid({
   items = [],
   getKey,
   renderItem,
   label,
-  className = 'grid gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-7',
+  className = CARD_GRID,
 }) {
   return (
     <MotionConfig reducedMotion="user">
@@ -270,6 +276,8 @@ export function TemplateCard({
   imageAlt,
   imageWidth = 780,
   imageHeight = 1688,
+  imageSrcSet,
+  imageSizes = CARD_IMAGE_SIZES,
   loading = 'lazy',
   accent = '#C5A059',
   background = '#F4F1EA',
@@ -297,6 +305,8 @@ export function TemplateCard({
         imageAlt={imageAlt}
         imageWidth={imageWidth}
         imageHeight={imageHeight}
+        imageSrcSet={imageSrcSet}
+        imageSizes={imageSizes}
         loading={loading}
         priority={priority}
         accent={accent}
@@ -361,6 +371,8 @@ export function TemplateScene({
   imageAlt,
   imageWidth = 780,
   imageHeight = 1688,
+  imageSrcSet,
+  imageSizes,
   loading = 'lazy',
   priority = false,
   accent = '#C5A059',
@@ -426,6 +438,8 @@ export function TemplateScene({
                 key={image}
                 ref={imgRef}
                 src={image}
+                srcSet={imageSrcSet}
+                sizes={imageSrcSet ? imageSizes : undefined}
                 alt={imageAlt ?? `${name} şablonunun önbaxışı`}
                 width={imageWidth}
                 height={imageHeight}
