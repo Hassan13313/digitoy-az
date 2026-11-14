@@ -4,7 +4,7 @@
 //   <FeatureDemo lang={lang} autoPlay />
 // ════════════════════════════════════════════════════════════════
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
-import { AnimatePresence, MotionConfig, motion, useInView, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, MotionConfig, motion, useInView } from 'framer-motion';
 import {
   BookOpen,
   Heart,
@@ -28,7 +28,7 @@ import {
   Users,
 } from 'lucide-react';
 import t from '../../../data/translations';
-import { STATIC_INTRO } from '../../../utils/prerender';
+import { STATIC_INTRO, useHydrationSafeReducedMotion } from '../../../utils/prerender';
 
 // ── Funksiyaların siyahısı ──────────────────────────────────────────────
 const FEATURES = [
@@ -144,7 +144,8 @@ const planLabel = (plan, x) =>
 export default function FeatureDemo({ lang = 'az', autoPlay = false, initialId = 'gallery' }) {
   const x = t[lang] ?? t.az ?? {};
   const uid = useId();
-  const reduce = useReducedMotion();
+  /* hidrasiya: server «hərəkəti azalt»-ı bilmir — irəliləmə nöqtələri ilk render-də onunla eyni olsun */
+  const reduce = useHydrationSafeReducedMotion();
   const rootRef = useRef(null);
   const tabRefs = useRef([]);
   const inView = useInView(rootRef, { amount: 0.35 });

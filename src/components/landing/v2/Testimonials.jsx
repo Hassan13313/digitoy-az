@@ -139,51 +139,55 @@ export default function Testimonials({ lang = 'az', reviews, demoHref = '/demo',
                 {list.map((r, i) => {
                   const active = i === index;
                   return (
-                    <motion.figure
+                    /* Slayd = div[role=group] (ARIA karusel nümunəsi); <figure>-un öz rolu var, ona
+                       role="group" vermək Lighthouse «ARIA role should be appropriate» xətası idi */
+                    <motion.div
                       key={i}
                       id={`${uid}-slide-${i}`}
                       role="group"
                       aria-roledescription={x.slideRole ?? 'slayd'}
                       aria-label={`${i + 1} / ${n}`}
                       aria-hidden={!active}
-                      className="col-start-1 row-start-1 flex flex-col items-center text-center"
+                      className="col-start-1 row-start-1"
                       initial={false}
                       animate={{ opacity: active ? 1 : 0, y: active ? 0 : 10 }}
                       transition={{ duration: 0.6, ease: EASE }}
                       style={{ pointerEvents: active ? 'auto' : 'none' }}
                     >
-                      <div className="flex gap-1" role="img" aria-label={starsLabel(r.rating ?? 5)}>
-                        {Array.from({ length: 5 }, (_, s) => (
-                          <Star
-                            key={s}
+                      <figure className="flex flex-col items-center text-center">
+                        <div className="flex gap-1" role="img" aria-label={starsLabel(r.rating ?? 5)}>
+                          {Array.from({ length: 5 }, (_, s) => (
+                            <Star
+                              key={s}
+                              aria-hidden="true"
+                              strokeWidth={1.2}
+                              className={`h-4 w-4 ${s < (r.rating ?? 5) ? 'fill-gold text-gold' : 'text-beige-dark'}`}
+                            />
+                          ))}
+                        </div>
+                        <blockquote className="mt-7">
+                          <p className="font-serif text-[1.625rem] font-normal italic leading-[1.35] text-ink [text-wrap:balance] sm:text-[2rem] lg:text-[2.375rem]">
+                            “{r.quote}”
+                          </p>
+                        </blockquote>
+                        <figcaption className="mt-9 flex items-center gap-4 text-left">
+                          <span
                             aria-hidden="true"
-                            strokeWidth={1.2}
-                            className={`h-4 w-4 ${s < (r.rating ?? 5) ? 'fill-gold text-gold' : 'text-beige-dark'}`}
-                          />
-                        ))}
-                      </div>
-                      <blockquote className="mt-7">
-                        <p className="font-serif text-[1.625rem] font-normal italic leading-[1.35] text-ink [text-wrap:balance] sm:text-[2rem] lg:text-[2.375rem]">
-                          “{r.quote}”
-                        </p>
-                      </blockquote>
-                      <figcaption className="mt-9 flex items-center gap-4 text-left">
-                        <span
-                          aria-hidden="true"
-                          className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-espresso-grad font-serif text-xl italic text-gold-light shadow-lift ring-1 ring-inset ring-gold/40"
-                        >
-                          {r.names?.trim()?.[0]}
-                        </span>
-                        <span>
-                          <span className="block font-sans text-[15px] font-semibold text-ink">{r.names}</span>
-                          <span className="mt-0.5 block text-[13px] tracking-[0.04em] text-brown-dark">
-                            {[r.event, [r.city, [r.month, r.year].filter(Boolean).join(' ')].filter(Boolean).join(', ')]
-                              .filter(Boolean)
-                              .join(' — ')}
+                            className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-espresso-grad font-serif text-xl italic text-gold-light shadow-lift ring-1 ring-inset ring-gold/40"
+                          >
+                            {r.names?.trim()?.[0]}
                           </span>
-                        </span>
-                      </figcaption>
-                    </motion.figure>
+                          <span>
+                            <span className="block font-sans text-[15px] font-semibold text-ink">{r.names}</span>
+                            <span className="mt-0.5 block text-[13px] tracking-[0.04em] text-brown-dark">
+                              {[r.event, [r.city, [r.month, r.year].filter(Boolean).join(' ')].filter(Boolean).join(', ')]
+                                .filter(Boolean)
+                                .join(' — ')}
+                            </span>
+                          </span>
+                        </figcaption>
+                      </figure>
+                    </motion.div>
                   );
                 })}
               </motion.div>
