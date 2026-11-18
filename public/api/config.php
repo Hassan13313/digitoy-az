@@ -322,7 +322,7 @@ function rateGate(string $key, int $limit, int $window): bool {
 /* ── Sxem versiyası (Phase 39) ──
    Sütun və ya cədvəl əlavə edəndə BU RƏQƏMİ ARTIR — əks halda miqrasiya
    canlıda işləməz. */
-const SCHEMA_VERSION = 49;
+const SCHEMA_VERSION = 50;   /* 50: event_messages, owner_edit_pins, guest_changes (2026-11-18) */
 
 /* ── Cədvəlləri avtomatik yarat ──
    Phase 39 OPTİMİZASİYASI: əvvəl bu funksiya HƏR sorğuda 6 `CREATE TABLE
@@ -711,6 +711,43 @@ function runMigrations(PDO $db): void {
             template_key VARCHAR(80) NOT NULL PRIMARY KEY,
             content      MEDIUMTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
             updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
+    /* ── 2026-11-18 (v50) — toy günü təbriki / rəy mesajlarının göndərilmə qeydi ──
+       Mesajı admin WhatsApp-dan özü göndərir (yarı-avtomatik); burada yalnız
+       «göndərildi» işarəsi saxlanılır ki, siyahıda təkrar çıxmasın. */
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS event_messages (
+            draft_code VARCHAR(20) NOT NULL,
+            kind       VARCHAR(16) NOT NULL,
+            sent_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (draft_code, kind)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
+    /* ── v50 — müştəri panelində oturma planını redaktə PİN-i (hash) ── */
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS owner_edit_pins (
+            slug       VARCHAR(120) NOT NULL PRIMARY KEY,
+            pin_hash   VARCHAR(255) NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
+    /* ── v50 — qonaq/masa dəyişikliklərinin tarixçəsi («geri qaytar» üçün) ── */
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS guest_changes (
+            id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            invitation_id VARCHAR(120) NOT NULL,
+            actor         VARCHAR(10)  NOT NULL,
+            action        VARCHAR(12)  NOT NULL,
+            guest_id      INT UNSIGNED DEFAULT NULL,
+            before_json   TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+            after_json    TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+            undone        TINYINT(1)   NOT NULL DEFAULT 0,
+            created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_inv (invitation_id, id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
 

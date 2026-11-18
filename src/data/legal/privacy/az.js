@@ -54,6 +54,7 @@ export default {
           'dəvətnaməni hazırlamaq, göstərmək və yeniləmək;',
           'sifarişi qəbul etmək, sizinlə əlaqə saxlamaq və son variantı razılaşdırmaq;',
           'konstruktorda nömrə yazıb sifarişi tamamlamadıqda — sizinlə əlaqə saxlayıb kömək təklif etmək;',
+          'sifarişiniz təsdiqləndikdən sonra — tədbir günü WhatsApp ilə təbrik və tədbirdən 2 gün sonra xidmətimiz haqqında rəyinizi soruşan bir mesaj göndərmək (mesajlar əl ilə göndərilir; istəmirsinizsə bizə yazın, göndərmərik);',
           'iştirak təsdiqi, oturma planı, xatirə kitabı və foto qalereya funksiyalarını işlətmək;',
           'saytın təhlükəsizliyini qorumaq və sui-istifadənin qarşısını almaq;',
           'razılığınız olduqda — saytın necə istifadə edildiyini anlayıb onu yaxşılaşdırmaq;',

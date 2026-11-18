@@ -216,6 +216,22 @@ export async function reindexMedia() {
   return res.json()
 }
 
+/* 2026-11-18 — toy günü təbriki / rəy mesajları (yarı-avtomatik, admin göndərir) */
+export async function getEventMessages() {
+  const res = await fetch(`${BASE}/event_messages.php`, { headers: adminHeaders(), cache: 'no-store' })
+  if (!res.ok) throw new Error(`event_messages: ${res.status}`)
+  return res.json()
+}
+export async function markEventMessage(code, kind, sent) {
+  const res = await fetch(`${BASE}/event_messages.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminHeaders() },
+    body: JSON.stringify({ action: 'mark', code, kind, sent }),
+  })
+  if (!res.ok) throw new Error(`event_messages/mark: ${res.status}`)
+  return res.json()
+}
+
 /* 2026-11-18 — köhnə albom şəkilləri üçün ≤1600px baxış nüsxəsi (bir addım ~15 s) */
 export async function buildDisplayCopies() {
   const res = await fetch(`${BASE}/admin_maintenance.php`, {

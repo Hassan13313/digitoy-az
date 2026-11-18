@@ -54,6 +54,7 @@ export default {
           'to prepare, display and update the invitation;',
           'to accept the order, contact you and agree on the final version;',
           'if you left a number in the builder but did not finish the order — to contact you and offer help;',
+          'after your order is approved — to send one WhatsApp greeting on the day of the event and, 2 days later, one message asking for your feedback about our service (sent by hand; write to us and we will not send them);',
           'to run the RSVP, seating plan, guestbook and photo gallery features;',
           'to keep the site secure and prevent abuse;',
           'with your consent — to understand how the site is used and improve it;',

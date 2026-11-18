@@ -5,6 +5,7 @@ import { Notice } from './v2/adminUi'
 import { azWeekdayShort } from './adminFormat'
 import { shortDay } from '../../utils/dateFormat'
 import { packageLabel } from '../../data/packages'
+import EventMessagesPanel from './EventMessagesPanel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Admin Dashboard — sifariş statistikası + qalereya analitikası
@@ -82,6 +83,8 @@ export default function AdminDashboard({ onNavigate }) {
           Qalereya hadisə jurnalı ilk baxışdan sonra yaranır — yeni quraşdırmada bu normaldır.
         </Notice>
       )}
+      {/* 2026-11-18 — toy günü təbriki / rəy sorğusu (yalnız bu gün siyahı varsa görünür) */}
+      <EventMessagesPanel />
       <DashboardView
         stats={viewStats}
         pending={{ count: o.submitted || 0, items: [] }}

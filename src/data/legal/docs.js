@@ -7,7 +7,7 @@
    Mətnlərin özü: src/data/legal/<id>/<dil>.js (lazy chunk).
    ══════════════════════════════════════════════════════════════════════ */
 
-export const LEGAL_UPDATED = '2026-11-06'
+export const LEGAL_UPDATED = '2026-11-18'
 
 export const LEGAL_DOCS = [
   {
