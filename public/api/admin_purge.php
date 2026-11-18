@@ -129,9 +129,16 @@ try {
         'DELETE FROM media_flags     WHERE slug = :s',
         'DELETE FROM gallery_events  WHERE slug = :s',
         'DELETE FROM gallery_config  WHERE slug = :s',
+        /* v50 — oturma planı tarixçəsi (qonaq adları saxlayır) və redaktə PİN-i */
+        'DELETE FROM guest_changes   WHERE invitation_id = :s',
+        'DELETE FROM owner_edit_pins WHERE slug = :s',
         'DELETE FROM invitations     WHERE slug = :s',
     ] as $sql) {
         $db->prepare($sql)->execute([':s' => $slug]);
+    }
+    $codes = array_values(array_filter(array_column($orders, 'draft_code')));
+    if ($codes) {
+        $db->prepare('DELETE FROM event_messages WHERE draft_code IN (' . implode(',', array_fill(0, count($codes), '?')) . ')')->execute($codes);
     }
     if ($orderIds) $db->exec('DELETE FROM draft_invitations WHERE id IN (' . implode(',', $orderIds) . ')');
     $db->commit();

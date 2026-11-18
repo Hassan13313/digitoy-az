@@ -88,6 +88,10 @@ function purgeOrders(PDO $db, string $uploads, array $orders): array {
 
     $files = 0;
     if ($n === count($ids)) {   /* arada biri bərpa olunubsa fayllara toxunma */
+        $codes = array_values(array_filter(array_map(fn($o) => (string) $o['draft_code'], $go)));
+        if ($codes) {   /* v50 — toy günü / rəy mesajlarının qeydləri */
+            $db->prepare('DELETE FROM event_messages WHERE draft_code IN (' . implode(',', array_fill(0, count($codes), '?')) . ')')->execute($codes);
+        }
         foreach (array_keys($refs) as $rel) {
             if (($p = purgeSafePath($uploads, $rel)) !== null) $files += purgeRmTree($p, false)[0];
         }

@@ -100,6 +100,8 @@ ok('kənar fayl toxunulmayıb', is_file($outside)); @unlink($outside);
 $db = new PDO('sqlite::memory:', null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]);
 $db->exec("CREATE TABLE invitations (slug TEXT, draft_code TEXT, form_data TEXT)");
 $db->exec("CREATE TABLE draft_invitations (id INTEGER PRIMARY KEY, draft_code TEXT, status TEXT, approved_slug TEXT, form_data TEXT)");
+$db->exec("CREATE TABLE event_messages (draft_code TEXT, kind TEXT)");   /* v50 */
+$db->exec("INSERT INTO event_messages VALUES ('DT-GONE01', 'congrats'), ('DT-LIVE01', 'review')");
 $enc = fn ($a) => json_encode($a, JSON_UNESCAPED_UNICODE);   /* DB-dəki forma: «\/» */
 $own = '_story/aaaa1111/own1.jpg'; $shr = '_story/aaaa1111/shared1.jpg'; $mus = '_music/bbbb2222/song1.mp3';
 $db->exec("INSERT INTO invitations VALUES ('canli-toy-ab12cd', 'DT-LIVE01', " . $db->quote($enc(['p' => '/uploads/' . $shr])) . ")");
@@ -124,6 +126,8 @@ ok('saxlananlar kodla qaytarılır', $res['kept'] === ['DT-LIVE01', 'DT-OTHER1']
 ok('sifarişin öz hekayə şəkli silinir', !is_file($root . '/' . $own) && $res['files'] === 1);
 ok('canlı dəvətnamənin ortaq şəkli qalır', is_file($root . '/' . $shr));
 ok('aktiv sifarişin musiqisi qalır', is_file($root . '/' . $mus));
+ok('silinən sifarişin mesaj qeydləri silinir, saxlananınkı qalır',
+    $db->query("SELECT draft_code FROM event_messages ORDER BY draft_code")->fetchAll(PDO::FETCH_COLUMN) === ['DT-LIVE01']);
 
 $one = $db->query("SELECT id, draft_code, approved_slug, form_data FROM draft_invitations WHERE draft_code = 'DT-LIVE01'")->fetchAll();
 $r1 = purgeOrders($db, $root, $one);

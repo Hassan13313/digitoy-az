@@ -47,6 +47,10 @@ $link = file_get_contents(__DIR__ . '/../public/api/owner_link.php');
 check('admin PİN-i hash ilə saxlayır', str_contains($link, 'password_hash($pin, PASSWORD_DEFAULT)'));
 $cfg = file_get_contents(__DIR__ . '/../public/api/config.php');
 check('sxem v50 cədvəlləri', str_contains($cfg, 'CREATE TABLE IF NOT EXISTS owner_edit_pins') && str_contains($cfg, 'CREATE TABLE IF NOT EXISTS guest_changes'));
+$purge = file_get_contents(__DIR__ . '/../public/api/admin_purge.php');
+check('dəvətnamə silinəndə tarixçə (qonaq adları) və PİN də silinir',
+    str_contains($purge, 'DELETE FROM guest_changes   WHERE invitation_id = :s') && str_contains($purge, 'DELETE FROM owner_edit_pins WHERE slug = :s'));
+check('dəvətnamə silinəndə mesaj qeydləri də silinir', str_contains($purge, 'DELETE FROM event_messages WHERE draft_code IN'));
 $ht = file_get_contents(__DIR__ . '/../public/api/.htaccess');
 check('kitabxana birbaşa açılmır', str_contains($ht, 'seating_owner_lib'));
 
