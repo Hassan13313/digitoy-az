@@ -66,9 +66,11 @@
       "body": [
         "DigiToy-da qiymət paketə görədir:",
         {"list": [
+          "MİNİ — 39 ₼, yalnız məlumat (Love Story və Təbrik Kitabı olmadan);",
           "SADƏ — 59 ₼;",
           "VİP — 89 ₼;",
-          "PREMIUM — 129 ₼, QR foto qalereyası daxil."
+          "PREMIUM — 129 ₼, QR foto qalereyası daxil;",
+          "VİDEO — 29 ₼, WhatsApp və Instagram üçün videolu dəvətnamə."
         ]},
         "Bir dəvətnamənin qiyməti qonaq sayından asılı deyil. Ödəniş son variant sizinlə təsdiqləndikdən sonra edilir."
       ]
@@ -94,7 +96,7 @@
   ],
   "cta": {
     "title": "Online dəvətnamənizi indi hazırlayın",
-    "text": "Şablonu seçin, məlumatları yazın — dəvətnamə adətən 24 saat ərzində hazır olur. Qiymət 59 ₼-dan."
+    "text": "Şablonu seçin, məlumatları yazın — dəvətnamə adətən 24 saat ərzində hazır olur. Qiymət 39 ₼-dan."
   },
   "related": ["toy-devetnamesi-metnleri", "nisan-devetnamesi-metnleri", "ad-gunu-devetnamesi-metnleri", "korporativ-devetname-metnleri"]
 }

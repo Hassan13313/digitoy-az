@@ -10,7 +10,8 @@
    Yəni `sections` sahəsi olmayan BÜTÜN köhnə dəvətnamələr olduğu kimi qalır —
    yalnız açıq-aşkar `false` yazılmış bölmə gizlənir.
 
-   ⚠ Paket kilidləri ÜSTÜNDÜR: SADE-də RSVP/oturma/qalereya onsuz da bağlıdır.
+   ⚠ Paket kilidləri ÜSTÜNDÜR: SADE-də RSVP/oturma/qalereya onsuz da bağlıdır,
+     MINI-də əlavə olaraq «Bizim Hekayəmiz» və «Təbrik Kitabı» da.
    Switch onu AÇA BİLMƏZ — `getSectionVisibility` iki şərti AND ilə birləşdirir.
 
    Hero (adlar + tarix) və outro/footer siyahıda yoxdur: onlar dəvətnamənin
@@ -35,7 +36,7 @@ export const SECTION_DEFS = [
        avtomatik açılsa boş blok kimi görünərdi. Bax: `isSectionOn`
        funksiyasındaki `DEFAULT_OFF` yoxlaması. */
     id: 'lovestory',
-    gate: null,
+    gate: 'allowLoveStory',   /* 2026-11-18 — MINI paketində yoxdur */
     labels: { az: 'Bizim Hekayəmiz', en: 'Our Story',      ru: 'Наша история' },
     hints:  { az: 'Tanışlıqdan toya qədər zaman xətti.', en: 'A timeline from first meeting to the wedding.', ru: 'Хронология от знакомства до свадьбы.' },
   },
@@ -77,7 +78,7 @@ export const SECTION_DEFS = [
   },
   {
     id: 'guestbook',
-    gate: null,
+    gate: 'allowGuestbook',   /* 2026-11-18 — MINI paketində yoxdur */
     labels: { az: 'Qonaq Dəftəri',     en: 'Guestbook',      ru: 'Книга пожеланий' },
     hints:  { az: 'Qonaqlar arzu və təbrik yazır.', en: 'Guests leave wishes and messages.', ru: 'Гости оставляют пожелания.' },
   },

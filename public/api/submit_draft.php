@@ -37,8 +37,7 @@ if (!$sessionId || !preg_match('/^[a-zA-Z0-9\-]{8,64}$/', $sessionId)) {
     exit;
 }
 
-$validPkgs = ['SADE', 'VIP', 'PREMIUM'];
-if (!in_array($package, $validPkgs, true)) $package = 'SADE';
+if (!isset(DIGITOY_PACKAGES[$package])) $package = 'SADE';
 
 $json = $formData ? json_encode($formData, JSON_UNESCAPED_UNICODE) : null;
 

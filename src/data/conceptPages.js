@@ -12,7 +12,7 @@
 export const CONCEPT_PAGES = {
   toy: {
     title: 'Toy və Nişan Dəvətnaməsi — Online Şablonlar | DigiToy',
-    description: 'Toy və nişan üçün online dəvətnamə şablonları: lüks, klassik, minimalist və vintage dizaynlar. İştirak Təsdiqi, oturma planı və QR foto paylaşımı ilə. 59 ₼-dan.',
+    description: 'Toy və nişan üçün online dəvətnamə şablonları: lüks, klassik, minimalist və vintage dizaynlar. İştirak Təsdiqi, oturma planı və QR foto paylaşımı ilə. 39 ₼-dan.',
     h1: { az: 'Toy və Nişan Dəvətnaməsi', en: 'Wedding & Engagement Invitations', ru: 'Приглашения на свадьбу и помолвку' },
     intro: {
       az: 'Toy və nişan üçün online dəvətnamə şablonları. Hər dizaynın öz açılışı, şrifti və rəng dili var. Canlı önbaxışa baxın, bəyəndiyinizi seçin, linki qonaqlarınıza WhatsApp ilə göndərin.',

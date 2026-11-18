@@ -17,7 +17,7 @@ import { readFileSync, readdirSync } from 'node:fs'
 import t from '../src/data/translations.js'
 import { LANDING_COPY } from '../src/data/landingCopy.js'
 import { BUILDER_COPY } from '../src/data/builderCopy.js'
-import { buildPricingPackages } from '../src/data/packageCopy.js'
+import { buildPricingPackages, buildVideoPackage } from '../src/data/packageCopy.js'
 import { getFaqItems } from '../src/data/faq.js'
 import { getReviews } from '../src/data/testimonials.js'
 
@@ -65,10 +65,15 @@ for (const [name, COPY] of [['LANDING_COPY', LANDING_COPY], ['BUILDER_COPY', BUI
 /* ── 4. Props ilə gələn məzmun ── */
 for (const l of LANGS) {
   const pk = buildPricingPackages(l)
-  ok(`${l}: 3 paket`, pk.length === 3)
-  ok(`${l}: qiymətlər 59/89/129`, pk.map((p) => p.price).join('/') === '59/89/129')
-  ok(`${l}: hər paketdə funksiya və hədiyyə sətri`, pk.every((p) => p.name && p.tagline && p.features.length > 0 && p.gift))
+  /* 2026-11-18: MINI (39) + ayrıca VIDEO kartı (29); Vagzali hədiyyə sətri çıxarıldı */
+  ok(`${l}: 4 veb-paket`, pk.length === 4)
+  ok(`${l}: qiymətlər 39/59/89/129`, pk.map((p) => p.price).join('/') === '39/59/89/129')
+  ok(`${l}: hər paketdə ad, təsvir və funksiyalar`, pk.every((p) => p.name && p.tagline && p.features.length > 0))
+  ok(`${l}: kartlarda Vagzali sətri yoxdur`, pk.every((p) => !p.gift && !JSON.stringify(p).includes('Vagzali')))
   ok(`${l}: yalnız Premium önə çıxır`, pk.filter((p) => p.featured).map((p) => p.id).join() === 'PREMIUM')
+  ok(`${l}: SADƏ kartında Love Story və Təbrik Kitabı var`, pk[1].features.filter(([st]) => st === 'yes').length >= 3)
+  const vp = buildVideoPackage(l)
+  ok(`${l}: VIDEO kartı 29 ₼, 2–3 saat`, vp.id === 'VIDEO' && vp.price === '29' && /2–3/.test(vp.ready) && vp.features.length >= 4)
   const faq = getFaqItems(l)
   ok(`${l}: FAQ tamdır`, faq.length >= 8 && faq.every((i) => i.q && i.a))
   const rv = getReviews(l)

@@ -32,7 +32,6 @@ import { resolveDressGenders } from '../../data/dressCode'
 import { PACKAGE_DEFS, getLockedSteps } from '../../data/packages'
 import { listBuilderSections, isSectionOn } from '../../data/sections'
 import LoveStoryStep from './LoveStoryStep'
-import { ACTIVE_PARTNERS } from '../../data/partners'
 import MusicStep from './MusicStep'
 import TemplateSelect from './TemplateSelect'
 import { resolveBuilderTemplateId, eventTypeOnSelect } from '../../templates/templateConfig'
@@ -48,7 +47,7 @@ import ContactPhoneField from '../builder/ContactPhoneField'
 import t from '../../data/translations'
 import BuilderShell, { StepCard, GhostButton } from '../builder/BuilderShell'
 import { ChoiceGroup, SelectCard, AddButton } from '../builder/fields'
-import { SectionToggleRow, ToggleList, OptionCard, PaletteCard, PartnerCard as PartnerOfferCard, QrShareCard } from '../builder/choices'
+import { SectionToggleRow, ToggleList, OptionCard, PaletteCard, QrShareCard } from '../builder/choices'
 import { Notice, NoticeButton, ConfirmDialog } from '../builder/feedback'
 import { inputBase, ringState, labelClass, hintClass } from '../builder/styles'
 import { trackEvent } from '../../utils/analytics'
@@ -1196,7 +1195,8 @@ function SeatingMethodSelector({ seatingPlan, seatingMethod, onPlanChange, onMet
      9 — Dəvətnamə bölmələri (göstər/gizlət)                                */
 /* Phase 43-də bir yeni id əlavə olundu — mövcud 0–9 TOXUNULMAZ qaldı:
      10 — Bizim Hekayəmiz (zaman xətti üzrə hekayə blokları) */
-const BUILDER_STEP_ORDER = [0, 1, 9, 10, 2, 3, 4, 5, 6, 7, 8]
+/* id 8 (köhnə «Partnyorlar») boşdur — başqa addıma VERİLMƏMƏLİDİR */
+const BUILDER_STEP_ORDER = [0, 1, 9, 10, 2, 3, 4, 5, 6, 7]
 
 /* Bölmə → onu dolduran builder addımı. Bölmə söndürüləndə addım da gizlənir
    (müştəri istifadə etməyəcəyi formanı doldurmağa məcbur qalmasın).
@@ -1231,7 +1231,6 @@ const STEP_DESCRIPTIONS = {
     5: 'Dəvətnamənizin fon musiqisini şəxsi zövqünüzə uyğun seçin.',
     6: 'Qonaqların öz masalarını asanlıqla tapması üçün.',
     7: 'QR kod vasitəsilə xatirə şəkillərini toplayın.',
-    8: 'Digitoy tərəfdaşları vasitəsilə xüsusi endirim və üstünlüklərdən yararlana bilərsiniz.',
     9: 'Dəvətnamədə hansı blokların görünəcəyini seçin. Söndürdüyünüz bölmə qonağa göstərilmir.',
     10: 'Tanışlığınızdan bu günə qədər olan anları zaman xətti kimi yazın. Hər bloka şəkil əlavə edə bilərsiniz — boş bloklar dəvətnamədə görünmür.',
   },
@@ -1244,7 +1243,6 @@ const STEP_DESCRIPTIONS = {
     5: 'Choose the background music of your invitation to match your taste.',
     6: 'Help guests find their table quickly and easily.',
     7: 'Collect memories via QR photo sharing.',
-    8: 'Through Digitoy partners you can enjoy special discounts and benefits.',
     9: 'Choose which blocks appear in your invitation. A section you switch off is never shown to guests.',
     10: 'Write the moments from your first meeting until today as a timeline. Each block can carry a photo — empty blocks are never shown.',
   },
@@ -1257,7 +1255,6 @@ const STEP_DESCRIPTIONS = {
     5: 'Выберите фоновую музыку приглашения по своему вкусу.',
     6: 'Помогите гостям быстро найти свой стол.',
     7: 'Собирайте воспоминания через QR-фотообмен.',
-    8: 'Через партнёров Digitoy вы можете получить специальные скидки и преимущества.',
     9: 'Выберите, какие блоки появятся в приглашении. Выключенный раздел гостям не показывается.',
     10: 'Опишите моменты от знакомства до сегодняшнего дня в виде хронологии. К каждому блоку можно добавить фото — пустые блоки не показываются.',
   },
@@ -1343,70 +1340,6 @@ function SectionsStep({ lang, pkgId, sections, onToggle, onAllOn }) {
   )
 }
 
-/* ── Phase 25.3 — Partnyorlar: Builder-in ayrıca SON addımı (bütün paketlərdə).
-   Sırf informativ — dəvətnamə datasına, draft-a və sifariş axınına toxunmur.
-   Partnyorlar src/data/partners.js-dən gəlir — yeni partnyor = massivə yeni obyekt. ── */
-const PARTNER_UI = {
-  az: {
-    stepLabel: 'Partnyorlar',
-    title: '🤝 Partnyor Endirimləri',
-    sub: 'Digitoy tərəfdaşları vasitəsilə xüsusi endirim və üstünlüklərdən yararlana bilərsiniz.',
-    badgeLabel: 'Sizin paketiniz:',
-    badgeValue: (pct) => `${pct}-dək`,
-    claim: 'Digitoy müştərisi olduğunuzu bildirərək paketinizə uyğun xüsusi endirimdən yararlana bilərsiniz.',
-    cta: '📌 Əlaqə saxlayarkən "Digitoy müştərisiyəm" deməyiniz kifayətdir. Paketinizə uyğun endirim avtomatik tətbiq olunacaq.',
-    footNote: (name) => `Bu endirim yalnız ${name} tərəfindən təqdim olunur və Digitoy tərəfdaş üstünlüyüdür.`,
-  },
-  en: {
-    stepLabel: 'Partners',
-    title: '🤝 Partner Discounts',
-    sub: 'Through Digitoy partners you can enjoy special discounts and benefits.',
-    badgeLabel: 'Your package:',
-    badgeValue: (pct) => `up to ${pct}`,
-    claim: 'Simply mention that you are a Digitoy customer to enjoy the special discount for your package.',
-    cta: '📌 When getting in touch, simply say "I am a Digitoy customer" — the discount for your package will be applied automatically.',
-    footNote: (name) => `This discount is provided solely by ${name} and is a Digitoy partner benefit.`,
-  },
-  ru: {
-    stepLabel: 'Партнёры',
-    title: '🤝 Партнёрские скидки',
-    sub: 'Через партнёров Digitoy вы можете получить специальные скидки и преимущества.',
-    badgeLabel: 'Ваш пакет:',
-    badgeValue: (pct) => `до ${pct}`,
-    claim: 'Сообщите, что вы клиент Digitoy, чтобы воспользоваться специальной скидкой по вашему пакету.',
-    cta: '📌 При обращении достаточно сказать «Я клиент Digitoy» — скидка по вашему пакету будет применена автоматически.',
-    footNote: (name) => `Эта скидка предоставляется только ${name} и является партнёрским преимуществом Digitoy.`,
-  },
-}
-
-/* Partnyorlar addımının məzmunu — bütün aktiv partnyorları dinamik render edir */
-function PartnersStep({ lang, pkgId }) {
-  const ui = PARTNER_UI[lang] || PARTNER_UI.az
-  if (ACTIVE_PARTNERS.length === 0) return null
-  return (
-    <div className="space-y-4">
-      {ACTIVE_PARTNERS.map((p) => {
-        const pct = p.discounts[pkgId] || p.discounts.SADE
-        return (
-          <PartnerOfferCard
-            key={p.id}
-            lang={lang}
-            name={p.name}
-            logo={p.logo ? <img src={p.logo} alt="" className="h-full w-full object-cover" /> : undefined}
-            description={p.description[lang] || p.description.az}
-            discount={ui.badgeValue(pct)}
-            packageLabel={ui.badgeLabel.replace(/:\s*$/, '')}
-            howTo={`${ui.claim} ${ui.cta.replace(/^📌\s*/, '')}`}
-            instagramUrl={p.instagram}
-            whatsappUrl={p.whatsapp}
-            disclaimer={ui.footNote(p.name)}
-          />
-        )
-      })}
-    </div>
-  )
-}
-
 export default function BuilderForm({ lang, initialData, initialStep = null, onSubmit, isAdmin = false }) {
   const tr = t[lang]
 
@@ -1441,7 +1374,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
   ))
 
   /* Phase 35 axını: 0 Dizayn · 1 Tədbir · 9 Bölmələr · 2 Məkan · 3 Proqram
-     · 4 Geyim · 5 Musiqi · 6 Oturma · 7 Qalereya · 8 Partnyorlar (həmişə SON).
+     · 4 Geyim · 5 Musiqi · 6 Oturma · 7 Qalereya.
      Sıra BUILDER_STEP_ORDER-dədir; id-lər Phase 25.3-dəki kimi qalır.
 
      ⚠ İki filtr var:
@@ -1622,8 +1555,6 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
   const isCouple = COUPLE_TYPES.includes(data.eventType)
   const isCorp   = CORP_TYPES.includes(data.eventType)
 
-  const partnerUi = PARTNER_UI[lang] || PARTNER_UI.az
-
   const extraTitles = STEP_EXTRA_TITLES[lang] || STEP_EXTRA_TITLES.az
 
   /* Addım id → başlıq (sıra deyil, ID ilə — bax BUILDER_STEP_ORDER) */
@@ -1636,7 +1567,6 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
     5: tr.step_music_title,
     6: tr.step5_title,
     7: tr.step6_title,
-    8: partnerUi.stepLabel,
     9: extraTitles[9],
     10: tr.step_lovestory_title || extraTitles[10],
   }
@@ -1887,7 +1817,7 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
         ) : null}
       >
       <StepCard
-        title={actualStep === 8 ? partnerUi.title.replace(/^🤝\s*/, '') : titleOf(actualStep)}
+        title={titleOf(actualStep)}
         subtitle={(STEP_DESCRIPTIONS[lang] || STEP_DESCRIPTIONS.az)[actualStep]}
       >
 
@@ -2188,10 +2118,6 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
           <GalleryAdminStep data={data} isCouple={isCouple} isCorp={isCorp} isAdmin={isAdmin || adminMode} canonicalSlug={canonicalSlug} />
         )}
 
-        {/* STEP 8 — Partnyorlar (bütün paketlərdə son addım) */}
-        {actualStep === 8 && (
-          <PartnersStep lang={lang} pkgId={pkgId} />
-        )}
       </StepCard>
       </BuilderShell>
 

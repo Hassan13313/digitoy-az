@@ -91,6 +91,9 @@ export const ORDER_DETAIL_TABS = [
  *        Təsdiqlənmiş sifarişin tab məzmunu (SeatingPlanTab, GuestReportTab, RsvpTab)
  * @param {Partial<Record<'seating'|'report'|'rsvp',number>>} [p.tabCounts]
  * @param {import('react').ReactNode} [p.asideExtra]  Digitoy: xülasə sütununun sonunda əlavə blok
+ * @param {boolean} [p.webInvite=true]  false — veb-dəvətnaməsi olmayan sifariş (VİDEO paketi):
+ *        şablon/dress code sətirləri, «Redaktə et» və qonaq alətləri göstərilmir
+ * @param {import('react').ReactNode} [p.mainPanel]  webInvite=false olanda sağ sütunun məzmunu
  */
 export default function OrderDetail({
   order,
@@ -112,7 +115,10 @@ export default function OrderDetail({
   panels = {},
   tabCounts = {},
   asideExtra,
+  webInvite = true,
+  mainPanel,
 }) {
+  if (!webInvite) onEdit = undefined;
   const [dialog, setDialog] = useControllable(dialogProp, onDialogChange, null);
   const [tab, setTab] = useControllable(tabProp, onTab, 'seating');
   const s = order.status;
@@ -127,18 +133,18 @@ export default function OrderDetail({
       label: 'Paket',
       value: `${order.pkg}${order.price != null ? ` (${formatPrice(order.price)})` : ''}`,
     },
-    { icon: LayoutTemplate, label: 'Şablon', value: order.template && <TemplateLabel {...order.template} /> },
+    webInvite && { icon: LayoutTemplate, label: 'Şablon', value: order.template && <TemplateLabel {...order.template} /> },
     { icon: PartyPopper, label: 'Hadisə', value: order.event },
     { icon: Calendar, label: 'Tarix', value: order.date },
     { icon: MapPin, label: 'Məkan', value: order.venue },
-    { icon: Shirt, label: 'Dress code', value: order.dressCode },
+    webInvite && { icon: Shirt, label: 'Dress code', value: order.dressCode },
     {
       icon: Phone,
       label: 'Telefon',
       value: order.phone && <span className="tabular-nums">{order.phone}</span>,
     },
     ...(order.extraInfo ?? []),
-  ];
+  ].filter(Boolean);
 
   const WaTag = whatsappHref ? 'a' : 'button';
   const waProps = whatsappHref
@@ -295,7 +301,7 @@ export default function OrderDetail({
 
         {/* ── Sağ: qonaq alətləri ── */}
         <div className="mt-8 min-w-0 lg:mt-0">
-          {approved ? (
+          {!webInvite ? mainPanel : approved ? (
             <>
               <Tabs
                 label="Qonaq alətləri"

@@ -4,9 +4,8 @@
 // ox düymələri və Space/Enter avtomatik işləyir.
 // ════════════════════════════════════════════════════════════════
 import { useId } from 'react';
-import { ArrowUpRight, Check, Copy, Eye, Lock, Pin, Sparkles } from 'lucide-react';
+import { ArrowUpRight, Check, Copy, Eye, Lock, Sparkles } from 'lucide-react';
 import t from '../../data/translations';
-import { WhatsAppIcon } from '../landing/v2/ui';
 import { Switch } from './fields';
 import { TemplateScene } from '../public/templates';
 
@@ -465,111 +464,6 @@ export function PaletteCard({
         </div>
       )}
     </div>
-  );
-}
-
-// ════════════════════════════════════════════════════════════════
-/**
- * Partnyor endirim kartı.
- * @param {object} p
- * @param {string} p.name              «Vagzali.az»
- * @param {React.ReactNode} [p.logo]   Loqo (<img>); verilməsə adın ilk hərfi
- * @param {string} [p.description]
- * @param {string} p.discount          «15%-dək»
- * @param {string} [p.packageLabel]    «Sizin paketiniz»
- * @param {string} [p.howTo]           İstifadə qaydası (məs. «"Digitoy müştərisiyəm" deyin»)
- * @param {string} [p.instagramUrl]
- * @param {string} [p.whatsappUrl]
- * @param {string} [p.disclaimer]
- * @param {'az'|'en'|'ru'} [p.lang]
- */
-export function PartnerCard({
-  name,
-  logo,
-  description,
-  discount,
-  packageLabel,
-  howTo,
-  instagramUrl,
-  whatsappUrl,
-  disclaimer,
-  lang = 'az',
-}) {
-  const x = tx(lang);
-  return (
-    <article className="relative overflow-hidden rounded-3xl bg-white p-6 shadow-soft ring-1 ring-gold/20 sm:p-8">
-      <span
-        aria-hidden="true"
-        className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[radial-gradient(closest-side,rgba(232,213,163,0.45),transparent)]"
-      />
-      <div className="relative flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex items-center gap-4">
-          <span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-full bg-cream font-serif text-2xl italic text-gold-deep ring-1 ring-gold/30">
-            {logo ?? name?.[0]}
-          </span>
-          <div>
-            <h4 className="font-serif text-[26px] leading-tight text-ink">{name}</h4>
-            {description && <p className="mt-0.5 text-[13.5px] text-brown-dark/90">{description}</p>}
-          </div>
-        </div>
-        {/* endirim möhürü */}
-        <div className="flex shrink-0 items-center gap-3 self-start rounded-2xl bg-espresso-grad px-5 py-3 text-cream shadow-lift ring-1 ring-inset ring-gold/30">
-          <div>
-            <p className="text-[9.5px] font-semibold uppercase tracking-[0.2em] text-gold-light">
-              {packageLabel ?? x.partnerYourPackage ?? 'Sizin paketiniz'}
-            </p>
-            <p className="font-serif text-[30px] leading-none lining-nums">{discount}</p>
-          </div>
-          <span className="text-[11px] uppercase tracking-[0.14em] text-sand">{x.partnerDiscount ?? 'endirim'}</span>
-        </div>
-      </div>
-
-      {howTo && (
-        <div className="relative mt-6 flex items-start gap-3 rounded-2xl bg-gold-mist/50 px-4 py-3.5 text-[14px] leading-relaxed text-brown-dark">
-          <Pin className="mt-0.5 h-4 w-4 shrink-0 text-gold-deep" strokeWidth={1.8} aria-hidden="true" />
-          <span>{howTo}</span>
-        </div>
-      )}
-
-      {(instagramUrl || whatsappUrl) && (
-        <div className="relative mt-6 grid gap-2.5 sm:grid-cols-2">
-          {instagramUrl && (
-            <a
-              href={instagramUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-white text-[12px] font-semibold uppercase tracking-label text-gold-deep ring-1 ring-inset ring-gold/45 transition-colors hover:bg-gold-mist/50"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                className="h-4 w-4"
-                aria-hidden="true"
-              >
-                <rect x="3" y="3" width="18" height="18" rx="5" />
-                <circle cx="12" cy="12" r="4" />
-                <circle cx="17.3" cy="6.7" r="0.9" fill="currentColor" stroke="none" />
-              </svg>
-              Instagram
-            </a>
-          )}
-          {whatsappUrl && (
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-espresso text-[12px] font-semibold uppercase tracking-label text-cream ring-1 ring-inset ring-gold/30 transition-colors hover:bg-espresso-soft"
-            >
-              <WhatsAppIcon className="h-4 w-4 text-gold-light" />
-              WhatsApp
-            </a>
-          )}
-        </div>
-      )}
-      {disclaimer && <p className="relative mt-5 text-[12px] leading-relaxed text-brown-dark/80">{disclaimer}</p>}
-    </article>
   );
 }
 

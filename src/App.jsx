@@ -52,7 +52,7 @@ const ACTIVE_UI = 'v3'
    yazır — bu sözlər başlığın ƏVVƏLİNDƏ olmalıdır. ⚠ seo.php ilə HƏRFBƏHƏRF
    eyni (tests/seo_keywords_test.mjs). */
 const HOME_TITLE = 'Online Dəvətnamə — Rəqəmsal və Elektron Toy Dəvətnaməsi | DigiToy'
-const HOME_DESC  = 'Online dəvətnamə hazırlayın: toy, nişan və ad günü üçün rəqəmsal (elektron) dəvətnamə — İştirak Təsdiqi, oturma planı, QR foto paylaşımı. 59 ₼-dan.'
+const HOME_DESC  = 'Online dəvətnamə hazırlayın: toy, nişan və ad günü üçün rəqəmsal (elektron) dəvətnamə — İştirak Təsdiqi, oturma planı, QR foto paylaşımı. 29 ₼-dan.'
 const DEMO_TITLE = 'Online Dəvətnamə Nümunəsi — Rəqəmsal Toy Dəvətnaməsi | DigiToy'
 const DEMO_DESC  = 'Online dəvətnamə necə görünür? DigiToy rəqəmsal toy dəvətnaməsinin canlı nümunəsi: İştirak Təsdiqi, oturma planı, QR foto paylaşımı və premium dizayn bir arada.'
 const TEMPLATES_TITLE = 'Online Dəvətnamə Şablonları — Toy, Nişan, Xına, Ad Günü | DigiToy'

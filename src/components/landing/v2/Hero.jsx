@@ -41,7 +41,7 @@ export default function Hero({ lang = 'az', onStart, onDemo, demoHref = '/demo' 
         };
 
   const trust = [
-    x.heroTrust1 ?? '59 ₼-dan başlayan',
+    x.heroTrust1 ?? '29 ₼-dan başlayan',
     x.heroTrust2 ?? 'AZ · EN · RU',
     x.heroTrust3 ?? '~5 dəqiqəyə hazır',
   ];

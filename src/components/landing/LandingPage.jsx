@@ -11,7 +11,8 @@ import { Container, SectionHeading } from './v2/ui'
 import t from '../../data/translations'
 import { getReviews } from '../../data/testimonials'
 import { getFaqItems } from '../../data/faq'
-import { buildPricingPackages, UI as PKG_UI, VAGZALI_NOTE } from '../../data/packageCopy'
+import { buildPricingPackages, buildVideoPackage, UI as PKG_UI } from '../../data/packageCopy'
+import { isVideoPackage } from '../../data/packages'
 import { SOCIAL_LINKS, CONTACT_EMAIL } from '../../data/constants'
 import { LEGAL_DOCS } from '../../data/legal/docs'
 import { GUIDES } from '../../data/guides'
@@ -29,6 +30,8 @@ import OnlineInvitationInfo from './v2/OnlineInvitationInfo'
    paket seçiləndə yüklənir (ana səhifənin JS-i ~1 MB-dan xeyli kiçilir) */
 const BuilderForm = lazy(() => import('./BuilderForm'))
 const Preview     = lazy(() => import('./Preview'))
+/* 2026-11-18 — VİDEO paketi (29 ₼): veb-builder deyil, qısa sifariş forması */
+const VideoOrderForm = lazy(() => import('./VideoOrderForm'))
 function StepLoader() {
   return (
     <div className="flex min-h-[50vh] items-center justify-center" role="status" aria-label="Yüklənir">
@@ -204,7 +207,8 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
         return
       }
       if (s.stage === 'builder') {
-        const pkg = readBuilderSnapshot()?.data?.package
+        /* Girişin öz paketi (VIDEO builder snapshot-u yazmır) → yoxdursa snapshot */
+        const pkg = s.pkg || readBuilderSnapshot()?.data?.package
         /* «yenidən başla»-dan sonra (snapshot silinib) builder-ə qayıtmaq olmur */
         if (from === 'packages' && !pkg) { patchState({ stage: 'packages' }); return }
         setShowPreview(false)
@@ -313,7 +317,7 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
   /* Paket seçildikdə çağırılır — yalnız bundan sonra BuilderForm açılır */
   const handlePackageSelect = (pkgId) => {
     try { localStorage.setItem('selected_package', pkgId) } catch { /* private mode */ }
-    pushView(currentUrl(), { view: historyView, stage: 'builder' })
+    pushView(currentUrl(), { view: historyView, stage: 'builder', pkg: pkgId })
     setSelectedPackage(pkgId)
     setFormData(d => ({ ...d, package: pkgId }))   // initialData.package-i sinxronlaşdır
     setReturnToStep(null)
@@ -323,6 +327,7 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
   }
 
   const nav = navItems(tr)
+  const videoPkg = buildVideoPackage(lang)
   const pkgUi = PKG_UI[lang] || PKG_UI.az
   const legal = legalUi(lang).links
   const legalLinks = LEGAL_DOCS.map((d) => ({
@@ -377,11 +382,15 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
         {/* Başlıq — yalnız builder/preview aktiv ikən göstərilir (paket kartlarının öz başlığı var) */}
         {(showPreview || selectedPackage) && (
           <Container className="mb-8 sm:mb-16">
-            <SectionHeading
-              eyebrow={showPreview ? 'Preview' : 'Builder'}
-              title={tr.builder_title}
-              subtitle={showPreview ? undefined : tr.builder_subtitle}
-            />
+            {!showPreview && isVideoPackage(selectedPackage) ? (
+              <SectionHeading eyebrow="Video" title={videoPkg.heading} subtitle={videoPkg.headingSub} />
+            ) : (
+              <SectionHeading
+                eyebrow={showPreview ? 'Preview' : 'Builder'}
+                title={tr.builder_title}
+                subtitle={showPreview ? undefined : tr.builder_subtitle}
+              />
+            )}
           </Container>
         )}
 
@@ -408,17 +417,23 @@ export default function LandingPage({ lang, setLang, weddingData, setWeddingData
                 lang={lang}
                 embedded
                 packages={buildPricingPackages(lang)}
-                cardIds={{ SADE: 'first-pricing-card', VIP: 'vip-package-card' }}
+                videoPackage={videoPkg}
+                cardIds={{ MINI: 'first-pricing-card', VIP: 'vip-package-card', VIDEO: 'video-package-card' }}
                 onSelectPackage={handlePackageSelect}
                 copy={{
                   eyebrow: tr.pricingEyebrow,
                   title: pkgUi.title,
                   subtitle: pkgUi.subtitle,
-                  partner: VAGZALI_NOTE[lang] || VAGZALI_NOTE.az,
                   templates: TEMPLATES_CTA[lang] || TEMPLATES_CTA.az,
                   select: pkgUi.btn,
                 }}
               />
+            </motion.div>
+          ) : isVideoPackage(selectedPackage) && !isAdmin ? (
+            <motion.div key="video" className="mx-auto max-w-6xl px-5 sm:px-6" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.4, ease: [0.32, 0, 0.68, 1] }}>
+              <Suspense fallback={<StepLoader />}>
+                <VideoOrderForm lang={lang} />
+              </Suspense>
             </motion.div>
           ) : (
             <motion.div key="builder" className="mx-auto max-w-6xl px-5 sm:px-6" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.4, ease: [0.32, 0, 0.68, 1] }}>

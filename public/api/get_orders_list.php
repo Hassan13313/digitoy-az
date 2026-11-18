@@ -83,7 +83,6 @@ $stmt->bindValue(':off', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $rows = $stmt->fetchAll();
 
-$pkgLabels = ['SADE' => 'Sadə (59₼)', 'VIP' => 'VİP (89₼)', 'PREMIUM' => 'Premium (129₼)'];
 
 $orders = [];
 foreach ($rows as $row) {
@@ -104,7 +103,7 @@ foreach ($rows as $row) {
         'id'             => $row['id'],
         'draft_code'     => $row['draft_code'],
         'package'        => $row['package'],
-        'package_label'  => $pkgLabels[$row['package']] ?? $row['package'],
+        'package_label'  => DIGITOY_PACKAGES[$row['package']] ?? $row['package'],
         'status'         => $row['status'],
         'customer_phone' => $row['customer_phone'] ?? '',
         'submitted_at'   => $row['submitted_at'],

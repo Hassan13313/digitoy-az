@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Armchair, LogIn } from 'lucide-react'
+import { Armchair, Clapperboard, LogIn, Music, PenLine, StickyNote } from 'lucide-react'
 import { DEFAULT_TEMPLATE_ID } from '../../templates/templateConfig'
 import { getDraftByCode, approveDraft, rejectDraft, deleteDraft, saveInvitation } from '../../utils/api'
 import { computeInviteSlug } from '../../utils/inviteSlug'
@@ -9,9 +9,11 @@ import AdminRSVPBlock from './AdminRSVPBlock'
 import OwnerPanelLinkCard from './OwnerPanelLinkCard'
 import OrderDetail from './v2/OrderDetail'
 import { customerWaUrl, formatPhoneDisplay } from '../../utils/customerPhone'
-import { Button, ConfirmDialog, EmptyState, Notice, PageHeader, Skeleton } from './v2/adminUi'
+import { Button, ConfirmDialog, EmptyState, Notice, PageHeader, Panel, Skeleton } from './v2/adminUi'
 import { azDate } from './adminFormat'
 import { templateMeta } from './templateMeta'
+import { describeVideoSource, sampleWatchUrl, videoMusicLabel } from '../../data/videoSamples'
+import { isVideoPackage, packageLabel } from '../../data/packages'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Sifariş detalı — UI redesign 2026-10 (görünüş v2/OrderDetail)
@@ -31,7 +33,6 @@ const EVENT_LABELS = {
   toy: 'Toy', nishan: 'Nişan', birthday: 'Ad günü', corporate: 'Korporativ', other: 'Digər',
   xina: 'Xına gecəsi', sunnet: 'Sünnət toyu', baby: 'Baby shower', anniversary: 'İldönümü', graduation: 'Məzuniyyət', bachelorette: 'Qız gecəsi',
 }
-const PKG_LABEL = { SADE: 'Sadə (59₼)', VIP: 'VİP (89₼)', PREMIUM: 'Premium (129₼)' }
 const VIEW_STATUS = { submitted: 'new' }
 
 /* Token client-side yoxla — server round-trip olmadan */
@@ -81,12 +82,20 @@ export default function AdminOrderDetail({ draftCode, onBack }) {
     setDraft(prev => ({ ...prev, status: 'approved', approved_slug: slug || prev.approved_slug }))
   }
 
+  /* 2026-11-18 — VİDEO sifarişində veb-dəvətnamə YOXDUR: yalnız status təsdiqlənir */
+  const isVideo = isVideoPackage(draft?.package)
+
   const handleApprove = async () => {
     if (!isAdminTokenValid()) { setSessionError(true); return }
     setBusy(b => ({ ...b, approve: true }))
     setActionError('')
     try {
-      await createInvitation()
+      if (isVideo) {
+        await approveDraft(draftCode, '')
+        setDraft(prev => ({ ...prev, status: 'approved' }))
+      } else {
+        await createInvitation()
+      }
       setApproveAsk(false)
     } catch {
       setActionError('Xəta: təsdiq edilmədi.')
@@ -166,7 +175,7 @@ export default function AdminOrderDetail({ draftCode, onBack }) {
   const slug = draft.approved_slug
   const inviteUrl = slug ? `https://digitoy.az/invite/${slug}` : undefined
 
-  const extraInfo = []
+  const extraInfo = isVideo ? videoInfoRows(fd) : []
   if (fd.seatingMethod === 'digitory') extraInfo.push({ icon: Armchair, label: 'Oturma planı', value: 'DigiToy dolduracaq (+15 AZN)' })
   if (fd.seatingMethod === 'self' && fd.seatingPlan) extraInfo.push({ icon: Armchair, label: 'Oturma planı', value: 'Müştəri doldurdu' })
 
@@ -174,7 +183,7 @@ export default function AdminOrderDetail({ draftCode, onBack }) {
     code: draftCode,
     status: VIEW_STATUS[draft.status] || draft.status || 'draft',
     names: names || '—',
-    pkg: PKG_LABEL[draft.package] || draft.package,
+    pkg: packageLabel(draft.package),
     /* Phase 4 — şablon adı metadata-dan (hardcode yox) */
     template: templateMeta(fd.templateId || draft.template_id || DEFAULT_TEMPLATE_ID),
     event: EVENT_LABELS[fd.eventType] || fd.eventType || undefined,
@@ -189,7 +198,7 @@ export default function AdminOrderDetail({ draftCode, onBack }) {
   }
 
   /* Approved amma slug tapılmadı — dəvətnaməni sifarişin məlumatı ilə yarat */
-  const missingInvite = draft.status === 'approved' && !inviteUrl ? (
+  const missingInvite = !isVideo && draft.status === 'approved' && !inviteUrl ? (
     <Notice
       tone="warning"
       title="Dəvətnamə linki tapılmadı"
@@ -227,6 +236,8 @@ export default function AdminOrderDetail({ draftCode, onBack }) {
         /* Phase 50 — 050… kimi yerli yazılışda da işləsin (əvvəl wa.me/050… idi) */
         whatsappHref={customerWaUrl(draft.customer_phone)}
         busy={busy}
+        webInvite={!isVideo}
+        mainPanel={isVideo ? <VideoOrderPanel fd={fd} approved={draft.status === 'approved'} /> : undefined}
         asideExtra={
           <>
             {missingInvite}
@@ -247,12 +258,51 @@ export default function AdminOrderDetail({ draftCode, onBack }) {
         open={approveAsk}
         tone="success"
         title="Sifarişi təsdiqləmək?"
-        description={`${draftCode} · ${names || '—'} — dəvətnamə də yaradılacaq və müştəri linki aktiv olacaq.`}
+        description={isVideo
+          ? `${draftCode} · ${names || '—'} — video sifarişi təsdiqlənəcək (veb-dəvətnamə yaradılmır). Hazır videonu müştəriyə WhatsApp-da göndərin.`
+          : `${draftCode} · ${names || '—'} — dəvətnamə də yaradılacaq və müştəri linki aktiv olacaq.`}
         confirmLabel="Təsdiq et"
         busy={busy.approve}
         onCancel={() => setApproveAsk(false)}
         onConfirm={handleApprove}
       />
     </>
+  )
+}
+
+/* ── VİDEO sifarişi (2026-11-18) — məlumat sətirləri və sağ panel ── */
+function videoSampleValue(v) {
+  const { sample, link } = describeVideoSource(v)
+  if (sample) {
+    return <a href={sampleWatchUrl(sample)} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{sample.title.az}</a>
+  }
+  if (link) {
+    return <a href={link} target="_blank" rel="noopener noreferrer" className="break-all underline underline-offset-2">Öz nümunəsi: {link}</a>
+  }
+  return 'WhatsApp-da göndəriləcək'
+}
+
+function videoInfoRows(fd) {
+  return [
+    { icon: Clapperboard, label: 'Video nümunəsi', value: videoSampleValue(fd.video) },
+    { icon: Music, label: 'Musiqi', value: videoMusicLabel(fd.videoMusic, 'Siz seçin') },
+    ...(fd.note ? [{ icon: StickyNote, label: 'Qeyd', value: fd.note }] : []),
+  ]
+}
+
+function VideoOrderPanel({ fd, approved }) {
+  return (
+    <Panel title="Videodakı yazı" icon={PenLine}>
+      <p className="whitespace-pre-line text-[14.5px] leading-relaxed text-espresso">
+        {(fd.inviteText || '').trim() || 'Müştəri yazmayıb — tədbirə uyğun mətni siz yazın.'}
+      </p>
+      <Notice
+        tone="info"
+        className="mt-5"
+        title={approved
+          ? 'Sifariş təsdiqlənib. Hazır videonu (MP4) müştəriyə WhatsApp-da göndərin.'
+          : 'Videolu dəvətnamə sifarişidir — veb-dəvətnamə və qonaq alətləri yoxdur. Video 2–3 saat ərzində hazırlanıb müştəriyə WhatsApp-da göndərilir.'}
+      />
+    </Panel>
   )
 }

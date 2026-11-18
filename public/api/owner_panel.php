@@ -66,7 +66,7 @@ echo json_encode([
     'ok'       => true,
     'slug'     => $slug,
     'active'   => (int) $row['is_active'] === 1,
-    'package'  => in_array($pkg, ['SADE', 'VIP', 'PREMIUM'], true) ? $pkg : 'SADE',
+    'package'  => in_array($pkg, DIGITOY_WEB_PACKAGES, true) ? $pkg : 'SADE',
     'sections' => (object) $sections,
     /* Albomun baxış linki üçün token (bax gallery_auth.php › galleryViewToken) */
     'galleryView' => galleryViewToken($slug),

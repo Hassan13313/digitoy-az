@@ -1,5 +1,6 @@
-import { DRESS_CODE_PALETTES } from '../data/constants'
-import { ACTIVE_PARTNERS } from '../data/partners'
+import { DRESS_CODE_PALETTES, COUPLE_TYPES, CORP_TYPES } from '../data/constants'
+import { packageLabel } from '../data/packages'
+import { describeVideoSource, sampleWatchUrl, videoMusicLabel } from '../data/videoSamples'
 import { formatAzDate, formatTime24 } from './dateFormat'
 import t from '../data/translations'
 import { waChatUrl } from './waLink'
@@ -24,16 +25,10 @@ export function buildShortLiveLink(slug) {
   return `${getBasePlatformUrl()}/invite/${slug}`
 }
 
-const PACKAGE_LABELS = {
-  SADE:    'Sadə (59₼)',
-  VIP:     'VİP (89₼)',
-  PREMIUM: 'Premium (129₼)',
-}
-
 /* ── Mərkəzi WhatsApp mesaj generatoru ── */
 export function buildWhatsAppMessage(data, lang = 'az', slug = '', draftCode = '') {
-  const isCouple = ['toy', 'nishan'].includes(data.eventType)
-  const isCorp   = ['corporate', 'other'].includes(data.eventType)
+  const isCouple = COUPLE_TYPES.includes(data.eventType)
+  const isCorp   = CORP_TYPES.includes(data.eventType)
 
   const eventLabels = {
     toy:       t.az.event_toy,
@@ -67,7 +62,7 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '', draftCode = '
     nameLines = `👤 Ad: ${data.brideName || '—'}`
   }
 
-  const pkgLabel = PACKAGE_LABELS[data.package] || PACKAGE_LABELS[data.selectedPackage] || '—'
+  const pkgLabel = packageLabel(data.package || data.selectedPackage)
 
   const lines = [
     `💍 YENİ SİFARİŞ — Digitoy.az`,
@@ -85,29 +80,47 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '', draftCode = '
     ...(draftCode ? [`📋 Sifariş Kodu: ${draftCode}`] : []),
   ]
 
-  /* Phase 25.2 — Partnyor bonusları (yalnız admin üçün informativ blok).
-     Bütün aktiv partnyorlar üçün render olunur — yeni partnyor avtomatik daxil olur. */
-  const bonusPkg = ['SADE', 'VIP', 'PREMIUM'].includes(data.package) ? data.package
-    : ['SADE', 'VIP', 'PREMIUM'].includes(data.selectedPackage) ? data.selectedPackage
-    : null
-  if (bonusPkg) {
-    for (const partner of ACTIVE_PARTNERS) {
-      const pct = partner.discounts[bonusPkg]
-      if (!pct) continue
-      lines.push(
-        `━━━━━━━━━━━━━━━━━━`,
-        ``,
-        `🎁 ${partner.name} Bonusu`,
-        ``,
-        `Paketə uyğun endirim:`,
-        `${pct}-dək`,
-        ``,
-        `━━━━━━━━━━━━━━━━━━`,
-      )
-    }
-  }
-
   return encodeURIComponent(lines.join('\n'))
+}
+
+/* ── VİDEO paketi (29 ₼) — sifariş mesajı (admin üçün, həmişə AZ) ──
+   `v` = VideoOrderForm-un form_data-sı (bax components/landing/VideoOrderForm.jsx) */
+export function buildVideoWhatsAppMessage(v) {
+  const isCouple = COUPLE_TYPES.includes(v.eventType)
+  const isCorp   = CORP_TYPES.includes(v.eventType)
+  const eventLabel = v.eventType === 'other' ? (v.eventName || t.az.event_other) : (t.az[`event_${v.eventType}`] || v.eventType || '—')
+  const { formattedDate, dayName } = formatAzDate(v.date, 'az')
+  const dateStr = v.date ? (dayName ? `${formattedDate} — ${dayName}` : formattedDate) : '—'
+
+  const { sample, link } = describeVideoSource(v.video)
+  const sampleLine = sample ? `🎞️ Nümunə: ${sample.title.az}\n${sampleWatchUrl(sample)}`
+    : link ? `🎞️ Öz nümunəsi: ${link}`
+    : `🎞️ Nümunə: WhatsApp-da göndəriləcək`
+
+  const nameLines = isCouple ? `🤵 Bəy: ${v.groomName || '—'}\n👰 Gəlin: ${v.brideName || '—'}`
+    : isCorp ? `🏢 Ad: ${v.eventName || '—'}`
+    : `👤 Ad: ${v.brideName || '—'}${v.age ? ` (${v.age})` : ''}`
+
+  const lines = [
+    `🎬 YENİ SİFARİŞ — Digitoy.az`,
+    `━━━━━━━━━━━━━━━━━━`,
+    `📦 Paket: ${packageLabel('VIDEO')}`,
+    sampleLine,
+    `🎉 Tədbir: ${eventLabel}`,
+    nameLines,
+    `📅 Tarix: ${dateStr}`,
+    `🕒 Saat: ${v.time ? formatTime24(v.time) : '—'}`,
+    `📍 Məkan: ${v.venueName || '—'}`,
+    `📝 Yazı: ${(v.inviteText || '').trim() || 'Siz yazın'}`,
+    `🎵 Musiqi: ${videoMusicLabel(v.videoMusic, 'Siz seçin')}`,
+    ...((v.note || '').trim() ? [`💬 Qeyd: ${v.note.trim()}`] : []),
+    `━━━━━━━━━━━━━━━━━━`,
+  ]
+  return encodeURIComponent(lines.join('\n'))
+}
+
+export function buildVideoWhatsAppUrl(v, waNumber = '994992133696') {
+  return waChatUrl(waNumber, buildVideoWhatsAppMessage(v))
 }
 
 /* ── WhatsApp URL ── (wa.me YOX — emojiləri sındırır, bax utils/waLink.js) */

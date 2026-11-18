@@ -19,7 +19,7 @@ export const HOME_SEO = {
     blocks: [
       { title: 'Elektron dəvətnamədə nələr var', text: 'Geri sayım, Google Maps və Waze ilə məkan, tədbirin proqramı, geyim tərzi, fon musiqisi və foto qalereya. Qonaq iştirakını elə dəvətnamədə təsdiqləyir — «Gələcəm», «Gəlmiyəcəm» və ya «Bəlkə» — siz isə cavabları real vaxtda görürsünüz. Paketdən asılı olaraq oturma planı (masa nömrəsi) və QR kodla foto paylaşımı da əlavə olunur.' },
       { title: 'Dəvətnamə necə hazırlanır', text: 'Tədbiri və şablonu seçin. Adları, tarixi, məkanı və dəvət mətnini yazın, istəsəniz musiqi və şəkil əlavə edin. Önbaxışda yoxlayıb sifarişi WhatsApp ilə göndərin — dəvətnamə adətən 24 saat ərzində hazır olur, linki istənilən sayda qonağa göndərmək olar.' },
-      { title: 'Online dəvətnamə qiyməti', text: 'Paketlər 59 ₼-dan başlayır: SADƏ — 59 ₼, VİP — 89 ₼, PREMIUM — 129 ₼. Ödəniş son variant sizinlə təsdiqləndikdən sonra edilir. Dəvətnamə Azərbaycan, ingilis və rus dillərində açılır.' },
+      { title: 'Online dəvətnamə qiyməti', text: 'Paketlər 29 ₼-dan başlayır: VİDEO (videolu dəvətnamə) — 29 ₼, MİNİ — 39 ₼, SADƏ — 59 ₼, VİP — 89 ₼, PREMIUM — 129 ₼. Ödəniş son variant sizinlə təsdiqləndikdən sonra edilir. Dəvətnamə Azərbaycan, ingilis və rus dillərində açılır.' },
     ],
     eventsTitle: 'Tədbirə görə dəvətnamə şablonları',
     guidesTitle: 'Dəvətnamə mətnləri və bələdçilər',
@@ -31,7 +31,7 @@ export const HOME_SEO = {
     blocks: [
       { title: 'What is inside', text: 'A countdown, the venue with Google Maps and Waze, the programme, dress code, background music and a photo gallery. Guests confirm attendance right in the invitation and you see the answers in real time. Depending on the package, a seating plan (table number) and QR photo sharing are added.' },
       { title: 'How to create it', text: 'Choose the event and a design. Enter the names, date, venue and invitation text, and add music and photos if you like. Check the preview and send the order via WhatsApp — the invitation is usually ready within 24 hours and the link can be sent to any number of guests.' },
-      { title: 'Price', text: 'Packages start at 59 ₼: SADƏ — 59 ₼, VIP — 89 ₼, PREMIUM — 129 ₼. You pay once the final version is approved with you. Invitations open in Azerbaijani, English and Russian.' },
+      { title: 'Price', text: 'Packages start at 29 ₼: VIDEO (video invitation) — 29 ₼, MINI — 39 ₼, SADƏ — 59 ₼, VIP — 89 ₼, PREMIUM — 129 ₼. You pay once the final version is approved with you. Invitations open in Azerbaijani, English and Russian.' },
     ],
     eventsTitle: 'Invitation designs by event',
     guidesTitle: 'Invitation wording and guides (in Azerbaijani)',
@@ -43,7 +43,7 @@ export const HOME_SEO = {
     blocks: [
       { title: 'Что внутри', text: 'Обратный отсчёт, место с Google Maps и Waze, программа, дресс-код, фоновая музыка и фотогалерея. Гости подтверждают участие прямо в приглашении, а вы видите ответы в реальном времени. В зависимости от пакета добавляются план рассадки (номер стола) и обмен фото по QR-коду.' },
       { title: 'Как создать', text: 'Выберите событие и дизайн. Укажите имена, дату, место и текст приглашения, при желании добавьте музыку и фото. Проверьте предпросмотр и отправьте заказ через WhatsApp — приглашение обычно готово в течение 24 часов, ссылку можно отправить любому числу гостей.' },
-      { title: 'Стоимость', text: 'Пакеты от 59 ₼: SADƏ — 59 ₼, VIP — 89 ₼, PREMIUM — 129 ₼. Оплата — после того как финальный вариант согласован с вами. Приглашение открывается на азербайджанском, английском и русском.' },
+      { title: 'Стоимость', text: 'Пакеты от 29 ₼: ВИДЕО (видеоприглашение) — 29 ₼, МИНИ — 39 ₼, SADƏ — 59 ₼, VIP — 89 ₼, PREMIUM — 129 ₼. Оплата — после того как финальный вариант согласован с вами. Приглашение открывается на азербайджанском, английском и русском.' },
     ],
     eventsTitle: 'Шаблоны приглашений по событиям',
     guidesTitle: 'Тексты приглашений и руководства (на азербайджанском)',

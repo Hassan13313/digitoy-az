@@ -26,6 +26,18 @@ set_exception_handler(function (Throwable $e): void {
    EYNİ olmalıdır. Bütün köhnə/naməlum dəyərlər buna düşür. */
 define('DEFAULT_TEMPLATE_ID', 'simple-luxury');
 
+/* ── Paketlər — src/data/packages.js › PACKAGE_DEFS ilə EYNİ olmalıdır ──
+   Açar = paket id-si, dəyər = admin siyahısındakı ad. Sıra artan qiymətdir.
+   VIDEO veb-dəvətnamə deyil (yalnız video faylı) — DIGITOY_WEB_PACKAGES-də yoxdur. */
+const DIGITOY_PACKAGES = [
+    'VIDEO'   => 'Videolu dəvətnamə (29₼)',
+    'MINI'    => 'Mini (39₼)',
+    'SADE'    => 'Sadə (59₼)',
+    'VIP'     => 'VİP (89₼)',
+    'PREMIUM' => 'Premium (129₼)',
+];
+const DIGITOY_WEB_PACKAGES = ['MINI', 'SADE', 'VIP', 'PREMIUM'];
+
 /** template_id-ni təhlükəsiz normallaşdır (yalnız a-z, 0-9, tire; max 50) */
 function normalizeTemplateId($id): string {
     $id = is_string($id) ? strtolower(trim($id)) : '';

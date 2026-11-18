@@ -4,6 +4,7 @@ import DashboardView from './v2/AdminDashboard'
 import { Notice } from './v2/adminUi'
 import { azWeekdayShort } from './adminFormat'
 import { shortDay } from '../../utils/dateFormat'
+import { packageLabel } from '../../data/packages'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Admin Dashboard — sifariş statistikası + qalereya analitikası
@@ -14,7 +15,6 @@ import { shortDay } from '../../utils/dateFormat'
    Phase 43-dəki qayda.
    ───────────────────────────────────────────────────────────────────────── */
 
-const PKG_LABELS = { SADE: 'Sadə (59₼)', VIP: 'VİP (89₼)', PREMIUM: 'Premium (129₼)' }
 
 export default function AdminDashboard({ onNavigate }) {
   const [stats,   setStats]   = useState(null)
@@ -51,7 +51,7 @@ export default function AdminDashboard({ onNavigate }) {
   }
 
   const packages = useMemo(
-    () => Object.entries(stats?.packages || {}).map(([pkg, cnt]) => ({ label: PKG_LABELS[pkg] || pkg, value: Number(cnt) || 0 })),
+    () => Object.entries(stats?.packages || {}).map(([pkg, cnt]) => ({ label: packageLabel(pkg), value: Number(cnt) || 0 })),
     [stats],
   )
   const last7 = useMemo(

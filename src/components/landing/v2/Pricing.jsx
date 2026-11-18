@@ -1,78 +1,19 @@
 // ════════════════════════════════════════════════════════════════
-// Paketlər (#builder-section) — Sadə · VİP · Premium (Premium önə çıxır)
+// Paketlər (#builder-section) — Mini · Sadə · VİP · Premium (Premium önə çıxır)
+// + altında ayrıca enli «Videolu dəvətnamə» kartı (2026-11-18)
 // İstifadə:
 //   <Pricing lang={lang} onSelectPackage={(id) => ...} selectedPackage={selected}>
 //     {selected && <OrderForm packageId={selected} />}   ← mövcud sifariş formanız
 //   </Pricing>
 // ════════════════════════════════════════════════════════════════
 import { MotionConfig, motion } from 'framer-motion';
-import { ArrowRight, Check, Crown, Gift, Minus, Sparkles } from 'lucide-react';
+import { ArrowRight, Check, Clock, Crown, Minus, Play, Sparkles } from 'lucide-react';
 import t from '../../../data/translations';
+import { buildPricingPackages } from '../../../data/packageCopy';
 import { Button, Container, SectionHeading } from './ui';
 import { STATIC_INTRO } from '../../../utils/prerender';
 
 const EASE = [0.22, 1, 0.36, 1];
-
-// ← packageId-ləri öz layihənizdəki dəyərlərlə eyniləşdirin
-const PACKAGE_IDS = { simple: 'simple', vip: 'vip', premium: 'premium' };
-
-// status: 'yes' daxildir · 'no' daxil deyil · 'star' yalnız bu paketə xas
-const getPackages = (x) => [
-  {
-    id: PACKAGE_IDS.simple,
-    name: x.pkgSimpleName ?? 'Sadə',
-    price: 59,
-    tagline: x.pkgSimpleTagline ?? 'Toyunuz üçün zərif və premium rəqəmsal dəvətnamə.',
-    features: [
-      ['yes', x.pkgOpening ?? 'Açılış animasiyası'],
-      ['yes', x.pkgCountdown ?? 'Geri sayım saatı'],
-      ['yes', x.pkgMaps ?? 'Google Maps naviqasiya'],
-      ['yes', x.pkgDress ?? 'Dress code'],
-      ['yes', x.pkgProgram ?? 'Toy proqramı'],
-      ['yes', x.pkgLink ?? 'Paylaşıla bilən link'],
-      ['yes', x.pkgMusic ?? 'Dəvətnamənizdəki musiqini şəxsi zövqünüzə uyğun seçin'],
-      ['no', x.pkgRsvp ?? 'İştirak Təsdiqi'],
-      ['no', x.pkgSeating ?? 'Oturma Planı'],
-      ['no', x.pkgQr ?? 'QR Foto Paylaşım'],
-      ['no', x.pkgGalleryMgmt ?? 'Qalereya idarəetməsi'],
-    ],
-    gift: x.pkgSimpleGift ?? 'Vagzali.az-da gəlinlik və digər xidmətlər üçün 5%-dək xüsusi endirim',
-  },
-  {
-    id: PACKAGE_IDS.vip,
-    name: x.pkgVipName ?? 'VİP',
-    price: 89,
-    badge: x.pkgVipBadge ?? 'Ən çox seçilən',
-    tagline: x.pkgVipTagline ?? 'Qonaqların iştirakını və oturma planını rahat idarə edin.',
-    features: [
-      ['yes', x.pkgAllSimple ?? 'Sadə paketdəki hər şey'],
-      ['yes', x.pkgRsvp ?? 'İştirak Təsdiqi'],
-      ['yes', x.pkgSeating ?? 'Oturma Planı'],
-      ['yes', x.pkgGuestList ?? 'Qonaq siyahısının idarə olunması'],
-      ['no', x.pkgQr ?? 'QR Foto Paylaşım'],
-      ['no', x.pkgGalleryMgmt ?? 'Qalereya idarəetməsi'],
-    ],
-    gift: x.pkgVipGift ?? 'Vagzali.az-da gəlinlik və digər xidmətlər üçün 10%-dək xüsusi endirim',
-  },
-  {
-    id: PACKAGE_IDS.premium,
-    name: x.pkgPremiumName ?? 'Premium',
-    price: 129,
-    badge: x.pkgPremiumBadge ?? 'Ən tam paket',
-    featured: true,
-    tagline: x.pkgPremiumTagline ?? 'Toy gününüzün bütün xatirələrini bir yerdə toplayın.',
-    features: [
-      ['yes', x.pkgAllVip ?? 'VİP paketdəki hər şey'],
-      ['star', x.pkgQrSystem ?? 'QR Foto Paylaşım Sistemi'],
-      ['star', x.pkgGuestGallery ?? 'Qonaq Qalereyası'],
-      ['star', x.pkgGalleryMgmtFull ?? 'Qalereya İdarəetməsi'],
-      ['star', x.pkgZip ?? 'Bütün şəkilləri ZIP endirmə'],
-      ['star', x.pkgQrCard ?? 'HD çap üçün QR kart faylı'],
-      ['yes', x.pkgPriority ?? 'Prioritet hazırlama'],
-    ],
-    gift: x.pkgPremiumGift ?? 'Vagzali.az-da gəlinlik və digər xidmətlər üçün 15%-dək xüsusi endirim',
-  },
-];
 
 /** Bölmə fonu — Digitoy-da #builder-section (paketlər + builder) eyni fonu işlədir */
 export function PricingBackdrop() {
@@ -87,8 +28,9 @@ export function PricingBackdrop() {
 
 /**
  * İnteqrasiya props-ları (Digitoy):
- *  - packages  — hazır kart siyahısı (data/packageCopy.js › buildPricingPackages); verilməsə getPackages
- *  - copy      — { eyebrow, title, subtitle, partner, templates, select, selected, notIncluded }
+ *  - packages  — hazır kart siyahısı (data/packageCopy.js › buildPricingPackages); verilməsə həmin funksiya
+ *  - videoPackage — data/packageCopy.js › buildVideoPackage; verilərsə gridin altında enli kart
+ *  - copy      — { eyebrow, title, subtitle, templates, select, selected, notIncluded }
  *  - embedded  — true: <section> yox, yalnız məzmun (bölmənin özü LandingPage-dədir)
  *  - cardIds   — { [packageId]: 'dom-id' } — köhnə scroll ankerləri (first-pricing-card ...)
  */
@@ -102,9 +44,10 @@ export default function Pricing({
   copy = {},
   embedded = false,
   cardIds = {},
+  videoPackage = null,
 }) {
   const x = { ...(t[lang] ?? t.az ?? {}), ...pickCopy(copy) };
-  const packages = packagesProp ?? getPackages(x);
+  const packages = packagesProp ?? buildPricingPackages(lang);
 
   const body = (
         <Container>
@@ -115,12 +58,13 @@ export default function Pricing({
             subtitle={x.pricingSubtitle ?? 'Toyunuza ən uyğun paketi seçin — dəyər zərif detallarda yaşayır.'}
           />
 
-          {/* Artan sıra: 59 → 89 → 129. lg-də Premium sağda yuxarı qalxır və bir az enlidir */}
-          <ul className="mt-10 grid gap-7 sm:mt-16 sm:gap-8 lg:mt-24 lg:grid-cols-[1fr_1fr_1.08fr] lg:items-start lg:gap-5 xl:gap-7">
+          {/* Artan sıra: 39 → 59 → 89 → 129. Planşetdə 2×2, xl-də bir sıra;
+              xl-də Premium sağda yuxarı qalxır və bir az enlidir */}
+          <ul className="mt-10 grid gap-7 sm:mt-16 sm:gap-8 md:grid-cols-2 md:items-start md:gap-6 lg:mt-24 xl:grid-cols-[1fr_1fr_1fr_1.08fr] xl:gap-5">
             {packages.map((p, i) => (
               <motion.li
                 key={p.id}
-                className={p.featured ? 'lg:-mt-8' : 'lg:mt-4'}
+                className={p.featured ? 'xl:-mt-8' : 'xl:mt-4'}
                 initial={STATIC_INTRO ? false : { opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
@@ -133,10 +77,16 @@ export default function Pricing({
             ))}
           </ul>
 
-          <p className="mx-auto mt-12 flex max-w-xl items-start justify-center gap-2.5 text-left text-[13px] leading-relaxed text-brown-dark sm:items-center sm:text-center">
-            <Gift className="mt-0.5 h-4 w-4 shrink-0 text-gold-deep sm:mt-0" strokeWidth={1.6} aria-hidden="true" />
-            {x.pricingPartner ?? 'Digitoy müştəriləri Vagzali.az tərəfdaş üstünlüklərindən yararlana bilərlər.'}
-          </p>
+          {videoPackage && (
+            <div id={cardIds[videoPackage.id]} className="mt-10 sm:mt-12">
+              <VideoPackageCard
+                p={videoPackage}
+                x={x}
+                selected={selectedPackage === videoPackage.id}
+                onSelect={() => onSelectPackage(videoPackage.id)}
+              />
+            </div>
+          )}
 
           {/* Mövcud sifariş formanız burada açılır (dəyişmədən) */}
           {children}
@@ -176,7 +126,7 @@ export default function Pricing({
 function pickCopy(c) {
   const map = {
     eyebrow: 'pricingEyebrow', title: 'pricingTitle', subtitle: 'pricingSubtitle',
-    partner: 'pricingPartner', templates: 'pricingTemplates', select: 'pkgSelect',
+    templates: 'pricingTemplates', select: 'pkgSelect',
     selected: 'pkgSelected', notIncluded: 'pkgNotIncluded',
   };
   const out = {};
@@ -285,20 +235,6 @@ function PackageCard({ p, x, selected, onSelect }) {
         ))}
       </ul>
 
-      {/* hədiyyə */}
-      <div
-        className={`relative order-5 mt-6 flex items-start gap-3 rounded-2xl px-4 py-3.5 lg:mt-8 text-[13px] leading-snug ${
-          dark ? 'bg-white/[0.06] text-sand ring-1 ring-inset ring-gold/20' : 'bg-gold-mist/60 text-brown-dark'
-        }`}
-      >
-        <Gift
-          className={`mt-px h-4 w-4 shrink-0 ${dark ? 'text-gold-light' : 'text-gold-deep'}`}
-          strokeWidth={1.6}
-          aria-hidden="true"
-        />
-        <span>{p.gift}</span>
-      </div>
-
       {/* CTA — telefonda/planşetdə qiymətin dərhal altında (uzun siyahını
           keçmədən seçmək olur), desktopda kartın dibində */}
       <Button
@@ -318,6 +254,100 @@ function PackageCard({ p, x, selected, onSelect }) {
           (x.pkgSelect ?? 'Seçim et')
         )}
       </Button>
+    </article>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════
+// Videolu dəvətnamə — veb-paketlərdən ayrı məhsul, enli kart.
+// Solda üç şaquli nümunə posteri yelpik kimi (məhsulun özü — 9:16 video).
+// ════════════════════════════════════════════════════════════════
+const FAN = [
+  'left-0 top-5 -rotate-[9deg]',
+  'left-1/2 top-0 z-10 -translate-x-1/2',
+  'right-0 top-5 rotate-[9deg]',
+];
+
+function VideoPackageCard({ p, x, selected, onSelect }) {
+  const titleId = `pkg-${p.id}-title`;
+  return (
+    <article
+      aria-labelledby={titleId}
+      className={`relative grid gap-7 overflow-hidden rounded-[28px] bg-white/85 p-6 text-brown-dark shadow-soft ring-1 ring-gold/15 min-[400px]:p-7 sm:p-9 md:grid-cols-[200px_minmax(0,1fr)] md:items-center md:gap-10 lg:grid-cols-[230px_minmax(0,1fr)_240px] ${
+        selected ? 'ring-2 ring-gold-deep ring-offset-4 ring-offset-beige' : ''
+      }`}
+    >
+      {/* nümunə posterləri */}
+      <div aria-hidden="true" className="relative mx-auto h-[196px] w-[220px] md:h-[210px] md:w-full">
+        {(p.posters || []).map((src, i) => (
+          <span
+            key={src}
+            className={`absolute aspect-[9/16] w-[96px] overflow-hidden rounded-[14px] bg-beige shadow-lift ring-[3px] ring-white md:w-[104px] ${FAN[i]}`}
+          >
+            <img src={src} alt="" loading="lazy" decoding="async" referrerPolicy="no-referrer" className="h-full w-full scale-[1.03] object-cover" />
+            {i === 1 && (
+              <span className="absolute inset-0 grid place-items-center">
+                <span className="grid h-10 w-10 place-items-center rounded-full bg-espresso/80 text-cream backdrop-blur-sm">
+                  <Play className="ml-0.5 h-4 w-4 fill-current" strokeWidth={0} />
+                </span>
+              </span>
+            )}
+          </span>
+        ))}
+      </div>
+
+      {/* başlıq, qiymət, funksiyalar */}
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-end gap-x-5 gap-y-3">
+          <div>
+            <h3 id={titleId} className="text-xs font-semibold uppercase tracking-eyebrow text-gold-deep">
+              {p.eyebrow ?? p.name}
+            </h3>
+            <p className="mt-3 flex items-start gap-1.5">
+              <span className="font-serif text-[64px] font-normal leading-[0.85] tracking-[-0.02em] text-ink lining-nums sm:text-[76px]">{p.price}</span>
+              <span className="mt-1.5 font-sans text-2xl font-medium text-gold-deep">₼</span>
+              <span className="sr-only">{x.currencyName ?? 'manat'}</span>
+            </p>
+          </div>
+          {p.ready && (
+            <span className="mb-1 inline-flex items-center gap-1.5 rounded-full bg-gold-mist/70 px-3 py-1.5 text-[12.5px] font-medium text-brown-dark ring-1 ring-inset ring-gold/30">
+              <Clock className="h-3.5 w-3.5 text-gold-deep" strokeWidth={1.8} aria-hidden="true" />
+              {p.ready}
+            </span>
+          )}
+        </div>
+        <p className="mt-4 max-w-[52ch] text-[15px] leading-relaxed">{p.tagline}</p>
+        <ul className="mt-5 grid gap-x-6 gap-y-2.5 sm:grid-cols-2">
+          {p.features.map(([status, label]) => (
+            <li key={label} className="flex items-start gap-3 text-[14.5px] leading-snug">
+              <FeatureIcon status={status} />
+              <span>{label}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* CTA */}
+      <div className="md:col-span-2 lg:col-span-1">
+        <Button
+          variant="primary"
+          size="lg"
+          onClick={onSelect}
+          aria-pressed={selected}
+          aria-describedby={titleId}
+          className="w-full"
+        >
+          {selected ? (
+            <>
+              <Check className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+              {x.pkgSelected ?? 'Seçildi'}
+            </>
+          ) : (
+            (x.pkgSelect ?? 'Seçim et')
+          )}
+        </Button>
+        {p.note && <p className="mt-3 text-center text-[12.5px] leading-snug text-brown-dark/80">{p.note}</p>}
+      </div>
     </article>
   );
 }

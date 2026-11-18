@@ -59,6 +59,10 @@ export const EVENT_TYPES = [
   { id: 'other', icon: 'Sparkles' },
 ]
 
+/* Ad sahələrinin forması: cütlük (bəy + gəlin) · şirkət/tədbir adı · qalanı tək ad */
+export const COUPLE_TYPES = ['toy', 'nishan']
+export const CORP_TYPES = ['corporate', 'other']
+
 /* Bu tədbir növlərində istəyə bağlı rəqəm sahəsi göstərilir (yaş / il) */
 export const AGE_EVENT_TYPES = ['birthday', 'sunnet', 'anniversary']
 

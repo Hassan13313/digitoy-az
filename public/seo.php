@@ -63,7 +63,7 @@ $seoStatus = 200;
    (tests/seo_keywords_test.mjs). */
 $meta = [
     'title'  => 'Online Dəvətnamə — Rəqəmsal və Elektron Toy Dəvətnaməsi | DigiToy',
-    'desc'   => 'Online dəvətnamə hazırlayın: toy, nişan və ad günü üçün rəqəmsal (elektron) dəvətnamə — İştirak Təsdiqi, oturma planı, QR foto paylaşımı. 59 ₼-dan.',
+    'desc'   => 'Online dəvətnamə hazırlayın: toy, nişan və ad günü üçün rəqəmsal (elektron) dəvətnamə — İştirak Təsdiqi, oturma planı, QR foto paylaşımı. 29 ₼-dan.',
     'canon'  => SITE . '/',
     'index'  => true,
     'ogtype' => 'website',
@@ -160,7 +160,7 @@ function seoConceptPages(): array {
         'toy-nisan' => [
             'concept' => 'toy',
             'title' => 'Toy və Nişan Dəvətnaməsi — Online Şablonlar | DigiToy',
-            'desc' => 'Toy və nişan üçün online dəvətnamə şablonları: lüks, klassik, minimalist və vintage dizaynlar. İştirak Təsdiqi, oturma planı və QR foto paylaşımı ilə. 59 ₼-dan.',
+            'desc' => 'Toy və nişan üçün online dəvətnamə şablonları: lüks, klassik, minimalist və vintage dizaynlar. İştirak Təsdiqi, oturma planı və QR foto paylaşımı ilə. 39 ₼-dan.',
             'h1' => 'Toy və Nişan Dəvətnaməsi',
             'intro' => 'Toy və nişan üçün online dəvətnamə şablonları. Hər dizaynın öz açılışı, şrifti və rəng dili var. Canlı önbaxışa baxın, bəyəndiyinizi seçin, linki qonaqlarınıza WhatsApp ilə göndərin.',
             'names' => ['Ivory Silk', 'Bridal Couture', 'İlk Rəqs', 'Şam və Üzük', 'Bakı Gecəsi', 'Golden Hour', 'Alpine Luxe', 'Royal Palace', 'Oriental Luxe', 'Night Sky', 'Mediterranean', 'Crystal Glass', 'Gazette', 'Simple Luxury', 'Royal Gold', 'Luxury Jewelry', 'Floral Garden', 'White Elegance', 'Nature Touch', 'Vinyl Record', 'Cinema Premiere', 'Boarding Pass', 'Modern Black'],
@@ -345,7 +345,7 @@ function seoNoscript(string $path, callable $e, ?array $guide = null): string {
         foreach (seoHomeFaq() as [$q, $a]) $faq .= '<h3>' . $e($q) . '</h3><p>' . $e($a) . '</p>';
         $body = '<h1>Rəqəmsal Toy Dəvətnamənizi Özünüz Yaradın</h1>'
               . '<p>Sadəcə online dəvətnamə deyil — İştirak Təsdiqi, oturma planı, foto paylaşımı və xatirələrin toplandığı tam bir toy təcrübəsi. Hamısı bir zərif linkdə.</p>'
-              . '<h2>Paketinizi Seçin</h2><ul><li>SADƏ — 59 ₼</li><li>VİP — 89 ₼</li><li>PREMIUM — 129 ₼</li></ul>'
+              . '<h2>Paketinizi Seçin</h2><ul><li>MİNİ — 39 ₼</li><li>SADƏ — 59 ₼</li><li>VİP — 89 ₼</li><li>PREMIUM — 129 ₼</li><li>VİDEO (videolu dəvətnamə) — 29 ₼</li></ul>'
               . '<h2>Tez-tez verilən suallar</h2>' . $faq;
     } elseif (str_starts_with($path, '/sablonlar/') && ($cp = seoConceptPages()[substr($path, 11)] ?? null)) {
         /* 2026-11 SEO: şablonun real ekran şəkli + alt mətn (Google Şəkillər, JS-siz botlar) */
@@ -548,7 +548,7 @@ $block .= '    <meta name="twitter:image" content="' . $e($meta['image']) . '" /
    əlavə edilmir — orada schema-nın dəyəri yoxdur.
 
    Qiymətlər src/data/packages.js → PACKAGE_DEFS ilə eyni olmalıdır
-   (SADE 59, VIP 89, PREMIUM 129 AZN). */
+   (VIDEO 29, MINI 39, SADE 59, VIP 89, PREMIUM 129 AZN). */
 $jsonld = [];
 
 if ($path === '/') {
@@ -565,6 +565,10 @@ if ($path === '/') {
         'areaServed' => ['@type' => 'Country', 'name' => 'Azərbaycan'],
         'url' => SITE . '/',
         'offers' => [
+            ['@type' => 'Offer', 'name' => 'VİDEO — videolu dəvətnamə', 'price' => '29', 'priceCurrency' => 'AZN',
+             'availability' => 'https://schema.org/InStock', 'url' => SITE . '/'],
+            ['@type' => 'Offer', 'name' => 'MİNİ',    'price' => '39',  'priceCurrency' => 'AZN',
+             'availability' => 'https://schema.org/InStock', 'url' => SITE . '/'],
             ['@type' => 'Offer', 'name' => 'SADƏ',    'price' => '59',  'priceCurrency' => 'AZN',
              'availability' => 'https://schema.org/InStock', 'url' => SITE . '/'],
             ['@type' => 'Offer', 'name' => 'VIP',     'price' => '89',  'priceCurrency' => 'AZN',

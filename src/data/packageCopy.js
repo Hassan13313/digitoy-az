@@ -1,16 +1,17 @@
-import { PACKAGE_DEFS, PKG_FEATURES } from './packages.js'
-import { getPartner } from './partners.js'
+import { PACKAGE_DEFS, PKG_FEATURES, WEB_PACKAGE_IDS } from './packages.js'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Paket kartlarının mətnləri (3 dil) — köhnə PackageSelect və yeni Pricing
    (UI redesign 2026-10) EYNİ mənbədən oxuyur. Qiymət və funksiya siyahısı
-   packages.js-dədir, tərəfdaş endirimi partners.js-də.
+   packages.js-dədir.
+
+   VIDEO veb-paketlərdən ayrı, enli kart kimi göstərilir (buildVideoPackage).
    ───────────────────────────────────────────────────────────────────────── */
 
 export const PKG_LABELS = {
-  az: { SADE: 'SADƏ', VIP: 'VİP', PREMIUM: 'PREMIUM' },
-  en: { SADE: 'BASIC', VIP: 'VIP', PREMIUM: 'PREMIUM' },
-  ru: { SADE: 'БАЗОВЫЙ', VIP: 'VIP', PREMIUM: 'ПРЕМИУМ' },
+  az: { VIDEO: 'VİDEO', MINI: 'MİNİ', SADE: 'SADƏ', VIP: 'VİP', PREMIUM: 'PREMIUM' },
+  en: { VIDEO: 'VIDEO', MINI: 'MINI', SADE: 'BASIC', VIP: 'VIP', PREMIUM: 'PREMIUM' },
+  ru: { VIDEO: 'ВИДЕО', MINI: 'МИНИ', SADE: 'БАЗОВЫЙ', VIP: 'VIP', PREMIUM: 'ПРЕМИУМ' },
 }
 
 export const UI = {
@@ -21,32 +22,26 @@ export const UI = {
 
 export const PKG_SUBTITLES = {
   az: {
+    MINI:    'Tədbirinizin bütün məlumatları bir zərif linkdə.',
     SADE:    'Toyunuz üçün zərif və premium rəqəmsal dəvətnamə.',
     VIP:     'Qonaqların iştirakını və oturma planını rahat idarə edin.',
     PREMIUM: 'Toy gününüzün bütün xatirələrini bir yerdə toplayın.',
+    VIDEO:   'İstədiyiniz nümunədə videolu dəvətnamə — WhatsApp və Instagram-da paylaşmaq üçün.',
   },
   en: {
+    MINI:    'All the details of your event in one elegant link.',
     SADE:    'An elegant, premium digital invitation for your wedding.',
     VIP:     'Manage guest attendance and seating with ease.',
     PREMIUM: 'Bring every memory of your wedding day together in one place.',
+    VIDEO:   'A video invitation in the style you want — made for sharing on WhatsApp and Instagram.',
   },
   ru: {
+    MINI:    'Вся информация о вашем событии в одной элегантной ссылке.',
     SADE:    'Элегантное премиальное цифровое приглашение для вашей свадьбы.',
     VIP:     'Удобно управляйте подтверждением гостей и планом рассадки.',
     PREMIUM: 'Соберите все воспоминания свадебного дня в одном месте.',
+    VIDEO:   'Видеоприглашение в нужном вам стиле — для отправки в WhatsApp и Instagram.',
   },
-}
-
-export const VAGZALI_LINE = {
-  az: (pct) => `Vagzali.az-da gəlinlik və digər xidmətlər üçün ${pct}-dək xüsusi endirim`,
-  en: (pct) => `Up to ${pct} special discount on bridal and other services at Vagzali.az`,
-  ru: (pct) => `Специальная скидка до ${pct} на свадебные платья и другие услуги на Vagzali.az`,
-}
-
-export const VAGZALI_NOTE = {
-  az: 'Digitoy müştəriləri Vagzali.az tərəfdaş üstünlüklərindən yararlana bilərlər.',
-  en: 'Digitoy customers can enjoy Vagzali.az partner benefits.',
-  ru: 'Клиенты Digitoy могут воспользоваться партнёрскими преимуществами Vagzali.az.',
 }
 
 export const PKG_BADGES = {
@@ -55,36 +50,58 @@ export const PKG_BADGES = {
   ru: { PREMIUM: 'ПОЛНЫЙ ПАКЕТ' },
 }
 
+/* Videolu dəvətnamə kartının (Pricing › VideoPackageCard) və seçiləndən sonrakı
+   bölmə başlığının (LandingPage) mətnləri — ana bundle-da qalan YEGANƏ video mətnləri */
+const VIDEO_CARD_COPY = {
+  az: { eyebrow: 'Videolu dəvətnamə', ready: '2–3 saat ərzində hazır', note: 'Veb-dəvətnamə deyil — hazır video faylı WhatsApp-da sizə göndərilir.',
+        heading: 'Videolu dəvətnamə', headingSub: 'Üç addımda məlumatları göndərin — videonuz 2–3 saat ərzində hazır olur.' },
+  en: { eyebrow: 'Video invitation', ready: 'Ready within 2–3 hours', note: 'Not a web invitation — the finished video file is sent to you on WhatsApp.',
+        heading: 'Video invitation', headingSub: 'Send us the details in three steps — your video is ready within 2–3 hours.' },
+  ru: { eyebrow: 'Видеоприглашение', ready: 'Готово за 2–3 часа', note: 'Это не веб-приглашение — готовый видеофайл мы отправим вам в WhatsApp.',
+        heading: 'Видеоприглашение', headingSub: 'Отправьте данные в три шага — видео будет готово за 2–3 часа.' },
+}
+
+/* YouTube Shorts posteri (≈15 KB). Video kartındakı 3 poster = data/videoSamples.js-in
+   İLK 3 nümunəsi (test yoxlayır). Burada yalnız id-lər var: bu fayl ana bundle-dadır,
+   nümunə siyahısı isə video formasının lazy chunk-ında qalsın. */
+export const youtubePoster = (youtubeId) => `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`
+export const CARD_POSTER_IDS = ['0Tbh4YeXb0s', 'dEB56U42FJc', 'ELSPNLLqVn0']
+
 /* QR Foto Paylaşım + Qalereya — Premium-un əsas fərqləndiricisi.
    Bu açar sözləri ehtiva edən sətirlər kartda vurğulanır (3 dildə). */
 export const isDifferentiator = (text) => /qr|qalereya|gallery|галере|zip/i.test(text)
 
-/* Yeni Pricing komponentinin formatı:
-   { id, name, price, tagline, features: [[status, label]], gift, badge?, featured? }
-   status: 'yes' daxildir · 'no' daxil deyil · 'star' Premium-a xas fərqləndirici */
-export function buildPricingPackages(lang = 'az') {
+function buildCard(id, lang) {
   const labels = PKG_LABELS[lang] || PKG_LABELS.az
   const feats = PKG_FEATURES[lang] || PKG_FEATURES.az
   const subtitles = PKG_SUBTITLES[lang] || PKG_SUBTITLES.az
   const badges = PKG_BADGES[lang] || PKG_BADGES.az
   const ui = UI[lang] || UI.az
-  const gift = VAGZALI_LINE[lang] || VAGZALI_LINE.az
-  const discounts = getPartner('vagzali').discounts
-  return ['SADE', 'VIP', 'PREMIUM'].map((id) => {
-    const def = PACKAGE_DEFS[id]
-    const premium = id === 'PREMIUM'
-    return {
-      id,
-      name: labels[id],
-      price: def.price,
-      tagline: subtitles[id],
-      features: [
-        ...feats[id].included.map((f) => [premium && isDifferentiator(f) ? 'star' : 'yes', f]),
-        ...feats[id].locked.map((f) => ['no', f]),
-      ],
-      gift: gift(discounts[id]),
-      badge: def.popular ? ui.popular.replace(/^★\s*/, '') : premium ? badges.PREMIUM : undefined,
-      featured: premium,
-    }
-  })
+  const def = PACKAGE_DEFS[id]
+  const premium = id === 'PREMIUM'
+  return {
+    id,
+    name: labels[id],
+    price: def.price,
+    tagline: subtitles[id],
+    features: [
+      ...feats[id].included.map((f) => [premium && isDifferentiator(f) ? 'star' : 'yes', f]),
+      ...feats[id].locked.map((f) => ['no', f]),
+    ],
+    badge: def.popular ? ui.popular.replace(/^★\s*/, '') : premium ? badges.PREMIUM : undefined,
+    featured: premium,
+  }
+}
+
+/* Yeni Pricing komponentinin formatı:
+   { id, name, price, tagline, features: [[status, label]], badge?, featured? }
+   status: 'yes' daxildir · 'no' daxil deyil · 'star' Premium-a xas fərqləndirici
+   Yalnız veb-paketlər (artan qiymət): MINI · SADE · VIP · PREMIUM */
+export function buildPricingPackages(lang = 'az') {
+  return WEB_PACKAGE_IDS.map((id) => buildCard(id, lang))
+}
+
+/* VIDEO paketi — veb-paketlərdən ayrı, enli kart kimi göstərilir */
+export function buildVideoPackage(lang = 'az') {
+  return { ...buildCard('VIDEO', lang), ...(VIDEO_CARD_COPY[lang] || VIDEO_CARD_COPY.az), posters: CARD_POSTER_IDS.map(youtubePoster) }
 }
