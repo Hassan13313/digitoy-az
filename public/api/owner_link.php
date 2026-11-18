@@ -7,6 +7,9 @@
         istənilən qədər kopyalaya bilsin, müştərinin linki dəyişməsin).
    POST /api/owner_link.php {slug, action:'rotate'} → { ok, url }
         Yeni açar — köhnə link dərhal işləməz.
+   POST /api/owner_link.php {slug, action:'pin'}    → { ok, pin }
+        2026-11-18: oturma planı redaktəsi üçün yeni 6 rəqəmli PİN (yalnız hash
+        saxlanılır, PİN bir dəfə göstərilir; köhnə PİN və redaktə tokenləri ölür).
 
    Açar URL-in FRAGMENT hissəsindədir (#k=…): brauzer onu serverə,
    Referer başlığına və WhatsApp önbaxış botuna göndərmir.
@@ -14,6 +17,7 @@
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/owner_auth.php';
+require_once __DIR__ . '/seating_owner_lib.php';
 
 requireAdmin();
 header('Cache-Control: no-store');
@@ -37,6 +41,22 @@ if (!isValidSlug($slug)) {
 
 ensureTables();
 $db = getDB();
+
+if ($method === 'POST' && ($body['action'] ?? '') === 'pin') {
+    $exists = $db->prepare('SELECT 1 FROM invitations WHERE slug = :s LIMIT 1');
+    $exists->execute([':s' => $slug]);
+    if (!$exists->fetchColumn()) {
+        http_response_code(404);
+        echo json_encode(['error' => 'INVITATION_NOT_FOUND']);
+        exit;
+    }
+    $pin = newSeatingPin();
+    $db->prepare('REPLACE INTO owner_edit_pins (slug, pin_hash) VALUES (:s, :h)')
+       ->execute([':s' => $slug, ':h' => password_hash($pin, PASSWORD_DEFAULT)]);
+    adminAuditLog('owner_seating_pin', $slug);
+    echo json_encode(['ok' => true, 'pin' => $pin]);
+    exit;
+}
 
 if ($method === 'POST') {
     if (($body['action'] ?? '') !== 'rotate') {

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ClipboardCheck, Images, MessageSquare, Users } from 'lucide-react'
+import { Armchair, ClipboardCheck, Images, MessageSquare, Users } from 'lucide-react'
 import AdminRSVPBlock from '../admin/AdminRSVPBlock'
 import AdminGuestReports from '../admin/AdminGuestReports'
 import StatusPage from '../public/StatusPage'
@@ -8,6 +8,7 @@ import { EmptyState, TabPanel, Tabs } from '../admin/v2/adminUi'
 import OwnerHeader from './OwnerHeader'
 import OwnerGuestbook from './OwnerGuestbook'
 import OwnerPhotos from './OwnerPhotos'
+import OwnerSeating from './OwnerSeating'
 import { getOwnerPanel } from '../../utils/ownerApi'
 import { clearOwnerKey, getOwnerKey, storeOwnerKey, takeKeyFromLocation } from '../../utils/ownerKey'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
@@ -97,6 +98,8 @@ export default function OwnerPanel() {
     return [
       vis.rsvp && { id: 'rsvp', label: 'İştirak təsdiqi', icon: ClipboardCheck },
       (vis.rsvp || vis.seating) && { id: 'guests', label: 'Qonaq hesabatı', icon: Users },
+      /* 2026-11-18 — müştəri oturma planını özü redaktə edir (PİN ilə, VİP/Premium) */
+      vis.seating && { id: 'seating', label: 'Oturma planı', icon: Armchair },
       vis.guestbook && { id: 'guestbook', label: 'Təbriklər', icon: MessageSquare },
       vis.gallery && { id: 'photos', label: 'Şəkillər', icon: Images },
     ].filter(Boolean)
@@ -161,6 +164,7 @@ export default function OwnerPanel() {
             <TabPanel idPrefix={TAB_ID} id={activeTab}>
               {activeTab === 'rsvp' && <AdminRSVPBlock slug={slug} names={names} refreshSignal={tick} />}
               {activeTab === 'guests' && <AdminGuestReports slug={slug} names={names} dateStr={dateStr} refreshSignal={tick} />}
+              {activeTab === 'seating' && <OwnerSeating slug={slug} />}
               {activeTab === 'guestbook' && <OwnerGuestbook slug={slug} refreshSignal={tick} />}
               {activeTab === 'photos' && <OwnerPhotos slug={slug} viewToken={data.galleryView} />}
             </TabPanel>

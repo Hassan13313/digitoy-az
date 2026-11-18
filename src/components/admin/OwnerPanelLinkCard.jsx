@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { LayoutDashboard, MessageCircle, RotateCcw } from 'lucide-react'
+import { KeyRound, LayoutDashboard, MessageCircle, RotateCcw } from 'lucide-react'
 import { Button, ConfirmDialog, CopyField, Notice, Panel, Skeleton, Toast } from './v2/adminUi'
 import { useOwnerLink } from './useOwnerLink'
 import { customerWaUrl } from '../../utils/customerPhone'
+import { createSeatingPin } from '../../utils/ownerApi'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Sifariş detalı → «Müştəri paneli» kartı (Phase 50).
@@ -11,10 +12,11 @@ import { customerWaUrl } from '../../utils/customerPhone'
    yükləmə QR, slayd şou). Əvvəl müştəriyə bunlar ayrı-ayrı göndərilirdi.
    ───────────────────────────────────────────────────────────────────────── */
 
-const waMessage = (url) => encodeURIComponent(
+const waMessage = (url, pin) => encodeURIComponent(
   `Salam! Dəvətnamənizin müştəri paneli:\n${url}\n\n`
   + 'Burada iştirak təsdiqlərini, qonaq hesabatını, təbrikləri və şəkilləri canlı izləyə bilərsiniz. '
-  + 'Link yalnız sizə məxsusdur — başqası ilə paylaşmayın.',
+  + 'Link yalnız sizə məxsusdur — başqası ilə paylaşmayın.'
+  + (pin ? `\n\nOturma planını özünüz dəyişmək üçün «Oturma planı» bölməsində bu PİN-i daxil edin: ${pin}\nPİN-i heç kimlə paylaşmayın.` : ''),
 )
 
 /** «Linki yenilə» təsdiqi — sifariş detalı və «Dəvətnamələr» menyusu eyni mətni göstərir */
@@ -33,11 +35,26 @@ export function RotateOwnerLinkDialog({ open, names, busy, onCancel, onConfirm }
   )
 }
 
-export default function OwnerPanelLinkCard({ slug, phone }) {
+export default function OwnerPanelLinkCard({ slug, phone, seating = false }) {
   const { url, error, loading, rotating, rotate } = useOwnerLink(slug)
   const [ask, setAsk] = useState(false)
   const [toast, setToast] = useState(null)
-  const waHref = url ? customerWaUrl(phone, waMessage(url)) : undefined
+  /* 2026-11-18 — oturma planı redaktə PİN-i: yalnız yaradılanda göstərilir (serverdə hash) */
+  const [pin, setPin] = useState('')
+  const [pinBusy, setPinBusy] = useState(false)
+  const waHref = url ? customerWaUrl(phone, waMessage(url, pin)) : undefined
+  const makePin = async () => {
+    setPinBusy(true)
+    try {
+      const r = await createSeatingPin(slug)
+      setPin(r.pin)
+      setToast({ tone: 'success', message: 'Yeni PİN hazırdır — WhatsApp mesajına əlavə olundu. Köhnə PİN artıq işləmir.' })
+    } catch {
+      setToast({ tone: 'error', message: 'PİN yaradılmadı. Yenidən cəhd edin.' })
+    } finally {
+      setPinBusy(false)
+    }
+  }
 
   const onRotate = async () => {
     const ok = await rotate()
@@ -64,10 +81,20 @@ export default function OwnerPanelLinkCard({ slug, phone }) {
                 WhatsApp ilə göndər
               </Button>
             )}
+            {seating && (
+              <Button size="sm" variant="ghost" icon={KeyRound} loading={pinBusy} onClick={makePin}>
+                {pin ? 'Yeni PİN' : 'Oturma redaktə PİN-i'}
+              </Button>
+            )}
             <Button size="sm" variant="ghost" destructive icon={RotateCcw} onClick={() => setAsk(true)}>
               Linki yenilə
             </Button>
           </div>
+          {pin && (
+            <p className="rounded-[10px] bg-[#F3EEE6] px-3.5 py-2.5 text-[13.5px] text-espresso">
+              Oturma planı redaktə PİN-i: <strong className="tabular-nums tracking-[0.2em]">{pin}</strong> — yalnız indi göstərilir, müştəriyə göndərin.
+            </p>
+          )}
         </div>
       )}
 

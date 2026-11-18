@@ -251,7 +251,10 @@ export default function AdminOrderDetail({ draftCode, onBack }) {
           <>
             {missingInvite}
             {/* Phase 50 — müştəriyə BİR link: iştirak təsdiqi, təbriklər, şəkillər */}
-            {draft.status === 'approved' && slug && <OwnerPanelLinkCard slug={slug} phone={draft.customer_phone} />}
+            {draft.status === 'approved' && slug && (
+              <OwnerPanelLinkCard slug={slug} phone={draft.customer_phone}
+                seating={['VIP', 'PREMIUM'].includes(fd.package || draft.package) && fd.sections?.seating !== false} />
+            )}
           </>
         }
         panels={slug ? {
