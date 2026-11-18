@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { History, KeyRound, LockKeyhole, Undo2 } from 'lucide-react'
 import SeatingPlanTab from '../admin/v2/SeatingPlanTab'
-import { seatingStats, seatingTables, withLocalTable } from '../admin/v2/seatingView'
+import { addLocalTable, seatingStats, seatingTables } from '../admin/v2/seatingView'
 import { Button, Notice, Panel } from '../admin/v2/adminUi'
 import { getGuests } from '../../utils/api'
 import { clearSeatToken, getSeatToken, ownerSeating } from '../../utils/ownerApi'
@@ -65,7 +65,8 @@ export default function OwnerSeating({ slug }) {
     }
   }
 
-  const tables = useMemo(() => seatingTables(data), [data])
+  const [localTables, setLocalTables] = useState([])
+  const tables = useMemo(() => seatingTables(data, localTables), [data, localTables])
 
   return (
     <div className="space-y-4">
@@ -86,7 +87,7 @@ export default function OwnerSeating({ slug }) {
         <SeatingPlanTab
           tables={tables}
           stats={seatingStats(data)}
-          onAddTable={(name) => setData((d) => withLocalTable(d, name))}
+          onAddTable={(name) => setLocalTables(addLocalTable(name))}
           onAddGuest={(tableId, d) => op('add', { table_id: tableId, full_name: d.name, notes: d.note || '' })}
           onUpdateGuest={(id, d) => op('update', { id: Number(id), full_name: d.name, table_id: d.tableId, notes: d.note || '' })}
           onMoveGuest={(id, to) => op('move', { id: Number(id), table_id: to })}

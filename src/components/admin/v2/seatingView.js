@@ -3,10 +3,12 @@
 
 const VIEW_STATUS = { GOING: 'yes', NOT_GOING: 'no', MAYBE: 'maybe', NO_RESPONSE: 'none' }
 
-export function seatingTables(data) {
+/** `localTables` — istifadəçinin yenicə əlavə etdiyi, hələ qonağı olmayan masalar.
+    Serverdə masa yalnız qonaqla yaranır, ona görə bunlar ayrıca state-də saxlanılır:
+    hər əməliyyatdan sonra `data` yenidən yüklənəndə itməsinlər. */
+export function seatingTables(data, localTables = []) {
   const guests = data?.guests ?? []
-  /* Masa siyahısı: qonaqların masaları + API / lokal əlavə olunmuş boş masalar */
-  const ids = [...new Set([...guests.map((g) => g.table_id), ...(data?.tables?.map((t) => t.table_id) ?? [])])].sort()
+  const ids = [...new Set([...guests.map((g) => g.table_id), ...(data?.tables?.map((t) => t.table_id) ?? []), ...localTables])].sort()
   return ids.map((tid) => ({
     id: tid,
     name: tid,
@@ -29,11 +31,4 @@ export function seatingStats(data) {
   }
 }
 
-/** Boş masa yalnız lokal göstərilir — ilk qonaq əlavə olunanda serverdə yaranır */
-export function withLocalTable(data, name) {
-  return {
-    ...data,
-    tables: [...(data?.tables ?? []), { table_id: name, total: 0, going: 0, not_going: 0, maybe: 0, no_response: 0, responded: 0 }],
-    guests: data?.guests ?? [],
-  }
-}
+export const addLocalTable = (name) => (list) => (list.includes(name) ? list : [...list, name])

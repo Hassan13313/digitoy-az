@@ -3,7 +3,7 @@ import { Upload } from 'lucide-react'
 import { getGuests, manageGuest, migrateGuests } from '../../utils/api'
 import GuestImportModal from './GuestImportModal'
 import SeatingPlanTab from './v2/SeatingPlanTab'
-import { seatingStats, seatingTables, withLocalTable } from './v2/seatingView'
+import { addLocalTable, seatingStats, seatingTables } from './v2/seatingView'
 import { Button, Notice } from './v2/adminUi'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -52,7 +52,8 @@ export default function AdminSeatingPlan({ slug, seatingPlan }) {
   }
 
   /* Boş masa yalnız lokal göstərilir — istifadəçi sonra qonaq əlavə edəcək */
-  const handleAddTable = (name) => setData(prev => withLocalTable(prev, name))
+  const [localTables, setLocalTables] = useState([])
+  const handleAddTable = (name) => setLocalTables(addLocalTable(name))
 
   /* Qonaq əməliyyatları: xəta olsa pəncərə açıq qalır (Promise rədd olunur) */
   const op = async (fn) => {
@@ -69,7 +70,7 @@ export default function AdminSeatingPlan({ slug, seatingPlan }) {
     }
   }
 
-  const tables = useMemo(() => seatingTables(data), [data])
+  const tables = useMemo(() => seatingTables(data, localTables), [data, localTables])
 
   if (!slug) return null
 
