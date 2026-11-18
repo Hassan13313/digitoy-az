@@ -19,6 +19,7 @@
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/retention.php';
+require_once __DIR__ . '/photo_variants.php';
 
 requireAdmin();
 ensureTables();
@@ -242,7 +243,7 @@ if ($method === 'POST' && $action === 'reindex_media') {
             $ext = strtolower(pathinfo($fn, PATHINFO_EXTENSION));
             if (!in_array($ext, $mediaExts, true)) continue;
             /* törəmələr sayılmır — dashboard onları da saymırdı */
-            if (substr($fn, -10) === '_thumb.jpg' || substr($fn, -11) === '_poster.jpg') continue;
+            if (isPhotoDerivativeName($fn)) continue;
             if (isset($known[$slug . '/' . $fn])) continue;
 
             $rows[] = [
@@ -282,6 +283,33 @@ if ($method === 'POST' && $action === 'reindex_media') {
         'total'   => $total,
         'message' => "{$indexed} yeni media indeksləndi. Cəmi {$total} qeyd.",
     ]);
+    exit;
+}
+
+if ($method === 'POST' && $action === 'display_copies') {
+    /* ── 2026-11-18: köhnə albom şəkilləri üçün ≤1600px baxış nüsxəsi ──
+       Hər sorğu ~15 saniyə işləyir və dayanır (hostinqin vaxt limiti): admin
+       paneli `remaining` 0 olana qədər təkrar çağırır. Orijinallara toxunulmur. */
+    @set_time_limit(40);
+    $base    = __DIR__ . '/../uploads/';
+    $started = microtime(true);
+    $stats   = ['created' => 0, 'small' => 0, 'failed' => 0];
+    $remaining = 0;
+    foreach ((array) glob($base . '*', GLOB_ONLYDIR) as $albumDir) {
+        if (!isValidSlug(basename($albumDir))) continue;
+        foreach ((array) glob($albumDir . '/*') as $file) {
+            if (!is_file($file) || isPhotoDerivativeName(basename($file))) continue;
+            $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+            if (!in_array($ext, DISPLAY_IMAGE_EXT, true)) continue;
+            if (is_file(substr($file, 0, -strlen($ext) - 1) . DISPLAY_SUFFIX)) continue;
+            if (microtime(true) - $started > 15) { $remaining++; continue; }
+            $r = ensureDisplayCopy($file);
+            if (isset($stats[$r])) $stats[$r]++;
+        }
+    }
+    /* Kiçik (≤1600px) şəkillər nüsxəsiz qalır — onlar növbəti dəfə də «qalan» sayılmasın */
+    if ($remaining === 0) adminAuditLog('display_copies', null, json_encode($stats));
+    echo json_encode(['ok' => true] + $stats + ['remaining' => $remaining]);
     exit;
 }
 

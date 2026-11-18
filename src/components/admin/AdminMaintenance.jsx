@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getMaintenanceStatus, cleanupDrafts, reindexMedia, getAdminAudit, runRetention } from '../../utils/api'
+import { getMaintenanceStatus, cleanupDrafts, reindexMedia, getAdminAudit, runRetention, buildDisplayCopies } from '../../utils/api'
 import MaintenancePage from './v2/MaintenancePage'
 import { Button, Notice } from './v2/adminUi'
 import { azDate } from './adminFormat'
@@ -73,6 +73,24 @@ export default function AdminMaintenance() {
       load()
     } catch (e) {
       setMedia({ state: 'error', resultText: e?.message || 'İndeks qurulmadı.' })
+    }
+  }
+
+  /* Albom şəkilləri: köhnə yüklənmələr üçün yüngül baxış nüsxəsi — qalan 0 olana qədər */
+  const [display, setDisplay] = useState({ state: 'idle' })
+  const runDisplayCopies = async () => {
+    setDisplay({ state: 'running' })
+    let created = 0
+    try {
+      for (let i = 0; i < 60; i++) {
+        const r = await buildDisplayCopies()
+        created += r.created || 0
+        if (!r.remaining) break
+        setDisplay({ state: 'running', resultText: `${created} nüsxə hazırdır, ${r.remaining} qalıb…` })
+      }
+      setDisplay({ state: 'done', resultText: created ? `${created} şəkil üçün yüngül nüsxə yaradıldı.` : 'Bütün şəkillər artıq hazırdır.' })
+    } catch (e) {
+      setDisplay({ state: 'error', resultText: e?.message || 'Nüsxələr yaradılmadı.' })
     }
   }
 
@@ -155,6 +173,8 @@ export default function AdminMaintenance() {
           resultText: media.resultText ?? (md.indexed_at ? `Son indeks: ${formatDateTime(md.indexed_at)}` : undefined),
         }}
         onReindex={runReindex}
+        display={display}
+        onDisplayCopies={runDisplayCopies}
         audit={audit}
         onShowAudit={loadAudit}
         texts={{

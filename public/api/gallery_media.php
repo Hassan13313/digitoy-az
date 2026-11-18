@@ -20,6 +20,8 @@
    da qalereya tam işləyir.
 ══════════════════════════════════════════════════ */
 
+require_once __DIR__ . '/photo_variants.php';   /* törəmə adları + baxış nüsxəsi */
+
 /** Qalereyada media sayılan uzantılar (get_photos.php ilə EYNİ siyahı) */
 const GALLERY_IMAGE_EXT = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic'];
 const GALLERY_VIDEO_EXT = ['mp4', 'mov', 'quicktime'];
@@ -85,9 +87,7 @@ function scanGalleryMedia(string $slug): array {
         /* Törəmə fayllar ayrıca media kimi sayılmır — yalnız orijinala
            bağlı kiçik təsvirlərdir (_thumb: foto önizləməsi,
            _poster: videonun ilk kadrı) */
-        if (substr($file, -10) === '_thumb.jpg')  continue;
-        if (substr($file, -11) === '_poster.jpg') continue;
-        if (isGalleryWebCopy($file))              continue;   /* VPS-in yüngül video nüsxəsi */
+        if (isPhotoDerivativeName($file)) continue;   /* _thumb / _poster / _display / VPS-in _web.mp4 */
 
         $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
         if (!in_array($ext, array_merge(GALLERY_IMAGE_EXT, GALLERY_VIDEO_EXT))) continue;
@@ -107,6 +107,8 @@ function scanGalleryMedia(string $slug): array {
         $hasPoster  = isset($fileSet[$posterFile]);
         $webFile    = $base . '_web.mp4';
         $hasWeb     = $isVideo && isset($fileSet[$webFile]);
+        $displayFile = $base . DISPLAY_SUFFIX;
+        $hasDisplay  = !$isVideo && isset($fileSet[$displayFile]);
 
         /* ── Oxunmayan posteri özü düzəlt (2026-09-28) ──
            28.09-dək hissəli yükləmədə poster 0600 ilə qalırdı (bax
@@ -130,6 +132,8 @@ function scanGalleryMedia(string $slug): array {
             'posterUrl'  => $hasPoster ? ($baseUrl . '/uploads/' . $slug . '/' . $posterFile) : null,
             /* 2026-11: baxış üçün yüngül nüsxə (H.264 ≤1080p, faststart) — orijinal endirmə üçün qalır */
             'webUrl'     => $hasWeb ? ($baseUrl . '/uploads/' . $slug . '/' . $webFile) : null,
+            /* 2026-11-18: şəklin ≤1600px baxış nüsxəsi (photo_variants.php) — yoxdursa orijinal */
+            'displayUrl' => $hasDisplay ? ($baseUrl . '/uploads/' . $slug . '/' . $displayFile) : null,
             'name'       => $file,
             'type'       => $mime,
             'size'       => $stat ? (int) $stat['size'] : 0,
@@ -160,9 +164,7 @@ function countGalleryMedia(string $slug): array {
     if (is_dir($uploadDir)) {
         foreach ((array) scandir($uploadDir) as $file) {
             if ($file === '.' || $file === '..') continue;
-            if (substr($file, -10) === '_thumb.jpg')  continue;
-            if (substr($file, -11) === '_poster.jpg') continue;
-            if (isGalleryWebCopy($file))              continue;
+            if (isPhotoDerivativeName($file)) continue;
             $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
             if (in_array($ext, GALLERY_VIDEO_EXT, true))      $videos++;
             elseif (in_array($ext, GALLERY_IMAGE_EXT, true))  $photos++;

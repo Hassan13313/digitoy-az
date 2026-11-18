@@ -9,6 +9,7 @@
 ══════════════════════════════════════════════════ */
 
 require_once __DIR__ . '/media_policy.php';
+require_once __DIR__ . '/photo_variants.php';
 
 const ALLOWED_MEDIA_MIME = [
     'image/jpeg'      => 'jpg',
@@ -104,6 +105,8 @@ function storeMedia(string $srcPath, string $mime, string $slug,
                 $thumbName = $basename . '_thumb.jpg';
             }
             imagedestroy($thumb);
+            /* 2026-11-18 — böyük görünüş üçün ≤1600px nüsxə (bax photo_variants.php) */
+            if ($thumbName !== null) makeDisplayCopy($img, $dir . $basename . DISPLAY_SUFFIX);
         }
         imagedestroy($img);
 
@@ -111,6 +114,7 @@ function storeMedia(string $srcPath, string $mime, string $slug,
             /* Yarımçıq qalan hər şeyi təmizlə — zibil media qalmamalıdır */
             @unlink($destPath);
             @unlink($dir . $basename . '_thumb.jpg');
+            @unlink($dir . $basename . DISPLAY_SUFFIX);
             return ['ok' => false, 'status' => 422, 'code' => 'CORRUPT_IMAGE',
                     'error' => 'Şəkil emal edilə bilmədi. Başqa şəkil seçin.'];
         }

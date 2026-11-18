@@ -15,6 +15,7 @@ import {
   Eye,
   HardDriveDownload,
   History,
+  Image as ImageIcon,
   ScrollText,
   ShieldAlert,
   Trash2,
@@ -146,6 +147,8 @@ export function HealthCard({
  * @param {()=>void} [p.onRetentionRun]  Digitoy: önizləmədən sonra real təmizləmə (təsdiqlə)
  * @param {{indexed:number,albums:number,built:boolean,state?:'idle'|'running'|'done'|'error',progress?:number,resultText?:string}} p.media
  * @param {()=>void} p.onReindex
+ * @param {{state?:string,resultText?:string}} [p.display]  albom şəkillərinin baxış nüsxələri
+ * @param {()=>void} [p.onDisplayCopies]
  * @param {{state?:'idle'|'running'|'done'|'error',rows?:{id:string,date:string,action:string,object:string,ip:string}[],errorText?:string}} [p.audit]
  * @param {()=>void} p.onShowAudit  «Jurnalı göstər» — pəncərə açılır, siz `audit.rows`-u yükləyirsiniz
  * @param {Record<string,string>} [p.texts]  İzah mətnlərini dəyişmək üçün: backup, backupHelp, drafts, retention, media, audit
@@ -163,6 +166,8 @@ export default function MaintenancePage({
   onRetentionRun,
   media = { indexed: 0, albums: 0, built: false },
   onReindex,
+  display = {},
+  onDisplayCopies,
   audit = {},
   onShowAudit,
   texts = {},
@@ -333,6 +338,14 @@ export default function MaintenancePage({
               )}
               {media.state !== 'running' && (
                 <OpStatus state={media.state ?? 'idle'} text={media.resultText} />
+              )}
+              {onDisplayCopies && (
+                <>
+                  <Button icon={ImageIcon} variant="secondary" loading={display.state === 'running'} onClick={onDisplayCopies}>
+                    Şəkilləri yüngülləşdir
+                  </Button>
+                  <OpStatus state={display.state ?? 'idle'} text={display.resultText ?? 'Köhnə albom şəkilləri üçün ≤1600px baxış nüsxəsi (orijinal qalır).'} />
+                </>
               )}
             </>
           }

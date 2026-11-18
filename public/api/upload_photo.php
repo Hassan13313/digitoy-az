@@ -24,6 +24,7 @@
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/media_policy.php';
+require_once __DIR__ . '/photo_variants.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -300,6 +301,7 @@ $destPath = $uploadDir . $filename;
 
 $isImage     = (strpos($mime, 'image/') === 0);
 $thumbName   = null;
+$displayName = null;
 $posterName  = null;
 $processedOK = false;
 
@@ -347,6 +349,10 @@ if ($isImage && extension_loaded('gd')) {
                 $processedOK = true;
             }
             imagedestroy($thumb);
+            /* 2026-11-18 — böyük görünüş / slayd-şou üçün ≤1600px nüsxə (bax photo_variants.php) */
+            if ($processedOK && makeDisplayCopy($img, $uploadDir . $basename . DISPLAY_SUFFIX)) {
+                $displayName = $basename . DISPLAY_SUFFIX;
+            }
         }
         imagedestroy($img);
     }
@@ -356,6 +362,7 @@ if ($isImage && extension_loaded('gd')) {
            diskdə "zibil" media qalmamalıdır (consistency invariantı) */
         @unlink($destPath);
         @unlink($uploadDir . $basename . '_thumb.jpg');
+        @unlink($uploadDir . $basename . DISPLAY_SUFFIX);
         if ($heicTemp) @unlink($heicTemp);
         http_response_code(422);
         echo json_encode([
@@ -449,6 +456,7 @@ echo json_encode([
     'ok'        => true,
     'url'       => $url,
     'thumbUrl'  => $thumbUrl,
+    'displayUrl' => $displayName ? ($baseUrl . '/uploads/' . $slug . '/' . $displayName) : null,
     'posterUrl' => $posterName ? ($baseUrl . '/uploads/' . $slug . '/' . $posterName) : null,
     'filename'  => $filename,
     'id'        => $filename,

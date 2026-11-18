@@ -216,6 +216,17 @@ export async function reindexMedia() {
   return res.json()
 }
 
+/* 2026-11-18 — köhnə albom şəkilləri üçün ≤1600px baxış nüsxəsi (bir addım ~15 s) */
+export async function buildDisplayCopies() {
+  const res = await fetch(`${BASE}/admin_maintenance.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminHeaders() },
+    body: JSON.stringify({ action: 'display_copies' }),
+  })
+  if (!res.ok) throw await toApiError(res, 'Baxış nüsxələri yaradılmadı')
+  return res.json()
+}
+
 export async function deleteGuestbookMessage(id) {
   const res = await fetch(`${BASE}/admin_guestbook.php`, {
     method: 'POST',

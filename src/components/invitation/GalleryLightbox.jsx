@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Lightbox from '../guest-photos/Lightbox'
 import { downloadItem } from '../../utils/photoGallery'
 import { useMediaReaction } from '../../hooks/useMediaReaction'
+import { mediaViewSrc } from '../../utils/mediaView'
 
 /* ══════════════════════════════════════════════════
    QALEREYA LIGHTBOX — tam ekran baxış + sürüşdürmə
@@ -36,7 +37,9 @@ export default function GalleryLightbox({
   const view = useMemo(() => items.map((i) => ({
     id: i.id,
     type: isVideoItem(i) ? 'video' : 'image',
-    src: i.url,
+    /* 2026-11-18 — baxış üçün yüngül nüsxə (şəkil ≤1600px, video VPS-in H.264 nüsxəsi);
+       yoxdursa orijinal. «HD endir» həmişə orijinalı endirir (downloadItem). */
+    src: mediaViewSrc(i),
     poster: i.posterUrl || undefined,
     name: i.name,
     alt: i.name || '',

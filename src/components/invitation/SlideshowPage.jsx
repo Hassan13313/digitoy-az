@@ -3,6 +3,7 @@ import SlideshowStage from '../guest-photos/slideshow'
 import { getPhotos, getGalleryMeta, trackGalleryEvent, rememberGalleryView } from '../../utils/api'
 import { GalleryLocked } from '../guest-photos/access'
 import { formatAzDate } from '../../utils/dateFormat'
+import { mediaViewSrc } from '../../utils/mediaView'
 
 /* ══════════════════════════════════════════════════
    SlideshowPage — TV / proyektor rejimi (Phase 43)
@@ -207,7 +208,7 @@ export default function SlideshowPage() {
     return {
       id: i.id,
       type: video ? 'video' : 'image',
-      src: i.url,
+      src: mediaViewSrc(i),   /* yüngül nüsxə (bax utils/mediaView.js) */
       poster: video ? (i.posterUrl || undefined) : (i.thumbUrl || undefined),
       featured: !!i.featured,
     }

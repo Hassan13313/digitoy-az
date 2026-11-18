@@ -13,6 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 /* Phase 47: avtomatik təmizləmə — gündə bir dəfə, cavab göndəriləndən SONRA */
 require_once __DIR__ . '/retention.php';
+require_once __DIR__ . '/photo_variants.php';
 retentionScheduleAfterResponse();
 
 $db = getDB();
@@ -80,7 +81,7 @@ if ($photoIndexed) {
             foreach ((array) glob($albumDir . '/*') as $file) {
                 $ext  = strtolower(pathinfo($file, PATHINFO_EXTENSION));
                 $base = pathinfo($file, PATHINFO_BASENAME);
-                if (in_array($ext, $mediaExts) && substr($base, -10) !== '_thumb.jpg') {
+                if (in_array($ext, $mediaExts) && !isPhotoDerivativeName($base)) {
                     $photoCount++;
                 }
             }

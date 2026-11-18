@@ -24,6 +24,7 @@
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/photo_variants.php';
 
 requireAdmin();
 
@@ -73,15 +74,16 @@ if (is_dir($uploadsDir)) {
 
             $isThumb  = substr($f, -10) === '_thumb.jpg';
             $isPoster = substr($f, -11) === '_poster.jpg';
+            $isDisplay = substr($f, -12) === DISPLAY_SUFFIX;   /* 2026-11-18 baxış nüsxəsi */
 
             if ($size === 0) {
                 $issues[] = ['type' => 'zero_byte', 'file' => $f];
                 continue;
             }
 
-            if ($isThumb || $isPoster) {
+            if ($isThumb || $isPoster || $isDisplay) {
                 /* Törəmə faylın orijinalı hələ mövcuddurmu? */
-                $stem  = $isThumb ? substr($f, 0, -10) : substr($f, 0, -11);
+                $stem  = $isThumb ? substr($f, 0, -10) : ($isDisplay ? substr($f, 0, -12) : substr($f, 0, -11));
                 $found = false;
                 foreach ($mediaExts as $e) {
                     if (isset($set[$stem . '.' . $e])) { $found = true; break; }
