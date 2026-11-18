@@ -2,13 +2,13 @@
    VİDEO paketi — nümunə üslubların seçimi (2026-11-18)
 
    • Kart = seçim düyməsi (aria-pressed); «Bax» ayrıca düymədir və videonu
-     pəncərədə açır — iframe YALNIZ bu klikdən sonra yüklənir (youtube-nocookie).
-   • Posterlər i.ytimg.com-dan gəlir (lazy). Video saytda saxlanılmır.
+     pəncərədə açır — MP4 YALNIZ bu klikdən sonra yüklənir.
+   • Videolar və posterlər saytın özündədir: public/video/samples/.
 ══════════════════════════════════════════════════ */
 import { useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Check, ExternalLink, Play, X } from 'lucide-react'
-import { VIDEO_SAMPLES, samplePoster, sampleEmbedUrl, sampleWatchUrl, sampleTitle } from '../../data/videoSamples'
+import { Check, Play, X } from 'lucide-react'
+import { VIDEO_SAMPLES, samplePoster, sampleVideo, sampleTitle } from '../../data/videoSamples'
 import { useBodyScrollLock, useFocusTrap } from '../guest-photos/hooks'
 import { videoCopy } from '../../data/videoOrderCopy'
 
@@ -38,8 +38,7 @@ export default function VideoSamplePicker({ lang = 'az', value, onChange, error 
                     alt=""
                     loading="lazy"
                     decoding="async"
-                    referrerPolicy="no-referrer"
-                    className="absolute inset-0 h-full w-full scale-[1.02] object-cover"
+                    className="absolute inset-0 h-full w-full object-cover"
                   />
                   {selected && (
                     <span className="absolute right-2 top-2 grid h-6 w-6 place-items-center rounded-full bg-espresso text-gold-light shadow-soft">
@@ -120,12 +119,16 @@ function SampleDialog({ sample, lang, selected, onChoose, onClose }) {
         </div>
         {/* 9:16 — ekrana sığsın deyə hündürlük də məhdudlaşdırılır */}
         <div className="mx-auto aspect-[9/16] w-full max-h-[62vh] max-w-[calc(62vh*9/16)] bg-espresso">
-          <iframe
-            src={sampleEmbedUrl(sample)}
-            title={title}
-            allow="autoplay; encrypted-media; picture-in-picture"
-            allowFullScreen
-            className="h-full w-full"
+          <video
+            src={sampleVideo(sample)}
+            poster={samplePoster(sample)}
+            autoPlay
+            muted
+            loop
+            playsInline
+            controls
+            aria-label={title}
+            className="h-full w-full object-cover"
           />
         </div>
         <div className="flex flex-col gap-2 p-4">
@@ -137,15 +140,6 @@ function SampleDialog({ sample, lang, selected, onChoose, onClose }) {
             <Check className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
             {selected ? c.chosen : c.chooseThis}
           </button>
-          <a
-            href={sampleWatchUrl(sample)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-[44px] items-center justify-center gap-1.5 text-[13px] font-medium text-gold-deep underline-offset-4 hover:underline"
-          >
-            {c.openYoutube}
-            <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.8} aria-hidden="true" />
-          </a>
         </div>
       </div>
     </div>,

@@ -1,89 +1,52 @@
 /* ─────────────────────────────────────────────────────────────────────────────
    VİDEO paketi (29 ₼) — nümunə üslublar (2026-11-18).
 
-   Hər nümunə YouTube Shorts videosudur və saytda YENİDƏN YERLƏŞDİRİLMİR:
-   poster i.ytimg.com-dan gəlir, video yalnız «Bax» basılanda
-   youtube-nocookie.com iframe-ində açılır (CSP frame-src artıq icazə verir).
-   Videolar başqa studiyaların işidir — müştəriyə ÜSLUB nümunəsi kimi göstərilir;
-   hazır video müştərinin öz adları və Azərbaycan dilində mətni ilə hazırlanır.
+   Videolar DigiToy-un ÖZ işidir: fon şəkilləri ChatGPT-də (sahibin hesabında)
+   yaradılıb, yazılar və hərəkət lokal render olunub (ffmpeg) — public/video/samples/.
+   Hər nümunə: <id>.mp4 (720×1280, ~1 MB, səssiz) + <id>.webp poster (360×640).
 
-   Yeni nümunə = massivə yeni obyekt. `id` sifariş mesajına və admin-ə gedir,
-   ona görə dəyişdirilməməlidir (köhnə sifarişlər onu göstərir).
+   Yeni nümunə = massivə yeni obyekt + iki fayl. `id` sifariş mesajına və admin-ə
+   gedir, ona görə dəyişdirilməməlidir (köhnə sifarişlər onu göstərir).
    ───────────────────────────────────────────────────────────────────────── */
 
-import { youtubePoster } from './packageCopy.js'
+const S = (id, az, en, ru, nAz, nEn, nRu) => ({
+  id,
+  title: { az, en, ru },
+  note: { az: nAz, en: nEn, ru: nRu },
+})
 
 export const VIDEO_SAMPLES = [
-  {
-    id: 'gold-baroque',
-    youtubeId: '0Tbh4YeXb0s',
-    title: { az: 'Qızılı çərçivə və al güllər', en: 'Gold frame and red roses', ru: 'Золотая рамка и алые розы' },
-    note:  { az: 'Klassik, təntənəli toy üçün', en: 'For a classic, festive wedding', ru: 'Для классической торжественной свадьбы' },
-  },
-  {
-    id: 'black-gold',
-    youtubeId: 'dEB56U42FJc',
-    title: { az: 'Qara və qızılı', en: 'Black and gold', ru: 'Чёрный и золотой' },
-    note:  { az: 'Sakit, müasir və dəbdəbəli', en: 'Calm, modern and luxurious', ru: 'Спокойно, современно, роскошно' },
-  },
-  {
-    id: 'pink-magnolia',
-    youtubeId: 'ELSPNLLqVn0',
-    title: { az: 'Çəhrayı maqnoliya', en: 'Pink magnolia', ru: 'Розовая магнолия' },
-    note:  { az: 'Zərif budaqlar, yüngül hərəkət', en: 'Delicate branches, gentle motion', ru: 'Нежные ветви, лёгкое движение' },
-  },
-  {
-    id: 'green-leaves',
-    youtubeId: '-vrsWN4cBBc',
-    title: { az: 'Yaşıl yarpaqlar', en: 'Green leaves', ru: 'Зелёные листья' },
-    note:  { az: 'Minimal və təbii', en: 'Minimal and natural', ru: 'Минимально и естественно' },
-  },
-  {
-    id: 'pastel-flowers',
-    youtubeId: '6K9i6vsdI_I',
-    title: { az: 'Pastel güllər', en: 'Pastel flowers', ru: 'Пастельные цветы' },
-    note:  { az: 'Nişan və kiçik məclis üçün', en: 'For an engagement or a small party', ru: 'Для помолвки и небольшого праздника' },
-  },
-  {
-    id: 'crimson-roses',
-    youtubeId: 'xERck0MHV60',
-    title: { az: 'Qırmızı-çəhrayı güllər', en: 'Crimson and pink roses', ru: 'Красные и розовые розы' },
-    note:  { az: 'Parlaq rənglər, xına gecəsinə uyğun', en: 'Bold colours, suits a henna night', ru: 'Яркие цвета, подходит для хны' },
-  },
-  {
-    id: 'watercolor-couple',
-    youtubeId: 'CC6VvVnvZqo',
-    title: { az: 'Akvarel cütlük', en: 'Watercolour couple', ru: 'Акварельная пара' },
-    note:  { az: 'Çəkilmiş bəy və gəlin obrazı', en: 'Illustrated bride and groom', ru: 'Нарисованные жених и невеста' },
-  },
-  {
-    id: 'photo-oval',
-    youtubeId: 'iE_tCjqffPs',
-    title: { az: 'Şəkilli dəvət', en: 'Invitation with a photo', ru: 'Приглашение с фото' },
-    note:  { az: 'Sizin şəkliniz oval çərçivədə', en: 'Your photo in an oval frame', ru: 'Ваше фото в овальной рамке' },
-  },
-  {
-    id: 'gatsby-night',
-    youtubeId: 'eeYq9LUqaH8',
-    title: { az: 'Gatsby gecəsi', en: 'Gatsby night', ru: 'Вечер в стиле Гэтсби' },
-    note:  { az: 'Qızılı parıltı — ad günü, korporativ', en: 'Gold sparkle — birthday, corporate', ru: 'Золотое сияние — день рождения, корпоратив' },
-  },
-  {
-    id: 'birthday-balloons',
-    youtubeId: 'ai0E08nFXTs',
-    title: { az: 'Ad günü — şarlar', en: 'Birthday balloons', ru: 'День рождения — шары' },
-    note:  { az: 'Yubiley və ad günü üçün', en: 'For a birthday or jubilee', ru: 'Для дня рождения и юбилея' },
-  },
+  S('ivory-arch', 'Fil sümüyü tağ və orxideyalar', 'Ivory arch and orchids', 'Арка цвета слоновой кости и орхидеи',
+    'Klassik, zərif toy', 'A classic, elegant wedding', 'Классическая, изящная свадьба'),
+  S('royal-burgundy', 'Bordo məxmər və qızılı çərçivə', 'Burgundy velvet and gold frame', 'Бордовый бархат и золотая рама',
+    'Təntənəli, saray üslubu', 'Grand, palace style', 'Торжественно, дворцовый стиль'),
+  S('midnight-sky', 'Gecə səması və hilal', 'Night sky and crescent moon', 'Ночное небо и полумесяц',
+    'Nişan və axşam məclisi', 'Engagement or evening party', 'Помолвка и вечерний праздник'),
+  S('garden-arch', 'Yaşıl bağ tağı', 'Green garden arch', 'Зелёная садовая арка',
+    'Təbii, işıqlı və təravətli', 'Natural, bright and fresh', 'Естественно, светло и свежо'),
+  S('black-gold', 'Qara və qızılı', 'Black and gold', 'Чёрный и золотой',
+    'Dəbdəbəli gecə toyu', 'A glamorous evening wedding', 'Роскошная вечерняя свадьба'),
+  S('blush-peony', 'Çəhrayı pionlar', 'Blush peonies', 'Нежные пионы',
+    'Yumşaq, romantik nişan', 'A soft, romantic engagement', 'Нежная, романтичная помолвка'),
+  S('xina-night', 'Xına gecəsi — al və qızılı', 'Henna night — red and gold', 'Вечер хны — красный и золотой',
+    'Şamlar, buta naxışları', 'Candles and buta patterns', 'Свечи и узоры бута'),
+  S('crystal-ballroom', 'Kristal saray zalı', 'Crystal ballroom', 'Хрустальный бальный зал',
+    'Çilçıraqlar və mərmər', 'Chandeliers and marble', 'Люстры и мрамор'),
+  S('baku-night', 'Bakı gecəsi', 'Baku at night', 'Ночной Баку',
+    'Şəhər işıqları, qızılı tonlar', 'City lights in golden tones', 'Огни города в золотых тонах'),
+  S('birthday-gold', 'Ad günü — qızılı şarlar', 'Birthday — gold balloons', 'День рождения — золотые шары',
+    'Ad günü və yubiley', 'Birthday or jubilee', 'День рождения и юбилей'),
 ]
 
 export const findVideoSample = (id) => VIDEO_SAMPLES.find((s) => s.id === id) || null
 export const sampleTitle = (s, lang = 'az') => s.title[lang] || s.title.az
 
-/* Kiçik poster (≈15 KB) — kart üçün kifayətdir; video yalnız «Bax»-da açılır */
-export const samplePoster = (s) => youtubePoster(s.youtubeId)
-export const sampleWatchUrl = (s) => `https://www.youtube.com/shorts/${s.youtubeId}`
-export const sampleEmbedUrl = (s) =>
-  `https://www.youtube-nocookie.com/embed/${s.youtubeId}?autoplay=1&playsinline=1&rel=0&modestbranding=1`
+/* Fayllar 1 il keşlənir (.htaccess) — videonu yenidən render edəndə V-ni artırın */
+const V = '1'
+export const sampleVideo = (s) => `/video/samples/${s.id}.mp4?v=${V}`
+export const samplePoster = (s) => `/video/samples/${s.id}.webp?v=${V}`
+/* Admin-ə gedən WhatsApp mesajı üçün tam ünvan */
+export const sampleWatchUrl = (s) => `https://digitoy.az${sampleVideo(s)}`
 
 /* Müştərinin öz nümunə linki: yalnız http(s) URL, 500 simvola qədər */
 export function normalizeSampleLink(raw) {

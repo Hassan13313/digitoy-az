@@ -15,31 +15,31 @@ export const PKG_LABELS = {
 }
 
 export const UI = {
-  az: { title: 'Paketinizi Seçin', subtitle: 'Toyunuza ən uyğun paketi seçin — dəyər zərif detallarda yaşayır.', popular: '★ ƏN ÇOX SEÇİLƏN', btn: 'SEÇİM ET', pricing: 'PRICING' },
-  en: { title: 'Choose Your Package', subtitle: 'Select the best package for your event.', popular: '★ MOST POPULAR', btn: 'GET STARTED', pricing: 'PRICING' },
-  ru: { title: 'Выберите пакет', subtitle: 'Выберите лучший пакет для вашего мероприятия.', popular: '★ САМЫЙ ПОПУЛЯРНЫЙ', btn: 'НАЧАТЬ', pricing: 'PRICING' },
+  az: { title: 'Paketinizi Seçin', subtitle: 'Hər paket hazır, zərif və tam işlək dəvətnamədir — sizə lazım olanı seçin. Ödəniş son variant sizinlə təsdiqləndikdən sonra edilir.', popular: '★ ƏN ÇOX SEÇİLƏN', btn: 'SEÇİM ET', pricing: 'PRICING' },
+  en: { title: 'Choose Your Package', subtitle: 'Every package is a ready, elegant, fully working invitation — pick what you need. You pay once the final version is approved with you.', popular: '★ MOST POPULAR', btn: 'GET STARTED', pricing: 'PRICING' },
+  ru: { title: 'Выберите пакет', subtitle: 'Каждый пакет — готовое, элегантное и полностью рабочее приглашение. Оплата — после того как финальный вариант согласован с вами.', popular: '★ САМЫЙ ПОПУЛЯРНЫЙ', btn: 'НАЧАТЬ', pricing: 'PRICING' },
 }
 
 export const PKG_SUBTITLES = {
   az: {
-    MINI:    'Tədbirinizin bütün məlumatları bir zərif linkdə.',
-    SADE:    'Toyunuz üçün zərif və premium rəqəmsal dəvətnamə.',
-    VIP:     'Qonaqların iştirakını və oturma planını rahat idarə edin.',
-    PREMIUM: 'Toy gününüzün bütün xatirələrini bir yerdə toplayın.',
+    MINI:    'Bütün vacib məlumatlar bir zərif linkdə — çap və paylama xərci olmadan.',
+    SADE:    'Sevgi hekayəniz və qonaqların arzuları — illərlə xatırlanacaq dəvətnamə.',
+    VIP:     'Kimin gələcəyini əvvəlcədən bilin — qonaq sayını və masaları rahat planlayın.',
+    PREMIUM: 'Toy gününüzün hər anı — qonaqların çəkdiyi bütün şəkil və videolar bir albomda.',
     VIDEO:   'İstədiyiniz nümunədə videolu dəvətnamə — WhatsApp və Instagram-da paylaşmaq üçün.',
   },
   en: {
-    MINI:    'All the details of your event in one elegant link.',
-    SADE:    'An elegant, premium digital invitation for your wedding.',
-    VIP:     'Manage guest attendance and seating with ease.',
-    PREMIUM: 'Bring every memory of your wedding day together in one place.',
+    MINI:    'Every key detail in one elegant link — no printing, no delivery costs.',
+    SADE:    'Your love story and your guests’ wishes — an invitation remembered for years.',
+    VIP:     'Know who is coming in advance — plan guest numbers and tables with ease.',
+    PREMIUM: 'Every moment of your day — all your guests’ photos and videos in one album.',
     VIDEO:   'A video invitation in the style you want — made for sharing on WhatsApp and Instagram.',
   },
   ru: {
-    MINI:    'Вся информация о вашем событии в одной элегантной ссылке.',
-    SADE:    'Элегантное премиальное цифровое приглашение для вашей свадьбы.',
-    VIP:     'Удобно управляйте подтверждением гостей и планом рассадки.',
-    PREMIUM: 'Соберите все воспоминания свадебного дня в одном месте.',
+    MINI:    'Вся важная информация в одной элегантной ссылке — без печати и доставки.',
+    SADE:    'Ваша история любви и пожелания гостей — приглашение, которое помнят годами.',
+    VIP:     'Узнайте заранее, кто придёт, — спокойно планируйте число гостей и столы.',
+    PREMIUM: 'Каждый момент вашего дня — все фото и видео гостей в одном альбоме.',
     VIDEO:   'Видеоприглашение в нужном вам стиле — для отправки в WhatsApp и Instagram.',
   },
 }
@@ -61,15 +61,17 @@ const VIDEO_CARD_COPY = {
         heading: 'Видеоприглашение', headingSub: 'Отправьте данные в три шага — видео будет готово за 2–3 часа.' },
 }
 
-/* YouTube Shorts posteri (≈15 KB). Video kartındakı 3 poster = data/videoSamples.js-in
-   İLK 3 nümunəsi (test yoxlayır). Burada yalnız id-lər var: bu fayl ana bundle-dadır,
-   nümunə siyahısı isə video formasının lazy chunk-ında qalsın. */
-export const youtubePoster = (youtubeId) => `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`
-export const CARD_POSTER_IDS = ['0Tbh4YeXb0s', 'dEB56U42FJc', 'ELSPNLLqVn0']
+/* Video kartındakı 3 poster = data/videoSamples.js-in İLK 3 nümunəsi (test yoxlayır).
+   Burada yalnız id-lər var: bu fayl ana bundle-dadır, nümunə siyahısı isə video
+   formasının lazy chunk-ında qalsın. */
+export const CARD_SAMPLE_IDS = ['ivory-arch', 'royal-burgundy', 'midnight-sky']
 
-/* QR Foto Paylaşım + Qalereya — Premium-un əsas fərqləndiricisi.
-   Bu açar sözləri ehtiva edən sətirlər kartda vurğulanır (3 dildə). */
-export const isDifferentiator = (text) => /qr|qalereya|gallery|галере|zip/i.test(text)
+/* Kartdakı funksiya qruplarının başlıqları (üstünlüklər ulduzla, başlıqsız gəlir) */
+const GROUP_LABELS = {
+  az: { yes: 'Həmçinin daxildir', no: 'Daxil deyil' },
+  en: { yes: 'Also included', no: 'Not included' },
+  ru: { yes: 'Также входит', no: 'Не входит' },
+}
 
 function buildCard(id, lang) {
   const labels = PKG_LABELS[lang] || PKG_LABELS.az
@@ -85,17 +87,19 @@ function buildCard(id, lang) {
     price: def.price,
     tagline: subtitles[id],
     features: [
-      ...feats[id].included.map((f) => [premium && isDifferentiator(f) ? 'star' : 'yes', f]),
+      ...feats[id].highlights.map((f) => ['star', f]),
+      ...feats[id].base.map((f) => ['yes', f]),
       ...feats[id].locked.map((f) => ['no', f]),
     ],
+    groupLabels: GROUP_LABELS[lang] || GROUP_LABELS.az,
     badge: def.popular ? ui.popular.replace(/^★\s*/, '') : premium ? badges.PREMIUM : undefined,
     featured: premium,
   }
 }
 
 /* Yeni Pricing komponentinin formatı:
-   { id, name, price, tagline, features: [[status, label]], badge?, featured? }
-   status: 'yes' daxildir · 'no' daxil deyil · 'star' Premium-a xas fərqləndirici
+   { id, name, price, tagline, features: [[status, label]], groupLabels, badge?, featured? }
+   status: 'star' bu paketin üstünlüyü · 'yes' həmçinin daxildir · 'no' daxil deyil
    Yalnız veb-paketlər (artan qiymət): MINI · SADE · VIP · PREMIUM */
 export function buildPricingPackages(lang = 'az') {
   return WEB_PACKAGE_IDS.map((id) => buildCard(id, lang))
@@ -103,5 +107,5 @@ export function buildPricingPackages(lang = 'az') {
 
 /* VIDEO paketi — veb-paketlərdən ayrı, enli kart kimi göstərilir */
 export function buildVideoPackage(lang = 'az') {
-  return { ...buildCard('VIDEO', lang), ...(VIDEO_CARD_COPY[lang] || VIDEO_CARD_COPY.az), posters: CARD_POSTER_IDS.map(youtubePoster) }
+  return { ...buildCard('VIDEO', lang), ...(VIDEO_CARD_COPY[lang] || VIDEO_CARD_COPY.az), posters: CARD_SAMPLE_IDS.map((id) => `/video/samples/${id}.webp?v=1`) }
 }

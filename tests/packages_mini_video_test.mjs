@@ -14,12 +14,12 @@
      6. 10 nümunə, unikal id/youtubeId, 3 dildə ad
      7. PHP: save/submit_draft VIDEO və MINI-ni qəbul edir
    ───────────────────────────────────────────────────────────────────────── */
-import { readFileSync } from 'node:fs'
+import { readFileSync, existsSync, statSync } from 'node:fs'
 import { registerHooks } from 'node:module'
 import { getPackageGates, getLockedSteps, PACKAGE_DEFS, WEB_PACKAGE_IDS, isVideoPackage, packageLabel } from '../src/data/packages.js'
 import { getSectionVisibility, listBuilderSections } from '../src/data/sections.js'
 import { VIDEO_SAMPLES, normalizeSampleLink, findVideoSample, describeVideoSource, videoMusicLabel } from '../src/data/videoSamples.js'
-import { CARD_POSTER_IDS } from '../src/data/packageCopy.js'
+import { CARD_SAMPLE_IDS } from '../src/data/packageCopy.js'
 import { VIDEO_ORDER_COPY } from '../src/data/videoOrderCopy.js'
 
 /* whatsappOrder.js Vite üslubunda uzantısız idxal edir ('../data/constants') —
@@ -85,7 +85,7 @@ const base = {
 }
 const msg = decodeURIComponent(buildVideoWhatsAppMessage(base))
 ok('video mesajı: paket adı', msg.includes('Videolu dəvətnamə (29₼)'))
-ok('video mesajı: nümunə adı + YouTube linki', msg.includes(VIDEO_SAMPLES[0].title.az) && msg.includes(`youtube.com/shorts/${VIDEO_SAMPLES[0].youtubeId}`))
+ok('video mesajı: nümunə adı + video linki', msg.includes(VIDEO_SAMPLES[0].title.az) && msg.includes(`https://digitoy.az/video/samples/${VIDEO_SAMPLES[0].id}.mp4`))
 ok('video mesajı: bəy və gəlin', msg.includes('Bəy: Murad') && msg.includes('Gəlin: Leyla'))
 ok('video mesajı: boş mətn/musiqi → «Siz»', msg.includes('Yazı: Siz yazın') && msg.includes('Musiqi: Siz seçin'))
 ok('video mesajı: Vagzali yoxdur', !/vagzali/i.test(msg))
@@ -108,16 +108,20 @@ ok('link: 500+ simvol rədd', normalizeSampleLink('https://a.az/' + 'x'.repeat(5
 /* ── 6. Nümunələr ── */
 ok('10 nümunə', VIDEO_SAMPLES.length === 10)
 ok('id-lər unikal', new Set(VIDEO_SAMPLES.map((s) => s.id)).size === 10)
-ok('youtubeId-lər unikal və 11 simvol', new Set(VIDEO_SAMPLES.map((s) => s.youtubeId)).size === 10 && VIDEO_SAMPLES.every((s) => /^[A-Za-z0-9_-]{11}$/.test(s.youtubeId)))
+for (const s of VIDEO_SAMPLES) {
+  const mp4 = new URL(`../public/video/samples/${s.id}.mp4`, import.meta.url)
+  const webp = new URL(`../public/video/samples/${s.id}.webp`, import.meta.url)
+  ok(`${s.id}: mp4 (≤ 2.5 MB) və poster var`, existsSync(mp4) && statSync(mp4).size < 2.5e6 && existsSync(webp) && statSync(webp).size < 80e3)
+}
 ok('3 dildə ad və qeyd', VIDEO_SAMPLES.every((s) => ['az', 'en', 'ru'].every((l) => s.title[l] && s.note[l])))
-ok('Pricing posterləri = ilk 3 nümunə', CARD_POSTER_IDS.join() === VIDEO_SAMPLES.slice(0, 3).map((s) => s.youtubeId).join())
+ok('Pricing posterləri = ilk 3 nümunə', CARD_SAMPLE_IDS.join() === VIDEO_SAMPLES.slice(0, 3).map((s) => s.id).join())
 ok('describeVideoSource', describeVideoSource({ source: 'sample', sampleId: 'black-gold' }).sample?.id === 'black-gold'
   && describeVideoSource({ source: 'link', link: 'pin.it/x' }).link === 'https://pin.it/x'
   && Object.keys(describeVideoSource({ source: 'link', link: 'javascript:1' })).length === 0
   && Object.keys(describeVideoSource({ source: 'sample', sampleId: 'yox' })).length === 0)
 ok('videoMusicLabel', videoMusicLabel({ mode: 'preset', title: 'A', artist: 'B' }, 'X') === 'A — B'
   && videoMusicLabel({ mode: 'own', custom: ' C ' }, 'X') === 'C' && videoMusicLabel({ mode: 'auto' }, 'X') === 'X' && videoMusicLabel(undefined, 'X') === 'X')
-ok('findVideoSample', findVideoSample('black-gold')?.youtubeId === 'dEB56U42FJc' && findVideoSample('yox') === null)
+ok('findVideoSample', findVideoSample('black-gold')?.id === 'black-gold' && findVideoSample('yox') === null)
 
 /* ── 6b. Sifariş formasının mətnləri 3 dildə eyni açarlarla ── */
 const keys = (o) => Object.keys(o).sort().join(',')

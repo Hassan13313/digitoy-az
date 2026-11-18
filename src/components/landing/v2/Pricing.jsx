@@ -6,6 +6,7 @@
 //     {selected && <OrderForm packageId={selected} />}   ← mövcud sifariş formanız
 //   </Pricing>
 // ════════════════════════════════════════════════════════════════
+import { Fragment } from 'react';
 import { MotionConfig, motion } from 'framer-motion';
 import { ArrowRight, Check, Clock, Crown, Minus, Play, Sparkles } from 'lucide-react';
 import t from '../../../data/translations';
@@ -210,8 +211,15 @@ function PackageCard({ p, x, selected, onSelect }) {
 
       {/* funksiyalar */}
       <ul className="relative order-4 flex-1 space-y-3 lg:space-y-3.5">
-        {p.features.map(([status, label]) => (
-          <li key={label} className="flex items-start gap-3 text-[14.5px] leading-snug">
+        {p.features.map(([status, label], i) => (
+          <Fragment key={label}>
+            {/* Qrup başlığı: «Həmçinin daxildir» / «Daxil deyil» — qrup dəyişəndə */}
+            {i > 0 && status !== p.features[i - 1][0] && p.groupLabels?.[status] && (
+              <li aria-hidden="true" className={`pt-2 text-[12.5px] font-semibold ${dark ? 'text-sand/70' : 'text-brown-muted'}`}>
+                {p.groupLabels[status]}
+              </li>
+            )}
+          <li className="flex items-start gap-3 text-[14.5px] leading-snug">
             <FeatureIcon status={status} dark={dark} />
             <span
               className={
@@ -232,6 +240,7 @@ function PackageCard({ p, x, selected, onSelect }) {
               {label}
             </span>
           </li>
+          </Fragment>
         ))}
       </ul>
 
@@ -284,7 +293,7 @@ function VideoPackageCard({ p, x, selected, onSelect }) {
             key={src}
             className={`absolute aspect-[9/16] w-[96px] overflow-hidden rounded-[14px] bg-beige shadow-lift ring-[3px] ring-white md:w-[104px] ${FAN[i]}`}
           >
-            <img src={src} alt="" loading="lazy" decoding="async" referrerPolicy="no-referrer" className="h-full w-full scale-[1.03] object-cover" />
+            <img src={src} alt="" loading="lazy" decoding="async" width="104" height="185" className="h-full w-full object-cover" />
             {i === 1 && (
               <span className="absolute inset-0 grid place-items-center">
                 <span className="grid h-10 w-10 place-items-center rounded-full bg-espresso/80 text-cream backdrop-blur-sm">

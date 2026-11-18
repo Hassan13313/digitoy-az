@@ -26,73 +26,91 @@ export const packageLabel = (pkgId) => {
   return d ? `${d.name} (${d.price}₼)` : (pkgId || '—')
 }
 
-/* Phase 18 — dəyər əsaslı mövqeləndirmə: hər paket "VIP-dəkilərin hamısı + ..."
-   kumulyativ çərçivəsi ilə təqdim olunur, ayrı-ayrı funksiya siyahısı kimi yox. */
+/* Paket kartlarının funksiyaları (2026-11-18 yenidən yazıldı): hər paket öz dəyərini
+   TAM göstərir — «… paketdəki hər şey» kimi istinad sətirləri YOXDUR.
+     highlights — bu paketin üstünlükləri (kartda ulduzla, önə çəkilir)
+     base       — həmçinin daxildir (açıq-aydın sadalanır)
+     locked     — daxil deyil (üstündən xətt) */
 export const PKG_FEATURES = {
   az: {
     MINI: {
-      included: ['Açılış animasiyası', 'Geri sayım saatı', 'Google Maps naviqasiya', 'Dress code', 'Toy proqramı', 'Paylaşıla bilən link', '🎵 Dəvətnamənizdəki musiqini şəxsi zövqünüzə uyğun seçin'],
-      locked:   ['Bizim Hekayəmiz (Love Story)', 'Təbrik Kitabı', 'İştirak Təsdiqi'],
+      highlights: ['Açılış animasiyalı premium dizayn', 'Google Maps və Waze ilə bir toxunuşla yol', 'Toya qalan vaxtı göstərən geri sayım'],
+      base:       ['Tədbir proqramı və dress code', 'Sizin seçdiyiniz fon musiqisi', 'Azərbaycan, ingilis və rus dillərində', 'Limitsiz qonağa bir link'],
+      locked:     ['Bizim Hekayəmiz (Love Story)', 'Təbrik Kitabı', 'İştirak Təsdiqi'],
     },
     SADE: {
-      included: ['Mini paketdəki hər şey', 'Bizim Hekayəmiz (Love Story)', 'Təbrik Kitabı — qonaqların arzuları'],
-      locked:   ['İştirak Təsdiqi', 'Oturma Planı', 'QR Foto Paylaşım', 'Qalereya idarəetməsi'],
+      highlights: ['Bizim Hekayəmiz — şəkilli Love Story zaman xətti', 'Təbrik Kitabı — qonaqların arzuları sizdə qalır'],
+      base:       ['Açılış animasiyalı premium dizayn', 'Google Maps və Waze ilə yol', 'Geri sayım, proqram və dress code', 'Sizin seçdiyiniz fon musiqisi', '3 dildə, limitsiz qonağa bir link'],
+      locked:     ['İştirak Təsdiqi', 'Oturma Planı', 'QR Foto Paylaşım'],
     },
     VIP: {
-      included: ['Sadə paketdəki hər şey', 'İştirak Təsdiqi', 'Oturma Planı', 'Qonaq siyahısının idarə olunması'],
-      locked:   ['QR Foto Paylaşım', 'Qalereya idarəetməsi'],
+      highlights: ['İştirak Təsdiqi — cavabları real vaxtda görün', 'Oturma Planı — qonaq masasını özü tapır', 'Qonaq siyahısı və canlı hesabat'],
+      base:       ['Love Story və Təbrik Kitabı', 'Açılış animasiyalı premium dizayn', 'Google Maps, geri sayım, proqram, dress code', 'Fon musiqisi, 3 dil, limitsiz qonaq'],
+      locked:     ['QR Foto Paylaşım', 'Qonaq Qalereyası'],
     },
     PREMIUM: {
-      included: ['VIP paketdəki hər şey', 'QR Foto Paylaşım Sistemi', 'Qonaq Qalereyası', 'Qalereya İdarəetməsi', 'Bütün şəkilləri ZIP endirmə', 'HD çap üçün QR kart faylı', 'Prioritet hazırlama'],
-      locked:   [],
+      highlights: ['QR Foto Paylaşım — qonaqlar şəkil və video yükləyir', 'Sizə özəl qonaq qalereyası', 'Bütün şəkilləri bir kliklə ZIP endirin', 'Masalar üçün HD çap QR kartı', 'Prioritet hazırlama'],
+      base:       ['İştirak Təsdiqi və Oturma Planı', 'Qonaq siyahısı və canlı hesabat', 'Love Story və Təbrik Kitabı', 'Premium dizayn, Maps, geri sayım, musiqi, 3 dil'],
+      locked:     [],
     },
     VIDEO: {
-      included: ['Nümunəyə uyğun şaquli video (9:16)', 'Adlarınız, tarix, saat və məkan', 'Dəvət mətni sizin istəyinizlə', 'Fon musiqisi seçimi', 'WhatsApp və Instagram üçün hazır MP4'],
-      locked:   [],
+      highlights: [],
+      base:       ['Nümunəyə uyğun şaquli video (9:16)', 'Adlarınız, tarix, saat və məkan', 'Dəvət mətni sizin istəyinizlə', 'Fon musiqisi seçimi', 'WhatsApp və Instagram üçün hazır MP4'],
+      locked:     [],
     },
   },
   en: {
     MINI: {
-      included: ['Opening animation', 'Countdown timer', 'Google Maps navigation', 'Dress code', 'Event program', 'Shareable link', '🎵 Choose the music of your invitation to match your taste'],
-      locked:   ['Our Story (Love Story)', 'Guestbook', 'RSVP (guest confirmation)'],
+      highlights: ['Premium design with an opening animation', 'One-tap directions with Google Maps and Waze', 'Countdown to your big day'],
+      base:       ['Event programme and dress code', 'Background music of your choice', 'In Azerbaijani, English and Russian', 'One link for unlimited guests'],
+      locked:     ['Our Story (Love Story)', 'Guestbook', 'RSVP (guest confirmation)'],
     },
     SADE: {
-      included: ['Everything in Mini', 'Our Story (Love Story)', 'Guestbook — wishes from your guests'],
-      locked:   ['RSVP (guest confirmation)', 'Seating plan', 'QR photo sharing', 'Gallery management'],
+      highlights: ['Our Story — a Love Story timeline with photos', 'Guestbook — your guests’ wishes stay with you'],
+      base:       ['Premium design with an opening animation', 'Directions with Google Maps and Waze', 'Countdown, programme and dress code', 'Background music of your choice', '3 languages, one link for unlimited guests'],
+      locked:     ['RSVP (guest confirmation)', 'Seating plan', 'QR photo sharing'],
     },
     VIP: {
-      included: ['Everything in Basic', 'RSVP (guest confirmation)', 'Seating plan', 'Guest list management'],
-      locked:   ['QR photo sharing', 'Gallery management'],
+      highlights: ['RSVP — see the answers in real time', 'Seating plan — guests find their own table', 'Guest list and live report'],
+      base:       ['Love Story and Guestbook', 'Premium design with an opening animation', 'Google Maps, countdown, programme, dress code', 'Music, 3 languages, unlimited guests'],
+      locked:     ['QR photo sharing', 'Guest gallery'],
     },
     PREMIUM: {
-      included: ['Everything in VIP', 'QR photo sharing system', 'Guest gallery', 'Gallery management', 'Download all photos as ZIP', 'HD print-ready QR card file', 'Priority preparation'],
-      locked:   [],
+      highlights: ['QR photo sharing — guests upload photos and videos', 'Your own private guest gallery', 'Download every photo as a ZIP in one click', 'HD print-ready QR card for the tables', 'Priority preparation'],
+      base:       ['RSVP and seating plan', 'Guest list and live report', 'Love Story and Guestbook', 'Premium design, Maps, countdown, music, 3 languages'],
+      locked:     [],
     },
     VIDEO: {
-      included: ['Vertical video (9:16) in the style you pick', 'Your names, date, time and venue', 'Invitation text the way you want it', 'Background music of your choice', 'Ready MP4 for WhatsApp and Instagram'],
-      locked:   [],
+      highlights: [],
+      base:       ['Vertical video (9:16) in the style you pick', 'Your names, date, time and venue', 'Invitation text the way you want it', 'Background music of your choice', 'Ready MP4 for WhatsApp and Instagram'],
+      locked:     [],
     },
   },
   ru: {
     MINI: {
-      included: ['Анимация открытия', 'Таймер обратного отсчёта', 'Навигация Google Maps', 'Дресс-код', 'Программа мероприятия', 'Ссылка для отправки', '🎵 Выберите музыку приглашения по своему вкусу'],
-      locked:   ['Наша история (Love Story)', 'Книга пожеланий', 'Подтверждение участия'],
+      highlights: ['Премиальный дизайн с анимацией открытия', 'Маршрут в одно касание: Google Maps и Waze', 'Обратный отсчёт до вашего дня'],
+      base:       ['Программа и дресс-код', 'Фоновая музыка на ваш выбор', 'На азербайджанском, английском и русском', 'Одна ссылка для любого числа гостей'],
+      locked:     ['Наша история (Love Story)', 'Книга пожеланий', 'Подтверждение участия'],
     },
     SADE: {
-      included: ['Всё из пакета Мини', 'Наша история (Love Story)', 'Книга пожеланий от гостей'],
-      locked:   ['Подтверждение участия', 'План рассадки', 'QR обмен фото', 'Управление галереей'],
+      highlights: ['Наша история — Love Story с фотографиями', 'Книга пожеланий — пожелания гостей остаются с вами'],
+      base:       ['Премиальный дизайн с анимацией открытия', 'Маршрут через Google Maps и Waze', 'Отсчёт, программа и дресс-код', 'Фоновая музыка на ваш выбор', '3 языка, одна ссылка для всех гостей'],
+      locked:     ['Подтверждение участия', 'План рассадки', 'QR обмен фото'],
     },
     VIP: {
-      included: ['Всё из пакета Базовый', 'Подтверждение участия', 'План рассадки', 'Управление списком гостей'],
-      locked:   ['QR обмен фото', 'Управление галереей'],
+      highlights: ['Подтверждение участия — ответы в реальном времени', 'План рассадки — гость сам находит свой стол', 'Список гостей и живой отчёт'],
+      base:       ['Love Story и книга пожеланий', 'Премиальный дизайн с анимацией открытия', 'Google Maps, отсчёт, программа, дресс-код', 'Музыка, 3 языка, без ограничения гостей'],
+      locked:     ['QR обмен фото', 'Галерея гостей'],
     },
     PREMIUM: {
-      included: ['Всё из пакета VIP', 'Система QR обмена фото', 'Галерея гостей', 'Управление галереей', 'Скачивание всех фото в ZIP', 'HD файл QR-карты для печати', 'Приоритетная подготовка'],
-      locked:   [],
+      highlights: ['QR обмен фото — гости загружают фото и видео', 'Ваша личная галерея гостей', 'Все фото одним ZIP-архивом в один клик', 'HD QR-карта для печати на столы', 'Приоритетная подготовка'],
+      base:       ['Подтверждение участия и план рассадки', 'Список гостей и живой отчёт', 'Love Story и книга пожеланий', 'Премиум-дизайн, Maps, отсчёт, музыка, 3 языка'],
+      locked:     [],
     },
     VIDEO: {
-      included: ['Вертикальное видео (9:16) в выбранном стиле', 'Ваши имена, дата, время и место', 'Текст приглашения по вашему желанию', 'Фоновая музыка на выбор', 'Готовый MP4 для WhatsApp и Instagram'],
-      locked:   [],
+      highlights: [],
+      base:       ['Вертикальное видео (9:16) в выбранном стиле', 'Ваши имена, дата, время и место', 'Текст приглашения по вашему желанию', 'Фоновая музыка на выбор', 'Готовый MP4 для WhatsApp и Instagram'],
+      locked:     [],
     },
   },
 }
