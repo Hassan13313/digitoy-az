@@ -2,6 +2,7 @@
 /* ── get_draft.php — session_id YA DA draft_code üzrə draft-ı qaytar ── */
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/order_link.php';
+require_once __DIR__ . '/order_sync.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
@@ -61,6 +62,8 @@ if (!$row) {
     exit;
 }
 
+$invSlug = orderInvitationSlug($db, $row['approved_slug'], $row['draft_code']);
+
 echo json_encode([
     'found'          => true,
     'draft_code'     => $row['draft_code'],
@@ -70,5 +73,8 @@ echo json_encode([
     'form_data'      => $row['form_data'] ? json_decode($row['form_data'], true) : null,
     'customer_phone' => $row['customer_phone'] ?? null,
     'submitted_at'   => $row['submitted_at']   ?? null,
-    'approved_slug'  => orderInvitationSlug($db, $row['approved_slug'], $row['draft_code']),
+    'approved_slug'  => $invSlug,
+    /* 2026-11-18 — admin axını: dəvətnamə varsa ONUN hazırkı halı (həqiqət mənbəyi,
+       bax order_sync.php). Müştərinin session bərpasına verilmir. */
+    'invitation_form_data' => $draftCode ? invitationFormDataBySlug($db, $invSlug) : null,
 ]);

@@ -4,6 +4,7 @@ require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/slug_alloc.php';
 require_once __DIR__ . '/i18n_merge.php';
 require_once __DIR__ . '/template_version.php';
+require_once __DIR__ . '/order_sync.php';
 
 requireAdmin();
 
@@ -67,6 +68,9 @@ function invitationJsonWithMergedI18n(PDO $db, string $column, $value, array $in
     if (!is_array($stored)) $stored = [];
 
     $merged = mergeInvitationI18n($stored, $incomingFd);
+    /* 2026-11-18 — admin-in dizayn düzəlişləri (form_data.admin) builder nüsxəsində
+       olmur: gəlməyibsə saxlanılan QORUNUR (bax order_sync.php) */
+    $merged = preserveAdminOwnedKeys($stored, $merged);
     /* Şablon versiyası: açar gəlməyibsə saxlanılmış dəyər qorunur (bax template_version.php) */
     $merged = tvForSave($merged, $raw === false ? null : $stored);
     $out = json_encode($merged, JSON_UNESCAPED_UNICODE);
@@ -96,6 +100,7 @@ if ($res['action'] === 'update_slug') {
     $data = invitationJsonWithMergedI18n($db, 'slug', $res['slug'], $formData);
     $upd = $db->prepare("UPDATE invitations SET form_data = :data, template_id = :tpl, updated_at = NOW() WHERE slug = :slug");
     $upd->execute([':data' => $data, ':tpl' => $templateId, ':slug' => $res['slug']]);
+    mirrorInvitationToDraft($db, $draftCode, $data);
     echo json_encode(['ok' => true, 'slug' => $res['slug'], 'created' => false]);
     exit;
 }
@@ -104,6 +109,7 @@ if ($res['action'] === 'update_code') {
     $data = invitationJsonWithMergedI18n($db, 'draft_code', $draftCode, $formData);
     $upd = $db->prepare("UPDATE invitations SET form_data = :data, template_id = :tpl, updated_at = NOW() WHERE draft_code = :c");
     $upd->execute([':data' => $data, ':tpl' => $templateId, ':c' => $draftCode]);
+    mirrorInvitationToDraft($db, $draftCode, $data);
     echo json_encode(['ok' => true, 'slug' => $res['slug'], 'created' => false]);
     exit;
 }

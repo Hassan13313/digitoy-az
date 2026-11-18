@@ -72,8 +72,16 @@ export default function AdminOrderDetail({ draftCode, onBack }) {
     window.location.href = `/?draft=${draftCode}`
   }
 
-  /* Phase 46 — SİNXRON: təsdiq dəvətnaməni də yaradır. */
+  /* Phase 46 — SİNXRON: təsdiq dəvətnaməni də yaradır.
+     2026-11-18 — dəvətnamə ARTIQ VARSA heç nə üstündən yazılmır, yalnız status
+     dəyişir: əvvəl sifarişin köhnə nüsxəsi admin-in «Dəvətnamələr»dəki
+     düzəlişlərini silirdi (bax api/order_sync.php). */
   const createInvitation = async () => {
+    if (draft?.approved_slug && draft?.invitation_form_data) {
+      await approveDraft(draftCode, draft.approved_slug)
+      setDraft(prev => ({ ...prev, status: 'approved' }))
+      return
+    }
     const fd = draft?.form_data
     if (!fd) throw new Error('Sifarişin məlumatı tapılmadı.')
     const saved = await saveInvitation(computeInviteSlug(fd), fd, draftCode)
@@ -163,7 +171,8 @@ export default function AdminOrderDetail({ draftCode, onBack }) {
     </div>
   )
 
-  const fd = draft.form_data || {}
+  /* Dəvətnamə varsa onun hazırkı halı göstərilir — iki bölmə həmişə eynidir */
+  const fd = draft.invitation_form_data || draft.form_data || {}
   const isCouple = ['toy', 'nishan'].includes(fd.eventType)
   const isCorp = ['corporate', 'other'].includes(fd.eventType)
   const names = isCouple

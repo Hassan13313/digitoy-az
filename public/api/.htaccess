@@ -47,6 +47,11 @@ RedirectMatch 404 ^/api/migrations/
     Require all denied
 </Files>
 
+# 2026-11-18 — sifaris/devetname sinxronlugu, sekil nusxeleri, toy mesajlari, oturma redaktesi (yalniz include)
+<FilesMatch "^(order_sync|photo_variants|event_messages_lib|seating_owner_lib)\.php$">
+    Require all denied
+</FilesMatch>
+
 # Phase 45 — acilis/hekaye override-larinin yoxlama qaydalari (yalniz include)
 <Files "admin_content_rules.php">
     Require all denied

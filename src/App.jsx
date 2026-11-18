@@ -706,8 +706,11 @@ export default function App({ ssrPath = null }) {
       if (draftParam && hasAccess) {
         getDraftByCode(draftParam)
           .then(function(draft) {
-            if (draft?.found && draft.form_data) {
-              setWeddingData(function(prev) { return { ...prev, ...draft.form_data } })
+            /* 2026-11-18 — dəvətnamə artıq varsa ONUN hazırkı halı açılır
+               (admin-in «Dəvətnamələr»dəki düzəlişləri itməsin, bax api/order_sync.php) */
+            const fd = draft?.found && (draft.invitation_form_data || draft.form_data)
+            if (fd) {
+              setWeddingData(function(prev) { return { ...prev, ...fd } })
             }
             if (slug) setAdminSlug(slug)
             setView('admin-review')
