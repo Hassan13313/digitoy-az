@@ -43,3 +43,6 @@ DIGITOY_AUDIT.md
 tests/fixtures/*.mp4
 tests/fixtures/*.jpg
 !tests/fixtures/README.md
+
+# VPS video çeviricisinin tokeni — yalnız serverdə (2026-11-18)
+public/api/config.worker.php
