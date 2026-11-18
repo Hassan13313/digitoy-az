@@ -372,8 +372,22 @@ function seoNoscript(string $path, callable $e, ?array $guide = null): string {
               . '<p>Toy, nişan, xına gecəsi, ad günü, ildönümü, uşaq tədbirləri, korporativ və digər tədbirlər üçün online dəvətnamə şablonları. Əvvəlcə tədbirinizi seçin: hər tədbirin öz dizaynları var — rəng, şrift, animasiya və açılış ekranı fərqlidir.</p>'
               . '<h2>Tədbirə görə şablonlar</h2><ul>' . implode('', $others) . '</ul>';
     } elseif ($path === '/demo') {
+        /* 2026-11-18 SEO: botlar üçün mətn 87 sözdən ibarət idi — nümunənin nəyi göstərdiyi açıq yazılır */
         $body = '<h1>Online Dəvətnamə Nümunəsi</h1>'
-              . '<p>Online dəvətnamə necə görünür? DigiToy rəqəmsal toy dəvətnaməsinin canlı nümunəsi: İştirak Təsdiqi, oturma planı, QR foto paylaşımı və premium dizayn bir arada.</p>';
+              . '<p>Online dəvətnamə necə görünür? DigiToy rəqəmsal toy dəvətnaməsinin canlı nümunəsi: İştirak Təsdiqi, oturma planı, QR foto paylaşımı və premium dizayn bir arada.</p>'
+              . '<h2>Nümunədə nələr var</h2><ul>'
+              . '<li>Açılış ekranı və musiqi — qonaq linki açanda dəvətnamə animasiya ilə açılır.</li>'
+              . '<li>Tədbirə geri sayım, tarix, saat və proqram.</li>'
+              . '<li>Məkan və xəritə — bir toxunuşla yol göstərilir.</li>'
+              . '<li>İştirak Təsdiqi (RSVP) — qonaq gələcəyini, gəlməyəcəyini və neçə nəfər olacağını bildirir.</li>'
+              . '<li>Oturma planı — qonaq adını yazıb öz masasını tapır.</li>'
+              . '<li>QR foto paylaşımı — qonaqlar tədbirdə çəkdikləri şəkil və videoları bir albomda toplayır.</li>'
+              . '<li>Azərbaycan, İngilis və Rus dillərində tam versiya.</li></ul>'
+              . '<h2>Öz dəvətnamənizi necə sifariş edirsiniz</h2><ol>'
+              . '<li>Tədbirinizə uyğun şablonu seçin.</li>'
+              . '<li>Adları, tarixi, məkanı və mətni doldurun — önbaxışda dərhal görürsünüz.</li>'
+              . '<li>Sifarişi WhatsApp ilə göndərin; son variant təsdiqlənəndən sonra ödəniş edilir.</li></ol>'
+              . '<p>Paketlər: VİDEO — 29 ₼, MİNİ — 39 ₼, SADƏ — 59 ₼, VİP — 89 ₼, PREMIUM — 129 ₼.</p>';
     } else {
         return '';
     }
@@ -682,7 +696,8 @@ if ($path === '/') {
 }
 
 foreach ($jsonld as $ld) {
-    $json = json_encode($ld, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    /* JSON_HEX_TAG: mətndə «</script>» olsa belə blok qırılmır (2026-11-18 audit) */
+    $json = json_encode($ld, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP);
     if ($json !== false) {
         $block .= "\n    <script type=\"application/ld+json\">" . $json . '</script>';
     }
@@ -716,12 +731,18 @@ if ($guide) {
    Məzmun HTML-də olduğu üçün eyni mətnli <noscript> lazım deyil. Fayl yoxdursa — köhnə qayda.
    Fayl adı yalnız məlum marşrutlardan qurulur (seoConceptPages-in açarı) — istifadəçi
    girişi fayl yoluna düşmür. */
+/* 2026-11-18 — hüquqi səhifələr də (ağ siyahı: yol → fayl adı) */
+$legalPre = ['/mexfilik' => 'legal--privacy', '/sertler' => 'legal--terms', '/geri-qaytarma' => 'legal--refund'];
 $preName = $path === '/' ? 'home'
          : ($path === '/templates' ? 'templates'
-         : ($conceptPage ? 'sablonlar--' . $cm[1] : ''));
+         : ($conceptPage ? 'sablonlar--' . $cm[1] : ($legalPre[$path] ?? '')));
 $preFile = $preName !== '' ? __DIR__ . '/_prerender/' . $preName . '.html' : '';
 $pre = ($preFile !== '' && is_file($preFile)) ? (string) @file_get_contents($preFile) : '';
-if ($pre !== '' && str_contains($out, '<div id="root"></div>')) {
+if ($pre !== '' && str_starts_with($preName, 'legal--')) {
+    /* Hüquqi səhifə: mətni brauzerdə effektdə yüklənir → hidrasiya uyğun gəlməzdi (#418).
+       Hazır HTML botlar üçün <noscript>-dədir; JS-li ziyarətçi səhifəni əvvəlki kimi görür. */
+    $noscript = '<noscript>' . $pre . '</noscript>';
+} elseif ($pre !== '' && str_contains($out, '<div id="root"></div>')) {
     $out = str_replace('<div id="root"></div>', '<div id="root" data-pre="' . $e($path) . '">' . $pre . '</div>', $out);
     $noscript = '';
 }

@@ -360,6 +360,7 @@ export default function App({ ssrPath = null }) {
   const [view,        setView]        = useState(() => {
     if (typeof window === 'undefined') {
       if (ssrPath === '/') return 'landing'
+      if (matchLegalRoute(ssrPath || '')) return 'legal'   /* 2026-11-18: hüquqi səhifələr də hazır HTML ilə */
       return /^\/templates\/?$/.test(ssrPath || '') || parseConceptPage() ? 'templates' : 'loading'
     }
     if (window.location.pathname === '/preview/live') return 'live-preview'
@@ -373,7 +374,7 @@ export default function App({ ssrPath = null }) {
     return matchGuideRoute(window.location.pathname) ? 'guide' : 'loading'
   })
   const [legalDoc,    setLegalDoc]    = useState(
-    () => (typeof window !== 'undefined' ? matchLegalRoute(window.location.pathname) : null),
+    () => matchLegalRoute(typeof window !== 'undefined' ? window.location.pathname : (ssrPath || '')),
   )
   const [guideSlug,   setGuideSlug]   = useState(
     () => (typeof window !== 'undefined' ? matchGuideRoute(window.location.pathname) : null),

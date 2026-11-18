@@ -61,7 +61,7 @@ export default function FAQ({ lang = 'az', items, whatsappUrl = 'https://wa.me/9
         mainEntity: list
           .filter((i) => !i.todo)
           .map((i) => ({ '@type': 'Question', name: i.q, acceptedAnswer: { '@type': 'Answer', text: i.a } })),
-      }),
+      }).replace(/</g, '\\u003c'),   /* «</script>» mətndə olsa belə <script> bloku qırılmır */
     [list],
   );
 

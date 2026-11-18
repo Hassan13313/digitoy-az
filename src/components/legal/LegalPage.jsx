@@ -9,6 +9,7 @@ import { LEGAL_PAGE_UI } from '../../data/legal/page'
 import { spaClick } from '../../utils/siteRoutes'
 import { formatDayMonthYear } from '../../utils/dateFormat'
 import { consent } from '../../utils/consent'
+import { IS_SSR } from '../../utils/prerender'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    HÜQUQİ SƏHİFƏ — /mexfilik, /sertler, /geri-qaytarma (Phase 47 məntiqi ·
@@ -33,7 +34,12 @@ export default function LegalPage({ doc, lang, setLang, onBack }) {
   const ui = { links: legalUi(lang).links, page: LEGAL_PAGE_UI[lang] || LEGAL_PAGE_UI.az }
   const extra = EXTRA[lang] || EXTRA.az
   const key = `${doc}/${lang}`
-  const [loaded, setLoaded] = useState({ key: null, text: null })
+  /* Prerender (Node): mətn src/prerender.jsx-in qoyduğu qlobaldan dərhal gəlir — botlar üçün
+     tam HTML (seo.php onu <noscript>-ə qoyur, hidrasiya edilmir). Brauzerdə əvvəlki kimi effektdə. */
+  const [loaded, setLoaded] = useState(() => {
+    const ssrText = IS_SSR ? globalThis.__DT_LEGAL__?.[key] : null
+    return ssrText ? { key, text: ssrText } : { key: null, text: null }
+  })
   const text = loaded.key === key ? loaded.text : null
   const articleRef = useRef(null)
 

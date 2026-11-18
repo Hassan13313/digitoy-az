@@ -22,8 +22,10 @@ const TMP = path.join(ROOT, 'node_modules', '.prerender')
 const OUT_DIR = path.join(ROOT, 'dist', '_prerender')
 
 /* Hər fraqmentin olmalı olduğu işarə — yoxdursa nəsə səhv render olunub (məs. yükləyici) */
-const MUST = (route) => (route === '/' ? 'id="hero-title"' : '/img/templates/')
-const MIN_BYTES = 15000
+const LEGAL_PATHS = new Set(['/mexfilik', '/sertler', '/geri-qaytarma'])
+const MUST = (route) => (route === '/' ? 'id="hero-title"' : LEGAL_PATHS.has(route) ? '<h1' : '/img/templates/')
+/* Hüquqi səhifə kataloqdan yığcamdır — öz həddi */
+const MIN_BYTES_FOR = (route) => (LEGAL_PATHS.has(route) ? 4000 : 15000)
 
 async function main() {
   if (!existsSync(path.join(ROOT, 'dist', 'index.html'))) {
@@ -49,7 +51,7 @@ async function main() {
   for (const [route, name] of mod.PRERENDER_ROUTES) {
     try {
       const html = await mod.renderPath(route)
-      if (typeof html !== 'string' || html.length < MIN_BYTES || !html.includes(MUST(route))) {
+      if (typeof html !== 'string' || html.length < MIN_BYTES_FOR(route) || !html.includes(MUST(route))) {
         console.error(`prerender: ${route} — gözlənilməz nəticə (${html?.length} bayt), YAZILMADI`)
         continue
       }
