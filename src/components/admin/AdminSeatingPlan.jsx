@@ -3,6 +3,7 @@ import { Upload } from 'lucide-react'
 import { getGuests, manageGuest, migrateGuests } from '../../utils/api'
 import GuestImportModal from './GuestImportModal'
 import SeatingPlanTab from './v2/SeatingPlanTab'
+import { seatingStats, seatingTables, withLocalTable } from './v2/seatingView'
 import { Button, Notice } from './v2/adminUi'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -13,8 +14,6 @@ import { Button, Notice } from './v2/adminUi'
    planı MƏTNİNİ köçürür), Excel/CSV idxalı (GuestImportModal). Yeni masa
    serverə yazılmır — ilk qonaq əlavə olunanda yaranır (köhnə davranış).
    ───────────────────────────────────────────────────────────────────────── */
-
-const VIEW_STATUS = { GOING: 'yes', NOT_GOING: 'no', MAYBE: 'maybe', NO_RESPONSE: 'none' }
 
 export default function AdminSeatingPlan({ slug, seatingPlan }) {
   const [data,       setData]       = useState(null)
@@ -53,13 +52,7 @@ export default function AdminSeatingPlan({ slug, seatingPlan }) {
   }
 
   /* Boş masa yalnız lokal göstərilir — istifadəçi sonra qonaq əlavə edəcək */
-  const handleAddTable = (name) => {
-    setData(prev => ({
-      ...prev,
-      tables: [...(prev?.tables ?? []), { table_id: name, total: 0, going: 0, not_going: 0, maybe: 0, no_response: 0, responded: 0 }],
-      guests: prev?.guests ?? [],
-    }))
-  }
+  const handleAddTable = (name) => setData(prev => withLocalTable(prev, name))
 
   /* Qonaq əməliyyatları: xəta olsa pəncərə açıq qalır (Promise rədd olunur) */
   const op = async (fn) => {
@@ -76,32 +69,11 @@ export default function AdminSeatingPlan({ slug, seatingPlan }) {
     }
   }
 
-  const guests = useMemo(() => data?.guests ?? [], [data])
-  const tables = useMemo(() => {
-    /* Masa siyahısı (API + lokal əlavə) */
-    const ids = [...new Set([
-      ...guests.map(g => g.table_id),
-      ...(data?.tables?.map(t => t.table_id) ?? []),
-    ])].sort()
-    return ids.map(tid => ({
-      id: tid,
-      name: tid,
-      guests: guests.filter(g => g.table_id === tid).map(g => ({
-        id: String(g.id),
-        name: g.full_name,
-        status: VIEW_STATUS[g.status] || 'none',
-        plus: Number(g.extra_guests) || 0,
-        /* Phase 43 — Excel idxalından gələn telefon (sütun yoxdursa null) */
-        phone: g.phone || '',
-        note: g.notes || '',
-      })),
-    }))
-  }, [guests, data])
+  const tables = useMemo(() => seatingTables(data), [data])
 
   if (!slug) return null
 
-  const s = data?.stats || {}
-  const hasMigratableData = !!(seatingPlan && seatingPlan.trim() && guests.length === 0)
+  const hasMigratableData = !!(seatingPlan && seatingPlan.trim() && !data?.guests?.length)
 
   return (
     <>
@@ -125,10 +97,7 @@ export default function AdminSeatingPlan({ slug, seatingPlan }) {
 
       <SeatingPlanTab
         tables={tables}
-        stats={{
-          total: s.total ?? 0, yes: s.going ?? 0, no: s.not_going ?? 0, maybe: s.maybe ?? 0,
-          none: s.no_response ?? 0, rate: s.response_rate ?? 0,
-        }}
+        stats={seatingStats(data)}
         onAddTable={handleAddTable}
         onAddGuest={(tableId, d) => op(() => manageGuest('add', {
           invitation_id: slug, full_name: d.name, table_id: tableId, notes: d.note || null,

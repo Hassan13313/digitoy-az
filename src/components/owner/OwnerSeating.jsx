@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { History, KeyRound, LockKeyhole, Undo2 } from 'lucide-react'
 import SeatingPlanTab from '../admin/v2/SeatingPlanTab'
+import { seatingStats, seatingTables, withLocalTable } from '../admin/v2/seatingView'
 import { Button, Notice, Panel } from '../admin/v2/adminUi'
 import { getGuests } from '../../utils/api'
 import { clearSeatToken, getSeatToken, ownerSeating } from '../../utils/ownerApi'
@@ -64,21 +65,7 @@ export default function OwnerSeating({ slug }) {
     }
   }
 
-  const [extraTables, setExtraTables] = useState([])
-  const tables = useMemo(() => {
-    const guests = data?.guests ?? []
-    const ids = [...new Set([...guests.map((g) => g.table_id), ...(data?.tables?.map((t) => t.table_id) ?? []), ...extraTables])].sort()
-    return ids.map((tid) => ({
-      id: tid,
-      name: tid,
-      guests: guests.filter((g) => g.table_id === tid).map((g) => ({
-        id: String(g.id), name: g.full_name, status: 'none', plus: 0, phone: '', note: g.notes || '',
-      })),
-    }))
-  }, [data, extraTables])
-
-  const s = data?.stats || {}
-  const stats = { total: s.total ?? (data?.guests?.length || 0), yes: s.going ?? 0, no: s.not_going ?? 0, maybe: s.maybe ?? 0, none: s.no_response ?? 0, rate: s.response_rate ?? 0 }
+  const tables = useMemo(() => seatingTables(data), [data])
 
   return (
     <div className="space-y-4">
@@ -98,8 +85,8 @@ export default function OwnerSeating({ slug }) {
       <div className={unlocked ? '' : 'pointer-events-none select-none opacity-60'} aria-disabled={!unlocked || undefined}>
         <SeatingPlanTab
           tables={tables}
-          stats={stats}
-          onAddTable={(name) => setExtraTables((t) => (t.includes(name) ? t : [...t, name]))}
+          stats={seatingStats(data)}
+          onAddTable={(name) => setData((d) => withLocalTable(d, name))}
           onAddGuest={(tableId, d) => op('add', { table_id: tableId, full_name: d.name, notes: d.note || '' })}
           onUpdateGuest={(id, d) => op('update', { id: Number(id), full_name: d.name, table_id: d.tableId, notes: d.note || '' })}
           onMoveGuest={(id, to) => op('move', { id: Number(id), table_id: to })}
