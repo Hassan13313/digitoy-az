@@ -16,7 +16,9 @@
    Qurulum:
      npm i playwright && npx playwright install webkit chromium
    İşlət:
-     BASE=http://localhost:8080 MEDIA=/fixtures node tests/device_matrix_test.mjs
+     BASE=http://localhost:8080 MEDIA=/fixtures ADMIN_TOKEN=<admin token> node tests/device_matrix_test.mjs
+   ADMIN_TOKEN — 2026-11-06-dan albom məxfidir: get_photos.php anonim sorğuya 401
+   verir, test manifesti admin tokeni ilə oxuyur (qonaq axını tokensiz qalır).
 ══════════════════════════════════════════════════ */
 
 import { webkit, chromium, devices } from 'playwright'
@@ -33,10 +35,11 @@ const bad = (n, exp, got) => { fail++; console.log(`    FAIL ${n}\n         göz
 const eq  = (n, exp, got) => (String(exp) === String(got)) ? ok(n) : bad(n, exp, got)
 const yes = (n, cond, got = '') => cond ? ok(n) : bad(n, 'true', got || 'false')
 
-const fetchManifest = (page, slug) => page.evaluate(async (s) => {
-  const r = await fetch(`/api/get_photos.php?slug=${s}`, { cache: 'no-store' })
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || ''
+const fetchManifest = (page, slug) => page.evaluate(async ([s, t]) => {
+  const r = await fetch(`/api/get_photos.php?slug=${s}`, { cache: 'no-store', headers: t ? { 'X-Admin-Token': t } : {} })
   return r.json()
-}, slug)
+}, [slug, ADMIN_TOKEN])
 
 /* Yalnız şəkillərin saxlanmış ölçüsü (video sıxılmır) */
 const imageBytes = (m) => (m.photos || [])
@@ -91,10 +94,10 @@ async function runDevice(label, browserType, deviceProfile, slug) {
 
   try {
     await page.goto(`${BASE}/invite/${slug}/foto`, { waitUntil: 'domcontentloaded' })
-    await page.waitForSelector('button:has-text("Şəkil çək")', { timeout: 30000 })
+    await page.waitForSelector('label:has-text("Şəkil çək")', { timeout: 30000 })
 
     for (const t of ['Şəkil çək', 'Qalereyadan seç', 'Video göndər']) {
-      yes(`"${t}" düyməsi görünür`, await page.locator(`button:has-text("${t}")`).isVisible())
+      yes(`"${t}" düyməsi görünür`, await page.locator(`label:has-text("${t}")`).isVisible())
     }
 
     eq('kamera girişi capture="environment"', 'environment',
@@ -114,11 +117,10 @@ async function runDevice(label, browserType, deviceProfile, slug) {
 
     /* ── Qalereyadan çoxlu şəkil ── */
     const photos = ['test_photo.jpg', 'phone_photo_12mp.jpg'].map(f).filter(existsSync)
-    await page.locator('button:has-text("Qalereyadan seç")').click()
     await page.locator('input[type=file][multiple]').first().setInputFiles(photos)
     await page.waitForSelector('button:has-text("faylı göndər")', { timeout: 15000 })
     await page.locator('button:has-text("faylı göndər")').click()
-    await page.waitForSelector('text=Təşəkkürlər', { timeout: 180000 })
+    await page.waitForSelector('text=Təşəkkür edirik', { timeout: 180000 })
     ok(`${photos.length} şəkil göndərildi`)
 
     const originalBytes = photos.reduce((s, p) => s + statSync(p).size, 0)
@@ -131,10 +133,9 @@ async function runDevice(label, browserType, deviceProfile, slug) {
     const video = f('real_video.mp4')
     if (existsSync(video)) {
       await page.locator('button:has-text("Daha Çox Göndər")').click()
-      await page.locator('button:has-text("Video göndər")').click()
       await page.locator('input[type=file][accept="video/*"]').setInputFiles(video)
       await page.locator('button:has-text("faylı göndər")').click()
-      await page.waitForSelector('text=Təşəkkürlər', { timeout: 180000 })
+      await page.waitForSelector('text=Təşəkkür edirik', { timeout: 180000 })
       ok('video göndərildi')
     }
 
@@ -166,8 +167,7 @@ async function runResumeTest(slug) {
   try {
     await throttle(context, page, 8000)   /* ~8 Mbps — bitməsin, amma sürünməsin */
     await page.goto(`${BASE}/invite/${slug}/foto`, { waitUntil: 'domcontentloaded' })
-    await page.waitForSelector('button:has-text("Video göndər")', { timeout: 60000 })
-    await page.locator('button:has-text("Video göndər")').click()
+    await page.waitForSelector('label:has-text("Video göndər")', { timeout: 60000 })
     await page.locator('input[type=file][accept="video/*"]').setInputFiles(big)
     await page.locator('button:has-text("faylı göndər")').click()
 
@@ -210,10 +210,8 @@ async function runThrottledTest(slug) {
   try {
     await throttle(context, page, 400)
     await page.goto(`${BASE}/invite/${slug}/foto`, { waitUntil: 'domcontentloaded' })
-    await page.waitForSelector('button:has-text("Qalereyadan seç")', { timeout: 180000 })
+    await page.waitForSelector('label:has-text("Qalereyadan seç")', { timeout: 180000 })
     ok('səhifə Slow 4G-də açılır')
-
-    await page.locator('button:has-text("Qalereyadan seç")').click()
     await page.locator('input[type=file][multiple]').first().setInputFiles([f('phone_photo_12mp.jpg')])
     await page.waitForSelector('button:has-text("faylı göndər")', { timeout: 30000 })
     await page.locator('button:has-text("faylı göndər")').click()
@@ -226,7 +224,7 @@ async function runThrottledTest(slug) {
     }
     yes('yavaş şəbəkədə real tərəqqi göstərilir (donma hissi yoxdur)', sawProgress)
 
-    await page.waitForSelector('text=Təşəkkürlər', { timeout: 300000 })
+    await page.waitForSelector('text=Təşəkkür edirik', { timeout: 300000 })
     ok('Slow 4G-də yükləmə tamamlanır')
   } finally {
     await browser.close()
@@ -247,8 +245,7 @@ async function runOfflineTest(slug) {
   try {
     await throttle(context, page, 8000)
     await page.goto(`${BASE}/invite/${slug}/foto`, { waitUntil: 'domcontentloaded' })
-    await page.waitForSelector('button:has-text("Video göndər")', { timeout: 60000 })
-    await page.locator('button:has-text("Video göndər")').click()
+    await page.waitForSelector('label:has-text("Video göndər")', { timeout: 60000 })
     await page.locator('input[type=file][accept="video/*"]').setInputFiles(big)
     await page.locator('button:has-text("faylı göndər")').click()
 
@@ -284,7 +281,7 @@ async function runOfflineTest(slug) {
     const atReconnect = (await serverReceived(page, slug)).received
     let recovered = null
     for (let i = 0; i < 200; i++) {
-      if (await page.locator('text=Təşəkkürlər').count() > 0)                  { recovered = 'avtomatik tamamlandı'; break }
+      if (await page.locator('text=Təşəkkür edirik').count() > 0)                  { recovered = 'avtomatik tamamlandı'; break }
       if (await page.locator('button:has-text("yenidən göndər")').count() > 0) { recovered = 'yenidən göndər düyməsi'; break }
       /* Üçüncü qəbul edilən nəticə: yükləmə sadəcə DAVAM EDİR */
       const now = (await serverReceived(page, slug)).received
