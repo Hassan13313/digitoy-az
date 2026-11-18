@@ -133,7 +133,10 @@ if ($path === '/') {
            HƏR dəvətnamə açılışı PDO timeout-u qədər (saniyələrlə)
            gözləyərdi. Ölçüldü: DB əlçatmaz olanda bu yol 2013 ms sürür.
            İndi bu xərci yalnız botlar ödəyir, o da keşlənir. */
-        [$meta['title'], $meta['desc']] = seoInviteMeta(seoIsCrawler() ? seoLookupInvite($slug) : null);
+        $inv = seoIsCrawler() ? seoLookupInvite($slug) : null;
+        [$meta['title'], $meta['desc']] = seoInviteMeta($inv);
+        /* 2026-11-18 — önbaxış şəkli şablona və tədbir növünə görə (public/og/) */
+        $meta['image'] = seoInviteImage($inv);
     }
 } else {
     /* Daxili marşrut (admin, canlı/şablon önbaxışı) və ya mövcud olmayan
@@ -459,12 +462,27 @@ function seoInviteMeta(?array $d): array {
     return ["$event — Dəvətnamə | DigiToy", "Sizi «{$event}» tədbirinə dəvət edirik. $tail"];
 }
 
+/** Önbaxış şəkli: public/og/<şablon>--<tədbir növü>.jpg → <şablon>--neutral.jpg →
+    ümumi og-image.jpg. Şəkilləri scripts/og-images.mjs yaradır (1200×630 JPEG). */
+function seoInviteImage(?array $d, ?string $dir = null): string {
+    $dir = $dir ?? __DIR__ . '/og';
+    $tpl = preg_replace('/[^a-z0-9\-]/', '', strtolower((string) ($d['tpl'] ?? '')));
+    $type = preg_replace('/[^a-z]/', '', strtolower((string) ($d['type'] ?? '')));
+    if ($tpl !== '') {
+        foreach (array_filter(["$tpl--" . ($type ?: 'toy'), "$tpl--neutral"]) as $name) {
+            if (is_file("$dir/$name.jpg")) return SITE . "/og/$name.jpg";
+        }
+    }
+    return SITE . '/og-image.jpg';
+}
+
 /** Dəvətnamənin önbaxış üçün məlumatı (növ + adlar). Alınmasa null.
     Nəticə qısa müddət keşlənir — eyni link təkrar paylaşılanda DB-yə
     yenidən getmirik. Keş həm TAPILAN, həm də TAPILMAYAN nəticəni saxlayır.
     ⚠ Keş faylının adı Phase 45.2-də dəyişib (köhnə .txt yalnız adı saxlayırdı). */
 function seoLookupInvite(string $slug): ?array {
-    $cacheFile = sys_get_temp_dir() . '/digitoy_seo2_' . hash('sha256', $slug) . '.json';
+    /* seo3: 2026-11-18 — nəticəyə şablon (tpl) əlavə olundu, köhnə keş istifadə edilmir */
+    $cacheFile = sys_get_temp_dir() . '/digitoy_seo3_' . hash('sha256', $slug) . '.json';
     if (is_file($cacheFile) && (time() - (int) @filemtime($cacheFile)) < 3600) {
         $c = json_decode((string) @file_get_contents($cacheFile), true);
         return is_array($c) && $c ? $c : null;
@@ -512,6 +530,7 @@ function seoQueryInvite(string $slug): ?array {
             'groom' => trim((string) ($d['groomName'] ?? '')),
             'bride' => trim((string) ($d['brideName'] ?? '')),
             'event' => trim((string) ($d['eventName'] ?? '')),
+            'tpl'   => trim((string) ($d['templateId'] ?? '')),
         ];
     } catch (Throwable $e) {
         return null;   /* DB sönsə belə səhifə açılır */
