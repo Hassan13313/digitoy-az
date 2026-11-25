@@ -48,7 +48,7 @@ RedirectMatch 404 ^/api/migrations/
 </Files>
 
 # 2026-11-18 — sifaris/devetname sinxronlugu, sekil nusxeleri, toy mesajlari, oturma redaktesi (yalniz include)
-<FilesMatch "^(order_sync|photo_variants|event_messages_lib|seating_owner_lib)\.php$">
+<FilesMatch "^(order_sync|photo_variants|event_messages_lib|seating_owner_lib|promo_lib)\.php$">
     Require all denied
 </FilesMatch>
 

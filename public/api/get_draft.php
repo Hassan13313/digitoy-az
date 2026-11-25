@@ -3,6 +3,7 @@
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/order_link.php';
 require_once __DIR__ . '/order_sync.php';
+require_once __DIR__ . '/promo_lib.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
@@ -77,4 +78,4 @@ echo json_encode([
     /* 2026-11-18 — admin axını: dəvətnamə varsa ONUN hazırkı halı (həqiqət mənbəyi,
        bax order_sync.php). Müştərinin session bərpasına verilmir. */
     'invitation_form_data' => $draftCode ? invitationFormDataBySlug($db, $invSlug) : null,
-]);
+] + ($draftCode ? promoOrderFields($db, $row['draft_code']) : []));   /* promokod — yalnız admin axını */

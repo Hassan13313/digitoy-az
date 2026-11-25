@@ -86,28 +86,30 @@ function promoFind(PDO $db, $code): ?array {
     return $st->fetch(PDO::FETCH_ASSOC) ?: null;
 }
 
-function promoUsedCount(PDO $db, string $code): int {
-    $st = $db->prepare('SELECT COUNT(*) FROM draft_invitations WHERE promo_code = :c AND status IN ' . PROMO_COUNTED);
-    $st->execute([':c' => $code]);
+/** $excludeId — müştərinin öz sifarişi: təkrar göndərəndə limitdəki yerini özü tutmasın. */
+function promoUsedCount(PDO $db, string $code, ?int $excludeId = null): int {
+    $st = $db->prepare('SELECT COUNT(*) FROM draft_invitations
+                        WHERE promo_code = :c AND status IN ' . PROMO_COUNTED . ' AND id <> :x');
+    $st->execute([':c' => $code, ':x' => $excludeId ?? 0]);
     return (int) $st->fetchColumn();
 }
 
 /** promo_check.php-nin cavabı: kodu tapır, istifadəni sayır, qaydaları tətbiq edir. */
-function promoCheck(PDO $db, $raw, string $package, string $today): array {
+function promoCheck(PDO $db, $raw, string $package, string $today, ?int $excludeId = null): array {
     $row = promoFind($db, $raw);
-    return promoEvaluate($row, $package, $today, $row ? promoUsedCount($db, $row['code']) : 0);
+    return promoEvaluate($row, $package, $today, $row ? promoUsedCount($db, $row['code'], $excludeId) : 0);
 }
 
 /**
  * submit_draft.php sifarişə nə yazsın. Kod keçməsə sifariş endirimsiz qeyd olunur
  * (müştəriyə göstərilən endirim admin üçün yox, `result` cavabda qayıdır).
  */
-function promoSubmitFields(PDO $db, $raw, string $package, string $today): array {
+function promoSubmitFields(PDO $db, $raw, string $package, string $today, ?int $draftId = null): array {
     $base = DIGITOY_PACKAGE_PRICES[$package] ?? null;
     $out  = ['promo_code' => null, 'price_base' => $base, 'price_final' => $base, 'result' => null];
     if (!is_string($raw) || trim($raw) === '' || $base === null) return $out;
 
-    $res = promoCheck($db, $raw, $package, $today);
+    $res = promoCheck($db, $raw, $package, $today, $draftId);
     $out['result'] = $res;
     if ($res['ok']) {
         $out['promo_code']  = $res['code'];

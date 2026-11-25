@@ -37,6 +37,9 @@ const DIGITOY_PACKAGES = [
     'PREMIUM' => 'Premium (129₼)',
 ];
 const DIGITOY_WEB_PACKAGES = ['MINI', 'SADE', 'VIP', 'PREMIUM'];
+/* Paket qiymətləri (₼) — promokod endirimi bunlardan hesablanır (promo_lib.php).
+   src/data/packages.js › PACKAGE_DEFS[*].price ilə EYNİ olmalıdır (tests/promo_ui_test.mjs yoxlayır). */
+const DIGITOY_PACKAGE_PRICES = ['VIDEO' => 29, 'MINI' => 39, 'SADE' => 59, 'VIP' => 89, 'PREMIUM' => 129];
 
 /** template_id-ni təhlükəsiz normallaşdır (yalnız a-z, 0-9, tire; max 50) */
 function normalizeTemplateId($id): string {
@@ -322,7 +325,7 @@ function rateGate(string $key, int $limit, int $window): bool {
 /* ── Sxem versiyası (Phase 39) ──
    Sütun və ya cədvəl əlavə edəndə BU RƏQƏMİ ARTIR — əks halda miqrasiya
    canlıda işləməz. */
-const SCHEMA_VERSION = 50;   /* 50: event_messages, owner_edit_pins, guest_changes (2026-11-18) */
+const SCHEMA_VERSION = 51;   /* 51: promo_codes + draft_invitations.promo_code/price_base/price_final (2026-11-25) */
 
 /* ── Cədvəlləri avtomatik yarat ──
    Phase 39 OPTİMİZASİYASI: əvvəl bu funksiya HƏR sorğuda 6 `CREATE TABLE
@@ -750,6 +753,40 @@ function runMigrations(PDO $db): void {
             INDEX idx_inv (invitation_id, id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
+
+    /* ── v51 (2026-11-25) — promokodlar (promo_lib.php, admin_promo.php) ──
+       Kod sütunları hər iki cədvəldə eyni collation-dadır (müqayisədə «Illegal mix» olmasın).
+       ADDITIVE: köhnə kod yeni sütunları görmür. */
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS promo_codes (
+            id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            code       VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL UNIQUE,
+            kind       VARCHAR(8)  NOT NULL,
+            amount     SMALLINT UNSIGNED NOT NULL,
+            packages   VARCHAR(64) DEFAULT NULL,
+            starts_on  DATE DEFAULT NULL,
+            ends_on    DATE DEFAULT NULL,
+            max_uses   INT UNSIGNED DEFAULT NULL,
+            active     TINYINT(1) NOT NULL DEFAULT 1,
+            owner      VARCHAR(80)  CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+            note       VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+    $promoCols = [
+        'promo_code'  => 'VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci',
+        'price_base'  => 'SMALLINT UNSIGNED',
+        'price_final' => 'SMALLINT UNSIGNED',
+    ];
+    foreach ($promoCols as $col => $type) {
+        if (!empty($db->query("SHOW COLUMNS FROM draft_invitations LIKE '$col'")->fetchAll())) continue;
+        try {
+            $db->exec("ALTER TABLE draft_invitations ADD COLUMN $col $type DEFAULT NULL");
+        } catch (PDOException $e) {
+            if ((int) ($e->errorInfo[1] ?? 0) !== 1060) throw $e;   /* paralel sorğu artıq əlavə edib */
+        }
+    }
 
     /* ── Sxem versiyasını qeyd et ──
        Bu sətir olmasa ensureTables() hər sorğuda tam miqrasiya işlədər. */

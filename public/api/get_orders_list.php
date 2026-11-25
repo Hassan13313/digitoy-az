@@ -72,7 +72,7 @@ $total = (int)$cntStmt->fetchColumn();
 /* Siyahı */
 /* Qaralamanın submitted_at-ı NULL-dur — onda son fəaliyyət (updated_at) */
 $sql  = "SELECT id, draft_code, package, status, customer_phone, submitted_at, updated_at, current_step,
-                form_data, template_id, approved_slug
+                form_data, template_id, approved_slug, promo_code, price_final
          FROM draft_invitations $where
          ORDER BY COALESCE(submitted_at, updated_at) DESC
          LIMIT :lim OFFSET :off";
@@ -115,6 +115,9 @@ foreach ($rows as $row) {
         'invitation_slug' => $row['status'] === 'approved'
             ? orderInvitationSlug($db, $row['approved_slug'], $row['draft_code']) : null,
         'template_id'    => !empty($fd['templateId']) ? $fd['templateId'] : ($row['template_id'] ?? DEFAULT_TEMPLATE_ID),
+        /* 2026-11-25 — promokod və serverin hesabladığı yekun qiymət (köhnə sifarişlərdə null) */
+        'promo_code'     => $row['promo_code'] ?? null,
+        'price_final'    => isset($row['price_final']) ? (int) $row['price_final'] : null,
     ];
 }
 

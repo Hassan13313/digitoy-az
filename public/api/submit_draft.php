@@ -2,6 +2,7 @@
 /* ── submit_draft.php — draft-ı submitted vəziyyətinə keçir ── */
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/phone_lib.php';
+require_once __DIR__ . '/promo_lib.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -66,6 +67,12 @@ $stmt = $db->prepare("SELECT id, draft_code FROM draft_invitations
 $stmt->execute([':sid' => $sessionId]);
 $existing = $stmt->fetch();
 
+/* 2026-11-25 — promokod: brauzerin göstərdiyi qiymətə etibar etmirik, burada yenidən
+   yoxlanır. Kod keçməsə sifariş endirimsiz (tam qiymətlə) qeyd olunur. Öz sifarişi
+   limitdə sayılmır (təkrar göndərəndə endirim itməsin). */
+$promo = promoSubmitFields($db, $body['promo_code'] ?? null, $package, promoToday(),
+    $existing ? (int) $existing['id'] : null);
+
 if ($existing) {
     $draftCode = $existing['draft_code'] ?: generateDraftCode($db);
     $stmt = $db->prepare("UPDATE draft_invitations
@@ -74,6 +81,9 @@ if ($existing) {
             form_data      = :data,
             template_id    = :tpl,
             customer_phone = COALESCE(:phone, customer_phone),
+            promo_code     = :promo,
+            price_base     = :pbase,
+            price_final    = :pfinal,
             status         = 'submitted',
             submitted_at   = IF(submitted_at IS NULL, NOW(), submitted_at),
             expires_at     = DATE_ADD(NOW(), INTERVAL 30 DAY)
@@ -84,13 +94,18 @@ if ($existing) {
         ':data'  => $json,
         ':tpl'   => $templateId,
         ':phone' => $customerPhone,
+        ':promo' => $promo['promo_code'],
+        ':pbase' => $promo['price_base'],
+        ':pfinal'=> $promo['price_final'],
         ':id'    => $existing['id'],
     ]);
 } else {
     $draftCode = generateDraftCode($db);
     $stmt = $db->prepare("INSERT INTO draft_invitations
-        (session_id, draft_code, package, form_data, template_id, customer_phone, status, submitted_at, expires_at)
-        VALUES (:sid, :code, :pkg, :data, :tpl, :phone, 'submitted', NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY))");
+        (session_id, draft_code, package, form_data, template_id, customer_phone,
+         promo_code, price_base, price_final, status, submitted_at, expires_at)
+        VALUES (:sid, :code, :pkg, :data, :tpl, :phone,
+         :promo, :pbase, :pfinal, 'submitted', NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY))");
     $stmt->execute([
         ':sid'   => $sessionId,
         ':code'  => $draftCode,
@@ -98,7 +113,10 @@ if ($existing) {
         ':data'  => $json,
         ':tpl'   => $templateId,
         ':phone' => $customerPhone,
+        ':promo' => $promo['promo_code'],
+        ':pbase' => $promo['price_base'],
+        ':pfinal'=> $promo['price_final'],
     ]);
 }
 
-echo json_encode(['ok' => true, 'draft_code' => $draftCode]);
+echo json_encode(['ok' => true, 'draft_code' => $draftCode, 'promo' => $promo['result']]);
