@@ -19,7 +19,9 @@ if (strlen((string) $raw) > 2048) {
     echo json_encode(['error' => 'Payload too large']);
     exit;
 }
-if (!rateGate('promo_check|' . clientIp(), 20, 600)) {
+/* 60 / 10 dəq: mobil operatorlar çox müştərini bir IP-dən çıxarır (CGNAT) — kampaniya günü
+   real müştərilər bloklanmasın; kodları təxminlə tapmaq üçün isə yenə çox yavaşdır. */
+if (!rateGate('promo_check|' . clientIp(), 60, 600)) {
     http_response_code(429);
     echo json_encode(['error' => 'RATE_LIMITED'], JSON_UNESCAPED_UNICODE);
     exit;

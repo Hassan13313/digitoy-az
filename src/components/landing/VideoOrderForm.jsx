@@ -22,6 +22,7 @@ import { Notice } from '../builder/feedback'
 import { MusicTrackRow } from '../builder/media'
 import ContactPhoneField from '../builder/ContactPhoneField'
 import VideoSamplePicker from './VideoSamplePicker'
+import PromoCodeField from './PromoCodeField'
 import { EVENT_TYPES, AGE_EVENT_TYPES, COUPLE_TYPES, CORP_TYPES, WHATSAPP_NUMBER } from '../../data/constants'
 import { PRESET_TRACKS, formatSeconds } from '../../data/music'
 import { describeVideoSource, findVideoSample, normalizeSampleLink, sampleTitle, videoMusicLabel } from '../../data/videoSamples'
@@ -89,6 +90,7 @@ export default function VideoOrderForm({ lang = 'az' }) {
   const [dir, setDir] = useState(1)
   const [errors, setErrors] = useState({})
   const [phone, setPhone] = useState(() => readCustomerPhone())
+  const [promo, setPromo] = useState(null)   /* PromoCodeField nəticəsi (server yoxlayıb) */
   const [sent, setSent] = useState(false)
 
   useEffect(() => { writeStore({ data, step }) }, [data, step])
@@ -156,11 +158,14 @@ export default function VideoOrderForm({ lang = 'az' }) {
         link: v.source === 'link' ? normalizeSampleLink(v.link) : '',
       },
     }
-    const url = buildVideoWhatsAppUrl(payload, WHATSAPP_NUMBER)
-    submitDraft(videoSessionId(), payload, 'VIDEO', normalizeCustomerPhone(phone) || '')
-      .then((r) => { if (r?.draft_code) trackEvent('order_submitted', { lang, package: 'VIDEO' }) })
+    /* Promokod yalnız WhatsApp mesajına və submitDraft-ın ayrıca sahəsinə (form_data-ya yox) */
+    const url = buildVideoWhatsAppUrl(promo ? { ...payload, promo } : payload, WHATSAPP_NUMBER)
+    const promoCode = promo?.code || ''
+    const ev = { lang, package: 'VIDEO', ...(promoCode && { promo: promoCode }) }
+    submitDraft(videoSessionId(), payload, 'VIDEO', normalizeCustomerPhone(phone) || '', promoCode)
+      .then((r) => { if (r?.draft_code) trackEvent('order_submitted', ev) })
       .catch(() => {})
-    trackEvent('whatsapp_order_clicked', { lang, package: 'VIDEO' })
+    trackEvent('whatsapp_order_clicked', ev)
     const w = window.open(url, '_blank')
     if (w) { try { w.opener = null } catch { /* cross-origin */ } } else { setTimeout(() => { window.location.href = url }, 350) }
     setSent(true)
@@ -307,6 +312,7 @@ export default function VideoOrderForm({ lang = 'az' }) {
               {c.readyNote}
             </p>
             <ContactPhoneField value={phone} onChange={setPhone} lang={lang} />
+            <PromoCodeField lang={lang} pkg="VIDEO" sessionId={videoSessionId()} value={promo} onChange={setPromo} />
             <p className="text-[13px] leading-snug text-brown-dark/85">{c.orderHint}</p>
           </div>
         )}

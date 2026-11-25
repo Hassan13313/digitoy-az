@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Eye, EyeOff, MessageCircle, Edit2, Calendar, MapPin, Shirt, Users, Image, ListOrdered, Crown, Martini, Palette, Music } from 'lucide-react'
 import { DRESS_CODE_PALETTES } from '../../data/constants'
@@ -9,6 +9,7 @@ import { submitDraft } from '../../utils/api'
 import { readCustomerPhone } from '../../utils/customerPhone'
 import { trackEvent } from '../../utils/analytics'
 import OrderLegalNote from '../legal/OrderLegalNote'
+import PromoCodeField from './PromoCodeField'
 import t from '../../data/translations'
 import { SECTION_DEFS, isSectionOn } from '../../data/sections'
 
@@ -60,16 +61,20 @@ export default function Preview({ lang, data, onEdit, onView }) {
   const timeStr    = formatTime24(data.time)
   const dateDisplay = dayName ? `${formattedDate} — ${dayName}` : formattedDate
 
-  const waUrl = buildWhatsAppUrl(data, lang, ADMIN_WA)
+  const pkg = data.package || data.selectedPackage || 'SADE'
+  const [sessionId] = useState(() => { try { return localStorage.getItem('digitoy_session_id') || '' } catch { return '' } })
+  /* Promokod form_data-ya qatılmır: yalnız WhatsApp mesajına və submitDraft-ın ayrıca sahəsinə */
+  const [promo, setPromo] = useState(null)
+  const waUrl = buildWhatsAppUrl(promo ? { ...data, promo } : data, lang, ADMIN_WA)
 
   const handleWaClick = useCallback(() => {
-    const sid = localStorage.getItem('digitoy_session_id') || ''
-    const pkg = data.package || data.selectedPackage || 'SADE'
-    trackEvent('whatsapp_order_clicked', { lang, package: pkg })
-    submitDraft(sid, data, pkg, readCustomerPhone()).then(r => {
-      if (r?.draft_code) trackEvent('order_submitted', { lang, package: pkg })
+    const promoCode = promo?.code || ''
+    trackEvent('whatsapp_order_clicked', { lang, package: pkg, ...(promoCode && { promo: promoCode }) })
+    const sid = localStorage.getItem('digitoy_session_id') || sessionId
+    submitDraft(sid, data, pkg, readCustomerPhone(), promoCode).then(r => {
+      if (r?.draft_code) trackEvent('order_submitted', { lang, package: pkg, ...(promoCode && { promo: promoCode }) })
     }).catch(() => {})
-  }, [data, lang])
+  }, [data, lang, pkg, promo, sessionId])
 
   /* Phase 35 — cütlüyün söndürdüyü bölmələrin adları (paket kilidi SAYILMIR:
      burada yalnız istifadəçinin öz seçimi göstərilir). */
@@ -244,6 +249,11 @@ export default function Preview({ lang, data, onEdit, onView }) {
             )
           })}
         </div>
+      </div>
+
+      {/* 2026-11-25 — promokod (WhatsApp mesajına və sifarişə düşür) */}
+      <div className="mb-5">
+        <PromoCodeField lang={lang} pkg={pkg} sessionId={sessionId} value={promo} onChange={setPromo} />
       </div>
 
       {/* CTA buttons */}
