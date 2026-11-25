@@ -143,6 +143,27 @@ ok('prerender: /sablonlar/..%2Fhome → fraqment yoxdur', !str_contains($run('/s
 @unlink($tmp . '/_prerender/templates.html'); @unlink($tmp . '/_prerender/sablonlar--xina-gecesi.html');
 @unlink($tmp . '/_prerender/home.html'); @rmdir($tmp . '/_prerender');
 
+/* ── 2026-11-25: müştəriyə gedən BÜTÜN dəvətnamə linklərində (panel, albom, slayd) şablonun
+      önizləmə şəkli — əvvəl yalnız əsas linkdə idi, qalanları ümumi «digitoy» şəkli verirdi.
+      DB əvəzinə seo.php-nin öz bot keşi (seoLookupInvite) əvvəlcədən doldurulur. ── */
+$botSlug  = 'og-test-' . getmypid();
+$botCache = sys_get_temp_dir() . '/digitoy_seo3_' . hash('sha256', $botSlug) . '.json';
+file_put_contents($botCache, json_encode(['type' => 'toy', 'groom' => 'Tural', 'bride' => 'Aysel', 'event' => '', 'tpl' => 'oriental-luxe']));
+@mkdir($tmp . '/og');
+touch($tmp . '/og/oriental-luxe--toy.jpg');
+file_put_contents($tmp . '/run_bot.php', '<?php $_SERVER["HTTP_USER_AGENT"] = "WhatsApp/2.23.20.0 A"; $_SERVER["REQUEST_URI"] = $argv[1];'
+    . ' ob_start(); include __DIR__ . "/seo.php"; $o = ob_get_clean(); echo (int) http_response_code(), "\n", $o;');
+foreach (['', '/panel', '/foto', '/qalereya-idare', '/slayd'] as $sub) {
+    $html = (string) shell_exec(escapeshellarg(PHP_BINARY) . ' -d display_errors=0 ' . escapeshellarg($tmp . '/run_bot.php') . ' ' . escapeshellarg("/invite/$botSlug$sub") . ' 2>&1');
+    preg_match('#<meta property="og:image" content="([^"]*)"#', $html, $img);
+    ok("bot /invite/<slug>$sub → şablonun önizləmə şəkli", ($img[1] ?? '') === 'https://digitoy.az/og/oriental-luxe--toy.jpg');
+    if ($sub === '/panel') {
+        preg_match_all('#<meta (?:property|name)="(?:og|twitter):[^"]*" content="([^"]*)"#', $html, $og);
+        ok('bot /panel → önizləmədə adlar YOXDUR (məxfilik)', !preg_match('/Aysel|Tural/u', implode(' ', $og[1])));
+    }
+}
+@unlink($botCache); @unlink($tmp . '/og/oriental-luxe--toy.jpg'); @rmdir($tmp . '/og'); @unlink($tmp . '/run_bot.php');
+
 /* müvəqqəti qovluğu təmizlə — yalnız yuxarıda özümüzün köçürdüyü fayllar */
 foreach ($guideFiles as $f) @unlink($tmp . '/guides/' . basename($f));
 @rmdir($tmp . '/guides');

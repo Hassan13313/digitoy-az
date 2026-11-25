@@ -104,6 +104,13 @@ if ($path === '/') {
     $meta['canon']  = '';
     $meta['ogtype'] = 'profile';
 
+    /* ⚠ DB sorğusu YALNIZ crawler üçün (səbəb aşağıda, dəvətnamə önbaxışında).
+       2026-11-25 — önizləmə şəkli (şablon + tədbir növü, public/og/) BÜTÜN dəvətnamə
+       linklərində: müştəriyə gedən məktubdakı panel, albom və slayd linkləri əvvəl
+       ümumi «digitoy» şəklini göstərirdi. Şəkildə ad yoxdur → panel məxfiliyi pozulmur. */
+    $inv = seoIsCrawler() ? seoLookupInvite($slug) : null;
+    $meta['image'] = seoInviteImage($inv);
+
     if ($sub === 'foto') {
         $meta['title'] = 'Şəkillərini Paylaş | DigiToy';
         $meta['desc']  = 'Tədbirdən çəkdiyiniz şəkil və videoları bir toxunuşla paylaşın.';
@@ -132,11 +139,9 @@ if ($path === '/') {
            Əgər hər ziyarətçi üçün sorğu etsəydik və DB yavaşlasa/sönsə,
            HƏR dəvətnamə açılışı PDO timeout-u qədər (saniyələrlə)
            gözləyərdi. Ölçüldü: DB əlçatmaz olanda bu yol 2013 ms sürür.
-           İndi bu xərci yalnız botlar ödəyir, o da keşlənir. */
-        $inv = seoIsCrawler() ? seoLookupInvite($slug) : null;
+           İndi bu xərci yalnız botlar ödəyir, o da keşlənir.
+           ($inv və şəkil yuxarıda, bütün alt linklər üçün ortaq hesablanır.) */
         [$meta['title'], $meta['desc']] = seoInviteMeta($inv);
-        /* 2026-11-18 — önbaxış şəkli şablona və tədbir növünə görə (public/og/) */
-        $meta['image'] = seoInviteImage($inv);
     }
 } else {
     /* Daxili marşrut (admin, canlı/şablon önbaxışı) və ya mövcud olmayan
