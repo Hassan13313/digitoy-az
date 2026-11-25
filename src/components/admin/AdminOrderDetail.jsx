@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Armchair, Clapperboard, LogIn, Music, PenLine, StickyNote } from 'lucide-react'
+import { Armchair, Clapperboard, LogIn, Music, PenLine, StickyNote, TicketPercent } from 'lucide-react'
 import { DEFAULT_TEMPLATE_ID } from '../../templates/templateConfig'
 import { getDraftByCode, approveDraft, rejectDraft, deleteDraft, saveInvitation } from '../../utils/api'
 import { computeInviteSlug } from '../../utils/inviteSlug'
@@ -187,12 +187,16 @@ export default function AdminOrderDetail({ draftCode, onBack }) {
   const extraInfo = isVideo ? videoInfoRows(fd) : []
   if (fd.seatingMethod === 'digitory') extraInfo.push({ icon: Armchair, label: 'Oturma planı', value: 'DigiToy dolduracaq (+15 AZN)' })
   if (fd.seatingMethod === 'self' && fd.seatingPlan) extraInfo.push({ icon: Armchair, label: 'Oturma planı', value: 'Müştəri doldurdu' })
+  /* 2026-11-25 — promokod: server yoxlayıb yazdığı kod və qiymət */
+  if (draft.promo_code) {
+    extraInfo.unshift({ icon: TicketPercent, label: 'Promokod', value: `${draft.promo_code} · ${draft.price_base}₼ → ${draft.price_final}₼` })
+  }
 
   const order = {
     code: draftCode,
     status: VIEW_STATUS[draft.status] || draft.status || 'draft',
     names: names || '—',
-    pkg: packageLabel(draft.package),
+    pkg: draft.promo_code ? `${packageLabel(draft.package)} → ${draft.price_final}₼` : packageLabel(draft.package),
     /* Phase 4 — şablon adı metadata-dan (hardcode yox) */
     template: templateMeta(fd.templateId || draft.template_id || DEFAULT_TEMPLATE_ID),
     event: EVENT_LABELS[fd.eventType] || fd.eventType || undefined,

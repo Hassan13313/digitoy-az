@@ -61,6 +61,7 @@ import {
   Search,
   ShieldCheck,
   ShoppingBag,
+  TicketPercent,
   Trash2,
   X,
 } from 'lucide-react';
@@ -2179,6 +2180,7 @@ export function BarList({ items = [], formatValue, className = '' }) {
 export const ADMIN_SECTIONS = [
   { id: 'dashboard', label: 'Dashboard', short: 'Panel', icon: LayoutGrid },
   { id: 'orders', label: 'Sifarişlər', icon: ShoppingBag },
+  { id: 'promo', label: 'Promokodlar', short: 'Promokod', icon: TicketPercent },
   { id: 'invites', label: 'Dəvətnamələr', short: 'Dəvətnamə', icon: FileText },
   { id: 'templates', label: 'Şablonlar', icon: LayoutTemplate },
   { id: 'photos', label: 'Fotolar', icon: ImageIcon },

@@ -99,7 +99,8 @@ export default function AdminOrdersList({ onSelectOrder }) {
     /* qaralamanın submitted_at-ı yoxdur — son fəaliyyət */
     date: formatDate(o.submitted_at || o.updated_at),
     names: o.names || '—',
-    pkg: o.package_label,
+    /* 2026-11-25 — promokodla gələn sifariş: «Premium (129₼) · QARACUMA → 90₼» */
+    pkg: o.promo_code ? `${o.package_label} · ${o.promo_code} → ${o.price_final}₼` : o.package_label,
     template: templateMeta(o.template_id),
     status: VIEW_STATUS[o.status] || o.status || 'draft',
     /* Phase 48 — təsdiqlənmiş, amma dəvətnaməsi silinmiş/yaradılmamış sifariş.
