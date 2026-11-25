@@ -912,15 +912,66 @@ export async function getDraftByCode(draftCode) {
 }
 
 /* ── Draft: submit et (WhatsApp sifariş öncəsi) ── */
-export async function submitDraft(sessionId, formData, pkg, customerPhone = '') {
+export async function submitDraft(sessionId, formData, pkg, customerPhone = '', promoCode = '') {
+  const body = { session_id: sessionId, form_data: formData, package: pkg, customer_phone: customerPhone }
+  /* 2026-11-25 — promokod form_data-ya YOX, ayrıca sahədə (server yenidən yoxlayır) */
+  if (promoCode) body.promo_code = promoCode
   const res = await fetch(`${BASE}/submit_draft.php`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ session_id: sessionId, form_data: formData, package: pkg, customer_phone: customerPhone }),
+    body: JSON.stringify(body),
   })
   if (!res.ok) throw new Error(`submit_draft: ${res.status}`)
   return res.json()
 }
+
+/* ── Promokod yoxlanışı (2026-11-25) ──
+   { ok:true, code, kind, amount, price_base, price_final } | { ok:false, reason }.
+   429 → reason RATE_LIMITED; şəbəkə xətası → throw (çağıran NETWORK göstərir). */
+export async function checkPromo(code, pkg, sessionId = '') {
+  const res = await fetch(`${BASE}/promo_check.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code, package: pkg, session_id: sessionId }),
+  })
+  if (res.status === 429) return { ok: false, reason: 'RATE_LIMITED' }
+  if (!res.ok) throw new Error(`promo_check: ${res.status}`)
+  return res.json()
+}
+
+/* ── Admin «Promokodlar» ── */
+async function promoAdminPost(payload, fallback) {
+  const res = await fetch(`${BASE}/admin_promo.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminHeaders() },
+    body: JSON.stringify(payload),
+  })
+  const data = await res.json().catch(() => null)
+  if (!res.ok) {
+    const err = new Error(data?.errors ? Object.values(data.errors)[0] : fallback)
+    err.status = res.status
+    err.code   = data?.error || null
+    err.fields = data?.errors || {}
+    throw err
+  }
+  return data
+}
+
+export async function listPromoCodes() {
+  const res = await fetch(`${BASE}/admin_promo.php`, { headers: adminHeaders() })
+  if (!res.ok) throw await toApiError(res, 'Promokodlar yüklənmədi')
+  return res.json() /* { items: [...] } */
+}
+
+/** `id` varsa yeniləyir (kodun özü dəyişmir), yoxdursa yaradır. */
+export const savePromoCode = (form) =>
+  promoAdminPost({ ...form, action: form.id ? 'update' : 'create' }, 'Promokod saxlanılmadı')
+
+export const setPromoActive = (id, active) =>
+  promoAdminPost({ action: 'set_active', id, active }, 'Status dəyişmədi')
+
+export const deletePromoCode = (id) =>
+  promoAdminPost({ action: 'delete', id }, 'Promokod silinmədi')
 
 /* ── Slug üzrə RSVP cavabları (admin VƏ YA «Müştəri paneli» açarı) ── */
 export async function getRsvpResponses(slug) {

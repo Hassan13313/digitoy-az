@@ -4,6 +4,7 @@ import { describeVideoSource, sampleWatchUrl, videoMusicLabel } from '../data/vi
 import { formatAzDate, formatTime24 } from './dateFormat'
 import t from '../data/translations'
 import { waChatUrl } from './waLink'
+import { promoWaLines } from './promo'
 
 /* ── URL-safe Base64 encode ── */
 export function encodeData(data) {
@@ -68,6 +69,7 @@ export function buildWhatsAppMessage(data, lang = 'az', slug = '', draftCode = '
     `💍 YENİ SİFARİŞ — Digitoy.az`,
     `━━━━━━━━━━━━━━━━━━`,
     `📦 Paket: ${pkgLabel}`,
+    ...promoWaLines(data.promo),
     `🎉 Tədbir: ${eventLabels[data.eventType] || data.eventType}`,
     nameLines,
     `📅 Tarix: ${dateStr}`,
@@ -105,6 +107,7 @@ export function buildVideoWhatsAppMessage(v) {
     `🎬 YENİ SİFARİŞ — Digitoy.az`,
     `━━━━━━━━━━━━━━━━━━`,
     `📦 Paket: ${packageLabel('VIDEO')}`,
+    ...promoWaLines(v.promo),
     sampleLine,
     `🎉 Tədbir: ${eventLabel}`,
     nameLines,

@@ -39,6 +39,7 @@ import { consent } from './utils/consent'
 import { useSEO } from './hooks/useSEO'
 import { inviteSeoMeta } from './utils/inviteSeo'
 import { initAnalytics, trackPageView, trackEvent } from './utils/analytics'
+import { capturePromoFromUrl } from './utils/promo'
 import './App.css'
 
 /* Canlı önbaxış səhifəsi (yalnız admin iframe-i açır) — lazy, ayrı chunk.
@@ -415,6 +416,8 @@ export default function App({ ssrPath = null }) {
 
   /* Analitika: GA4/PostHog-u bir dəfə işə sal (yalnız production + env dəyişənləri varsa) */
   useEffect(() => { initAnalytics() }, [])
+  /* 2026-11-25 — `?kod=QARACUMA` linki: kod yadda qalır, sifariş addımında avtomatik tətbiq olunur */
+  useEffect(() => { capturePromoFromUrl() }, [])
 
   /* Phase 47: kuki banneri harada çıxsın və hansı dildə — utils/consent.js.
      page_view effektindən ƏVVƏL: dəvətnamədə razılıq yoxdursa hadisə atılsın. */
