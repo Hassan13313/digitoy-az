@@ -7,6 +7,7 @@
    müştərinin razılığı ilə onu yeni versiyaya keçirir (admin_template_version.php).
 
    Qaydalar (src/templates/legacy/registry.js ilə eyni):
+     • ŞABLON DƏYİŞİB (UPDATE, 2026-11-25) → yeni şablonun indiki versiyası (tvCurrentFor)
      • YENİ sətir (INSERT)  → açar gəlməyibsə 2 yazılır
      • YENİLƏMƏ (UPDATE)    → açar gəlməyibsə SAXLANILMIŞ dəyər qorunur
                               (builder/sifariş datasında açar yoxdur — o, köhnə
@@ -67,6 +68,16 @@ function tvForSave(array $incoming, ?array $stored): array {
     unset($incoming['templateDefaults']);
     $in = tvNormalize($incoming['templateVersion'] ?? null);
     unset($incoming['templateVersion']);
+    /* 2026-11-25 — versiya ŞABLONA aiddir. Admin «Sifarişlər › Redaktə»-də şablonu dəyişib
+       təsdiqləyəndə köhnə şablonun versiyası (sifarişə köçmüş form_data-dan gələn və ya
+       saxlanılan) yeni şablona yapışırdı → yeni şablon dondurulmuş köhnə dizaynla açılırdı.
+       Şablon dəyişibsə həmişə yeni şablonun indiki versiyası. */
+    $newTpl = is_string($incoming['templateId'] ?? null) ? $incoming['templateId'] : '';
+    $oldTpl = is_string($stored['templateId'] ?? null) ? $stored['templateId'] : '';
+    if ($stored !== null && $newTpl !== '' && $oldTpl !== '' && $newTpl !== $oldTpl) {
+        $incoming['templateVersion'] = tvCurrentFor($newTpl);
+        return $incoming;
+    }
     if ($in !== null) {
         $incoming['templateVersion'] = $in;
         return $incoming;

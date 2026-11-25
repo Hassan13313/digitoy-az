@@ -52,6 +52,18 @@ ok('v3 UPDATE: köhnə v2 dəvətnamə v2-də qalır (dondurulub)', tvForSave($r
 ok('v3 UPDATE: v1 dəvətnamə v1-də qalır', tvForSave($rp, ['templateVersion' => 1])['templateVersion'] === 1);
 ok('v3: admin açıq 3 seçə bilir', tvForSave($rp + ['templateVersion' => 3], ['templateVersion' => 2])['templateVersion'] === 3);
 ok('v3: 4 yanlışdır', tvNormalize(4) === null && tvNormalize('3') === 3);
+
+/* ── 2026-11-25: admin «Sifarişlər › Redaktə»-də ŞABLONU DƏYİŞİB təsdiqləyir — versiya köhnə
+      şablondan yapışıb qalırdı (sifarişə köçmüş form_data), yeni şablon dondurulmuş köhnə
+      dizaynla açılırdı. Versiya şablona aiddir: şablon dəyişəndə yeni şablonun indikisi. ── */
+$wasIvory = ['templateId' => 'ivory-silk', 'templateVersion' => 2];
+ok('şablon dəyişdi: daşınmış açıq 2 → royal-palace 3', tvForSave(['templateId' => 'royal-palace', 'templateVersion' => 2], $wasIvory)['templateVersion'] === 3);
+ok('şablon dəyişdi: açar gəlmədi, saxlanılan 2 → royal-palace 3', tvForSave(['templateId' => 'royal-palace'], $wasIvory)['templateVersion'] === 3);
+ok('şablon dəyişdi: v1 (açarsız köhnə) oriental-luxe → royal-gold 3', tvForSave(['templateId' => 'royal-gold'], ['templateId' => 'oriental-luxe'])['templateVersion'] === 3);
+ok('şablon dəyişdi: v3 şablondan ivory-silk-ə → 2', tvForSave(['templateId' => 'ivory-silk', 'templateVersion' => 3], ['templateId' => 'royal-palace', 'templateVersion' => 3])['templateVersion'] === 2);
+ok('şablon EYNİ: daşınmış 2 qorunur (köhnə dəvətnamə öz dizaynında)', tvForSave(['templateId' => 'royal-palace', 'templateVersion' => 2], ['templateId' => 'royal-palace', 'templateVersion' => 2])['templateVersion'] === 2);
+ok('şablon EYNİ: admin builder-də kartı seçib 3 göndərir → 3', tvForSave(['templateId' => 'royal-palace', 'templateVersion' => 3], ['templateId' => 'royal-palace', 'templateVersion' => 2])['templateVersion'] === 3);
+ok('saxlanılanda templateId yoxdur: əvvəlki qayda (saxlanılan qorunur)', tvForSave(['templateId' => 'royal-palace'], ['templateVersion' => 2])['templateVersion'] === 2);
 ok('v3 READ: 3 → 3', tvForRead(['templateVersion' => 3])['templateVersion'] === 3);
 
 /* ── oxuma ── */

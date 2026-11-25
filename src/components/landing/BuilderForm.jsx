@@ -35,6 +35,7 @@ import LoveStoryStep from './LoveStoryStep'
 import MusicStep from './MusicStep'
 import TemplateSelect from './TemplateSelect'
 import { resolveBuilderTemplateId, eventTypeOnSelect } from '../../templates/templateConfig'
+import { currentVersionOf } from '../../templates/legacy/registry'
 import { computeInviteSlug } from '../../utils/inviteSlug'
 import { defaultWedding } from '../../data/defaultWedding'
 import { buildShortLiveLink } from '../../utils/whatsappOrder'
@@ -1436,6 +1437,11 @@ export default function BuilderForm({ lang, initialData, initialStep = null, onS
      müştəri 1-ci addımı doldurubsa onun seçiminə toxunulmur. */
   const setSelectedTemplate = (id, concept = null) => {
     set('templateId', id)
+    /* 2026-11-25 — admin «Sifarişlər › Redaktə»-də şablon kartını SEÇİR → builder-də gördüyü
+       indiki dizayn yazılır. Əvvəl sifarişə köçmüş köhnə `templateVersion` qalırdı və təsdiqdən
+       sonra dəvətnamə dondurulmuş köhnə dizaynla açılırdı. Şablona toxunulmayan redaktədə
+       versiya dəyişmir (köhnə dəvətnamələr öz dizaynında qalır). Server də yoxlayır. */
+    if (isAdmin) set('templateVersion', currentVersionOf(id))
     const ev = eventTypeOnSelect(id, concept, data)
     if (ev) set('eventType', ev)
   }
