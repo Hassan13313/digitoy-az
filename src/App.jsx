@@ -11,6 +11,7 @@ const GalleryPage      = lazy(() => import('./components/invitation/GalleryPage'
 const SlideshowPage    = lazy(() => import('./components/invitation/SlideshowPage'))
 const OwnerPanel       = lazy(() => import('./components/owner/OwnerPanel'))
 const VenueSeating     = lazy(() => import('./components/seating/VenueSeating'))
+const SeatFinderPage   = lazy(() => import('./components/seating/SeatFinderPage'))
 const AdminApp         = lazy(() => import('./components/admin/AdminApp'))
 const AdminLoginGate   = lazy(() => import('./components/admin/AdminLoginGate'))
 const TemplatesPage    = lazy(() => import('./components/landing/TemplatesPage'))
@@ -144,6 +145,9 @@ function getSEOConfig(view, { weddingData, slug, legalDoc, guideSlug, templatesC
     /* v53 — restoran üçün oturma planı (yalnız baxış): indekslənmir */
     case 'venue-plan':
       return { title: 'Oturma planı | DigiToy', description: 'Toyun zal planı və masa-masa qonaq siyahısı.', noindex: true, nofollow: true }
+    /* girişdəki «Masanı tap» QR-ı — sadə axtarış səhifəsi */
+    case 'seat-finder':
+      return { title: 'Masanızı tapın | DigiToy', description: 'Adınızı yazın, masanızı tapın.', noindex: true, nofollow: true }
 
     case 'admin-panel':
     case 'admin-login':
@@ -252,6 +256,8 @@ function routeAfterAuth(
     if (sub === 'panel')          { setView('owner-panel');  return }
     /* v53 — restoran linki: açar fragment-dədir (#k=…), bax seating/VenueSeating */
     if (sub === 'zal')            { setView('venue-plan');   return }
+    /* girişdəki «Masanı tap» QR stendi → yalnız masa axtarışı (şablonsuz, açılışsız) */
+    if (sub === 'masa')           { setView('seat-finder');  return }
 
     const viewParam  = params.get('view')
     const dParam     = params.get('d')
@@ -876,6 +882,7 @@ export default function App({ ssrPath = null }) {
   if (view === 'slideshow')    return <Suspense fallback={<RouteLoader />}><SlideshowPage /></Suspense>
   if (view === 'owner-panel')  return <Suspense fallback={<RouteLoader />}><OwnerPanel /></Suspense>
   if (view === 'venue-plan')   return <Suspense fallback={<RouteLoader />}><VenueSeating /></Suspense>
+  if (view === 'seat-finder')  return <Suspense fallback={<RouteLoader />}><SeatFinderPage /></Suspense>
   if (view === 'admin-panel')  return <Suspense fallback={<RouteLoader />}><AdminApp lang={lang} setLang={setLang} /></Suspense>
   if (view === 'admin-login')  return (
     <Suspense fallback={<RouteLoader />}>

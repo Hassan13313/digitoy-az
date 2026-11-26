@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { QRCodeCanvas } from 'qrcode.react'
 import {
-  getInvitationsList, getGalleryMeta, getPhotos, saveGallerySettings,
+  getInvitationsList, getGalleryMeta, getPhotos, saveGallerySettings, getGuests,
 } from '../../utils/api'
 import { resizeToDataUrl, resizeErrorText } from '../../utils/imageResize'
 import {
@@ -136,7 +136,16 @@ export default function AdminQrStand() {
   const [purpose, setPurpose] = useState('photo')          /* 'photo' | 'seat' */
   const [seatText, setSeatText] = useState({ title: SEAT_TITLE, desc: SEAT_DESC })
   const isSeat = purpose === 'seat'
-  const shareUrl = !slug ? '' : isSeat ? `${window.location.origin}/invite/${slug}?masa=1` : `${window.location.origin}/invite/${slug}/foto`
+  /* «Masanı tap» → ayrıca sadə səhifə (/masa): şablonun açılışı və bölmələrindən asılı deyil */
+  const shareUrl = !slug ? '' : isSeat ? `${window.location.origin}/invite/${slug}/masa` : `${window.location.origin}/invite/${slug}/foto`
+  /* QR işə yarasın deyə: masaya yerləşdirilmiş qonaq varmı? */
+  const [seated, setSeated] = useState(null)
+  useEffect(() => {
+    if (!isSeat || !slug) return undefined
+    let alive = true
+    getGuests(slug).then((d) => { if (alive) setSeated((d.guests || []).filter((g) => g.table_id).length) }).catch(() => { if (alive) setSeated(null) })
+    return () => { alive = false }
+  }, [isSeat, slug])
   const dateLabel = meta?.date ? formatAzDate(meta.date, 'az').formattedDate : ''
 
   /* Stend parametrləri — önbaxış və ixrac ÜÇÜN EYNİ obyekt */
@@ -247,8 +256,13 @@ export default function AdminQrStand() {
               className={`min-h-10 rounded-[8px] px-4 text-[14px] font-medium ${purpose === v ? 'bg-espresso text-white' : 'text-[#6B5E54]'}`}>{l}</button>
           ))}
         </div>
-        {isSeat && <span className="text-[13px] text-[#6B5E54]">QR dəvətnamənin «masanı tap» axtarışını açır. Girişə qoyun.</span>}
+        {isSeat && <span className="text-[13px] text-[#6B5E54]">QR «Masanızı tapın» səhifəsini açır: qonaq adını yazır, masasını görür. Girişə qoyun.</span>}
       </div>
+      {isSeat && seated === 0 && (
+        <Notice tone="warning" className="mb-4" title="Bu dəvətnamədə hələ masaya yerləşdirilmiş qonaq yoxdur">
+          QR-ı oxuyan qonaq «Masa planı hələ hazır deyil» yazısını görəcək. Əvvəlcə «Sifarişlər › Oturma planı»nda qonaqları masalara yerləşdirin.
+        </Notice>
+      )}
       <QrStandEditor
         invitations={invitations}
         selectedId={slug || null}

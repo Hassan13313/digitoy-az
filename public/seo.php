@@ -95,7 +95,7 @@ if ($path === '/') {
     $meta['desc']   = $guide['description'];
     $meta['canon']  = SITE . $path;
     $meta['ogtype'] = 'article';
-} elseif (preg_match('#^/invite/([a-zA-Z0-9\-]{2,120})(?:/(foto|qalereya-idare|slayd|panel|zal))?$#', $path, $m)) {
+} elseif (preg_match('#^/invite/([a-zA-Z0-9\-]{2,120})(?:/(foto|qalereya-idare|slayd|panel|zal|masa))?$#', $path, $m)) {
     $slug = $m[1];
     $sub  = $m[2] ?? '';
 
@@ -120,6 +120,11 @@ if ($path === '/') {
     } elseif ($sub === 'slayd') {
         $meta['title'] = 'Slayd Şou | DigiToy';
         $meta['desc']  = 'Qonaqların paylaşdığı şəkillər canlı slayd şouda.';
+    } elseif ($sub === 'masa') {
+        /* girişdəki «Masanı tap» QR-ı — qonağın masa axtarışı */
+        $meta['title']    = 'Masanızı tapın | DigiToy';
+        $meta['desc']     = 'Adınızı yazın, masanızı tapın.';
+        $meta['nofollow'] = true;
     } elseif ($sub === 'zal') {
         /* v53 — restoran üçün oturma planı: önbaxışda adlar GÖSTƏRİLMİR */
         $meta['title']    = 'Oturma planı | DigiToy';
