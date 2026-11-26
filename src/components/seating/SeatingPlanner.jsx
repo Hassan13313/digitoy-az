@@ -1,15 +1,16 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { Check, Pencil, Plus } from 'lucide-react'
+import { Check, Link2, Pencil, Plus, Printer, Utensils, Wand2 } from 'lucide-react'
 import GuestRoster from './GuestRoster'
 import TableCards from './TableCards'
 import HallPlan from './HallPlan'
 import GuestPreview from './GuestPreview'
 import { LinenDefs } from './TableArt'
-import { GuestDialog, TableDialog, TagDialog, ZoneDialog } from './SeatingDialogs'
+import { ArrangeDialog, GuestDialog, LinkDialog, TableDialog, TagDialog, VenueDialog, ZoneDialog } from './SeatingDialogs'
+import PrintView from './PrintView'
 import useSeatDrag from './useSeatDrag'
 import {
-  SIDE_EVENTS, groupList, layoutPayload, lc, nextId, nextTableName, normalizeLayout,
-  plannerGuests, seatSides, seatsOf,
+  SIDE_EVENTS, apartConflicts, autoArrange, expandTogether, groupList, layoutPayload, lc, nextId, nextTableName,
+  normalizeLayout, plannerGuests, seatSides, seatsOf,
 } from './seatingModel'
 import './seating.css'
 
@@ -20,6 +21,10 @@ import './seating.css'
      addGuest(d) · updateGuest(id, d) · deleteGuest(id) · bulk(ids, patch)
      saveLayout(layout, { renames, removed }) · undo?()   (hamısı Promise)
    Hər əməliyyatdan sonra `onReload()`. `readOnly` — yalnız baxış (PİN-siz).
+   v53: assign(pairs) · adopt(responseId) · venueLink(rotate) → açar (ixtiyari);
+   avtomatik yerləşdirmə, «birlikdə / ayrı» bağları, çap/PDF, restoran linki,
+   «gəlməyəcək» qonaqlar stul tutmur. `views` — göstərilən tablar, `roNote` —
+   baxış rejiminin mətni, `slug` — restoran linki üçün.
    ───────────────────────────────────────────────────────────────────────── */
 
 const VIEWS = [['cards', 'Masalar'], ['map', 'Zal planı'], ['guest', 'Qonaq görünüşü']]
@@ -36,7 +41,10 @@ function useNarrow(ref, px) {
   return narrow
 }
 
-export default function SeatingPlanner({ data, loading, readOnly = false, eventType = '', title = '', api, onReload, onImport }) {
+export default function SeatingPlanner({
+  data, loading, readOnly = false, eventType = '', title = '', api, onReload, onImport, slug = '',
+  views = ['cards', 'map', 'guest'], roNote = 'Baxış rejimi: dəyişmək üçün yuxarıda PİN-i daxil edin.',
+}) {
   const rootRef = useRef(null)
   const hallRef = useRef(null)
   const narrow = useNarrow(rootRef, 760)
@@ -56,6 +64,7 @@ export default function SeatingPlanner({ data, loading, readOnly = false, eventT
   const [busy, setBusy] = useState(false)
   const [toast, setToast] = useState(null)
   const [sheet, setSheet] = useState(false)
+  const [printing, setPrinting] = useState(false)
 
   const showSides = SIDE_EVENTS.has(eventType || '') || guests.some((g) => g.side)
   const groups = useMemo(() => groupList(layout.groups, guests), [layout.groups, guests])
@@ -70,6 +79,24 @@ export default function SeatingPlanner({ data, loading, readOnly = false, eventT
   }), [layout.tables, byTable])
   const byName = useMemo(() => new Map(tablesView.map((t) => [t.name, t.list])), [tablesView])
   const seatsByTable = useMemo(() => new Map(tablesView.map((t) => [t.name, seatSides(t.list)])), [tablesView])
+
+  const links = layout.links
+  const linkInfo = useMemo(() => {
+    const m = new Map()
+    const bump = (id, k) => { const v = m.get(id) || { together: 0, apart: 0 }; v[k]++; m.set(id, v) }
+    for (const l of links) { bump(l.a, l.kind); bump(l.b, l.kind) }
+    return m
+  }, [links])
+  const nameOf = (id) => guests.find((g) => g.id === id)?.name || '—'
+
+  /* Çap: PrintView body-yə çəkilir, sonra brauzerin çap pəncərəsi (PDF kimi saxlamaq olar) */
+  useEffect(() => {
+    if (!printing) return undefined
+    const done = () => setPrinting(false)
+    window.addEventListener('afterprint', done)
+    const t = setTimeout(() => { window.print(); setTimeout(done, 500) }, 60)
+    return () => { clearTimeout(t); window.removeEventListener('afterprint', done) }
+  }, [printing])
 
   /* Seçim: serverdən yeni məlumat gələndə artıq olmayan qonaqlar sayılmır */
   const sel = useMemo(() => {
@@ -103,7 +130,8 @@ export default function SeatingPlanner({ data, loading, readOnly = false, eventT
   }
 
   const place = (ids, tableName) => {
-    ids = [...ids]
+    /* «birlikdə» bağlılar həmişə bir yerdə köçür */
+    ids = expandTogether([...ids], links, new Set(guests.map((g) => g.id)))
     if (!ids.length || readOnly) return
     const t = tablesView.find((x) => x.name === tableName)
     const moving = guests.filter((g) => ids.includes(g.id))
@@ -112,6 +140,8 @@ export default function SeatingPlanner({ data, loading, readOnly = false, eventT
     if (t) {
       const after = t.used + moving.filter((g) => lc(g.table) !== lc(t.name)).reduce((s, g) => s + seatsOf(g), 0)
       if (after > t.cap) msg += `. Masada yer qalmadı (${after}/${t.cap})`
+      const merged = [...t.list.filter((g) => !ids.includes(g.id)), ...moving]
+      if (apartConflicts(merged, links).length) msg += '. Diqqət: bu masada «ayrı otursun» deyilən qonaqlar var'
     }
     setSel((s) => { const n = new Set(s); ids.forEach((id) => n.delete(id)); return n })
     run(() => api.bulk(ids, { table_id: tableName }), msg)
@@ -206,6 +236,39 @@ export default function SeatingPlanner({ data, loading, readOnly = false, eventT
     if (await run(() => api.bulk(ids, p), `${ids.length} qonaq yeniləndi`)) close()
   }
 
+  /* ── v53: siyahıda olmayan RSVP, bağlar, avtomatik yerləşdirmə, restoran linki ── */
+  const adopt = (ids) => run(async () => { for (const id of ids) await api.adopt(id) },
+    ids.length === 1 ? 'Siyahıya əlavə edildi — indi masaya yerləşdirə bilərsiniz' : `${ids.length} qonaq siyahıya əlavə edildi`)
+  const saveLinks = async ({ kind, drop }) => {
+    const ids = guests.filter((g) => sel.has(g.id)).map((g) => g.id).slice(0, 12)
+    let next = links.filter((l) => !drop.has(`${l.a}-${l.b}-${l.kind}`))
+    const add = []
+    if (kind === 'together') for (let i = 1; i < ids.length; i++) add.push({ a: ids[i - 1], b: ids[i], kind })
+    if (kind === 'apart') for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) add.push({ a: ids[i], b: ids[j], kind })
+    const key = (l) => `${Math.min(l.a, l.b)}-${Math.max(l.a, l.b)}-${l.kind}`
+    const have = new Set(next.map(key))
+    next = [...next, ...add.filter((l) => !have.has(key(l)))]
+    const msg = kind === 'together' ? 'Bağlandı: birlikdə oturacaqlar' : kind === 'apart' ? 'Bağlandı: ayrı oturacaqlar' : 'Bağlar yeniləndi'
+    if (await saveLayout({ ...layout, links: next }, {}, msg)) close()
+  }
+  const startArrange = () => {
+    const plan = autoArrange(guests, layout.tables, links)
+    if (!plan.pairs.length && !plan.unplaced.length) { say('Masası olmayan qonaq qalmayıb'); return }
+    open('arrange', { plan })
+  }
+  const applyArrange = async () => {
+    const pairs = dlg.plan.pairs
+    if (await run(() => api.assign(pairs.map((x) => ({ id: x.id, table_id: x.table }))), `${pairs.length} qonaq avtomatik yerləşdirildi`)) close()
+  }
+  const venueUrl = (key) => `${window.location.origin}/invite/${slug}/zal#k=${key}`
+  const openVenue = async (rotate = false) => {
+    if (busy) return
+    setBusy(true)
+    try { const key = await api.venueLink(rotate); open('venue', { url: venueUrl(key) }); if (rotate) say('Yeni link hazırdır — köhnə link artıq işləmir') }
+    catch (e) { say(e?.message || 'Link alınmadı', { error: true }) }
+    finally { setBusy(false) }
+  }
+
   const total = guests.length, seated = guests.filter((g) => g.table).length
   const placing = sel.size > 0 && !readOnly && !editing
   const anySeated = [...sel].some((id) => guests.find((g) => g.id === id)?.table)
@@ -234,7 +297,7 @@ export default function SeatingPlanner({ data, loading, readOnly = false, eventT
           <small>{total - seated ? `${total - seated} qonaq hələ masasızdır` : total ? 'Hamı yerləşdirilib' : 'Qonaq siyahısı boşdur'}</small>
         </div>
         <div className="sp-seg" role="tablist" aria-label="Görünüş">
-          {VIEWS.map(([v, l]) => <button key={v} type="button" role="tab" aria-selected={view === v} onClick={() => setView(v)}>{l}</button>)}
+          {VIEWS.filter(([v]) => views.includes(v)).map(([v, l]) => <button key={v} type="button" role="tab" aria-selected={view === v} onClick={() => setView(v)}>{l}</button>)}
         </div>
       </div>
 
@@ -242,20 +305,25 @@ export default function SeatingPlanner({ data, loading, readOnly = false, eventT
         <GuestRoster guests={guests} sel={sel} q={q} onQuery={setQ} side={side} onSide={setSide} showSides={showSides}
           groups={groups} folded={folded} onFold={fold} onToggle={toggle} onSelectIds={selectIds}
           onEdit={(g) => open('guest', { guest: g })} onAdd={() => open('guest')} onImport={onImport}
-          readOnly={readOnly} drag={drag} sheet={sheet} onCloseSheet={() => setSheet(false)} />
+          readOnly={readOnly} drag={drag} sheet={sheet} onCloseSheet={() => setSheet(false)}
+          unlisted={data?.unlisted || []} onAdopt={adopt} linkInfo={linkInfo} busy={busy} />
 
         <div className="sp-stage">
           {loading && !data ? <p className="sp-loading">Yüklənir…</p> : (
             <>
               {view === 'cards' && (
                 <>
-                  <div className="sp-v-head"><h3>Masalar</h3>{legend}
+                  <div className="sp-v-head"><h3>Masalar</h3>{legend}</div>
+                  <div className="sp-tools">
                     {!readOnly && <button type="button" className="sp-btn" onClick={() => open('table', { table: { name: nextTableName(layout.tables), shape: 'round', cap: 10 } })}><Plus aria-hidden="true" />Masa əlavə et</button>}
+                    {!readOnly && api.assign && <button type="button" className="sp-btn" disabled={busy} onClick={startArrange}><Wand2 aria-hidden="true" />Avtomatik yerləşdir</button>}
+                    <button type="button" className="sp-btn" onClick={() => setPrinting(true)}><Printer aria-hidden="true" />Çap / PDF</button>
+                    {!readOnly && api.venueLink && slug && <button type="button" className="sp-btn" disabled={busy} onClick={() => openVenue(false)}><Utensils aria-hidden="true" />Restoran linki</button>}
                   </div>
                   {!readOnly && steps('cards')}
-                  {readOnly && <p className="sp-ro">Baxış rejimi: dəyişmək üçün yuxarıda PİN-i daxil edin.</p>}
-                  <TableCards tables={tablesView} byTable={byName} sel={sel} readOnly={readOnly || editing} drag={drag}
-                    onToggle={toggle} onPlace={(name) => place(sel, name)}
+                  {readOnly && roNote && <p className="sp-ro">{roNote}</p>}
+                  <TableCards tables={tablesView} byTable={byName} sel={sel} links={links} readOnly={readOnly || editing} drag={drag}
+                    onToggle={toggle} onPlace={(name) => place(sel, name)} onUnseat={(ids) => place(ids, '')}
                     onEdit={(t) => open('table', { table: { ...t, existing: true } })}
                     onAdd={() => open('table', { table: { name: nextTableName(layout.tables), shape: 'round', cap: 10 } })} />
                 </>
@@ -275,6 +343,7 @@ export default function SeatingPlanner({ data, loading, readOnly = false, eventT
                     <>
                       <div className="sp-v-head"><h3>Zal planı</h3>{legend}
                         {!readOnly && <button type="button" className="sp-btn" onClick={startEdit}><Pencil aria-hidden="true" />Zalı düzənlə</button>}
+                        <button type="button" className="sp-btn" onClick={() => setPrinting(true)}><Printer aria-hidden="true" />Çap / PDF</button>
                       </div>
                       {!readOnly && steps('map')}
                     </>
@@ -314,6 +383,7 @@ export default function SeatingPlanner({ data, loading, readOnly = false, eventT
             ? <button type="button" className="go" onClick={() => setSheet(false)}>Masa seç</button>
             : <button type="button" onClick={() => setSheet(true)}>Siyahı</button>)}
           <button type="button" onClick={() => open('tag')}>{showSides ? 'Tərəf və qrup' : 'Qrup'}</button>
+          <button type="button" onClick={() => open('link')}><Link2 aria-hidden="true" />Bağla</button>
           {anySeated && <button type="button" disabled={busy} onClick={() => place([...sel].filter((id) => guests.find((g) => g.id === id)?.table), '')}>Masadan çıxar</button>}
           <button type="button" onClick={() => setSel(new Set())}>Ləğv et</button>
         </div>
@@ -338,6 +408,10 @@ export default function SeatingPlanner({ data, loading, readOnly = false, eventT
           onUnseat={(id) => place([id], '')} />
       )}
       {dlg?.type === 'zone' && <ZoneDialog key={dlg.key} open zone={dlg.zone} onClose={close} onSave={saveZone} onDelete={deleteZone} />}
+      {dlg?.type === 'link' && <LinkDialog key={dlg.key} open selected={guests.filter((g) => sel.has(g.id))} links={links} nameOf={nameOf} busy={busy} onClose={close} onSave={saveLinks} />}
+      {dlg?.type === 'arrange' && <ArrangeDialog key={dlg.key} open plan={dlg.plan} busy={busy} onClose={close} onApply={applyArrange} />}
+      {dlg?.type === 'venue' && <VenueDialog key={dlg.key} open url={dlg.url} busy={busy} onClose={close} onRotate={() => openVenue(true)} />}
+      {printing && <PrintView title={title} tables={tablesView} byName={byName} seatsByTable={seatsByTable} layout={layout} guests={guests} />}
     </div>
   )
 }

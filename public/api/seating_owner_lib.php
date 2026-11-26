@@ -62,6 +62,7 @@ function seatUndoPlan(array $change): ?array {
         'update', 'move' => ($id && is_array($before)) ? ['restore', $id, $before] : null,
         /* v52: toplu dəyişiklik (masa / tərəf / qrup) və zal planı */
         'bulk', 'layout' => is_array($before) ? [$change['action'], null, $before] : null,
+        'assign' => is_array($before) ? ['bulk', null, $before] : null,   /* v53: avtomatik yerləşdirmə */
         default  => null,
     };
 }

@@ -31,7 +31,9 @@ export const SIDE_EVENTS = new Set(['toy', 'nishan', 'xina', ''])
 const STATUS = { GOING: 'yes', NOT_GOING: 'no', MAYBE: 'maybe', NO_RESPONSE: 'none' }
 
 export const lc = (s) => String(s ?? '').toLocaleLowerCase('az')
-export const seatsOf = (g) => 1 + (Number(g?.plus) || 0)
+/* «Gəlməyəcəyəm» cavabı verən qonaq stul tutmur (masada qalsa da sayılmır) — v53 */
+export const takesSeat = (g) => g?.status !== 'no'
+export const seatsOf = (g) => (takesSeat(g) ? 1 + (Number(g?.plus) || 0) : 0)
 export const initials = (n) => String(n || '').trim().split(/\s+/).map((w) => w[0] || '').slice(0, 2).join('')
 export const shortName = (n) => { const [a, b] = String(n || '').split(' '); return b ? `${a} ${b[0]}.` : a }
 const round = (v) => Math.round(v * 2) / 2
@@ -108,6 +110,9 @@ export function normalizeLayout(raw, guestTables = []) {
     groups: Array.isArray(raw?.groups) ? [...raw.groups] : [],
     showMap: raw?.showMap === true,
     showTablemates: raw?.showTablemates !== false,
+    links: (Array.isArray(raw?.links) ? raw.links : [])
+      .filter((x) => x && Number(x.a) > 0 && Number(x.b) > 0 && Number(x.a) !== Number(x.b))
+      .map((x) => ({ a: Number(x.a), b: Number(x.b), kind: x.kind === 'apart' ? 'apart' : 'together' })),
   }
 }
 
@@ -119,6 +124,7 @@ export function layoutPayload(l) {
     groups: l.groups,
     showMap: l.showMap,
     showTablemates: l.showTablemates,
+    links: l.links || [],
   }
 }
 
@@ -135,6 +141,98 @@ export function groupList(layoutGroups = [], guests = []) {
 /** Masadakı stullar: hər yer üçün qonağın tərəfi (null — tərəfi yoxdur) */
 export function seatSides(guests) {
   return guests.flatMap((g) => Array(seatsOf(g)).fill(g.side || null))
+}
+
+/* ── «Birlikdə» / «ayrı» bağları (v53) ── */
+
+/** «Birlikdə otursun» blokları: id → bloka daxil olan bütün id-lər (birləşmə-tapma) */
+export function togetherMap(links = [], ids = null) {
+  const parent = new Map()
+  const find = (x) => { while (parent.get(x) !== x) { parent.set(x, parent.get(parent.get(x))); x = parent.get(x) } return x }
+  const add = (x) => { if (!parent.has(x)) parent.set(x, x) }
+  for (const l of links) {
+    if (l.kind !== 'together' || (ids && (!ids.has(l.a) || !ids.has(l.b)))) continue
+    add(l.a); add(l.b)
+    const ra = find(l.a), rb = find(l.b)
+    if (ra !== rb) parent.set(ra, rb)
+  }
+  const groups = new Map()
+  for (const x of parent.keys()) { const r = find(x); groups.set(r, [...(groups.get(r) || []), x]) }
+  const out = new Map()
+  for (const members of groups.values()) for (const m of members) out.set(m, members)
+  return out
+}
+
+/** Seçilən id-lər + onlarla «birlikdə» bağlı olanlar */
+export function expandTogether(ids, links, known) {
+  const tm = togetherMap(links, known)
+  const out = new Set()
+  for (const id of ids) for (const m of tm.get(id) || [id]) out.add(m)
+  return [...out]
+}
+
+/** Masada «ayrı otursun» deyilən cütlər: [[a,b], …] */
+export function apartConflicts(list, links = []) {
+  const here = new Set(list.map((g) => g.id))
+  return links.filter((l) => l.kind === 'apart' && here.has(l.a) && here.has(l.b)).map((l) => [l.a, l.b])
+}
+
+/**
+ * Avtomatik yerləşdirmə (yalnız masası olmayan və «gəlməyəcəm» deməyən qonaqlar).
+ * • eyni tərəf + qrup bir yerdə saxlanılır, «birlikdə» bağlılar ayrılmır;
+ * • qız evi zalın sol yarısındakı masalara (x < 50), oğlan evi sağ yarısına;
+ * • əvvəl eyni qrupun oturduğu, sonra yeri ən dəqiq uyğun gələn masa (best-fit);
+ * • «ayrı otursun» deyilən qonaqla eyni masaya qoyulmur.
+ * @returns {{pairs:{id:number,table:string}[], unplaced:object[]}}
+ */
+export function autoArrange(guests, tables, links = []) {
+  const byLc = new Map(tables.map((t) => [lc(t.name), t]))
+  const occ = new Map(tables.map((t) => [t.name, guests.filter((g) => g.table && lc(g.table) === lc(t.name))]))
+  const free = new Map(tables.map((t) => [t.name, t.cap - occ.get(t.name).reduce((s, g) => s + seatsOf(g), 0)]))
+  const sideOfTable = (t) => (t.x == null ? null : t.x < 50 ? 'bride' : 'groom')
+  const apart = new Map()
+  for (const l of links) if (l.kind === 'apart') { apart.set(l.a, [...(apart.get(l.a) || []), l.b]); apart.set(l.b, [...(apart.get(l.b) || []), l.a]) }
+  const pending = guests.filter((g) => !g.table && takesSeat(g))
+  const tm = togetherMap(links)
+  const byId = new Map(guests.map((g) => [g.id, g]))
+  /* bloklar: «birlikdə» bağlılar bir blokdur (artıq oturan üzvü varsa həmin masa «lövbər»dir) */
+  const seen = new Set()
+  const blocks = []
+  for (const g of pending) {
+    if (seen.has(g.id)) continue
+    const members = (tm.get(g.id) || [g.id]).map((id) => byId.get(id)).filter(Boolean)
+    const anchor = members.find((m) => m.table && byLc.has(lc(m.table)))
+    const todo = members.filter((m) => !m.table && takesSeat(m))
+    todo.forEach((m) => seen.add(m.id))
+    blocks.push({ guests: todo, seats: todo.reduce((s, m) => s + seatsOf(m), 0), side: g.side, group: g.group || '', anchor: anchor ? byLc.get(lc(anchor.table)).name : null })
+  }
+  /* qrup (tərəf + qrup) üzrə, böyükdən kiçiyə */
+  const groups = new Map()
+  for (const b of blocks) { const k = `${b.side || ''}|${lc(b.group)}`; groups.set(k, [...(groups.get(k) || []), b]) }
+  const ordered = [...groups.values()].sort((a, b) => b.reduce((s, x) => s + x.seats, 0) - a.reduce((s, x) => s + x.seats, 0))
+  const pairs = [], unplaced = []
+  const fits = (t, b) => free.get(t.name) >= b.seats && !b.guests.some((g) => (apart.get(g.id) || []).some((o) => occ.get(t.name).some((x) => x.id === o)))
+  const put = (t, b) => {
+    for (const g of b.guests) { pairs.push({ id: g.id, table: t.name }); occ.get(t.name).push(g) }
+    free.set(t.name, free.get(t.name) - b.seats)
+  }
+  const score = (t, b) => {
+    const sameGroup = occ.get(t.name).some((x) => b.group && lc(x.group) === lc(b.group) && x.side === b.side) ? 0 : 1
+    const sideMiss = b.side && sideOfTable(t) && sideOfTable(t) !== b.side ? 1 : 0
+    return [sideMiss, sameGroup, free.get(t.name) - b.seats]
+  }
+  const cmp = (x, y) => { for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return x[i] - y[i]; return 0 }
+  for (const list of ordered) {
+    for (const b of [...list].sort((x, y) => y.seats - x.seats)) {
+      if (!b.guests.length) continue
+      const anchorT = b.anchor && tables.find((t) => t.name === b.anchor)
+      if (anchorT && fits(anchorT, b)) { put(anchorT, b); continue }
+      const best = tables.filter((t) => fits(t, b)).sort((t1, t2) => cmp(score(t1, b), score(t2, b)))[0]
+      if (best) put(best, b)
+      else unplaced.push(...b.guests)
+    }
+  }
+  return { pairs, unplaced }
 }
 
 export const nextId = (list) => Math.max(0, ...list.map((x) => Number(x.id) || 0)) + 1

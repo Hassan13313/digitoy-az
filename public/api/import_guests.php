@@ -33,6 +33,7 @@
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/seating_layout_lib.php';   /* v52: seatSide, seatGroup; v53: normGuestName (RSVP ilə ortaq) */
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -69,18 +70,6 @@ if (count($rows) > IMPORT_MAX_ROWS) {
     exit;
 }
 
-/** Ad müqayisəsi üçün normallaşdırma — AZ hərfləri translit edilir */
-function normGuestName(string $s): string {
-    $s = mb_strtolower(trim($s), 'UTF-8');
-    $map = [
-        'ə' => 'e', 'ğ' => 'g', 'ı' => 'i', 'İ' => 'i', 'i̇' => 'i',
-        'ö' => 'o', 'ş' => 's', 'ü' => 'u', 'ç' => 'c',
-    ];
-    $s = strtr($s, $map);
-    $s = preg_replace('/\s+/u', ' ', $s);
-    return trim((string) $s);
-}
-
 /** Telefon — yalnız rəqəm, +, boşluq, tire, mötərizə */
 function cleanPhone($v): ?string {
     if (!is_string($v)) return null;
@@ -110,7 +99,6 @@ try {
        UNIQUE açar yoxdur, ona görə burada FAIL-OPEN qəbul edilir. */
 }
 
-require_once __DIR__ . '/seating_layout_lib.php';   /* v52: seatSide, seatGroup */
 $seenInFile   = [];
 $toInsert     = [];
 $errors       = [];

@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict'
 import {
   autoPlace, groupList, layoutPayload, nextTableName, normalizeLayout, plannerGuests, seatSides, seatsOf, tableLabel,
-  DEFAULT_ZONES,
+  DEFAULT_ZONES, autoArrange, apartConflicts, expandTogether, takesSeat, togetherMap,
 } from '../src/components/seating/seatingModel.js'
 
 let n = 0
@@ -71,5 +71,65 @@ t('qrup siyahısı: standartlar + planda + qonaqlarda, təkrarsız', () => {
 })
 t('yeni masa adı təkrarlanmır', () => assert.equal(nextTableName([{ name: 'Masa 1' }, { name: 'Masa 2' }]), 'Masa 3'))
 t('yeni masa adı boşluğu tutmur', () => assert.equal(nextTableName([{ name: 'Masa 2' }]), 'Masa 3'))
+
+/* ── v53: RSVP, bağlar, avtomatik yerləşdirmə ── */
+t('«gəlməyəcək» stul tutmur', () => {
+  assert.equal(takesSeat({ status: 'no' }), false)
+  assert.equal(seatsOf({ status: 'no', plus: 2 }), 0)
+  assert.equal(seatsOf({ status: 'maybe', plus: 1 }), 2)
+  assert.deepEqual(seatSides([{ side: 'bride', status: 'no' }, { side: 'groom' }]), ['groom'])
+})
+t('plan bağları normallaşır', () => {
+  const l = normalizeLayout({ links: [{ a: 1, b: 2, kind: 'apart' }, { a: 3, b: 3 }, { a: '4', b: '5' }, null] }, [])
+  assert.deepEqual(l.links, [{ a: 1, b: 2, kind: 'apart' }, { a: 4, b: 5, kind: 'together' }])
+  assert.deepEqual(layoutPayload({ ...l, tables: [], zones: [] }).links, l.links)
+})
+const L = [{ a: 1, b: 2, kind: 'together' }, { a: 2, b: 3, kind: 'together' }, { a: 4, b: 5, kind: 'apart' }]
+t('birlikdə blokları zəncirlə birləşir', () => {
+  assert.deepEqual(togetherMap(L).get(1).sort(), [1, 2, 3])
+  assert.deepEqual(expandTogether([3], L).sort(), [1, 2, 3])
+  assert.deepEqual(expandTogether([9], L), [9])
+})
+t('ayrı cütlər eyni masada aşkarlanır', () => {
+  assert.deepEqual(apartConflicts([{ id: 4 }, { id: 5 }, { id: 6 }], L), [[4, 5]])
+  assert.deepEqual(apartConflicts([{ id: 4 }], L), [])
+})
+const T = [{ name: 'Sol', cap: 4, x: 13, y: 30 }, { name: 'Sağ', cap: 4, x: 87, y: 30 }, { name: 'Böyük', cap: 10, x: 87, y: 70 }]
+const G = (id, side, group, extra = {}) => ({ id, name: 'Q' + id, side, group, plus: 0, status: 'none', table: '', ...extra })
+t('qız evi sola, oğlan evi sağa', () => {
+  const r = autoArrange([G(1, 'bride', 'Ailə'), G(2, 'groom', 'Ailə')], T)
+  assert.equal(r.pairs.find((p) => p.id === 1).table, 'Sol')
+  assert.ok(['Sağ', 'Böyük'].includes(r.pairs.find((p) => p.id === 2).table))
+})
+t('qrup bir masada qalır (sığırsa), best-fit', () => {
+  const gs = [1, 2, 3].map((i) => G(i, 'groom', 'İş'))
+  const r = autoArrange(gs, T)
+  assert.equal(new Set(r.pairs.map((p) => p.table)).size, 1)
+  assert.equal(r.pairs[0].table, 'Sağ')   /* 4 yerlik masa 10 yerlikdən dəqiq uyğundur */
+})
+t('«gəlməyəcək» və masası olan qonaq toxunulmur', () => {
+  const r = autoArrange([G(1, 'bride', 'A', { status: 'no' }), G(2, 'bride', 'A', { table: 'Sol' })], T)
+  assert.deepEqual(r.pairs, [])
+})
+t('birlikdə blok bölünmür, oturan üzvün masasına gedir', () => {
+  const gs = [G(1, 'groom', 'A', { table: 'Böyük' }), G(2, 'bride', 'B'), G(3, 'bride', 'B')]
+  const r = autoArrange(gs, T, [{ a: 1, b: 2, kind: 'together' }, { a: 2, b: 3, kind: 'together' }])
+  assert.deepEqual(r.pairs.map((p) => p.table), ['Böyük', 'Böyük'])
+})
+t('ayrı deyilən qonaqla eyni masaya qoyulmur', () => {
+  const gs = [G(4, 'bride', 'A', { table: 'Sol' }), G(5, 'bride', 'A')]
+  const r = autoArrange(gs, T, [{ a: 4, b: 5, kind: 'apart' }])
+  assert.notEqual(r.pairs[0].table, 'Sol')
+})
+t('yer çatmayanda qalanlar qaytarılır', () => {
+  const r = autoArrange(Array.from({ length: 20 }, (_, i) => G(i + 1, 'groom', 'X')), T)
+  assert.equal(r.pairs.length, 18)
+  assert.equal(r.unplaced.length, 2)
+})
+t('+1-lər tutuma daxildir', () => {
+  const r = autoArrange([G(1, 'bride', 'A', { plus: 3 }), G(2, 'bride', 'A', { plus: 3 })], [{ name: 'Sol', cap: 4, x: 10, y: 10 }])
+  assert.equal(r.pairs.length, 1)
+  assert.equal(r.unplaced.length, 1)
+})
 
 console.log(`seating_model: ${n} yoxlama keçdi`)

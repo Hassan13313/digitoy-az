@@ -117,6 +117,26 @@ export function useSeating({ seatingPlan, lang = 'az' }) {
       createElement(HallPlan, { layout: mapLayout, mini: true, highlight: selected.table_id }))
     : null), [mapLayout, selected])
 
+  /* v53 — girişdəki «Masanı tap» QR-ı (?masa=1): dəvətnamə açılan kimi masa axtarışına apar */
+  useEffect(() => {
+    if (!new URLSearchParams(window.location.search).has('masa')) return undefined
+    let done = false, timer = 0
+    /* açılış animasiyası bitənə qədər bölmə hələ yoxdur — ~10 san. ərzində yoxla */
+    const go = (left = 25) => {
+      if (done) return
+      const sec = document.querySelector('[data-section="seating"]')
+      if (!sec || !sec.getBoundingClientRect().height) { if (left > 0) timer = setTimeout(() => go(left - 1), 400); return }
+      done = true
+      sec.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      timer = setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 900)
+    }
+    /* açılış hadisəsi bəzi şablonlarda yoxdur → «Dəvəti aç» toxunuşundan sonra da */
+    const onOpen = () => { clearTimeout(timer); timer = setTimeout(() => go(), 900) }
+    window.addEventListener('digitoy:invitation-opened', onOpen)
+    window.addEventListener('pointerup', onOpen, { once: true })
+    return () => { clearTimeout(timer); window.removeEventListener('digitoy:invitation-opened', onOpen); window.removeEventListener('pointerup', onOpen) }
+  }, [])
+
   const pick  = (g) => { setSelected(g); setQuery(g.full_name); setActiveIdx(-1) }
   const reset = () => { setSelected(null); setQuery(''); setActiveIdx(-1); inputRef.current?.focus() }
 

@@ -60,6 +60,10 @@ export default function AdminSeatingPlan({ slug, seatingPlan, eventType = '', ti
     deleteGuest: (id) => friendly(manageGuest('delete', { id })),
     bulk: (ids, patch) => friendly(manageGuest('bulk', { invitation_id: slug, ids, patch })),
     saveLayout: (layout, extra) => friendly(manageGuest('layout', { invitation_id: slug, layout, ...extra })),
+    /* v53 */
+    assign: (pairs) => friendly(manageGuest('assign', { invitation_id: slug, pairs })),
+    adopt: (responseId) => friendly(manageGuest('adopt', { invitation_id: slug, response_id: responseId })),
+    venueLink: (rotate) => friendly(manageGuest('venue_link', { invitation_id: slug, rotate: !!rotate })).then((r) => r.key),
   }), [slug])
 
   if (!slug) return null
@@ -85,7 +89,7 @@ export default function AdminSeatingPlan({ slug, seatingPlan, eventType = '', ti
       )}
       {migrateMsg && <Notice tone="success" title={migrateMsg} className="mb-4" />}
 
-      <SeatingPlanner data={data} loading={loading} eventType={eventType} title={title}
+      <SeatingPlanner data={data} loading={loading} eventType={eventType} title={title} slug={slug}
         api={api} onReload={load} onImport={() => setImportOpen(true)} />
 
       {/* Phase 43 — Excel/CSV idxal modalı */}

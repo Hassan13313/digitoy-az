@@ -24,12 +24,14 @@ const ERR = {
   TOO_MANY_GUESTS: 'Qonaq sayı limitə çatıb.',
   NOTHING_TO_UNDO: 'Geri qaytarılacaq dəyişiklik yoxdur.',
   RATE_LIMITED: 'Çox tez-tez dəyişiklik edilir. Bir az gözləyib yenidən cəhd edin.',
+  RESPONSE_NOT_FOUND: 'Bu cavab artıq siyahıdadır və ya silinib. Səhifəni yeniləyin.',
 }
 const errText = (e) => ERR[e?.code] || 'Əməliyyat alınmadı. Bağlantını yoxlayıb yenidən cəhd edin.'
 
 const ACTION_LABEL = { add: 'əlavə edildi', delete: 'silindi', update: 'dəyişdirildi', move: 'masası dəyişdi' }
 function historyText(h) {
   if (h.action === 'layout') return 'Zal planı dəyişdi'
+  if (h.action === 'assign') return `${h.after?.count || ''} qonaq avtomatik yerləşdirildi`
   if (h.action === 'bulk') {
     const a = h.after || {}
     const what = 'table_id' in a ? (a.table_id ? `${a.table_id} masasına keçdi` : 'masadan çıxdı') : 'tərəfi / qrupu dəyişdi'
@@ -73,6 +75,10 @@ export default function OwnerSeating({ slug, eventType = '', title = '' }) {
       bulk: (ids, patch) => op('bulk', { ids, patch }),
       saveLayout: (layout, extra) => op('layout', { layout, ...extra }),
       undo: () => op('undo'),
+      /* v53 */
+      assign: (pairs) => op('assign', { pairs }),
+      adopt: (responseId) => op('adopt', { response_id: responseId }),
+      venueLink: (rotate) => op('venue_link', { rotate: !!rotate }).then((r) => r.key),
     }
   }, [slug])
 
@@ -97,7 +103,7 @@ export default function OwnerSeating({ slug, eventType = '', title = '' }) {
         </div>
       )}
 
-      <SeatingPlanner data={data} loading={loading && !data} readOnly={!unlocked} eventType={eventType} title={title}
+      <SeatingPlanner data={data} loading={loading && !data} readOnly={!unlocked} eventType={eventType} title={title} slug={slug}
         api={api} onReload={reload} />
 
       {unlocked && history.length > 0 && (

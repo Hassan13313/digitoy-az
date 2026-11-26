@@ -95,7 +95,7 @@ if ($path === '/') {
     $meta['desc']   = $guide['description'];
     $meta['canon']  = SITE . $path;
     $meta['ogtype'] = 'article';
-} elseif (preg_match('#^/invite/([a-zA-Z0-9\-]{2,120})(?:/(foto|qalereya-idare|slayd|panel))?$#', $path, $m)) {
+} elseif (preg_match('#^/invite/([a-zA-Z0-9\-]{2,120})(?:/(foto|qalereya-idare|slayd|panel|zal))?$#', $path, $m)) {
     $slug = $m[1];
     $sub  = $m[2] ?? '';
 
@@ -120,6 +120,11 @@ if ($path === '/') {
     } elseif ($sub === 'slayd') {
         $meta['title'] = 'Slayd Şou | DigiToy';
         $meta['desc']  = 'Qonaqların paylaşdığı şəkillər canlı slayd şouda.';
+    } elseif ($sub === 'zal') {
+        /* v53 — restoran üçün oturma planı: önbaxışda adlar GÖSTƏRİLMİR */
+        $meta['title']    = 'Oturma planı | DigiToy';
+        $meta['desc']     = 'Toyun zal planı və masa-masa qonaq siyahısı.';
+        $meta['nofollow'] = true;
     } elseif ($sub === 'panel') {
         /* Phase 50 — müştərinin şəxsi paneli: önbaxışda adlar GÖSTƏRİLMİR,
            səhifədəki linklər də izlənmir (nofollow). */

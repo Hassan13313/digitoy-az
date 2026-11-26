@@ -8,6 +8,9 @@
      { slug, action:'move', token, id, table_id }            table_id '' = masadan çıxar
      { slug, action:'bulk', token, ids:[…], patch:{ table_id?, side?, group_name? } }   (v52)
      { slug, action:'layout', token, layout:{…}, renames?:[{from,to}], removed?:[ad] }  (v52)
+     { slug, action:'assign', token, pairs:[{id, table_id}] }   avtomatik yerləşdirmə (v53)
+     { slug, action:'adopt', token, response_id }               siyahıda olmayan RSVP → qonaq (v53)
+     { slug, action:'venue_link', token, rotate? }              restoran linkinin açarı (v53)
      { slug, action:'delete', token, id }
      { slug, action:'undo', token }                         → son dəyişikliyi geri qaytarır
      { slug, action:'history', token }                      → son 20 dəyişiklik
@@ -173,6 +176,25 @@ switch ($action) {
         $res = seatApplyLayout($db, $slug, $body['layout'] ?? null, $body['renames'] ?? [], $body['removed'] ?? []);
         seatRecord($db, $slug, 'layout', null, ['layout' => $res['before'], 'guests' => $res['guests']], ['tables' => count($res['layout']['tables'])]);
         echo json_encode(['ok' => true, 'layout' => $res['layout']], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    case 'assign': {
+        $db->beginTransaction();
+        $before = seatApplyAssign($db, $slug, $body['pairs'] ?? []);
+        if ($before) seatRecord($db, $slug, 'assign', null, $before, ['count' => count($before)]);
+        $db->commit();
+        echo json_encode(['ok' => true, 'changed' => count($before)]);
+        exit;
+    }
+    case 'adopt': {
+        $g = seatAdopt($db, $slug, $body['response_id'] ?? 0);
+        if (!$g) seatFail(404, 'RESPONSE_NOT_FOUND');
+        seatRecord($db, $slug, 'add', $g['id'], null, ['table_id' => '', 'full_name' => $g['full_name'], 'notes' => '']);
+        echo json_encode(['ok' => true, 'id' => $g['id']]);
+        exit;
+    }
+    case 'venue_link': {
+        echo json_encode(['ok' => true, 'key' => seatVenueKey($db, $slug, !empty($body['rotate']))]);
         exit;
     }
     case 'history': {

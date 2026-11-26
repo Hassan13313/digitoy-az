@@ -95,7 +95,7 @@ if ($_origin !== '') {
         /* ⚠ `If-None-Match` və `If-Modified-Since` CORS safelist-də DEYİL:
            preflight tələb edirlər. Onlarsız qalereyanın şərti GET (ETag/304)
            optimallaşdırması cross-origin rejimdə tamamilə sınırdı. */
-        header('Access-Control-Allow-Headers: Content-Type, X-Admin-Token, X-Gallery-Token, X-Gallery-View, X-Owner-Token, Authorization, If-None-Match, If-Modified-Since');
+        header('Access-Control-Allow-Headers: Content-Type, X-Admin-Token, X-Gallery-Token, X-Gallery-View, X-Owner-Token, X-Venue-Key, Authorization, If-None-Match, If-Modified-Since');
         /* Cavab başlıqları cross-origin JS-ə default olaraq GÖRÜNMÜR —
            `res.headers.get('ETag')` null qaytarır və keş heç vaxt qurulmur. */
         header('Access-Control-Expose-Headers: ETag, Last-Modified');
@@ -325,7 +325,7 @@ function rateGate(string $key, int $limit, int $window): bool {
 /* ── Sxem versiyası (Phase 39) ──
    Sütun və ya cədvəl əlavə edəndə BU RƏQƏMİ ARTIR — əks halda miqrasiya
    canlıda işləməz. */
-const SCHEMA_VERSION = 52;   /* 52: guests.side/group_name + seating_layouts (zal planı, 2026-11-26) */
+const SCHEMA_VERSION = 53;   /* 52: guests.side/group_name + seating_layouts; 53: seating_layouts.venue_key (restoran linki) — 2026-11-26 */
 
 /* ── Cədvəlləri avtomatik yarat ──
    Phase 39 OPTİMİZASİYASI: əvvəl bu funksiya HƏR sorğuda 6 `CREATE TABLE
@@ -810,6 +810,14 @@ function runMigrations(PDO $db): void {
             updated_at    DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
+    /* v53 — restoran üçün yalnız baxış linkinin açarı (seating_view.php) */
+    if (empty($db->query("SHOW COLUMNS FROM seating_layouts LIKE 'venue_key'")->fetchAll())) {
+        try {
+            $db->exec("ALTER TABLE seating_layouts ADD COLUMN venue_key VARCHAR(64) DEFAULT NULL");
+        } catch (PDOException $e) {
+            if ((int) ($e->errorInfo[1] ?? 0) !== 1060) throw $e;   /* paralel sorğu artıq əlavə edib */
+        }
+    }
 
     /* ── Sxem versiyasını qeyd et ──
        Bu sətir olmasa ensureTables() hər sorğuda tam miqrasiya işlədər. */

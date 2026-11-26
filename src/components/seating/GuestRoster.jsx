@@ -1,4 +1,4 @@
-import { Check, ChevronDown, Pencil, X } from 'lucide-react'
+import { Check, ChevronDown, Link2, Pencil, Unlink2, UserPlus, X } from 'lucide-react'
 import { initials, lc } from './seatingModel'
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -6,9 +6,12 @@ import { initials, lc } from './seatingModel'
    düymələri, qruplar başlıq kimi (yığılır, «Hamısını seç»). Sətrə toxunmaq —
    seçmək; siçanla tutub masaya çəkmək; barmaqla bir az saxlayıb çəkmək.
    Telefonda aşağıdan açılan pərdədir (`sheet`).
+   v53: yuxarıda «RSVP cavabı verib, siyahıda yoxdur» (bir kliklə siyahıya),
+   sətirdə «birlikdə» / «ayrı» bağlarının sayı.
    ───────────────────────────────────────────────────────────────────────── */
 
 const RSVP_TAG = { no: ['Gəlməyəcək', 'no'], none: ['Cavab verməyib', ''], maybe: ['Bəlkə gələr', ''] }
+const UNLISTED_TAG = { yes: ['Gələcək', 'yes'], no: ['Gəlməyəcək', 'no'], maybe: ['Bəlkə gələr', ''] }
 
 function rosterPool(guests, q) {
   const n = lc(q.trim())
@@ -18,6 +21,7 @@ function rosterPool(guests, q) {
 export default function GuestRoster({
   guests, sel, q, onQuery, side, onSide, showSides, groups, folded, onFold,
   onToggle, onSelectIds, onEdit, onAdd, onImport, readOnly, drag, sheet, onCloseSheet,
+  unlisted = [], onAdopt, linkInfo, busy,
 }) {
   const pool = rosterPool(guests, q)
   const bySide = (s) => pool.filter((g) => s === 'all' || g.side === s)
@@ -46,6 +50,29 @@ export default function GuestRoster({
         <p className="sp-note">{q.trim() ? 'Axtarış bütün qonaqlarda gedir, masada olanlar da çıxır.' : 'Burada masası olmayan qonaqlar görünür.'}</p>
       </div>
       <div className="sp-list">
+        {unlisted.length > 0 && !q.trim() && (
+          <section className="sp-unlisted">
+            <div className="sp-sec-h">
+              <span className="sp-sec-t is-static">RSVP cavabı verib, siyahıda yoxdur<b>{unlisted.length}</b></span>
+              {!readOnly && unlisted.length > 1 && <button type="button" className="sp-link" disabled={busy} onClick={() => onAdopt(unlisted.map((u) => u.id))}>Hamısını əlavə et</button>}
+            </div>
+            <p className="sp-note">Bu qonaqlar adlarını özləri yazıb cavab veriblər. Siyahıya əlavə edin ki, masaya yerləşdirə biləsiniz.</p>
+            {unlisted.map((u) => {
+              const tag = UNLISTED_TAG[u.status]
+              return (
+                <div key={u.id} className="sp-row is-unlisted">
+                  <span className="sp-pick is-static">
+                    <span className="sp-av" aria-hidden="true">{initials(u.name)}</span>
+                    <span className="sp-nm"><b>{u.name}</b>
+                      <small>{u.extra_guests > 0 && <span className="sp-plus">+{u.extra_guests} nəfər</span>}{tag && <span className={`sp-tag ${tag[1]}`}>{tag[0]}</span>}</small>
+                    </span>
+                  </span>
+                  {!readOnly && <button type="button" className="sp-edit is-on" disabled={busy} aria-label={`Siyahıya əlavə et: ${u.name}`} title="Siyahıya əlavə et" onClick={() => onAdopt([u.id])}><UserPlus aria-hidden="true" /></button>}
+                </div>
+              )
+            })}
+          </section>
+        )}
         {sections.map(([gr, list]) => {
           const shut = folded.has(gr)
           const all = list.every((g) => sel.has(g.id))
@@ -61,7 +88,7 @@ export default function GuestRoster({
                   </button>
                 )}
               </div>
-              {!shut && list.map((g) => <Row key={g.id} g={g} on={sel.has(g.id)} readOnly={readOnly} drag={drag} sel={sel} onToggle={onToggle} onEdit={onEdit} />)}
+              {!shut && list.map((g) => <Row key={g.id} g={g} on={sel.has(g.id)} readOnly={readOnly} drag={drag} sel={sel} onToggle={onToggle} onEdit={onEdit} links={linkInfo?.get(g.id)} />)}
             </section>
           )
         })}
@@ -78,7 +105,7 @@ export default function GuestRoster({
   )
 }
 
-function Row({ g, on, readOnly, drag, sel, onToggle, onEdit }) {
+function Row({ g, on, readOnly, drag, sel, onToggle, onEdit, links }) {
   const tag = RSVP_TAG[g.status]
   return (
     <div className={`sp-row${on ? ' is-sel' : ''}`}
@@ -95,6 +122,8 @@ function Row({ g, on, readOnly, drag, sel, onToggle, onEdit }) {
             {g.plus > 0 && <span className="sp-plus">+{g.plus} nəfər</span>}
             {g.table && <span>{g.table}</span>}
             {tag && <span className={`sp-tag ${tag[1]}`}>{tag[0]}</span>}
+            {links?.together > 0 && <span className="sp-lk" title="Birlikdə oturmalı olduğu qonaqlar"><Link2 aria-hidden="true" />{links.together}</span>}
+            {links?.apart > 0 && <span className="sp-lk apart" title="Ayrı oturmalı olduğu qonaqlar"><Unlink2 aria-hidden="true" />{links.apart}</span>}
           </small>
         </span>
       </button>

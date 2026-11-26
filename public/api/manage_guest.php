@@ -6,6 +6,9 @@
    v52 (2026-11-26): masasız qonaq (table_id ''), side / group_name,
      bulk   { invitation_id, ids:[…], patch:{ table_id?, side?, group_name? } }
      layout { invitation_id, layout:{…}, renames:[{from,to}], removed:[ad] }
+     assign { invitation_id, pairs:[{id, table_id}] }       (v53 avtomatik yerləşdirmə)
+     adopt  { invitation_id, response_id }                   (v53 siyahıda olmayan RSVP → qonaq)
+     venue_link { invitation_id, rotate? }                   (v53 restoran linkinin açarı)
    Qaydalar: seating_layout_lib.php (müştəri paneli ilə eyni).
 ══════════════════════════════════════════════════ */
 require_once __DIR__ . '/config.php';
@@ -121,7 +124,7 @@ if ($action === 'move') {
 }
 
 /* ── v52: BULK (seçilmiş qonaqlar: masa / tərəf / qrup) və LAYOUT (zal planı) ── */
-if ($action === 'bulk' || $action === 'layout') {
+if (in_array($action, ['bulk', 'layout', 'assign', 'adopt', 'venue_link'], true)) {
     $invId = is_string($body['invitation_id'] ?? null) ? trim($body['invitation_id']) : '';
     if (!isValidSlug($invId)) { http_response_code(422); echo json_encode(['error' => 'invitation_id required']); exit; }
     if ($action === 'bulk') {
@@ -132,10 +135,27 @@ if ($action === 'bulk' || $action === 'layout') {
         echo json_encode(['ok' => true, 'changed' => count($changed)]);
         exit;
     }
+    if ($action === 'assign') {
+        $db->beginTransaction();
+        $changed = seatApplyAssign($db, $invId, $body['pairs'] ?? []);
+        $db->commit();
+        echo json_encode(['ok' => true, 'changed' => count($changed)]);
+        exit;
+    }
+    if ($action === 'adopt') {
+        $g = seatAdopt($db, $invId, $body['response_id'] ?? 0);
+        if (!$g) { http_response_code(404); echo json_encode(['error' => 'RESPONSE_NOT_FOUND']); exit; }
+        echo json_encode(['ok' => true, 'id' => $g['id']]);
+        exit;
+    }
+    if ($action === 'venue_link') {
+        echo json_encode(['ok' => true, 'key' => seatVenueKey($db, $invId, !empty($body['rotate']))]);
+        exit;
+    }
     $res = seatApplyLayout($db, $invId, $body['layout'] ?? null, $body['renames'] ?? [], $body['removed'] ?? []);
     echo json_encode(['ok' => true, 'layout' => $res['layout']], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
 http_response_code(422);
-echo json_encode(['error' => 'Invalid action. Use: add, update, delete, move, bulk, layout']);
+echo json_encode(['error' => 'Invalid action. Use: add, update, delete, move, bulk, layout, assign, adopt, venue_link']);

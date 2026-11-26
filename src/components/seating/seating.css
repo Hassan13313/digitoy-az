@@ -245,3 +245,49 @@ body.sp-dragging,body.sp-dragging *{cursor:grabbing!important;user-select:none!i
 .sp.is-narrow .sp-selbar button{flex:1}
 .sp.is-narrow .sp-stage{padding-bottom:90px}
 @media (prefers-reduced-motion:reduce){.sp *,.sp-toast{transition:none!important;animation:none!important}}
+
+/* ── v53: alətlər, xəbərdarlıqlar, siyahıda olmayan RSVP, bağlar ── */
+.sp-tools{display:flex;flex-wrap:wrap;gap:8px;margin:-4px 0 14px}
+.sp-warn{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin:10px 0 0;padding:8px 10px;border-radius:12px;background:#F7E9E4;color:var(--sp-rust);font-size:13px;text-align:left}
+.sp-warn svg{width:15px;height:15px;flex:none}
+.sp-warn span{flex:1;min-width:120px}
+.sp-warn button{border:0;border-radius:9px;background:#fff;color:var(--sp-rust);font-weight:600;font-size:12.5px;min-height:32px;padding:0 10px;box-shadow:inset 0 0 0 1px #E7C3BA}
+.sp-nm-btn.is-no span{text-decoration:line-through;color:var(--sp-mut)}
+.sp-nm-btn small{font-size:11.5px;color:var(--sp-rust);font-weight:500}
+.sp-lk{display:inline-flex;align-items:center;gap:3px;color:var(--sp-gold);font-weight:600}
+.sp-lk svg{width:13px;height:13px}
+.sp-lk.apart{color:var(--sp-rust)}
+.sp-unlisted{margin-top:6px;padding:4px 6px 8px;border-radius:14px;background:#FBF6EA;box-shadow:inset 0 0 0 1px #EEDFB8}
+.sp-unlisted .sp-sec-h{background:transparent;position:static}
+.sp-unlisted .sp-note{padding:0 6px 4px}
+.sp-sec-t.is-static{cursor:default}
+.sp-pick.is-static{cursor:default}
+.sp-row.is-unlisted:hover{background:transparent}
+.sp-edit.is-on{opacity:1;color:var(--sp-gold)}
+.sp-tag.yes{background:#ECF1E4;color:var(--sp-olive)}
+.sp-row-btns{display:flex;flex-wrap:wrap;gap:8px}
+.sp-row-btns .sp-btn{text-decoration:none}
+.sp-tlist li.is-dropped span{text-decoration:line-through;opacity:.55}
+.sp-tlist small{color:#6B5E54}
+.sp-dlg .sp-warn{margin:0}
+.sp-selbar button svg{width:15px;height:15px;vertical-align:-2px;margin-right:4px}
+
+/* ── Çap / PDF (PrintView) ── */
+.sp-print-root{display:none}
+@media print{
+  @page{size:A4;margin:12mm}
+  body:has(>.sp-print-root)>*:not(.sp-print-root){display:none!important}
+  .sp-print-root{display:block!important;color:#2C2523;font:10.5pt/1.35 Inter,system-ui,sans-serif}
+  .sp-pr-head h1{font:700 20pt "Cormorant Garamond","Playfair Display",Georgia,serif;margin:0}
+  .sp-pr-head p{margin:2pt 0 8pt;color:#6B5E54}
+  .sp-pr-hall{break-inside:avoid;margin-bottom:10pt}
+  .sp-pr-hall .sp-hall{box-shadow:inset 0 0 0 1px #C9BCA7;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sp-pr-grid{columns:3;column-gap:10pt}
+  .sp-pr-table{break-inside:avoid;margin:0 0 8pt;padding:6pt 8pt;border:1px solid #D9CDB8;border-radius:6pt}
+  .sp-pr-table h2{margin:0 0 3pt;font:700 12pt "Cormorant Garamond","Playfair Display",Georgia,serif;display:flex;justify-content:space-between}
+  .sp-pr-table h2 small{font:500 9pt Inter,sans-serif;color:#6B5E54}
+  .sp-pr-table ol{margin:0;padding-left:14pt}
+  .sp-pr-table li.is-no{color:#9A3B2E;text-decoration:line-through}
+  .sp-pr-table li i{text-decoration:none}
+  .sp-pr-foot{margin-top:6pt;text-align:right;color:#A79C90;font-size:8pt}
+}

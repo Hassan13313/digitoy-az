@@ -151,10 +151,18 @@ foreach ($guests as $g) {
 }
 $realAtt = $going + $extraTotal;
 
+/* v53 — RSVP cavabı verib siyahıda olmayanlar (planlayıcı «siyahıya əlavə et» üçün) */
+try {
+    $unlisted = seatUnlisted($db, $invId, array_column($guests, 'full_name'));
+} catch (Throwable $e) {
+    $unlisted = [];
+}
+
 echo json_encode([
     'ok'     => true,
     'guests' => $guests,
     'layout' => $layout,
+    'unlisted' => $unlisted,
     'tables' => array_values($tableMap),
     'stats'  => [
         'total'              => $total,

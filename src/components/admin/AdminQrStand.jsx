@@ -26,6 +26,10 @@ import { Notice } from './v2/adminUi'
 const PREVIEW_DPI = 96
 const DEFAULT_TITLE = 'Şəkillərinizi bizimlə paylaşın'
 const DEFAULT_DESC  = 'QR kodu telefonunuzun kamerası ilə skan edin və çəkdiyiniz şəkilləri bizə göndərin.'
+/* v53 (2026-11-26) — «Masanı tap» stendi: QR dəvətnamənin masa axtarışına aparır (?masa=1).
+   Mətnləri serverdə saxlanmır (şəkil stendinin mətnləri qorunur), hər dəfə standartdan başlayır. */
+const SEAT_TITLE = 'Masanızı tapın'
+const SEAT_DESC  = 'QR kodu telefonunuzun kamerası ilə skan edin, adınızı yazın və masanızı zal planında görün.'
 
 /* Görünüşün maket id-ləri ↔ server/PDF id-ləri */
 const toView   = (l) => (l === 'portrait' ? 'photo' : l)
@@ -129,7 +133,10 @@ export default function AdminQrStand() {
     return auto ? auto.url : null
   }, [form.coverPhoto, photos])
 
-  const shareUrl = slug ? `${window.location.origin}/invite/${slug}/foto` : ''
+  const [purpose, setPurpose] = useState('photo')          /* 'photo' | 'seat' */
+  const [seatText, setSeatText] = useState({ title: SEAT_TITLE, desc: SEAT_DESC })
+  const isSeat = purpose === 'seat'
+  const shareUrl = !slug ? '' : isSeat ? `${window.location.origin}/invite/${slug}?masa=1` : `${window.location.origin}/invite/${slug}/foto`
   const dateLabel = meta?.date ? formatAzDate(meta.date, 'az').formattedDate : ''
 
   /* Stend parametrləri — önbaxış və ixrac ÜÇÜN EYNİ obyekt */
@@ -137,13 +144,13 @@ export default function AdminQrStand() {
     layout:      form.standLayout,
     names:       meta?.names || '',
     dateLabel,
-    title:       form.standTitle,
-    description: form.standDescription,
+    title:       isSeat ? seatText.title : form.standTitle,
+    description: isSeat ? seatText.desc : form.standDescription,
     urlLabel:    shareUrl.replace(/^https?:\/\//, ''),
     photoSrc,
     showPhoto:   form.standShowPhoto,
     showDate:    form.standShowDate,
-  }), [form, meta, dateLabel, shareUrl, photoSrc])
+  }), [form, meta, dateLabel, shareUrl, photoSrc, isSeat, seatText])
 
   /* ── Önbaxış (debounce: mətn yazarkən hər hərfdə canvas çizilmir) ── */
   useEffect(() => {
@@ -176,7 +183,7 @@ export default function AdminQrStand() {
   }
 
   /* ── İxrac ── */
-  const safeName = (slug || 'digitoy').replace(/[^a-zA-Z0-9-]/g, '')
+  const safeName = (isSeat ? 'masa-' : '') + (slug || 'digitoy').replace(/[^a-zA-Z0-9-]/g, '')
   const [exportError, setExportError] = useState('')
 
   const exportPdf = async () => {
@@ -210,7 +217,7 @@ export default function AdminQrStand() {
     try {
       /* YALNIZ stend sahələri — qapaq ayarları serverdə qorunur */
       await saveGallerySettings(slug, {
-        standTitle:       form.standTitle,
+        standTitle:       form.standTitle,        /* «Masanı tap» mətnləri buraya yazılmır */
         standDescription: form.standDescription,
         standLayout:      form.standLayout,
         standShowDate:    form.standShowDate,
@@ -232,6 +239,16 @@ export default function AdminQrStand() {
   return (
     <>
       {(listError || error) && <Notice tone="danger" title={listError || error} className="mb-4" />}
+      <div className="mb-4 flex flex-wrap items-center gap-3 rounded-[12px] bg-white px-4 py-3 ring-1 ring-inset ring-[#E5DED2]">
+        <span className="text-[14px] font-medium text-espresso">Stend nə üçündür?</span>
+        <div role="radiogroup" aria-label="Stendin məqsədi" className="inline-flex rounded-[10px] bg-[#FAF8F4] p-1 ring-1 ring-inset ring-[#E5DED2]">
+          {[['photo', 'Şəkil paylaşımı'], ['seat', 'Masanı tap']].map(([v, l]) => (
+            <button key={v} type="button" role="radio" aria-checked={purpose === v} onClick={() => setPurpose(v)}
+              className={`min-h-10 rounded-[8px] px-4 text-[14px] font-medium ${purpose === v ? 'bg-espresso text-white' : 'text-[#6B5E54]'}`}>{l}</button>
+          ))}
+        </div>
+        {isSeat && <span className="text-[13px] text-[#6B5E54]">QR dəvətnamənin «masanı tap» axtarışını açır. Girişə qoyun.</span>}
+      </div>
       <QrStandEditor
         invitations={invitations}
         selectedId={slug || null}
@@ -243,8 +260,8 @@ export default function AdminQrStand() {
         loadingList={listBusy && list.length === 0}
         settings={{
           layout: toView(form.standLayout),
-          title: form.standTitle,
-          subtitle: form.standDescription,
+          title: isSeat ? seatText.title : form.standTitle,
+          subtitle: isSeat ? seatText.desc : form.standDescription,
           showDate: form.standShowDate,
           showPhoto: form.standShowPhoto,
           photoUrl: photoSrc,
@@ -253,6 +270,10 @@ export default function AdminQrStand() {
         onChange={(p) => {
           const next = {}
           if ('layout' in p)    next.standLayout = fromView(p.layout)
+          if (isSeat && ('title' in p || 'subtitle' in p)) {
+            setSeatText((t) => ({ title: 'title' in p ? String(p.title).slice(0, 120) : t.title, desc: 'subtitle' in p ? String(p.subtitle).slice(0, 400) : t.desc }))
+            return
+          }
           if ('title' in p)     next.standTitle = String(p.title).slice(0, 120)
           if ('subtitle' in p)  next.standDescription = String(p.subtitle).slice(0, 400)
           if ('showDate' in p)  next.standShowDate = p.showDate

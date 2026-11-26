@@ -10,6 +10,7 @@ const GalleryPage      = lazy(() => import('./components/invitation/GalleryPage'
    bu kodu heç vaxt endirmir. */
 const SlideshowPage    = lazy(() => import('./components/invitation/SlideshowPage'))
 const OwnerPanel       = lazy(() => import('./components/owner/OwnerPanel'))
+const VenueSeating     = lazy(() => import('./components/seating/VenueSeating'))
 const AdminApp         = lazy(() => import('./components/admin/AdminApp'))
 const AdminLoginGate   = lazy(() => import('./components/admin/AdminLoginGate'))
 const TemplatesPage    = lazy(() => import('./components/landing/TemplatesPage'))
@@ -140,6 +141,10 @@ function getSEOConfig(view, { weddingData, slug, legalDoc, guideSlug, templatesC
     case 'owner-panel':
       return { title: 'Müştəri paneli | DigiToy', description: 'Dəvətnamənizin iştirak təsdiqləri, təbrikləri və şəkilləri bir yerdə.', noindex: true, nofollow: true }
 
+    /* v53 — restoran üçün oturma planı (yalnız baxış): indekslənmir */
+    case 'venue-plan':
+      return { title: 'Oturma planı | DigiToy', description: 'Toyun zal planı və masa-masa qonaq siyahısı.', noindex: true, nofollow: true }
+
     case 'admin-panel':
     case 'admin-login':
     case 'admin-review':
@@ -245,6 +250,8 @@ function routeAfterAuth(
     if (sub === 'slayd')          { setView('slideshow');    return }
     /* Phase 50 — «Müştəri paneli»: açar URL fragment-indədir (#k=…), bax owner/OwnerPanel */
     if (sub === 'panel')          { setView('owner-panel');  return }
+    /* v53 — restoran linki: açar fragment-dədir (#k=…), bax seating/VenueSeating */
+    if (sub === 'zal')            { setView('venue-plan');   return }
 
     const viewParam  = params.get('view')
     const dParam     = params.get('d')
@@ -868,6 +875,7 @@ export default function App({ ssrPath = null }) {
   if (view === 'gallery-page') return <Suspense fallback={<RouteLoader />}><GalleryPage /></Suspense>
   if (view === 'slideshow')    return <Suspense fallback={<RouteLoader />}><SlideshowPage /></Suspense>
   if (view === 'owner-panel')  return <Suspense fallback={<RouteLoader />}><OwnerPanel /></Suspense>
+  if (view === 'venue-plan')   return <Suspense fallback={<RouteLoader />}><VenueSeating /></Suspense>
   if (view === 'admin-panel')  return <Suspense fallback={<RouteLoader />}><AdminApp lang={lang} setLang={setLang} /></Suspense>
   if (view === 'admin-login')  return (
     <Suspense fallback={<RouteLoader />}>

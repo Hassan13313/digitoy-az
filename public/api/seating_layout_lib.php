@@ -22,6 +22,7 @@ const SEAT_LAYOUT_TABLES_MAX = 150;
 const SEAT_LAYOUT_ZONES_MAX  = 30;
 const SEAT_GROUPS_MAX        = 40;
 const SEAT_BULK_MAX          = 500;
+const SEAT_LINKS_MAX         = 500;
 const SEAT_ZONE_KINDS = ['stage', 'couple', 'dance', 'door', 'music', 'photo', 'cake', 'gift', 'kids', 'bar', 'custom'];
 
 /** Ad / masa / qeyd təmizləmə: boşluqlar sıxılır, idarə simvolları atılır, uzunluq kəsilir */
@@ -116,11 +117,26 @@ function seatLayoutNormalize($in): array {
         if ($g !== null && !in_array($g, $groups, true)) $groups[] = $g;
     }
 
+    /* v53 — «birlikdə otursun» / «ayrı otursun» (qonaq id cütləri) */
+    $links = [];
+    foreach (is_array($in['links'] ?? null) ? $in['links'] : [] as $l) {
+        if (count($links) >= SEAT_LINKS_MAX) break;
+        if (!is_array($l)) continue;
+        $a = (int) seatNum($l['a'] ?? null, 1, PHP_INT_MAX, 0);
+        $b = (int) seatNum($l['b'] ?? null, 1, PHP_INT_MAX, 0);
+        $kind = ($l['kind'] ?? '') === 'apart' ? 'apart' : 'together';
+        if (!$a || !$b || $a === $b) continue;
+        [$a, $b] = $a < $b ? [$a, $b] : [$b, $a];
+        $k = "$a-$b-$kind";
+        if (!isset($links[$k])) $links[$k] = ['a' => $a, 'b' => $b, 'kind' => $kind];
+    }
+
     return [
         'v'              => 1,
         'tables'         => $tables,
         'zones'          => $zones,
         'groups'         => $groups,
+        'links'          => array_values($links),
         'showMap'        => ($in['showMap'] ?? false) === true,
         'showTablemates' => ($in['showTablemates'] ?? true) !== false,
     ];
@@ -150,7 +166,10 @@ function seatLayoutLoad(PDO $db, string $slug): ?array {
 /** null → sətir silinir (geri qaytarma heç vaxt saxlanmamış vəziyyətə qaytaranda) */
 function seatLayoutSave(PDO $db, string $slug, ?array $layout): void {
     if ($layout === null) {
-        $db->prepare('DELETE FROM seating_layouts WHERE invitation_id = :s')->execute([':s' => $slug]);
+        /* restoran açarı varsa sətir qalır (link ölməsin), yalnız plan boşalır */
+        $db->prepare('DELETE FROM seating_layouts WHERE invitation_id = :s AND venue_key IS NULL')->execute([':s' => $slug]);
+        $db->prepare('UPDATE seating_layouts SET layout_json = :j WHERE invitation_id = :s')
+           ->execute([':s' => $slug, ':j' => json_encode(seatLayoutNormalize(null), JSON_UNESCAPED_UNICODE)]);
         return;
     }
     $db->prepare('INSERT INTO seating_layouts (invitation_id, layout_json) VALUES (:s, :j)
@@ -247,4 +266,103 @@ function seatApplyLayout(PDO $db, string $slug, $layoutIn, $renamesIn, $removedI
         throw $e;
     }
     return ['layout' => $layout, 'before' => $before, 'guests' => $guests];
+}
+
+/* ══ v53 (2026-11-26) — RSVP ilə bağlantı, avtomatik yerləşdirmə, restoran linki ══ */
+
+/** Ad müqayisəsi üçün normallaşdırma — AZ hərfləri translit edilir (idxal və RSVP eyni qaydanı işlədir) */
+function normGuestName(string $s): string {
+    $s = mb_strtolower(trim($s), 'UTF-8');
+    $map = [
+        'ə' => 'e', 'ğ' => 'g', 'ı' => 'i', 'İ' => 'i', 'i̇' => 'i',
+        'ö' => 'o', 'ş' => 's', 'ü' => 'u', 'ç' => 'c',
+    ];
+    $s = strtr($s, $map);
+    $s = preg_replace('/\s+/u', ' ', $s);
+    return trim((string) $s);
+}
+
+/** Avtomatik yerləşdirmə: [{id, table_id}] cütləri — hər qonağa öz masası (bir tranzaksiyada) */
+function seatApplyAssign(PDO $db, string $slug, $pairsIn): array {
+    $pairs = [];
+    foreach (is_array($pairsIn) ? $pairsIn : [] as $p) {
+        if (count($pairs) >= SEAT_BULK_MAX) break;
+        if (!is_array($p)) continue;
+        $id = seatIds([$p['id'] ?? 0])[0] ?? 0;
+        if ($id) $pairs[$id] = seatClean($p['table_id'] ?? '', SEAT_TABLE_MAX);
+    }
+    if (!$pairs) return [];
+    $ids = array_keys($pairs);
+    $in = implode(',', array_fill(0, count($ids), '?'));
+    $q = $db->prepare("SELECT id, table_id, side, group_name FROM guests WHERE invitation_id = ? AND id IN ($in)");
+    $q->execute([$slug, ...$ids]);
+    $before = $q->fetchAll(PDO::FETCH_ASSOC);
+    $u = $db->prepare('UPDATE guests SET table_id = ? WHERE id = ? AND invitation_id = ?');
+    foreach ($before as $r) $u->execute([$pairs[(int) $r['id']], (int) $r['id'], $slug]);
+    return array_map(fn($r) => ['id' => (int) $r['id'], 'table_id' => $r['table_id'], 'side' => $r['side'], 'group_name' => $r['group_name']], $before);
+}
+
+/**
+ * Siyahıda olmayan RSVP cavabları: qonaq adını özü yazıb (guest_responses),
+ * həmin ad (normallaşdırılmış) qonaq siyahısında yoxdur. Planlayıcı bunları
+ * «siyahıya əlavə et» üçün göstərir. Hər ad üçün ən son cavab.
+ */
+function seatUnlisted(PDO $db, string $slug, array $guestNames): array {
+    $have = [];
+    foreach ($guestNames as $n) $have[normGuestName((string) $n)] = true;
+    $q = $db->prepare("SELECT id, guest_name, attendance_status, extra_guests, created_at FROM guest_responses
+                       WHERE invitation_id = :s AND attendance_status IS NOT NULL ORDER BY id DESC LIMIT 2000");
+    $q->execute([':s' => $slug]);
+    $out = [];
+    foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        $k = normGuestName((string) $r['guest_name']);
+        if ($k === '' || isset($have[$k]) || isset($out[$k])) continue;
+        $out[$k] = ['id' => (int) $r['id'], 'name' => $r['guest_name'], 'status' => $r['attendance_status'],
+                    'extra_guests' => (int) $r['extra_guests'], 'at' => $r['created_at']];
+    }
+    return array_values($out);
+}
+
+/** Siyahıda olmayan cavabı qonaq kimi əlavə et (masasız) + iştirak cavabını köçür. Yeni qonaq id-si və ya null */
+function seatAdopt(PDO $db, string $slug, $responseId): ?array {
+    $q = $db->prepare('SELECT guest_name, attendance_status, extra_guests, created_at FROM guest_responses WHERE id = :id AND invitation_id = :s LIMIT 1');
+    $q->execute([':id' => (int) $responseId, ':s' => $slug]);
+    $r = $q->fetch(PDO::FETCH_ASSOC);
+    if (!$r || $r['attendance_status'] === null) return null;
+    $name = seatClean($r['guest_name'], 120);
+    if ($name === '') return null;
+    $status = ['yes' => 'GOING', 'no' => 'NOT_GOING', 'maybe' => 'MAYBE'][$r['attendance_status']] ?? 'NO_RESPONSE';
+    $db->beginTransaction();
+    try {
+        $db->prepare("INSERT INTO guests (invitation_id, table_id, full_name) VALUES (:s, '', :n)")->execute([':s' => $slug, ':n' => $name]);
+        $id = (int) $db->lastInsertId();
+        $db->prepare('INSERT INTO attendance (guest_id, status, submitted_at, extra_guests) VALUES (:g, :st, :at, :ex)')
+           ->execute([':g' => $id, ':st' => $status, ':at' => $r['created_at'], ':ex' => (int) $r['extra_guests']]);
+        $db->commit();
+    } catch (Throwable $e) {
+        if ($db->inTransaction()) $db->rollBack();
+        throw $e;
+    }
+    return ['id' => $id, 'full_name' => $name];
+}
+
+/** Restoran (yalnız baxış) açarı — yoxdursa və ya $rotate → yeni; köhnə link dərhal işləməz */
+function seatVenueKey(PDO $db, string $slug, bool $rotate): string {
+    $q = $db->prepare('SELECT venue_key FROM seating_layouts WHERE invitation_id = :s LIMIT 1');
+    $q->execute([':s' => $slug]);
+    $key = (string) ($q->fetchColumn() ?: '');
+    if ($key !== '' && !$rotate) return $key;
+    $key = bin2hex(random_bytes(24));
+    $db->prepare('INSERT INTO seating_layouts (invitation_id, layout_json, venue_key) VALUES (:s, :j, :k)
+                  ON DUPLICATE KEY UPDATE venue_key = VALUES(venue_key)')
+       ->execute([':s' => $slug, ':j' => json_encode(seatLayoutNormalize(null), JSON_UNESCAPED_UNICODE), ':k' => $key]);
+    return $key;
+}
+
+function seatVenueValid(PDO $db, string $slug, string $key): bool {
+    if (!preg_match('/^[a-f0-9]{48}$/', $key)) return false;
+    $q = $db->prepare('SELECT venue_key FROM seating_layouts WHERE invitation_id = :s LIMIT 1');
+    $q->execute([':s' => $slug]);
+    $saved = (string) ($q->fetchColumn() ?: '');
+    return $saved !== '' && hash_equals($saved, $key);
 }

@@ -9,7 +9,7 @@ import { ZONE_ICON } from './HallPlan'
    Yerli <dialog> (fokus tələsi, Esc, arxa fon brauzerdən).
    ───────────────────────────────────────────────────────────────────────── */
 
-function SpDialog({ open, onClose, title, sub, children, footer, onSubmit, busy }) {
+function SpDialog({ open, onClose, title, sub, children, footer, onSubmit, busy, okLabel = 'Yadda saxla', hideOk = false }) {
   const ref = useRef(null)
   useEffect(() => {
     const d = ref.current
@@ -28,7 +28,7 @@ function SpDialog({ open, onClose, title, sub, children, footer, onSubmit, busy 
             {footer}
             <span className="sp-sp" />
             <button type="button" className="sp-btn" onClick={onClose} disabled={busy}>Bağla</button>
-            <button type="submit" className="sp-btn pri" disabled={busy}>{busy ? 'Saxlanılır…' : 'Yadda saxla'}</button>
+            {!hideOk && <button type="submit" className="sp-btn pri" disabled={busy}>{busy ? 'Saxlanılır…' : okLabel}</button>}
           </menu>
         </form>
       )}
@@ -209,6 +209,85 @@ export function ZoneDialog({ open, zone, onSave, onDelete, onClose }) {
         <label><input type="radio" name="shape" value="rect" defaultChecked={zone?.shape !== 'oval'} /><Square aria-hidden="true" />Düzbucaq</label>
         <label><input type="radio" name="shape" value="oval" defaultChecked={zone?.shape === 'oval'} /><Circle aria-hidden="true" />Oval</label>
       </fieldset>
+    </SpDialog>
+  )
+}
+
+/* ── v53 ──────────────────────────────────────────────────────────────── */
+
+/** Seçilən qonaqları bağla: «birlikdə otursunlar» və ya «ayrı otursunlar»; mövcud bağları sil */
+export function LinkDialog({ open, selected, links, nameOf, onSave, onClose, busy }) {
+  const ids = new Set(selected.map((g) => g.id))
+  const mine = links.filter((l) => ids.has(l.a) || ids.has(l.b))
+  const [drop, setDrop] = useState(() => new Set())
+  const can = selected.length >= 2
+  return (
+    <SpDialog open={open} onClose={onClose} busy={busy} title="Bağla" sub={`Seçilən ${selected.length} qonaq`}
+      onSubmit={(fd) => onSave({ kind: can ? String(fd.get('kind') || '') : '', drop })}>
+      {can ? (
+        <fieldset className="sp-big2">
+          <legend>Bu qonaqlar…</legend>
+          <label><input type="radio" name="kind" value="together" defaultChecked />Birlikdə otursunlar</label>
+          <label><input type="radio" name="kind" value="apart" />Ayrı otursunlar</label>
+          <label><input type="radio" name="kind" value="" />Yeni bağ yoxdur</label>
+        </fieldset>
+      ) : <p className="sp-dsub">Yeni bağ üçün ən azı iki qonaq seçin. Aşağıda bu qonağın bağlarını silə bilərsiniz.</p>}
+      <p className="sp-dsub">«Birlikdə» bağlı qonaqlar həmişə bir yerdə köçürülür. «Ayrı» deyilənlər eyni masaya düşəndə xəbərdarlıq çıxır.</p>
+      {mine.length > 0 && (
+        <div className="sp-f">
+          <span>Mövcud bağlar</span>
+          <ul className="sp-tlist">
+            {mine.map((l) => {
+              const k = `${l.a}-${l.b}-${l.kind}`
+              return (
+                <li key={k} className={drop.has(k) ? 'is-dropped' : ''}>
+                  <span>{nameOf(l.a)} <em>{l.kind === 'apart' ? '≠' : '+'}</em> {nameOf(l.b)} <small>({l.kind === 'apart' ? 'ayrı' : 'birlikdə'})</small></span>
+                  <button type="button" onClick={() => setDrop((d) => { const n = new Set(d); n.has(k) ? n.delete(k) : n.add(k); return n })}>{drop.has(k) ? 'Saxla' : 'Sil'}</button>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      )}
+    </SpDialog>
+  )
+}
+
+/** Avtomatik yerləşdirmənin önbaxışı */
+export function ArrangeDialog({ open, plan, onApply, onClose, busy }) {
+  const perTable = new Map()
+  for (const p of plan.pairs) perTable.set(p.table, (perTable.get(p.table) || 0) + 1)
+  return (
+    <SpDialog open={open} onClose={onClose} busy={busy} title="Avtomatik yerləşdir" okLabel="Yerləşdir" hideOk={!plan.pairs.length}
+      sub={plan.pairs.length ? `${plan.pairs.length} qonaq ${perTable.size} masaya yerləşdiriləcək` : 'Yerləşdiriləcək qonaq tapılmadı'}
+      onSubmit={() => onApply()}>
+      <p className="sp-dsub">Qız evi zalın sol tərəfindəki, oğlan evi sağ tərəfindəki masalara düşür. Eyni qrup bir yerdə saxlanılır, «birlikdə» bağlılar ayrılmır. «Gəlməyəcək» cavabı verənlər yerləşdirilmir. Sonra istədiyinizi əl ilə dəyişə bilərsiniz.</p>
+      {perTable.size > 0 && (
+        <ul className="sp-tlist">
+          {[...perTable].map(([t, n]) => <li key={t}><span>{t}</span><small>+{n} qonaq</small></li>)}
+        </ul>
+      )}
+      {plan.unplaced.length > 0 && (
+        <p className="sp-warn"><span>{plan.unplaced.length} qonaq üçün yer çatmadı. Masa əlavə edin və ya tutumu artırın, sonra yenidən basın.</span></p>
+      )}
+    </SpDialog>
+  )
+}
+
+/** Restoran üçün yalnız baxış linki */
+export function VenueDialog({ open, url, onRotate, onClose, busy }) {
+  const [copied, setCopied] = useState(false)
+  const [ask, setAsk] = useState(false)
+  const copy = async () => { try { await navigator.clipboard.writeText(url); setCopied(true) } catch { setCopied(false) } }
+  return (
+    <SpDialog open={open} onClose={onClose} busy={busy} title="Restoran linki" hideOk
+      sub="Bu linklə restoran / menecer zal planını və masa-masa qonaq siyahısını görür və çap edir. Dəyişiklik edə bilmir, telefon nömrələri və qeydlər görünmür.">
+      <label className="sp-f">Link<input readOnly value={url} onFocus={(e) => e.target.select()} /></label>
+      <div className="sp-row-btns">
+        <button type="button" className="sp-btn pri" onClick={copy}>{copied ? 'Kopyalandı' : 'Kopyala'}</button>
+        <a className="sp-btn" href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Oturma planı: ${url}`)}`} target="_blank" rel="noopener noreferrer">WhatsApp ilə göndər</a>
+        <button type="button" className={`sp-btn danger${ask ? ' is-ask' : ''}`} disabled={busy} onClick={() => (ask ? (setAsk(false), onRotate()) : setAsk(true))}>{ask ? 'Bəli, köhnə link işləməsin' : 'Linki yenilə'}</button>
+      </div>
     </SpDialog>
   )
 }

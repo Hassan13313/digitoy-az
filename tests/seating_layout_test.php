@@ -72,7 +72,7 @@ check('zal planının tərsi', seatUndoPlan(['action' => 'layout', 'guest_id' =>
 
 /* Endpoint və miqrasiya (mənbə yoxlaması) */
 $cfg = file_get_contents(__DIR__ . '/../public/api/config.php');
-check('sxem v52', str_contains($cfg, 'const SCHEMA_VERSION = 52;') && str_contains($cfg, 'CREATE TABLE IF NOT EXISTS seating_layouts'));
+check('sxem v52+', preg_match('/const SCHEMA_VERSION = (5[2-9]|[6-9][0-9]);/', $cfg) && str_contains($cfg, 'CREATE TABLE IF NOT EXISTS seating_layouts'));
 check('guests side / group_name sütunları', str_contains($cfg, "'side'       => 'VARCHAR(8)'") && str_contains($cfg, "'group_name' => 'VARCHAR(60)"));
 $gg = file_get_contents(__DIR__ . '/../public/api/get_guests.php');
 check('ictimai cavabda yalnız seatPublicSeating', str_contains($gg, "'seating' => seatPublicSeating(\$layout)"));
@@ -90,6 +90,25 @@ $ht = file_get_contents(__DIR__ . '/../public/api/.htaccess');
 check('yeni kitabxana birbaşa açılmır', str_contains($ht, 'seating_layout_lib'));
 $purge = file_get_contents(__DIR__ . '/../public/api/admin_purge.php');
 check('dəvətnamə silinəndə zal planı da silinir', str_contains($purge, 'DELETE FROM seating_layouts WHERE invitation_id = :s'));
+
+/* ── v53: bağlar, avtomatik yerləşdirmə, restoran linki ── */
+$ln = seatLayoutNormalize(['links' => [['a' => 5, 'b' => 2], ['a' => 2, 'b' => 5], ['a' => 3, 'b' => 3], ['a' => 'x', 'b' => 1], ['a' => 1, 'b' => 4, 'kind' => 'apart'], 'yanlış']]);
+check('bağlar: təkrar, özünə bağ və yanlışlar atılır', $ln['links'] === [['a' => 2, 'b' => 5, 'kind' => 'together'], ['a' => 1, 'b' => 4, 'kind' => 'apart']]);
+check('bağ limiti', count(seatLayoutNormalize(['links' => array_map(fn($i) => ['a' => $i, 'b' => $i + 1], range(1, 900))])['links']) === SEAT_LINKS_MAX);
+check('ictimai cavabda bağlar yoxdur', !array_key_exists('links', seatPublicSeating(['showMap' => true, 'tables' => [], 'zones' => [], 'links' => [['a' => 1, 'b' => 2]]])['layout']));
+check('avtomatik yerləşdirmənin tərsi (bulk kimi)', seatUndoPlan(['action' => 'assign', 'guest_id' => null, 'before_json' => json_encode([['id' => 1, 'table_id' => '']])])[0] === 'bulk');
+check('ad normallaşdırma (RSVP ilə siyahı)', normGuestName('  Əli   Məmmədov ') === normGuestName('ELİ memmedov'));
+$sv = file_get_contents(__DIR__ . '/../public/api/seating_view.php');
+check('restoran linki açarı yoxlayır', str_contains($sv, 'seatVenueValid($db, $slug, $key)') && str_contains($sv, "viewFail(401, 'ACCESS_REQUIRED')"));
+check('restoran linki telefon/qeyd/tərəf vermir', !str_contains($sv, 'g.phone') && !str_contains($sv, 'g.notes') && !str_contains($sv, 'g.side') && !str_contains($sv, 'group_name'));
+check('restoran linki sürət limiti', str_contains($sv, "rateGate('seat_view_ip|'"));
+check('açar hash_equals ilə', str_contains($lib, 'hash_equals($saved, $key)'));
+check('sxem v53 venue_key', str_contains($cfg, "ADD COLUMN venue_key VARCHAR(64)"));
+$cfgNow = file_get_contents(__DIR__ . '/../public/api/config.php');
+check('CORS X-Venue-Key', str_contains($cfgNow, 'X-Venue-Key'));
+$seo = file_get_contents(__DIR__ . '/../public/seo.php');
+check('seo: /zal adları göstərmir', str_contains($seo, "panel|zal") && str_contains($seo, "\$sub === 'zal'"));
+check('müştəri avtomatik yerləşdirməsi tarixçəyə', str_contains($os, "seatRecord(\$db, \$slug, 'assign'"));
 
 echo "$ok passed, $fail failed\n";
 exit($fail ? 1 : 0);
