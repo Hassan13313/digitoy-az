@@ -454,7 +454,7 @@ export default function NatureTouchTemplate(props) {
                       <span style={{ fontSize: 12, letterSpacing: '.2em', color: '#6B4A30' }}>{SL.table}</span>
                       <span style={{ fontFamily: serif, fontSize: tableFontPx(tb.num, 58), lineHeight: 1, color: '#4A3220', textShadow: '0 1px 0 rgba(255,240,210,.8), 0 -1px 0 rgba(90,60,30,.25)' }}>{tb.num}</span>
                     </WoodSlice>
-                    {seating.tablemates.length > 0 && <div style={{ marginTop: 16, fontSize: 15, color: C.MOSS, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}
+                    {seating.tablemates.length > 0 && <div style={{ marginTop: 16, fontSize: 15, color: C.MOSS, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}{seating.mapEl}
                     <button onClick={seating.reset} data-press style={{ marginTop: 6, background: 'none', border: 'none', color: C.INK, fontSize: 14.5, minHeight: 44, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 4, fontFamily: sans }}>
                       {seatingL.again || 'Yenidən axtar'}
                     </button>

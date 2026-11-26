@@ -337,7 +337,7 @@ export default function DinoAdventureTemplate(props) {
                     {/* toz çəkilir */}
                     <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: `radial-gradient(rgba(120,90,40,.2) 1.4px, transparent 1.8px) 0 0 / 8px 8px, #E2C995`, animation: 'da-dust .9s ease-out .25s both' }} />
                   </div>
-                  {seating.tablemates.length > 0 && <div style={{ marginTop: 16, fontSize: 15.5, color: C.MUTED, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}
+                  {seating.tablemates.length > 0 && <div style={{ marginTop: 16, fontSize: 15.5, color: C.MUTED, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}{seating.mapEl}
                   <button onClick={seating.reset} data-press style={{ marginTop: 6, background: 'none', border: 'none', color: C.LEAF, fontWeight: 700, fontSize: 15.5, minHeight: 44, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 4, fontFamily: body }}>
                     {seatingL.again || 'Yenidən axtar'}
                   </button>

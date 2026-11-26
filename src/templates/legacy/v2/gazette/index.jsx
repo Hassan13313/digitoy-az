@@ -333,7 +333,7 @@ export default function GazetteTemplate(props) {
                       </div>
                       <div style={{ minWidth: 0 }}>
                         <div style={{ fontFamily: disp, fontWeight: 900, fontSize: 20, lineHeight: 1.15 }}>{upper(seating.selected.full_name, lang)}</div>
-                        {seating.tablemates.length > 0 && <div style={{ marginTop: 6, fontSize: 13.5, lineHeight: 1.45, color: C.GREY }}><b style={{ color: C.INK }}>{T.mates}:</b> {seating.tablemates.map((g) => g.full_name).join(', ')}</div>}
+                        {seating.tablemates.length > 0 && <div style={{ marginTop: 6, fontSize: 13.5, lineHeight: 1.45, color: C.GREY }}><b style={{ color: C.INK }}>{T.mates}:</b> {seating.tablemates.map((g) => g.full_name).join(', ')}</div>}{seating.mapEl}
                       </div>
                     </div>
                   </div>

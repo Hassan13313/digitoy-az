@@ -36,6 +36,8 @@ $st = $db->prepare("
         g.table_id,
         g.full_name,
         g.notes,
+        g.side,
+        g.group_name,
         COALESCE(a.status, 'NO_RESPONSE') AS status,
         a.submitted_at,
         COALESCE(a.extra_guests, 0) AS extra_guests
@@ -54,6 +56,11 @@ $STATUS_AZ = [
     'NO_RESPONSE' => 'Cavab yoxdur',
 ];
 
+/* v52 — tərəf, qrup; masasız qonaq */
+$SIDE_AZ = ['bride' => 'Qız evi', 'groom' => 'Oğlan evi'];
+$sideOf  = fn($g) => $SIDE_AZ[$g['side'] ?? ''] ?? '';
+$tableOf = fn($g) => ($g['table_id'] ?? '') === '' ? 'Masasız' : $g['table_id'];
+
 /* ── CSV escape ── */
 $esc = fn($v) => (strpbrk((string)($v ?? ''), ';",' . "\n") !== false)
     ? '"' . str_replace('"', '""', (string)($v ?? '')) . '"'
@@ -70,7 +77,7 @@ if ($mode === 'status') {
         $grouped[$g['status']][] = $g;
     }
 
-    $lines = ['Ad' . $sep . 'Status' . $sep . 'Əlavə qonaq' . $sep . 'Masa' . $sep . 'Qeyd' . $sep . 'Tarix'];
+    $lines = ['Ad' . $sep . 'Status' . $sep . 'Əlavə qonaq' . $sep . 'Masa' . $sep . 'Qeyd' . $sep . 'Tarix' . $sep . 'Tərəf' . $sep . 'Qrup'];
     foreach ($grouped as $statusKey => $list) {
         if (empty($list)) continue;
         $lines[] = '';
@@ -80,9 +87,11 @@ if ($mode === 'status') {
                 $esc($g['full_name']),
                 $esc($STATUS_AZ[$g['status']] ?? $g['status']),
                 $esc($g['extra_guests'] > 0 ? '+' . $g['extra_guests'] : '0'),
-                $esc($g['table_id']),
+                $esc($tableOf($g)),
                 $esc($g['notes'] ?? ''),
                 $esc($g['submitted_at'] ? substr($g['submitted_at'], 0, 10) : ''),
+                $esc($sideOf($g)),
+                $esc($g['group_name'] ?? ''),
             ]);
         }
     }
@@ -90,21 +99,23 @@ if ($mode === 'status') {
     /* Masalara görə qruplaşdır (default) */
     $grouped = [];
     foreach ($guests as $g) {
-        $grouped[$g['table_id']][] = $g;
+        $grouped[$tableOf($g)][] = $g;
     }
 
-    $lines = ['Masa' . $sep . 'Ad' . $sep . 'Status' . $sep . 'Əlavə qonaq' . $sep . 'Qeyd' . $sep . 'Tarix'];
+    $lines = ['Masa' . $sep . 'Ad' . $sep . 'Status' . $sep . 'Əlavə qonaq' . $sep . 'Qeyd' . $sep . 'Tarix' . $sep . 'Tərəf' . $sep . 'Qrup'];
     foreach ($grouped as $tableId => $list) {
         $lines[] = '';
         $lines[] = '=== ' . $tableId . ' ===';
         foreach ($list as $g) {
             $lines[] = implode($sep, [
-                $esc($g['table_id']),
+                $esc($tableOf($g)),
                 $esc($g['full_name']),
                 $esc($STATUS_AZ[$g['status']] ?? $g['status']),
                 $esc($g['extra_guests'] > 0 ? '+' . $g['extra_guests'] : '0'),
                 $esc($g['notes'] ?? ''),
                 $esc($g['submitted_at'] ? substr($g['submitted_at'], 0, 10) : ''),
+                $esc($sideOf($g)),
+                $esc($g['group_name'] ?? ''),
             ]);
         }
     }

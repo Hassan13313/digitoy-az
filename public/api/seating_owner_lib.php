@@ -12,9 +12,10 @@
    Yalnız include edilir (api/.htaccess). Saf hissələr tests/seating_owner_test.php.
    ══════════════════════════════════════════════════════════════════════════ */
 
+require_once __DIR__ . '/seating_layout_lib.php';   /* seatClean, SEAT_TABLE_MAX, zal planı, toplu dəyişiklik */
+
 const SEAT_TOKEN_TTL   = 12 * 3600;
 const SEAT_NAME_MAX    = 120;
-const SEAT_TABLE_MAX   = 80;
 const SEAT_NOTE_MAX    = 300;
 const SEAT_GUESTS_MAX  = 2000;
 
@@ -40,14 +41,6 @@ function seatTokenValid(string $token, string $slug, string $secret, ?int $now =
     return hash_equals(hash_hmac('sha256', $slug . '|' . $m[1], $secret), $m[2]);
 }
 
-/** Ad / masa / qeyd təmizləmə: boşluqlar sıxılır, idarə simvolları atılır, uzunluq kəsilir */
-function seatClean($v, int $max): string {
-    $s = is_string($v) ? $v : '';
-    $s = preg_replace('/[\x00-\x1F\x7F]+/u', ' ', $s) ?? '';
-    $s = trim(preg_replace('/\s+/u', ' ', $s) ?? '');
-    return mb_substr($s, 0, $max);
-}
-
 /** Dəyişikliyi tarixçəyə yaz («geri qaytar» üçün) */
 function seatRecord(PDO $db, string $slug, string $action, ?int $guestId, ?array $before, ?array $after): void {
     $st = $db->prepare('INSERT INTO guest_changes (invitation_id, actor, action, guest_id, before_json, after_json)
@@ -67,6 +60,8 @@ function seatUndoPlan(array $change): ?array {
         'add'    => $id ? ['delete', $id, null] : null,
         'delete' => is_array($before) ? ['insert', null, $before] : null,
         'update', 'move' => ($id && is_array($before)) ? ['restore', $id, $before] : null,
+        /* v52: toplu dəyişiklik (masa / tərəf / qrup) və zal planı */
+        'bulk', 'layout' => is_array($before) ? [$change['action'], null, $before] : null,
         default  => null,
     };
 }

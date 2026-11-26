@@ -33,6 +33,14 @@ const HEADER_MAP = {
     'phone', 'mobile', 'tel.', 'phone number', 'contact',
     'телефон', 'моб', 'номер',
   ],
+  /* v52 (2026-11-26) — qız evi / oğlan evi və tanışlıq qrupu (ixtiyari sütunlar) */
+  side: [
+    'tərəf', 'teref', 'kimin qonağı', 'kimin qonagi', 'qız evi / oğlan evi', 'ev',
+    'side', 'сторона',
+  ],
+  group: [
+    'qrup', 'tanışlıq', 'tanisliq', 'kateqoriya', 'group', 'category', 'группа',
+  ],
 }
 
 /** Başlıq mətnini müqayisə üçün normallaşdır */
@@ -84,7 +92,7 @@ function scoreHeaderRow(row) {
 
   /* Başlıq sayılmaq üçün ən azı AD + bir başqa sütun tapılmalıdır:
      tək uyğunluq təsadüfi mətn ola bilər. */
-  const others = (found.table !== undefined ? 1 : 0) + (found.phone !== undefined ? 1 : 0)
+  const others = ['table', 'phone', 'side', 'group'].filter((k) => found[k] !== undefined).length
   if (found.name === undefined || others === 0) return null
   return { columns: found, score }
 }
@@ -294,10 +302,13 @@ export async function readGuestFile(file) {
   if (!columns) columns = { name: 0, table: 1, phone: 2 }
 
   const dataRows = sheetRows.slice(headerRow + 1)
+  const cell = (r, k) => (columns[k] === undefined ? '' : String(r[columns[k]] ?? '').trim())
   const rows = dataRows.map(r => ({
-    name:  String(r[columns.name]  ?? '').trim(),
-    table: String(r[columns.table] ?? '').trim(),
-    phone: String(r[columns.phone] ?? '').trim(),
+    name:  cell(r, 'name'),
+    table: cell(r, 'table'),
+    phone: cell(r, 'phone'),
+    side:  cell(r, 'side'),
+    group: cell(r, 'group'),
   })).filter(r => r.name !== '' || r.table !== '' || r.phone !== '')
 
   return { rows, columns, headerDetected, rawCount: sheetRows.length, sheetRows }

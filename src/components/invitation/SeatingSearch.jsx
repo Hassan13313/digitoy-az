@@ -13,7 +13,7 @@ import { withStringOverrides } from '../../data/adminOverrides'
 export default function SeatingSearch({ seatingPlan, lang, adminStrings = null, kicker = null, title = null }) {
   const tr = withStringOverrides(t[lang] || t.az, adminStrings, lang)
   const {
-    suggestions, selected, tablemates,
+    suggestions, selected, tablemates, mapEl,
     query, setQuery, activeIdx, setActiveIdx, setSelected,
     isEmpty, showNotFound, pick, reset, onKeyDown, inputRef,
     labels: rawL, statusMap: STATUS_DOT,
@@ -183,6 +183,8 @@ export default function SeatingSearch({ seatingPlan, lang, adminStrings = null, 
 
                 <div style={{ height: 1, marginBottom: 18, background: 'linear-gradient(to right, rgba(197,160,89,0.4), rgba(197,160,89,0.12))' }} />
 
+                {/* v52: müştəri «masa yoldaşları görünməsin» seçibsə siyahı boşdur — başlıq da çıxmır */}
+                {tablemates.length > 0 && (<>
                 <p style={{ fontSize: 8, letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(140,123,107,0.65)', marginBottom: 12, fontFamily: '"Inter",system-ui,sans-serif', fontWeight: 500 }}>
                   {tr.inv_tablemates}
                 </p>
@@ -214,6 +216,8 @@ export default function SeatingSearch({ seatingPlan, lang, adminStrings = null, 
                     )
                   })}
                 </div>
+                </>)}
+                {mapEl}
               </div>
             </motion.div>
           )}

@@ -37,7 +37,7 @@ export function SeatFinder({ inv, tr, listId, field, suggest, font, muted, accen
         <div key={seating.selected.full_name} style={{ marginTop: 26, textAlign: 'center' }}>
           <div style={{ fontSize: 17, color: accent, marginBottom: 14, ...nameStyle }}>{seating.selected.full_name}</div>
           {card(tableNum(seating.selected.table_id), seating.selected.table_id)}
-          {seating.tablemates.length > 0 && <div style={{ marginTop: 16, fontSize: 15.5, color: muted, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}
+          {seating.tablemates.length > 0 && <div style={{ marginTop: 16, fontSize: 15.5, color: muted, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}{seating.mapEl}
           <button onClick={seating.reset} data-press style={{ marginTop: 6, background: 'none', border: 'none', color: accent, fontSize: 15.5, minHeight: 44, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 4, fontFamily: font }}>
             {seatingL.again || 'Yenidən axtar'}
           </button>

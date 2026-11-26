@@ -15,6 +15,7 @@
 ══════════════════════════════════════════════════ */
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/owner_auth.php';
+require_once __DIR__ . '/seating_layout_lib.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
@@ -50,7 +51,7 @@ function guestQuery(PDO $db, bool $withPhone): string {
             g.seat_number,
             g.notes,
             g.created_at,
-            " . ($withPhone ? "g.phone," : "") . "
+            " . ($withPhone ? "g.phone, g.side, g.group_name," : "") . "
             COALESCE(a.status, 'NO_RESPONSE') AS attendance_status,
             a.submitted_at,
             a.optional_message,
@@ -75,6 +76,13 @@ try {
 $role    = invitationRole($invId);   /* 'admin' | 'owner' | null (ictimai) */
 $isAdmin = $role === 'admin';
 
+/* v52 — zal planı. Oxunmursa (miqrasiya işləməyib) köhnə davranış: plan yoxdur. */
+try {
+    $layout = seatLayoutLoad($db, $invId);
+} catch (Throwable $e) {
+    $layout = null;
+}
+
 if ($role === null) {
     echo json_encode([
         'ok'     => true,
@@ -84,6 +92,8 @@ if ($role === null) {
             'full_name'   => $r['full_name'],
             'seat_number' => $r['seat_number'] !== null ? (int)$r['seat_number'] : null,
         ], $rows),
+        /* v52 — müştərinin seçimi: masa yoldaşları / zal planı göstərilsin? Tərəf və qrup HEÇ VAXT verilmir. */
+        'seating' => seatPublicSeating($layout),
     ]);
     exit;
 }
@@ -102,6 +112,9 @@ $guests = array_map(fn($r) => [
     'submitted_at'     => $r['submitted_at'],
     'optional_message' => $r['optional_message'],
     'extra_guests'     => (int)$r['extra_guests'],
+    /* v52 — qız/oğlan evi və tanışlıq qrupu (yalnız admin və müştəri paneli) */
+    'side'             => $r['side'] ?? null,
+    'group_name'       => $r['group_name'] ?? null,
 ], $rows);
 
 /* ── Masa üzrə statistika ── */
@@ -141,6 +154,7 @@ $realAtt = $going + $extraTotal;
 echo json_encode([
     'ok'     => true,
     'guests' => $guests,
+    'layout' => $layout,
     'tables' => array_values($tableMap),
     'stats'  => [
         'total'              => $total,

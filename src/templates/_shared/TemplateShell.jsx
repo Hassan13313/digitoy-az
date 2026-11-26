@@ -789,9 +789,12 @@ export default function TemplateShell({
                             textTransform: 'uppercase', whiteSpace: 'nowrap',
                           }}>{seating.selected.table_id}</span>
                         </div>
-                        <div style={{ fontSize: 11, color: theme.muted, marginTop: 10, lineHeight: 1.6 }}>
-                          {seating.selected.table_id}: {seating.tablemates.map((g) => g.full_name).join(', ')}
-                        </div>
+                        {seating.tablemates.length > 0 && (
+                          <div style={{ fontSize: 11, color: theme.muted, marginTop: 10, lineHeight: 1.6 }}>
+                            {seating.selected.table_id}: {seating.tablemates.map((g) => g.full_name).join(', ')}
+                          </div>
+                        )}
+                        {seating.mapEl}
                         <button onClick={seating.reset} data-press style={{
                           marginTop: 6, background: 'none', border: 'none', cursor: 'pointer',
                           fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase',

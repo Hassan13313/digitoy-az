@@ -1,16 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { History, KeyRound, LockKeyhole, Undo2 } from 'lucide-react'
-import SeatingPlanTab from '../admin/v2/SeatingPlanTab'
-import { addLocalTable, seatingStats, seatingTables } from '../admin/v2/seatingView'
+import SeatingPlanner from '../seating/SeatingPlanner'
 import { Button, Notice, Panel } from '../admin/v2/adminUi'
 import { getGuests } from '../../utils/api'
 import { clearSeatToken, getSeatToken, ownerSeating } from '../../utils/ownerApi'
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Müştəri paneli › Oturma planı (2026-11-18)
+   Müştəri paneli › Oturma planı (2026-11-18; 2026-11-26 — seating/SeatingPlanner)
    Baxmaq üçün link kifayətdir; redaktə üçün DigiToy-un ayrıca göndərdiyi
    6 rəqəmli PİN lazımdır (link ailə qrupunda paylaşılsa belə plan pozulmasın).
-   Hər dəyişiklik tarixçəyə yazılır — «Son dəyişikliyi geri qaytar» düyməsi.
+   Hər dəyişiklik tarixçəyə yazılır — «Geri qaytar».
    Server: api/owner_seating.php (yalnız VİP / Premium).
    ───────────────────────────────────────────────────────────────────────── */
 
@@ -20,53 +19,68 @@ const ERR = {
   TOO_MANY_ATTEMPTS: 'Çox sayda cəhd edildi. 15 dəqiqə sonra yenidən yoxlayın.',
   EDIT_LOCKED: 'Redaktə vaxtı bitdi — PİN-i yenidən daxil edin.',
   SEATING_NOT_IN_PACKAGE: 'Oturma planının redaktəsi bu paketdə yoxdur.',
-  NAME_AND_TABLE_REQUIRED: 'Qonağın adı və masası boş ola bilməz.',
+  NAME_REQUIRED: 'Qonağın adı boş ola bilməz.',
+  NAME_AND_TABLE_REQUIRED: 'Qonağın adı boş ola bilməz.',
   TOO_MANY_GUESTS: 'Qonaq sayı limitə çatıb.',
   NOTHING_TO_UNDO: 'Geri qaytarılacaq dəyişiklik yoxdur.',
+  RATE_LIMITED: 'Çox tez-tez dəyişiklik edilir. Bir az gözləyib yenidən cəhd edin.',
 }
 const errText = (e) => ERR[e?.code] || 'Əməliyyat alınmadı. Bağlantını yoxlayıb yenidən cəhd edin.'
 
 const ACTION_LABEL = { add: 'əlavə edildi', delete: 'silindi', update: 'dəyişdirildi', move: 'masası dəyişdi' }
+function historyText(h) {
+  if (h.action === 'layout') return 'Zal planı dəyişdi'
+  if (h.action === 'bulk') {
+    const a = h.after || {}
+    const what = 'table_id' in a ? (a.table_id ? `${a.table_id} masasına keçdi` : 'masadan çıxdı') : 'tərəfi / qrupu dəyişdi'
+    return `${a.count || ''} qonaq ${what}`
+  }
+  const g = h.after || h.before || {}
+  return `${g.full_name} — ${ACTION_LABEL[h.action] || h.action}`
+}
 
-export default function OwnerSeating({ slug }) {
+export default function OwnerSeating({ slug, eventType = '', title = '' }) {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [unlocked, setUnlocked] = useState(() => !!getSeatToken(slug))
-  const [saving, setSaving] = useState(false)
   const [notice, setNotice] = useState(null)
   const [history, setHistory] = useState([])
+  const [undoing, setUndoing] = useState(false)
 
-  /* İlk yükləmə effektdə (loading artıq true-dur); sonrakılar `load` ilə */
   const fetchGuests = useCallback(() => getGuests(slug)
     .then((d) => setData(d))
     .catch(() => setNotice({ tone: 'danger', text: 'Qonaq siyahısı yüklənmədi.' }))
     .finally(() => setLoading(false)), [slug])
-  const load = useCallback(() => { setLoading(true); fetchGuests() }, [fetchGuests])
   const loadHistory = useCallback(() => {
-    if (!getSeatToken(slug)) return
-    ownerSeating(slug, 'history').then((r) => setHistory(r.items || [])).catch(() => {})
+    if (!getSeatToken(slug)) return Promise.resolve()
+    return ownerSeating(slug, 'history').then((r) => setHistory(r.items || [])).catch(() => {})
   }, [slug])
+  const reload = useCallback(() => Promise.all([fetchGuests(), loadHistory()]), [fetchGuests, loadHistory])
   useEffect(() => { fetchGuests() }, [fetchGuests])
   useEffect(() => { if (unlocked) loadHistory() }, [unlocked, loadHistory])
 
-  const op = async (action, payload) => {
-    setSaving(true)
-    setNotice(null)
-    try {
-      await ownerSeating(slug, action, payload)
-      load()
-      loadHistory()
-    } catch (e) {
+  /* Server əməliyyatı; redaktə vaxtı bitibsə PİN pəncərəsi qayıdır */
+  const api = useMemo(() => {
+    const op = (action, payload) => ownerSeating(slug, action, payload).catch((e) => {
       if (e?.code === 'EDIT_LOCKED') { clearSeatToken(slug); setUnlocked(false) }
-      setNotice({ tone: 'danger', text: errText(e) })
-      throw e
-    } finally {
-      setSaving(false)
+      throw new Error(errText(e))
+    })
+    const guest = (d) => ({ full_name: d.name, table_id: d.table, notes: d.note || '', side: d.side || '', group_name: d.group || '' })
+    return {
+      addGuest: (d) => op('add', guest(d)),
+      updateGuest: (id, d) => op('update', { id, ...guest(d) }),
+      deleteGuest: (id) => op('delete', { id }),
+      bulk: (ids, patch) => op('bulk', { ids, patch }),
+      saveLayout: (layout, extra) => op('layout', { layout, ...extra }),
+      undo: () => op('undo'),
     }
-  }
+  }, [slug])
 
-  const [localTables, setLocalTables] = useState([])
-  const tables = useMemo(() => seatingTables(data, localTables), [data, localTables])
+  const undoLast = async () => {
+    setUndoing(true)
+    setNotice(null)
+    try { await api.undo(); await reload() } catch (e) { setNotice({ tone: 'danger', text: e.message }) } finally { setUndoing(false) }
+  }
 
   return (
     <div className="space-y-4">
@@ -77,40 +91,24 @@ export default function OwnerSeating({ slug }) {
       ) : (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-[12px] bg-white px-4 py-3 ring-1 ring-inset ring-[#E5DED2]">
           <p className="text-[13.5px] text-[#6B5E54]">Dəyişikliklər dəvətnamədəki «masanı tap» axtarışına dərhal düşür.</p>
-          <Button size="sm" icon={Undo2} disabled={!history.length} loading={saving} onClick={() => op('undo').catch(() => {})}>
+          <Button size="sm" icon={Undo2} disabled={!history.length} loading={undoing} onClick={undoLast}>
             Son dəyişikliyi geri qaytar
           </Button>
         </div>
       )}
 
-      <div className={unlocked ? '' : 'pointer-events-none select-none opacity-60'} aria-disabled={!unlocked || undefined}>
-        <SeatingPlanTab
-          tables={tables}
-          stats={seatingStats(data)}
-          onAddTable={(name) => setLocalTables(addLocalTable(name))}
-          onAddGuest={(tableId, d) => op('add', { table_id: tableId, full_name: d.name, notes: d.note || '' })}
-          onUpdateGuest={(id, d) => op('update', { id: Number(id), full_name: d.name, table_id: d.tableId, notes: d.note || '' })}
-          onMoveGuest={(id, to) => op('move', { id: Number(id), table_id: to })}
-          onDeleteGuest={(id) => op('delete', { id: Number(id) })}
-          saving={saving}
-          onRefresh={load}
-          refreshing={loading && !!data}
-          loading={loading && !data}
-        />
-      </div>
+      <SeatingPlanner data={data} loading={loading && !data} readOnly={!unlocked} eventType={eventType} title={title}
+        api={api} onReload={reload} />
 
       {unlocked && history.length > 0 && (
         <Panel title="Son dəyişiklikləriniz" icon={History}>
           <ul className="space-y-1.5 text-[13.5px] text-espresso">
-            {history.slice(0, 8).map((h) => {
-              const g = h.after || h.before || {}
-              return (
-                <li key={h.id} className="flex flex-wrap justify-between gap-x-3">
-                  <span>{g.full_name} — {ACTION_LABEL[h.action] || h.action}{h.action === 'move' && h.after ? ` (${h.before?.table_id} → ${h.after.table_id})` : ''}</span>
-                  <span className="tabular-nums text-[#6B5E54]">{String(h.at || '').slice(11, 16)}</span>
-                </li>
-              )
-            })}
+            {history.slice(0, 8).map((h) => (
+              <li key={h.id} className="flex flex-wrap justify-between gap-x-3">
+                <span>{historyText(h)}</span>
+                <span className="tabular-nums text-[#6B5E54]">{String(h.at || '').slice(11, 16)}</span>
+              </li>
+            ))}
           </ul>
         </Panel>
       )}

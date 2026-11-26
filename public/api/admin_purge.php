@@ -132,6 +132,8 @@ try {
         /* v50 — oturma planı tarixçəsi (qonaq adları saxlayır) və redaktə PİN-i */
         'DELETE FROM guest_changes   WHERE invitation_id = :s',
         'DELETE FROM owner_edit_pins WHERE slug = :s',
+        /* v52 — zal planı (masa adları, zonalar) */
+        'DELETE FROM seating_layouts WHERE invitation_id = :s',
         'DELETE FROM invitations     WHERE slug = :s',
     ] as $sql) {
         $db->prepare($sql)->execute([':s' => $slug]);

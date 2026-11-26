@@ -392,7 +392,7 @@ export default function NightSkyTemplate(props) {
                     <Sparkle size={30} style={{ margin: '0 auto' }} />
                     <div style={{ marginTop: 12, fontSize: 15, color: C.SILVER }}>{seating.selected.full_name}</div>
                     <div style={{ marginTop: 6, fontFamily: serif, fontStyle: 'italic', fontWeight: 300, fontSize: tableFontPx(tb.num, 44), lineHeight: 1, color: C.STARGOLD }}>{tb.hasWord && <span style={{ display: 'block', fontSize: 12, fontStyle: 'normal', letterSpacing: '.18em', color: C.SILVER, marginBottom: 6 }}>{tr.inv_table}</span>}{tb.num}</div>
-                    {seating.tablemates.length > 0 && <div style={{ marginTop: 14, fontSize: 14.5, color: C.MUTED, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}
+                    {seating.tablemates.length > 0 && <div style={{ marginTop: 14, fontSize: 14.5, color: C.MUTED, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}{seating.mapEl}
                     <button onClick={seating.reset} data-press style={{ marginTop: 8, background: 'none', border: 'none', color: C.MOON, fontSize: 14, minHeight: 44, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 4, fontFamily: sans }}>
                       {seatingL.again || 'Yenidən axtar'}
                     </button>

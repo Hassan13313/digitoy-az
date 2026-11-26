@@ -131,7 +131,8 @@ export default function AdminGuestReports({ slug, names, dateStr = '', refreshSi
 
   useEffect(() => { load() }, [slug, refreshSignal]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const allGuests = useMemo(() => data?.guests ?? [], [data])
+  /* v52: masası olmayan qonaq (table_id '') hesabatda «Masasız» qrupunda */
+  const allGuests = useMemo(() => (data?.guests ?? []).map(g => (g.table_id ? g : { ...g, table_id: 'Masasız' })), [data])
   const stats     = data?.stats ?? {}
   const tableIds  = useMemo(() => [...new Set(allGuests.map(g => g.table_id))].sort(), [allGuests])
 

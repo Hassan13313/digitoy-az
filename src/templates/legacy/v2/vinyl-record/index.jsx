@@ -410,7 +410,7 @@ export default function VinylRecordTemplate(props) {
                       </div>
                       <div style={{ padding: '14px 16px', minWidth: 0 }}>
                         <div style={{ fontFamily: head, fontSize: 19, lineHeight: 1.2 }}>{seating.selected.full_name}</div>
-                        {seating.tablemates.length > 0 && <div style={{ marginTop: 6, fontSize: 13.5, color: alpha(C.CHAR, 0.7), lineHeight: 1.45 }}>{seating.tablemates.map((g) => g.full_name).join(' · ')}</div>}
+                        {seating.tablemates.length > 0 && <div style={{ marginTop: 6, fontSize: 13.5, color: alpha(C.CHAR, 0.7), lineHeight: 1.45 }}>{seating.tablemates.map((g) => g.full_name).join(' · ')}</div>}{seating.mapEl}
                       </div>
                     </div>
                     <div style={{ height: 10, background: C.TEAL }} />

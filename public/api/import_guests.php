@@ -5,7 +5,8 @@
    POST /api/import_guests.php   (admin tələb olunur)
    body: {
      invitation_id: "<slug>",
-     rows: [ { name, table, phone? }, … ],   max 2000
+     rows: [ { name, table?, phone?, side?, group? }, … ],   max 2000
+           (v52: masa boşdursa qonaq «masasız» qalır; side «Qız evi»/«Oğlan evi»…)
      dry_run: false                          true → yalnız yoxlama hesabatı
    }
    → { ok, inserted, skipped:{duplicate,invalid}, errors:[…], total }
@@ -109,7 +110,7 @@ try {
        UNIQUE açar yoxdur, ona görə burada FAIL-OPEN qəbul edilir. */
 }
 
-$defaultTable = 'Masa 1';
+require_once __DIR__ . '/seating_layout_lib.php';   /* v52: seatSide, seatGroup */
 $seenInFile   = [];
 $toInsert     = [];
 $errors       = [];
@@ -123,6 +124,8 @@ foreach ($rows as $i => $row) {
     $name  = trim((string) ($row['name'] ?? ''));
     $table = trim((string) ($row['table'] ?? ''));
     $phone = cleanPhone($row['phone'] ?? null);
+    $side  = seatSide($row['side'] ?? null);
+    $group = seatGroup($row['group'] ?? null);
 
     /* ── Validasiya ── */
     if ($name === '') {
@@ -138,8 +141,7 @@ foreach ($rows as $i => $row) {
         continue;
     }
 
-    if ($table === '') $table = $defaultTable;
-    if (mb_strlen($table) > 80) $table = mb_substr($table, 0, 80);
+    $table = seatClean($table, SEAT_TABLE_MAX);   /* boş = masasız (v52; əvvəl «Masa 1» idi) */
 
     $key = normGuestName($name);
     if (isset($seenInFile[$key]) || isset($existing[$key])) {
@@ -149,7 +151,7 @@ foreach ($rows as $i => $row) {
     }
     $seenInFile[$key] = true;
 
-    $toInsert[] = ['name' => $name, 'table' => $table, 'phone' => $phone];
+    $toInsert[] = ['name' => $name, 'table' => $table, 'phone' => $phone, 'side' => $side, 'group' => $group];
 }
 
 /* ── Yalnız yoxlama rejimi ── */
@@ -175,8 +177,8 @@ if ($toInsert) {
     try {
         $db->beginTransaction();
         $st = $db->prepare(
-            'INSERT INTO guests (invitation_id, table_id, full_name, phone)
-             VALUES (:inv, :tbl, :name, :phone)'
+            'INSERT INTO guests (invitation_id, table_id, full_name, phone, side, group_name)
+             VALUES (:inv, :tbl, :name, :phone, :side, :grp)'
         );
         foreach ($toInsert as $g) {
             $st->execute([
@@ -184,6 +186,8 @@ if ($toInsert) {
                 ':tbl'   => $g['table'],
                 ':name'  => $g['name'],
                 ':phone' => $g['phone'],
+                ':side'  => $g['side'],
+                ':grp'   => $g['group'],
             ]);
             $inserted++;
         }

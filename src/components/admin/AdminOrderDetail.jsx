@@ -262,7 +262,7 @@ export default function AdminOrderDetail({ draftCode, onBack }) {
           </>
         }
         panels={slug ? {
-          seating: <AdminSeatingPlan slug={slug} seatingPlan={fd.seatingPlan || ''} />,
+          seating: <AdminSeatingPlan slug={slug} seatingPlan={fd.seatingPlan || ''} eventType={fd.eventType || ''} title={names} />,
           report: <AdminGuestReports slug={slug} names={names} dateStr={dateStr} />,
           /* Phase 48 — siyahısız (adını yazıb) verilən cavablar; hesabat yalnız siyahını oxuyur */
           rsvp: <AdminRSVPBlock slug={slug} names={names} />,

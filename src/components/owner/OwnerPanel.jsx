@@ -164,7 +164,7 @@ export default function OwnerPanel() {
             <TabPanel idPrefix={TAB_ID} id={activeTab}>
               {activeTab === 'rsvp' && <AdminRSVPBlock slug={slug} names={names} refreshSignal={tick} />}
               {activeTab === 'guests' && <AdminGuestReports slug={slug} names={names} dateStr={dateStr} refreshSignal={tick} />}
-              {activeTab === 'seating' && <OwnerSeating slug={slug} />}
+              {activeTab === 'seating' && <OwnerSeating slug={slug} eventType={data.event?.type || ''} title={names} />}
               {activeTab === 'guestbook' && <OwnerGuestbook slug={slug} refreshSignal={tick} />}
               {activeTab === 'photos' && <OwnerPhotos slug={slug} viewToken={data.galleryView} />}
             </TabPanel>

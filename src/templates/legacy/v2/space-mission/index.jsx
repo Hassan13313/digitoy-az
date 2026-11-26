@@ -403,7 +403,7 @@ export default function SpaceMissionTemplate(props) {
                     <span style={{ fontFamily: body, fontWeight: 600, fontSize: 12, letterSpacing: '.2em', color: C.MUTED }}>{upAz(T.table, lang)}</span>
                     <span style={{ fontFamily: LED, fontWeight: 800, fontSize: tableSize(tableNum(seating.selected.table_id), 56), lineHeight: 1, color: C.SUN, textShadow: `0 0 16px ${alpha(C.SUN, 0.5)}` }}>{tableNum(seating.selected.table_id)}</span>
                   </MissionPatch>
-                  {seating.tablemates.length > 0 && <div style={{ marginTop: 16, fontSize: 15, color: C.MUTED, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}
+                  {seating.tablemates.length > 0 && <div style={{ marginTop: 16, fontSize: 15, color: C.MUTED, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}{seating.mapEl}
                   <button onClick={seating.reset} data-press style={{ marginTop: 6, background: 'none', border: 'none', color: C.SUN, fontSize: 15, minHeight: 44, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 4, fontFamily: body }}>
                     {seatingL.again || 'Yenidən axtar'}
                   </button>

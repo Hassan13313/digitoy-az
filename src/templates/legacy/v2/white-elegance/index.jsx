@@ -353,6 +353,7 @@ export default function WhiteEleganceTemplate(props) {
                       {seating.tablemates.length > 0 && (
                         <div style={{ marginTop: 12, fontSize: 14.5, color: C.GREY, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(' · ')}</div>
                       )}
+                      {seating.mapEl}
                       <button onClick={seating.reset} data-press style={{ marginTop: 8, background: 'none', border: 'none', fontFamily: f, fontStyle: 'italic', fontSize: 15, color: C.INK, minHeight: 44, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 4 }}>
                         {seatingL.again || 'Yenidən axtar'}
                       </button>

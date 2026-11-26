@@ -88,7 +88,7 @@ export const ORDER_DETAIL_TABS = [
  * @param {(d:'reject'|'delete'|null)=>void} [p.onDialogChange]
  * @param {'seating'|'report'|'rsvp'} [p.tab]  @param {(t:string)=>void} [p.onTab]
  * @param {{seating?:import('react').ReactNode,report?:import('react').ReactNode,rsvp?:import('react').ReactNode}} [p.panels]
- *        Təsdiqlənmiş sifarişin tab məzmunu (SeatingPlanTab, GuestReportTab, RsvpTab)
+ *        Təsdiqlənmiş sifarişin tab məzmunu (SeatingPlanner, GuestReportTab, RsvpTab)
  * @param {Partial<Record<'seating'|'report'|'rsvp',number>>} [p.tabCounts]
  * @param {import('react').ReactNode} [p.asideExtra]  Digitoy: xülasə sütununun sonunda əlavə blok
  * @param {boolean} [p.webInvite=true]  false — veb-dəvətnaməsi olmayan sifariş (VİDEO paketi):

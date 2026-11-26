@@ -1,0 +1,864 @@
+<!doctype html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Oturma planı — maket 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600&display=swap&subset=latin-ext" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F1EA;--card:#fff;--ring:#E5DED2;--line:#EEE8DF;--soft:#FAF8F4;--ivory:#FFFDF8;
+  --ink:#2C2523;--ink2:#3A312D;--mut:#6B5E54;--sand:#CBBFAE;
+  --gold:#84652A;--goldr:#A9822F;--rim:#C5A059;--mist:#F3EAD3;--rust:#9A3B2E;--olive:#4F6B3A;
+  --q:#A8466A;--o:#3B6290;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font:14px/1.45 Inter,system-ui,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--goldr);outline-offset:2px}
+[hidden]{display:none!important}
+.m-only{display:none!important}
+
+/* ── Üst zolaq ── */
+.top{display:grid;grid-template-columns:auto minmax(220px,380px) auto;justify-content:space-between;align-items:center;gap:14px 32px;padding:16px 24px;background:var(--card);border-bottom:1px solid var(--ring)}
+.badge{display:inline-block;font-size:12px;font-weight:500;color:var(--gold);background:var(--mist);padding:2px 9px;border-radius:99px}
+h1{font:600 26px/1.15 "Playfair Display",Georgia,serif;margin:6px 0 0}
+.sub{margin:2px 0 0;color:var(--mut);font-size:13px}
+.prog p{margin:0 0 7px;font-size:14px;color:var(--mut)}
+.prog p b{font:600 22px "Playfair Display",Georgia,serif;color:var(--ink)}
+.pbar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.pbar span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#B8903A,#C5A059);transition:width .45s cubic-bezier(.2,.8,.2,1)}
+.prog small{display:block;margin-top:6px;color:var(--mut);font-size:12.5px}
+.seg{display:inline-flex;background:var(--soft);border-radius:12px;padding:4px;box-shadow:inset 0 0 0 1px var(--ring)}
+.seg button{border:0;background:none;padding:0 16px;min-height:40px;border-radius:9px;font-weight:500;color:var(--mut);white-space:nowrap}
+.seg button[aria-selected=true]{background:var(--ink);color:#fff}
+
+.layout{display:grid;grid-template-columns:350px minmax(0,1fr)}
+
+/* ── Qonaq siyahısı ── */
+.roster{background:var(--card);border-right:1px solid var(--ring);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.roster.hover{box-shadow:inset 0 0 0 2px var(--goldr)}
+.r-head{display:flex;align-items:center;gap:8px;padding:16px 16px 10px}
+.r-head h2{font:600 20px "Playfair Display",Georgia,serif;margin:0;flex:1}
+.r-close{display:none;width:40px;height:40px;border:0;border-radius:12px;background:var(--soft);font-size:20px;place-items:center}
+.r-tools{padding:0 16px 10px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--line)}
+.search{width:100%;height:44px;border:0;border-radius:12px;padding:0 12px 0 38px;background:var(--soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%236B5E54' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='7' cy='7' r='5'/%3E%3Cpath d='m14 14-3.2-3.2'/%3E%3C/svg%3E") 13px 50%/15px no-repeat;box-shadow:inset 0 0 0 1px var(--ring);font-size:15px}
+.search:focus{outline:none;box-shadow:inset 0 0 0 2px var(--goldr)}
+.sides{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--soft);padding:4px;border-radius:12px;box-shadow:inset 0 0 0 1px var(--ring)}
+.sides button{border:0;background:none;border-radius:9px;min-height:40px;font-size:13px;font-weight:500;color:var(--mut);display:flex;align-items:center;justify-content:center;gap:6px;padding:0 4px}
+.sides button span{font-size:12px;opacity:.7;font-variant-numeric:tabular-nums}
+.sides button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(44,37,35,.14)}
+.sides button.on.q{color:var(--q)}.sides button.on.o{color:var(--o)}
+.list-note{margin:0;font-size:12.5px;color:var(--mut)}
+.sd{display:inline-block;width:9px;height:9px;border-radius:50%;flex:none;background:#A79C90}
+.sd.q{background:var(--q)}.sd.o{background:var(--o)}
+.list{flex:1;overflow:auto;padding:0 10px 110px}
+.sec-h{position:sticky;top:0;z-index:1;display:flex;align-items:center;justify-content:space-between;background:var(--card);padding:10px 2px 4px}
+.sec-t{border:0;background:none;display:flex;align-items:center;gap:6px;font-weight:600;font-size:14px;padding:6px 6px;border-radius:8px}
+.sec-t b{font-weight:500;color:var(--mut)}
+.sec-t svg{transition:transform .2s;color:var(--mut)}
+section.shut .sec-t svg{transform:rotate(-90deg)}
+section.shut .sec-b{display:none}
+.link{border:0;background:none;color:var(--gold);font-size:13px;font-weight:600;padding:6px 8px;border-radius:8px}
+.link:hover{background:var(--mist)}
+.row{display:flex;align-items:center;border-radius:14px;margin:2px 0;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;transition:background .15s}
+.row:hover{background:var(--soft)}
+.row.sel{background:var(--mist)}
+.pick{flex:1;min-width:0;display:flex;align-items:center;gap:12px;border:0;background:none;text-align:left;padding:8px;min-height:60px;border-radius:14px;cursor:grab}
+.av{width:40px;height:40px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:13.5px;font-weight:600;transition:background .15s,color .15s}
+.av.q{background:#F6E6EC;color:var(--q)}.av.o{background:#E5ECF5;color:var(--o)}
+.row.sel .av{background:var(--ink);color:#fff}
+.nm{min-width:0;flex:1}
+.nm b{display:block;font-weight:500;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nm small{display:flex;flex-wrap:wrap;gap:3px 8px;font-size:12.5px;color:var(--mut);margin-top:1px}
+.plus{color:var(--gold);font-weight:500}
+.tag{font-size:11.5px;padding:0 7px;border-radius:99px;background:var(--line);color:var(--mut);line-height:19px}
+.tag.no{background:#F7E9E4;color:var(--rust)}
+.edit{flex:none;width:42px;height:42px;border:0;background:none;border-radius:12px;color:#A79C90;display:grid;place-items:center;opacity:0;transition:opacity .15s}
+.row:hover .edit,.row.sel .edit,.edit:focus-visible{opacity:1}
+.edit:hover{background:var(--line);color:var(--ink)}
+@media (hover:none){.edit{opacity:1}}
+.r-done{margin:28px 10px;text-align:center}
+.r-done b{display:block;font:600 19px "Playfair Display",Georgia,serif;margin-bottom:4px}
+.r-done p,.r-empty{margin:0;color:var(--mut);font-size:13.5px}
+.r-empty{margin:24px 10px;text-align:center}
+.r-foot{padding:10px 16px;border-top:1px solid var(--line);background:var(--soft)}
+
+/* ── Sağ tərəf ── */
+.stage{padding:22px 26px 140px;min-width:0}
+.v-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-bottom:14px}
+.v-head h2{font:600 24px/1.2 "Playfair Display",Georgia,serif;margin:0 auto 0 0}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--mut);align-items:center}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend .ring{width:10px;height:10px;border-radius:3px;box-shadow:inset 0 0 0 1.5px #CFC4B4;background:#fff}
+.legend .chair{width:10px;height:10px;border-radius:3px}
+.legend .chair.q{background:var(--q)}.legend .chair.o{background:var(--o)}
+.btn{border:0;border-radius:12px;padding:0 16px;min-height:42px;background:var(--card);box-shadow:inset 0 0 0 1px var(--ring);font-weight:500;font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
+.btn:hover{background:var(--soft)}
+.btn.pri{background:var(--ink);color:#fff;box-shadow:none}
+.btn.pri:hover{background:var(--ink2)}
+.btn.sm{min-height:36px;padding:0 12px;font-size:13px}
+.btn.danger{color:var(--rust)}
+.steps{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0 0 18px;padding:0}
+.steps li{display:flex;align-items:center;gap:9px;padding:7px 16px 7px 7px;border-radius:99px;background:var(--card);box-shadow:inset 0 0 0 1px var(--ring);font-size:14px;color:var(--mut);transition:background .2s,box-shadow .2s}
+.steps b{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--soft);color:var(--ink);font-size:13px;box-shadow:inset 0 0 0 1px var(--ring)}
+.steps li.now{background:var(--mist);box-shadow:inset 0 0 0 1.5px var(--rim);color:#4E3E18}
+.steps li.now b{background:var(--goldr);color:#fff;box-shadow:none}
+.steps li.done b{background:var(--olive);color:#fff;box-shadow:none}
+
+/* Masa kartları */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px;align-items:start}
+.tcard{position:relative;background:linear-gradient(180deg,var(--ivory) 0%,#fff 60%);border-radius:22px;box-shadow:inset 0 0 0 1px #EADFC9,0 2px 12px rgba(44,37,35,.05);padding:16px 14px 14px;text-align:center;transition:box-shadow .2s,transform .2s}
+.tc-art{margin:0 auto 6px;width:136px}
+.tc-art.long{width:100%;max-width:230px;margin:10px auto 12px}
+.tcard h3{font:600 21px/1.2 "Playfair Display",Georgia,serif;margin:0}
+.tc-meta{margin:3px 0 0;font-size:13.5px;color:var(--mut)}
+.tc-meta b{color:var(--ink)}
+.st.full{color:var(--gold);font-weight:600}
+.st.warn{color:var(--rust);font-weight:600}
+.names{list-style:none;margin:12px 0 0;padding:10px 0 0;border-top:1px solid var(--line);text-align:left;display:flex;flex-direction:column;gap:1px}
+.nm-btn{width:100%;border:0;background:none;display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:10px;font-size:14px;cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;min-height:36px;text-align:left}
+.nm-btn span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nm-btn em{font-style:normal;color:var(--gold);font-size:12.5px;font-weight:600}
+.nm-btn:hover{background:var(--soft)}
+.nm-btn.sel{background:var(--mist);box-shadow:inset 0 0 0 1.5px var(--rim)}
+.tc-empty{margin:12px 0 0;padding:16px 10px;border-radius:14px;border:1.5px dashed #E2D6C1;color:var(--mut);font-size:13.5px}
+.place{margin-top:12px;width:100%;min-height:48px;border:0;border-radius:14px;background:var(--ink);color:#fff;font-weight:600;font-size:14.5px}
+.place:hover{background:var(--ink2)}
+.tc-edit{margin-top:8px;border:0;background:none;color:var(--gold);font-size:13px;font-weight:500;padding:7px 12px;border-radius:9px}
+.tc-edit:hover{background:var(--mist)}
+body.placing .tcard{box-shadow:inset 0 0 0 2px #E3CC93,0 6px 22px rgba(169,130,47,.13);cursor:pointer}
+.tcard.over{box-shadow:inset 0 0 0 1.5px #DDB0A6}
+.tcard.hover{box-shadow:inset 0 0 0 2.5px var(--goldr),0 16px 36px rgba(132,101,42,.24)!important;transform:translateY(-3px)}
+.add-card{min-height:250px;width:100%;border:2px dashed #DCCFB8;border-radius:22px;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--mut);font-weight:500;font-size:14.5px}
+.add-card:hover{background:var(--ivory);color:var(--ink)}
+.add-card svg{color:var(--goldr)}
+
+/* Masanın şəkli (SVG) */
+.tsvg{display:block;width:100%;height:auto;overflow:visible}
+.tsvg .tn{font-family:"Playfair Display",Georgia,serif;font-weight:600;font-size:23px;fill:#2C2523;text-anchor:middle;dominant-baseline:middle}
+.tsvg .tn.sm{font-size:8px}
+.tsvg .tc{font-family:Inter,sans-serif;font-size:8.5px;font-weight:500;fill:#6B5E54;text-anchor:middle;dominant-baseline:middle}
+.tsvg .tc.sm{font-size:5.5px}
+.over .tsvg .tc{fill:#9A3B2E;font-weight:700}
+.me .tsvg .tn{fill:#fff}
+
+/* Zal planı */
+.hall-wrap{border-radius:22px;background:var(--card);box-shadow:inset 0 0 0 1px var(--ring);padding:14px}
+.hall{position:relative;container-type:inline-size;aspect-ratio:10/7;max-width:max(480px,calc((100vh - 290px)*10/7));margin:0 auto;border-radius:16px;background:radial-gradient(120% 90% at 50% 22%,#FFFEFA 0%,#F5EEE1 100%);box-shadow:inset 0 0 0 1px #EADFC9;overflow:hidden}
+.hall.editing{background:radial-gradient(#D9CCB4 1px,transparent 1.4px) 0 0/22px 22px,radial-gradient(120% 90% at 50% 22%,#FFFEFA 0%,#F5EEE1 100%)}
+.zone{position:absolute;display:grid;place-items:center;border-radius:10px;pointer-events:none;color:var(--gold);background:rgba(243,234,211,.8);box-shadow:inset 0 0 0 1px #E6D6AE}
+.zone span{display:flex;align-items:center;justify-content:center;gap:.4em;font-size:clamp(8px,1.3cqw,14px);font-weight:500;padding:0 .4em;text-align:center;line-height:1.15}
+.zone svg{width:1.35em;height:1.35em;flex:none}
+.zone.oval{border-radius:50%}
+.zone.k-stage{background:#EFE3C4;box-shadow:none;color:#6E5422}
+.zone.k-couple{background:#fff;box-shadow:inset 0 0 0 1.5px var(--goldr),0 4px 14px rgba(132,101,42,.12);color:var(--ink)}
+.zone.k-couple span{font-family:"Playfair Display",Georgia,serif;font-size:clamp(9px,1.45cqw,16px)}
+.zone.k-dance{background:transparent;box-shadow:none;border:1.5px dashed #D6C7AC;color:#A28F72}
+.zone.k-door{background:transparent;box-shadow:none;border-top:3px solid var(--sand);border-radius:0;color:var(--mut)}
+.hall.editing .zone{pointer-events:auto;cursor:move;touch-action:none;outline:1.5px dashed var(--goldr);outline-offset:2px}
+.rz{position:absolute;right:-8px;bottom:-8px;width:18px;height:18px;border-radius:6px;background:#fff;box-shadow:0 0 0 2px var(--goldr),0 2px 6px rgba(0,0,0,.18);cursor:nwse-resize;touch-action:none}
+.mt{position:absolute;transform:translate(-50%,-50%);border:0;padding:0;background:none;cursor:pointer;z-index:2;transition:filter .2s}
+.mt.round{width:12%}.mt.long{width:26%}
+body.placing .mt{filter:drop-shadow(0 0 4px rgba(169,130,47,.65))}
+.mt.hover,body.placing .mt:hover{filter:drop-shadow(0 0 10px rgba(169,130,47,.95))}
+.hall.editing .mt{cursor:move;touch-action:none;outline:1.5px dashed var(--goldr);outline-offset:3px;border-radius:50%}
+.hall.editing .mt.long{border-radius:10px}
+.edit-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px;margin-bottom:14px;padding:14px 16px;border-radius:16px;background:var(--mist);box-shadow:inset 0 0 0 1px #E6D6AE}
+.edit-bar p{margin:0;max-width:620px;color:#4E3E18;font-size:14px;line-height:1.5}
+.eb-btns{display:flex;flex-wrap:wrap;gap:8px}
+
+/* Qonaq görünüşü */
+.gv{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:28px;align-items:start}
+.phone{background:#1F1A18;border-radius:38px;padding:11px;box-shadow:0 24px 60px rgba(44,37,35,.28)}
+.screen{background:#FDFBF7;border-radius:28px;padding:26px 18px 22px;min-height:610px}
+.screen .who{margin:0;text-align:center;color:var(--gold);font-size:13px}
+.screen h3{font:500 28px/1.15 "Playfair Display",Georgia,serif;text-align:center;margin:4px 0 16px}
+.gres{list-style:none;margin:10px 0 0;padding:0}
+.gres button{width:100%;display:flex;justify-content:space-between;gap:8px;border:0;background:none;padding:10px 8px;border-radius:10px;text-align:left;font-size:14px}
+.gres button[aria-pressed=true]{background:var(--mist)}
+.gres small{color:var(--mut)}
+.found{margin-top:14px;text-align:center}
+.found p{margin:0;color:var(--mut);font-size:13px}
+.found strong{display:block;font:600 34px/1.1 "Playfair Display",Georgia,serif;margin:2px 0 12px}
+.mini .hall{max-width:none;border-radius:12px}
+.mini .mt{cursor:default}
+.mini .mt.me{z-index:3;animation:glow 1.8s ease-in-out infinite}
+@keyframes glow{50%{filter:drop-shadow(0 0 7px rgba(169,130,47,1))}}
+.notes{display:flex;flex-direction:column;gap:14px;max-width:560px}
+.note{background:var(--card);border-radius:16px;padding:18px 20px;box-shadow:inset 0 0 0 1px var(--ring)}
+.note.ask{background:var(--mist);box-shadow:inset 0 0 0 1px #E6D6AE}
+.note h4{margin:0 0 6px;font:600 18px "Playfair Display",Georgia,serif}
+.note p,.note li{margin:0;color:#4A3F39;font-size:14px;line-height:1.55}
+.note ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+
+/* Seçim paneli, bildiriş, sürüşdürmə */
+.selbar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 24px);z-index:40;display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:var(--ink);color:#fff;padding:10px 10px 10px 20px;border-radius:18px;box-shadow:0 16px 44px rgba(28,22,20,.35)}
+.sb-txt{display:flex;flex-direction:column;margin-right:10px;line-height:1.3}
+.sb-txt b{font-size:15px}
+.sb-txt span{font-size:12.5px;color:var(--sand)}
+.selbar button{border:0;border-radius:12px;background:var(--ink2);color:#fff;min-height:44px;padding:0 15px;font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.selbar button:hover{background:#4A3F3A}
+.selbar .go{background:var(--goldr)}
+.selbar .go:hover{background:#B8903A}
+.toast{position:fixed;left:50%;top:14px;z-index:60;width:max-content;max-width:calc(100vw - 24px);transform:translate(-50%,-160%);opacity:0;visibility:hidden;display:flex;align-items:center;gap:14px;background:var(--ink);color:#fff;padding:10px 10px 10px 16px;border-radius:14px;box-shadow:0 12px 34px rgba(28,22,20,.3);font-size:14px;transition:transform .25s cubic-bezier(.2,.8,.2,1),opacity .2s,visibility .25s}
+.toast.show{transform:translate(-50%,0);opacity:1;visibility:visible}
+.toast button{border:0;background:var(--ink2);color:var(--mist);font-weight:600;border-radius:9px;min-height:36px;padding:0 12px;white-space:nowrap}
+.ghost{position:fixed;left:0;top:0;z-index:70;pointer-events:none;background:var(--ink);color:#fff;padding:8px 14px;border-radius:99px;font-size:14px;font-weight:500;box-shadow:0 10px 26px rgba(0,0,0,.22);white-space:nowrap;display:flex;align-items:center;gap:7px}
+body.dragging,body.dragging *{cursor:grabbing!important;user-select:none!important;-webkit-user-select:none!important}
+.fab{display:none;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:20;border:0;border-radius:99px;background:var(--ink);color:#fff;min-height:54px;padding:0 24px;font-size:15px;font-weight:600;box-shadow:0 12px 30px rgba(28,22,20,.3);align-items:center;gap:10px;white-space:nowrap}
+.fab span{background:var(--goldr);border-radius:99px;padding:1px 9px;font-size:13px}
+body.sel-on .fab{display:none!important}
+.scrim{display:none}
+
+/* Pəncərə */
+dialog{border:0;border-radius:20px;padding:0;width:min(460px,calc(100vw - 20px));max-height:calc(100dvh - 24px);box-shadow:0 30px 80px rgba(28,22,20,.35);color:var(--ink)}
+dialog::backdrop{background:rgba(28,22,20,.45)}
+.dform{padding:22px;display:flex;flex-direction:column;gap:16px}
+.dform h3{margin:0;font:600 23px "Playfair Display",Georgia,serif}
+.dsub{margin:-10px 0 0;color:var(--mut);font-size:13.5px}
+.f{display:flex;flex-direction:column;gap:7px;font-size:13.5px;font-weight:500}
+.f input,.f select{height:46px;border:0;border-radius:12px;padding:0 13px;box-shadow:inset 0 0 0 1px var(--ring);background:#fff;font-weight:400;font-size:15px}
+.f input:focus,.f select:focus{outline:none;box-shadow:inset 0 0 0 2px var(--goldr)}
+.big2,.chips-pick{border:0;padding:0;margin:0;min-width:0}
+.big2{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px}
+.big2 legend,.chips-pick legend{font-size:13.5px;font-weight:500;margin-bottom:7px;padding:0}
+.big2 label{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;border-radius:14px;box-shadow:inset 0 0 0 1px var(--ring);cursor:pointer;font-size:14.5px;font-weight:500}
+.big2 input,.chips-pick input{position:absolute;opacity:0;pointer-events:none}
+.big2 label:has(input:checked){box-shadow:inset 0 0 0 2px var(--ink);background:var(--soft)}
+.big2 label.q:has(input:checked){box-shadow:inset 0 0 0 2px var(--q);background:#FBF0F3;color:var(--q)}
+.big2 label.o:has(input:checked){box-shadow:inset 0 0 0 2px var(--o);background:#EEF3FA;color:var(--o)}
+.chips-pick{display:flex;flex-wrap:wrap;gap:7px}
+.chips-pick legend{width:100%}
+.chips-pick label{position:relative;display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:99px;box-shadow:inset 0 0 0 1px var(--ring);cursor:pointer;font-size:14px}
+.chips-pick label svg{width:16px;height:16px;color:var(--gold)}
+.chips-pick label:has(input:checked){background:var(--ink);color:#fff;box-shadow:none}
+.chips-pick label:has(input:checked) svg{color:var(--mist)}
+.big2 label:has(input:focus-visible),.chips-pick label:has(input:focus-visible){outline:2px solid var(--goldr);outline-offset:2px}
+.stepper{display:flex;align-items:center;gap:8px}
+.stepper button{width:48px;height:46px;border:0;border-radius:12px;background:var(--soft);box-shadow:inset 0 0 0 1px var(--ring);font-size:22px;line-height:1}
+.stepper input{width:72px;height:46px;text-align:center;border:0;border-radius:12px;box-shadow:inset 0 0 0 1px var(--ring);font-size:18px;font-weight:600;-moz-appearance:textfield;appearance:textfield}
+.stepper input::-webkit-inner-spin-button,.stepper input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.dform menu{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:2px 0 0;padding:0}
+.dform menu .sp{flex:1}
+.tlist{list-style:none;margin:0;padding:0;max-height:220px;overflow:auto;border-top:1px solid var(--line)}
+.tlist li{display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}
+.tlist li span{flex:1;min-width:0}
+.tlist em{font-style:normal;color:var(--gold)}
+.tlist .muted{color:var(--mut);padding:10px 0}
+.tlist button{border:0;background:var(--soft);border-radius:9px;min-height:34px;padding:0 11px;font-size:13px;color:var(--rust)}
+
+@media (max-width:900px){
+  .m-only{display:inline-flex!important}
+  .d-only{display:none!important}
+  .top{grid-template-columns:1fr;padding:14px 14px 12px;gap:12px}
+  h1{font-size:23px}
+  .seg{width:100%}
+  .seg button{flex:1;padding:0 4px;font-size:13px}
+  .layout{display:block}
+  .roster{position:fixed;left:0;right:0;bottom:0;top:auto;height:86vh;z-index:30;border:0;border-radius:22px 22px 0 0;box-shadow:0 -12px 40px rgba(28,22,20,.25);transform:translateY(105%);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+  .roster.open{transform:none}
+  .r-close{display:grid}
+  .scrim{position:fixed;inset:0;z-index:25;background:rgba(28,22,20,.35)}
+  body.sheet .scrim{display:block}
+  .fab{display:flex}
+  .stage{padding:16px 12px 150px}
+  .v-head h2{font-size:21px}
+  .grid{grid-template-columns:1fr 1fr;gap:12px}
+  .hall-wrap{padding:8px;border-radius:16px}
+  .gv{grid-template-columns:1fr}
+  .selbar{left:10px;right:10px;bottom:10px;transform:none;width:auto;padding:12px}
+  .sb-txt{width:100%;margin:0 0 2px 4px}
+  .selbar button{flex:1;justify-content:center}
+  body.sheet .selbar .open-list,body:not(.sheet) .selbar .go{display:none!important}
+}
+@media (max-width:560px){.grid{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <radialGradient id="linen" cx="50%" cy="38%" r="65%"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#F4ECDD"/></radialGradient>
+</defs></svg>
+
+<header class="top">
+  <div>
+    <span class="badge">Maket 2 — nümunə məlumat, yeniləyəndə sıfırlanır</span>
+    <h1>Oturma planı</h1>
+    <p class="sub">Aysel və Rauf, toy, 14 dekabr</p>
+  </div>
+  <div class="prog" id="prog"></div>
+  <nav class="seg" role="tablist" aria-label="Görünüş">
+    <button role="tab" data-view="cards" aria-selected="true">Masalar</button>
+    <button role="tab" data-view="map" aria-selected="false">Zal planı</button>
+    <button role="tab" data-view="guest" aria-selected="false">Qonaq görünüşü</button>
+  </nav>
+</header>
+
+<div class="layout">
+  <aside class="roster" id="roster" data-drop="roster" aria-label="Qonaq siyahısı">
+    <div class="r-head">
+      <h2>Qonaqlar</h2>
+      <button class="btn sm pri" data-act="add-guest">+ Qonaq</button>
+      <button class="r-close" data-act="close-sheet" aria-label="Siyahını bağla">×</button>
+    </div>
+    <div class="r-tools">
+      <input class="search" id="q" type="search" placeholder="Qonaq axtar" aria-label="Qonaq axtar">
+      <div class="sides" id="sideTabs" aria-label="Kimin qonağı"></div>
+      <p class="list-note" id="listNote"></p>
+    </div>
+    <div class="list" id="list"></div>
+    <div class="r-foot"><button class="link" data-act="import">Excel-dən siyahı yüklə</button></div>
+  </aside>
+  <main class="stage" id="stage"></main>
+</div>
+
+<div class="scrim" data-act="close-sheet"></div>
+<button class="fab" id="fab" data-act="open-sheet"></button>
+<div class="selbar" id="selbar" hidden></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<dialog id="dlg"></dialog>
+
+<script>
+/* ── İkonlar ── */
+const I = (p, s = 18) => `<svg width="${s}" height="${s}" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+const ICON = {
+  couple: I('<circle cx="7.5" cy="11" r="4.5"/><circle cx="12.5" cy="11" r="4.5"/>'),
+  music: I('<path d="M8 15V5l8-2v10"/><circle cx="6" cy="15" r="2"/><circle cx="14" cy="13" r="2"/>'),
+  photo: I('<rect x="2.5" y="6" width="15" height="10" rx="2"/><circle cx="10" cy="11" r="3"/><path d="M7 6l1.2-2h3.6L13 6"/>'),
+  cake: I('<path d="M3 17h14v-6H3zM3 14c2 1.4 4.5 1.4 7 0s5-1.4 7 0M10 11V7.5"/><path d="M10 7.5c-1.2-1 0-2.6 0-3.5 1 1 1.2 2.5 0 3.5z"/>'),
+  gift: I('<rect x="3" y="8" width="14" height="9" rx="1"/><path d="M2.5 8h15M10 8v9M10 8C8.5 4.5 5 5 6.5 7.5M10 8c1.5-3.5 5-3 3.5-.5"/>'),
+  door: I('<path d="M5 17V3h10v14M3 17h14M12 10h.01"/>'),
+  stage: I('<path d="M10 3l2 4.5 4.8.5-3.6 3.2 1 4.8L10 13.6 5.8 16l1-4.8L3.2 8l4.8-.5z"/>'),
+  dance: I('<path d="M10 3v4M10 13v4M3 10h4M13 10h4M5.5 5.5l2 2M12.5 12.5l2 2M14.5 5.5l-2 2M7.5 12.5l-2 2"/>'),
+  kids: I('<path d="M10 2.5c-2.5 0-4 2-4 4.5S8 12 10 12s4-2.5 4-5-1.5-4.5-4-4.5zM10 12l-1 1.6h2L10 12v5"/>'),
+  bar: I('<path d="M5 3h10l-5 7zM10 10v6M7 17h6"/>'),
+  custom: '',
+};
+const UI = {
+  check: I('<path d="M5 10.5l3.2 3L15 6.5"/>', 16),
+  chev: I('<path d="M6 8l4 4 4-4"/>', 16),
+  pencil: I('<path d="M13.5 3.5l3 3L7 16H4v-3z"/>', 17),
+  plus: I('<path d="M10 4v12M4 10h12"/>', 16),
+  plusBig: I('<circle cx="10" cy="10" r="8"/><path d="M10 6.5v7M6.5 10h7"/>', 34),
+  round: I('<circle cx="10" cy="10" r="6"/>', 18),
+  long: I('<rect x="2.5" y="6.5" width="15" height="7" rx="2"/>', 18),
+  oval: I('<ellipse cx="10" cy="10" rx="7.5" ry="5"/>', 18),
+  rect: I('<rect x="3" y="5" width="14" height="10" rx="1.5"/>', 18),
+};
+const ZONE_PRESETS = [['Musiqi zonası', 'music'], ['Foto zona', 'photo'], ['Şirniyyat masası', 'cake'], ['Hədiyyə masası', 'gift'], ['Uşaq guşəsi', 'kids'], ['Bar', 'bar']];
+
+/* ── Nümunə məlumat ── */
+const SIDES = { q: 'Qız evi', o: 'Oğlan evi' };
+let groups = ['Ailə', 'Qohumlar', 'İş yoldaşları', 'Məhlə uşaqları', 'Sinif yoldaşları', 'Dostlar'];
+const RAW = [
+  ['Leyla Məmmədova','q','Ailə',1,'yes',1], ['Səbinə Əliyeva','q','Ailə',0,'yes',1], ['Elnur Məmmədov','q','Ailə',2,'yes',1],
+  ['Mehriban Qasımova','q','Ailə',0,'yes',1], ['Aidə Məmmədova','q','Ailə',1,'yes',1],
+  ['Gülnar Hüseynova','q','Qohumlar',0,'yes',2], ['Tural Hüseynov','q','Qohumlar',1,'yes',2], ['Nərmin Quliyeva','q','Qohumlar',0,'maybe',2],
+  ['Xəyalə Bağırova','q','Qohumlar',0,'yes',2], ['Vüsal Əhmədov','q','Qohumlar',2,'yes',0],
+  ['Aynur Kərimova','q','Sinif yoldaşları',0,'yes',3], ['Fidan Rzayeva','q','Sinif yoldaşları',0,'yes',3],
+  ['Ülviyyə Nəsirova','q','Sinif yoldaşları',0,'none',0], ['Könül Abbasova','q','Sinif yoldaşları',1,'yes',0],
+  ['Günay İsmayılova','q','İş yoldaşları',0,'yes',0], ['Rəşad Babayev','q','İş yoldaşları',1,'yes',0],
+  ['Zərifə Həsənova','q','İş yoldaşları',0,'maybe',0], ['Sevda Mustafayeva','q','İş yoldaşları',0,'yes',0],
+  ['Samirə Vəliyeva','q','Məhlə uşaqları',0,'none',0], ['Arzu Cəfərova','q','Məhlə uşaqları',0,'yes',0], ['Pərvin Zeynalova','q','Məhlə uşaqları',1,'none',0],
+  ['Lalə Orucova','q','Dostlar',1,'yes',3], ['Nigar Səfərova','q','Dostlar',0,'no',0],
+  ['Rauf Əsədov','o','Ailə',1,'yes',5], ['Kamran Əsədov','o','Ailə',0,'yes',5], ['Zaur Əsədov','o','Ailə',2,'yes',5], ['Natiq İbrahimov','o','Ailə',0,'yes',5],
+  ['Nazim Paşayev','o','Qohumlar',1,'yes',6], ['Orxan Paşayev','o','Qohumlar',0,'yes',6], ['Ramin Şükürov','o','Qohumlar',0,'maybe',6],
+  ['Aqil Bayramov','o','Qohumlar',0,'yes',0], ['Şahin Mirzəyev','o','Qohumlar',2,'yes',9], ['Rövşən Qəmbərov','o','Qohumlar',1,'yes',9],
+  ['Elçin Novruzov','o','İş yoldaşları',0,'yes',7], ['Fərid Alıyev','o','İş yoldaşları',1,'yes',7], ['Murad Hacıyev','o','İş yoldaşları',0,'yes',7],
+  ['Anar Musayev','o','İş yoldaşları',0,'none',0],
+  ['Cavid Sadıqov','o','Məhlə uşaqları',0,'yes',0], ['Emin Talıbov','o','Məhlə uşaqları',1,'yes',0], ['Toğrul Yusifov','o','Məhlə uşaqları',0,'yes',0],
+  ['Seymur Kazımov','o','Məhlə uşaqları',0,'maybe',0],
+  ['İlkin Rəhimov','o','Sinif yoldaşları',0,'yes',8], ['Ruslan Nağıyev','o','Sinif yoldaşları',0,'yes',8], ['Fuad Məlikov','o','Sinif yoldaşları',1,'yes',8],
+  ['Vüqar Həmidov','o','Sinif yoldaşları',0,'none',0],
+  ['Elvin Qafarov','o','Dostlar',0,'yes',3], ['Samir Ağayev','o','Dostlar',1,'yes',0],
+];
+let guests = RAW.map(([name, side, group, plus, rsvp, table], i) => ({ id: i + 1, name, side, group, plus, rsvp, table }));
+let nextId = guests.length + 1;
+let tables = [
+  { id: 1, name: 'Masa 1', shape: 'round', cap: 10, x: 13, y: 31 },
+  { id: 2, name: 'Masa 2', shape: 'round', cap: 10, x: 13, y: 56 },
+  { id: 3, name: 'Masa 3', shape: 'round', cap: 10, x: 13, y: 81 },
+  { id: 4, name: 'Masa 4', shape: 'round', cap: 10, x: 31, y: 84 },
+  { id: 5, name: 'Masa 5', shape: 'round', cap: 10, x: 87, y: 31 },
+  { id: 6, name: 'Masa 6', shape: 'round', cap: 10, x: 87, y: 56 },
+  { id: 7, name: 'Masa 7', shape: 'round', cap: 10, x: 87, y: 81 },
+  { id: 8, name: 'Masa 8', shape: 'round', cap: 10, x: 69, y: 84 },
+  { id: 9, name: 'Uzun masa', shape: 'long', cap: 14, x: 50, y: 72 },
+];
+let zones = [
+  { id: 1, label: 'Səhnə', kind: 'stage', shape: 'rect', x: 50, y: 6, w: 36, h: 7 },
+  { id: 2, label: 'Bəy və gəlin', kind: 'couple', shape: 'rect', x: 50, y: 16.5, w: 20, h: 7.5 },
+  { id: 3, label: 'Rəqs meydançası', kind: 'dance', shape: 'oval', x: 50, y: 43.5, w: 32, h: 33 },
+  { id: 4, label: 'Giriş', kind: 'door', shape: 'rect', x: 50, y: 95.5, w: 12, h: 5 },
+];
+
+/* ── Vəziyyət ── */
+let view = 'cards', layoutMode = false, last = null, gq = 'Leyla', gsel = null;
+let showMap = false; // zal planı hər yerə uyğun düzülməmiş ola bilər, ona görə qonaqlara göstərmək müştərinin seçimidir
+const sel = new Set(), folded = new Set();
+const f = { q: '', side: 'all' };
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const lc = (s) => String(s).toLocaleLowerCase('az');
+const byId = (id) => guests.find((g) => g.id === id);
+const tById = (id) => tables.find((t) => t.id === id);
+const zById = (id) => zones.find((z) => z.id === id);
+const seats = (g) => 1 + (Number(g.plus) || 0);
+const atTable = (id) => guests.filter((g) => g.table === id);
+const used = (id) => atTable(id).reduce((s, g) => s + seats(g), 0);
+const short = (n) => { const [a, b] = n.split(' '); return b ? `${a} ${b[0]}.` : a; };
+const initials = (n) => n.split(/\s+/).map((w) => w[0]).slice(0, 2).join('');
+const isPhone = () => matchMedia('(max-width:900px)').matches;
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const nextOf = (list) => Math.max(0, ...list.map((x) => x.id)) + 1;
+
+/* ── Masanın şəkli: dəyirmi və ya uzun, stullar tərəf rəngində ── */
+const SIDE_HEX = { q: '#A8466A', o: '#3B6290' };
+function tableLabel(t) { const m = t.name.match(/\d+/); return m ? m[0] : t.shape === 'long' ? t.name.slice(0, 14) : t.name.split(' ')[0].slice(0, 5); }
+function tableSVG(t, o = {}) {
+  const occ = o.neutral ? [] : atTable(t.id).flatMap((g) => Array(seats(g)).fill(g.side));
+  const n = Math.max(t.cap, occ.length), u = used(t.id);
+  const chair = (i) => {
+    if (o.neutral) return 'fill="#ECE5D9"';
+    if (i >= t.cap) return 'fill="#9A3B2E"';
+    return occ[i] ? `fill="${SIDE_HEX[occ[i]]}"` : 'fill="#FFFFFF" stroke="#D3C7B5" stroke-width="1.2"';
+  };
+  const top = o.me ? '#2C2523' : 'url(#linen)';
+  const name = esc(tableLabel(t));
+  if (t.shape === 'round') {
+    const cw = Math.min(11, 190 / n);
+    const chairs = Array.from({ length: n }, (_, i) => `<rect x="${50 - cw / 2}" y="2" width="${cw}" height="10" rx="3.5" transform="rotate(${(i / n * 360).toFixed(1)} 50 50)" ${chair(i)}/>`).join('');
+    return `<svg class="tsvg" viewBox="0 0 100 100" aria-hidden="true">${chairs}
+      <circle cx="50" cy="50" r="34" fill="${top}" stroke="#C5A059" stroke-width="1.8"/>
+      <circle cx="50" cy="50" r="29" fill="none" stroke="${o.me ? '#84652A' : '#EADBB4'}" stroke-width=".8"/>
+      <text x="50" y="${o.neutral ? 51 : 47}" class="tn">${name}</text>${o.neutral ? '' : `<text x="50" y="65" class="tc">${u}/${t.cap}</text>`}</svg>`;
+  }
+  const m = Math.ceil(n / 2), b = n - m, cw = Math.min(9, 60 / m);
+  const px = (k, cnt) => 10 + (k + 0.5) * 80 / cnt - cw / 2;
+  const chairs = Array.from({ length: n }, (_, i) => (i < m
+    ? `<rect x="${px(i, m)}" y="1" width="${cw}" height="7" rx="2.5" ${chair(i)}/>`
+    : `<rect x="${px(i - m, b)}" y="32" width="${cw}" height="7" rx="2.5" ${chair(i)}/>`)).join('');
+  return `<svg class="tsvg" viewBox="0 0 100 40" aria-hidden="true">${chairs}
+    <rect x="6" y="10" width="88" height="20" rx="5" fill="${top}" stroke="#C5A059" stroke-width="1.4"/>
+    <text x="50" y="${o.neutral ? 20.5 : 18}" class="tn sm">${name}</text>${o.neutral ? '' : `<text x="50" y="25.5" class="tc sm">${u}/${t.cap}</text>`}</svg>`;
+}
+
+/* ── Siyahı: yalnız masasız qonaqlar; axtarışda hamı ── */
+function poolGuests() { const q = lc(f.q.trim()); return q ? guests.filter((g) => lc(g.name).includes(q)) : guests.filter((g) => !g.table); }
+const rosterGuests = () => poolGuests().filter((g) => f.side === 'all' || g.side === f.side);
+function renderRoster() {
+  const pool = poolGuests();
+  const cnt = (s) => pool.filter((g) => s === 'all' || g.side === s).length;
+  $('#sideTabs').innerHTML = [['all', 'Hamısı'], ['q', 'Qız evi'], ['o', 'Oğlan evi']].map(([s, l]) =>
+    `<button class="${s} ${f.side === s ? 'on' : ''}" data-side="${s}" aria-pressed="${f.side === s}">${s === 'all' ? '' : `<i class="sd ${s}"></i>`}${l}<span>${cnt(s)}</span></button>`).join('');
+  $('#listNote').textContent = f.q.trim() ? 'Axtarış bütün qonaqlarda gedir, masada olanlar da çıxır.' : 'Burada masası olmayan qonaqlar görünür.';
+  const vis = rosterGuests();
+  const sections = [...groups, ''].map((gr) => [gr, vis.filter((g) => (g.group || '') === gr)]).filter(([, l]) => l.length);
+  let html;
+  if (sections.length) {
+    html = sections.map(([gr, l]) => {
+      const all = l.every((g) => sel.has(g.id)), shut = folded.has(gr);
+      return `<section class="${shut ? 'shut' : ''}"><div class="sec-h">
+        <button class="sec-t" data-fold="${esc(gr)}" aria-expanded="${!shut}">${UI.chev}${gr ? esc(gr) : 'Qrupsuz'}<b>${l.length}</b></button>
+        <button class="link" data-selgroup="${esc(gr)}">${all ? 'Seçimi götür' : 'Hamısını seç'}</button></div>
+        <div class="sec-b">${l.map(row).join('')}</div></section>`;
+    }).join('');
+  } else if (f.q.trim()) html = '<p class="r-empty">Bu adla qonaq tapılmadı.</p>';
+  else if (guests.every((g) => g.table)) html = '<div class="r-done"><b>Hamı yerləşdirildi</b><p>Kimisə başqa masaya keçirmək üçün masadakı adına toxunun.</p></div>';
+  else html = '<p class="r-empty">Bu tərəfdə masası olmayan qonaq qalmayıb.</p>';
+  $('#list').innerHTML = html;
+  $('#fab').innerHTML = `Qonaq seç <span>${guests.filter((g) => !g.table).length}</span>`;
+}
+function row(g) {
+  const t = g.table && tById(g.table), on = sel.has(g.id);
+  const tag = g.rsvp === 'no' ? '<span class="tag no">Gəlməyəcək</span>' : g.rsvp === 'none' ? '<span class="tag">Cavab verməyib</span>' : g.rsvp === 'maybe' ? '<span class="tag">Bəlkə gələr</span>' : '';
+  return `<div class="row ${on ? 'sel' : ''}" data-drag="${g.id}">
+    <button class="pick" data-pick="${g.id}" aria-pressed="${on}">
+      <span class="av ${g.side}" aria-hidden="true">${on ? UI.check : esc(initials(g.name))}</span>
+      <span class="nm"><b>${esc(g.name)}</b><small>${g.plus ? `<span class="plus">+${g.plus} nəfər</span>` : ''}${t ? `<span>${esc(t.name)}</span>` : ''}${tag}</small></span>
+    </button>
+    <button class="edit" data-act="edit" data-id="${g.id}" aria-label="Düzəliş et: ${esc(g.name)}">${UI.pencil}</button>
+  </div>`;
+}
+
+/* ── Göstərici ── */
+function renderProg() {
+  const total = guests.length, seated = guests.filter((g) => g.table).length;
+  $('#prog').innerHTML = `<p><b>${seated}</b> / ${total} qonaq yerləşdirilib</p>
+    <div class="pbar"><span style="width:${total ? seated / total * 100 : 0}%"></span></div>
+    <small>${total - seated ? `${total - seated} qonaq hələ masasızdır` : 'Hamı yerləşdirilib'}</small>`;
+}
+function stepsHTML(where) {
+  const s = sel.size > 0;
+  return `<ol class="steps"><li class="${s ? 'done' : 'now'}"><b>${s ? UI.check : '1'}</b><span class="d-only">Soldakı siyahıdan qonaqları seçin</span><span class="m-only">«Qonaq seç» düyməsi ilə qonaqları seçin</span></li>
+    <li class="${s ? 'now' : ''}"><b>2</b>${where === 'map' ? 'Xəritədə masaya toxunun' : 'Masaya toxunun və ya adı masaya sürüşdürün'}</li></ol>`;
+}
+
+/* ── Masalar ── */
+function renderCards() {
+  return `<div class="v-head"><h2>Masalar</h2>
+      <div class="legend"><span><i class="chair q"></i>Qız evi</span><span><i class="chair o"></i>Oğlan evi</span><span><i class="ring"></i>Boş stul</span></div>
+      <button class="btn" data-act="add-table">${UI.plus}Masa əlavə et</button></div>
+    ${stepsHTML('cards')}
+    <div class="grid">${tables.map(card).join('')}<button class="add-card" data-act="add-table">${UI.plusBig}<span>Yeni masa</span></button></div>`;
+}
+function card(t) {
+  const list = atTable(t.id), u = used(t.id), over = u > t.cap;
+  const st = over ? `<span class="st warn">${u - t.cap} stul əlavə edin</span>` : u === t.cap ? '<span class="st full">Masa doludur</span>'
+    : u ? `<span class="st">${t.cap - u} boş yer</span>` : '<span class="st">Boş masa</span>';
+  return `<article class="tcard ${over ? 'over' : ''}" data-drop="table:${t.id}" data-card="${t.id}">
+    <div class="tc-art ${t.shape}">${tableSVG(t)}</div>
+    <h3>${esc(t.name)}</h3>
+    <p class="tc-meta"><b>${u}</b> / ${t.cap} nəfər, ${st}</p>
+    ${list.length ? `<ul class="names">${list.map((g) => `<li data-drag="${g.id}"><button class="nm-btn ${sel.has(g.id) ? 'sel' : ''}" data-pick="${g.id}" aria-pressed="${sel.has(g.id)}"><i class="sd ${g.side}"></i><span>${esc(g.name)}</span>${g.plus ? `<em>+${g.plus}</em>` : ''}</button></li>`).join('')}</ul>`
+      : '<p class="tc-empty">Qonaqları seçin və bu masaya toxunun</p>'}
+    ${sel.size ? `<button class="place" data-place="${t.id}">Bu masaya yerləşdir</button>` : `<button class="tc-edit" data-act="edit-table" data-id="${t.id}">Masanı dəyiş</button>`}
+  </article>`;
+}
+
+/* ── Zal planı ── */
+function renderMap() {
+  const head = layoutMode
+    ? `<div class="edit-bar"><p><b>Zalı düzənləyirsiniz.</b> Masaları və zonaları tutub istədiyiniz yerə çəkin. Zonanı küncündəki kvadratdan dartıb böyüdün. Adını dəyişmək və ya silmək üçün üstünə toxunun.</p>
+        <div class="eb-btns"><button class="btn" data-act="add-table">${UI.plus}Masa</button><button class="btn" data-act="add-zone">${UI.plus}Zona</button><button class="btn pri" data-act="done-hall">Hazırdır</button></div></div>`
+    : `<div class="v-head"><h2>Zal planı</h2>
+        <div class="legend"><span><i class="chair q"></i>Qız evi</span><span><i class="chair o"></i>Oğlan evi</span><span><i class="ring"></i>Boş stul</span></div>
+        <button class="btn" data-act="edit-hall">${UI.pencil}Zalı düzənlə</button></div>${stepsHTML('map')}`;
+  return `${head}<div class="hall-wrap">${hallHTML(false)}</div>`;
+}
+function hallHTML(mini, me) {
+  return `<div class="hall ${layoutMode && !mini ? 'editing' : ''}" ${mini ? '' : 'id="hall"'}>
+    ${zones.map((z) => zoneHTML(z, mini)).join('')}${tables.map((t) => mtHTML(t, mini, me)).join('')}</div>`;
+}
+function zoneHTML(z, mini) {
+  const edit = !mini && layoutMode;
+  return `<div class="zone k-${z.kind} ${z.shape}" ${mini ? '' : `data-zone="${z.id}"`} ${edit ? `role="button" tabindex="0" aria-label="Zona: ${esc(z.label)}"` : ''}
+    style="left:${z.x - z.w / 2}%;top:${z.y - z.h / 2}%;width:${z.w}%;height:${z.h}%"><span>${ICON[z.kind] || ''}${esc(z.label)}</span>${edit ? `<i class="rz" data-rz="${z.id}" title="Dartıb böyüdün"></i>` : ''}</div>`;
+}
+function mtHTML(t, mini, me) {
+  const style = `left:${t.x}%;top:${t.y}%`;
+  if (mini) return `<div class="mt ${t.shape} ${me === t.id ? 'me' : ''}" style="${style}">${tableSVG(t, { neutral: true, me: me === t.id })}</div>`;
+  const u = used(t.id);
+  return `<button type="button" class="mt ${t.shape} ${u > t.cap ? 'over' : ''}" data-drop="table:${t.id}" data-mt="${t.id}" style="${style}" aria-label="${esc(t.name)}: ${u} / ${t.cap} yer">${tableSVG(t)}</button>`;
+}
+
+/* ── Qonaq görünüşü ── */
+function renderGuest() {
+  return `<div class="gv">
+    <div class="phone"><div class="screen">
+      <p class="who">Aysel və Rauf, 14 dekabr</p>
+      <h3>Masanızı tapın</h3>
+      <input class="search" id="gq" type="search" placeholder="Adınızı yazın" value="${esc(gq)}" aria-label="Adınızı yazın">
+      <div id="gres"></div>
+    </div></div>
+    <div class="notes">
+      <div class="note ask"><h4 id="smq">Qonaqlar zal planını görsün?</h4>
+        <p>«Hə» seçsəniz, qonaq adını yazanda masa nömrəsi ilə yanaşı zalın kiçik planını da görür, öz masası işıqlanır. «Yox» seçsəniz, yalnız masa nömrəsi görünür.</p>
+        <fieldset class="big2" aria-labelledby="smq" style="margin-top:12px">
+          <label><input type="radio" name="showmap" value="1" ${showMap ? 'checked' : ''}>Hə, göstərilsin</label>
+          <label><input type="radio" name="showmap" value="0" ${showMap ? '' : 'checked'}>Yox, yalnız masa nömrəsi</label>
+        </fieldset></div>
+      <div class="note"><h4>Qonaq bunları heç vaxt görmür</h4>
+        <ul><li>Qız evi və ya oğlan evi işarəsi</li><li>Qruplar, məsələn «Məhlə uşaqları»</li><li>Masasında başqa kimlərin oturduğu</li><li>Masası hələ təyin olunmayan qonaqlar axtarışda çıxmır</li></ul></div>
+    </div></div>`;
+}
+function renderGres() {
+  const box = $('#gres'); if (!box) return;
+  const q = lc(gq.trim());
+  if (q.length < 2) { box.innerHTML = ''; return; }
+  const m = guests.filter((g) => g.table && lc(g.name).includes(q)).slice(0, 5);
+  if (!m.length) { box.innerHTML = '<div class="found"><p>Bu adla masa tapılmadı. Adınızı dəvətnamədəki kimi yazın.</p></div>'; return; }
+  const cur = m.find((g) => g.id === gsel) || m[0], t = tById(cur.table);
+  box.innerHTML = `${m.length > 1 ? `<ul class="gres">${m.map((g) => `<li><button data-g="${g.id}" aria-pressed="${g.id === cur.id}"><span>${esc(g.name)}</span><small>${esc(tById(g.table).name)}</small></button></li>`).join('')}</ul>` : ''}
+    <div class="found"><p>${esc(cur.name)}, sizin masanız</p><strong>${esc(t.name)}</strong>${showMap ? `<div class="mini">${hallHTML(true, t.id)}</div>` : ''}</div>`;
+}
+
+/* ── Seçim paneli ── */
+function renderSel() {
+  const bar = $('#selbar');
+  document.body.classList.toggle('placing', sel.size > 0 && !layoutMode);
+  document.body.classList.toggle('sel-on', sel.size > 0);
+  if (!sel.size) { bar.hidden = true; return; }
+  const anySeated = [...sel].some((id) => byId(id).table);
+  bar.hidden = false;
+  bar.innerHTML = `<div class="sb-txt"><b>${sel.size} qonaq seçildi</b><span class="d-only">İndi masaya toxunun və ya sürüşdürün</span></div>
+    <button class="go m-only" data-act="pick-table">Masa seç</button>
+    <button class="open-list m-only" data-act="open-sheet">Siyahı</button>
+    <button data-act="tag">Tərəf və qrup</button>
+    ${anySeated ? '<button data-act="unseat-sel">Masadan çıxar</button>' : ''}
+    <button data-act="clear-sel">Ləğv et</button>`;
+}
+
+function renderStage() {
+  document.querySelectorAll('[data-view]').forEach((b) => b.setAttribute('aria-selected', b.dataset.view === view));
+  $('#stage').innerHTML = view === 'cards' ? renderCards() : view === 'map' ? renderMap() : renderGuest();
+  if (view === 'guest') renderGres();
+}
+function render() { renderProg(); renderRoster(); renderStage(); renderSel(); }
+const renderSelAll = () => { renderRoster(); renderStage(); renderSel(); };
+
+/* ── Əməliyyatlar (hamısı geri qaytarılır) ── */
+function snap() { last = JSON.parse(JSON.stringify({ guests, tables, zones, groups })); }
+function undo() {
+  if (!last) return;
+  ({ guests, tables, zones, groups } = last); last = null; sel.clear();
+  toast('Geri qaytarıldı'); render();
+}
+function assign(ids, tableId) {
+  ids = [...ids]; if (!ids.length) return;
+  snap();
+  ids.forEach((id) => { byId(id).table = tableId; sel.delete(id); });
+  const t = tById(tableId);
+  const who = ids.length === 1 ? esc(byId(ids[0]).name) : `${ids.length} qonaq`;
+  let msg = t ? `${esc(t.name)}: ${who} yerləşdirildi` : `${who} masadan çıxarıldı`;
+  if (t && used(t.id) > t.cap) msg += `. Masada yer qalmadı (${used(t.id)}/${t.cap})`;
+  toast(msg, true); render();
+}
+function removeThing(kind, id) {
+  snap();
+  let name;
+  if (kind === 'table') { name = tById(id).name; atTable(id).forEach((g) => { g.table = 0; }); tables = tables.filter((x) => x.id !== id); }
+  if (kind === 'zone') { name = zById(id).label; zones = zones.filter((x) => x.id !== id); }
+  if (kind === 'guest') { name = byId(id).name; guests = guests.filter((x) => x.id !== id); sel.delete(id); }
+  dlg.close();
+  toast(`${esc(name)} silindi`, true); render();
+}
+
+/* ── Bildiriş ── */
+let tt;
+function toast(msg, undoable) {
+  const el = $('#toast');
+  el.innerHTML = `<span>${msg}</span>${undoable ? '<button data-act="undo">Geri qaytar</button>' : ''}`;
+  el.classList.add('show'); clearTimeout(tt);
+  tt = setTimeout(() => el.classList.remove('show'), 5000);
+}
+
+/* ── Pəncərələr ── */
+const dlg = $('#dlg');
+function openDialog(html, onOk) {
+  dlg.innerHTML = `<form method="dialog" class="dform">${html}</form>`; dlg.returnValue = '';
+  dlg.onclose = () => { if (dlg.returnValue === 'ok') onOk(new FormData(dlg.querySelector('form'))); };
+  dlg.showModal();
+}
+const stepper = (name, v, min, max, label) => `<div class="f"><span>${label}</span><div class="stepper">
+  <button type="button" data-step="-1" aria-label="Azalt">−</button><input type="number" name="${name}" value="${v}" min="${min}" max="${max}" inputmode="numeric" aria-label="${label}"><button type="button" data-step="1" aria-label="Artır">+</button></div></div>`;
+const footer = (ok, extra = '') => `<menu>${extra}<span class="sp"></span><button class="btn" value="cancel" formnovalidate>Bağla</button><button class="btn pri" value="ok">${ok}</button></menu>`;
+const sidePick = (v, keep) => `<fieldset class="big2"><legend>Kimin qonağıdır?</legend>${['q', 'o'].map((s) => `<label class="${s}"><input type="radio" name="side" value="${s}" ${v === s ? 'checked' : ''}><i class="sd ${s}"></i>${SIDES[s]}</label>`).join('')}${keep ? '<label><input type="radio" name="side" value="" checked>Dəyişmə</label>' : ''}</fieldset>`;
+const groupPick = (v, keep) => `<fieldset class="chips-pick"><legend>Qrup</legend>${keep ? '<label><input type="radio" name="group" value="__keep" checked>Dəyişmə</label>' : ''}${[...groups, ''].map((x) => `<label><input type="radio" name="group" value="${esc(x)}" ${!keep && x === (v || '') ? 'checked' : ''}>${x ? esc(x) : 'Qrupsuz'}</label>`).join('')}</fieldset>
+  <label class="f">Yeni qrup lazımdırsa, adını yazın<input name="newgroup" maxlength="40" placeholder="məs. Universitet yoldaşları" autocomplete="off"></label>`;
+const pickGroup = (fd) => { const ng = String(fd.get('newgroup') || '').trim(); if (ng && !groups.includes(ng)) groups.push(ng); return ng || fd.get('group'); };
+
+function guestForm(g) {
+  const isNew = !g, v = g || { name: '', side: f.side === 'o' ? 'o' : 'q', group: '', plus: 0, table: 0 };
+  openDialog(`<h3>${isNew ? 'Qonaq əlavə et' : 'Qonaq'}</h3>
+    <label class="f">Adı və soyadı<input name="name" required maxlength="80" value="${esc(v.name)}" autocomplete="off"></label>
+    ${sidePick(v.side)}${groupPick(v.group)}
+    ${stepper('plus', v.plus, 0, 9, 'Yanında neçə nəfər gəlir?')}
+    <label class="f">Masa<select name="table"><option value="0">Hələ masası yoxdur</option>${tables.map((t) => `<option value="${t.id}" ${t.id === v.table ? 'selected' : ''}>${esc(t.name)} (${used(t.id)}/${t.cap})</option>`).join('')}</select></label>
+    ${footer(isNew ? 'Əlavə et' : 'Yadda saxla', isNew ? '' : `<button type="button" class="btn danger" data-act="del-guest" data-id="${g.id}">Qonağı sil</button>`)}`, (fd) => {
+    const name = String(fd.get('name')).trim(); if (!name) return;
+    snap();
+    const data = { name, side: fd.get('side') || 'q', group: pickGroup(fd), plus: clamp(Number(fd.get('plus')) || 0, 0, 9), table: Number(fd.get('table')) };
+    if (isNew) guests.push({ id: nextId++, rsvp: 'none', ...data }); else Object.assign(byId(g.id), data);
+    toast(isNew ? `${esc(name)} əlavə edildi` : 'Yadda saxlanıldı', true); render();
+  });
+}
+function tagForm() {
+  openDialog(`<h3>Tərəf və qrup</h3><p class="dsub">Seçilən ${sel.size} qonaq üçün</p>${sidePick('', true)}${groupPick('', true)}${footer('Yadda saxla')}`, (fd) => {
+    const side = fd.get('side'), grp = pickGroup(fd);
+    if (!side && grp === '__keep') return;
+    snap();
+    sel.forEach((id) => { const g = byId(id); if (side) g.side = side; if (grp !== '__keep') g.group = grp; });
+    toast(`${sel.size} qonaq yeniləndi`, true); render();
+  });
+}
+function tableForm(t) {
+  const isNew = !t, v = t || { name: `Masa ${nextOf(tables)}`, shape: 'round', cap: 10 };
+  const list = isNew ? [] : atTable(t.id);
+  openDialog(`<h3>${isNew ? 'Yeni masa' : esc(v.name)}</h3>${isNew ? '' : `<p class="dsub">${used(t.id)} / ${t.cap} yer dolu</p>`}
+    <label class="f">Masanın adı<input name="name" required maxlength="40" value="${esc(v.name)}" autocomplete="off"></label>
+    <fieldset class="big2"><legend>Forması</legend><label><input type="radio" name="shape" value="round" ${v.shape === 'round' ? 'checked' : ''}>${UI.round}Dəyirmi</label><label><input type="radio" name="shape" value="long" ${v.shape === 'long' ? 'checked' : ''}>${UI.long}Uzun</label></fieldset>
+    ${stepper('cap', v.cap, 2, 40, 'Neçə nəfərlikdir?')}
+    ${isNew ? '' : `<div class="f"><span>Masadakı qonaqlar</span><ul class="tlist">${list.length ? list.map((g) => `<li><i class="sd ${g.side}"></i><span>${esc(g.name)}${g.plus ? ` <em>+${g.plus}</em>` : ''}</span><button type="button" data-unseat="${g.id}">Masadan çıxar</button></li>`).join('') : '<li class="muted">Bu masada hələ qonaq yoxdur.</li>'}</ul></div>`}
+    ${footer(isNew ? 'Əlavə et' : 'Yadda saxla', isNew ? '' : `<button type="button" class="btn danger" data-act="del-table" data-id="${t.id}">Masanı sil</button>`)}`, (fd) => {
+    const name = String(fd.get('name')).trim(); if (!name) return;
+    snap();
+    const data = { name, shape: fd.get('shape') || 'round', cap: clamp(Number(fd.get('cap')) || 10, 2, 40) };
+    if (isNew) {
+      tables.push({ id: nextOf(tables), x: 40 + (tables.length % 4) * 7, y: 46, ...data });
+      toast(`${esc(name)} əlavə edildi. Zal planında «Zalı düzənlə» ilə yerini dəyişin`, true);
+    } else { Object.assign(tById(t.id), data); toast('Yadda saxlanıldı', true); }
+    render();
+  });
+}
+function zoneForm(z) {
+  const isNew = !z, v = z || { label: '', shape: 'rect' };
+  openDialog(`<h3>${isNew ? 'Yeni zona' : esc(v.label)}</h3>
+    ${isNew ? `<fieldset class="chips-pick"><legend>Hazır adlardan seçin</legend>${ZONE_PRESETS.map(([l, k]) => `<label><input type="radio" name="preset" value="${k}" data-label="${esc(l)}">${ICON[k]}${esc(l)}</label>`).join('')}</fieldset>` : ''}
+    <label class="f">${isNew ? 'və ya öz adınızı yazın' : 'Zonanın adı'}<input name="label" required maxlength="30" value="${esc(v.label)}" placeholder="məs. Gəlin otağı" autocomplete="off"></label>
+    <fieldset class="big2"><legend>Forması</legend><label><input type="radio" name="shape" value="rect" ${v.shape !== 'oval' ? 'checked' : ''}>${UI.rect}Düzbucaq</label><label><input type="radio" name="shape" value="oval" ${v.shape === 'oval' ? 'checked' : ''}>${UI.oval}Oval</label></fieldset>
+    ${footer(isNew ? 'Əlavə et' : 'Yadda saxla', isNew ? '' : `<button type="button" class="btn danger" data-act="del-zone" data-id="${z.id}">Zonanı sil</button>`)}`, (fd) => {
+    const label = String(fd.get('label')).trim(); if (!label) return;
+    snap();
+    const shape = fd.get('shape') || 'rect';
+    if (isNew) {
+      const p = ZONE_PRESETS.find(([l]) => l === label);
+      zones.push({ id: nextOf(zones), label, kind: p ? p[1] : 'custom', shape, x: 50, y: 50, w: 16, h: 8 });
+      toast(`${esc(label)} əlavə edildi. Onu tutub istədiyiniz yerə çəkin`, true);
+    } else { Object.assign(zById(z.id), { label, shape }); toast('Yadda saxlanıldı', true); }
+    render();
+  });
+}
+const openSheet = () => { $('#roster').classList.add('open'); document.body.classList.add('sheet'); };
+const closeSheet = () => { $('#roster').classList.remove('open'); document.body.classList.remove('sheet'); };
+
+/* ── Kliklər ── */
+let suppress = false;
+document.addEventListener('click', (e) => {
+  if (suppress) { suppress = false; e.preventDefault(); e.stopPropagation(); return; }
+  const c = (s) => e.target.closest(s);
+  let el;
+  if ((el = c('[data-step]'))) { const inp = el.parentElement.querySelector('input'); inp.value = clamp(Number(inp.value) + Number(el.dataset.step), Number(inp.min), Number(inp.max)); return; }
+  if ((el = c('[data-view]'))) { view = el.dataset.view; renderStage(); renderSel(); return; }
+  if ((el = c('[data-pick]'))) { const id = +el.dataset.pick; sel.has(id) ? sel.delete(id) : sel.add(id); renderSelAll(); return; }
+  if ((el = c('[data-side]'))) { f.side = el.dataset.side; renderRoster(); return; }
+  if ((el = c('[data-fold]'))) { const g = el.dataset.fold; folded.has(g) ? folded.delete(g) : folded.add(g); renderRoster(); return; }
+  if ((el = c('[data-selgroup]'))) {
+    const ids = rosterGuests().filter((g) => (g.group || '') === el.dataset.selgroup).map((g) => g.id);
+    const all = ids.every((id) => sel.has(id));
+    ids.forEach((id) => (all ? sel.delete(id) : sel.add(id))); renderSelAll(); return;
+  }
+  if ((el = c('[data-unseat]'))) { const li = el.closest('dialog li'); assign([+el.dataset.unseat], 0); li?.remove(); return; }
+  if ((el = c('[data-place]'))) { assign(sel, +el.dataset.place); return; }
+  if ((el = c('[data-zone]')) && layoutMode) { zoneForm(zById(+el.dataset.zone)); return; }
+  if ((el = c('[data-mt]'))) { const id = +el.dataset.mt; if (sel.size && !layoutMode) assign(sel, id); else tableForm(tById(id)); return; }
+  if ((el = c('[data-card]')) && sel.size && !c('[data-act]')) { assign(sel, +el.dataset.card); return; }
+  if ((el = c('[data-g]'))) { gsel = +el.dataset.g; renderGres(); return; }
+  if (!(el = c('[data-act]'))) return;
+  const id = +el.dataset.id;
+  switch (el.dataset.act) {
+    case 'add-guest': guestForm(); break;
+    case 'edit': guestForm(byId(id)); break;
+    case 'del-guest': removeThing('guest', id); break;
+    case 'add-table': tableForm(); break;
+    case 'edit-table': tableForm(tById(id)); break;
+    case 'del-table': removeThing('table', id); break;
+    case 'add-zone': zoneForm(); break;
+    case 'del-zone': removeThing('zone', id); break;
+    case 'edit-hall': layoutMode = true; sel.clear(); renderSelAll(); break;
+    case 'done-hall': layoutMode = false; renderStage(); renderSel(); toast('Zal planı yadda saxlanıldı'); break;
+    case 'tag': tagForm(); break;
+    case 'unseat-sel': assign([...sel].filter((x) => byId(x).table), 0); break;
+    case 'undo': undo(); break;
+    case 'clear-sel': sel.clear(); renderSelAll(); break;
+    case 'open-sheet': openSheet(); break;
+    case 'close-sheet': case 'pick-table': closeSheet(); break;
+    case 'import': toast('Maketdə işləmir. Real versiyada Excel faylındakı «Tərəf» və «Qrup» sütunları da oxunacaq.'); break;
+  }
+});
+document.addEventListener('change', (e) => {
+  if (e.target.name === 'preset') dlg.querySelector('[name=label]').value = e.target.dataset.label;
+  if (e.target.name === 'showmap') {
+    showMap = e.target.value === '1'; renderGres();
+    toast(showMap ? 'Qonaqlar zal planını görəcək' : 'Qonaqlar yalnız masa nömrəsini görəcək');
+  }
+});
+document.addEventListener('input', (e) => {
+  if (e.target.id === 'q') { f.q = e.target.value; renderRoster(); }
+  if (e.target.id === 'gq') { gq = e.target.value; gsel = null; renderGres(); }
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.matches?.('[data-zone][role=button]')) zoneForm(zById(+e.target.dataset.zone));
+  if (e.key === 'Escape' && !dlg.open && sel.size) { sel.clear(); renderSelAll(); }
+});
+
+/* ── Sürüşdürmə ──
+   Siçan: sətri tutub çəkin. Barmaq: adın üstündə bir az saxlayın (titrəyir), sonra çəkin.
+   Zalı düzənlə: masa və zonanı çəkin, zonanı küncündən böyüdün. */
+let pd = null, ghost = null;
+const hallPct = (e) => { const r = $('#hall').getBoundingClientRect(); return [(e.clientX - r.left) / r.width * 100, (e.clientY - r.top) / r.height * 100]; };
+const half = (v) => Math.round(v * 2) / 2;
+document.addEventListener('pointerdown', (e) => {
+  if (e.button > 0 || dlg.open) return;
+  if (layoutMode) {
+    const rz = e.target.closest('[data-rz]');
+    if (rz) { const z = zById(+rz.dataset.rz); pd = { kind: 'resize', z, el: rz.parentElement, x: e.clientX, y: e.clientY, w: z.w, h: z.h, left: z.x - z.w / 2, top: z.y - z.h / 2 }; return; }
+    const it = e.target.closest('[data-mt],[data-zone]');
+    if (it) { const isZone = !!it.dataset.zone, o = isZone ? zById(+it.dataset.zone) : tById(+it.dataset.mt), [px, py] = hallPct(e); pd = { kind: 'move', o, isZone, el: it, x: e.clientX, y: e.clientY, dx: o.x - px, dy: o.y - py }; }
+    return;
+  }
+  if (e.target.closest('.edit')) return;
+  const src = e.target.closest('[data-drag]'); if (!src) return;
+  const id = +src.dataset.drag;
+  const p = pd = { kind: 'guest', ids: sel.has(id) ? [...sel] : [id], x: e.clientX, y: e.clientY, touch: e.pointerType !== 'mouse' };
+  if (p.touch) p.timer = setTimeout(() => { if (pd === p) { navigator.vibrate?.(15); startDrag(p, p.x, p.y); } }, 380);
+});
+function startDrag(p, x, y) {
+  p.active = true; suppress = true;
+  document.body.classList.add('dragging');
+  if (p.kind !== 'guest') return;
+  const first = byId(p.ids[0]);
+  ghost = document.createElement('div'); ghost.className = 'ghost';
+  ghost.innerHTML = `<i class="sd ${first.side}"></i>${esc(short(first.name))}${p.ids.length > 1 ? ` və daha ${p.ids.length - 1} nəfər` : ''}`;
+  ghost.style.transform = `translate(${x + 14}px,${y + 10}px)`;
+  document.body.append(ghost);
+  if (isPhone()) closeSheet();
+}
+document.addEventListener('pointermove', (e) => {
+  if (!pd) return;
+  if (!pd.active) {
+    const d = Math.hypot(e.clientX - pd.x, e.clientY - pd.y);
+    if (pd.touch && pd.kind === 'guest') { if (d > 8) { clearTimeout(pd.timer); pd = null; } return; }
+    if (d < 5) return;
+    startDrag(pd, e.clientX, e.clientY);
+  }
+  e.preventDefault();
+  if (pd.kind === 'move') {
+    const [px, py] = hallPct(e), o = pd.o;
+    o.x = half(clamp(px + pd.dx, 3, 97)); o.y = half(clamp(py + pd.dy, 3, 97));
+    if (pd.isZone) { pd.el.style.left = (o.x - o.w / 2) + '%'; pd.el.style.top = (o.y - o.h / 2) + '%'; }
+    else { pd.el.style.left = o.x + '%'; pd.el.style.top = o.y + '%'; }
+    return;
+  }
+  if (pd.kind === 'resize') {
+    const r = $('#hall').getBoundingClientRect(), z = pd.z;
+    z.w = half(clamp(pd.w + (e.clientX - pd.x) / r.width * 100, 6, 90)); z.h = half(clamp(pd.h + (e.clientY - pd.y) / r.height * 100, 4, 80));
+    z.x = pd.left + z.w / 2; z.y = pd.top + z.h / 2;
+    pd.el.style.width = z.w + '%'; pd.el.style.height = z.h + '%';
+    return;
+  }
+  ghost.style.transform = `translate(${e.clientX + 14}px,${e.clientY + 10}px)`;
+  if (e.clientY > innerHeight - 80) scrollBy(0, 14); else if (e.clientY < 80) scrollBy(0, -14);
+  const tgt = document.elementFromPoint(e.clientX, e.clientY)?.closest('[data-drop]') || null;
+  if (tgt !== pd.over) { pd.over?.classList.remove('hover'); tgt?.classList.add('hover'); pd.over = tgt; }
+}, { passive: false });
+/* Barmaqla çəkərkən səhifə sürüşməsin */
+document.addEventListener('touchmove', (e) => { if (pd?.active) e.preventDefault(); }, { passive: false });
+document.addEventListener('contextmenu', (e) => { if (pd) e.preventDefault(); });
+function endDrag(drop) {
+  const p = pd; pd = null;
+  if (!p) return;
+  clearTimeout(p.timer);
+  if (!p.active) return;
+  document.body.classList.remove('dragging');
+  ghost?.remove(); ghost = null;
+  p.over?.classList.remove('hover');
+  setTimeout(() => { suppress = false; }, 0);
+  if (p.kind !== 'guest') return;
+  const d = drop && p.over?.dataset.drop;
+  if (d === 'roster') assign(p.ids.filter((id) => byId(id).table), 0);
+  else if (d?.startsWith('table:')) assign(p.ids, +d.slice(6));
+}
+document.addEventListener('pointerup', () => endDrag(true));
+document.addEventListener('pointercancel', () => endDrag(false));
+
+render();
+</script>
+</body>
+</html>

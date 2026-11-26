@@ -390,7 +390,7 @@ export default function RoyalPalaceTemplate(props) {
                       <div style={{ fontFamily: capsF, fontWeight: 600, fontSize: tableFontPx(roman(tb.num) || tb.num, 48), lineHeight: 1 }}>{roman(tb.num) || tb.num}</div>
                       {roman(tb.num) && <div style={{ fontSize: 14, color: '#5A4A33' }}>{tb.num}</div>}
                     </div>
-                    {seating.tablemates.length > 0 && <div style={{ marginTop: 18, fontStyle: 'italic', fontSize: 16.5, color: C.MUTED, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}
+                    {seating.tablemates.length > 0 && <div style={{ marginTop: 18, fontStyle: 'italic', fontSize: 16.5, color: C.MUTED, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}{seating.mapEl}
                     <button onClick={seating.reset} data-press style={{ marginTop: 6, background: 'none', border: 'none', color: C.GOLD_L, fontSize: 16, minHeight: 44, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 4, fontFamily: body }}>
                       {seatingL.again || 'Yenidən axtar'}
                     </button>

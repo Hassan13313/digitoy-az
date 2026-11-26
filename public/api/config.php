@@ -325,7 +325,7 @@ function rateGate(string $key, int $limit, int $window): bool {
 /* ── Sxem versiyası (Phase 39) ──
    Sütun və ya cədvəl əlavə edəndə BU RƏQƏMİ ARTIR — əks halda miqrasiya
    canlıda işləməz. */
-const SCHEMA_VERSION = 51;   /* 51: promo_codes + draft_invitations.promo_code/price_base/price_final (2026-11-25) */
+const SCHEMA_VERSION = 52;   /* 52: guests.side/group_name + seating_layouts (zal planı, 2026-11-26) */
 
 /* ── Cədvəlləri avtomatik yarat ──
    Phase 39 OPTİMİZASİYASI: əvvəl bu funksiya HƏR sorğuda 6 `CREATE TABLE
@@ -787,6 +787,29 @@ function runMigrations(PDO $db): void {
             if ((int) ($e->errorInfo[1] ?? 0) !== 1060) throw $e;   /* paralel sorğu artıq əlavə edib */
         }
     }
+
+    /* ── v52 (2026-11-26) — oturma planı: qız/oğlan evi, tanışlıq qrupu, zal planı ──
+       seating_layout_lib.php. ADDITIVE: köhnə kod yeni sütunları/cədvəli görmür.
+       Masasız qonaq = table_id '' (sütun NOT NULL qalır). */
+    $seatCols = [
+        'side'       => 'VARCHAR(8)',
+        'group_name' => 'VARCHAR(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci',
+    ];
+    foreach ($seatCols as $col => $type) {
+        if (!empty($db->query("SHOW COLUMNS FROM guests LIKE '$col'")->fetchAll())) continue;
+        try {
+            $db->exec("ALTER TABLE guests ADD COLUMN $col $type DEFAULT NULL");
+        } catch (PDOException $e) {
+            if ((int) ($e->errorInfo[1] ?? 0) !== 1060) throw $e;   /* paralel sorğu artıq əlavə edib */
+        }
+    }
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS seating_layouts (
+            invitation_id VARCHAR(120) NOT NULL PRIMARY KEY,
+            layout_json   MEDIUMTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+            updated_at    DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
 
     /* ── Sxem versiyasını qeyd et ──
        Bu sətir olmasa ensureTables() hər sorğuda tam miqrasiya işlədər. */

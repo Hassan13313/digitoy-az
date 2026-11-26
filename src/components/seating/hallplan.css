@@ -1,0 +1,33 @@
+/* Zal planı və masa şəkli — planlayıcı + dəvətnamədəki kiçik xəritə (prefiks sp-, başqa stillərlə toqquşmasın) */
+.sp-tsvg{display:block;width:100%;height:auto;overflow:visible}
+.sp-tsvg .sp-tn{font-family:"Cormorant Garamond","Playfair Display",Georgia,serif;font-weight:700;font-size:25px;fill:#2C2523;text-anchor:middle;dominant-baseline:middle}
+.sp-tsvg .sp-tn.sm{font-size:9px}
+.sp-tsvg .sp-tn.me{fill:#fff}
+.sp-tsvg .sp-tc{font-family:Inter,system-ui,sans-serif;font-size:8.5px;font-weight:500;fill:#6B5E54;text-anchor:middle;dominant-baseline:middle}
+.sp-tsvg .sp-tc.sm{font-size:5.5px}
+.sp-tsvg .sp-tc.over{fill:#9A3B2E;font-weight:700}
+
+.sp-hall{position:relative;container-type:inline-size;aspect-ratio:10/7;width:100%;margin:0 auto;border-radius:16px;background:radial-gradient(120% 90% at 50% 22%,#FFFEFA 0%,#F5EEE1 100%);box-shadow:inset 0 0 0 1px #EADFC9;overflow:hidden;color:#2C2523;text-align:left}
+.sp-hall.is-editing{background:radial-gradient(#D9CCB4 1px,transparent 1.4px) 0 0/22px 22px,radial-gradient(120% 90% at 50% 22%,#FFFEFA 0%,#F5EEE1 100%)}
+.sp-hall.is-mini{border-radius:12px}
+.sp-zone{position:absolute;display:grid;place-items:center;border-radius:10px;color:#84652A;background:rgba(243,234,211,.8);box-shadow:inset 0 0 0 1px #E6D6AE;box-sizing:border-box}
+.sp-zone span{display:flex;align-items:center;justify-content:center;gap:.4em;font:500 clamp(7px,1.3cqw,14px)/1.15 Inter,system-ui,sans-serif;padding:0 .4em;text-align:center}
+.sp-zone svg{width:1.3em;height:1.3em;flex:none}
+.sp-zone.oval{border-radius:50%}
+.sp-zone.k-stage{background:#EFE3C4;box-shadow:none;color:#6E5422}
+.sp-zone.k-couple{background:#fff;box-shadow:inset 0 0 0 1.5px #A9822F,0 4px 14px rgba(132,101,42,.12);color:#2C2523}
+.sp-zone.k-couple span{font-family:"Cormorant Garamond","Playfair Display",Georgia,serif;font-weight:600;font-size:clamp(8px,1.6cqw,17px)}
+.sp-zone.k-dance{background:transparent;box-shadow:none;border:1.5px dashed #D6C7AC;color:#A28F72}
+.sp-zone.k-door{background:transparent;box-shadow:none;border-top:3px solid #CBBFAE;border-radius:0;color:#6B5E54}
+.sp-hall.is-editing .sp-zone{cursor:move;touch-action:none;outline:1.5px dashed #A9822F;outline-offset:2px}
+.sp-rz{position:absolute;right:-8px;bottom:-8px;width:18px;height:18px;border-radius:6px;background:#fff;box-shadow:0 0 0 2px #A9822F,0 2px 6px rgba(0,0,0,.18);cursor:nwse-resize;touch-action:none}
+.sp-mt{position:absolute;transform:translate(-50%,-50%);border:0;padding:0;margin:0;background:none;cursor:pointer;z-index:2;transition:filter .2s;-webkit-tap-highlight-color:transparent}
+.sp-mt.round{width:12%}
+.sp-mt.long{width:26%}
+.sp-hall.is-mini .sp-mt{cursor:default}
+.sp-hall.is-mini .sp-mt.is-me{z-index:3;animation:sp-glow 1.8s ease-in-out infinite}
+.sp-hall.is-editing .sp-mt{cursor:move;touch-action:none;outline:1.5px dashed #A9822F;outline-offset:3px;border-radius:50%}
+.sp-hall.is-editing .sp-mt.long{border-radius:10px}
+.sp-mt:focus-visible{outline:2px solid #A9822F;outline-offset:3px;border-radius:50%}
+@keyframes sp-glow{50%{filter:drop-shadow(0 0 7px rgba(169,130,47,1))}}
+@media (prefers-reduced-motion:reduce){.sp-hall.is-mini .sp-mt.is-me{animation:none;filter:drop-shadow(0 0 6px rgba(169,130,47,.9))}}

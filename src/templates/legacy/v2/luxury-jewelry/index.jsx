@@ -409,7 +409,7 @@ export default function LuxuryJewelryTemplate(props) {
                         <div style={{ fontFamily: disp, fontSize: tableFontPx(tb.num, 52), lineHeight: 1 }}>{tb.num}</div>
                       </div>
                     </div>
-                    {seating.tablemates.length > 0 && <div style={{ marginTop: 16, fontSize: 14, color: C.MUTED, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(' · ')}</div>}
+                    {seating.tablemates.length > 0 && <div style={{ marginTop: 16, fontSize: 14, color: C.MUTED, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(' · ')}</div>}{seating.mapEl}
                     <button onClick={seating.reset} data-press style={{ marginTop: 6, background: 'none', border: 'none', color: C.MINT, fontSize: 14, minHeight: 44, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 4, fontFamily: body }}>
                       {seatingL.again || 'Yenidən axtar'}
                     </button>

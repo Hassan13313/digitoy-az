@@ -400,6 +400,7 @@ export default function ModernBlackTemplate(props) {
                         {seating.tablemates.map((g) => g.full_name).join(' / ')}
                       </div>
                     )}
+                    {seating.mapEl}
                     <button onClick={seating.reset} data-press style={{ marginTop: 14, background: 'none', border: 'none', borderBottom: `1px solid ${C.WHITE}`, color: C.WHITE, padding: '6px 0', minHeight: 44, cursor: 'pointer', fontSize: 14, fontFamily: sans }}>
                       {seatingL.again || 'Yenidən axtar'}
                     </button>

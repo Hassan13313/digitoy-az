@@ -52,7 +52,7 @@ export default function ImportDialog({
   onReset,
   result,
   maxRows = 2000,
-  hint = 'Faylda «Ad», «Masa» və «Telefon» sütunları olsun.',
+  hint = 'Faylda «Ad» sütunu olsun. «Masa», «Telefon», «Tərəf» (Qız evi / Oğlan evi) və «Qrup» ixtiyaridir — masası olmayanlar siyahıda gözləyir.',
   warning,
 }) {
   const stepIndex = STEPS.findIndex((s) => s.id === step);
@@ -166,7 +166,7 @@ export default function ImportDialog({
               <table className="w-full min-w-[420px] border-separate border-spacing-0 text-[14px]">
                 <thead>
                   <tr>
-                    {['#', 'Ad', 'Masa', 'Telefon'].map((h) => (
+                    {['#', 'Ad', 'Masa', 'Telefon', 'Tərəf', 'Qrup'].map((h) => (
                       <th
                         key={h}
                         scope="col"
@@ -190,6 +190,8 @@ export default function ImportDialog({
                       <td className="h-11 border-b border-[#EEE8DF] px-3 text-[#3F342E] tabular-nums">
                         {r.phone || '—'}
                       </td>
+                      <td className="h-11 border-b border-[#EEE8DF] px-3 text-[#3F342E]">{({ bride: 'Qız evi', groom: 'Oğlan evi' })[r.side] || '—'}</td>
+                      <td className="h-11 border-b border-[#EEE8DF] px-3 text-[#3F342E]">{r.group || '—'}</td>
                     </tr>
                   ))}
                 </tbody>

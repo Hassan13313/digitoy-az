@@ -395,7 +395,7 @@ export default function CinemaPremiereTemplate(props) {
                         <span style={{ fontFamily: head, fontWeight: 700, fontSize: 16, letterSpacing: '.2em' }}>{upper(CR.table, lang)}</span>
                         <span style={{ fontFamily: head, fontWeight: 800, fontSize: tableFontPx(tb.num, 64), lineHeight: 1 }}>{tb.num}</span>
                       </div>
-                      {seating.tablemates.length > 0 && <div style={{ marginTop: 8, fontSize: 14, lineHeight: 1.5, opacity: 0.9 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}
+                      {seating.tablemates.length > 0 && <div style={{ marginTop: 8, fontSize: 14, lineHeight: 1.5, opacity: 0.9 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}{seating.mapEl}
                     </div>
                   </div>
                 )}

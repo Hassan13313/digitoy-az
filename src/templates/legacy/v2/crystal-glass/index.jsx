@@ -451,7 +451,7 @@ export default function CrystalGlassTemplate(props) {
                       <div style={{ fontSize: 15, color: C.STEEL }}>{seating.selected.full_name}</div>
                       <div style={{ marginTop: 6, fontFamily: head, fontWeight: 200, fontSize: tableFontPx(tb.num, 68), lineHeight: 1 }}>{tb.hasWord && <span style={{ display: 'block', fontSize: 12, fontWeight: 400, letterSpacing: '.18em', color: C.STEEL, marginBottom: 6 }}>{tr.inv_table}</span>}{tb.num}</div>
                       <div aria-hidden="true" style={{ width: 48, height: 1.5, margin: '10px auto 0', background: SPEC_LINE }} />
-                      {seating.tablemates.length > 0 && <div style={{ marginTop: 12, fontSize: 14.5, color: C.STEEL, lineHeight: 1.55 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}
+                      {seating.tablemates.length > 0 && <div style={{ marginTop: 12, fontSize: 14.5, color: C.STEEL, lineHeight: 1.55 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}{seating.mapEl}
                       <button onClick={seating.reset} data-press style={{ marginTop: 6, background: 'none', border: 'none', color: C.INK, fontSize: 14.5, minHeight: 44, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 4, fontFamily: body }}>
                         {seatingL.again || 'Yenidən axtar'}
                       </button>

@@ -1,5 +1,7 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo, createElement } from 'react'
 import { getGuests } from '../utils/api'
+import HallPlan from '../components/seating/HallPlan'
+import { normalizeLayout } from '../components/seating/seatingModel'
 import { trackEvent } from '../utils/analytics'
 import { normalizeAz } from '../utils/normalizeAz'
 
@@ -54,6 +56,8 @@ export function useSeating({ seatingPlan, lang = 'az' }) {
 
   /* slug yoxdursa (demo/preview) heç vaxt yükləmə olmayacaq → dərhal boş massiv */
   const [apiGuests, setApiGuests] = useState(slug ? null : [])   // null = yüklənir
+  /* v52 — müştərinin seçimi: masa yoldaşları / zal planı (plan yoxdursa köhnə davranış) */
+  const [seatCfg, setSeatCfg] = useState(null)
   const [query,     setQuery]     = useState('')
   const [selected,  setSelected]  = useState(null)
   const [activeIdx, setActiveIdx] = useState(-1)
@@ -63,14 +67,18 @@ export function useSeating({ seatingPlan, lang = 'az' }) {
   useEffect(() => {
     if (!slug) return
     getGuests(slug)
-      .then((d) => setApiGuests(d.guests ?? []))
+      .then((d) => {
+        setApiGuests(d.guests ?? [])
+        /* qonaq → `seating`; toy sahibi / admin (açarla) → tam `layout` — eyni seçim tətbiq olunsun */
+        setSeatCfg(d.seating ?? (d.layout ? { showTablemates: d.layout.showTablemates !== false, showMap: d.layout.showMap === true, layout: d.layout } : null))
+      })
       .catch(() => setApiGuests([]))
   }, [slug])
 
   /* ── Qonaq siyahısı: API > seatingPlan mətni ── */
   const allGuests = useMemo(() => {
     if (apiGuests === null) return []            // hələ yüklənir
-    if (apiGuests.length > 0) return apiGuests   // API məlumatı
+    if (apiGuests.length > 0) return apiGuests.filter((g) => g.table_id)   // API; masası olmayanlar axtarışda çıxmır (v52)
     return parseSeatingText(seatingPlan)         // fallback
   }, [apiGuests, seatingPlan])
 
@@ -93,11 +101,21 @@ export function useSeating({ seatingPlan, lang = 'az' }) {
     }
   }, [query, suggestions.length])
 
-  /* Masa yoldaşları: seçilmiş qonaqla eyni masadakılar */
+  /* Masa yoldaşları: seçilmiş qonaqla eyni masadakılar (müştəri «Yox» seçibsə göstərilmir) */
+  const showTablemates = seatCfg?.showTablemates !== false
   const tablemates = useMemo(() => {
-    if (!selected) return []
+    if (!selected || !showTablemates) return []
     return allGuests.filter((g) => g.table_id === selected.table_id)
-  }, [selected, allGuests])
+  }, [selected, allGuests, showTablemates])
+
+  /* Kiçik zal planı — müştəri «Hə» seçibsə; şablonlar `{seating.mapEl}` ilə yerləşdirir */
+  const mapLayout = useMemo(() => (seatCfg?.showMap && seatCfg.layout
+    ? normalizeLayout(seatCfg.layout, allGuests.map((g) => g.table_id))
+    : null), [seatCfg, allGuests])
+  const mapEl = useMemo(() => (mapLayout && selected
+    ? createElement('div', { className: 'sp-mini-wrap', style: { margin: '16px auto 6px', maxWidth: 420, width: '100%' } },
+      createElement(HallPlan, { layout: mapLayout, mini: true, highlight: selected.table_id }))
+    : null), [mapLayout, selected])
 
   const pick  = (g) => { setSelected(g); setQuery(g.full_name); setActiveIdx(-1) }
   const reset = () => { setSelected(null); setQuery(''); setActiveIdx(-1); inputRef.current?.focus() }
@@ -112,7 +130,7 @@ export function useSeating({ seatingPlan, lang = 'az' }) {
 
   return {
     /* data */
-    allGuests, suggestions, selected, tablemates,
+    allGuests, suggestions, selected, tablemates, mapEl,
     /* vəziyyət */
     query, setQuery, activeIdx, setActiveIdx, setSelected,
     loading: apiGuests === null,

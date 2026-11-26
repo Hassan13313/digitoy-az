@@ -2,35 +2,34 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Upload } from 'lucide-react'
 import { getGuests, manageGuest, migrateGuests } from '../../utils/api'
 import GuestImportModal from './GuestImportModal'
-import SeatingPlanTab from './v2/SeatingPlanTab'
-import { addLocalTable, seatingStats, seatingTables } from './v2/seatingView'
+import SeatingPlanner from '../seating/SeatingPlanner'
 import { Button, Notice } from './v2/adminUi'
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Oturma planı — qonaq idarəetməsi (UI redesign 2026-10: v2/SeatingPlanTab)
-
-   Məntiq dəyişməyib: get_guests.php, manage_guest.php (add | update | delete |
-   move), migrate_guests.php («Mövcud planı import et» — builder-dəki oturma
-   planı MƏTNİNİ köçürür), Excel/CSV idxalı (GuestImportModal). Yeni masa
-   serverə yazılmır — ilk qonaq əlavə olunanda yaranır (köhnə davranış).
+   Oturma planı — admin (2026-11-26: seating/SeatingPlanner — qonaq siyahısı,
+   masalar, zal planı, qonaq görünüşü; qız/oğlan evi, qruplar).
+   Server: get_guests.php, manage_guest.php (add | update | delete | move |
+   bulk | layout), migrate_guests.php («Mövcud planı import et» — builder-dəki
+   oturma planı MƏTNİNİ köçürür), Excel/CSV idxalı (GuestImportModal).
    ───────────────────────────────────────────────────────────────────────── */
 
-export default function AdminSeatingPlan({ slug, seatingPlan }) {
+/** Server xətası → istifadəçiyə aydın mətn */
+const friendly = (p) => p.catch(() => { throw new Error('Əməliyyat alınmadı. Bağlantını yoxlayıb yenidən cəhd edin.') })
+
+export default function AdminSeatingPlan({ slug, seatingPlan, eventType = '', title = '' }) {
   const [data,       setData]       = useState(null)
   const [loading,    setLoading]    = useState(true)
   const [error,      setError]      = useState('')
-  const [saving,     setSaving]     = useState(false)
-  const [opError,    setOpError]    = useState('')
   const [migrating,  setMigrating]  = useState(false)
   const [migrateMsg, setMigrateMsg] = useState('')
   /* Phase 43 — Excel/CSV idxal modalı */
   const [importOpen, setImportOpen] = useState(false)
 
   const load = useCallback(() => {
-    if (!slug) return
+    if (!slug) return Promise.resolve()
     setLoading(true)
     setError('')
-    getGuests(slug)
+    return getGuests(slug)
       .then(d => { setData(d); setLoading(false) })
       .catch(() => { setError('Qonaqlar yüklənmədi.'); setLoading(false) })
   }, [slug])
@@ -51,26 +50,17 @@ export default function AdminSeatingPlan({ slug, seatingPlan }) {
     }
   }
 
-  /* Boş masa yalnız lokal göstərilir — istifadəçi sonra qonaq əlavə edəcək */
-  const [localTables, setLocalTables] = useState([])
-  const handleAddTable = (name) => setLocalTables(addLocalTable(name))
-
-  /* Qonaq əməliyyatları: xəta olsa pəncərə açıq qalır (Promise rədd olunur) */
-  const op = async (fn) => {
-    setSaving(true)
-    setOpError('')
-    try {
-      await fn()
-      load()
-    } catch (e) {
-      setOpError(e?.message || 'Əməliyyat alınmadı.')
-      throw e
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const tables = useMemo(() => seatingTables(data, localTables), [data, localTables])
+  const api = useMemo(() => ({
+    addGuest: (d) => friendly(manageGuest('add', {
+      invitation_id: slug, full_name: d.name, table_id: d.table, notes: d.note || '', side: d.side || '', group_name: d.group || '',
+    })),
+    updateGuest: (id, d) => friendly(manageGuest('update', {
+      id, full_name: d.name, table_id: d.table, notes: d.note || '', side: d.side || '', group_name: d.group || '',
+    })),
+    deleteGuest: (id) => friendly(manageGuest('delete', { id })),
+    bulk: (ids, patch) => friendly(manageGuest('bulk', { invitation_id: slug, ids, patch })),
+    saveLayout: (layout, extra) => friendly(manageGuest('layout', { invitation_id: slug, layout, ...extra })),
+  }), [slug])
 
   if (!slug) return null
 
@@ -79,7 +69,6 @@ export default function AdminSeatingPlan({ slug, seatingPlan }) {
   return (
     <>
       {error && <Notice tone="danger" title={error} className="mb-4" />}
-      {opError && <Notice tone="danger" title={opError} className="mb-4" />}
       {hasMigratableData && !loading && (
         <Notice
           tone="info"
@@ -96,24 +85,8 @@ export default function AdminSeatingPlan({ slug, seatingPlan }) {
       )}
       {migrateMsg && <Notice tone="success" title={migrateMsg} className="mb-4" />}
 
-      <SeatingPlanTab
-        tables={tables}
-        stats={seatingStats(data)}
-        onAddTable={handleAddTable}
-        onAddGuest={(tableId, d) => op(() => manageGuest('add', {
-          invitation_id: slug, full_name: d.name, table_id: tableId, notes: d.note || null,
-        }))}
-        onUpdateGuest={(id, d) => op(() => manageGuest('update', {
-          id: Number(id), full_name: d.name, table_id: d.tableId, notes: d.note || null,
-        }))}
-        onMoveGuest={(id, to) => op(() => manageGuest('move', { id: Number(id), table_id: to }))}
-        onDeleteGuest={(id) => op(() => manageGuest('delete', { id: Number(id) }))}
-        saving={saving}
-        onOpenImport={() => setImportOpen(true)}
-        onRefresh={load}
-        refreshing={loading && !!data}
-        loading={loading && !data}
-      />
+      <SeatingPlanner data={data} loading={loading} eventType={eventType} title={title}
+        api={api} onReload={load} onImport={() => setImportOpen(true)} />
 
       {/* Phase 43 — Excel/CSV idxal modalı */}
       {importOpen && (

@@ -384,7 +384,7 @@ export default function MediterraneanTemplate(props) {
                         <span style={{ fontFamily: serif, fontStyle: 'italic', fontSize: tableFontPx(tb.num, 58), lineHeight: 1, color: C.AZURE }}>{tb.num}</span>
                       </div>
                     </div>
-                    {seating.tablemates.length > 0 && <div style={{ marginTop: 16, fontSize: 15, color: C.MUTED, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}
+                    {seating.tablemates.length > 0 && <div style={{ marginTop: 16, fontSize: 15, color: C.MUTED, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}{seating.mapEl}
                     <button onClick={seating.reset} data-press style={{ marginTop: 6, background: 'none', border: 'none', color: C.AZURE, fontSize: 15, minHeight: 44, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 4, fontFamily: body }}>
                       {seatingL.again || 'Yenidən axtar'}
                     </button>

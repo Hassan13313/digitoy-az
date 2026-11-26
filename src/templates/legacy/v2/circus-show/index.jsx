@@ -345,7 +345,7 @@ export default function CircusShowTemplate(props) {
                     <span style={{ fontWeight: 800, fontSize: 13, letterSpacing: '.18em', color: C.NAVY }}>{up(T.table, lang)}</span>
                     <span style={{ fontFamily: disp, fontSize: tableSize(tableNum(seating.selected.table_id), 52), lineHeight: 1.05, color: C.RED, textShadow: `2px 2px 0 ${C.NAVY}` }}>{tableNum(seating.selected.table_id)}</span>
                   </Hoop>
-                  {seating.tablemates.length > 0 && <div style={{ marginTop: 16, fontSize: 15.5, color: C.MUTED, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}
+                  {seating.tablemates.length > 0 && <div style={{ marginTop: 16, fontSize: 15.5, color: C.MUTED, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}{seating.mapEl}
                   <button onClick={seating.reset} data-press style={{ marginTop: 6, background: 'none', border: 'none', color: C.RED, fontWeight: 700, fontSize: 15, minHeight: 44, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 4, fontFamily: body }}>
                     {seatingL.again || 'Yenidən axtar'}
                   </button>

@@ -506,7 +506,7 @@ export default function OrientalLuxeTemplate(props) {
                       </svg>
                       <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 4, fontFamily: head, fontSize: tableFontPx(tb.num, 50), lineHeight: 1, color: C.NAR, textAlign: 'center', padding: '0 34px' }}>{tb.hasWord && <span style={{ display: 'block', fontSize: 12, letterSpacing: '.12em', color: alpha(C.NAR, 0.7) }}>{tr.inv_table}</span>}{tb.num}</div>
                     </div>
-                    {seating.tablemates.length > 0 && <div style={{ marginTop: 16, fontSize: 16, fontStyle: 'italic', color: C.MUTED, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}
+                    {seating.tablemates.length > 0 && <div style={{ marginTop: 16, fontSize: 16, fontStyle: 'italic', color: C.MUTED, lineHeight: 1.6 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}{seating.mapEl}
                     <button onClick={seating.reset} data-press style={{ marginTop: 6, background: 'none', border: 'none', color: C.GOLD, fontSize: 15, minHeight: 44, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 4, fontFamily: body }}>
                       {seatingL.again || 'Yenidən axtar'}
                     </button>

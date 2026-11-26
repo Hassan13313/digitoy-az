@@ -477,7 +477,7 @@ export default function BoardingPassTemplate(props) {
                     <div style={{ padding: '16px 16px 14px', minWidth: 0 }}>
                       <div style={{ fontFamily: mono, fontSize: 10.5, letterSpacing: '.16em', color: alpha(C.INK, 0.55) }}>{upper(T.paxOne, lang)}</div>
                       <div style={{ marginTop: 3, fontFamily: head, fontWeight: 500, fontSize: 20, lineHeight: 1.15 }}>{upper(seating.selected.full_name, lang)}</div>
-                      {seating.tablemates.length > 0 && <div style={{ marginTop: 10, fontSize: 14, color: alpha(C.INK, 0.7), lineHeight: 1.5 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}
+                      {seating.tablemates.length > 0 && <div style={{ marginTop: 10, fontSize: 14, color: alpha(C.INK, 0.7), lineHeight: 1.5 }}>{seating.tablemates.map((g) => g.full_name).join(', ')}</div>}{seating.mapEl}
                       <button onClick={seating.reset} data-press style={{ marginTop: 6, padding: 0, background: 'none', border: 'none', color: C.INK, fontSize: 14, minHeight: 44, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 4, fontFamily: body }}>
                         {seatingL.again || 'Yenidən axtar'}
                       </button>

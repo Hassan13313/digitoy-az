@@ -1,11 +1,16 @@
 <?php
 /* ══════════════════════════════════════════════════
    POST /api/manage_guest.php  (Admin tələb olunur)
-   action: add | update | delete | move
+   action: add | update | delete | move | bulk | layout
    Phase 22 — Guest Management Refactor
+   v52 (2026-11-26): masasız qonaq (table_id ''), side / group_name,
+     bulk   { invitation_id, ids:[…], patch:{ table_id?, side?, group_name? } }
+     layout { invitation_id, layout:{…}, renames:[{from,to}], removed:[ad] }
+   Qaydalar: seating_layout_lib.php (müştəri paneli ilə eyni).
 ══════════════════════════════════════════════════ */
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/seating_layout_lib.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -16,7 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 requireAdmin();
 
 $body   = json_decode(file_get_contents('php://input'), true);
-$action = trim($body['action'] ?? '');
+if (!is_array($body)) { http_response_code(400); echo json_encode(['error' => 'Invalid JSON']); exit; }
+$action = trim((string) ($body['action'] ?? ''));
 
 ensureTables();
 $db = getDB();
@@ -29,22 +35,25 @@ if ($action === 'add') {
     $seatNum  = isset($body['seat_number']) && $body['seat_number'] !== '' ? (int)$body['seat_number'] : null;
     $notes    = isset($body['notes']) ? trim($body['notes']) : null;
 
-    if (!$invId || !$tableId || !$fullName) {
+    /* v52: masa boş ola bilər — qonaq «masasız» siyahıda qalır */
+    if (!$invId || !$fullName) {
         http_response_code(422);
-        echo json_encode(['error' => 'invitation_id, table_id and full_name required']);
+        echo json_encode(['error' => 'invitation_id and full_name required']);
         exit;
     }
 
     $st = $db->prepare("
-        INSERT INTO guests (invitation_id, table_id, full_name, seat_number, notes)
-        VALUES (:inv, :tbl, :name, :seat, :notes)
+        INSERT INTO guests (invitation_id, table_id, full_name, seat_number, notes, side, group_name)
+        VALUES (:inv, :tbl, :name, :seat, :notes, :side, :grp)
     ");
     $st->execute([
         ':inv'   => substr($invId, 0, 120),
-        ':tbl'   => substr($tableId, 0, 80),
+        ':tbl'   => seatClean($tableId, SEAT_TABLE_MAX),
         ':name'  => substr($fullName, 0, 255),
         ':seat'  => $seatNum,
         ':notes' => $notes ? substr($notes, 0, 1000) : null,
+        ':side'  => seatSide($body['side'] ?? null),
+        ':grp'   => seatGroup($body['group_name'] ?? null),
     ]);
     $newId = (int)$db->lastInsertId();
     echo json_encode(['ok' => true, 'id' => $newId]);
@@ -57,13 +66,15 @@ if ($action === 'update') {
     $tableId  = isset($body['table_id'])  ? trim($body['table_id'])  : null;
     $fullName = isset($body['full_name']) ? trim($body['full_name']) : null;
     $seatNum  = array_key_exists('seat_number', $body) ? (($body['seat_number'] !== null && $body['seat_number'] !== '') ? (int)$body['seat_number'] : null) : false;
-    $notes    = array_key_exists('notes', $body) ? (trim($body['notes']) ?: null) : false;
+    $notes    = array_key_exists('notes', $body) ? (trim((string) ($body['notes'] ?? '')) ?: null) : false;   /* null → boş (PHP 8.1 trim(null) xəbərdarlığı JSON-u pozurdu) */
 
     if (!$id) { http_response_code(422); echo json_encode(['error' => 'id required']); exit; }
 
     $sets   = [];
     $params = [':id' => $id];
-    if ($tableId  !== null)  { $sets[] = 'table_id = :tbl';   $params[':tbl']  = substr($tableId, 0, 80); }
+    if ($tableId  !== null)  { $sets[] = 'table_id = :tbl';   $params[':tbl']  = seatClean($tableId, SEAT_TABLE_MAX); }
+    if (array_key_exists('side', $body))       { $sets[] = 'side = :side';      $params[':side'] = seatSide($body['side']); }
+    if (array_key_exists('group_name', $body)) { $sets[] = 'group_name = :grp'; $params[':grp']  = seatGroup($body['group_name']); }
     if ($fullName !== null)  { $sets[] = 'full_name = :name'; $params[':name'] = substr($fullName, 0, 255); }
     if ($seatNum  !== false) { $sets[] = 'seat_number = :seat'; $params[':seat'] = $seatNum; }
     if ($notes    !== false) { $sets[] = 'notes = :notes';     $params[':notes'] = $notes ? substr($notes, 0, 1000) : null; }
@@ -98,16 +109,33 @@ if ($action === 'delete') {
 /* ── MOVE (table dəyişdir) ── */
 if ($action === 'move') {
     $id      = (int)($body['id']       ?? 0);
-    $tableId = trim($body['table_id']  ?? '');
-    if (!$id || !$tableId) { http_response_code(422); echo json_encode(['error' => 'id and table_id required']); exit; }
+    $tableId = seatClean($body['table_id'] ?? '', SEAT_TABLE_MAX);   /* '' = masadan çıxar */
+    if (!$id) { http_response_code(422); echo json_encode(['error' => 'id required']); exit; }
 
     $db->prepare("UPDATE guests SET table_id = :tbl WHERE id = :id")->execute([
-        ':tbl' => substr($tableId, 0, 80),
+        ':tbl' => $tableId,
         ':id'  => $id,
     ]);
     echo json_encode(['ok' => true]);
     exit;
 }
 
+/* ── v52: BULK (seçilmiş qonaqlar: masa / tərəf / qrup) və LAYOUT (zal planı) ── */
+if ($action === 'bulk' || $action === 'layout') {
+    $invId = is_string($body['invitation_id'] ?? null) ? trim($body['invitation_id']) : '';
+    if (!isValidSlug($invId)) { http_response_code(422); echo json_encode(['error' => 'invitation_id required']); exit; }
+    if ($action === 'bulk') {
+        $ids = seatIds($body['ids'] ?? []);
+        $patch = seatPatch($body['patch'] ?? []);
+        if (!$ids || !$patch) { http_response_code(422); echo json_encode(['error' => 'ids and patch required']); exit; }
+        $changed = seatApplyBulk($db, $invId, $ids, $patch);
+        echo json_encode(['ok' => true, 'changed' => count($changed)]);
+        exit;
+    }
+    $res = seatApplyLayout($db, $invId, $body['layout'] ?? null, $body['renames'] ?? [], $body['removed'] ?? []);
+    echo json_encode(['ok' => true, 'layout' => $res['layout']], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 http_response_code(422);
-echo json_encode(['error' => 'Invalid action. Use: add, update, delete, move']);
+echo json_encode(['error' => 'Invalid action. Use: add, update, delete, move, bulk, layout']);

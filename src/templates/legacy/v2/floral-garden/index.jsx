@@ -779,6 +779,7 @@ export default function FloralGardenTemplate({
                           {seating.tablemates.map((g) => g.full_name).join(', ')}
                         </div>
                       )}
+                      {seating.mapEl}
                       <button
                         onClick={seating.reset}
                         data-press

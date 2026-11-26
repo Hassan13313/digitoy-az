@@ -949,9 +949,12 @@ export default function RoyalGoldTemplate({
                           letterSpacing: '.14em', padding: '4px 9px', textTransform: 'uppercase', whiteSpace: 'nowrap',
                         }}>{seating.selected.table_id}</span>
                       </div>
-                      <div style={{ fontSize: 11, color: TH.muted, marginTop: 10, lineHeight: 1.6 }}>
-                        {seating.selected.table_id}: {seating.tablemates.map((g) => g.full_name).join(', ')}
-                      </div>
+                      {seating.tablemates.length > 0 && (
+                        <div style={{ fontSize: 11, color: TH.muted, marginTop: 10, lineHeight: 1.6 }}>
+                          {seating.selected.table_id}: {seating.tablemates.map((g) => g.full_name).join(', ')}
+                        </div>
+                      )}
+                      {seating.mapEl}
                       <button
                         onClick={seating.reset}
                         data-press

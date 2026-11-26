@@ -121,7 +121,7 @@ export default function GuestImportModal({ slug, onClose, onImported }) {
         added: result.inserted,
         skipped: (result.skipped?.duplicate || 0) + (result.skipped?.invalid || 0),
       } : undefined}
-      hint="Başlıq sətrində «Ad Soyad», «Masa» və (istəyə görə) «Telefon» sütunları olsun — sıra əhəmiyyətli deyil, başlıqlar AZ/EN/RU dillərində tanınır. Başlıq yoxdursa birinci sütun ad, ikinci masa, üçüncü telefon sayılır. Masa boş qalsa qonaq «Masa 1»-ə düşür."
+      hint="Başlıq sətrində «Ad Soyad» sütunu olsun; «Masa», «Telefon», «Tərəf» (Qız evi / Oğlan evi) və «Qrup» (məs. İş yoldaşları) istəyə görədir — sıra əhəmiyyətli deyil, başlıqlar AZ/EN/RU dillərində tanınır. Başlıq yoxdursa birinci sütun ad, ikinci masa, üçüncü telefon sayılır. Masası boş qalan qonaq «Oturma planı»nda masasız siyahıda gözləyir."
       warning={warning}
     />
   )
